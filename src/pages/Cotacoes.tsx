@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
@@ -17,9 +17,24 @@ import {
   Download,
   Calendar,
   DollarSign,
-  Building2
+  Building2,
+  MoreVertical,
+  ChevronDown
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
 import EditQuoteDialog from "@/components/forms/EditQuoteDialog";
 import DeleteQuoteDialog from "@/components/forms/DeleteQuoteDialog";
@@ -37,6 +52,8 @@ export default function Cotacoes() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState("all");
+  
+  const addQuoteRef = useRef<HTMLButtonElement>(null);
 
   // OPTIMIZED: Use React Query with single optimized query (no N+1)
   const { cotacoes, isLoading, refetch } = useCotacoes();
@@ -112,14 +129,31 @@ export default function Cotacoes() {
         </div>
         <div className="flex items-center gap-2">
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <AddQuoteDialog onAdd={refetch} />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                Ações
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => addQuoteRef.current?.click()}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Cotação
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Download className="h-4 w-4 mr-2" />
+                Exportar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1 min-w-64">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -129,25 +163,18 @@ export default function Cotacoes() {
                 className="pl-9"
               />
             </div>
-            <select 
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-border rounded-md bg-background text-foreground"
-            >
-              <option value="all">Todos os Status</option>
-              <option value="ativa">Ativas</option>
-              <option value="pendente">Pendentes</option>
-              <option value="concluida">Concluídas</option>
-              <option value="expirada">Expiradas</option>
-            </select>
-            <Button variant="outline">
-              <Filter className="h-4 w-4 mr-2" />
-              Filtros
-            </Button>
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar
-            </Button>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Status</SelectItem>
+                <SelectItem value="ativa">Ativas</SelectItem>
+                <SelectItem value="pendente">Pendentes</SelectItem>
+                <SelectItem value="concluida">Concluídas</SelectItem>
+                <SelectItem value="expirada">Expiradas</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -228,22 +255,47 @@ export default function Cotacoes() {
                   </div>
                 </div>
 
-                <div className="flex gap-1">
-                  <ViewQuoteDialog 
-                    quote={cotacao}
-                    onUpdateSupplierValue={() => {}}
-                  />
-                  <EditQuoteDialog 
-                    quote={cotacao}
-                    onEdit={() => {}}
-                    products={[]}
-                    suppliers={mockSuppliers}
-                  />
-                  <DeleteQuoteDialog 
-                    quote={cotacao}
-                    onDelete={() => {}}
-                  />
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="ml-auto">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <ViewQuoteDialog 
+                      quote={cotacao}
+                      onUpdateSupplierValue={() => {}}
+                      trigger={
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Visualizar
+                        </DropdownMenuItem>
+                      }
+                    />
+                    <EditQuoteDialog 
+                      quote={cotacao}
+                      onEdit={() => {}}
+                      products={[]}
+                      suppliers={mockSuppliers}
+                      trigger={
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                      }
+                    />
+                    <DeleteQuoteDialog 
+                      quote={cotacao}
+                      onDelete={() => {}}
+                      trigger={
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </DropdownMenuItem>
+                      }
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </CardContent>
             </Card>
           ))}
@@ -304,21 +356,48 @@ export default function Cotacoes() {
                         <Badge variant="outline">{cotacao.fornecedores}</Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <ViewQuoteDialog 
-                            quote={cotacao}
-                            onUpdateSupplierValue={() => {}}
-                          />
-                          <EditQuoteDialog 
-                            quote={cotacao}
-                            onEdit={() => {}}
-                            products={[]}
-                            suppliers={mockSuppliers}
-                          />
-                          <DeleteQuoteDialog 
-                            quote={cotacao}
-                            onDelete={() => {}}
-                          />
+                        <div className="flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <ViewQuoteDialog 
+                                quote={cotacao}
+                                onUpdateSupplierValue={() => {}}
+                                trigger={
+                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    Visualizar
+                                  </DropdownMenuItem>
+                                }
+                              />
+                              <EditQuoteDialog 
+                                quote={cotacao}
+                                onEdit={() => {}}
+                                products={[]}
+                                suppliers={mockSuppliers}
+                                trigger={
+                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Editar
+                                  </DropdownMenuItem>
+                                }
+                              />
+                              <DeleteQuoteDialog 
+                                quote={cotacao}
+                                onDelete={() => {}}
+                                trigger={
+                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Excluir
+                                  </DropdownMenuItem>
+                                }
+                              />
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -351,6 +430,14 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
       )}
+
+      {/* Hidden trigger for dialog */}
+      <div className="hidden">
+        <AddQuoteDialog 
+          onAdd={refetch}
+          trigger={<button ref={addQuoteRef} />}
+        />
+      </div>
     </div>
   );
 }
