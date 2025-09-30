@@ -5,6 +5,7 @@ import { AppSidebar } from "./AppSidebar";
 import { Search, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 export function AppLayout() {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,7 +17,10 @@ export function AppLayout() {
       "/fornecedores": "Fornecedores",
       "/cotacoes": "Cotações",
       "/pedidos": "Pedidos",
-      "/historico": "Histórico"
+      "/historico": "Histórico",
+      "/relatorios": "Relatórios",
+      "/analytics": "Analytics",
+      "/configuracoes": "Configurações"
     };
     return titles[path] || "Sistema de Cotações";
   };
@@ -43,6 +47,7 @@ export function AppLayout() {
               
               {/* Action Buttons */}
               <div className="flex items-center gap-1 md:gap-2 shrink-0">
+                <ThemeToggle />
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-9 w-9 md:h-10 md:w-10 p-0">
                   <Bell className="h-4 w-4" />
                 </Button>

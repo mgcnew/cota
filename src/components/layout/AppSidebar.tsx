@@ -1,4 +1,4 @@
-import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Users } from "lucide-react";
+import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Users, Settings } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 const mainItems = [{
@@ -34,6 +34,12 @@ const analyticsItems = [{
   title: "Analytics",
   url: "/analytics",
   icon: BarChart3
+}];
+
+const systemItems = [{
+  title: "Configurações",
+  url: "/configuracoes",
+  icon: Settings
 }];
 export function AppSidebar() {
   const {
@@ -84,6 +90,23 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {analyticsItems.map(item => <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild className="my-1">
+                      <NavLink to={item.url} className={`${getNavClasses(item.url)} flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200`}>
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        <span className="font-medium">{item.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>)}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>}
+
+        {/* Sistema */}
+        {!isCollapsed && <SidebarGroup className="mt-4">
+            <SidebarGroupLabel>Sistema</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {systemItems.map(item => <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild className="my-1">
                       <NavLink to={item.url} className={`${getNavClasses(item.url)} flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200`}>
                         <item.icon className="h-5 w-5 flex-shrink-0" />
