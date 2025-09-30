@@ -79,73 +79,76 @@ export default function Cotacoes() {
   ];
 
   useEffect(() => {
-    if (!user) {
-      setAuthDialogOpen(true);
-    } else {
-      loadQuotes();
-    }
-  }, [user]);
+    loadCotacoes();
+  }, []);
 
-  const loadQuotes = async () => {
+  const loadCotacoes = async () => {
     try {
       setLoading(true);
       
       // Buscar cotações
       const { data: quotesData, error: quotesError } = await supabase
         .from("quotes")
-        .select(`
-          *,
-          quote_items (*),
-          quote_suppliers (*)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (quotesError) throw quotesError;
 
-      // Transformar dados para o formato esperado
-      const formattedQuotes: Quote[] = (quotesData || []).map((quote: any, index: number) => {
-        const items = quote.quote_items || [];
-        const suppliers = quote.quote_suppliers || [];
-        
-        // Formatar produtos
-        const produtosTexto = items.length > 0
-          ? items.map((item: any) => `${item.product_name} (${item.quantidade}${item.unidade})`).join(", ")
-          : "Sem produtos";
+      // Para cada cotação, buscar items e suppliers
+      const cotacoesCompletas = await Promise.all(
+        (quotesData || []).map(async (quote, index) => {
+          // Buscar items
+          const { data: items } = await supabase
+            .from("quote_items")
+            .select("*")
+            .eq("quote_id", quote.id);
 
-        // Calcular melhor preço
-        const valoresRespondidos = suppliers
-          .filter((s: any) => s.valor_oferecido > 0)
-          .map((s: any) => Number(s.valor_oferecido));
-        
-        const melhorValor = valoresRespondidos.length > 0 ? Math.min(...valoresRespondidos) : 0;
-        const fornecedorMelhorPreco = suppliers.find((s: any) => Number(s.valor_oferecido) === melhorValor);
+          // Buscar suppliers
+          const { data: suppliers } = await supabase
+            .from("quote_suppliers")
+            .select("*")
+            .eq("quote_id", quote.id);
 
-        // Formatar fornecedores participantes
-        const fornecedoresParticipantes: FornecedorParticipante[] = suppliers.map((s: any) => ({
-          id: s.supplier_id,
-          nome: s.supplier_name,
-          valorOferecido: Number(s.valor_oferecido) || 0,
-          dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString("pt-BR") : null,
-          observacoes: s.observacoes || "",
-          status: s.status as "pendente" | "respondido"
-        }));
+          // Formatar fornecedores participantes
+          const fornecedoresParticipantes: FornecedorParticipante[] = (suppliers || []).map(s => ({
+            id: s.supplier_id,
+            nome: s.supplier_name,
+            valorOferecido: Number(s.valor_oferecido) || 0,
+            dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString("pt-BR") : null,
+            observacoes: s.observacoes || "",
+            status: s.status as "pendente" | "respondido"
+          }));
 
-        return {
-          id: `COT-${String(index + 1).padStart(3, '0')}`,
-          produto: produtosTexto,
-          quantidade: `${items.length} produto(s)`,
-          status: quote.status,
-          dataInicio: new Date(quote.data_inicio).toLocaleDateString("pt-BR"),
-          dataFim: new Date(quote.data_fim).toLocaleDateString("pt-BR"),
-          fornecedores: suppliers.length,
-          melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
-          melhorFornecedor: fornecedorMelhorPreco?.supplier_name || "Aguardando",
-          economia: "0%",
-          fornecedoresParticipantes
-        };
-      });
+          // Calcular melhor preço
+          const valoresRespondidos = fornecedoresParticipantes
+            .filter(f => f.valorOferecido > 0)
+            .map(f => f.valorOferecido);
+          
+          const melhorValor = valoresRespondidos.length > 0 ? Math.min(...valoresRespondidos) : 0;
+          const fornecedorMelhorPreco = fornecedoresParticipantes.find(f => f.valorOferecido === melhorValor);
 
-      setCotacoes(formattedQuotes);
+          // Formatar produtos para exibição
+          const produtosTexto = (items || [])
+            .map(item => `${item.product_name} (${item.quantidade}${item.unidade})`)
+            .join(", ");
+
+          return {
+            id: `COT-${String(index + 1).padStart(3, '0')}`,
+            produto: produtosTexto || "Sem produtos",
+            quantidade: `${items?.length || 0} produto(s)`,
+            status: quote.status,
+            dataInicio: new Date(quote.data_inicio).toLocaleDateString("pt-BR"),
+            dataFim: new Date(quote.data_fim).toLocaleDateString("pt-BR"),
+            fornecedores: fornecedoresParticipantes.length,
+            melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
+            melhorFornecedor: fornecedorMelhorPreco?.nome || "Aguardando",
+            economia: "0%",
+            fornecedoresParticipantes
+          };
+        })
+      );
+
+      setCotacoes(cotacoesCompletas);
     } catch (error) {
       console.error("Erro ao carregar cotações:", error);
       toast({
@@ -158,13 +161,9 @@ export default function Cotacoes() {
     }
   };
 
-  if (!user) {
-    return <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />;
-  }
-
   const handleAddQuote = async () => {
     // Recarregar cotações após adicionar
-    await loadQuotes();
+    await loadCotacoes();
   };
 
   const handleEditQuote = (id: string, data: any) => {
