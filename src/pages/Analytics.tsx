@@ -52,6 +52,30 @@ export default function Analytics() {
   const [performanceFornecedores, setPerformanceFornecedores] = useState<any[]>([]);
   const [tendenciasMensais, setTendenciasMensais] = useState<any[]>([]);
 
+  // Funções auxiliares
+  const handleExportAnalytics = async () => {
+    await generateReport(
+      'analytics',
+      { 
+        startDate: startDate || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), 
+        endDate: endDate || new Date(),
+        fornecedores: selectedFornecedores,
+        produtos: selectedProdutos,
+        categorias: []
+      },
+      'pdf'
+    );
+  };
+
+  const applyDatePreset = (days: number) => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - days);
+    setStartDate(start);
+    setEndDate(end);
+    setIsDateDialogOpen(false);
+  };
+
   useEffect(() => {
     if (user && startDate && endDate) {
       loadAnalytics();
@@ -293,28 +317,6 @@ export default function Analytics() {
     }
   };
 
-  const handleExportAnalytics = async () => {
-    await generateReport(
-      'analytics',
-      { 
-        startDate: startDate || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), 
-        endDate: endDate || new Date(),
-        fornecedores: selectedFornecedores,
-        produtos: selectedProdutos,
-        categorias: []
-      },
-      'pdf'
-    );
-  };
-
-  const applyDatePreset = (days: number) => {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(end.getDate() - days);
-    setStartDate(start);
-    setEndDate(end);
-    setIsDateDialogOpen(false);
-  };
 
   if (loading) {
     return (
