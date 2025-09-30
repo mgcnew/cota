@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { Check, X, Users, Package, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,12 +22,12 @@ export function ReportFilters({
   onProdutosChange,
   onReset
 }: ReportFiltersProps) {
-  const [fornecedoresOpen, setFornecedoresOpen] = React.useState(false);
-  const [produtosOpen, setProdutosOpen] = React.useState(false);
-  const [fornecedores, setFornecedores] = React.useState<any[]>([]);
-  const [produtos, setProdutos] = React.useState<any[]>([]);
+  const [fornecedoresOpen, setFornecedoresOpen] = useState(false);
+  const [produtosOpen, setProdutosOpen] = useState(false);
+  const [fornecedores, setFornecedores] = useState<any[]>([]);
+  const [produtos, setProdutos] = useState<any[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadFornecedores();
     loadProdutos();
   }, []);

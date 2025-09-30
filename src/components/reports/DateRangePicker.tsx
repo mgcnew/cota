@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
@@ -22,8 +22,8 @@ export function DateRangePicker({
   onEndDateChange,
   className
 }: DateRangePickerProps) {
-  const [isStartOpen, setIsStartOpen] = React.useState(false);
-  const [isEndOpen, setIsEndOpen] = React.useState(false);
+  const [isStartOpen, setIsStartOpen] = useState(false);
+  const [isEndOpen, setIsEndOpen] = useState(false);
 
   const applyPreset = (days: number) => {
     const end = new Date();
