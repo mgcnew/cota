@@ -24,6 +24,7 @@ import {
 import { AddProductDialog } from "@/components/forms/AddProductDialog";
 import { EditProductDialog } from "@/components/forms/EditProductDialog";
 import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
+import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
 
 interface Product {
   id: string;
@@ -168,6 +169,10 @@ export default function Produtos() {
     }
   };
 
+  const handleProductsImported = (importedProducts: Product[]) => {
+    setProducts(prev => [...prev, ...importedProducts]);
+  };
+
   return (
     <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
@@ -178,7 +183,13 @@ export default function Produtos() {
             Gerencie seu catálogo de produtos e acompanhe preços
           </p>
         </div>
-        <AddProductDialog onProductAdded={handleProductAdded} onCategoryAdded={handleCategoryAdded} />
+        <div className="flex gap-2">
+          <ImportProductsDialog 
+            onProductsImported={handleProductsImported}
+            onCategoryAdded={handleCategoryAdded}
+          />
+          <AddProductDialog onProductAdded={handleProductAdded} onCategoryAdded={handleCategoryAdded} />
+        </div>
       </div>
 
       {/* Filters */}
