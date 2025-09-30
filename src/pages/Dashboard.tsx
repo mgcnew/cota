@@ -110,34 +110,26 @@ export default function Dashboard() {
 
       {/* Metrics Grid */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Cotações Ativas"
-          value="24"
-          icon={FileText}
-          variant="default"
-          trend={{ value: "+12%", label: "vs mês anterior", type: "positive" }}
-        />
-        <MetricCard
-          title="Fornecedores"
-          value="18"
-          icon={Building2}
-          variant="info"
-          trend={{ value: "+2", label: "novos este mês", type: "positive" }}
-        />
-        <MetricCard
-          title="Economia Gerada"
-          value="R$ 15.847"
-          icon={DollarSign}
-          variant="success"
-          trend={{ value: "+8.2%", label: "vs mês anterior", type: "positive" }}
-        />
-        <MetricCard
-          title="Produtos Cotados"
-          value="156"
-          icon={Package}
-          variant="warning"
-          trend={{ value: "+5.1%", label: "itens únicos", type: "positive" }}
-        />
+        <MetricCard title="Cotações Ativas" value="24" icon={FileText} variant="default" trend={{
+        value: "+12%",
+        label: "vs mês anterior",
+        type: "positive"
+      }} />
+        <MetricCard title="Fornecedores" value="18" icon={Building2} variant="info" trend={{
+        value: "+2",
+        label: "novos este mês",
+        type: "positive"
+      }} />
+        <MetricCard title="Economia Gerada" value="R$ 15.847" icon={DollarSign} variant="success" trend={{
+        value: "+8.2%",
+        label: "vs mês anterior",
+        type: "positive"
+      }} />
+        <MetricCard title="Produtos Cotados" value="156" icon={Package} variant="warning" trend={{
+        value: "+5.1%",
+        label: "itens únicos",
+        type: "positive"
+      }} />
       </div>
 
       {/* Content Grid */}
@@ -183,11 +175,7 @@ export default function Dashboard() {
             <div className="space-y-3 md:space-y-4">
               {topSuppliers.map((supplier, index) => <div key={supplier.name} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                    <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold text-white shrink-0 ${
-                      index === 0 ? "bg-warning" : 
-                      index === 1 ? "bg-info" : 
-                      "bg-primary"
-                    }`}>
+                    <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold text-white shrink-0 ${index === 0 ? "bg-warning" : index === 1 ? "bg-info" : "bg-primary"}`}>
                       {index + 1}
                     </div>
                     <div className="min-w-0">
@@ -207,17 +195,8 @@ export default function Dashboard() {
 
       {/* Quick Actions */}
       <Card className="card-elevated border-2 border-info/10">
-        <CardHeader>
-          <CardTitle className="text-base md:text-lg font-semibold">Ações Rápidas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:gap-4 grid-cols-2 md:grid-cols-4">
-            <IconButton icon={FileText} label="Nova Cotação" variant="default" />
-            <IconButton icon={Package} label="Adicionar Produto" variant="success" />
-            <IconButton icon={Building2} label="Novo Fornecedor" variant="info" />
-            <IconButton icon={ShoppingCart} label="Gerar Pedido" variant="warning" />
-          </div>
-        </CardContent>
+        
+        
       </Card>
     </div>;
 }
