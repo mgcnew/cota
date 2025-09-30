@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -33,18 +34,17 @@ import { toast } from "@/hooks/use-toast";
 
 const supplierSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
+  cnpj: z.string().trim().max(18, "CNPJ muito longo").optional().or(z.literal("")),
   contact: z.string().trim().min(1, "Contato é obrigatório").max(100, "Contato muito longo"),
-  phone: z.string().trim().max(20, "Telefone muito longo").optional(),
+  phone: z.string().trim().max(20, "Telefone muito longo").optional().or(z.literal("")),
   email: z.string().trim().email("Email inválido").max(255, "Email muito longo").optional().or(z.literal("")),
-  address: z.string().trim().max(200, "Endereço muito longo").optional(),
-  limit: z.string().trim().min(1, "Limite é obrigatório"),
-  status: z.enum(["active", "inactive", "pending"]),
+  address: z.string().trim().max(200, "Endereço muito longo").optional().or(z.literal("")),
 });
 
 type SupplierFormData = z.infer<typeof supplierSchema>;
 
 interface AddSupplierDialogProps {
-  onAdd: (supplier: SupplierFormData) => void;
+  onAdd: () => void;
   trigger?: React.ReactNode;
 }
 
@@ -55,23 +55,56 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
     resolver: zodResolver(supplierSchema),
     defaultValues: {
       name: "",
+      cnpj: "",
       contact: "",
       phone: "",
       email: "",
       address: "",
-      limit: "",
-      status: "active",
     },
   });
 
-  const onSubmit = (data: SupplierFormData) => {
-    onAdd(data);
-    toast({
-      title: "Fornecedor adicionado",
-      description: `${data.name} foi adicionado com sucesso.`,
-    });
-    form.reset();
-    setOpen(false);
+  const onSubmit = async (data: SupplierFormData) => {
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !userData.user) {
+        toast({
+          title: "Erro",
+          description: "Você precisa estar autenticado.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('suppliers')
+        .insert({
+          name: data.name,
+          cnpj: data.cnpj || null,
+          contact: data.contact,
+          phone: data.phone || null,
+          email: data.email || null,
+          address: data.address || null,
+          user_id: userData.user.id,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Fornecedor adicionado",
+        description: `${data.name} foi adicionado com sucesso.`,
+      });
+      
+      onAdd();
+      form.reset();
+      setOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao adicionar fornecedor",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -101,6 +134,20 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                   <FormLabel>Nome do Fornecedor*</FormLabel>
                   <FormControl>
                     <Input placeholder="Ex: Holambra" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cnpj"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CNPJ</FormLabel>
+                  <FormControl>
+                    <Input placeholder="00.000.000/0000-00" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -164,45 +211,6 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="limit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Limite de Crédito*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="R$ 25.000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status*</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="active">Ativo</SelectItem>
-                        <SelectItem value="pending">Pendente</SelectItem>
-                        <SelectItem value="inactive">Inativo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>

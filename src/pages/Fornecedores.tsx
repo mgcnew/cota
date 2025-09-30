@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,129 +68,61 @@ type SupplierFormData = {
 };
 
 export default function Fornecedores() {
+  const { user, loading } = useAuth();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { paginate } = usePagination<Supplier>({ initialItemsPerPage: 10 });
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
-  // Mock data baseado na planilha Excel
-  const [suppliers, setSuppliers] = useState<Supplier[]>([
-    {
-      id: "1",
-      name: "Holambra",
-      contact: "João Silva",
-      limit: "R$ 25.000",
-      activeQuotes: 8,
-      totalQuotes: 45,
-      avgPrice: "R$ 7.65",
-      lastOrder: "22/09/25",
-      rating: 4.8,
-      status: "active",
-      phone: "(11) 99999-9999",
-      email: "contato@holambra.com.br"
-    },
-    {
-      id: "2",
-      name: "Seara",
-      contact: "Maria Santos",
-      limit: "R$ 50.000",
-      activeQuotes: 6,
-      totalQuotes: 38,
-      avgPrice: "R$ 15.84",
-      lastOrder: "22/09/25", 
-      rating: 4.6,
-      status: "active",
-      phone: "(11) 88888-8888",
-      email: "vendas@seara.com.br"
-    },
-    {
-      id: "3",
-      name: "Davi",
-      contact: "Davi Oliveira",
-      limit: "R$ 18.000",
-      activeQuotes: 12,
-      totalQuotes: 67,
-      avgPrice: "R$ 18.49",
-      lastOrder: "25/09/25",
-      rating: 4.9,
-      status: "active",
-      phone: "(11) 77777-7777"
-    },
-    {
-      id: "4", 
-      name: "Adriano/Sidio",
-      contact: "Adriano Costa",
-      limit: "R$ 15.000",
-      activeQuotes: 5,
-      totalQuotes: 29,
-      avgPrice: "R$ 8.00",
-      lastOrder: "18/09/25",
-      rating: 4.2,
-      status: "active"
-    },
-    {
-      id: "5",
-      name: "Amandinha",
-      contact: "Amanda Lima",
-      limit: "R$ 30.000",
-      activeQuotes: 3,
-      totalQuotes: 22,
-      avgPrice: "R$ 22.49",
-      lastOrder: "23/09/25",
-      rating: 4.5,
-      status: "active"
-    },
-    {
-      id: "6",
-      name: "Raja",
-      contact: "Carlos Raja",
-      limit: "R$ 12.000",
-      activeQuotes: 2,
-      totalQuotes: 18,
-      avgPrice: "R$ 12.60",
-      lastOrder: "18/09/25",
-      rating: 4.0,
-      status: "pending"
-    },
-    {
-      id: "7",
-      name: "Margarete",
-      contact: "Margarete Silva",
-      limit: "R$ 8.000",
-      activeQuotes: 4,
-      totalQuotes: 31,
-      avgPrice: "R$ 6.00",
-      lastOrder: "18/09/25",
-      rating: 4.7,
-      status: "active"
-    },
-    {
-      id: "8",
-      name: "Frigoplus",
-      contact: "Roberto Santos", 
-      limit: "R$ 20.000",
-      activeQuotes: 0,
-      totalQuotes: 8,
-      avgPrice: "R$ 0.00",
-      lastOrder: "12/09/25",
-      rating: 3.8,
-      status: "inactive"
+  useEffect(() => {
+    if (!loading && !user) {
+      setAuthDialogOpen(true);
     }
-  ]);
+  }, [loading, user]);
 
-  const handleAddSupplier = (data: SupplierFormData) => {
-    const newSupplier: Supplier = {
-      ...data,
-      id: String(suppliers.length + 1),
-      activeQuotes: 0,
-      totalQuotes: 0,
-      avgPrice: "R$ 0.00",
-      lastOrder: new Date().toLocaleDateString("pt-BR"),
-      rating: 0,
-    };
-    setSuppliers([...suppliers, newSupplier]);
+  useEffect(() => {
+    if (user) {
+      loadSuppliers();
+    }
+  }, [user]);
+
+  const loadSuppliers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedSuppliers: Supplier[] = data.map(s => ({
+        id: s.id,
+        name: s.name,
+        contact: s.contact || "",
+        limit: "R$ 0,00",
+        activeQuotes: 0,
+        totalQuotes: 0,
+        avgPrice: "R$ 0,00",
+        lastOrder: new Date(s.created_at).toLocaleDateString('pt-BR'),
+        rating: 0,
+        status: "active" as const,
+        phone: s.phone || undefined,
+        email: s.email || undefined,
+        address: s.address || undefined,
+      }));
+
+      setSuppliers(formattedSuppliers);
+    } catch (error) {
+      console.error("Erro ao carregar fornecedores:", error);
+    }
+  };
+
+  const handleAddSupplier = () => {
+    loadSuppliers();
   };
 
   const handleEditSupplier = (id: string, data: SupplierFormData) => {
@@ -269,8 +204,18 @@ export default function Fornecedores() {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">Carregando...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-3 md:p-6 space-y-4 md:space-y-6">
+    <>
+      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
+      <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -560,6 +505,7 @@ export default function Fornecedores() {
         onOpenChange={(open) => !open && setDeletingSupplier(null)}
         onDelete={handleDeleteSupplier}
       />
-    </div>
+      </div>
+    </>
   );
 }
