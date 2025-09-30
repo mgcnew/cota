@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Package, Building2, FileText, ShoppingCart, X } from "lucide-react";
+import { Search, Package, Building2, FileText, ShoppingCart } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -13,31 +13,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-// Mock data - Em produção, isso viria de uma API ou contexto global
-const mockData = {
-  produtos: [
-    { id: "1", name: "Parafuso M8", category: "Fixação", stock: 150 },
-    { id: "2", name: "Porca M8", category: "Fixação", stock: 200 },
-    { id: "3", name: "Arruela Lisa", category: "Fixação", stock: 300 },
-    { id: "4", name: "Cabo de Rede CAT6", category: "Elétrica", stock: 50 },
-    { id: "5", name: "Tomada 2P+T", category: "Elétrica", stock: 75 },
-  ],
-  fornecedores: [
-    { id: "1", name: "TechSul Materiais", contact: "contato@techsul.com" },
-    { id: "2", name: "Distribuidora Norte", contact: "vendas@norte.com" },
-    { id: "3", name: "Atacado Center", contact: "comercial@atacadocenter.com" },
-  ],
-  cotacoes: [
-    { id: "COT-001", produto: "Parafuso M8", fornecedor: "TechSul Materiais", status: "Pendente" },
-    { id: "COT-002", produto: "Cabo de Rede CAT6", fornecedor: "Distribuidora Norte", status: "Aprovada" },
-    { id: "COT-003", produto: "Tomada 2P+T", fornecedor: "Atacado Center", status: "Recusada" },
-  ],
-  pedidos: [
-    { id: "PED-001", fornecedor: "TechSul Materiais", produtos: ["Parafuso M8"], status: "Em Andamento" },
-    { id: "PED-002", fornecedor: "Distribuidora Norte", produtos: ["Cabo de Rede CAT6"], status: "Concluído" },
-  ],
-};
+import { useDebounce } from "@/hooks/useDebounce";
+import { useProducts } from "@/hooks/useProducts";
+import { useSuppliers } from "@/hooks/useSuppliers";
+import { useCotacoes } from "@/hooks/useCotacoes";
+import { usePedidos } from "@/hooks/usePedidos";
 
 interface GlobalSearchProps {
   open: boolean;
@@ -47,6 +27,13 @@ interface GlobalSearchProps {
 export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  // Fetch real data from database
+  const { products } = useProducts();
+  const { suppliers } = useSuppliers();
+  const { cotacoes } = useCotacoes();
+  const { pedidos } = usePedidos();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -60,25 +47,32 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
     return () => document.removeEventListener("keydown", down);
   }, [open, onOpenChange]);
 
-  const filteredResults = {
-    produtos: mockData.produtos.filter(p =>
-      p.name.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    fornecedores: mockData.fornecedores.filter(f =>
-      f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      f.contact.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    cotacoes: mockData.cotacoes.filter(c =>
-      c.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.produto.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.fornecedor.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    pedidos: mockData.pedidos.filter(p =>
-      p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.fornecedor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.produtos.some(prod => prod.toLowerCase().includes(searchQuery.toLowerCase()))
-    ),
-  };
+  const filteredResults = useMemo(() => {
+    const query = debouncedSearch.toLowerCase();
+    
+    return {
+      produtos: products.filter(p =>
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query)
+      ),
+      fornecedores: suppliers.filter(f =>
+        f.name.toLowerCase().includes(query) ||
+        (f.contact && f.contact.toLowerCase().includes(query)) ||
+        (f.email && f.email.toLowerCase().includes(query))
+      ),
+      cotacoes: cotacoes.filter(c =>
+        c.id.toLowerCase().includes(query) ||
+        c.produto.toLowerCase().includes(query) ||
+        c.melhorFornecedor.toLowerCase().includes(query) ||
+        c.status.toLowerCase().includes(query)
+      ),
+      pedidos: pedidos.filter(p =>
+        p.supplier_name.toLowerCase().includes(query) ||
+        p.status.toLowerCase().includes(query) ||
+        p.items?.some(item => item.product_name.toLowerCase().includes(query))
+      ),
+    };
+  }, [debouncedSearch, products, suppliers, cotacoes, pedidos]);
 
   const hasResults = 
     filteredResults.produtos.length > 0 ||
@@ -107,14 +101,18 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   };
 
   const getStatusColor = (status: string) => {
+    const normalizedStatus = status.toLowerCase();
     const colors: Record<string, string> = {
-      "Pendente": "bg-warning/10 text-warning border-warning/20",
-      "Aprovada": "bg-success/10 text-success border-success/20",
-      "Recusada": "bg-destructive/10 text-destructive border-destructive/20",
-      "Em Andamento": "bg-info/10 text-info border-info/20",
-      "Concluído": "bg-success/10 text-success border-success/20",
+      "pendente": "bg-warning/10 text-warning border-warning/20",
+      "ativa": "bg-info/10 text-info border-info/20",
+      "aprovada": "bg-success/10 text-success border-success/20",
+      "concluída": "bg-success/10 text-success border-success/20",
+      "concluído": "bg-success/10 text-success border-success/20",
+      "cancelada": "bg-destructive/10 text-destructive border-destructive/20",
+      "recusada": "bg-destructive/10 text-destructive border-destructive/20",
+      "em andamento": "bg-info/10 text-info border-info/20",
     };
-    return colors[status] || "bg-muted text-muted-foreground";
+    return colors[normalizedStatus] || "bg-muted text-muted-foreground";
   };
 
   return (
@@ -156,7 +154,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   <p className="text-xs text-muted-foreground">{produto.category}</p>
                 </div>
                 <Badge variant="outline" className="shrink-0">
-                  Estoque: {produto.stock}
+                  {produto.quotesCount} cotação(ões)
                 </Badge>
               </CommandItem>
             ))}
@@ -177,8 +175,13 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{fornecedor.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{fornecedor.contact}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {fornecedor.contact || fornecedor.email || "Sem contato"}
+                  </p>
                 </div>
+                <Badge variant="outline" className="shrink-0">
+                  {fornecedor.activeQuotes} ativas
+                </Badge>
               </CommandItem>
             ))}
           </CommandGroup>
@@ -199,7 +202,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{cotacao.id}</p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {cotacao.produto} • {cotacao.fornecedor}
+                    {cotacao.produto} • {cotacao.melhorFornecedor}
                   </p>
                 </div>
                 <Badge variant="outline" className={cn("shrink-0", getStatusColor(cotacao.status))}>
@@ -223,9 +226,11 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   <ShoppingCart className="h-4 w-4 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{pedido.id}</p>
+                  <p className="font-medium truncate">
+                    {new Date(pedido.order_date).toLocaleDateString('pt-BR')}
+                  </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {pedido.fornecedor} • {pedido.produtos.length} produto(s)
+                    {pedido.supplier_name} • {pedido.items?.length || 0} produto(s)
                   </p>
                 </div>
                 <Badge variant="outline" className={cn("shrink-0", getStatusColor(pedido.status))}>
