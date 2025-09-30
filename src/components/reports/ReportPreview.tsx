@@ -44,30 +44,30 @@ export function ReportPreview({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="text-sm text-muted-foreground">Período</div>
-            <div className="font-semibold">{reportData.economiaData.periodo}</div>
+            <div className="font-semibold">{reportData?.economiaData?.periodo ?? '-'}</div>
           </div>
           <div className="space-y-2">
             <div className="text-sm text-muted-foreground">Economia Total</div>
             <div className="font-semibold text-success text-lg">
-              {formatCurrency(reportData.economiaData.economiaGerada)}
+              {formatCurrency(reportData?.economiaData?.economiaGerada ?? 0)}
             </div>
           </div>
           <div className="space-y-2">
             <div className="text-sm text-muted-foreground">Percentual de Economia</div>
             <div className="font-semibold text-success">
-              {formatPercentage(reportData.economiaData.economiaPercentual)}
+              {formatPercentage(reportData?.economiaData?.economiaPercentual ?? 0)}
             </div>
           </div>
           <div className="space-y-2">
             <div className="text-sm text-muted-foreground">Cotações Realizadas</div>
-            <div className="font-semibold">{reportData.economiaData.cotacoesRealizadas}</div>
+            <div className="font-semibold">{reportData?.economiaData?.cotacoesRealizadas ?? 0}</div>
           </div>
         </div>
         
         <div>
           <h4 className="font-medium mb-3">Cotações Detalhadas</h4>
           <div className="space-y-2">
-            {reportData.cotacoes.slice(0, 5).map((cotacao) => (
+            {(reportData?.cotacoes ?? []).slice(0, 5).map((cotacao) => (
               <div key={cotacao.id} className="flex justify-between items-center p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">{cotacao.produto}</div>
@@ -81,9 +81,9 @@ export function ReportPreview({
                 </div>
               </div>
             ))}
-            {reportData.cotacoes.length > 5 && (
+            {(reportData?.cotacoes?.length ?? 0) > 5 && (
               <div className="text-sm text-muted-foreground text-center py-2">
-                + {reportData.cotacoes.length - 5} cotações adicionais no relatório completo
+                + {(reportData?.cotacoes?.length ?? 0) - 5} cotações adicionais no relatório completo
               </div>
             )}
           </div>
