@@ -221,12 +221,16 @@ export default function Relatorios() {
     await generateAllReports(currentFilters);
   };
   const handlePreviewReport = async (reportType: string) => {
-    const data = await getReportData(currentFilters);
-    setPreviewData(data);
+    // Open dialog first with loading state
     setPreviewReport({
       isOpen: true,
       type: reportType
     });
+    setPreviewData(null); // Reset data to show loading
+
+    // Then load data
+    const data = await getReportData(currentFilters);
+    setPreviewData(data);
   };
   const handleResetFilters = () => {
     setSelectedFornecedores([]);

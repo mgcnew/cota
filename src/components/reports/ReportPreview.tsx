@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Download, ZoomIn, ZoomOut, Eye } from "lucide-react";
+import { Download, ZoomIn, ZoomOut, Eye, Loader2 } from "lucide-react";
 import { formatCurrency, formatDate, formatPercentage } from "@/utils/reportData";
 import type { ReportData } from "@/utils/reportTemplates";
 
@@ -11,7 +11,7 @@ interface ReportPreviewProps {
   isOpen: boolean;
   onClose: () => void;
   reportType: string;
-  reportData: ReportData;
+  reportData: ReportData | null;
   onDownload: (format: 'pdf' | 'excel') => void;
 }
 
@@ -36,105 +36,128 @@ export function ReportPreview({
     }
   };
 
-  const renderEconomiaPreview = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <div className="text-sm text-muted-foreground">Período</div>
-          <div className="font-semibold">{reportData.economiaData.periodo}</div>
-        </div>
-        <div className="space-y-2">
-          <div className="text-sm text-muted-foreground">Economia Total</div>
-          <div className="font-semibold text-success text-lg">
-            {formatCurrency(reportData.economiaData.economiaGerada)}
+  const renderEconomiaPreview = () => {
+    if (!reportData) return null;
+    
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <div className="text-sm text-muted-foreground">Período</div>
+            <div className="font-semibold">{reportData.economiaData.periodo}</div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-sm text-muted-foreground">Economia Total</div>
+            <div className="font-semibold text-success text-lg">
+              {formatCurrency(reportData.economiaData.economiaGerada)}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-sm text-muted-foreground">Percentual de Economia</div>
+            <div className="font-semibold text-success">
+              {formatPercentage(reportData.economiaData.economiaPercentual)}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-sm text-muted-foreground">Cotações Realizadas</div>
+            <div className="font-semibold">{reportData.economiaData.cotacoesRealizadas}</div>
           </div>
         </div>
-        <div className="space-y-2">
-          <div className="text-sm text-muted-foreground">Percentual de Economia</div>
-          <div className="font-semibold text-success">
-            {formatPercentage(reportData.economiaData.economiaPercentual)}
+        
+        <div>
+          <h4 className="font-medium mb-3">Cotações Detalhadas</h4>
+          <div className="space-y-2">
+            {reportData.cotacoes.slice(0, 5).map((cotacao) => (
+              <div key={cotacao.id} className="flex justify-between items-center p-3 border rounded-lg">
+                <div>
+                  <div className="font-medium">{cotacao.produto}</div>
+                  <div className="text-sm text-muted-foreground">{cotacao.fornecedor}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold">{formatCurrency(cotacao.preco)}</div>
+                  <div className="text-sm text-success">
+                    Economia: {formatCurrency(cotacao.economiaGerada)}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {reportData.cotacoes.length > 5 && (
+              <div className="text-sm text-muted-foreground text-center py-2">
+                + {reportData.cotacoes.length - 5} cotações adicionais no relatório completo
+              </div>
+            )}
           </div>
-        </div>
-        <div className="space-y-2">
-          <div className="text-sm text-muted-foreground">Cotações Realizadas</div>
-          <div className="font-semibold">{reportData.economiaData.cotacoesRealizadas}</div>
         </div>
       </div>
-      
-      <div>
-        <h4 className="font-medium mb-3">Cotações Detalhadas</h4>
-        <div className="space-y-2">
-          {reportData.cotacoes.slice(0, 5).map((cotacao) => (
-            <div key={cotacao.id} className="flex justify-between items-center p-3 border rounded-lg">
+    );
+  };
+
+  const renderFornecedoresPreview = () => {
+    if (!reportData) return null;
+    
+    return (
+      <div className="space-y-4">
+        <h4 className="font-medium">Top Fornecedores por Performance</h4>
+        <div className="space-y-3">
+          {reportData.fornecedores.slice(0, 4).map((fornecedor) => (
+            <div key={fornecedor.nome} className="flex justify-between items-center p-3 border rounded-lg">
               <div>
-                <div className="font-medium">{cotacao.produto}</div>
-                <div className="text-sm text-muted-foreground">{cotacao.fornecedor}</div>
+                <div className="font-medium">{fornecedor.nome}</div>
+                <div className="text-sm text-muted-foreground">
+                  {fornecedor.cotacoesParticipadas} cotações • {fornecedor.tempoMedioResposta}h resposta
+                </div>
               </div>
               <div className="text-right">
-                <div className="font-semibold">{formatCurrency(cotacao.preco)}</div>
-                <div className="text-sm text-success">
-                  Economia: {formatCurrency(cotacao.economiaGerada)}
+                <div className="font-semibold">{formatCurrency(fornecedor.economiaGerada)}</div>
+                <Badge variant="outline">
+                  {fornecedor.avaliacaoPerformance}/10
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderProdutosPreview = () => {
+    if (!reportData) return null;
+    
+    return (
+      <div className="space-y-4">
+        <h4 className="font-medium">Produtos com Maior Variação</h4>
+        <div className="space-y-3">
+          {reportData.produtos.map((produto) => (
+            <div key={produto.nome} className="flex justify-between items-center p-3 border rounded-lg">
+              <div>
+                <div className="font-medium">{produto.nome}</div>
+                <div className="text-sm text-muted-foreground">{produto.categoria}</div>
+              </div>
+              <div className="text-right">
+                <div className="font-semibold">{formatCurrency(produto.precoAtual)}</div>
+                <div className={`text-sm ${produto.variacao < 0 ? 'text-success' : 'text-destructive'}`}>
+                  {formatPercentage(produto.variacao)}
                 </div>
               </div>
             </div>
           ))}
-          {reportData.cotacoes.length > 5 && (
-            <div className="text-sm text-muted-foreground text-center py-2">
-              + {reportData.cotacoes.length - 5} cotações adicionais no relatório completo
-            </div>
-          )}
         </div>
       </div>
-    </div>
-  );
-
-  const renderFornecedoresPreview = () => (
-    <div className="space-y-4">
-      <h4 className="font-medium">Top Fornecedores por Performance</h4>
-      <div className="space-y-3">
-        {reportData.fornecedores.slice(0, 4).map((fornecedor) => (
-          <div key={fornecedor.nome} className="flex justify-between items-center p-3 border rounded-lg">
-            <div>
-              <div className="font-medium">{fornecedor.nome}</div>
-              <div className="text-sm text-muted-foreground">
-                {fornecedor.cotacoesParticipadas} cotações • {fornecedor.tempoMedioResposta}h resposta
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="font-semibold">{formatCurrency(fornecedor.economiaGerada)}</div>
-              <Badge variant="outline">
-                {fornecedor.avaliacaoPerformance}/10
-              </Badge>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderProdutosPreview = () => (
-    <div className="space-y-4">
-      <h4 className="font-medium">Produtos com Maior Variação</h4>
-      <div className="space-y-3">
-        {reportData.produtos.map((produto) => (
-          <div key={produto.nome} className="flex justify-between items-center p-3 border rounded-lg">
-            <div>
-              <div className="font-medium">{produto.nome}</div>
-              <div className="text-sm text-muted-foreground">{produto.categoria}</div>
-            </div>
-            <div className="text-right">
-              <div className="font-semibold">{formatCurrency(produto.precoAtual)}</div>
-              <div className={`text-sm ${produto.variacao < 0 ? 'text-success' : 'text-destructive'}`}>
-                {formatPercentage(produto.variacao)}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderPreviewContent = () => {
+    if (!reportData) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+            <p className="text-muted-foreground">Carregando dados do relatório...</p>
+          </div>
+        </div>
+      );
+    }
+
     switch (reportType) {
       case 'economia':
         return renderEconomiaPreview();
@@ -201,12 +224,14 @@ export function ReportPreview({
               <Button
                 variant="outline"
                 onClick={() => onDownload('excel')}
+                disabled={!reportData}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Excel
               </Button>
               <Button
                 onClick={() => onDownload('pdf')}
+                disabled={!reportData}
               >
                 <Download className="h-4 w-4 mr-2" />
                 PDF
