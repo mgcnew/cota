@@ -346,7 +346,7 @@ export default function Cotacoes() {
         </Card>
       )}
 
-      {filteredCotacoes.length === 0 && !loading && (
+      {filteredCotacoes.length === 0 && !isLoading && (
         <Card>
           <CardContent className="p-12 text-center">
             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

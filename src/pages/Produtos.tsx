@@ -380,8 +380,8 @@ export default function Produtos() {
         product={editingProduct}
         open={!!editingProduct}
         onOpenChange={(open) => !open && setEditingProduct(null)}
-        onProductUpdated={handleProductUpdated}
-        onCategoryAdded={handleCategoryAdded}
+        onProductUpdated={() => {}}
+        onCategoryAdded={() => {}}
         categories={categories}
       />
 
@@ -390,7 +390,7 @@ export default function Produtos() {
         product={deletingProduct}
         open={!!deletingProduct}
         onOpenChange={(open) => !open && setDeletingProduct(null)}
-        onProductDeleted={handleProductDeleted}
+        onProductDeleted={() => {}}
       />
       </div>
     </>
