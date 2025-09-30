@@ -32,7 +32,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { ViewMode } from "@/types/pagination";
 
 export default function Cotacoes() {
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
   const { paginate } = usePagination<Quote>({ initialItemsPerPage: 10 });
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);

@@ -40,7 +40,7 @@ export default function Produtos() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
   const { paginate } = usePagination<Product>({ initialItemsPerPage: 10 });
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);

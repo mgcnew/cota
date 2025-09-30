@@ -70,7 +70,7 @@ type SupplierFormData = {
 export default function Fornecedores() {
   const { user, loading } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
   const { paginate } = usePagination<Supplier>({ initialItemsPerPage: 10 });
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
