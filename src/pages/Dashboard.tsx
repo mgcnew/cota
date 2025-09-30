@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/ui/metric-card";
 import { IconButton } from "@/components/ui/icon-button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, Legend, Tooltip } from "recharts";
 import { TrendingUp, TrendingDown, Package, Building2, FileText, ShoppingCart, DollarSign, Users, Calendar, ArrowUpRight, Plus } from "lucide-react";
 export default function Dashboard() {
   const [timeRange, setTimeRange] = useState("30d");
@@ -92,6 +94,39 @@ export default function Dashboard() {
     avgPrice: "R$ 8.00",
     savings: "5%"
   }];
+
+  const monthlyData = [
+    { month: 'Abr', economia: 12500, cotacoes: 18 },
+    { month: 'Mai', economia: 14200, cotacoes: 22 },
+    { month: 'Jun', economia: 13800, cotacoes: 20 },
+    { month: 'Jul', economia: 15100, cotacoes: 24 },
+    { month: 'Ago', economia: 14600, cotacoes: 21 },
+    { month: 'Set', economia: 15847, cotacoes: 24 }
+  ];
+
+  const pieChartData = topSuppliers.map((supplier, index) => ({
+    name: supplier.name,
+    value: supplier.quotes,
+    fill: `hsl(var(--chart-${index + 1}))`
+  }));
+
+  const COLORS = [
+    'hsl(var(--warning))',
+    'hsl(var(--info))',
+    'hsl(var(--primary))',
+    'hsl(var(--success))'
+  ];
+
+  const chartConfig = {
+    economia: {
+      label: "Economia",
+      color: "hsl(var(--success))",
+    },
+    cotacoes: {
+      label: "Cotações",
+      color: "hsl(var(--info))",
+    },
+  };
   return <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -130,6 +165,141 @@ export default function Dashboard() {
         label: "itens únicos",
         type: "positive"
       }} />
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+        {/* Pie Chart - Top Fornecedores */}
+        <Card className="card-elevated border-2 border-primary/10">
+          <CardHeader>
+            <CardTitle className="text-base md:text-lg font-semibold">Distribuição por Fornecedores</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieChartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid gap-2">
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  {payload[0].name}
+                                </span>
+                                <span className="font-bold text-foreground">
+                                  {payload[0].value} cotações
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Line Chart - Desempenho Mensal */}
+        <Card className="card-elevated border-2 border-success/10">
+          <CardHeader>
+            <CardTitle className="text-base md:text-lg font-semibold">Desempenho Mensal</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="month" 
+                    className="text-xs"
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <YAxis 
+                    yAxisId="left"
+                    className="text-xs"
+                    stroke="hsl(var(--muted-foreground))"
+                    tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                  />
+                  <YAxis 
+                    yAxisId="right" 
+                    orientation="right"
+                    className="text-xs"
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <Tooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-3 shadow-sm">
+                            <div className="grid gap-2">
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  Economia
+                                </span>
+                                <span className="font-bold text-success">
+                                  R$ {payload[0]?.value?.toLocaleString('pt-BR')}
+                                </span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  Cotações
+                                </span>
+                                <span className="font-bold text-info">
+                                  {payload[1]?.value}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend />
+                  <Line 
+                    yAxisId="left"
+                    type="monotone" 
+                    dataKey="economia" 
+                    stroke="hsl(var(--success))" 
+                    strokeWidth={2}
+                    name="Economia (R$)"
+                    dot={{ fill: "hsl(var(--success))" }}
+                  />
+                  <Line 
+                    yAxisId="right"
+                    type="monotone" 
+                    dataKey="cotacoes" 
+                    stroke="hsl(var(--info))" 
+                    strokeWidth={2}
+                    name="Cotações"
+                    dot={{ fill: "hsl(var(--info))" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Content Grid */}
@@ -192,11 +362,5 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Actions */}
-      <Card className="card-elevated border-2 border-info/10">
-        
-        
-      </Card>
     </div>;
 }
