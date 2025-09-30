@@ -15,7 +15,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     active: {
       variant: "default" as const,
       label: "Ativo",
-      className: "bg-gradient-success border-none text-white shadow-sm"
+      className: "bg-success text-white border-success shadow-sm"
     },
     inactive: {
       variant: "secondary" as const,
@@ -25,7 +25,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     pending: {
       variant: "outline" as const,
       label: "Pendente",
-      className: "bg-gradient-warning border-none text-white shadow-sm"
+      className: "bg-warning text-white border-warning shadow-sm"
     },
     completed: {
       variant: "secondary" as const,
@@ -35,7 +35,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     expired: {
       variant: "destructive" as const,
       label: "Expirado",
-      className: "bg-gradient-error border-none text-white shadow-sm"
+      className: "bg-error text-white border-error shadow-sm"
     }
   };
 

@@ -154,7 +154,7 @@
 @layer components {
   /* Professional Card Components */
   .card-elevated {
-    background: var(--gradient-card);
+    background: hsl(var(--card));
     box-shadow: var(--shadow-soft);
     transition: var(--transition-smooth);
   }
@@ -167,7 +167,7 @@
   /* Dashboard Metrics Cards */
   .metrics-card {
     @apply rounded-2xl p-6 bg-card border;
-    background: var(--gradient-card);
+    background: hsl(var(--card));
     box-shadow: var(--shadow-soft);
     transition: var(--transition-smooth);
   }

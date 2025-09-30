@@ -184,9 +184,9 @@ export default function Dashboard() {
               {topSuppliers.map((supplier, index) => <div key={supplier.name} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-2 md:gap-3 min-w-0">
                     <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold text-white shrink-0 ${
-                      index === 0 ? "bg-gradient-warning" : 
-                      index === 1 ? "bg-gradient-info" : 
-                      "bg-gradient-primary"
+                      index === 0 ? "bg-warning" : 
+                      index === 1 ? "bg-info" : 
+                      "bg-primary"
                     }`}>
                       {index + 1}
                     </div>

@@ -72,8 +72,6 @@ export function MetricCard({
         className
       )}
     >
-      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50", styles.gradient)} />
-      
       <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
