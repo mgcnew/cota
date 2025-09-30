@@ -68,6 +68,30 @@ export default function Produtos() {
 
   const paginatedData = paginate(filteredProducts);
 
+  // Cálculos de métricas reais
+  const stats = useMemo(() => {
+    const totalCategories = categories.length - 1; // -1 para remover "all"
+    const activeQuotes = products.reduce((sum, p) => sum + p.quotesCount, 0);
+    
+    const productsWithPrices = products.filter(p => p.lastQuotePrice !== "R$ 0,00");
+    let averageValue = "R$ 0,00";
+    
+    if (productsWithPrices.length > 0) {
+      const total = productsWithPrices.reduce((sum, p) => {
+        const price = parseFloat(p.lastQuotePrice.replace(/[^\d,]/g, '').replace(',', '.'));
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+      averageValue = `R$ ${(total / productsWithPrices.length).toFixed(2)}`;
+    }
+    
+    return {
+      totalProducts: products.length,
+      totalCategories,
+      activeQuotes,
+      averageValue,
+    };
+  }, [products, categories]);
+
   const getTrendIcon = (trend: "up" | "down" | "stable") => {
     if (trend === "up") return <TrendingUp className="h-4 w-4 text-success" />;
     if (trend === "down") return <TrendingUp className="h-4 w-4 text-error rotate-180" />;
@@ -142,7 +166,7 @@ export default function Produtos() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs md:text-sm text-muted-foreground">Total de Produtos</p>
-                <p className="text-xl md:text-2xl font-bold">{products.length}</p>
+                <p className="text-xl md:text-2xl font-bold">{stats.totalProducts}</p>
               </div>
               <div className="p-2 rounded-lg bg-primary/10">
                 <Package className="h-5 w-5 md:h-6 md:w-6 text-primary" />
@@ -156,7 +180,7 @@ export default function Produtos() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs md:text-sm text-muted-foreground">Categorias</p>
-                <p className="text-xl md:text-2xl font-bold">{categories.length - 1}</p>
+                <p className="text-xl md:text-2xl font-bold">{stats.totalCategories}</p>
               </div>
               <div className="p-2 rounded-lg bg-info/10">
                 <Filter className="h-5 w-5 md:h-6 md:w-6 text-info" />
@@ -170,7 +194,7 @@ export default function Produtos() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs md:text-sm text-muted-foreground">Cotações Ativas</p>
-                <p className="text-xl md:text-2xl font-bold">24</p>
+                <p className="text-xl md:text-2xl font-bold">{stats.activeQuotes}</p>
               </div>
               <div className="p-2 rounded-lg bg-success/10">
                 <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-success" />
@@ -184,7 +208,7 @@ export default function Produtos() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs md:text-sm text-muted-foreground">Valor Médio</p>
-                <p className="text-xl md:text-2xl font-bold">R$ 14.52</p>
+                <p className="text-xl md:text-2xl font-bold">{stats.averageValue}</p>
               </div>
               <div className="p-2 rounded-lg bg-warning/10">
                 <Scale className="h-5 w-5 md:h-6 md:w-6 text-warning" />

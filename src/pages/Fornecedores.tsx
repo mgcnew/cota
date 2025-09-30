@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useSuppliers } from "@/hooks/useSuppliers";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,6 +69,7 @@ type SupplierFormData = {
 
 export default function Fornecedores() {
   const { user, loading } = useAuth();
+  const { suppliers, isLoading: suppliersLoading, refetch } = useSuppliers();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const { paginate } = usePagination<Supplier>({ initialItemsPerPage: 10 });
@@ -76,7 +77,6 @@ export default function Fornecedores() {
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -84,61 +84,20 @@ export default function Fornecedores() {
     }
   }, [loading, user]);
 
-  useEffect(() => {
-    if (user) {
-      loadSuppliers();
-    }
-  }, [user]);
-
-  const loadSuppliers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('suppliers')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const formattedSuppliers: Supplier[] = data.map(s => ({
-        id: s.id,
-        name: s.name,
-        contact: s.contact || "",
-        limit: "R$ 0,00",
-        activeQuotes: 0,
-        totalQuotes: 0,
-        avgPrice: "R$ 0,00",
-        lastOrder: new Date(s.created_at).toLocaleDateString('pt-BR'),
-        rating: 0,
-        status: "active" as const,
-        phone: s.phone || undefined,
-        email: s.email || undefined,
-        address: s.address || undefined,
-      }));
-
-      setSuppliers(formattedSuppliers);
-    } catch (error) {
-      console.error("Erro ao carregar fornecedores:", error);
-    }
-  };
-
   const handleAddSupplier = () => {
-    loadSuppliers();
+    refetch();
   };
 
   const handleEditSupplier = (id: string, data: SupplierFormData) => {
-    setSuppliers(suppliers.map(supplier => 
-      supplier.id === id 
-        ? { ...supplier, ...data }
-        : supplier
-    ));
+    refetch();
   };
 
   const handleDeleteSupplier = (id: string) => {
-    setSuppliers(suppliers.filter(supplier => supplier.id !== id));
+    refetch();
   };
 
   const handleSuppliersImported = (importedSuppliers: Supplier[]) => {
-    setSuppliers(prev => [...prev, ...importedSuppliers]);
+    refetch();
   };
 
   // Mock data de produtos para cotações
@@ -204,7 +163,24 @@ export default function Fornecedores() {
     );
   };
 
-  if (loading) {
+  // Calculate real stats
+  const stats = useMemo(() => {
+    const totalLimit = suppliers.reduce((sum, s) => {
+      const limitValue = parseFloat(s.limit.replace(/[^\d,]/g, '').replace(',', '.'));
+      return sum + (isNaN(limitValue) ? 0 : limitValue);
+    }, 0);
+
+    const activeQuotesTotal = suppliers.reduce((sum, s) => sum + s.activeQuotes, 0);
+
+    return {
+      total: suppliers.length,
+      active: suppliers.filter(s => s.status === "active").length,
+      totalLimit: totalLimit > 0 ? `R$ ${totalLimit.toFixed(0)}k` : "R$ 0",
+      activeQuotes: activeQuotesTotal,
+    };
+  }, [suppliers]);
+
+  if (loading || suppliersLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">Carregando...</div>
@@ -267,25 +243,25 @@ export default function Fornecedores() {
       <div className="grid gap-3 md:gap-4 grid-cols-2 md:grid-cols-4">
         <MetricCard
           title="Total"
-          value={suppliers.length}
+          value={stats.total}
           icon={Building2}
           variant="default"
         />
         <MetricCard
           title="Ativos"
-          value={suppliers.filter(s => s.status === "active").length}
+          value={stats.active}
           icon={TrendingUp}
           variant="success"
         />
         <MetricCard
           title="Limite Total"
-          value="R$ 198k"
+          value={stats.totalLimit}
           icon={DollarSign}
           variant="info"
         />
         <MetricCard
           title="Cotações Ativas"
-          value="40"
+          value={stats.activeQuotes}
           icon={FileText}
           variant="warning"
         />
