@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -17,14 +17,25 @@ import {
   Edit,
   Trash2,
   TrendingUp,
-  Scale
+  Scale,
+  FileUp,
+  Quote
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AddProductDialog } from "@/components/forms/AddProductDialog";
 import { EditProductDialog } from "@/components/forms/EditProductDialog";
@@ -47,6 +58,18 @@ export default function Produtos() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const addDialogTriggerRef = useRef<HTMLDivElement>(null);
+  const importDialogTriggerRef = useRef<HTMLDivElement>(null);
+
+  const triggerAddDialog = () => {
+    const button = addDialogTriggerRef.current?.querySelector('button');
+    button?.click();
+  };
+
+  const triggerImportDialog = () => {
+    const button = importDialogTriggerRef.current?.querySelector('button');
+    button?.click();
+  };
 
   // OPTIMIZED: Use React Query for data fetching with caching
   const { products, categories, isLoading: productsLoading, deleteProduct } = useProducts();
@@ -120,19 +143,35 @@ export default function Produtos() {
         </div>
         <div className="flex items-center gap-2">
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <ImportProductsDialog 
-            onProductsImported={() => {}}
-            onCategoryAdded={() => {}}
-          />
-          <AddProductDialog onProductAdded={() => {}} onCategoryAdded={() => {}} />
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Ações
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-background border z-50 w-48">
+              <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={triggerAddDialog}>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Produto
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={triggerImportDialog}>
+                <FileUp className="h-4 w-4 mr-2" />
+                Importar Produtos
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* Filters */}
       <Card>
         <CardContent className="p-3 md:p-4">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-            <div className="relative flex-1 max-w-full md:max-w-md">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Buscar produtos..."
@@ -142,19 +181,19 @@ export default function Produtos() {
               />
             </div>
             
-            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className="whitespace-nowrap"
-                >
-                  {category === "all" ? "Todos" : category}
-                </Button>
-              ))}
-            </div>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border z-50">
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category === "all" ? "Todas as categorias" : category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -239,6 +278,11 @@ export default function Produtos() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-background border z-50">
+                      <DropdownMenuItem onClick={() => navigate(`/cotacoes?produto=${encodeURIComponent(product.name)}`)}>
+                        <Quote className="h-4 w-4 mr-2" />
+                        Ver Cotações
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => setEditingProduct(product)}>
                         <Edit className="h-4 w-4 mr-2" />
                         Editar
@@ -283,14 +327,6 @@ export default function Produtos() {
                     <span className="font-medium">{product.lastUpdate}</span>
                   </div>
                 </div>
-
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => navigate(`/cotacoes?produto=${encodeURIComponent(product.name)}`)}
-                >
-                  Ver Cotações
-                </Button>
               </CardContent>
             </Card>
           ))}
@@ -340,28 +376,32 @@ export default function Produtos() {
                       <TableCell className="hidden lg:table-cell">{product.bestSupplier}</TableCell>
                       <TableCell className="hidden sm:table-cell">{product.quotesCount}</TableCell>
                       <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => navigate(`/cotacoes?produto=${encodeURIComponent(product.name)}`)}
-                          >
-                            <Search className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setEditingProduct(product)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setDeletingProduct(product)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                        <div className="flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-background border z-50">
+                              <DropdownMenuItem onClick={() => navigate(`/cotacoes?produto=${encodeURIComponent(product.name)}`)}>
+                                <Quote className="h-4 w-4 mr-2" />
+                                Ver Cotações
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-destructive"
+                                onClick={() => setDeletingProduct(product)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -399,7 +439,22 @@ export default function Produtos() {
         </Card>
       )}
 
-      {/* Edit Product Dialog */}
+      {/* Dialogs - Hidden triggers for dropdown actions */}
+      <div className="sr-only">
+        <div ref={addDialogTriggerRef}>
+          <AddProductDialog 
+            onProductAdded={() => {}} 
+            onCategoryAdded={() => {}} 
+          />
+        </div>
+        <div ref={importDialogTriggerRef}>
+          <ImportProductsDialog 
+            onProductsImported={() => {}}
+            onCategoryAdded={() => {}}
+          />
+        </div>
+      </div>
+
       <EditProductDialog
         product={editingProduct}
         open={!!editingProduct}
@@ -409,7 +464,6 @@ export default function Produtos() {
         categories={categories}
       />
 
-      {/* Delete Product Dialog */}
       <DeleteProductDialog
         product={deletingProduct}
         open={!!deletingProduct}
