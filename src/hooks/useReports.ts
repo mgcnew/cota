@@ -20,7 +20,7 @@ export function useReports() {
       // Simular progresso
       setProgress(20);
       
-      const reportData = processReportData(filters);
+      const reportData = await processReportData(filters);
       setProgress(50);
 
       const timestamp = new Date().toISOString().slice(0, 10);
@@ -78,7 +78,7 @@ export function useReports() {
     setProgress(0);
 
     try {
-      const reportData = processReportData(filters);
+      const reportData = await processReportData(filters);
       const timestamp = new Date().toISOString().slice(0, 10);
       
       toast({
@@ -108,8 +108,8 @@ export function useReports() {
     }
   }, [toast]);
 
-  const getReportData = React.useCallback((filters: ReportFilters) => {
-    return processReportData(filters);
+  const getReportData = React.useCallback(async (filters: ReportFilters) => {
+    return await processReportData(filters);
   }, []);
 
   return {

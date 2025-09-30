@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { mockFornecedores, mockProdutos } from "@/utils/reportData";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ReportFiltersProps {
   selectedFornecedores: string[];
@@ -24,6 +24,35 @@ export function ReportFilters({
 }: ReportFiltersProps) {
   const [fornecedoresOpen, setFornecedoresOpen] = React.useState(false);
   const [produtosOpen, setProdutosOpen] = React.useState(false);
+  const [fornecedores, setFornecedores] = React.useState<any[]>([]);
+  const [produtos, setProdutos] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    loadFornecedores();
+    loadProdutos();
+  }, []);
+
+  const loadFornecedores = async () => {
+    const { data, error } = await supabase
+      .from("suppliers")
+      .select("*")
+      .order("name");
+    
+    if (!error && data) {
+      setFornecedores(data);
+    }
+  };
+
+  const loadProdutos = async () => {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("name");
+    
+    if (!error && data) {
+      setProdutos(data);
+    }
+  };
 
   const handleFornecedorToggle = (fornecedor: string) => {
     const updated = selectedFornecedores.includes(fornecedor)
@@ -77,18 +106,18 @@ export function ReportFilters({
               <CommandInput placeholder="Buscar fornecedores..." />
               <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
               <CommandGroup className="max-h-64 overflow-auto">
-                {mockFornecedores.map((fornecedor) => (
-                  <CommandItem key={fornecedor.nome} className="cursor-pointer">
+                {fornecedores.map((fornecedor) => (
+                  <CommandItem key={fornecedor.id} className="cursor-pointer">
                     <div 
                       className="flex items-center space-x-2 w-full"
-                      onClick={() => handleFornecedorToggle(fornecedor.nome)}
+                      onClick={() => handleFornecedorToggle(fornecedor.name)}
                     >
                       <Checkbox
-                        checked={selectedFornecedores.includes(fornecedor.nome)}
-                        onChange={() => handleFornecedorToggle(fornecedor.nome)}
+                        checked={selectedFornecedores.includes(fornecedor.name)}
+                        onChange={() => handleFornecedorToggle(fornecedor.name)}
                       />
-                      <span className="flex-1">{fornecedor.nome}</span>
-                      {selectedFornecedores.includes(fornecedor.nome) && (
+                      <span className="flex-1">{fornecedor.name}</span>
+                      {selectedFornecedores.includes(fornecedor.name) && (
                         <Check className="h-3 w-3 text-primary" />
                       )}
                     </div>
@@ -117,18 +146,18 @@ export function ReportFilters({
               <CommandInput placeholder="Buscar produtos..." />
               <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
               <CommandGroup className="max-h-64 overflow-auto">
-                {mockProdutos.map((produto) => (
-                  <CommandItem key={produto.nome} className="cursor-pointer">
+                {produtos.map((produto) => (
+                  <CommandItem key={produto.id} className="cursor-pointer">
                     <div 
                       className="flex items-center space-x-2 w-full"
-                      onClick={() => handleProdutoToggle(produto.nome)}
+                      onClick={() => handleProdutoToggle(produto.name)}
                     >
                       <Checkbox
-                        checked={selectedProdutos.includes(produto.nome)}
-                        onChange={() => handleProdutoToggle(produto.nome)}
+                        checked={selectedProdutos.includes(produto.name)}
+                        onChange={() => handleProdutoToggle(produto.name)}
                       />
-                      <span className="flex-1">{produto.nome}</span>
-                      {selectedProdutos.includes(produto.nome) && (
+                      <span className="flex-1">{produto.name}</span>
+                      {selectedProdutos.includes(produto.name) && (
                         <Check className="h-3 w-3 text-primary" />
                       )}
                     </div>

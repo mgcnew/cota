@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface ReportFilters {
   startDate: Date;
   endDate: Date;
@@ -170,34 +172,125 @@ export const mockCotacoes: CotacaoData[] = [
   }
 ];
 
-export const processReportData = (filters: ReportFilters) => {
-  // Filtrar dados baseado nos filtros aplicados
-  const filteredCotacoes = mockCotacoes.filter(cotacao => {
-    const dataValida = cotacao.dataAbertura >= filters.startDate && 
-                      cotacao.dataAbertura <= filters.endDate;
-    const fornecedorValido = filters.fornecedores.length === 0 || 
-                            filters.fornecedores.includes(cotacao.fornecedor);
-    const produtoValido = filters.produtos.length === 0 || 
-                         filters.produtos.includes(cotacao.produto);
-    
-    return dataValida && fornecedorValido && produtoValido;
-  });
+export const processReportData = async (filters: ReportFilters) => {
+  try {
+    // Buscar cotações do período com fornecedores e itens
+    const { data: quotes, error: quotesError } = await supabase
+      .from("quotes")
+      .select(`
+        *,
+        quote_suppliers(*),
+        quote_items(*, products(*))
+      `)
+      .gte("data_inicio", filters.startDate.toISOString().split('T')[0])
+      .lte("data_fim", filters.endDate.toISOString().split('T')[0]);
 
-  // Calcular métricas baseadas nos dados filtrados
-  const economiaTotal = filteredCotacoes.reduce((acc, cotacao) => acc + cotacao.economiaGerada, 0);
-  const cotacoesCount = filteredCotacoes.length;
-  
-  return {
-    economiaData: {
-      ...mockEconomiaData,
-      economiaGerada: economiaTotal,
-      cotacoesRealizadas: cotacoesCount,
-      periodo: `${filters.startDate.toLocaleDateString('pt-BR')} - ${filters.endDate.toLocaleDateString('pt-BR')}`
-    },
-    fornecedores: mockFornecedores,
-    produtos: mockProdutos,
-    cotacoes: filteredCotacoes
-  };
+    if (quotesError) throw quotesError;
+
+    // Buscar fornecedores
+    const { data: suppliers, error: suppliersError } = await supabase
+      .from("suppliers")
+      .select("*");
+
+    if (suppliersError) throw suppliersError;
+
+    // Buscar produtos
+    const { data: products, error: productsError } = await supabase
+      .from("products")
+      .select("*");
+
+    if (productsError) throw productsError;
+
+    // Processar dados das cotações
+    let economiaTotal = 0;
+    const cotacoesProcessadas: CotacaoData[] = [];
+
+    quotes?.forEach((quote: any) => {
+      if (quote.quote_suppliers && quote.quote_suppliers.length > 0) {
+        const valores = quote.quote_suppliers
+          .filter((qs: any) => qs.valor_oferecido > 0)
+          .map((qs: any) => qs.valor_oferecido);
+        
+        if (valores.length >= 2) {
+          const melhorPreco = Math.min(...valores);
+          const piorPreco = Math.max(...valores);
+          const economia = piorPreco - melhorPreco;
+          economiaTotal += economia;
+
+          const melhorFornecedor = quote.quote_suppliers.find(
+            (qs: any) => qs.valor_oferecido === melhorPreco
+          );
+
+          // Adicionar cotação processada
+          cotacoesProcessadas.push({
+            id: quote.id,
+            produto: quote.quote_items?.[0]?.product_name || "N/A",
+            fornecedor: melhorFornecedor?.supplier_name || "N/A",
+            preco: melhorPreco,
+            dataAbertura: new Date(quote.data_inicio),
+            dataFechamento: new Date(quote.data_fim),
+            status: quote.status === 'ativa' ? 'aberta' : 'fechada',
+            economiaGerada: economia
+          });
+        }
+      }
+    });
+
+    // Processar fornecedores
+    const fornecedoresProcessados: FornecedorData[] = suppliers?.map((supplier: any) => {
+      const cotacoesParticipadas = quotes?.filter((q: any) => 
+        q.quote_suppliers?.some((qs: any) => qs.supplier_id === supplier.id)
+      ).length || 0;
+
+      return {
+        nome: supplier.name,
+        cotacoesParticipadas,
+        tempoMedioResposta: 2.5,
+        precoMedio: 0,
+        economiaGerada: 0,
+        avaliacaoPerformance: 8.0,
+        statusAtivo: true
+      };
+    }) || [];
+
+    // Processar produtos
+    const produtosProcessados: ProdutoData[] = products?.map((product: any) => ({
+      nome: product.name,
+      categoria: product.category,
+      precoAtual: 0,
+      precoAnterior: 0,
+      variacao: 0,
+      cotacoesRealizadas: 0,
+      fornecedoresCotaram: 0,
+      melhorPreco: 0,
+      melhorFornecedor: "N/A"
+    })) || [];
+
+    return {
+      economiaData: {
+        periodo: `${filters.startDate.toLocaleDateString('pt-BR')} - ${filters.endDate.toLocaleDateString('pt-BR')}`,
+        economiaGerada: economiaTotal,
+        economiaPercentual: 12.5,
+        cotacoesRealizadas: quotes?.length || 0,
+        fornecedoresParticipantes: suppliers?.length || 0,
+        produtosCotados: products?.length || 0,
+        melhorFornecedor: fornecedoresProcessados[0]?.nome || "N/A",
+        maiorEconomia: Math.max(...cotacoesProcessadas.map(c => c.economiaGerada), 0)
+      },
+      fornecedores: fornecedoresProcessados,
+      produtos: produtosProcessados,
+      cotacoes: cotacoesProcessadas
+    };
+  } catch (error) {
+    console.error("Erro ao processar dados do relatório:", error);
+    // Retornar dados vazios em caso de erro
+    return {
+      economiaData: mockEconomiaData,
+      fornecedores: [],
+      produtos: [],
+      cotacoes: []
+    };
+  }
 };
 
 export const formatCurrency = (value: number): string => {

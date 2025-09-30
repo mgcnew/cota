@@ -3,16 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { TrendingUp, FileText, Download, Calendar, BarChart3, PieChart, DollarSign, Users, Package, Building2, Eye, Settings } from "lucide-react";
+import { TrendingUp, FileText, Download, Calendar, BarChart3, PieChart, DollarSign, Users, Package, Building2, Eye, Settings, Loader2 } from "lucide-react";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import { ReportFilters } from "@/components/reports/ReportFilters";
 import { ReportPreview } from "@/components/reports/ReportPreview";
 import { useReports } from "@/hooks/useReports";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 export default function Relatorios() {
   const {
     toast
   } = useToast();
+  const { user } = useAuth();
   const {
     isGenerating,
     progress,
@@ -34,6 +37,107 @@ export default function Relatorios() {
     isOpen: false,
     type: ''
   });
+  const [previewData, setPreviewData] = React.useState<any>(null);
+
+  // Estado para dados reais
+  const [loading, setLoading] = React.useState(true);
+  const [estatisticasGerais, setEstatisticasGerais] = React.useState({
+    economiaTotal: "R$ 0,00",
+    economiaPercentual: "0%",
+    cotacoesRealizadas: 0,
+    fornecedoresAtivos: 0,
+    produtosCotados: 0,
+    pedidosGerados: 0
+  });
+
+  React.useEffect(() => {
+    if (user) {
+      loadStatistics();
+    }
+  }, [user, startDate, endDate]);
+
+  const loadStatistics = async () => {
+    try {
+      setLoading(true);
+
+      // Buscar cotações no período
+      const { data: quotes, error: quotesError } = await supabase
+        .from("quotes")
+        .select("*, quote_suppliers(*)")
+        .gte("data_inicio", startDate?.toISOString().split('T')[0])
+        .lte("data_fim", endDate?.toISOString().split('T')[0]);
+
+      if (quotesError) throw quotesError;
+
+      // Buscar pedidos no período
+      const { data: orders, error: ordersError } = await supabase
+        .from("orders")
+        .select("*")
+        .gte("order_date", startDate?.toISOString().split('T')[0])
+        .lte("order_date", endDate?.toISOString().split('T')[0]);
+
+      if (ordersError) throw ordersError;
+
+      // Buscar fornecedores ativos
+      const { data: suppliers, error: suppliersError } = await supabase
+        .from("suppliers")
+        .select("id");
+
+      if (suppliersError) throw suppliersError;
+
+      // Buscar produtos
+      const { data: products, error: productsError } = await supabase
+        .from("products")
+        .select("id");
+
+      if (productsError) throw productsError;
+
+      // Calcular economia total das cotações
+      let economiaTotal = 0;
+      let totalCotacoes = 0;
+      
+      if (quotes) {
+        quotes.forEach((quote: any) => {
+          if (quote.quote_suppliers && quote.quote_suppliers.length > 0) {
+            // Encontrar o melhor e pior preço
+            const valores = quote.quote_suppliers
+              .filter((qs: any) => qs.valor_oferecido > 0)
+              .map((qs: any) => qs.valor_oferecido);
+            
+            if (valores.length >= 2) {
+              const melhorPreco = Math.min(...valores);
+              const piorPreco = Math.max(...valores);
+              economiaTotal += (piorPreco - melhorPreco);
+              totalCotacoes++;
+            }
+          }
+        });
+      }
+
+      // Calcular percentual de economia (assumindo economia sobre o valor total de pedidos)
+      const totalPedidos = orders?.reduce((acc, order) => acc + Number(order.total_value), 0) || 0;
+      const economiaPercentual = totalPedidos > 0 ? (economiaTotal / totalPedidos) * 100 : 0;
+
+      setEstatisticasGerais({
+        economiaTotal: `R$ ${economiaTotal.toFixed(2).replace('.', ',')}`,
+        economiaPercentual: `${economiaPercentual.toFixed(1)}%`,
+        cotacoesRealizadas: quotes?.length || 0,
+        fornecedoresAtivos: suppliers?.length || 0,
+        produtosCotados: products?.length || 0,
+        pedidosGerados: orders?.length || 0
+      });
+
+    } catch (error) {
+      console.error("Erro ao carregar estatísticas:", error);
+      toast({
+        title: "Erro ao carregar estatísticas",
+        description: "Não foi possível carregar os dados dos relatórios",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Mock data para relatórios
   const relatoriosDisponiveis = [{
@@ -43,7 +147,7 @@ export default function Relatorios() {
     icone: DollarSign,
     formato: ["PDF", "Excel"],
     periodo: "Mensal",
-    ultimaAtualizacao: "25/09/2025"
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR')
   }, {
     titulo: "Performance de Fornecedores",
     descricao: "Avaliação de desempenho e preços dos fornecedores",
@@ -51,7 +155,7 @@ export default function Relatorios() {
     icone: Building2,
     formato: ["PDF", "Excel"],
     periodo: "Trimestral",
-    ultimaAtualizacao: "23/09/2025"
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR')
   }, {
     titulo: "Análise de Produtos",
     descricao: "Histórico de preços e variações por produto",
@@ -59,7 +163,7 @@ export default function Relatorios() {
     icone: Package,
     formato: ["PDF", "Excel", "CSV"],
     periodo: "Semanal",
-    ultimaAtualizacao: "24/09/2025"
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR')
   }, {
     titulo: "Cotações por Período",
     descricao: "Resumo de todas as cotações realizadas",
@@ -67,7 +171,7 @@ export default function Relatorios() {
     icone: FileText,
     formato: ["PDF", "Excel"],
     periodo: "Mensal",
-    ultimaAtualizacao: "25/09/2025"
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR')
   }, {
     titulo: "Dashboard Executivo",
     descricao: "Visão geral com métricas principais",
@@ -75,7 +179,7 @@ export default function Relatorios() {
     icone: BarChart3,
     formato: ["PDF"],
     periodo: "Mensal",
-    ultimaAtualizacao: "25/09/2025"
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR')
   }, {
     titulo: "Análise de Gastos",
     descricao: "Controle de gastos e orçamento por categoria",
@@ -83,16 +187,8 @@ export default function Relatorios() {
     icone: PieChart,
     formato: ["PDF", "Excel"],
     periodo: "Mensal",
-    ultimaAtualizacao: "24/09/2025"
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR')
   }];
-  const estatisticasGerais = {
-    economiaTotal: "R$ 47.231",
-    economiaPercentual: "12.5%",
-    cotacoesRealizadas: 156,
-    fornecedoresAtivos: 18,
-    produtosCotados: 45,
-    pedidosGerados: 23
-  };
 
   // Funções para gerenciar filtros e ações
   const currentFilters = {
@@ -124,7 +220,9 @@ export default function Relatorios() {
     }
     await generateAllReports(currentFilters);
   };
-  const handlePreviewReport = (reportType: string) => {
+  const handlePreviewReport = async (reportType: string) => {
+    const data = await getReportData(currentFilters);
+    setPreviewData(data);
     setPreviewReport({
       isOpen: true,
       type: reportType
@@ -136,6 +234,14 @@ export default function Relatorios() {
     setStartDate(new Date(2025, 8, 1));
     setEndDate(new Date(2025, 8, 30));
   };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -349,7 +455,7 @@ export default function Relatorios() {
       <ReportPreview isOpen={previewReport.isOpen} onClose={() => setPreviewReport({
       isOpen: false,
       type: ''
-    })} reportType={previewReport.type} reportData={getReportData(currentFilters)} onDownload={format => {
+    })} reportType={previewReport.type} reportData={previewData} onDownload={format => {
       handleDownloadReport(previewReport.type, format);
       setPreviewReport({
         isOpen: false,
