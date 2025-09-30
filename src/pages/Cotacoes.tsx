@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -56,8 +54,6 @@ interface Quote {
 }
 
 export default function Cotacoes() {
-  const { user } = useAuth();
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { paginate } = usePagination<Quote>({ initialItemsPerPage: 10 });
   const [searchTerm, setSearchTerm] = useState("");
@@ -346,6 +342,12 @@ export default function Cotacoes() {
         />
       </div>
 
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <p className="text-muted-foreground">Carregando cotações...</p>
+        </div>
+      ) : (
+        <>
       {/* Cotações View */}
       {viewMode === "grid" ? (
         <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -506,7 +508,7 @@ export default function Cotacoes() {
         </Card>
       )}
 
-      {filteredCotacoes.length === 0 && (
+      {filteredCotacoes.length === 0 && !loading && (
         <Card>
           <CardContent className="p-12 text-center">
             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -517,7 +519,8 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
       )}
-
+      </>
+      )}
     </div>
   );
 }
