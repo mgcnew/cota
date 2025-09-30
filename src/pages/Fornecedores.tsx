@@ -28,6 +28,7 @@ import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
 import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
 import DeleteSupplierDialog from "@/components/forms/DeleteSupplierDialog";
 import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
+import { ImportSuppliersDialog } from "@/components/forms/ImportSuppliersDialog";
 import { toast } from "@/hooks/use-toast";
 import { MetricCard } from "@/components/ui/metric-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -194,6 +195,10 @@ export default function Fornecedores() {
     setSuppliers(suppliers.filter(supplier => supplier.id !== id));
   };
 
+  const handleSuppliersImported = (importedSuppliers: Supplier[]) => {
+    setSuppliers(prev => [...prev, ...importedSuppliers]);
+  };
+
   // Mock data de produtos para cotações
   const mockProducts = [
     { id: "1", name: "Coxa com Sobrecoxa" },
@@ -265,7 +270,10 @@ export default function Fornecedores() {
             Gerencie seus fornecedores e acompanhe performance
           </p>
         </div>
-        <AddSupplierDialog onAdd={handleAddSupplier} />
+        <div className="flex gap-2">
+          <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} />
+          <AddSupplierDialog onAdd={handleAddSupplier} />
+        </div>
       </div>
 
       {/* Filters */}
