@@ -16,12 +16,17 @@ import {
   DollarSign,
   Building2
 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
 import EditQuoteDialog from "@/components/forms/EditQuoteDialog";
 import DeleteQuoteDialog from "@/components/forms/DeleteQuoteDialog";
 import ViewQuoteDialog from "@/components/forms/ViewQuoteDialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { MetricCard } from "@/components/ui/metric-card";
+import { ViewToggle } from "@/components/ui/view-toggle";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { usePagination } from "@/hooks/usePagination";
+import { ViewMode } from "@/types/pagination";
 
 interface FornecedorParticipante {
   id: string;
@@ -47,6 +52,8 @@ interface Quote {
 }
 
 export default function Cotacoes() {
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const { paginate } = usePagination<Quote>({ initialItemsPerPage: 10 });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -269,6 +276,8 @@ export default function Cotacoes() {
     return matchesSearch && matchesStatus;
   });
 
+  const paginatedData = paginate(filteredCotacoes);
+
   return (
     <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
@@ -279,11 +288,14 @@ export default function Cotacoes() {
             Gerencie todas as cotações da empresa
           </p>
         </div>
-        <AddQuoteDialog 
-          onAdd={handleAddQuote}
-          products={mockProducts}
-          suppliers={mockSuppliers}
-        />
+        <div className="flex items-center gap-2">
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
+          <AddQuoteDialog 
+            onAdd={handleAddQuote}
+            products={mockProducts}
+            suppliers={mockSuppliers}
+          />
+        </div>
       </div>
 
       {/* Filters */}
@@ -350,62 +362,178 @@ export default function Cotacoes() {
         />
       </div>
 
-      {/* Cotações List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Todas as Cotações</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {filteredCotacoes.map((cotacao) => (
-              <div key={cotacao.id} className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/30 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-foreground">{cotacao.produto}</span>
+      {/* Cotações View */}
+      {viewMode === "grid" ? (
+        <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {paginatedData.items.map((cotacao) => (
+            <Card key={cotacao.id} className="card-elevated border-2 hover:border-primary/30 transition-all hover:shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1">
+                    <CardTitle className="text-lg">{cotacao.produto}</CardTitle>
+                    <div className="flex items-center gap-2 flex-wrap">
                       {getStatusBadge(cotacao.status)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {cotacao.id} • {cotacao.quantidade} • {cotacao.fornecedores} fornecedores
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {cotacao.dataInicio} - {cotacao.dataFim}
+                      <Badge variant="outline">{cotacao.quantidade}</Badge>
                     </div>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-6">
-                  <div className="text-right">
-                    <div className="font-semibold text-success">{cotacao.melhorPreco}</div>
-                    <div className="text-xs text-muted-foreground">{cotacao.melhorFornecedor}</div>
-                    <div className="text-xs text-success">-{cotacao.economia} economia</div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">ID:</span>
+                    <span className="font-medium">{cotacao.id}</span>
                   </div>
-                  
-                  <div className="flex gap-1">
-                    <ViewQuoteDialog 
-                      quote={cotacao}
-                      onUpdateSupplierValue={handleUpdateSupplierValue}
-                    />
-                    <EditQuoteDialog 
-                      quote={cotacao}
-                      onEdit={handleEditQuote}
-                      products={mockProducts}
-                      suppliers={mockSuppliers}
-                    />
-                    <DeleteQuoteDialog 
-                      quote={cotacao}
-                      onDelete={handleDeleteQuote}
-                    />
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Fornecedores:</span>
+                    <span className="font-medium">{cotacao.fornecedores}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Período:</span>
+                    <span className="font-medium text-xs">{cotacao.dataInicio} - {cotacao.dataFim}</span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+
+                <div className="pt-3 border-t border-border">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Melhor Preço</p>
+                      <p className="text-xl font-bold text-success">{cotacao.melhorPreco}</p>
+                      <p className="text-xs text-muted-foreground">{cotacao.melhorFornecedor}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="secondary" className="text-success">
+                        -{cotacao.economia}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-1">
+                  <ViewQuoteDialog 
+                    quote={cotacao}
+                    onUpdateSupplierValue={handleUpdateSupplierValue}
+                  />
+                  <EditQuoteDialog 
+                    quote={cotacao}
+                    onEdit={handleEditQuote}
+                    products={mockProducts}
+                    suppliers={mockSuppliers}
+                  />
+                  <DeleteQuoteDialog 
+                    quote={cotacao}
+                    onDelete={handleDeleteQuote}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Cotação</TableHead>
+                    <TableHead className="hidden md:table-cell">Produto</TableHead>
+                    <TableHead className="hidden lg:table-cell">Período</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Melhor Preço</TableHead>
+                    <TableHead className="hidden sm:table-cell">Fornecedores</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.items.map((cotacao) => (
+                    <TableRow key={cotacao.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <FileText className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{cotacao.id}</div>
+                            <div className="text-xs text-muted-foreground md:hidden">{cotacao.produto}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div>
+                          <div className="font-medium">{cotacao.produto}</div>
+                          <div className="text-xs text-muted-foreground">{cotacao.quantidade}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <div className="text-sm">
+                          <div>{cotacao.dataInicio}</div>
+                          <div className="text-muted-foreground">{cotacao.dataFim}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(cotacao.status)}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-semibold text-success">{cotacao.melhorPreco}</div>
+                          <div className="text-xs text-muted-foreground">{cotacao.melhorFornecedor}</div>
+                          <div className="text-xs text-success">-{cotacao.economia}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant="outline">{cotacao.fornecedores}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-1">
+                          <ViewQuoteDialog 
+                            quote={cotacao}
+                            onUpdateSupplierValue={handleUpdateSupplierValue}
+                          />
+                          <EditQuoteDialog 
+                            quote={cotacao}
+                            onEdit={handleEditQuote}
+                            products={mockProducts}
+                            suppliers={mockSuppliers}
+                          />
+                          <DeleteQuoteDialog 
+                            quote={cotacao}
+                            onDelete={handleDeleteQuote}
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <DataPagination
+              currentPage={paginatedData.pagination.currentPage}
+              totalPages={paginatedData.pagination.totalPages}
+              itemsPerPage={paginatedData.pagination.itemsPerPage}
+              totalItems={paginatedData.pagination.totalItems}
+              onPageChange={paginatedData.pagination.goToPage}
+              onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+              startIndex={paginatedData.pagination.startIndex}
+              endIndex={paginatedData.pagination.endIndex}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {filteredCotacoes.length === 0 && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Nenhuma cotação encontrada</h3>
+            <p className="text-muted-foreground mb-4">
+              Tente ajustar os filtros ou crie uma nova cotação
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
     </div>
   );
 }

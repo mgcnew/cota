@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ViewToggle } from "@/components/ui/view-toggle";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { usePagination } from "@/hooks/usePagination";
+import { ViewMode } from "@/types/pagination";
 import { 
   ShoppingCart, 
   Plus,
@@ -27,6 +31,8 @@ import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
 import ViewPedidoDialog from "@/components/forms/ViewPedidoDialog";
 
 export default function Pedidos() {
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const { paginate } = usePagination<any>({ initialItemsPerPage: 10 });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [fornecedorFilter, setFornecedorFilter] = useState("all");
@@ -209,6 +215,8 @@ export default function Pedidos() {
     return matchesSearch && matchesStatus && matchesFornecedor && matchesValorMin && matchesValorMax && matchesDataInicio && matchesDataFim;
   });
 
+  const paginatedData = paginate(filteredPedidos);
+
   const totalValue = pedidos
     .filter(p => p.status !== "cancelado")
     .reduce((acc, p) => acc + parseFloat(p.total.replace("R$ ", "").replace(".", "").replace(",", ".")), 0);
@@ -223,10 +231,13 @@ export default function Pedidos() {
             Gerencie todos os pedidos realizados
           </p>
         </div>
-        <Button className="gradient-primary" onClick={() => setAddDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Pedido
-        </Button>
+        <div className="flex items-center gap-2">
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
+          <Button className="gradient-primary" onClick={() => setAddDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Pedido
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -373,13 +384,12 @@ export default function Pedidos() {
         </Card>
       </div>
 
-      {/* Pedidos List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Todos os Pedidos ({filteredPedidos.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
+      {/* Pedidos View */}
+      {viewMode === "table" ? (
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Pedido</TableHead>
@@ -392,7 +402,7 @@ export default function Pedidos() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPedidos.map((pedido) => (
+              {paginatedData.items.map((pedido) => (
                 <TableRow key={pedido.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -462,14 +472,63 @@ export default function Pedidos() {
               ))}
             </TableBody>
           </Table>
-          
-          {filteredPedidos.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhum pedido encontrado com os filtros aplicados.
             </div>
-          )}
+            <DataPagination
+              currentPage={paginatedData.pagination.currentPage}
+              totalPages={paginatedData.pagination.totalPages}
+              itemsPerPage={paginatedData.pagination.itemsPerPage}
+              totalItems={paginatedData.pagination.totalItems}
+              onPageChange={paginatedData.pagination.goToPage}
+              onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+              startIndex={paginatedData.pagination.startIndex}
+              endIndex={paginatedData.pagination.endIndex}
+            />
         </CardContent>
       </Card>
+      ) : (
+        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedData.items.map((pedido) => (
+            <Card key={pedido.id} className="card-elevated">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">{pedido.id}</CardTitle>
+                  </div>
+                  {getStatusBadge(pedido.status)}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Fornecedor:</span>
+                    <span className="font-medium">{pedido.fornecedor}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Valor:</span>
+                    <span className="font-bold text-success">{pedido.total}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Entrega:</span>
+                    <span className="font-medium">{pedido.dataEntrega}</span>
+                  </div>
+                </div>
+                <div className="flex gap-1 pt-2">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedPedido(pedido); setViewDialogOpen(true); }}>
+                    <Eye className="h-4 w-4 mr-1" />Ver
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => { setSelectedPedido(pedido); setEditDialogOpen(true); }}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => { setSelectedPedido(pedido); setDeleteDialogOpen(true); }}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Dialogs */}
       <AddPedidoDialog 

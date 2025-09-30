@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
 import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
 import DeleteSupplierDialog from "@/components/forms/DeleteSupplierDialog";
@@ -32,6 +33,10 @@ import { ImportSuppliersDialog } from "@/components/forms/ImportSuppliersDialog"
 import { toast } from "@/hooks/use-toast";
 import { MetricCard } from "@/components/ui/metric-card";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ViewToggle } from "@/components/ui/view-toggle";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { usePagination } from "@/hooks/usePagination";
+import { ViewMode } from "@/types/pagination";
 
 interface Supplier {
   id: string;
@@ -60,6 +65,8 @@ type SupplierFormData = {
 };
 
 export default function Fornecedores() {
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const { paginate } = usePagination<Supplier>({ initialItemsPerPage: 10 });
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -222,6 +229,8 @@ export default function Fornecedores() {
     return matchesSearch && matchesStatus;
   });
 
+  const paginatedData = paginate(filteredSuppliers);
+
   const getStatusBadge = (status: string) => {
     const variants = {
       active: "default",
@@ -270,7 +279,8 @@ export default function Fornecedores() {
             Gerencie seus fornecedores e acompanhe performance
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
           <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} />
           <AddSupplierDialog onAdd={handleAddSupplier} />
         </div>
@@ -336,105 +346,188 @@ export default function Fornecedores() {
         />
       </div>
 
-      {/* Suppliers Grid */}
-      <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredSuppliers.map((supplier) => (
-          <Card key={supplier.id} className="card-elevated border-2 hover:border-primary/30 transition-all hover:shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2 min-w-0">
-                  <CardTitle className="text-base md:text-lg truncate">{supplier.name}</CardTitle>
-                  <p className="text-xs md:text-sm text-muted-foreground truncate">{supplier.contact}</p>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <StatusBadge status={supplier.status} />
-                    {renderStarRating(supplier.rating)}
+      {/* Suppliers View */}
+      {viewMode === "grid" ? (
+        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedData.items.map((supplier) => (
+            <Card key={supplier.id} className="card-elevated border-2 hover:border-primary/30 transition-all hover:shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2 min-w-0">
+                    <CardTitle className="text-base md:text-lg truncate">{supplier.name}</CardTitle>
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">{supplier.contact}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <StatusBadge status={supplier.status} />
+                      {renderStarRating(supplier.rating)}
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => setDeletingSupplier(supplier)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Limite</p>
+                    <p className="font-semibold text-foreground">{supplier.limit}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Preço médio</p>
+                    <p className="font-semibold text-success">{supplier.avgPrice}</p>
                   </div>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="text-destructive"
-                      onClick={() => setDeletingSupplier(supplier)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Limite</p>
-                  <p className="font-semibold text-foreground">{supplier.limit}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Preço médio</p>
-                  <p className="font-semibold text-success">{supplier.avgPrice}</p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Cotações ativas</p>
-                  <p className="font-semibold text-primary">{supplier.activeQuotes}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Cotações ativas</p>
+                    <p className="font-semibold text-primary">{supplier.activeQuotes}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total</p>
+                    <p className="font-semibold text-muted-foreground">{supplier.totalQuotes}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="font-semibold text-muted-foreground">{supplier.totalQuotes}</p>
-                </div>
-              </div>
 
-              <div className="space-y-2 pt-2 border-t border-border">
-                {supplier.phone && (
+                <div className="space-y-2 pt-2 border-t border-border">
+                  {supplier.phone && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-muted-foreground">{supplier.phone}</span>
+                    </div>
+                  )}
+                  {supplier.email && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-muted-foreground">{supplier.email}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 text-sm">
-                    <Phone className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">{supplier.phone}</span>
+                    <FileText className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">Último pedido: {supplier.lastOrder}</span>
                   </div>
-                )}
-                {supplier.email && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">{supplier.email}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-sm">
-                  <FileText className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">Último pedido: {supplier.lastOrder}</span>
                 </div>
-              </div>
 
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  Ver Cotações
-                </Button>
-                <AddQuoteDialog
-                  onAdd={handleAddQuote}
-                  products={mockProducts}
-                  suppliers={suppliers.map(s => ({ id: s.id, name: s.name }))}
-                  defaultSupplierId={supplier.id}
-                  trigger={
-                    <Button size="sm" className="flex-1">
-                      Nova Cotação
-                    </Button>
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    Ver Cotações
+                  </Button>
+                  <AddQuoteDialog
+                    onAdd={handleAddQuote}
+                    products={mockProducts}
+                    suppliers={suppliers.map(s => ({ id: s.id, name: s.name }))}
+                    defaultSupplierId={supplier.id}
+                    trigger={
+                      <Button size="sm" className="flex-1">
+                        Nova Cotação
+                      </Button>
+                    }
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fornecedor</TableHead>
+                    <TableHead className="hidden md:table-cell">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell">Limite</TableHead>
+                    <TableHead>Preço Médio</TableHead>
+                    <TableHead className="hidden sm:table-cell">Cotações</TableHead>
+                    <TableHead className="hidden lg:table-cell">Avaliação</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.items.map((supplier) => (
+                    <TableRow key={supplier.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Building2 className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{supplier.name}</div>
+                            <div className="text-xs text-muted-foreground">{supplier.contact}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <StatusBadge status={supplier.status} />
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">{supplier.limit}</TableCell>
+                      <TableCell>
+                        <span className="font-semibold text-success">{supplier.avgPrice}</span>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <div className="text-sm">
+                          <div className="font-medium text-primary">{supplier.activeQuotes} ativas</div>
+                          <div className="text-muted-foreground">{supplier.totalQuotes} total</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {renderStarRating(supplier.rating)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setEditingSupplier(supplier)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setDeletingSupplier(supplier)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <DataPagination
+              currentPage={paginatedData.pagination.currentPage}
+              totalPages={paginatedData.pagination.totalPages}
+              itemsPerPage={paginatedData.pagination.itemsPerPage}
+              totalItems={paginatedData.pagination.totalItems}
+              onPageChange={paginatedData.pagination.goToPage}
+              onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+              startIndex={paginatedData.pagination.startIndex}
+              endIndex={paginatedData.pagination.endIndex}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {filteredSuppliers.length === 0 && (
         <Card>
