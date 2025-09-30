@@ -1,14 +1,14 @@
-import * as React from "react";
+import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { PDFReportGenerator, ExcelReportGenerator, generateZipReport } from "@/utils/reportTemplates";
 import { processReportData, type ReportFilters } from "@/utils/reportData";
 
 export function useReports() {
   const { toast } = useToast();
-  const [isGenerating, setIsGenerating] = React.useState(false);
-  const [progress, setProgress] = React.useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  const generateReport = React.useCallback(async (
+  const generateReport = useCallback(async (
     reportType: string,
     filters: ReportFilters,
     format: 'pdf' | 'excel' | 'both'
@@ -73,7 +73,7 @@ export function useReports() {
     }
   }, [toast]);
 
-  const generateAllReports = React.useCallback(async (filters: ReportFilters) => {
+  const generateAllReports = useCallback(async (filters: ReportFilters) => {
     setIsGenerating(true);
     setProgress(0);
 
@@ -108,7 +108,7 @@ export function useReports() {
     }
   }, [toast]);
 
-  const getReportData = React.useCallback(async (filters: ReportFilters) => {
+  const getReportData = useCallback(async (filters: ReportFilters) => {
     return await processReportData(filters);
   }, []);
 
