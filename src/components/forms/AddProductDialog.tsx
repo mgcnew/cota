@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -28,8 +29,6 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
 
 const productSchema = z.object({
   name: z.string()
@@ -60,7 +59,6 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
   const [open, setOpen] = useState(false);
   const [showNewCategory, setShowNewCategory] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
   
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -77,15 +75,6 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
   const watchCategory = form.watch("category");
 
   const onSubmit = async (data: ProductFormData) => {
-    if (!user) {
-      toast({
-        title: "Erro",
-        description: "Você precisa estar logado para adicionar produtos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     // Determinar a categoria final
     const finalCategory = data.category === "nova" ? data.newCategory! : data.category;
     
@@ -95,21 +84,28 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
     }
 
     try {
-      const { data: product, error } = await supabase
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !userData.user) {
+        toast({
+          title: "Erro",
+          description: "Você precisa estar autenticado para adicionar produtos.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
         .from('products')
         .insert({
           name: data.name,
           category: finalCategory,
-          weight: data.weight || "N/A",
-          user_id: user.id,
-        })
-        .select()
-        .single();
+          weight: data.weight || null,
+          user_id: userData.user.id,
+        });
 
       if (error) throw error;
 
-      onProductAdded(product);
-      
       // Adicionar nova categoria à lista se necessário
       if (data.category === "nova" && data.newCategory && onCategoryAdded) {
         onCategoryAdded(data.newCategory);
@@ -120,13 +116,15 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
         description: `${data.name} foi adicionado com sucesso.`,
       });
 
+      onProductAdded(null);
       form.reset();
       setShowNewCategory(false);
       setOpen(false);
-    } catch (error: any) {
+    } catch (error) {
+      console.error("Erro ao adicionar produto:", error);
       toast({
-        title: "Erro ao adicionar produto",
-        description: error.message,
+        title: "Erro",
+        description: "Não foi possível adicionar o produto. Tente novamente.",
         variant: "destructive",
       });
     }
