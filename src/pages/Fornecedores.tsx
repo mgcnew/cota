@@ -377,9 +377,6 @@ export default function Fornecedores() {
                   </Button>
                   <AddQuoteDialog
                     onAdd={handleAddQuote}
-                    products={mockProducts}
-                    suppliers={suppliers.map(s => ({ id: s.id, name: s.name }))}
-                    defaultSupplierId={supplier.id}
                     trigger={
                       <Button size="sm" className="flex-1">
                         Nova Cotação

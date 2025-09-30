@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -52,12 +55,14 @@ interface Quote {
 }
 
 export default function Cotacoes() {
+  const { user } = useAuth();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { paginate } = usePagination<Quote>({ initialItemsPerPage: 10 });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Mock data de produtos e fornecedores
+  // Mock data temporário para EditQuoteDialog
   const mockProducts = [
     { id: "1", name: "Coxa com Sobrecoxa" },
     { id: "2", name: "Filé de Frango" },
@@ -73,6 +78,16 @@ export default function Cotacoes() {
     { id: "4", name: "Adriano/Sidio" },
     { id: "5", name: "Amandinha" },
   ];
+
+  useEffect(() => {
+    if (!user) {
+      setAuthDialogOpen(true);
+    }
+  }, [user]);
+
+  if (!user) {
+    return <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />;
+  }
 
   // Mock data baseado na planilha Excel
   const [cotacoes, setCotacoes] = useState<Quote[]>([
@@ -165,33 +180,48 @@ export default function Cotacoes() {
     }
   ]);
 
-  const handleAddQuote = (data: any) => {
-    const fornecedoresParticipantes: FornecedorParticipante[] = data.fornecedoresIds.map((supplierId: string) => {
-      const supplier = mockSuppliers.find(s => s.id === supplierId);
-      return {
-        id: supplierId,
-        nome: supplier?.name || "Desconhecido",
-        valorOferecido: 0,
-        dataResposta: null,
-        observacoes: "",
-        status: "pendente" as const
-      };
-    });
+  const handleAddQuote = async (data: any) => {
+    try {
+      // Buscar nomes dos fornecedores
+      const { data: suppliersData } = await supabase
+        .from("suppliers")
+        .select("id, name")
+        .in("id", data.fornecedoresIds);
 
-    const newQuote: Quote = {
-      id: `COT-${String(cotacoes.length + 1).padStart(3, '0')}`,
-      produto: data.produto,
-      quantidade: `${data.quantidade}${data.unidade}`,
-      status: "ativa",
-      dataInicio: data.dataInicio.toLocaleDateString("pt-BR"),
-      dataFim: data.dataFim.toLocaleDateString("pt-BR"),
-      fornecedores: fornecedoresParticipantes.length,
-      melhorPreco: "R$ 0.00",
-      melhorFornecedor: "Aguardando",
-      economia: "0%",
-      fornecedoresParticipantes
-    };
-    setCotacoes([newQuote, ...cotacoes]);
+      const fornecedoresParticipantes: FornecedorParticipante[] = data.fornecedoresIds.map((supplierId: string) => {
+        const supplier = suppliersData?.find(s => s.id === supplierId);
+        return {
+          id: supplierId,
+          nome: supplier?.name || "Desconhecido",
+          valorOferecido: 0,
+          dataResposta: null,
+          observacoes: "",
+          status: "pendente" as const
+        };
+      });
+
+      // Formatação dos produtos para exibição
+      const produtosTexto = data.produtos.map((p: any) => 
+        `${p.produtoNome} (${p.quantidade}${p.unidade})`
+      ).join(", ");
+
+      const newQuote: Quote = {
+        id: `COT-${String(cotacoes.length + 1).padStart(3, '0')}`,
+        produto: produtosTexto,
+        quantidade: `${data.produtos.length} produto(s)`,
+        status: "ativa",
+        dataInicio: data.dataInicio.toLocaleDateString("pt-BR"),
+        dataFim: data.dataFim.toLocaleDateString("pt-BR"),
+        fornecedores: fornecedoresParticipantes.length,
+        melhorPreco: "R$ 0.00",
+        melhorFornecedor: "Aguardando",
+        economia: "0%",
+        fornecedoresParticipantes
+      };
+      setCotacoes([newQuote, ...cotacoes]);
+    } catch (error) {
+      console.error("Erro ao criar cotação:", error);
+    }
   };
 
   const handleEditQuote = (id: string, data: any) => {
@@ -290,11 +320,7 @@ export default function Cotacoes() {
         </div>
         <div className="flex items-center gap-2">
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <AddQuoteDialog 
-            onAdd={handleAddQuote}
-            products={mockProducts}
-            suppliers={mockSuppliers}
-          />
+          <AddQuoteDialog onAdd={handleAddQuote} />
         </div>
       </div>
 
