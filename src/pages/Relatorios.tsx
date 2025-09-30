@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -25,23 +25,23 @@ export default function Relatorios() {
   } = useReports();
 
   // Estado para filtros e dialogs
-  const [startDate, setStartDate] = React.useState<Date | undefined>(new Date(2025, 8, 1)); // 1º de setembro
-  const [endDate, setEndDate] = React.useState<Date | undefined>(new Date(2025, 8, 30)); // 30 de setembro
-  const [selectedFornecedores, setSelectedFornecedores] = React.useState<string[]>([]);
-  const [selectedProdutos, setSelectedProdutos] = React.useState<string[]>([]);
-  const [isPeriodDialogOpen, setIsPeriodDialogOpen] = React.useState(false);
-  const [previewReport, setPreviewReport] = React.useState<{
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date(2025, 8, 1)); // 1º de setembro
+  const [endDate, setEndDate] = useState<Date | undefined>(new Date(2025, 8, 30)); // 30 de setembro
+  const [selectedFornecedores, setSelectedFornecedores] = useState<string[]>([]);
+  const [selectedProdutos, setSelectedProdutos] = useState<string[]>([]);
+  const [isPeriodDialogOpen, setIsPeriodDialogOpen] = useState(false);
+  const [previewReport, setPreviewReport] = useState<{
     isOpen: boolean;
     type: string;
   }>({
     isOpen: false,
     type: ''
   });
-  const [previewData, setPreviewData] = React.useState<any>(null);
+  const [previewData, setPreviewData] = useState<any>(null);
 
   // Estado para dados reais
-  const [loading, setLoading] = React.useState(true);
-  const [estatisticasGerais, setEstatisticasGerais] = React.useState({
+  const [loading, setLoading] = useState(true);
+  const [estatisticasGerais, setEstatisticasGerais] = useState({
     economiaTotal: "R$ 0,00",
     economiaPercentual: "0%",
     cotacoesRealizadas: 0,
@@ -50,7 +50,7 @@ export default function Relatorios() {
     pedidosGerados: 0
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       loadStatistics();
     }
