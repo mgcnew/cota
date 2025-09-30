@@ -44,6 +44,138 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          product_name: string
+          quantidade: string
+          quote_id: string
+          unidade: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          product_name: string
+          quantidade: string
+          quote_id: string
+          unidade: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          product_name?: string
+          quantidade?: string
+          quote_id?: string
+          unidade?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_suppliers: {
+        Row: {
+          created_at: string
+          data_resposta: string | null
+          id: string
+          observacoes: string | null
+          quote_id: string
+          status: string
+          supplier_id: string
+          supplier_name: string
+          updated_at: string
+          valor_oferecido: number | null
+        }
+        Insert: {
+          created_at?: string
+          data_resposta?: string | null
+          id?: string
+          observacoes?: string | null
+          quote_id: string
+          status?: string
+          supplier_id: string
+          supplier_name: string
+          updated_at?: string
+          valor_oferecido?: number | null
+        }
+        Update: {
+          created_at?: string
+          data_resposta?: string | null
+          id?: string
+          observacoes?: string | null
+          quote_id?: string
+          status?: string
+          supplier_id?: string
+          supplier_name?: string
+          updated_at?: string
+          valor_oferecido?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_suppliers_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_suppliers_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          created_at: string
+          data_fim: string
+          data_inicio: string
+          id: string
+          observacoes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_fim: string
+          data_inicio: string
+          id?: string
+          observacoes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_fim?: string
+          data_inicio?: string
+          id?: string
+          observacoes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           address: string | null

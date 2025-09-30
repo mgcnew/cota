@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -53,10 +56,14 @@ interface Quote {
 }
 
 export default function Cotacoes() {
+  const { user } = useAuth();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { paginate } = usePagination<Quote>({ initialItemsPerPage: 10 });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [cotacoes, setCotacoes] = useState<Quote[]>([]);
 
   // Mock data temporário para EditQuoteDialog
   const mockProducts = [
@@ -75,142 +82,97 @@ export default function Cotacoes() {
     { id: "5", name: "Amandinha" },
   ];
 
-  // Mock data baseado na planilha Excel
-  const [cotacoes, setCotacoes] = useState<Quote[]>([
-    {
-      id: "COT-001",
-      produto: "Coxa com Sobrecoxa",
-      quantidade: "500kg",
-      status: "ativa",
-      dataInicio: "22/09/2025",
-      dataFim: "29/09/2025",
-      fornecedores: 5,
-      melhorPreco: "R$ 7.60",
-      melhorFornecedor: "Holambra",
-      economia: "12%",
-      fornecedoresParticipantes: [
-        { id: "1", nome: "Holambra", valorOferecido: 7.60, dataResposta: "23/09/2025", observacoes: "", status: "respondido" },
-        { id: "2", nome: "Seara", valorOferecido: 8.20, dataResposta: "23/09/2025", observacoes: "", status: "respondido" },
-        { id: "3", nome: "Davi", valorOferecido: 7.95, dataResposta: "24/09/2025", observacoes: "", status: "respondido" },
-        { id: "4", nome: "Adriano/Sidio", valorOferecido: 8.50, dataResposta: null, observacoes: "", status: "pendente" },
-        { id: "5", nome: "Amandinha", valorOferecido: 7.80, dataResposta: "22/09/2025", observacoes: "", status: "respondido" },
-      ]
-    },
-    {
-      id: "COT-002", 
-      produto: "Filé de Frango",
-      quantidade: "500kg",
-      status: "concluida",
-      dataInicio: "15/09/2025",
-      dataFim: "22/09/2025",
-      fornecedores: 3,
-      melhorPreco: "R$ 15.84",
-      melhorFornecedor: "Seara",
-      economia: "8%",
-      fornecedoresParticipantes: [
-        { id: "2", nome: "Seara", valorOferecido: 15.84, dataResposta: "16/09/2025", observacoes: "", status: "respondido" },
-        { id: "3", nome: "Davi", valorOferecido: 16.20, dataResposta: "17/09/2025", observacoes: "", status: "respondido" },
-        { id: "5", nome: "Amandinha", valorOferecido: 16.50, dataResposta: "16/09/2025", observacoes: "", status: "respondido" },
-      ]
-    },
-    {
-      id: "COT-003",
-      produto: "Linguiça Toscana Aurora",
-      quantidade: "200kg",
-      status: "pendente",
-      dataInicio: "17/09/2025",
-      dataFim: "24/09/2025",
-      fornecedores: 3,
-      melhorPreco: "R$ 18.49",
-      melhorFornecedor: "Davi",
-      economia: "15%",
-      fornecedoresParticipantes: [
-        { id: "3", nome: "Davi", valorOferecido: 18.49, dataResposta: "18/09/2025", observacoes: "", status: "respondido" },
-        { id: "1", nome: "Holambra", valorOferecido: 0, dataResposta: null, observacoes: "", status: "pendente" },
-        { id: "2", nome: "Seara", valorOferecido: 0, dataResposta: null, observacoes: "", status: "pendente" },
-      ]
-    },
-    {
-      id: "COT-004",
-      produto: "Contra Filé",
-      quantidade: "300kg",
-      status: "ativa",
-      dataInicio: "18/09/2025",
-      dataFim: "25/09/2025",
-      fornecedores: 4,
-      melhorPreco: "R$ 36.00",
-      melhorFornecedor: "Silvia",
-      economia: "5%",
-      fornecedoresParticipantes: [
-        { id: "1", nome: "Holambra", valorOferecido: 37.20, dataResposta: "19/09/2025", observacoes: "", status: "respondido" },
-        { id: "3", nome: "Davi", valorOferecido: 36.00, dataResposta: "20/09/2025", observacoes: "", status: "respondido" },
-        { id: "4", nome: "Adriano/Sidio", valorOferecido: 0, dataResposta: null, observacoes: "", status: "pendente" },
-        { id: "5", nome: "Amandinha", valorOferecido: 36.50, dataResposta: "19/09/2025", observacoes: "", status: "respondido" },
-      ]
-    },
-    {
-      id: "COT-005",
-      produto: "Peito de Frango",
-      quantidade: "400kg",
-      status: "expirada",
-      dataInicio: "10/09/2025",
-      dataFim: "17/09/2025",
-      fornecedores: 2,
-      melhorPreco: "R$ 12.50",
-      melhorFornecedor: "Adriano/Sidio",
-      economia: "7%",
-      fornecedoresParticipantes: [
-        { id: "4", nome: "Adriano/Sidio", valorOferecido: 12.50, dataResposta: "11/09/2025", observacoes: "", status: "respondido" },
-        { id: "2", nome: "Seara", valorOferecido: 13.20, dataResposta: "12/09/2025", observacoes: "", status: "respondido" },
-      ]
+  useEffect(() => {
+    if (!user) {
+      setAuthDialogOpen(true);
+    } else {
+      loadQuotes();
     }
-  ]);
+  }, [user]);
 
-  const handleAddQuote = async (data: any) => {
+  const loadQuotes = async () => {
     try {
-      // Buscar nomes dos fornecedores
-      const { data: suppliersData } = await supabase
-        .from("suppliers")
-        .select("id, name")
-        .in("id", data.fornecedoresIds);
+      setLoading(true);
+      
+      // Buscar cotações
+      const { data: quotesData, error: quotesError } = await supabase
+        .from("quotes")
+        .select(`
+          *,
+          quote_items (*),
+          quote_suppliers (*)
+        `)
+        .order("created_at", { ascending: false });
 
-      const fornecedoresParticipantes: FornecedorParticipante[] = data.fornecedoresIds.map((supplierId: string) => {
-        const supplier = suppliersData?.find(s => s.id === supplierId);
+      if (quotesError) throw quotesError;
+
+      // Transformar dados para o formato esperado
+      const formattedQuotes: Quote[] = (quotesData || []).map((quote: any, index: number) => {
+        const items = quote.quote_items || [];
+        const suppliers = quote.quote_suppliers || [];
+        
+        // Formatar produtos
+        const produtosTexto = items.length > 0
+          ? items.map((item: any) => `${item.product_name} (${item.quantidade}${item.unidade})`).join(", ")
+          : "Sem produtos";
+
+        // Calcular melhor preço
+        const valoresRespondidos = suppliers
+          .filter((s: any) => s.valor_oferecido > 0)
+          .map((s: any) => Number(s.valor_oferecido));
+        
+        const melhorValor = valoresRespondidos.length > 0 ? Math.min(...valoresRespondidos) : 0;
+        const fornecedorMelhorPreco = suppliers.find((s: any) => Number(s.valor_oferecido) === melhorValor);
+
+        // Formatar fornecedores participantes
+        const fornecedoresParticipantes: FornecedorParticipante[] = suppliers.map((s: any) => ({
+          id: s.supplier_id,
+          nome: s.supplier_name,
+          valorOferecido: Number(s.valor_oferecido) || 0,
+          dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString("pt-BR") : null,
+          observacoes: s.observacoes || "",
+          status: s.status as "pendente" | "respondido"
+        }));
+
         return {
-          id: supplierId,
-          nome: supplier?.name || "Desconhecido",
-          valorOferecido: 0,
-          dataResposta: null,
-          observacoes: "",
-          status: "pendente" as const
+          id: `COT-${String(index + 1).padStart(3, '0')}`,
+          produto: produtosTexto,
+          quantidade: `${items.length} produto(s)`,
+          status: quote.status,
+          dataInicio: new Date(quote.data_inicio).toLocaleDateString("pt-BR"),
+          dataFim: new Date(quote.data_fim).toLocaleDateString("pt-BR"),
+          fornecedores: suppliers.length,
+          melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
+          melhorFornecedor: fornecedorMelhorPreco?.supplier_name || "Aguardando",
+          economia: "0%",
+          fornecedoresParticipantes
         };
       });
 
-      // Formatação dos produtos para exibição
-      const produtosTexto = data.produtos.map((p: any) => 
-        `${p.produtoNome} (${p.quantidade}${p.unidade})`
-      ).join(", ");
-
-      const newQuote: Quote = {
-        id: `COT-${String(cotacoes.length + 1).padStart(3, '0')}`,
-        produto: produtosTexto,
-        quantidade: `${data.produtos.length} produto(s)`,
-        status: "ativa",
-        dataInicio: data.dataInicio.toLocaleDateString("pt-BR"),
-        dataFim: data.dataFim.toLocaleDateString("pt-BR"),
-        fornecedores: fornecedoresParticipantes.length,
-        melhorPreco: "R$ 0.00",
-        melhorFornecedor: "Aguardando",
-        economia: "0%",
-        fornecedoresParticipantes
-      };
-      setCotacoes([newQuote, ...cotacoes]);
+      setCotacoes(formattedQuotes);
     } catch (error) {
-      console.error("Erro ao criar cotação:", error);
+      console.error("Erro ao carregar cotações:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as cotações",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (!user) {
+    return <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />;
+  }
+
+  const handleAddQuote = async () => {
+    // Recarregar cotações após adicionar
+    await loadQuotes();
+  };
+
   const handleEditQuote = (id: string, data: any) => {
+    // TODO: Implementar edição no banco
     setCotacoes(cotacoes.map(cotacao => 
       cotacao.id === id 
         ? {
@@ -227,10 +189,12 @@ export default function Cotacoes() {
   };
 
   const handleDeleteQuote = (id: string) => {
+    // TODO: Implementar exclusão no banco
     setCotacoes(cotacoes.filter(cotacao => cotacao.id !== id));
   };
 
   const handleUpdateSupplierValue = (quoteId: string, supplierId: string, newValue: number) => {
+    // TODO: Implementar atualização no banco
     setCotacoes(cotacoes.map(cotacao => {
       if (cotacao.id === quoteId) {
         const updatedFornecedores = cotacao.fornecedoresParticipantes.map(f => 
@@ -284,6 +248,14 @@ export default function Cotacoes() {
       </Badge>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">Carregando cotações...</p>
+      </div>
+    );
+  }
 
   const filteredCotacoes = cotacoes.filter(cotacao => {
     const matchesSearch = cotacao.produto.toLowerCase().includes(searchTerm.toLowerCase()) ||

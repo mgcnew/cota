@@ -142,16 +142,88 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
     }
   };
 
-  const onSubmit = (data: QuoteFormData) => {
-    onAdd(data);
-    toast({
-      title: "Cotação criada",
-      description: "A cotação foi criada com sucesso.",
-    });
-    form.reset();
-    setSelectedSuppliers([]);
-    setSupplierSearch("");
-    setOpen(false);
+  const onSubmit = async (data: QuoteFormData) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Erro",
+          description: "Você precisa estar logado para criar uma cotação",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // 1. Criar a cotação principal
+      const { data: quote, error: quoteError } = await supabase
+        .from("quotes")
+        .insert({
+          user_id: user.id,
+          data_inicio: data.dataInicio.toISOString().split('T')[0],
+          data_fim: data.dataFim.toISOString().split('T')[0],
+          observacoes: data.observacoes || null,
+          status: 'ativa'
+        })
+        .select()
+        .single();
+
+      if (quoteError) throw quoteError;
+
+      // 2. Inserir os produtos da cotação
+      const quoteItemsData = data.produtos.map(p => ({
+        quote_id: quote.id,
+        product_id: p.produtoId,
+        product_name: p.produtoNome,
+        quantidade: p.quantidade,
+        unidade: p.unidade
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("quote_items")
+        .insert(quoteItemsData);
+
+      if (itemsError) throw itemsError;
+
+      // 3. Inserir os fornecedores participantes
+      const { data: suppliersData } = await supabase
+        .from("suppliers")
+        .select("id, name")
+        .in("id", data.fornecedoresIds);
+
+      const quoteSuppliersData = data.fornecedoresIds.map(supplierId => {
+        const supplier = suppliersData?.find(s => s.id === supplierId);
+        return {
+          quote_id: quote.id,
+          supplier_id: supplierId,
+          supplier_name: supplier?.name || "Desconhecido",
+          status: 'pendente'
+        };
+      });
+
+      const { error: suppliersError } = await supabase
+        .from("quote_suppliers")
+        .insert(quoteSuppliersData);
+
+      if (suppliersError) throw suppliersError;
+
+      onAdd(data);
+      toast({
+        title: "Cotação criada",
+        description: "A cotação foi criada com sucesso.",
+      });
+      form.reset();
+      setSelectedSuppliers([]);
+      setSupplierSearch("");
+      setOpen(false);
+    } catch (error: any) {
+      console.error("Erro ao criar cotação:", error);
+      toast({
+        title: "Erro ao criar cotação",
+        description: error.message || "Ocorreu um erro ao criar a cotação",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSupplierSelect = (supplier: Supplier) => {
