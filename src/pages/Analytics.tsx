@@ -286,20 +286,61 @@ export default function Analytics() {
 
       setPerformanceFornecedores(performanceArray);
 
-      // Tendências mensais (últimos 4 meses)
+      // Tendências mensais (últimos 4 meses) - dados reais
       const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
       const now = new Date();
       const tendencias = [];
 
+      // Buscar dados dos últimos 4 meses
       for (let i = 3; i >= 0; i--) {
-        const mes = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const mesNome = meses[mes.getMonth()];
-        
+        const mesData = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const mesNome = meses[mesData.getMonth()];
+        const mesInicio = new Date(mesData.getFullYear(), mesData.getMonth(), 1);
+        const mesFim = new Date(mesData.getFullYear(), mesData.getMonth() + 1, 0);
+
+        // Buscar cotações do mês
+        const { data: quotesDoMes } = await supabase
+          .from("quotes")
+          .select(`
+            *,
+            quote_suppliers(*)
+          `)
+          .gte("data_inicio", mesInicio.toISOString().split('T')[0])
+          .lte("data_fim", mesFim.toISOString().split('T')[0]);
+
+        // Buscar pedidos do mês
+        const { data: ordersDoMes } = await supabase
+          .from("orders")
+          .select("*")
+          .gte("order_date", mesInicio.toISOString().split('T')[0])
+          .lte("order_date", mesFim.toISOString().split('T')[0]);
+
+        // Calcular economia do mês
+        let economiaDoMes = 0;
+        let cotacoesDoMes = quotesDoMes?.length || 0;
+
+        quotesDoMes?.forEach((quote: any) => {
+          if (quote.quote_suppliers && quote.quote_suppliers.length >= 2) {
+            const valores = quote.quote_suppliers
+              .filter((qs: any) => qs.valor_oferecido > 0)
+              .map((qs: any) => qs.valor_oferecido);
+            
+            if (valores.length >= 2) {
+              const melhorPreco = Math.min(...valores);
+              const piorPreco = Math.max(...valores);
+              economiaDoMes += ((piorPreco - melhorPreco) / piorPreco) * 100;
+            }
+          }
+        });
+
+        // Valor total de pedidos do mês
+        const valorDoMes = ordersDoMes?.reduce((acc, order) => acc + Number(order.total_value), 0) || 0;
+
         tendencias.push({
           mes: mesNome,
-          cotacoes: Math.floor(Math.random() * 10) + 15,
-          economia: Math.random() * 5 + 8,
-          valor: Math.floor(Math.random() * 15000) + 40000
+          cotacoes: cotacoesDoMes,
+          economia: cotacoesDoMes > 0 ? economiaDoMes / cotacoesDoMes : 0,
+          valor: valorDoMes
         });
       }
 
