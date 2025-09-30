@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,106 +48,61 @@ interface Product {
 
 export default function Produtos() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { paginate } = usePagination<Product>({ initialItemsPerPage: 10 });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
-  const [products, setProducts] = useState<Product[]>([
-
-  // Mock data baseado na planilha Excel
-  {
-      id: "1",
-      name: "Coxa com Sobrecoxa",
-      category: "Frango",
-      weight: "500kg",
-      lastQuotePrice: "R$ 7.60",
-      bestSupplier: "Holambra",
-      quotesCount: 5,
-      lastUpdate: "22/09/25",
-      trend: "down"
-    },
-    {
-      id: "2", 
-      name: "Coxa com Sobrecoxa Dorsal",
-      category: "Frango",
-      weight: "300kg",
-      lastQuotePrice: "R$ 7.00",
-      bestSupplier: "Adoro",
-      quotesCount: 3,
-      lastUpdate: "22/09/25",
-      trend: "stable"
-    },
-    {
-      id: "3",
-      name: "Asa",
-      category: "Frango", 
-      weight: "500kg",
-      lastQuotePrice: "R$ 10.20",
-      bestSupplier: "Leandro",
-      quotesCount: 4,
-      lastUpdate: "22/09/25",
-      trend: "up"
-    },
-    {
-      id: "4",
-      name: "Filé de Frango",
-      category: "Frango",
-      weight: "500kg", 
-      lastQuotePrice: "R$ 15.84",
-      bestSupplier: "Seara",
-      quotesCount: 1,
-      lastUpdate: "22/09/25",
-      trend: "stable"
-    },
-    {
-      id: "5",
-      name: "Linguiça Toscana Aurora",
-      category: "Embutidos",
-      weight: "200kg",
-      lastQuotePrice: "R$ 18.49",
-      bestSupplier: "Davi",
-      quotesCount: 8,
-      lastUpdate: "17/09/25",
-      trend: "down"
-    },
-    {
-      id: "6",
-      name: "Presunto Aurora",
-      category: "Frios",
-      weight: "N/A",
-      lastQuotePrice: "R$ 22.49",
-      bestSupplier: "Amandinha",
-      quotesCount: 2,
-      lastUpdate: "23/09/25",
-      trend: "up"
-    },
-    {
-      id: "7",
-      name: "Contra Filé",
-      category: "Bovino",
-      weight: "N/A",
-      lastQuotePrice: "R$ 36.00",
-      bestSupplier: "Silvia",
-      quotesCount: 4,
-      lastUpdate: "18/09/25",
-      trend: "stable"
-    },
-    {
-      id: "8",
-      name: "Metade Suíno",
-      category: "Suíno",
-      weight: "15 metades",
-      lastQuotePrice: "R$ 12.60",
-      bestSupplier: "Raja",
-      quotesCount: 3,
-      lastUpdate: "18/09/25",
-      trend: "down"
-    }
-  ]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const [categories, setCategories] = useState(["all", "Frango", "Embutidos", "Frios", "Bovino", "Suíno"]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      setAuthDialogOpen(true);
+    }
+  }, [loading, user]);
+
+  useEffect(() => {
+    if (user) {
+      loadProducts();
+    }
+  }, [user]);
+
+  const loadProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedProducts: Product[] = data.map(p => ({
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        weight: p.weight || "N/A",
+        lastQuotePrice: "R$ 0,00",
+        bestSupplier: "-",
+        quotesCount: 0,
+        lastUpdate: new Date(p.created_at).toLocaleDateString('pt-BR'),
+        trend: "stable" as const,
+      }));
+
+      setProducts(formattedProducts);
+      
+      // Atualizar categorias
+      const uniqueCategories = Array.from(new Set(data.map(p => p.category)));
+      setCategories(["all", ...uniqueCategories]);
+    } catch (error) {
+      console.error("Erro ao carregar produtos:", error);
+    }
+  };
+
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -160,8 +118,8 @@ export default function Produtos() {
     return <span className="h-4 w-4 rounded-full bg-muted-foreground/50" />;
   };
 
-  const handleProductAdded = (newProduct: Product) => {
-    setProducts(prev => [...prev, newProduct]);
+  const handleProductAdded = (newProduct: any) => {
+    loadProducts();
   };
 
   const handleProductUpdated = (updatedProduct: Product) => {
@@ -182,8 +140,18 @@ export default function Produtos() {
     setProducts(prev => [...prev, ...importedProducts]);
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">Carregando...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-3 md:p-6 space-y-4 md:space-y-6">
+    <>
+      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
+      <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -490,6 +458,7 @@ export default function Produtos() {
         onOpenChange={(open) => !open && setDeletingProduct(null)}
         onProductDeleted={handleProductDeleted}
       />
-    </div>
+      </div>
+    </>
   );
 }

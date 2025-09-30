@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const productSchema = z.object({
   name: z.string()
@@ -58,6 +60,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
   const [open, setOpen] = useState(false);
   const [showNewCategory, setShowNewCategory] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -73,7 +76,16 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
   
   const watchCategory = form.watch("category");
 
-  const onSubmit = (data: ProductFormData) => {
+  const onSubmit = async (data: ProductFormData) => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para adicionar produtos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Determinar a categoria final
     const finalCategory = data.category === "nova" ? data.newCategory! : data.category;
     
@@ -82,33 +94,42 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
       return;
     }
 
-    const newProduct = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: data.name,
-      category: finalCategory,
-      weight: data.weight || "N/A",
-      lastQuotePrice: "R$ 0,00",
-      bestSupplier: "-",
-      quotesCount: 0,
-      lastUpdate: new Date().toLocaleDateString('pt-BR'),
-      trend: "stable" as const
-    };
+    try {
+      const { data: product, error } = await supabase
+        .from('products')
+        .insert({
+          name: data.name,
+          category: finalCategory,
+          weight: data.weight || "N/A",
+          user_id: user.id,
+        })
+        .select()
+        .single();
 
-    onProductAdded(newProduct);
-    
-    // Adicionar nova categoria à lista se necessário
-    if (data.category === "nova" && data.newCategory && onCategoryAdded) {
-      onCategoryAdded(data.newCategory);
+      if (error) throw error;
+
+      onProductAdded(product);
+      
+      // Adicionar nova categoria à lista se necessário
+      if (data.category === "nova" && data.newCategory && onCategoryAdded) {
+        onCategoryAdded(data.newCategory);
+      }
+      
+      toast({
+        title: "Produto adicionado",
+        description: `${data.name} foi adicionado com sucesso.`,
+      });
+
+      form.reset();
+      setShowNewCategory(false);
+      setOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao adicionar produto",
+        description: error.message,
+        variant: "destructive",
+      });
     }
-    
-    toast({
-      title: "Produto adicionado",
-      description: `${data.name} foi adicionado com sucesso.`,
-    });
-
-    form.reset();
-    setShowNewCategory(false);
-    setOpen(false);
   };
 
   return (
