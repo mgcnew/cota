@@ -1,25 +1,48 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { AlertTriangle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DeletePedidoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   pedido: any;
-  onDelete: (id: string) => void;
+  onDelete: () => void;
 }
 
 export default function DeletePedidoDialog({ open, onOpenChange, pedido, onDelete }: DeletePedidoDialogProps) {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
 
-  const handleDelete = () => {
-    onDelete(pedido.id);
-    toast({
-      title: "Pedido excluído",
-      description: "O pedido foi removido com sucesso",
-    });
-    onOpenChange(false);
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', pedido.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Pedido excluído",
+        description: "Pedido removido com sucesso",
+      });
+
+      onDelete();
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Error deleting order:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao excluir pedido",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,11 +75,12 @@ export default function DeletePedidoDialog({ open, onOpenChange, pedido, onDelet
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancelar
           </Button>
-          <Button variant="destructive" onClick={handleDelete}>
-            Excluir Pedido
+          <Button variant="destructive" onClick={handleDelete} disabled={loading}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Excluir
           </Button>
         </DialogFooter>
       </DialogContent>

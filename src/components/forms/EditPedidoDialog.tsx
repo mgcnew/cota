@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface PedidoItem {
   produto: string;
@@ -18,40 +20,62 @@ interface EditPedidoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   pedido: any;
-  onEdit: (pedido: any) => void;
+  onEdit: () => void;
 }
 
 export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }: EditPedidoDialogProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [fornecedor, setFornecedor] = useState("");
   const [dataEntrega, setDataEntrega] = useState("");
   const [status, setStatus] = useState("");
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<PedidoItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
 
-  const fornecedores = ["Holambra", "Seara", "Davi", "Adriano/Sidio", "Silvia"];
   const statusOptions = ["pendente", "processando", "confirmado", "entregue", "cancelado"];
 
   useEffect(() => {
-    if (pedido) {
-      setFornecedor(pedido.fornecedor);
-      setDataEntrega(pedido.dataEntrega.split('/').reverse().join('-'));
+    if (open) {
+      loadSuppliers();
+      loadProducts();
+    }
+    if (pedido && open) {
+      setFornecedor(pedido.supplier_id || "");
+      setDataEntrega(pedido.delivery_date || "");
       setStatus(pedido.status);
       setObservacoes(pedido.observacoes || "");
-      
-      if (pedido.detalhesItens) {
-        setItens(pedido.detalhesItens);
-      } else {
-        const valorTotal = parseFloat(pedido.total.replace("R$ ", "").replace(".", "").replace(",", "."));
-        const valorPorItem = valorTotal / pedido.produtos.length;
-        setItens(pedido.produtos.map((p: string) => ({
-          produto: p,
-          quantidade: 1,
-          valorUnitario: valorPorItem
-        })));
-      }
+      setItens(pedido.detalhesItens || [{ produto: "", quantidade: 1, valorUnitario: 0 }]);
     }
-  }, [pedido]);
+  }, [pedido, open]);
+
+  const loadSuppliers = async () => {
+    const { data, error } = await supabase
+      .from('suppliers')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error loading suppliers:', error);
+      return;
+    }
+    setSuppliers(data || []);
+  };
+
+  const loadProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error loading products:', error);
+      return;
+    }
+    setProducts(data || []);
+  };
 
   const handleAddItem = () => {
     setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0 }]);
@@ -71,7 +95,16 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
     return itens.reduce((acc, item) => acc + (item.quantidade * item.valorUnitario), 0);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!fornecedor || !dataEntrega || itens.some(item => !item.produto || item.quantidade <= 0)) {
       toast({
         title: "Erro",
@@ -81,27 +114,70 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
       return;
     }
 
-    const total = calculateTotal();
-    const produtos = itens.map(item => item.produto);
+    setLoading(true);
+    try {
+      const total = calculateTotal();
+      const selectedSupplier = suppliers.find(s => s.id === fornecedor);
 
-    const pedidoAtualizado = {
-      ...pedido,
-      fornecedor,
-      total: `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      status,
-      dataEntrega: dataEntrega.split('-').reverse().join('/'),
-      itens: itens.length,
-      produtos,
-      observacoes,
-      detalhesItens: itens,
-    };
+      // Update order
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update({
+          supplier_id: fornecedor,
+          supplier_name: selectedSupplier?.name || '',
+          total_value: total,
+          status,
+          delivery_date: dataEntrega,
+          observations: observacoes,
+        })
+        .eq('id', pedido.id);
 
-    onEdit(pedidoAtualizado);
-    toast({
-      title: "Pedido atualizado",
-      description: "Alterações salvas com sucesso",
-    });
-    onOpenChange(false);
+      if (orderError) throw orderError;
+
+      // Delete existing items
+      const { error: deleteError } = await supabase
+        .from('order_items')
+        .delete()
+        .eq('order_id', pedido.id);
+
+      if (deleteError) throw deleteError;
+
+      // Insert new items
+      const orderItems = itens.map(item => {
+        const product = products.find(p => p.name === item.produto);
+        return {
+          order_id: pedido.id,
+          product_id: product?.id || null,
+          product_name: item.produto,
+          quantity: item.quantidade,
+          unit_price: item.valorUnitario,
+          total_price: item.quantidade * item.valorUnitario,
+        };
+      });
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      toast({
+        title: "Pedido atualizado",
+        description: "Alterações salvas com sucesso",
+      });
+
+      onEdit();
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Error updating order:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao atualizar pedido",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -120,8 +196,8 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
                   <SelectValue placeholder="Selecione o fornecedor" />
                 </SelectTrigger>
                 <SelectContent>
-                  {fornecedores.map((f) => (
-                    <SelectItem key={f} value={f}>{f}</SelectItem>
+                  {suppliers.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -168,11 +244,19 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
                 <div key={index} className="flex gap-2 items-end">
                   <div className="flex-1 space-y-2">
                     <Label className="text-xs">Produto</Label>
-                    <Input
-                      placeholder="Nome do produto"
+                    <Select
                       value={item.produto}
-                      onChange={(e) => handleItemChange(index, 'produto', e.target.value)}
-                    />
+                      onValueChange={(value) => handleItemChange(index, 'produto', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o produto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {products.map((p) => (
+                          <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="w-24 space-y-2">
                     <Label className="text-xs">Qtd</Label>
@@ -186,14 +270,12 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
                   <div className="w-32 space-y-2">
                     <Label className="text-xs">Valor Unit.</Label>
                     <Input
-                      type="text"
-                      placeholder="R$ 0,00"
-                      value={item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/[^\d,]/g, '').replace(',', '.');
-                        const numValue = parseFloat(value) || 0;
-                        handleItemChange(index, 'valorUnitario', numValue);
-                      }}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={item.valorUnitario}
+                      onChange={(e) => handleItemChange(index, 'valorUnitario', parseFloat(e.target.value) || 0)}
                     />
                   </div>
                   <div className="w-32 space-y-2">
@@ -237,10 +319,11 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} disabled={loading}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar Alterações
           </Button>
         </DialogFooter>

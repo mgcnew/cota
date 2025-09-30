@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface PedidoItem {
   produto: string;
@@ -22,12 +24,47 @@ interface AddPedidoDialogProps {
 
 export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedidoDialogProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [fornecedor, setFornecedor] = useState("");
   const [dataEntrega, setDataEntrega] = useState("");
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<PedidoItem[]>([{ produto: "", quantidade: 1, valorUnitario: 0 }]);
+  const [loading, setLoading] = useState(false);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
 
-  const fornecedores = ["Holambra", "Seara", "Davi", "Adriano/Sidio", "Silvia"];
+  useEffect(() => {
+    if (open) {
+      loadSuppliers();
+      loadProducts();
+    }
+  }, [open]);
+
+  const loadSuppliers = async () => {
+    const { data, error } = await supabase
+      .from('suppliers')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error loading suppliers:', error);
+      return;
+    }
+    setSuppliers(data || []);
+  };
+
+  const loadProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error loading products:', error);
+      return;
+    }
+    setProducts(data || []);
+  };
 
   const handleAddItem = () => {
     setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0 }]);
@@ -47,7 +84,16 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
     return itens.reduce((acc, item) => acc + (item.quantidade * item.valorUnitario), 0);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!fornecedor || !dataEntrega || itens.some(item => !item.produto || item.quantidade <= 0)) {
       toast({
         title: "Erro",
@@ -57,35 +103,70 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
       return;
     }
 
-    const total = calculateTotal();
-    const hoje = new Date().toLocaleDateString('pt-BR');
-    const produtos = itens.map(item => item.produto);
+    setLoading(true);
+    try {
+      const total = calculateTotal();
+      const selectedSupplier = suppliers.find(s => s.id === fornecedor);
 
-    const novoPedido = {
-      id: `PED-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
-      fornecedor,
-      total: `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      status: "pendente",
-      dataPedido: hoje,
-      dataEntrega,
-      itens: itens.length,
-      produtos,
-      observacoes,
-      detalhesItens: itens,
-    };
+      // Insert order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          supplier_id: fornecedor,
+          supplier_name: selectedSupplier?.name || '',
+          total_value: total,
+          status: 'pendente',
+          delivery_date: dataEntrega,
+          observations: observacoes,
+        })
+        .select()
+        .single();
 
-    onAdd(novoPedido);
-    toast({
-      title: "Pedido criado",
-      description: "Pedido adicionado com sucesso",
-    });
+      if (orderError) throw orderError;
 
-    // Reset form
-    setFornecedor("");
-    setDataEntrega("");
-    setObservacoes("");
-    setItens([{ produto: "", quantidade: 1, valorUnitario: 0 }]);
-    onOpenChange(false);
+      // Insert order items
+      const orderItems = itens.map(item => {
+        const product = products.find(p => p.name === item.produto);
+        return {
+          order_id: order.id,
+          product_id: product?.id || null,
+          product_name: item.produto,
+          quantity: item.quantidade,
+          unit_price: item.valorUnitario,
+          total_price: item.quantidade * item.valorUnitario,
+        };
+      });
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      toast({
+        title: "Pedido criado",
+        description: "Pedido adicionado com sucesso",
+      });
+
+      onAdd(order);
+
+      // Reset form
+      setFornecedor("");
+      setDataEntrega("");
+      setObservacoes("");
+      setItens([{ produto: "", quantidade: 1, valorUnitario: 0 }]);
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Error creating order:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao criar pedido",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -104,8 +185,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
                   <SelectValue placeholder="Selecione o fornecedor" />
                 </SelectTrigger>
                 <SelectContent>
-                  {fornecedores.map((f) => (
-                    <SelectItem key={f} value={f}>{f}</SelectItem>
+                  {suppliers.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -136,11 +217,19 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
                 <div key={index} className="flex gap-2 items-end">
                   <div className="flex-1 space-y-2">
                     <Label className="text-xs">Produto</Label>
-                    <Input
-                      placeholder="Nome do produto"
+                    <Select
                       value={item.produto}
-                      onChange={(e) => handleItemChange(index, 'produto', e.target.value)}
-                    />
+                      onValueChange={(value) => handleItemChange(index, 'produto', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o produto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {products.map((p) => (
+                          <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="w-24 space-y-2">
                     <Label className="text-xs">Qtd</Label>
@@ -203,10 +292,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} disabled={loading}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Criar Pedido
           </Button>
         </DialogFooter>
