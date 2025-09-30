@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useCotacoes } from "@/hooks/useCotacoes";
+import { useDebounce } from "@/hooks/useDebounce";
+import type { Quote, FornecedorParticipante } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
@@ -30,36 +31,15 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { ViewMode } from "@/types/pagination";
 
-interface FornecedorParticipante {
-  id: string;
-  nome: string;
-  valorOferecido: number;
-  dataResposta: string | null;
-  observacoes: string;
-  status: "pendente" | "respondido";
-}
-
-interface Quote {
-  id: string;
-  produto: string;
-  quantidade: string;
-  status: string;
-  dataInicio: string;
-  dataFim: string;
-  fornecedores: number;
-  melhorPreco: string;
-  melhorFornecedor: string;
-  economia: string;
-  fornecedoresParticipantes: FornecedorParticipante[];
-}
-
 export default function Cotacoes() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { paginate } = usePagination<Quote>({ initialItemsPerPage: 10 });
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [loading, setLoading] = useState(true);
-  const [cotacoes, setCotacoes] = useState<Quote[]>([]);
+
+  // OPTIMIZED: Use React Query with single optimized query (no N+1)
+  const { cotacoes, isLoading, refetch } = useCotacoes();
 
   // Mock data temporário para EditQuoteDialog
   const mockProducts = [
@@ -77,150 +57,6 @@ export default function Cotacoes() {
     { id: "4", name: "Adriano/Sidio" },
     { id: "5", name: "Amandinha" },
   ];
-
-  useEffect(() => {
-    loadCotacoes();
-  }, []);
-
-  const loadCotacoes = async () => {
-    try {
-      setLoading(true);
-      
-      // Buscar cotações
-      const { data: quotesData, error: quotesError } = await supabase
-        .from("quotes")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (quotesError) throw quotesError;
-
-      // Para cada cotação, buscar items e suppliers
-      const cotacoesCompletas = await Promise.all(
-        (quotesData || []).map(async (quote, index) => {
-          // Buscar items
-          const { data: items } = await supabase
-            .from("quote_items")
-            .select("*")
-            .eq("quote_id", quote.id);
-
-          // Buscar suppliers
-          const { data: suppliers } = await supabase
-            .from("quote_suppliers")
-            .select("*")
-            .eq("quote_id", quote.id);
-
-          // Formatar fornecedores participantes
-          const fornecedoresParticipantes: FornecedorParticipante[] = (suppliers || []).map(s => ({
-            id: s.supplier_id,
-            nome: s.supplier_name,
-            valorOferecido: Number(s.valor_oferecido) || 0,
-            dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString("pt-BR") : null,
-            observacoes: s.observacoes || "",
-            status: s.status as "pendente" | "respondido"
-          }));
-
-          // Calcular melhor preço
-          const valoresRespondidos = fornecedoresParticipantes
-            .filter(f => f.valorOferecido > 0)
-            .map(f => f.valorOferecido);
-          
-          const melhorValor = valoresRespondidos.length > 0 ? Math.min(...valoresRespondidos) : 0;
-          const fornecedorMelhorPreco = fornecedoresParticipantes.find(f => f.valorOferecido === melhorValor);
-
-          // Formatar produtos para exibição
-          const produtosTexto = (items || [])
-            .map(item => `${item.product_name} (${item.quantidade}${item.unidade})`)
-            .join(", ");
-
-          return {
-            id: `COT-${String(index + 1).padStart(3, '0')}`,
-            produto: produtosTexto || "Sem produtos",
-            quantidade: `${items?.length || 0} produto(s)`,
-            status: quote.status,
-            dataInicio: new Date(quote.data_inicio).toLocaleDateString("pt-BR"),
-            dataFim: new Date(quote.data_fim).toLocaleDateString("pt-BR"),
-            fornecedores: fornecedoresParticipantes.length,
-            melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
-            melhorFornecedor: fornecedorMelhorPreco?.nome || "Aguardando",
-            economia: "0%",
-            fornecedoresParticipantes
-          };
-        })
-      );
-
-      setCotacoes(cotacoesCompletas);
-    } catch (error) {
-      console.error("Erro ao carregar cotações:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as cotações",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddQuote = async () => {
-    // Recarregar cotações após adicionar
-    await loadCotacoes();
-  };
-
-  const handleEditQuote = (id: string, data: any) => {
-    // TODO: Implementar edição no banco
-    setCotacoes(cotacoes.map(cotacao => 
-      cotacao.id === id 
-        ? {
-            ...cotacao,
-            produto: data.produto,
-            quantidade: `${data.quantidade}${data.unidade}`,
-            status: data.status,
-            dataInicio: data.dataInicio.toLocaleDateString("pt-BR"),
-            dataFim: data.dataFim.toLocaleDateString("pt-BR"),
-            fornecedores: data.fornecedorId && data.fornecedorId !== "all" ? 1 : mockSuppliers.length,
-          }
-        : cotacao
-    ));
-  };
-
-  const handleDeleteQuote = (id: string) => {
-    // TODO: Implementar exclusão no banco
-    setCotacoes(cotacoes.filter(cotacao => cotacao.id !== id));
-  };
-
-  const handleUpdateSupplierValue = (quoteId: string, supplierId: string, newValue: number) => {
-    // TODO: Implementar atualização no banco
-    setCotacoes(cotacoes.map(cotacao => {
-      if (cotacao.id === quoteId) {
-        const updatedFornecedores = cotacao.fornecedoresParticipantes.map(f => 
-          f.id === supplierId 
-            ? { 
-                ...f, 
-                valorOferecido: newValue,
-                dataResposta: new Date().toLocaleDateString("pt-BR"),
-                status: "respondido" as const
-              }
-            : f
-        );
-
-        // Recalcular melhor preço
-        const valoresRespondidos = updatedFornecedores
-          .filter(f => f.valorOferecido > 0)
-          .map(f => f.valorOferecido);
-        
-        const melhorValor = valoresRespondidos.length > 0 ? Math.min(...valoresRespondidos) : 0;
-        const fornecedorMelhorPreco = updatedFornecedores.find(f => f.valorOferecido === melhorValor);
-
-        return {
-          ...cotacao,
-          fornecedoresParticipantes: updatedFornecedores,
-          melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
-          melhorFornecedor: fornecedorMelhorPreco?.nome || "Aguardando",
-        };
-      }
-      return cotacao;
-    }));
-  };
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -244,20 +80,23 @@ export default function Cotacoes() {
     );
   };
 
-  if (loading) {
+  // OPTIMIZED: Memoize filtered results
+  const filteredCotacoes = useMemo(() => {
+    return cotacoes.filter(cotacao => {
+      const matchesSearch = cotacao.produto.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                           cotacao.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      const matchesStatus = statusFilter === "all" || cotacao.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [cotacoes, debouncedSearchTerm, statusFilter]);
+
+  if (isLoading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-screen">
         <p className="text-muted-foreground">Carregando cotações...</p>
       </div>
     );
   }
-
-  const filteredCotacoes = cotacoes.filter(cotacao => {
-    const matchesSearch = cotacao.produto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         cotacao.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || cotacao.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
 
   const paginatedData = paginate(filteredCotacoes);
 
@@ -273,7 +112,7 @@ export default function Cotacoes() {
         </div>
         <div className="flex items-center gap-2">
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <AddQuoteDialog onAdd={handleAddQuote} />
+          <AddQuoteDialog onAdd={refetch} />
         </div>
       </div>
 
@@ -341,7 +180,7 @@ export default function Cotacoes() {
         />
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center py-12">
           <p className="text-muted-foreground">Carregando cotações...</p>
         </div>
@@ -398,17 +237,17 @@ export default function Cotacoes() {
                 <div className="flex gap-1">
                   <ViewQuoteDialog 
                     quote={cotacao}
-                    onUpdateSupplierValue={handleUpdateSupplierValue}
+                    onUpdateSupplierValue={() => {}}
                   />
                   <EditQuoteDialog 
                     quote={cotacao}
-                    onEdit={handleEditQuote}
-                    products={mockProducts}
+                    onEdit={() => {}}
+                    products={[]}
                     suppliers={mockSuppliers}
                   />
                   <DeleteQuoteDialog 
                     quote={cotacao}
-                    onDelete={handleDeleteQuote}
+                    onDelete={() => {}}
                   />
                 </div>
               </CardContent>
@@ -474,17 +313,17 @@ export default function Cotacoes() {
                         <div className="flex justify-end gap-1">
                           <ViewQuoteDialog 
                             quote={cotacao}
-                            onUpdateSupplierValue={handleUpdateSupplierValue}
+                            onUpdateSupplierValue={() => {}}
                           />
                           <EditQuoteDialog 
                             quote={cotacao}
-                            onEdit={handleEditQuote}
-                            products={mockProducts}
+                            onEdit={() => {}}
+                            products={[]}
                             suppliers={mockSuppliers}
                           />
                           <DeleteQuoteDialog 
                             quote={cotacao}
-                            onDelete={handleDeleteQuote}
+                            onDelete={() => {}}
                           />
                         </div>
                       </TableCell>

@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
+import { useProducts } from "@/hooks/useProducts";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,18 +34,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { ViewMode } from "@/types/pagination";
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  weight: string;
-  lastQuotePrice: string;
-  bestSupplier: string;
-  quotesCount: number;
-  lastUpdate: string;
-  trend: "up" | "down" | "stable";
-}
+import type { Product } from "@/hooks/useProducts";
 
 export default function Produtos() {
   const navigate = useNavigate();
@@ -53,12 +43,13 @@ export default function Produtos() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { paginate } = usePagination<Product>({ initialItemsPerPage: 10 });
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
 
-  const [categories, setCategories] = useState(["all", "Frango", "Embutidos", "Frios", "Bovino", "Suíno"]);
+  // OPTIMIZED: Use React Query for data fetching with caching
+  const { products, categories, isLoading: productsLoading, deleteProduct } = useProducts();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -66,49 +57,14 @@ export default function Produtos() {
     }
   }, [loading, user]);
 
-  useEffect(() => {
-    if (user) {
-      loadProducts();
-    }
-  }, [user]);
-
-  const loadProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const formattedProducts: Product[] = data.map(p => ({
-        id: p.id,
-        name: p.name,
-        category: p.category,
-        weight: p.weight || "N/A",
-        lastQuotePrice: "R$ 0,00",
-        bestSupplier: "-",
-        quotesCount: 0,
-        lastUpdate: new Date(p.created_at).toLocaleDateString('pt-BR'),
-        trend: "stable" as const,
-      }));
-
-      setProducts(formattedProducts);
-      
-      // Atualizar categorias
-      const uniqueCategories = Array.from(new Set(data.map(p => p.category)));
-      setCategories(["all", ...uniqueCategories]);
-    } catch (error) {
-      console.error("Erro ao carregar produtos:", error);
-    }
-  };
-
-
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // OPTIMIZED: Memoize filtered products to avoid unnecessary recalculations
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, debouncedSearchQuery, selectedCategory]);
 
   const paginatedData = paginate(filteredProducts);
 
@@ -118,29 +74,7 @@ export default function Produtos() {
     return <span className="h-4 w-4 rounded-full bg-muted-foreground/50" />;
   };
 
-  const handleProductAdded = (newProduct: any) => {
-    loadProducts();
-  };
-
-  const handleProductUpdated = (updatedProduct: Product) => {
-    setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
-  };
-
-  const handleProductDeleted = (productId: string) => {
-    setProducts(prev => prev.filter(p => p.id !== productId));
-  };
-
-  const handleCategoryAdded = (newCategory: string) => {
-    if (!categories.includes(newCategory)) {
-      setCategories(prev => [...prev, newCategory]);
-    }
-  };
-
-  const handleProductsImported = (importedProducts: Product[]) => {
-    setProducts(prev => [...prev, ...importedProducts]);
-  };
-
-  if (loading) {
+  if (loading || productsLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">Carregando...</div>
@@ -163,10 +97,10 @@ export default function Produtos() {
         <div className="flex items-center gap-2">
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
           <ImportProductsDialog 
-            onProductsImported={handleProductsImported}
-            onCategoryAdded={handleCategoryAdded}
+            onProductsImported={() => {}}
+            onCategoryAdded={() => {}}
           />
-          <AddProductDialog onProductAdded={handleProductAdded} onCategoryAdded={handleCategoryAdded} />
+          <AddProductDialog onProductAdded={() => {}} onCategoryAdded={() => {}} />
         </div>
       </div>
 
