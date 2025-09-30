@@ -1,6 +1,9 @@
-import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Users, Settings } from "lucide-react";
+import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Users, Settings, LogOut, User } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 const mainItems = [{
   title: "Dashboard",
   url: "/",
@@ -120,15 +123,60 @@ export function AppSidebar() {
 
         {/* User Info */}
         <div className="mt-auto pt-4 border-t border-border/50">
-          <div className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted/50 transition-all duration-200 cursor-pointer group">
-            <div className="w-9 h-9 rounded-full bg-gradient-primary flex items-center justify-center shadow-md shadow-primary/20 ring-2 ring-primary/10 transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/30">
-              <Users className="h-4 w-4 text-white" />
-            </div>
-            {!isCollapsed && <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">Admin</p>
-                <p className="text-xs text-muted-foreground/70 truncate font-medium">Sistema Ativo</p>
-              </div>}
-          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted/50 transition-all duration-200 cursor-pointer group">
+                <div className="w-9 h-9 rounded-full bg-gradient-primary flex items-center justify-center shadow-md shadow-primary/20 ring-2 ring-primary/10 transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/30">
+                  <Users className="h-4 w-4 text-white" />
+                </div>
+                {!isCollapsed && <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-semibold text-foreground truncate">Admin</p>
+                    <p className="text-xs text-muted-foreground/70 truncate font-medium">Sistema Ativo</p>
+                  </div>}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-2 bg-card/95 backdrop-blur-xl border-border/50 shadow-xl" align="end" side="top" sideOffset={8}>
+              <div className="flex items-center gap-3 px-3 py-3 mb-2">
+                <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground">Admin</p>
+                  <p className="text-xs text-muted-foreground">admin@cotacoespro.com</p>
+                </div>
+              </div>
+              
+              <Separator className="my-2" />
+              
+              <div className="space-y-1">
+                <button 
+                  onClick={() => toast.info("Funcionalidade em desenvolvimento")}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/80 transition-colors text-sm text-foreground group"
+                >
+                  <User className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span className="font-medium">Meu Perfil</span>
+                </button>
+                
+                <NavLink 
+                  to="/configuracoes"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/80 transition-colors text-sm text-foreground group"
+                >
+                  <Settings className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span className="font-medium">Configurações</span>
+                </NavLink>
+                
+                <Separator className="my-2" />
+                
+                <button 
+                  onClick={() => toast.success("Logout realizado com sucesso")}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-destructive/10 transition-colors text-sm text-destructive group"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="font-medium">Sair</span>
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </SidebarContent>
     </Sidebar>;
