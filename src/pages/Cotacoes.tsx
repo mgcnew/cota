@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -55,8 +53,6 @@ interface Quote {
 }
 
 export default function Cotacoes() {
-  const { user } = useAuth();
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { paginate } = usePagination<Quote>({ initialItemsPerPage: 10 });
   const [searchTerm, setSearchTerm] = useState("");
@@ -78,16 +74,6 @@ export default function Cotacoes() {
     { id: "4", name: "Adriano/Sidio" },
     { id: "5", name: "Amandinha" },
   ];
-
-  useEffect(() => {
-    if (!user) {
-      setAuthDialogOpen(true);
-    }
-  }, [user]);
-
-  if (!user) {
-    return <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />;
-  }
 
   // Mock data baseado na planilha Excel
   const [cotacoes, setCotacoes] = useState<Quote[]>([
