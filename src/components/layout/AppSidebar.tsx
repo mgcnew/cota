@@ -4,45 +4,82 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGrou
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 const mainItems = [{
   title: "Dashboard",
   url: "/",
-  icon: BarChart3
+  icon: BarChart3,
+  color: "text-primary",
+  bgColor: "bg-primary/5",
+  hoverBg: "hover:bg-primary/10",
+  glowColor: "group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
 }, {
   title: "Produtos",
   url: "/produtos",
-  icon: Package
+  icon: Package,
+  color: "text-success",
+  bgColor: "bg-success/5",
+  hoverBg: "hover:bg-success/10",
+  glowColor: "group-hover:shadow-[0_0_15px_rgba(34,197,94,0.3)]"
 }, {
   title: "Fornecedores",
   url: "/fornecedores",
-  icon: Building2
+  icon: Building2,
+  color: "text-warning",
+  bgColor: "bg-warning/5",
+  hoverBg: "hover:bg-warning/10",
+  glowColor: "group-hover:shadow-[0_0_15px_rgba(251,146,60,0.3)]"
 }, {
   title: "Cotações",
   url: "/cotacoes",
-  icon: FileText
+  icon: FileText,
+  color: "text-info",
+  bgColor: "bg-info/5",
+  hoverBg: "hover:bg-info/10",
+  glowColor: "group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]"
 }, {
   title: "Pedidos",
   url: "/pedidos",
-  icon: ShoppingCart
+  icon: ShoppingCart,
+  color: "text-primary",
+  bgColor: "bg-primary/5",
+  hoverBg: "hover:bg-primary/10",
+  glowColor: "group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
 }, {
   title: "Histórico",
   url: "/historico",
-  icon: History
+  icon: History,
+  color: "text-muted-foreground",
+  bgColor: "bg-muted/5",
+  hoverBg: "hover:bg-muted/10",
+  glowColor: "group-hover:shadow-[0_0_10px_rgba(100,116,139,0.2)]"
 }];
 const analyticsItems = [{
   title: "Relatórios",
   url: "/relatorios",
-  icon: TrendingUp
+  icon: TrendingUp,
+  color: "text-primary",
+  bgColor: "bg-primary/5",
+  hoverBg: "hover:bg-primary/10",
+  glowColor: "group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
 }, {
   title: "Analytics",
   url: "/analytics",
-  icon: BarChart3
+  icon: BarChart3,
+  color: "text-primary",
+  bgColor: "bg-primary/5",
+  hoverBg: "hover:bg-primary/10",
+  glowColor: "group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
 }];
 
 const systemItems = [{
   title: "Configurações",
   url: "/configuracoes",
-  icon: Settings
+  icon: Settings,
+  color: "text-muted-foreground",
+  bgColor: "bg-muted/5",
+  hoverBg: "hover:bg-muted/10",
+  glowColor: "group-hover:shadow-[0_0_10px_rgba(100,116,139,0.2)]"
 }];
 export function AppSidebar() {
   const {
@@ -75,14 +112,32 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map(item => <SidebarMenuItem key={item.title} className="mx-1 px-0">
+              {mainItems.map(item => {
+                const isItemActive = isActive(item.url);
+                return <SidebarMenuItem key={item.title} className="mx-1 px-0">
                   <SidebarMenuButton asChild className="my-0.5">
-                    <NavLink to={item.url} end className={`${getNavClasses(item.url)} flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group`}>
-                      <item.icon className="h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                    <NavLink to={item.url} end className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group",
+                      isItemActive 
+                        ? `${item.bgColor} ${item.color} font-semibold shadow-sm border-l-3 ${item.color.replace('text-', 'border-')}`
+                        : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`
+                    )}>
+                      <div className={cn(
+                        "p-1.5 rounded-lg transition-all duration-300",
+                        item.bgColor,
+                        item.hoverBg,
+                        item.glowColor
+                      )}>
+                        <item.icon className={cn(
+                          "h-4 w-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
+                          isItemActive ? item.color : `${item.color}/70`
+                        )} />
+                      </div>
                       {!isCollapsed && <span className="font-medium transition-colors duration-200">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
-                </SidebarMenuItem>)}
+                </SidebarMenuItem>
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -92,14 +147,32 @@ export function AppSidebar() {
             <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1">Analytics</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {analyticsItems.map(item => <SidebarMenuItem key={item.title} className="mx-1">
+                {analyticsItems.map(item => {
+                  const isItemActive = isActive(item.url);
+                  return <SidebarMenuItem key={item.title} className="mx-1">
                     <SidebarMenuButton asChild className="my-0.5">
-                      <NavLink to={item.url} className={`${getNavClasses(item.url)} flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group`}>
-                        <item.icon className="h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                      <NavLink to={item.url} className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group",
+                        isItemActive
+                          ? `${item.bgColor} ${item.color} font-semibold shadow-sm border-l-3 ${item.color.replace('text-', 'border-')}`
+                          : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`
+                      )}>
+                        <div className={cn(
+                          "p-1.5 rounded-lg transition-all duration-300",
+                          item.bgColor,
+                          item.hoverBg,
+                          item.glowColor
+                        )}>
+                          <item.icon className={cn(
+                            "h-4 w-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
+                            isItemActive ? item.color : `${item.color}/70`
+                          )} />
+                        </div>
                         <span className="font-medium transition-colors duration-200">{item.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>)}
+                  </SidebarMenuItem>
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>}
@@ -109,14 +182,32 @@ export function AppSidebar() {
             <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1">Sistema</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {systemItems.map(item => <SidebarMenuItem key={item.title} className="mx-1">
+                {systemItems.map(item => {
+                  const isItemActive = isActive(item.url);
+                  return <SidebarMenuItem key={item.title} className="mx-1">
                     <SidebarMenuButton asChild className="my-0.5">
-                      <NavLink to={item.url} className={`${getNavClasses(item.url)} flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group`}>
-                        <item.icon className="h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                      <NavLink to={item.url} className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group",
+                        isItemActive
+                          ? `${item.bgColor} ${item.color} font-semibold shadow-sm border-l-3 ${item.color.replace('text-', 'border-')}`
+                          : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`
+                      )}>
+                        <div className={cn(
+                          "p-1.5 rounded-lg transition-all duration-300",
+                          item.bgColor,
+                          item.hoverBg,
+                          item.glowColor
+                        )}>
+                          <item.icon className={cn(
+                            "h-4 w-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
+                            isItemActive ? item.color : `${item.color}/70`
+                          )} />
+                        </div>
                         <span className="font-medium transition-colors duration-200">{item.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>)}
+                  </SidebarMenuItem>
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>}
