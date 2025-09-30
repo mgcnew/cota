@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Search, Bell, User } from "lucide-react";
+import { Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
 export function AppLayout() {
   const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const getPageTitle = () => {
     const path = location.pathname;
     const titles: Record<string, string> = {
@@ -37,12 +37,9 @@ export function AppLayout() {
                 <h1 className="text-base md:text-xl font-semibold text-foreground truncate">{getPageTitle()}</h1>
               </div>
               
-              {/* Global Search - Hidden on mobile */}
+              {/* Global Search */}
               <div className="hidden lg:flex items-center gap-4 flex-1 max-w-md mx-8">
-                <div className="relative w-full">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input placeholder="Buscar cotações, produtos, fornecedores..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-background/50 border-border/50 focus:border-primary/50" />
-                </div>
+                <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
               </div>
               
               {/* Action Buttons */}
@@ -63,6 +60,9 @@ export function AppLayout() {
             <Outlet />
           </main>
         </div>
+
+        {/* Global Search Dialog */}
+        <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
       </div>
     </SidebarProvider>;
 }
