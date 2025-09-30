@@ -180,12 +180,6 @@ export default function Cotacoes() {
         />
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <p className="text-muted-foreground">Carregando cotações...</p>
-        </div>
-      ) : (
-        <>
       {/* Cotações View */}
       {viewMode === "grid" ? (
         <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -356,8 +350,6 @@ export default function Cotacoes() {
             </p>
           </CardContent>
         </Card>
-      )}
-      </>
       )}
     </div>
   );
