@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -19,7 +19,10 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Star
+  Star,
+  Upload,
+  Eye,
+  ChevronDown
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -27,6 +30,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
 import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
@@ -77,6 +87,9 @@ export default function Fornecedores() {
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
+  
+  const addSupplierRef = useRef<HTMLButtonElement>(null);
+  const importSuppliersRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -202,15 +215,31 @@ export default function Fornecedores() {
         </div>
         <div className="flex items-center gap-2">
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} />
-          <AddSupplierDialog onAdd={handleAddSupplier} />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                Ações
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => addSupplierRef.current?.click()}>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Fornecedor
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => importSuppliersRef.current?.click()}>
+                <Upload className="h-4 w-4 mr-2" />
+                Importar Fornecedores
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -221,20 +250,17 @@ export default function Fornecedores() {
               />
             </div>
             
-            <div className="flex gap-2">
-              {["all", "active", "inactive", "pending"].map((status) => (
-                <Button
-                  key={status}
-                  variant={statusFilter === status ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter(status as any)}
-                >
-                  {status === "all" ? "Todos" : 
-                   status === "active" ? "Ativos" :
-                   status === "inactive" ? "Inativos" : "Pendentes"}
-                </Button>
-              ))}
-            </div>
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="active">Ativos</SelectItem>
+                <SelectItem value="inactive">Inativos</SelectItem>
+                <SelectItem value="pending">Pendentes</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -289,6 +315,10 @@ export default function Fornecedores() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Cotações
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
                         <Edit className="h-4 w-4 mr-2" />
                         Editar
@@ -347,19 +377,14 @@ export default function Fornecedores() {
                   </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Ver Cotações
-                  </Button>
-                  <AddQuoteDialog
-                    onAdd={handleAddQuote}
-                    trigger={
-                      <Button size="sm" className="flex-1">
-                        Nova Cotação
-                      </Button>
-                    }
-                  />
-                </div>
+                <AddQuoteDialog
+                  onAdd={handleAddQuote}
+                  trigger={
+                    <Button size="sm" className="w-full">
+                      Nova Cotação
+                    </Button>
+                  }
+                />
               </CardContent>
             </Card>
           ))}
@@ -411,21 +436,31 @@ export default function Fornecedores() {
                         {renderStarRating(supplier.rating)}
                       </TableCell>
                       <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setEditingSupplier(supplier)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setDeletingSupplier(supplier)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                        <div className="flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver Cotações
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-destructive"
+                                onClick={() => setDeletingSupplier(supplier)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -465,20 +500,32 @@ export default function Fornecedores() {
         </Card>
       )}
 
-      <EditSupplierDialog
+      <EditSupplierDialog 
         supplier={editingSupplier}
         open={!!editingSupplier}
         onOpenChange={(open) => !open && setEditingSupplier(null)}
         onEdit={handleEditSupplier}
       />
 
-      <DeleteSupplierDialog
+      <DeleteSupplierDialog 
         supplier={deletingSupplier}
         open={!!deletingSupplier}
         onOpenChange={(open) => !open && setDeletingSupplier(null)}
         onDelete={handleDeleteSupplier}
       />
+
+      {/* Hidden triggers for dialogs */}
+      <div className="hidden">
+        <AddSupplierDialog 
+          onAdd={handleAddSupplier}
+          trigger={<button ref={addSupplierRef} />}
+        />
+        <ImportSuppliersDialog 
+          onSuppliersImported={handleSuppliersImported}
+          trigger={<button ref={importSuppliersRef} />}
+        />
       </div>
+    </div>
     </>
   );
 }

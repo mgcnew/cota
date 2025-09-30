@@ -41,6 +41,7 @@ interface Supplier {
 
 interface ImportSuppliersDialogProps {
   onSuppliersImported: (suppliers: Supplier[]) => void;
+  trigger?: React.ReactNode;
 }
 
 interface ParsedSupplier {
@@ -54,7 +55,7 @@ interface ParsedSupplier {
   rating?: number;
 }
 
-export function ImportSuppliersDialog({ onSuppliersImported }: ImportSuppliersDialogProps) {
+export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSuppliersDialogProps) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedSupplier[]>([]);
@@ -271,10 +272,12 @@ export function ImportSuppliersDialog({ onSuppliersImported }: ImportSuppliersDi
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Upload className="h-4 w-4 mr-2" />
-          Importar
-        </Button>
+        {trigger || (
+          <Button variant="outline" size="sm">
+            <Upload className="h-4 w-4 mr-2" />
+            Importar
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
