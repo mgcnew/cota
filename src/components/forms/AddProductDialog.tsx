@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useActivityLog } from "@/hooks/useActivityLog";
 
 const productSchema = z.object({
   name: z.string()
@@ -59,6 +60,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
   const [open, setOpen] = useState(false);
   const [showNewCategory, setShowNewCategory] = useState(false);
   const { toast } = useToast();
+  const { logActivity } = useActivityLog();
   
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -105,6 +107,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
         });
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        tipo: "produto",
+        acao: "Produto adicionado",
+        detalhes: `${data.name} - Categoria: ${finalCategory}${data.weight ? `, Peso: ${data.weight}` : ""}`
+      });
 
       // Adicionar nova categoria à lista se necessário
       if (data.category === "nova" && data.newCategory && onCategoryAdded) {

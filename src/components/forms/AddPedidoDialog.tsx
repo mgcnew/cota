@@ -9,6 +9,7 @@ import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useActivityLog } from "@/hooks/useActivityLog";
 
 interface PedidoItem {
   produto: string;
@@ -25,6 +26,7 @@ interface AddPedidoDialogProps {
 export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedidoDialogProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { logActivity } = useActivityLog();
   const [fornecedor, setFornecedor] = useState("");
   const [dataEntrega, setDataEntrega] = useState("");
   const [observacoes, setObservacoes] = useState("");
@@ -143,6 +145,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
+
+      // Log activity
+      await logActivity({
+        tipo: "pedido",
+        acao: "Pedido criado",
+        detalhes: `Pedido para ${selectedSupplier?.name || 'Fornecedor'} no valor de R$ ${total.toFixed(2)}`,
+        valor: total
+      });
 
       toast({
         title: "Pedido criado",

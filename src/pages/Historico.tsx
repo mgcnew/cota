@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import ViewHistoricoDialog from "@/components/forms/ViewHistoricoDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { 
   History, 
   Search,
@@ -23,11 +25,13 @@ import {
   FileText,
   ShoppingCart,
   Building2,
-  X
+  X,
+  Loader2
 } from "lucide-react";
 
 export default function Historico() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [tipoFilter, setTipoFilter] = useState("all");
   const [usuarioFilter, setUsuarioFilter] = useState("all");
@@ -39,90 +43,49 @@ export default function Historico() {
   
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [historico, setHistorico] = useState<any[]>([]);
 
-  // Mock data de histórico
-  const historico = [
-    {
-      id: "HIS-001",
-      tipo: "cotacao",
-      acao: "Cotação finalizada",
-      detalhes: "COT-002 - Filé de Frango finalizada com economia de 8%",
-      data: "22/09/2025 14:30",
-      usuario: "Admin",
-      valor: "R$ 15.84",
-      economia: "8%"
-    },
-    {
-      id: "HIS-002",
-      tipo: "pedido",
-      acao: "Pedido criado",
-      detalhes: "PED-001 - Pedido para Holambra no valor de R$ 3.800,00",
-      data: "23/09/2025 09:15",
-      usuario: "Admin",
-      valor: "R$ 3.800,00",
-      economia: ""
-    },
-    {
-      id: "HIS-003",
-      tipo: "fornecedor",
-      acao: "Fornecedor adicionado",
-      detalhes: "Novo fornecedor: Distribuidora São Paulo",
-      data: "21/09/2025 16:45",
-      usuario: "Admin",
-      valor: "",
-      economia: ""
-    },
-    {
-      id: "HIS-004",
-      tipo: "cotacao",
-      acao: "Cotação iniciada",
-      detalhes: "COT-003 - Linguiça Toscana Aurora iniciada",
-      data: "17/09/2025 10:20",
-      usuario: "Admin",
-      valor: "",
-      economia: ""
-    },
-    {
-      id: "HIS-005",
-      tipo: "pedido",
-      acao: "Pedido entregue",
-      detalhes: "PED-002 - Pedido da Seara entregue com sucesso",
-      data: "23/09/2025 15:00",
-      usuario: "System",
-      valor: "R$ 7.920,00",
-      economia: ""
-    },
-    {
-      id: "HIS-006",
-      tipo: "cotacao",
-      acao: "Cotação expirada",
-      detalhes: "COT-005 - Peito de Frango expirada sem finalização",
-      data: "17/09/2025 23:59",
-      usuario: "System",
-      valor: "",
-      economia: ""
-    },
-    {
-      id: "HIS-007",
-      tipo: "produto",
-      acao: "Produto atualizado",
-      detalhes: "Coxa com Sobrecoxa - Preços atualizados",
-      data: "20/09/2025 11:30",
-      usuario: "Admin",
-      valor: "",
-      economia: ""
-    },
-    {
-      id: "HIS-008",
-      tipo: "pedido",
-      acao: "Pedido cancelado",
-      detalhes: "PED-005 - Pedido da Silvia cancelado por indisponibilidade",
-      data: "19/09/2025 13:45",
-      usuario: "Admin",
-      valor: "R$ 10.800,00",
-      economia: ""
+  useEffect(() => {
+    if (user) {
+      loadHistorico();
     }
-  ];
+  }, [user]);
+
+  const loadHistorico = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("activity_log")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Transform database data to match UI format
+      const formattedData = data.map((item) => ({
+        id: item.id,
+        tipo: item.tipo,
+        acao: item.acao,
+        detalhes: item.detalhes,
+        data: format(new Date(item.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+        usuario: user?.email || "Usuário",
+        valor: item.valor ? `R$ ${item.valor.toFixed(2).replace(".", ",")}` : "",
+        economia: item.economia ? `${item.economia}%` : ""
+      }));
+
+      setHistorico(formattedData);
+    } catch (error) {
+      console.error("Erro ao carregar histórico:", error);
+      toast({
+        title: "Erro ao carregar histórico",
+        description: "Não foi possível carregar o histórico de atividades",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getTipoIcon = (tipo: string) => {
     const icons = {
@@ -242,6 +205,14 @@ export default function Historico() {
       .filter(h => h.economia)
       .reduce((acc, h) => acc + parseFloat(h.economia.replace("%", "")), 0)
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

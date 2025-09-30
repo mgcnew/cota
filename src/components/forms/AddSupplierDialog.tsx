@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useActivityLog } from "@/hooks/useActivityLog";
 
 const supplierSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -50,6 +51,7 @@ interface AddSupplierDialogProps {
 
 export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogProps) {
   const [open, setOpen] = useState(false);
+  const { logActivity } = useActivityLog();
 
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
@@ -89,6 +91,13 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
         });
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        tipo: "fornecedor",
+        acao: "Fornecedor adicionado",
+        detalhes: `${data.name}${data.contact ? ` - Contato: ${data.contact}` : ""}${data.phone ? ` - Tel: ${data.phone}` : ""}`
+      });
 
       toast({
         title: "Fornecedor adicionado",

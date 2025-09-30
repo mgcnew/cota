@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          acao: string
+          created_at: string
+          detalhes: string
+          economia: number | null
+          id: string
+          tipo: string
+          user_id: string
+          valor: number | null
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          detalhes: string
+          economia?: number | null
+          id?: string
+          tipo: string
+          user_id: string
+          valor?: number | null
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          detalhes?: string
+          economia?: number | null
+          id?: string
+          tipo?: string
+          user_id?: string
+          valor?: number | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
