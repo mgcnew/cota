@@ -186,12 +186,14 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
                   <div className="w-32 space-y-2">
                     <Label className="text-xs">Valor Unit.</Label>
                     <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={item.valorUnitario}
-                      onChange={(e) => handleItemChange(index, 'valorUnitario', parseFloat(e.target.value) || 0)}
+                      type="text"
+                      placeholder="R$ 0,00"
+                      value={item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^\d,]/g, '').replace(',', '.');
+                        const numValue = parseFloat(value) || 0;
+                        handleItemChange(index, 'valorUnitario', numValue);
+                      }}
                     />
                   </div>
                   <div className="w-32 space-y-2">
