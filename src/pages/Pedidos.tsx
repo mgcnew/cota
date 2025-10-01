@@ -358,7 +358,7 @@ export default function Pedidos() {
                                 <ShoppingCart className="h-4 w-4 text-primary" />
                               </div>
                               <div>
-                                <div className="font-medium">{pedido.id}</div>
+                                
                                 <div className="text-xs text-muted-foreground">{pedido.dataPedido}</div>
                               </div>
                             </div>
