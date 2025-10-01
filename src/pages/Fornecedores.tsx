@@ -166,7 +166,7 @@ export default function Fornecedores() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold md:text-4xl text-[#f1753c]">Fornecedores</h1>
-          <p className="text-sm md:text-base text-muted-foreground">
+          <p className="text-sm text-black md:text-lg">
             Gerencie seus fornecedores e acompanhe performance
           </p>
         </div>
