@@ -34,7 +34,7 @@ export function AppLayout() {
             <div className="flex items-center justify-between h-full px-3 md:px-6 py-0 my-0">
               <div className="flex items-center gap-2 md:gap-4 min-w-0">
                 <SidebarTrigger className="text-muted-foreground hover:text-foreground shrink-0" />
-                <h1 className="text-base md:text-xl font-bold bg-gradient-to-r from-primary via-primary-light to-info bg-clip-text text-transparent truncate drop-shadow-sm">{getPageTitle()}</h1>
+                
               </div>
               
               {/* Global Search */}
