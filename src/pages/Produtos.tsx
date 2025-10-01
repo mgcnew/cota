@@ -8,34 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Package, 
-  Search, 
-  Plus, 
-  Filter,
-  MoreVertical,
-  Edit,
-  Trash2,
-  TrendingUp,
-  Scale,
-  FileUp,
-  Quote
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, Scale, FileUp, Quote } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AddProductDialog } from "@/components/forms/AddProductDialog";
 import { EditProductDialog } from "@/components/forms/EditProductDialog";
@@ -46,13 +21,19 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { ViewMode } from "@/types/pagination";
 import type { Product } from "@/hooks/useProducts";
-
 export default function Produtos() {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const {
+    user,
+    loading
+  } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("table");
-  const { paginate } = usePagination<Product>({ initialItemsPerPage: 10 });
+  const {
+    paginate
+  } = usePagination<Product>({
+    initialItemsPerPage: 10
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -60,20 +41,22 @@ export default function Produtos() {
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const addDialogTriggerRef = useRef<HTMLDivElement>(null);
   const importDialogTriggerRef = useRef<HTMLDivElement>(null);
-
   const triggerAddDialog = () => {
     const button = addDialogTriggerRef.current?.querySelector('button');
     button?.click();
   };
-
   const triggerImportDialog = () => {
     const button = importDialogTriggerRef.current?.querySelector('button');
     button?.click();
   };
 
   // OPTIMIZED: Use React Query for data fetching with caching
-  const { products, categories, isLoading: productsLoading, deleteProduct } = useProducts();
-
+  const {
+    products,
+    categories,
+    isLoading: productsLoading,
+    deleteProduct
+  } = useProducts();
   useEffect(() => {
     if (!loading && !user) {
       setAuthDialogOpen(true);
@@ -88,17 +71,14 @@ export default function Produtos() {
       return matchesSearch && matchesCategory;
     });
   }, [products, debouncedSearchQuery, selectedCategory]);
-
   const paginatedData = paginate(filteredProducts);
 
   // Cálculos de métricas reais
   const stats = useMemo(() => {
     const totalCategories = categories.length - 1; // -1 para remover "all"
     const activeQuotes = products.reduce((sum, p) => sum + p.quotesCount, 0);
-    
     const productsWithPrices = products.filter(p => p.lastQuotePrice !== "R$ 0,00");
     let averageValue = "R$ 0,00";
-    
     if (productsWithPrices.length > 0) {
       const total = productsWithPrices.reduce((sum, p) => {
         const price = parseFloat(p.lastQuotePrice.replace(/[^\d,]/g, '').replace(',', '.'));
@@ -106,37 +86,30 @@ export default function Produtos() {
       }, 0);
       averageValue = `R$ ${(total / productsWithPrices.length).toFixed(2)}`;
     }
-    
     return {
       totalProducts: products.length,
       totalCategories,
       activeQuotes,
-      averageValue,
+      averageValue
     };
   }, [products, categories]);
-
   const getTrendIcon = (trend: "up" | "down" | "stable") => {
     if (trend === "up") return <TrendingUp className="h-4 w-4 text-success" />;
     if (trend === "down") return <TrendingUp className="h-4 w-4 text-error rotate-180" />;
     return <span className="h-4 w-4 rounded-full bg-muted-foreground/50" />;
   };
-
   if (loading || productsLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
+    return <div className="flex items-center justify-center h-screen">
         <div className="text-center">Carregando...</div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Produtos</h1>
+          <h1 className="text-2xl font-bold text-[#f1753c] md:text-4xl">Produtos</h1>
           <p className="text-sm md:text-base text-muted-foreground">
             Gerencie seu catálogo de produtos e acompanhe preços
           </p>
@@ -173,12 +146,7 @@ export default function Produtos() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Buscar produtos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Buscar produtos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
             
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -187,11 +155,9 @@ export default function Produtos() {
                 <SelectValue placeholder="Categoria" />
               </SelectTrigger>
               <SelectContent className="bg-background border z-50">
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
+                {categories.map(category => <SelectItem key={category} value={category}>
                     {category === "all" ? "Todas as categorias" : category}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -258,10 +224,8 @@ export default function Produtos() {
       </div>
 
       {/* Products View */}
-      {viewMode === "grid" ? (
-        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map((product) => (
-            <Card key={product.id} className="card-elevated border-2 hover:border-primary/30 transition-all hover:shadow-lg">
+      {viewMode === "grid" ? <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedData.items.map(product => <Card key={product.id} className="card-elevated border-2 hover:border-primary/30 transition-all hover:shadow-lg">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
@@ -287,10 +251,7 @@ export default function Produtos() {
                         <Edit className="h-4 w-4 mr-2" />
                         Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="text-destructive"
-                        onClick={() => setDeletingProduct(product)}
-                      >
+                      <DropdownMenuItem className="text-destructive" onClick={() => setDeletingProduct(product)}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir
                       </DropdownMenuItem>
@@ -328,11 +289,8 @@ export default function Produtos() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
+            </Card>)}
+        </div> : <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
@@ -348,8 +306,7 @@ export default function Produtos() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map((product) => (
-                    <TableRow key={product.id}>
+                  {paginatedData.items.map(product => <TableRow key={product.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -393,10 +350,7 @@ export default function Produtos() {
                                 <Edit className="h-4 w-4 mr-2" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={() => setDeletingProduct(product)}
-                              >
+                              <DropdownMenuItem className="text-destructive" onClick={() => setDeletingProduct(product)}>
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Excluir
                               </DropdownMenuItem>
@@ -404,27 +358,15 @@ export default function Produtos() {
                           </DropdownMenu>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
             </div>
-            <DataPagination
-              currentPage={paginatedData.pagination.currentPage}
-              totalPages={paginatedData.pagination.totalPages}
-              itemsPerPage={paginatedData.pagination.itemsPerPage}
-              totalItems={paginatedData.pagination.totalItems}
-              onPageChange={paginatedData.pagination.goToPage}
-              onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-              startIndex={paginatedData.pagination.startIndex}
-              endIndex={paginatedData.pagination.endIndex}
-            />
+            <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
-      {filteredProducts.length === 0 && (
-        <Card>
+      {filteredProducts.length === 0 && <Card>
           <CardContent className="p-12 text-center">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Nenhum produto encontrado</h3>
@@ -436,41 +378,21 @@ export default function Produtos() {
               Adicionar Produto
             </Button>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* Dialogs - Hidden triggers for dropdown actions */}
       <div className="sr-only">
         <div ref={addDialogTriggerRef}>
-          <AddProductDialog 
-            onProductAdded={() => {}} 
-            onCategoryAdded={() => {}} 
-          />
+          <AddProductDialog onProductAdded={() => {}} onCategoryAdded={() => {}} />
         </div>
         <div ref={importDialogTriggerRef}>
-          <ImportProductsDialog 
-            onProductsImported={() => {}}
-            onCategoryAdded={() => {}}
-          />
+          <ImportProductsDialog onProductsImported={() => {}} onCategoryAdded={() => {}} />
         </div>
       </div>
 
-      <EditProductDialog
-        product={editingProduct}
-        open={!!editingProduct}
-        onOpenChange={(open) => !open && setEditingProduct(null)}
-        onProductUpdated={() => {}}
-        onCategoryAdded={() => {}}
-        categories={categories}
-      />
+      <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={() => {}} onCategoryAdded={() => {}} categories={categories} />
 
-      <DeleteProductDialog
-        product={deletingProduct}
-        open={!!deletingProduct}
-        onOpenChange={(open) => !open && setDeletingProduct(null)}
-        onProductDeleted={() => {}}
-      />
+      <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={() => {}} />
       </div>
-    </>
-  );
+    </>;
 }
