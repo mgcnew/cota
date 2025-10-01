@@ -31,7 +31,7 @@ export default function Configuracoes() {
   };
   return <div className="container max-w-5xl py-6 md:py-10 space-y-6">
       <div>
-        <h1 className="font-bold tracking-tight text-foreground text-4xl">Configurações</h1>
+        <h1 className="font-bold tracking-tight text-4xl text-[#ff4c00]">Configurações</h1>
         <p className="text-muted-foreground mt-2 text-lg">
           Gerencie as preferências e configurações do sistema
         </p>
