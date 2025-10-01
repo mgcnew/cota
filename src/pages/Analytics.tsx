@@ -9,23 +9,14 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  BarChart3, 
-  TrendingUp,
-  TrendingDown,
-  Calendar,
-  Filter,
-  Download,
-  DollarSign,
-  Package,
-  Building2,
-  Target,
-  Loader2
-} from "lucide-react";
-
+import { BarChart3, TrendingUp, TrendingDown, Calendar, Filter, Download, DollarSign, Package, Building2, Target, Loader2 } from "lucide-react";
 export default function Analytics() {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const date = new Date();
     date.setDate(date.getDate() - 90);
@@ -37,36 +28,52 @@ export default function Analytics() {
   const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  const { generateReport, progress, isGenerating } = useReports();
+  const {
+    generateReport,
+    progress,
+    isGenerating
+  } = useReports();
 
   // Estados para dados reais
-  const [metricas, setMetricas] = useState([
-    { titulo: "Taxa de Economia", valor: "0%", variacao: "0%", tipo: "positivo", descricao: "vs mês anterior" },
-    { titulo: "Tempo Médio de Cotação", valor: "0 dias", variacao: "0 dias", tipo: "positivo", descricao: "vs mês anterior" },
-    { titulo: "Taxa de Resposta", valor: "0%", variacao: "0%", tipo: "positivo", descricao: "fornecedores respondendo" },
-    { titulo: "Valor Médio por Pedido", valor: "R$ 0", variacao: "0%", tipo: "positivo", descricao: "vs mês anterior" }
-  ]);
-
+  const [metricas, setMetricas] = useState([{
+    titulo: "Taxa de Economia",
+    valor: "0%",
+    variacao: "0%",
+    tipo: "positivo",
+    descricao: "vs mês anterior"
+  }, {
+    titulo: "Tempo Médio de Cotação",
+    valor: "0 dias",
+    variacao: "0 dias",
+    tipo: "positivo",
+    descricao: "vs mês anterior"
+  }, {
+    titulo: "Taxa de Resposta",
+    valor: "0%",
+    variacao: "0%",
+    tipo: "positivo",
+    descricao: "fornecedores respondendo"
+  }, {
+    titulo: "Valor Médio por Pedido",
+    valor: "R$ 0",
+    variacao: "0%",
+    tipo: "positivo",
+    descricao: "vs mês anterior"
+  }]);
   const [topProdutos, setTopProdutos] = useState<any[]>([]);
   const [performanceFornecedores, setPerformanceFornecedores] = useState<any[]>([]);
   const [tendenciasMensais, setTendenciasMensais] = useState<any[]>([]);
 
   // Funções auxiliares
   const handleExportAnalytics = async () => {
-    await generateReport(
-      'analytics',
-      { 
-        startDate: startDate || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), 
-        endDate: endDate || new Date(),
-        fornecedores: selectedFornecedores,
-        produtos: selectedProdutos,
-        categorias: []
-      },
-      'pdf'
-    );
+    await generateReport('analytics', {
+      startDate: startDate || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+      endDate: endDate || new Date(),
+      fornecedores: selectedFornecedores,
+      produtos: selectedProdutos,
+      categorias: []
+    }, 'pdf');
   };
-
   const applyDatePreset = (days: number) => {
     const end = new Date();
     const start = new Date();
@@ -75,65 +82,53 @@ export default function Analytics() {
     setEndDate(end);
     setIsDateDialogOpen(false);
   };
-
   useEffect(() => {
     if (user && startDate && endDate) {
       loadAnalytics();
     }
   }, [user, startDate, endDate]);
-
   const loadAnalytics = async () => {
     try {
       setLoading(true);
 
       // Buscar cotações do período
-      const { data: quotes, error: quotesError } = await supabase
-        .from("quotes")
-        .select(`
+      const {
+        data: quotes,
+        error: quotesError
+      } = await supabase.from("quotes").select(`
           *,
           quote_suppliers(*),
           quote_items(*, products(*))
-        `)
-        .gte("data_inicio", startDate?.toISOString().split('T')[0])
-        .lte("data_fim", endDate?.toISOString().split('T')[0]);
-
+        `).gte("data_inicio", startDate?.toISOString().split('T')[0]).lte("data_fim", endDate?.toISOString().split('T')[0]);
       if (quotesError) throw quotesError;
 
       // Buscar pedidos do período
-      const { data: orders, error: ordersError } = await supabase
-        .from("orders")
-        .select("*, order_items(*)")
-        .gte("order_date", startDate?.toISOString().split('T')[0])
-        .lte("order_date", endDate?.toISOString().split('T')[0]);
-
+      const {
+        data: orders,
+        error: ordersError
+      } = await supabase.from("orders").select("*, order_items(*)").gte("order_date", startDate?.toISOString().split('T')[0]).lte("order_date", endDate?.toISOString().split('T')[0]);
       if (ordersError) throw ordersError;
 
       // Calcular métricas
       let economiaTotal = 0;
       let cotacoesComEconomia = 0;
-
       quotes?.forEach((quote: any) => {
         if (quote.quote_suppliers && quote.quote_suppliers.length >= 2) {
-          const valores = quote.quote_suppliers
-            .filter((qs: any) => qs.valor_oferecido > 0)
-            .map((qs: any) => qs.valor_oferecido);
-          
+          const valores = quote.quote_suppliers.filter((qs: any) => qs.valor_oferecido > 0).map((qs: any) => qs.valor_oferecido);
           if (valores.length >= 2) {
             const melhorPreco = Math.min(...valores);
             const piorPreco = Math.max(...valores);
-            economiaTotal += (piorPreco - melhorPreco);
+            economiaTotal += piorPreco - melhorPreco;
             cotacoesComEconomia++;
           }
         }
       });
-
       const totalOrders = orders?.reduce((acc, order) => acc + Number(order.total_value), 0) || 0;
-      const taxaEconomia = totalOrders > 0 ? (economiaTotal / totalOrders) * 100 : 0;
+      const taxaEconomia = totalOrders > 0 ? economiaTotal / totalOrders * 100 : 0;
 
       // Calcular tempo médio de cotação (data_fim - data_inicio)
       let tempoTotal = 0;
       let cotacoesFinalizadas = 0;
-      
       quotes?.forEach((quote: any) => {
         if (quote.status === 'fechada') {
           const inicio = new Date(quote.data_inicio);
@@ -143,61 +138,49 @@ export default function Analytics() {
           cotacoesFinalizadas++;
         }
       });
-
       const tempoMedio = cotacoesFinalizadas > 0 ? tempoTotal / cotacoesFinalizadas : 0;
 
       // Taxa de resposta de fornecedores
       let totalSolicitacoes = 0;
       let respostasRecebidas = 0;
-
       quotes?.forEach((quote: any) => {
         if (quote.quote_suppliers) {
           totalSolicitacoes += quote.quote_suppliers.length;
-          respostasRecebidas += quote.quote_suppliers.filter((qs: any) => 
-            qs.status === 'respondida' || qs.valor_oferecido > 0
-          ).length;
+          respostasRecebidas += quote.quote_suppliers.filter((qs: any) => qs.status === 'respondida' || qs.valor_oferecido > 0).length;
         }
       });
-
-      const taxaResposta = totalSolicitacoes > 0 ? (respostasRecebidas / totalSolicitacoes) * 100 : 0;
+      const taxaResposta = totalSolicitacoes > 0 ? respostasRecebidas / totalSolicitacoes * 100 : 0;
 
       // Valor médio por pedido
       const valorMedio = orders && orders.length > 0 ? totalOrders / orders.length : 0;
-
-      setMetricas([
-        {
-          titulo: "Taxa de Economia",
-          valor: `${taxaEconomia.toFixed(1)}%`,
-          variacao: "+2.3%",
-          tipo: "positivo",
-          descricao: "vs mês anterior"
-        },
-        {
-          titulo: "Tempo Médio de Cotação",
-          valor: `${tempoMedio.toFixed(1)} dias`,
-          variacao: "-0.8 dias",
-          tipo: "positivo",
-          descricao: "vs mês anterior"
-        },
-        {
-          titulo: "Taxa de Resposta",
-          valor: `${taxaResposta.toFixed(0)}%`,
-          variacao: "+5%",
-          tipo: "positivo",
-          descricao: "fornecedores respondendo"
-        },
-        {
-          titulo: "Valor Médio por Pedido",
-          valor: `R$ ${valorMedio.toFixed(2).replace('.', ',')}`,
-          variacao: "+12%",
-          tipo: "positivo",
-          descricao: "vs mês anterior"
-        }
-      ]);
+      setMetricas([{
+        titulo: "Taxa de Economia",
+        valor: `${taxaEconomia.toFixed(1)}%`,
+        variacao: "+2.3%",
+        tipo: "positivo",
+        descricao: "vs mês anterior"
+      }, {
+        titulo: "Tempo Médio de Cotação",
+        valor: `${tempoMedio.toFixed(1)} dias`,
+        variacao: "-0.8 dias",
+        tipo: "positivo",
+        descricao: "vs mês anterior"
+      }, {
+        titulo: "Taxa de Resposta",
+        valor: `${taxaResposta.toFixed(0)}%`,
+        variacao: "+5%",
+        tipo: "positivo",
+        descricao: "fornecedores respondendo"
+      }, {
+        titulo: "Valor Médio por Pedido",
+        valor: `R$ ${valorMedio.toFixed(2).replace('.', ',')}`,
+        variacao: "+12%",
+        tipo: "positivo",
+        descricao: "vs mês anterior"
+      }]);
 
       // Processar top produtos
       const produtosMap = new Map();
-      
       quotes?.forEach((quote: any) => {
         quote.quote_items?.forEach((item: any) => {
           const produtoNome = item.product_name;
@@ -209,40 +192,30 @@ export default function Analytics() {
               valor: 0
             });
           }
-          
           const produto = produtosMap.get(produtoNome);
           produto.cotacoes++;
-          
+
           // Calcular economia do produto
           if (quote.quote_suppliers && quote.quote_suppliers.length >= 2) {
-            const valores = quote.quote_suppliers
-              .filter((qs: any) => qs.valor_oferecido > 0)
-              .map((qs: any) => qs.valor_oferecido);
-            
+            const valores = quote.quote_suppliers.filter((qs: any) => qs.valor_oferecido > 0).map((qs: any) => qs.valor_oferecido);
             if (valores.length >= 2) {
               const melhorPreco = Math.min(...valores);
               const piorPreco = Math.max(...valores);
-              produto.economia += ((piorPreco - melhorPreco) / piorPreco) * 100;
+              produto.economia += (piorPreco - melhorPreco) / piorPreco * 100;
               produto.valor += melhorPreco;
             }
           }
         });
       });
-
-      const topProdutosArray = Array.from(produtosMap.values())
-        .sort((a, b) => b.economia - a.economia)
-        .slice(0, 5)
-        .map(p => ({
-          ...p,
-          economia: `${(p.economia / p.cotacoes).toFixed(0)}%`,
-          valor: `R$ ${p.valor.toFixed(2).replace('.', ',')}`
-        }));
-
+      const topProdutosArray = Array.from(produtosMap.values()).sort((a, b) => b.economia - a.economia).slice(0, 5).map(p => ({
+        ...p,
+        economia: `${(p.economia / p.cotacoes).toFixed(0)}%`,
+        valor: `R$ ${p.valor.toFixed(2).replace('.', ',')}`
+      }));
       setTopProdutos(topProdutosArray);
 
       // Performance de fornecedores
       const fornecedoresMap = new Map();
-
       quotes?.forEach((quote: any) => {
         quote.quote_suppliers?.forEach((qs: any) => {
           if (!fornecedoresMap.has(qs.supplier_name)) {
@@ -254,10 +227,8 @@ export default function Analytics() {
               respostas: 0
             });
           }
-
           const fornecedor = fornecedoresMap.get(qs.supplier_name);
           fornecedor.cotacoes++;
-
           if (qs.valor_oferecido > 0) {
             fornecedor.respostas++;
           }
@@ -271,19 +242,13 @@ export default function Analytics() {
           }
         });
       });
-
-      const performanceArray = Array.from(fornecedoresMap.values())
-        .filter(f => f.cotacoes > 0)
-        .map(f => ({
-          fornecedor: f.fornecedor,
-          score: Math.round((f.respostas / f.cotacoes) * 100),
-          cotacoes: f.cotacoes,
-          economia: "12%",
-          tempo: `${(f.tempoTotal / f.respostas || 0).toFixed(1)} dias`
-        }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5);
-
+      const performanceArray = Array.from(fornecedoresMap.values()).filter(f => f.cotacoes > 0).map(f => ({
+        fornecedor: f.fornecedor,
+        score: Math.round(f.respostas / f.cotacoes * 100),
+        cotacoes: f.cotacoes,
+        economia: "12%",
+        tempo: `${(f.tempoTotal / f.respostas || 0).toFixed(1)} dias`
+      })).sort((a, b) => b.score - a.score).slice(0, 5);
       setPerformanceFornecedores(performanceArray);
 
       // Tendências mensais (últimos 4 meses) - dados reais
@@ -299,43 +264,34 @@ export default function Analytics() {
         const mesFim = new Date(mesData.getFullYear(), mesData.getMonth() + 1, 0);
 
         // Buscar cotações do mês
-        const { data: quotesDoMes } = await supabase
-          .from("quotes")
-          .select(`
+        const {
+          data: quotesDoMes
+        } = await supabase.from("quotes").select(`
             *,
             quote_suppliers(*)
-          `)
-          .gte("data_inicio", mesInicio.toISOString().split('T')[0])
-          .lte("data_fim", mesFim.toISOString().split('T')[0]);
+          `).gte("data_inicio", mesInicio.toISOString().split('T')[0]).lte("data_fim", mesFim.toISOString().split('T')[0]);
 
         // Buscar pedidos do mês
-        const { data: ordersDoMes } = await supabase
-          .from("orders")
-          .select("*")
-          .gte("order_date", mesInicio.toISOString().split('T')[0])
-          .lte("order_date", mesFim.toISOString().split('T')[0]);
+        const {
+          data: ordersDoMes
+        } = await supabase.from("orders").select("*").gte("order_date", mesInicio.toISOString().split('T')[0]).lte("order_date", mesFim.toISOString().split('T')[0]);
 
         // Calcular economia do mês
         let economiaDoMes = 0;
         let cotacoesDoMes = quotesDoMes?.length || 0;
-
         quotesDoMes?.forEach((quote: any) => {
           if (quote.quote_suppliers && quote.quote_suppliers.length >= 2) {
-            const valores = quote.quote_suppliers
-              .filter((qs: any) => qs.valor_oferecido > 0)
-              .map((qs: any) => qs.valor_oferecido);
-            
+            const valores = quote.quote_suppliers.filter((qs: any) => qs.valor_oferecido > 0).map((qs: any) => qs.valor_oferecido);
             if (valores.length >= 2) {
               const melhorPreco = Math.min(...valores);
               const piorPreco = Math.max(...valores);
-              economiaDoMes += ((piorPreco - melhorPreco) / piorPreco) * 100;
+              economiaDoMes += (piorPreco - melhorPreco) / piorPreco * 100;
             }
           }
         });
 
         // Valor total de pedidos do mês
         const valorDoMes = ordersDoMes?.reduce((acc, order) => acc + Number(order.total_value), 0) || 0;
-
         tendencias.push({
           mes: mesNome,
           cotacoes: cotacoesDoMes,
@@ -343,9 +299,7 @@ export default function Analytics() {
           valor: valorDoMes
         });
       }
-
       setTendenciasMensais(tendencias);
-
     } catch (error) {
       console.error("Erro ao carregar analytics:", error);
       toast({
@@ -357,23 +311,17 @@ export default function Analytics() {
       setLoading(false);
     }
   };
-
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
+    return <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Analytics</h1>
-          <p className="text-muted-foreground">
+          <h1 className="font-bold text-foreground text-4xl">Analytics</h1>
+          <p className="text-muted-foreground text-lg">
             Análises avançadas e insights do sistema
           </p>
         </div>
@@ -382,10 +330,7 @@ export default function Analytics() {
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Calendar className="h-4 w-4 mr-2" />
-                {startDate && endDate 
-                  ? `${startDate.toLocaleDateString('pt-BR')} - ${endDate.toLocaleDateString('pt-BR')}`
-                  : 'Últimos 90 dias'
-                }
+                {startDate && endDate ? `${startDate.toLocaleDateString('pt-BR')} - ${endDate.toLocaleDateString('pt-BR')}` : 'Últimos 90 dias'}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
@@ -407,12 +352,7 @@ export default function Analytics() {
                     Último ano
                   </Button>
                 </div>
-                <DateRangePicker
-                  startDate={startDate}
-                  endDate={endDate}
-                  onStartDateChange={setStartDate}
-                  onEndDateChange={setEndDate}
-                />
+                <DateRangePicker startDate={startDate} endDate={endDate} onStartDateChange={setStartDate} onEndDateChange={setEndDate} />
               </div>
             </DialogContent>
           </Dialog>
@@ -422,35 +362,23 @@ export default function Analytics() {
               <Button variant="outline">
                 <Filter className="h-4 w-4 mr-2" />
                 Filtros
-                {(selectedFornecedores.length > 0 || selectedProdutos.length > 0) && 
-                  <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded">
+                {(selectedFornecedores.length > 0 || selectedProdutos.length > 0) && <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded">
                     {selectedFornecedores.length + selectedProdutos.length}
-                  </span>
-                }
+                  </span>}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Filtros Avançados</DialogTitle>
               </DialogHeader>
-              <ReportFilters
-                selectedFornecedores={selectedFornecedores}
-                selectedProdutos={selectedProdutos}
-                onFornecedoresChange={setSelectedFornecedores}
-                onProdutosChange={setSelectedProdutos}
-                onReset={() => {
-                  setSelectedFornecedores([]);
-                  setSelectedProdutos([]);
-                }}
-              />
+              <ReportFilters selectedFornecedores={selectedFornecedores} selectedProdutos={selectedProdutos} onFornecedoresChange={setSelectedFornecedores} onProdutosChange={setSelectedProdutos} onReset={() => {
+              setSelectedFornecedores([]);
+              setSelectedProdutos([]);
+            }} />
             </DialogContent>
           </Dialog>
           
-          <Button 
-            variant="outline" 
-            onClick={handleExportAnalytics}
-            disabled={isGenerating}
-          >
+          <Button variant="outline" onClick={handleExportAnalytics} disabled={isGenerating}>
             <Download className="h-4 w-4 mr-2" />
             {isGenerating ? 'Exportando...' : 'Exportar'}
           </Button>
@@ -458,20 +386,17 @@ export default function Analytics() {
       </div>
 
       {/* Progress Bar */}
-      {isGenerating && (
-        <div className="space-y-2">
+      {isGenerating && <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span>Gerando relatório...</span>
             <span>{Math.round(progress)}%</span>
           </div>
           <Progress value={progress} className="w-full" />
-        </div>
-      )}
+        </div>}
 
       {/* Métricas Principais */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {metricas.map((metrica) => (
-          <Card key={metrica.titulo} className="metrics-card">
+        {metricas.map(metrica => <Card key={metrica.titulo} className="metrics-card">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -479,18 +404,13 @@ export default function Analytics() {
                   <div className="text-sm text-muted-foreground">{metrica.titulo}</div>
                 </div>
                 <div className={`flex items-center gap-1 ${metrica.tipo === 'positivo' ? 'text-success' : 'text-error'}`}>
-                  {metrica.tipo === 'positivo' ? (
-                    <TrendingUp className="h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4" />
-                  )}
+                  {metrica.tipo === 'positivo' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                   <span className="text-sm font-medium">{metrica.variacao}</span>
                 </div>
               </div>
               <div className="text-xs text-muted-foreground mt-1">{metrica.descricao}</div>
             </CardContent>
-          </Card>
-        ))}
+          </Card>)}
       </div>
 
       {/* Charts Row */}
@@ -505,8 +425,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {tendenciasMensais.map((item) => (
-                <div key={item.mes} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+              {tendenciasMensais.map(item => <div key={item.mes} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
                       {item.mes}
@@ -522,8 +441,7 @@ export default function Analytics() {
                     <div className="font-semibold text-success">{item.economia}%</div>
                     <div className="text-xs text-muted-foreground">economia</div>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
           </CardContent>
         </Card>
@@ -538,13 +456,9 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {performanceFornecedores.map((fornecedor) => (
-                <div key={fornecedor.fornecedor} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+              {performanceFornecedores.map(fornecedor => <div key={fornecedor.fornecedor} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white ${
-                      fornecedor.score >= 90 ? 'bg-success' : 
-                      fornecedor.score >= 80 ? 'bg-primary' : 'bg-muted-foreground'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white ${fornecedor.score >= 90 ? 'bg-success' : fornecedor.score >= 80 ? 'bg-primary' : 'bg-muted-foreground'}`}>
                       {fornecedor.score}
                     </div>
                     <div>
@@ -558,8 +472,7 @@ export default function Analytics() {
                     <div className="font-semibold text-success">-{fornecedor.economia}</div>
                     <div className="text-xs text-muted-foreground">economia</div>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
           </CardContent>
         </Card>
@@ -575,8 +488,7 @@ export default function Analytics() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {topProdutos.map((produto, index) => (
-              <div key={produto.produto} className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/30 transition-colors">
+            {topProdutos.map((produto, index) => <div key={produto.produto} className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
                     {index + 1}
@@ -596,8 +508,7 @@ export default function Analytics() {
                     <div className="text-xs text-muted-foreground">economia</div>
                   </div>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </CardContent>
       </Card>
@@ -644,6 +555,5 @@ export default function Analytics() {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
