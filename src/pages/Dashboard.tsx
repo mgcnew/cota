@@ -6,48 +6,41 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, Legend, Tooltip } from "recharts";
 import { Package, Building2, FileText, DollarSign, Calendar, ArrowUpRight, Loader2, TrendingUp, Users } from "lucide-react";
 import { useDashboard } from "@/hooks/useDashboard";
-
 export default function Dashboard() {
   // OPTIMIZED: Use custom hook with React Query and memoization
-  const { metrics, recentQuotes, topSuppliers, monthlyData, isLoading } = useDashboard();
-
+  const {
+    metrics,
+    recentQuotes,
+    topSuppliers,
+    monthlyData,
+    isLoading
+  } = useDashboard();
   const pieChartData = useMemo(() => topSuppliers.map((supplier, index) => ({
     name: supplier.name,
     value: supplier.quotes,
     fill: `hsl(var(--chart-${index + 1}))`
   })), [topSuppliers]);
-
-  const COLORS = [
-    'hsl(var(--warning))',
-    'hsl(var(--info))',
-    'hsl(var(--primary))',
-    'hsl(var(--success))'
-  ];
-
+  const COLORS = ['hsl(var(--warning))', 'hsl(var(--info))', 'hsl(var(--primary))', 'hsl(var(--success))'];
   const chartConfig = {
     economia: {
       label: "Economia",
-      color: "hsl(var(--success))",
+      color: "hsl(var(--success))"
     },
     cotacoes: {
       label: "Cotações",
-      color: "hsl(var(--info))",
-    },
+      color: "hsl(var(--info))"
+    }
   };
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
+    return <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+      </div>;
   }
-
   return <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-[#f1753c] md:text-4xl">Dashboard</h1>
           <p className="text-sm md:text-base text-muted-foreground">
             Visão geral do sistema de cotações - {new Date().toLocaleDateString('pt-BR')}
           </p>
@@ -61,30 +54,10 @@ export default function Dashboard() {
 
       {/* Metrics Grid */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard 
-          title="Cotações Ativas" 
-          value={metrics.cotacoesAtivas.toString()} 
-          icon={FileText} 
-          variant="default"
-        />
-        <MetricCard 
-          title="Fornecedores" 
-          value={metrics.fornecedores.toString()} 
-          icon={Building2} 
-          variant="info"
-        />
-        <MetricCard 
-          title="Economia Gerada" 
-          value={`R$ ${metrics.economiaGerada.toFixed(2)}`} 
-          icon={DollarSign} 
-          variant="success"
-        />
-        <MetricCard 
-          title="Produtos Cotados" 
-          value={metrics.produtosCotados.toString()} 
-          icon={Package} 
-          variant="warning"
-        />
+        <MetricCard title="Cotações Ativas" value={metrics.cotacoesAtivas.toString()} icon={FileText} variant="default" />
+        <MetricCard title="Fornecedores" value={metrics.fornecedores.toString()} icon={Building2} variant="info" />
+        <MetricCard title="Economia Gerada" value={`R$ ${metrics.economiaGerada.toFixed(2)}`} icon={DollarSign} variant="success" />
+        <MetricCard title="Produtos Cotados" value={metrics.produtosCotados.toString()} icon={Package} variant="warning" />
       </div>
 
       {/* Charts Section */}
@@ -103,25 +76,18 @@ export default function Dashboard() {
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie
-                    data={pieChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {pieChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
+                  <Pie data={pieChartData} cx="50%" cy="50%" labelLine={false} label={({
+                  name,
+                  percent
+                }) => `${name} ${(percent * 100).toFixed(0)}%`} outerRadius={80} fill="#8884d8" dataKey="value">
+                    {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                   </Pie>
-                  <Tooltip 
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                  <Tooltip content={({
+                  active,
+                  payload
+                }) => {
+                  if (active && payload && payload.length) {
+                    return <div className="rounded-lg border bg-background p-2 shadow-sm">
                             <div className="grid gap-2">
                               <div className="flex flex-col">
                                 <span className="text-[0.70rem] uppercase text-muted-foreground">
@@ -132,12 +98,10 @@ export default function Dashboard() {
                                 </span>
                               </div>
                             </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
+                          </div>;
+                  }
+                  return null;
+                }} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -160,28 +124,15 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis 
-                    dataKey="month" 
-                    className="text-xs"
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <YAxis 
-                    yAxisId="left"
-                    className="text-xs"
-                    stroke="hsl(var(--muted-foreground))"
-                    tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
-                  />
-                  <YAxis 
-                    yAxisId="right" 
-                    orientation="right"
-                    className="text-xs"
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <Tooltip 
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="rounded-lg border bg-background p-3 shadow-sm">
+                  <XAxis dataKey="month" className="text-xs" stroke="hsl(var(--muted-foreground))" />
+                  <YAxis yAxisId="left" className="text-xs" stroke="hsl(var(--muted-foreground))" tickFormatter={value => `R$ ${(value / 1000).toFixed(0)}k`} />
+                  <YAxis yAxisId="right" orientation="right" className="text-xs" stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip content={({
+                  active,
+                  payload
+                }) => {
+                  if (active && payload && payload.length) {
+                    return <div className="rounded-lg border bg-background p-3 shadow-sm">
                             <div className="grid gap-2">
                               <div className="flex flex-col">
                                 <span className="text-[0.70rem] uppercase text-muted-foreground">
@@ -200,31 +151,17 @@ export default function Dashboard() {
                                 </span>
                               </div>
                             </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
+                          </div>;
+                  }
+                  return null;
+                }} />
                   <Legend />
-                  <Line 
-                    yAxisId="left"
-                    type="monotone" 
-                    dataKey="economia" 
-                    stroke="hsl(var(--success))" 
-                    strokeWidth={2}
-                    name="Economia (R$)"
-                    dot={{ fill: "hsl(var(--success))" }}
-                  />
-                  <Line 
-                    yAxisId="right"
-                    type="monotone" 
-                    dataKey="cotacoes" 
-                    stroke="hsl(var(--info))" 
-                    strokeWidth={2}
-                    name="Cotações"
-                    dot={{ fill: "hsl(var(--info))" }}
-                  />
+                  <Line yAxisId="left" type="monotone" dataKey="economia" stroke="hsl(var(--success))" strokeWidth={2} name="Economia (R$)" dot={{
+                  fill: "hsl(var(--success))"
+                }} />
+                  <Line yAxisId="right" type="monotone" dataKey="cotacoes" stroke="hsl(var(--info))" strokeWidth={2} name="Cotações" dot={{
+                  fill: "hsl(var(--info))"
+                }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
