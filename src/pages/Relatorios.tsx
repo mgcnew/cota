@@ -15,7 +15,9 @@ export default function Relatorios() {
   const {
     toast
   } = useToast();
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const {
     isGenerating,
     progress,
@@ -49,65 +51,55 @@ export default function Relatorios() {
     produtosCotados: 0,
     pedidosGerados: 0
   });
-
   useEffect(() => {
     if (user) {
       loadStatistics();
     }
   }, [user, startDate, endDate]);
-
   const loadStatistics = async () => {
     try {
       setLoading(true);
 
       // Buscar cotações no período
-      const { data: quotes, error: quotesError } = await supabase
-        .from("quotes")
-        .select("*, quote_suppliers(*)")
-        .gte("data_inicio", startDate?.toISOString().split('T')[0])
-        .lte("data_fim", endDate?.toISOString().split('T')[0]);
-
+      const {
+        data: quotes,
+        error: quotesError
+      } = await supabase.from("quotes").select("*, quote_suppliers(*)").gte("data_inicio", startDate?.toISOString().split('T')[0]).lte("data_fim", endDate?.toISOString().split('T')[0]);
       if (quotesError) throw quotesError;
 
       // Buscar pedidos no período
-      const { data: orders, error: ordersError } = await supabase
-        .from("orders")
-        .select("*")
-        .gte("order_date", startDate?.toISOString().split('T')[0])
-        .lte("order_date", endDate?.toISOString().split('T')[0]);
-
+      const {
+        data: orders,
+        error: ordersError
+      } = await supabase.from("orders").select("*").gte("order_date", startDate?.toISOString().split('T')[0]).lte("order_date", endDate?.toISOString().split('T')[0]);
       if (ordersError) throw ordersError;
 
       // Buscar fornecedores ativos
-      const { data: suppliers, error: suppliersError } = await supabase
-        .from("suppliers")
-        .select("id");
-
+      const {
+        data: suppliers,
+        error: suppliersError
+      } = await supabase.from("suppliers").select("id");
       if (suppliersError) throw suppliersError;
 
       // Buscar produtos
-      const { data: products, error: productsError } = await supabase
-        .from("products")
-        .select("id");
-
+      const {
+        data: products,
+        error: productsError
+      } = await supabase.from("products").select("id");
       if (productsError) throw productsError;
 
       // Calcular economia total das cotações
       let economiaTotal = 0;
       let totalCotacoes = 0;
-      
       if (quotes) {
         quotes.forEach((quote: any) => {
           if (quote.quote_suppliers && quote.quote_suppliers.length > 0) {
             // Encontrar o melhor e pior preço
-            const valores = quote.quote_suppliers
-              .filter((qs: any) => qs.valor_oferecido > 0)
-              .map((qs: any) => qs.valor_oferecido);
-            
+            const valores = quote.quote_suppliers.filter((qs: any) => qs.valor_oferecido > 0).map((qs: any) => qs.valor_oferecido);
             if (valores.length >= 2) {
               const melhorPreco = Math.min(...valores);
               const piorPreco = Math.max(...valores);
-              economiaTotal += (piorPreco - melhorPreco);
+              economiaTotal += piorPreco - melhorPreco;
               totalCotacoes++;
             }
           }
@@ -116,8 +108,7 @@ export default function Relatorios() {
 
       // Calcular percentual de economia (assumindo economia sobre o valor total de pedidos)
       const totalPedidos = orders?.reduce((acc, order) => acc + Number(order.total_value), 0) || 0;
-      const economiaPercentual = totalPedidos > 0 ? (economiaTotal / totalPedidos) * 100 : 0;
-
+      const economiaPercentual = totalPedidos > 0 ? economiaTotal / totalPedidos * 100 : 0;
       setEstatisticasGerais({
         economiaTotal: `R$ ${economiaTotal.toFixed(2).replace('.', ',')}`,
         economiaPercentual: `${economiaPercentual.toFixed(1)}%`,
@@ -126,7 +117,6 @@ export default function Relatorios() {
         produtosCotados: products?.length || 0,
         pedidosGerados: orders?.length || 0
       });
-
     } catch (error) {
       console.error("Erro ao carregar estatísticas:", error);
       toast({
@@ -239,19 +229,16 @@ export default function Relatorios() {
     setEndDate(new Date(2025, 8, 30));
   };
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
+    return <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+      </div>;
   }
-
   return <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Relatórios</h1>
-          <p className="text-muted-foreground">
+          <h1 className="font-bold text-foreground text-4xl">Relatórios</h1>
+          <p className="text-muted-foreground text-lg">
             Análises e relatórios detalhados do sistema
           </p>
         </div>
