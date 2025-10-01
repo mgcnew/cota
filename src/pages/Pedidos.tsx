@@ -24,7 +24,8 @@ import {
   XCircle,
   Trash2,
   X,
-  Loader2
+  Loader2,
+  DollarSign
 } from "lucide-react";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import EditPedidoDialog from "@/components/forms/EditPedidoDialog";
@@ -33,6 +34,7 @@ import ViewPedidoDialog from "@/components/forms/ViewPedidoDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function Pedidos() {
   const { user } = useAuth();
@@ -363,32 +365,52 @@ export default function Pedidos() {
         <>
           {/* Statistics Cards */}
           <div className="grid gap-4 md:grid-cols-4">
-            <Card>
+            <Card className="card-gradient-warning">
               <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-warning/10">
+                    <Clock className="h-5 w-5 text-warning" />
+                  </div>
+                </div>
                 <div className="text-2xl font-bold text-foreground">
                   {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
                 </div>
                 <p className="text-sm text-muted-foreground">Pedidos Ativos</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="card-gradient-success">
               <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-success/10">
+                    <Truck className="h-5 w-5 text-success" />
+                  </div>
+                </div>
                 <div className="text-2xl font-bold text-foreground">
                   {pedidos.filter(p => p.status === "entregue").length}
                 </div>
                 <p className="text-sm text-muted-foreground">Pedidos Entregues</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="card-gradient-primary">
               <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
                 <div className="text-2xl font-bold text-success">
                   R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-sm text-muted-foreground">Valor Total</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="card-gradient-info">
               <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="p-2 rounded-lg bg-info/10">
+                    <ShoppingCart className="h-5 w-5 text-info" />
+                  </div>
+                </div>
                 <div className="text-2xl font-bold text-foreground">
                   {pedidos.length > 0 ? Math.round(pedidos.reduce((acc, p) => acc + p.itens, 0) / pedidos.length) : 0}
                 </div>
@@ -499,14 +521,38 @@ export default function Pedidos() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {paginatedData.items.map((pedido) => (
-                <Card key={pedido.id} className="card-elevated">
-                  <CardHeader>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {paginatedData.items.map((pedido) => {
+                const cardClass = pedido.status === "entregue" ? "card-status-completed" : 
+                                pedido.status === "confirmado" ? "card-status-active" :
+                                pedido.status === "processando" ? "card-status-pending" :
+                                pedido.status === "cancelado" ? "card-status-error" : "card-status-pending";
+                
+                return (
+                <Card key={pedido.id} className={cn("group", cardClass)}>
+                  <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <ShoppingCart className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-lg">{pedido.id}</CardTitle>
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className={cn(
+                          "p-2.5 rounded-xl transition-all duration-300 group-hover:scale-110",
+                          pedido.status === "entregue" ? "bg-success/10" : 
+                          pedido.status === "confirmado" ? "bg-info/10" :
+                          pedido.status === "processando" ? "bg-warning/10" :
+                          pedido.status === "cancelado" ? "bg-error/10" : "bg-muted"
+                        )}>
+                          <div className={cn(
+                            pedido.status === "entregue" ? "text-success" : 
+                            pedido.status === "confirmado" ? "text-info" :
+                            pedido.status === "processando" ? "text-warning" :
+                            pedido.status === "cancelado" ? "text-error" : "text-muted-foreground"
+                          )}>
+                            {getStatusIcon(pedido.status)}
+                          </div>
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg leading-tight">{pedido.fornecedor}</CardTitle>
+                          <p className="text-sm text-muted-foreground">#{pedido.id}</p>
+                        </div>
                       </div>
                       {getStatusBadge(pedido.status)}
                     </div>
@@ -514,16 +560,16 @@ export default function Pedidos() {
                   <CardContent className="space-y-3">
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Fornecedor:</span>
-                        <span className="font-medium">{pedido.fornecedor}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Valor:</span>
                         <span className="font-bold text-success">{pedido.total}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Entrega:</span>
                         <span className="font-medium">{pedido.dataEntrega}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Itens:</span>
+                        <span className="font-medium">{pedido.itens} produtos</span>
                       </div>
                     </div>
                     <div className="flex gap-1 pt-2">
@@ -539,7 +585,8 @@ export default function Pedidos() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           )}
         </>

@@ -383,26 +383,46 @@ export default function Historico() {
 
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="card-gradient-primary">
           <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <History className="h-5 w-5 text-primary" />
+              </div>
+            </div>
             <div className="text-2xl font-bold text-foreground">{stats.totalAcoes}</div>
             <p className="text-sm text-muted-foreground">Total de Ações</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="card-gradient-info">
           <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 rounded-lg bg-info/10">
+                <FileText className="h-5 w-5 text-info" />
+              </div>
+            </div>
             <div className="text-2xl font-bold text-foreground">{stats.cotacoesFinalizadas}</div>
             <p className="text-sm text-muted-foreground">Cotações Finalizadas</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="card-gradient-warning">
           <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 rounded-lg bg-warning/10">
+                <ShoppingCart className="h-5 w-5 text-warning" />
+              </div>
+            </div>
             <div className="text-2xl font-bold text-foreground">{stats.pedidosCriados}</div>
             <p className="text-sm text-muted-foreground">Pedidos Criados</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="card-gradient-success">
           <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 rounded-lg bg-success/10">
+                <TrendingUp className="h-5 w-5 text-success" />
+              </div>
+            </div>
             <div className="text-2xl font-bold text-success">{stats.economiaTotal}%</div>
             <p className="text-sm text-muted-foreground">Economia Acumulada</p>
           </CardContent>
@@ -416,10 +436,20 @@ export default function Historico() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredHistorico.map((item) => (
-              <div key={item.id} className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-muted/30 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mt-0.5">
-                  {getTipoIcon(item.tipo)}
+            {filteredHistorico.map((item) => {
+              const iconColorClass = item.tipo === "cotacao" ? "text-info" :
+                                    item.tipo === "pedido" ? "text-warning" :
+                                    item.tipo === "fornecedor" ? "text-primary" : "text-success";
+              const bgColorClass = item.tipo === "cotacao" ? "bg-info/10" :
+                                  item.tipo === "pedido" ? "bg-warning/10" :
+                                  item.tipo === "fornecedor" ? "bg-primary/10" : "bg-success/10";
+              
+              return (
+              <div key={item.id} className="group flex items-start gap-4 p-4 rounded-lg border-2 border-border hover:border-primary/40 bg-card hover:shadow-lg dark:hover:shadow-primary/20 transition-all duration-300">
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mt-0.5 transition-transform duration-300 group-hover:scale-110", bgColorClass)}>
+                  <div className={iconColorClass}>
+                    {getTipoIcon(item.tipo)}
+                  </div>
                 </div>
                 
                 <div className="flex-1 space-y-1">
@@ -445,6 +475,7 @@ export default function Historico() {
                 <Button 
                   variant="ghost" 
                   size="sm"
+                  className="hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={() => {
                     setSelectedItem(item);
                     setViewDialogOpen(true);
@@ -453,7 +484,8 @@ export default function Historico() {
                   <Eye className="h-4 w-4" />
                 </Button>
               </div>
-            ))}
+              );
+            })}
             
             {filteredHistorico.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">

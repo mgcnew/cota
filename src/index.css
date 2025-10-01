@@ -227,6 +227,79 @@
   .fade-in-up {
     animation: fadeInUp 0.6s ease-out;
   }
+  /* Card variants - solid colors in light mode, gradients in dark mode */
+  .card-gradient-primary {
+    @apply border-2 border-primary/30 bg-card;
+    @apply hover:shadow-lg hover:border-primary/50;
+    @apply dark:bg-gradient-to-br dark:from-primary/10 dark:to-transparent;
+    @apply dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.25)];
+    @apply transition-all duration-300;
+  }
+
+  .card-gradient-success {
+    @apply border-2 border-success/30 bg-card;
+    @apply hover:shadow-lg hover:border-success/50;
+    @apply dark:bg-gradient-to-br dark:from-success/10 dark:to-transparent;
+    @apply dark:hover:shadow-[0_8px_30px_rgba(16,185,129,0.25)];
+    @apply transition-all duration-300;
+  }
+
+  .card-gradient-warning {
+    @apply border-2 border-warning/30 bg-card;
+    @apply hover:shadow-lg hover:border-warning/50;
+    @apply dark:bg-gradient-to-br dark:from-warning/10 dark:to-transparent;
+    @apply dark:hover:shadow-[0_8px_30px_rgba(245,158,11,0.25)];
+    @apply transition-all duration-300;
+  }
+
+  .card-gradient-info {
+    @apply border-2 border-info/30 bg-card;
+    @apply hover:shadow-lg hover:border-info/50;
+    @apply dark:bg-gradient-to-br dark:from-info/10 dark:to-transparent;
+    @apply dark:hover:shadow-[0_8px_30px_rgba(139,92,246,0.25)];
+    @apply transition-all duration-300;
+  }
+  
+  /* Status-based card variants */
+  .card-status-active {
+    @apply border-2 border-success/40 bg-card hover:border-success/60;
+    @apply hover:shadow-lg dark:hover:shadow-success/20;
+    @apply transition-all duration-300;
+  }
+  
+  .dark .card-status-active {
+    background: linear-gradient(to bottom right, hsl(var(--success) / 0.08), transparent);
+  }
+  
+  .card-status-pending {
+    @apply border-2 border-warning/40 bg-card hover:border-warning/60;
+    @apply hover:shadow-lg dark:hover:shadow-warning/20;
+    @apply transition-all duration-300;
+  }
+  
+  .dark .card-status-pending {
+    background: linear-gradient(to bottom right, hsl(var(--warning) / 0.08), transparent);
+  }
+  
+  .card-status-completed {
+    @apply border-2 border-info/40 bg-card hover:border-info/60;
+    @apply hover:shadow-lg dark:hover:shadow-info/20;
+    @apply transition-all duration-300;
+  }
+  
+  .dark .card-status-completed {
+    background: linear-gradient(to bottom right, hsl(var(--info) / 0.08), transparent);
+  }
+  
+  .card-status-error {
+    @apply border-2 border-error/40 bg-card hover:border-error/60;
+    @apply hover:shadow-lg dark:hover:shadow-error/20;
+    @apply transition-all duration-300;
+  }
+  
+  .dark .card-status-error {
+    background: linear-gradient(to bottom right, hsl(var(--error) / 0.08), transparent);
+  }
   
   .stagger-child {
     animation: fadeInUp 0.6s ease-out;

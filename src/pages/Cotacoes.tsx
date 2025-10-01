@@ -45,6 +45,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { ViewMode } from "@/types/pagination";
+import { cn } from "@/lib/utils";
 
 export default function Cotacoes() {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
@@ -210,15 +211,35 @@ export default function Cotacoes() {
       {/* Cotações View */}
       {viewMode === "grid" ? (
         <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map((cotacao) => (
-            <Card key={cotacao.id} className="card-elevated border-2 hover:border-primary/30 transition-all hover:shadow-lg">
+          {paginatedData.items.map((cotacao) => {
+            const cardClass = cotacao.status === "ativa" ? "card-status-active" : 
+                            cotacao.status === "pendente" ? "card-status-pending" :
+                            cotacao.status === "concluida" ? "card-status-completed" : "card-status-error";
+            
+            return (
+            <Card key={cotacao.id} className={cn("group", cardClass)}>
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <CardTitle className="text-lg">{cotacao.produto}</CardTitle>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {getStatusBadge(cotacao.status)}
-                      <Badge variant="outline">{cotacao.quantidade}</Badge>
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className={cn(
+                      "p-2.5 rounded-xl transition-all duration-300 group-hover:scale-110",
+                      cotacao.status === "ativa" ? "bg-success/10" : 
+                      cotacao.status === "pendente" ? "bg-warning/10" :
+                      cotacao.status === "concluida" ? "bg-info/10" : "bg-error/10"
+                    )}>
+                      <FileText className={cn(
+                        "h-5 w-5",
+                        cotacao.status === "ativa" ? "text-success" : 
+                        cotacao.status === "pendente" ? "text-warning" :
+                        cotacao.status === "concluida" ? "text-info" : "text-error"
+                      )} />
+                    </div>
+                    <div className="space-y-1 flex-1">
+                      <CardTitle className="text-lg leading-tight">{cotacao.produto}</CardTitle>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {getStatusBadge(cotacao.status)}
+                        <Badge variant="outline" className="text-xs">{cotacao.quantidade}</Badge>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -298,7 +319,8 @@ export default function Cotacoes() {
                 </DropdownMenu>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <Card>

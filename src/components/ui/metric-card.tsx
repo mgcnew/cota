@@ -26,35 +26,35 @@ export function MetricCard({
   const variantStyles = {
     default: {
       gradient: "from-primary/10 via-primary-light/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-primary to-primary-light",
-      iconColor: "text-primary-foreground",
+      iconBg: "bg-primary dark:bg-gradient-to-br dark:from-primary dark:to-primary-light",
+      iconColor: "text-white",
       border: "border-primary/30",
       glow: "shadow-[0_0_20px_rgba(59,130,246,0.15)] dark:shadow-[0_0_25px_rgba(59,130,246,0.25)]"
     },
     success: {
       gradient: "from-success/10 via-success-light/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-success to-success-light",
+      iconBg: "bg-success dark:bg-gradient-to-br dark:from-success dark:to-success-light",
       iconColor: "text-white",
       border: "border-success/30",
       glow: "shadow-[0_0_20px_rgba(16,185,129,0.15)] dark:shadow-[0_0_25px_rgba(16,185,129,0.25)]"
     },
     warning: {
       gradient: "from-warning/10 via-warning-light/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-warning to-warning-light",
+      iconBg: "bg-warning dark:bg-gradient-to-br dark:from-warning dark:to-warning-light",
       iconColor: "text-white",
       border: "border-warning/30",
       glow: "shadow-[0_0_20px_rgba(245,158,11,0.15)] dark:shadow-[0_0_25px_rgba(245,158,11,0.25)]"
     },
     error: {
       gradient: "from-error/10 via-error-light/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-error to-error-light",
+      iconBg: "bg-error dark:bg-gradient-to-br dark:from-error dark:to-error-light",
       iconColor: "text-white",
       border: "border-error/30",
       glow: "shadow-[0_0_20px_rgba(239,68,68,0.15)] dark:shadow-[0_0_25px_rgba(239,68,68,0.25)]"
     },
     info: {
       gradient: "from-info/10 via-info-light/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-info to-info-light",
+      iconBg: "bg-info dark:bg-gradient-to-br dark:from-info dark:to-info-light",
       iconColor: "text-white",
       border: "border-info/30",
       glow: "shadow-[0_0_20px_rgba(139,92,246,0.15)] dark:shadow-[0_0_25px_rgba(139,92,246,0.25)]"
