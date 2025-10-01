@@ -183,7 +183,7 @@ export function AppSidebar() {
                       <div className={cn("rounded-lg transition-all duration-300 flex items-center justify-center", isCollapsed ? "p-2" : "p-1.5", item.bgColor, item.hoverBg, item.glowColor)}>
                         <item.icon className={cn("transition-all duration-300 hover:scale-110 hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
                       </div>
-                      {!isCollapsed && <span className="font-medium transition-colors duration-200">{item.title}</span>}
+                      {!isCollapsed && <span className="transition-colors duration-200 text-lg font-normal">{item.title}</span>}
                     </NavLink>;
                 return <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild className="my-0.5 p-0">
