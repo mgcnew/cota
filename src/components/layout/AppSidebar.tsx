@@ -99,7 +99,7 @@ export function AppSidebar() {
           </div>
           {!isCollapsed && <div className="transition-opacity duration-200">
               <h2 className="font-bold leading-tight text-[#ff4c00] text-2xl">CotaçõesPro</h2>
-              <p className="text-xs text-muted-foreground/80 font-medium">Sistema de Gestão</p>
+              <p className="text-xs font-medium text-inherit">Sistema de Gestão</p>
             </div>}
         </div>
       </div>
