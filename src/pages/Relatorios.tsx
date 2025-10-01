@@ -237,7 +237,7 @@ export default function Relatorios() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-bold text-foreground text-4xl">Relatórios</h1>
+          <h1 className="font-bold text-4xl text-[#ff4c00]">Relatórios</h1>
           <p className="text-muted-foreground text-lg">
             Análises e relatórios detalhados do sistema
           </p>
