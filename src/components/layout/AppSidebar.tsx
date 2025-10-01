@@ -72,7 +72,6 @@ const analyticsItems = [{
   hoverBg: "hover:bg-primary/10",
   glowColor: "group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
 }];
-
 const systemItems = [{
   title: "Configurações",
   url: "/configuracoes",
@@ -91,7 +90,7 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = (path: string) => isActive(path) ? "bg-primary/10 text-primary font-semibold shadow-sm border-l-3 border-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50";
-  return <Sidebar className="border-r border-border/50 bg-card/40 backdrop-blur-md shadow-sm" collapsible="icon">
+  return <Sidebar collapsible="icon" className="border-r border-border/50 bg-card/40 backdrop-blur-md shadow-sm px-0 mx-[8px] py-px">
       {/* Logo */}
       <div className={cn("p-4 border-b border-border/50", isCollapsed ? "flex justify-center" : "px-6")}>
         <div className={cn("flex items-center gap-3", isCollapsed && "flex-col")}>
@@ -105,7 +104,7 @@ export function AppSidebar() {
         </div>
       </div>
 
-      <SidebarContent className="py-4">
+      <SidebarContent className="px-[2px] mx-[2px] my-0 py-[4px]">
         <TooltipProvider delayDuration={0}>
           {/* Main Navigation */}
           <SidebarGroup className="mx-0 px-0">
@@ -115,53 +114,26 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {mainItems.map(item => {
-                  const isItemActive = isActive(item.url);
-                  const navContent = (
-                    <NavLink to={item.url} end className={cn(
-                      "flex items-center transition-all duration-300 group",
-                      isCollapsed 
-                        ? "w-full justify-center py-3 rounded-xl" 
-                        : "gap-3 px-4 py-2.5 mx-2 rounded-xl",
-                      isItemActive 
-                        ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}`
-                        : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`
-                    )}>
-                      <div className={cn(
-                        "rounded-lg transition-all duration-300 flex items-center justify-center",
-                        isCollapsed ? "p-2" : "p-1.5",
-                        item.bgColor,
-                        item.hoverBg,
-                        item.glowColor
-                      )}>
-                        <item.icon className={cn(
-                          "transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
-                          isCollapsed ? "h-5 w-5" : "h-4 w-4",
-                          isItemActive ? item.color : `${item.color}/70`
-                        )} />
+                const isItemActive = isActive(item.url);
+                const navContent = <NavLink to={item.url} end className={cn("flex items-center transition-all duration-300 group", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
+                      <div className={cn("rounded-lg transition-all duration-300 flex items-center justify-center", isCollapsed ? "p-2" : "p-1.5", item.bgColor, item.hoverBg, item.glowColor)}>
+                        <item.icon className={cn("transition-all duration-300 group-hover:scale-110 group-hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
                       </div>
                       {!isCollapsed && <span className="font-medium transition-colors duration-200">{item.title}</span>}
-                    </NavLink>
-                  );
-
-                  return (
-                    <SidebarMenuItem key={item.title}>
+                    </NavLink>;
+                return <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild className="my-0.5 p-0">
-                        {isCollapsed ? (
-                          <Tooltip>
+                        {isCollapsed ? <Tooltip>
                             <TooltipTrigger asChild>
                               {navContent}
                             </TooltipTrigger>
                             <TooltipContent side="right" className="font-medium">
                               {item.title}
                             </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          navContent
-                        )}
+                          </Tooltip> : navContent}
                       </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
+                    </SidebarMenuItem>;
+              })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -174,53 +146,26 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {analyticsItems.map(item => {
-                  const isItemActive = isActive(item.url);
-                  const navContent = (
-                    <NavLink to={item.url} className={cn(
-                      "flex items-center transition-all duration-300 group",
-                      isCollapsed 
-                        ? "w-full justify-center py-3 rounded-xl" 
-                        : "gap-3 px-4 py-2.5 mx-2 rounded-xl",
-                      isItemActive
-                        ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}`
-                        : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`
-                    )}>
-                      <div className={cn(
-                        "rounded-lg transition-all duration-300 flex items-center justify-center",
-                        isCollapsed ? "p-2" : "p-1.5",
-                        item.bgColor,
-                        item.hoverBg,
-                        item.glowColor
-                      )}>
-                        <item.icon className={cn(
-                          "transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
-                          isCollapsed ? "h-5 w-5" : "h-4 w-4",
-                          isItemActive ? item.color : `${item.color}/70`
-                        )} />
+                const isItemActive = isActive(item.url);
+                const navContent = <NavLink to={item.url} className={cn("flex items-center transition-all duration-300 group", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
+                      <div className={cn("rounded-lg transition-all duration-300 flex items-center justify-center", isCollapsed ? "p-2" : "p-1.5", item.bgColor, item.hoverBg, item.glowColor)}>
+                        <item.icon className={cn("transition-all duration-300 group-hover:scale-110 group-hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
                       </div>
                       {!isCollapsed && <span className="font-medium transition-colors duration-200">{item.title}</span>}
-                    </NavLink>
-                  );
-
-                  return (
-                    <SidebarMenuItem key={item.title}>
+                    </NavLink>;
+                return <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild className="my-0.5 p-0">
-                        {isCollapsed ? (
-                          <Tooltip>
+                        {isCollapsed ? <Tooltip>
                             <TooltipTrigger asChild>
                               {navContent}
                             </TooltipTrigger>
                             <TooltipContent side="right" className="font-medium">
                               {item.title}
                             </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          navContent
-                        )}
+                          </Tooltip> : navContent}
                       </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
+                    </SidebarMenuItem>;
+              })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -233,53 +178,26 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {systemItems.map(item => {
-                  const isItemActive = isActive(item.url);
-                  const navContent = (
-                    <NavLink to={item.url} className={cn(
-                      "flex items-center transition-all duration-300 group",
-                      isCollapsed 
-                        ? "w-full justify-center py-3 rounded-xl" 
-                        : "gap-3 px-4 py-2.5 mx-2 rounded-xl",
-                      isItemActive
-                        ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}`
-                        : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`
-                    )}>
-                      <div className={cn(
-                        "rounded-lg transition-all duration-300 flex items-center justify-center",
-                        isCollapsed ? "p-2" : "p-1.5",
-                        item.bgColor,
-                        item.hoverBg,
-                        item.glowColor
-                      )}>
-                        <item.icon className={cn(
-                          "transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
-                          isCollapsed ? "h-5 w-5" : "h-4 w-4",
-                          isItemActive ? item.color : `${item.color}/70`
-                        )} />
+                const isItemActive = isActive(item.url);
+                const navContent = <NavLink to={item.url} className={cn("flex items-center transition-all duration-300 group", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
+                      <div className={cn("rounded-lg transition-all duration-300 flex items-center justify-center", isCollapsed ? "p-2" : "p-1.5", item.bgColor, item.hoverBg, item.glowColor)}>
+                        <item.icon className={cn("transition-all duration-300 group-hover:scale-110 group-hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
                       </div>
                       {!isCollapsed && <span className="font-medium transition-colors duration-200">{item.title}</span>}
-                    </NavLink>
-                  );
-
-                  return (
-                    <SidebarMenuItem key={item.title}>
+                    </NavLink>;
+                return <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild className="my-0.5 p-0">
-                        {isCollapsed ? (
-                          <Tooltip>
+                        {isCollapsed ? <Tooltip>
                             <TooltipTrigger asChild>
                               {navContent}
                             </TooltipTrigger>
                             <TooltipContent side="right" className="font-medium">
                               {item.title}
                             </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          navContent
-                        )}
+                          </Tooltip> : navContent}
                       </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
+                    </SidebarMenuItem>;
+              })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -289,10 +207,7 @@ export function AppSidebar() {
         <div className="mt-auto pt-4 border-t border-border/50">
           <Popover>
             <PopoverTrigger asChild>
-              <button className={cn(
-                "w-full flex items-center rounded-xl hover:bg-muted/50 transition-all duration-200 cursor-pointer group",
-                isCollapsed ? "justify-center py-3" : "gap-3 px-3 py-3"
-              )}>
+              <button className={cn("w-full flex items-center rounded-xl hover:bg-muted/50 transition-all duration-200 cursor-pointer group", isCollapsed ? "justify-center py-3" : "gap-3 px-3 py-3")}>
                 <div className="w-9 h-9 rounded-full bg-gradient-primary flex items-center justify-center shadow-md shadow-primary/20 ring-2 ring-primary/10 transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/30">
                   <Users className="h-4 w-4 text-white" />
                 </div>
@@ -316,28 +231,19 @@ export function AppSidebar() {
               <Separator className="my-2" />
               
               <div className="space-y-1">
-                <button 
-                  onClick={() => toast.info("Funcionalidade em desenvolvimento")}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/80 transition-colors text-sm text-foreground group"
-                >
+                <button onClick={() => toast.info("Funcionalidade em desenvolvimento")} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/80 transition-colors text-sm text-foreground group">
                   <User className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   <span className="font-medium">Meu Perfil</span>
                 </button>
                 
-                <NavLink 
-                  to="/configuracoes"
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/80 transition-colors text-sm text-foreground group"
-                >
+                <NavLink to="/configuracoes" className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/80 transition-colors text-sm text-foreground group">
                   <Settings className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   <span className="font-medium">Configurações</span>
                 </NavLink>
                 
                 <Separator className="my-2" />
                 
-                <button 
-                  onClick={() => toast.success("Logout realizado com sucesso")}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-destructive/10 transition-colors text-sm text-destructive group"
-                >
+                <button onClick={() => toast.success("Logout realizado com sucesso")} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-destructive/10 transition-colors text-sm text-destructive group">
                   <LogOut className="h-4 w-4" />
                   <span className="font-medium">Sair</span>
                 </button>
