@@ -10,24 +10,29 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Sun, Moon, Monitor, Bell, Palette, Globe, Info, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
-
 export default function Configuracoes() {
-  const { theme, setTheme } = useTheme();
-  const { settings, updateNotifications, updateDisplay, updateSystem, resetSettings } = useSettings();
+  const {
+    theme,
+    setTheme
+  } = useTheme();
+  const {
+    settings,
+    updateNotifications,
+    updateDisplay,
+    updateSystem,
+    resetSettings
+  } = useSettings();
   const [hasChanges, setHasChanges] = useState(false);
-
   const handleReset = () => {
     resetSettings();
     setTheme("system");
     setHasChanges(false);
     toast.success("Configurações restauradas para o padrão");
   };
-
-  return (
-    <div className="container max-w-5xl py-6 md:py-10 space-y-6">
+  return <div className="container max-w-5xl py-6 md:py-10 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Configurações</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="font-bold tracking-tight text-foreground text-4xl">Configurações</h1>
+        <p className="text-muted-foreground mt-2 text-lg">
           Gerencie as preferências e configurações do sistema
         </p>
       </div>
@@ -51,30 +56,21 @@ export default function Configuracoes() {
             <RadioGroup value={theme} onValueChange={setTheme} className="grid grid-cols-3 gap-4">
               <div>
                 <RadioGroupItem value="light" id="light" className="peer sr-only" />
-                <Label
-                  htmlFor="light"
-                  className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer transition-all"
-                >
+                <Label htmlFor="light" className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer transition-all">
                   <Sun className="mb-3 h-6 w-6" />
                   <span className="text-sm font-medium">Claro</span>
                 </Label>
               </div>
               <div>
                 <RadioGroupItem value="dark" id="dark" className="peer sr-only" />
-                <Label
-                  htmlFor="dark"
-                  className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer transition-all"
-                >
+                <Label htmlFor="dark" className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer transition-all">
                   <Moon className="mb-3 h-6 w-6" />
                   <span className="text-sm font-medium">Escuro</span>
                 </Label>
               </div>
               <div>
                 <RadioGroupItem value="system" id="system" className="peer sr-only" />
-                <Label
-                  htmlFor="system"
-                  className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer transition-all"
-                >
+                <Label htmlFor="system" className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer transition-all">
                   <Monitor className="mb-3 h-6 w-6" />
                   <span className="text-sm font-medium">Sistema</span>
                 </Label>
@@ -94,14 +90,12 @@ export default function Configuracoes() {
                     Reduz o espaçamento entre elementos
                   </p>
                 </div>
-                <Switch
-                  id="compact-mode"
-                  checked={settings.display.compactMode}
-                  onCheckedChange={(checked) => {
-                    updateDisplay({ compactMode: checked });
-                    setHasChanges(true);
-                  }}
-                />
+                <Switch id="compact-mode" checked={settings.display.compactMode} onCheckedChange={checked => {
+                updateDisplay({
+                  compactMode: checked
+                });
+                setHasChanges(true);
+              }} />
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
@@ -110,14 +104,12 @@ export default function Configuracoes() {
                     Mostrar cards de métricas no dashboard
                   </p>
                 </div>
-                <Switch
-                  id="show-metrics"
-                  checked={settings.display.showMetrics}
-                  onCheckedChange={(checked) => {
-                    updateDisplay({ showMetrics: checked });
-                    setHasChanges(true);
-                  }}
-                />
+                <Switch id="show-metrics" checked={settings.display.showMetrics} onCheckedChange={checked => {
+                updateDisplay({
+                  showMetrics: checked
+                });
+                setHasChanges(true);
+              }} />
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
@@ -126,14 +118,12 @@ export default function Configuracoes() {
                     Ativar animações e transições
                   </p>
                 </div>
-                <Switch
-                  id="animations"
-                  checked={settings.display.animationsEnabled}
-                  onCheckedChange={(checked) => {
-                    updateDisplay({ animationsEnabled: checked });
-                    setHasChanges(true);
-                  }}
-                />
+                <Switch id="animations" checked={settings.display.animationsEnabled} onCheckedChange={checked => {
+                updateDisplay({
+                  animationsEnabled: checked
+                });
+                setHasChanges(true);
+              }} />
               </div>
             </div>
           </div>
@@ -159,14 +149,12 @@ export default function Configuracoes() {
                 Receber atualizações por email
               </p>
             </div>
-            <Switch
-              id="email-notifications"
-              checked={settings.notifications.email}
-              onCheckedChange={(checked) => {
-                updateNotifications({ email: checked });
-                setHasChanges(true);
-              }}
-            />
+            <Switch id="email-notifications" checked={settings.notifications.email} onCheckedChange={checked => {
+            updateNotifications({
+              email: checked
+            });
+            setHasChanges(true);
+          }} />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -175,14 +163,12 @@ export default function Configuracoes() {
                 Receber notificações no navegador
               </p>
             </div>
-            <Switch
-              id="push-notifications"
-              checked={settings.notifications.push}
-              onCheckedChange={(checked) => {
-                updateNotifications({ push: checked });
-                setHasChanges(true);
-              }}
-            />
+            <Switch id="push-notifications" checked={settings.notifications.push} onCheckedChange={checked => {
+            updateNotifications({
+              push: checked
+            });
+            setHasChanges(true);
+          }} />
           </div>
           <Separator />
           <div className="space-y-3">
@@ -192,40 +178,34 @@ export default function Configuracoes() {
                 <Label htmlFor="quotes-notifications" className="font-normal">
                   Cotações
                 </Label>
-                <Switch
-                  id="quotes-notifications"
-                  checked={settings.notifications.quotes}
-                  onCheckedChange={(checked) => {
-                    updateNotifications({ quotes: checked });
-                    setHasChanges(true);
-                  }}
-                />
+                <Switch id="quotes-notifications" checked={settings.notifications.quotes} onCheckedChange={checked => {
+                updateNotifications({
+                  quotes: checked
+                });
+                setHasChanges(true);
+              }} />
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="orders-notifications" className="font-normal">
                   Pedidos
                 </Label>
-                <Switch
-                  id="orders-notifications"
-                  checked={settings.notifications.orders}
-                  onCheckedChange={(checked) => {
-                    updateNotifications({ orders: checked });
-                    setHasChanges(true);
-                  }}
-                />
+                <Switch id="orders-notifications" checked={settings.notifications.orders} onCheckedChange={checked => {
+                updateNotifications({
+                  orders: checked
+                });
+                setHasChanges(true);
+              }} />
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="suppliers-notifications" className="font-normal">
                   Fornecedores
                 </Label>
-                <Switch
-                  id="suppliers-notifications"
-                  checked={settings.notifications.suppliers}
-                  onCheckedChange={(checked) => {
-                    updateNotifications({ suppliers: checked });
-                    setHasChanges(true);
-                  }}
-                />
+                <Switch id="suppliers-notifications" checked={settings.notifications.suppliers} onCheckedChange={checked => {
+                updateNotifications({
+                  suppliers: checked
+                });
+                setHasChanges(true);
+              }} />
               </div>
             </div>
           </div>
@@ -246,13 +226,12 @@ export default function Configuracoes() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="language">Idioma</Label>
-            <Select
-              value={settings.system.language}
-              onValueChange={(value) => {
-                updateSystem({ language: value });
-                setHasChanges(true);
-              }}
-            >
+            <Select value={settings.system.language} onValueChange={value => {
+            updateSystem({
+              language: value
+            });
+            setHasChanges(true);
+          }}>
               <SelectTrigger id="language">
                 <SelectValue />
               </SelectTrigger>
@@ -265,13 +244,12 @@ export default function Configuracoes() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="date-format">Formato de Data</Label>
-            <Select
-              value={settings.system.dateFormat}
-              onValueChange={(value) => {
-                updateSystem({ dateFormat: value });
-                setHasChanges(true);
-              }}
-            >
+            <Select value={settings.system.dateFormat} onValueChange={value => {
+            updateSystem({
+              dateFormat: value
+            });
+            setHasChanges(true);
+          }}>
               <SelectTrigger id="date-format">
                 <SelectValue />
               </SelectTrigger>
@@ -284,13 +262,12 @@ export default function Configuracoes() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="currency">Moeda</Label>
-            <Select
-              value={settings.system.currency}
-              onValueChange={(value) => {
-                updateSystem({ currency: value });
-                setHasChanges(true);
-              }}
-            >
+            <Select value={settings.system.currency} onValueChange={value => {
+            updateSystem({
+              currency: value
+            });
+            setHasChanges(true);
+          }}>
               <SelectTrigger id="currency">
                 <SelectValue />
               </SelectTrigger>
@@ -322,16 +299,11 @@ export default function Configuracoes() {
             <span className="font-medium">{new Date().toLocaleDateString('pt-BR')}</span>
           </div>
           <Separator className="my-4" />
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleReset}
-          >
+          <Button variant="outline" className="w-full" onClick={handleReset}>
             <RotateCcw className="mr-2 h-4 w-4" />
             Restaurar Configurações Padrão
           </Button>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
