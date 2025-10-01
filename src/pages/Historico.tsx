@@ -168,7 +168,7 @@ export default function Historico() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-bold text-foreground text-4xl">Histórico</h1>
+          <h1 className="font-bold text-4xl text-[#ff4c00]">Histórico</h1>
           <p className="text-lg text-inherit">
             Acompanhe todas as atividades do sistema
           </p>
