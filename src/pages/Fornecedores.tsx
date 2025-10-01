@@ -6,37 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Building2, 
-  Search, 
-  Plus, 
-  Phone,
-  Mail,
-  MapPin,
-  TrendingUp,
-  DollarSign,
-  FileText,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Star,
-  Upload,
-  Eye,
-  ChevronDown
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
 import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
@@ -50,7 +22,6 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { ViewMode } from "@/types/pagination";
-
 interface Supplier {
   id: string;
   name: string;
@@ -66,7 +37,6 @@ interface Supplier {
   email?: string;
   address?: string;
 }
-
 type SupplierFormData = {
   name: string;
   contact: string;
@@ -76,104 +46,98 @@ type SupplierFormData = {
   limit: string;
   status: "active" | "inactive" | "pending";
 };
-
 export default function Fornecedores() {
-  const { user, loading } = useAuth();
-  const { suppliers, isLoading: suppliersLoading, refetch } = useSuppliers();
+  const {
+    user,
+    loading
+  } = useAuth();
+  const {
+    suppliers,
+    isLoading: suppliersLoading,
+    refetch
+  } = useSuppliers();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("table");
-  const { paginate } = usePagination<Supplier>({ initialItemsPerPage: 10 });
+  const {
+    paginate
+  } = usePagination<Supplier>({
+    initialItemsPerPage: 10
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
-  
   const addSupplierRef = useRef<HTMLButtonElement>(null);
   const importSuppliersRef = useRef<HTMLButtonElement>(null);
-
   useEffect(() => {
     if (!loading && !user) {
       setAuthDialogOpen(true);
     }
   }, [loading, user]);
-
   const handleAddSupplier = () => {
     refetch();
   };
-
   const handleEditSupplier = (id: string, data: SupplierFormData) => {
     refetch();
   };
-
   const handleDeleteSupplier = (id: string) => {
     refetch();
   };
-
   const handleSuppliersImported = (importedSuppliers: Supplier[]) => {
     refetch();
   };
 
   // Mock data de produtos para cotações
-  const mockProducts = [
-    { id: "1", name: "Coxa com Sobrecoxa" },
-    { id: "2", name: "Filé de Frango" },
-    { id: "3", name: "Linguiça Toscana Aurora" },
-    { id: "4", name: "Contra Filé" },
-    { id: "5", name: "Peito de Frango" },
-  ];
-
+  const mockProducts = [{
+    id: "1",
+    name: "Coxa com Sobrecoxa"
+  }, {
+    id: "2",
+    name: "Filé de Frango"
+  }, {
+    id: "3",
+    name: "Linguiça Toscana Aurora"
+  }, {
+    id: "4",
+    name: "Contra Filé"
+  }, {
+    id: "5",
+    name: "Peito de Frango"
+  }];
   const handleAddQuote = (data: any) => {
     toast({
       title: "Cotação criada",
-      description: "A cotação foi criada e enviada aos fornecedores.",
+      description: "A cotação foi criada e enviada aos fornecedores."
     });
   };
-
   const filteredSuppliers = suppliers.filter(supplier => {
-    const matchesSearch = supplier.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         supplier.contact.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = supplier.name.toLowerCase().includes(searchQuery.toLowerCase()) || supplier.contact.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || supplier.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
-
   const paginatedData = paginate(filteredSuppliers);
-
   const getStatusBadge = (status: string) => {
     const variants = {
       active: "default",
-      inactive: "secondary", 
+      inactive: "secondary",
       pending: "outline"
     } as const;
-    
     const labels = {
       active: "Ativo",
       inactive: "Inativo",
       pending: "Pendente"
     };
-
-    return (
-      <Badge variant={variants[status as keyof typeof variants]}>
+    return <Badge variant={variants[status as keyof typeof variants]}>
         {labels[status as keyof typeof labels]}
-      </Badge>
-    );
+      </Badge>;
   };
-
   const renderStarRating = (rating: number) => {
-    return (
-      <div className="flex items-center gap-1">
-        {Array.from({ length: 5 }, (_, i) => (
-          <Star
-            key={i}
-            className={`h-3 w-3 ${
-              i < Math.floor(rating) 
-                ? "fill-warning text-warning" 
-                : "text-muted-foreground"
-            }`}
-          />
-        ))}
+    return <div className="flex items-center gap-1">
+        {Array.from({
+        length: 5
+      }, (_, i) => <Star key={i} className={`h-3 w-3 ${i < Math.floor(rating) ? "fill-warning text-warning" : "text-muted-foreground"}`} />)}
         <span className="text-xs text-muted-foreground ml-1">{rating}</span>
-      </div>
-    );
+      </div>;
   };
 
   // Calculate real stats
@@ -182,33 +146,26 @@ export default function Fornecedores() {
       const limitValue = parseFloat(s.limit.replace(/[^\d,]/g, '').replace(',', '.'));
       return sum + (isNaN(limitValue) ? 0 : limitValue);
     }, 0);
-
     const activeQuotesTotal = suppliers.reduce((sum, s) => sum + s.activeQuotes, 0);
-
     return {
       total: suppliers.length,
       active: suppliers.filter(s => s.status === "active").length,
       totalLimit: totalLimit > 0 ? `R$ ${totalLimit.toFixed(0)}k` : "R$ 0",
-      activeQuotes: activeQuotesTotal,
+      activeQuotes: activeQuotesTotal
     };
   }, [suppliers]);
-
   if (loading || suppliersLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
+    return <div className="flex items-center justify-center h-screen">
         <div className="text-center">Carregando...</div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Fornecedores</h1>
+          <h1 className="text-2xl font-bold md:text-4xl text-[#f1753c]">Fornecedores</h1>
           <p className="text-sm md:text-base text-muted-foreground">
             Gerencie seus fornecedores e acompanhe performance
           </p>
@@ -242,15 +199,10 @@ export default function Fornecedores() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Buscar fornecedores..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Buscar fornecedores..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
             
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+            <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -267,37 +219,15 @@ export default function Fornecedores() {
 
       {/* Stats Cards */}
       <div className="grid gap-3 md:gap-4 grid-cols-2 md:grid-cols-4">
-        <MetricCard
-          title="Total"
-          value={stats.total}
-          icon={Building2}
-          variant="default"
-        />
-        <MetricCard
-          title="Ativos"
-          value={stats.active}
-          icon={TrendingUp}
-          variant="success"
-        />
-        <MetricCard
-          title="Limite Total"
-          value={stats.totalLimit}
-          icon={DollarSign}
-          variant="info"
-        />
-        <MetricCard
-          title="Cotações Ativas"
-          value={stats.activeQuotes}
-          icon={FileText}
-          variant="warning"
-        />
+        <MetricCard title="Total" value={stats.total} icon={Building2} variant="default" />
+        <MetricCard title="Ativos" value={stats.active} icon={TrendingUp} variant="success" />
+        <MetricCard title="Limite Total" value={stats.totalLimit} icon={DollarSign} variant="info" />
+        <MetricCard title="Cotações Ativas" value={stats.activeQuotes} icon={FileText} variant="warning" />
       </div>
 
       {/* Suppliers View */}
-      {viewMode === "grid" ? (
-        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map((supplier) => (
-            <Card key={supplier.id} className="card-elevated border-2 hover:border-primary/30 transition-all hover:shadow-lg">
+      {viewMode === "grid" ? <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedData.items.map(supplier => <Card key={supplier.id} className="card-elevated border-2 hover:border-primary/30 transition-all hover:shadow-lg">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2 min-w-0">
@@ -323,10 +253,7 @@ export default function Fornecedores() {
                         <Edit className="h-4 w-4 mr-2" />
                         Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="text-destructive"
-                        onClick={() => setDeletingSupplier(supplier)}
-                      >
+                      <DropdownMenuItem className="text-destructive" onClick={() => setDeletingSupplier(supplier)}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir
                       </DropdownMenuItem>
@@ -359,38 +286,26 @@ export default function Fornecedores() {
                 </div>
 
                 <div className="space-y-2 pt-2 border-t border-border">
-                  {supplier.phone && (
-                    <div className="flex items-center gap-2 text-sm">
+                  {supplier.phone && <div className="flex items-center gap-2 text-sm">
                       <Phone className="h-3 w-3 text-muted-foreground" />
                       <span className="text-muted-foreground">{supplier.phone}</span>
-                    </div>
-                  )}
-                  {supplier.email && (
-                    <div className="flex items-center gap-2 text-sm">
+                    </div>}
+                  {supplier.email && <div className="flex items-center gap-2 text-sm">
                       <Mail className="h-3 w-3 text-muted-foreground" />
                       <span className="text-muted-foreground">{supplier.email}</span>
-                    </div>
-                  )}
+                    </div>}
                   <div className="flex items-center gap-2 text-sm">
                     <FileText className="h-3 w-3 text-muted-foreground" />
                     <span className="text-muted-foreground">Último pedido: {supplier.lastOrder}</span>
                   </div>
                 </div>
 
-                <AddQuoteDialog
-                  onAdd={handleAddQuote}
-                  trigger={
-                    <Button size="sm" className="w-full">
+                <AddQuoteDialog onAdd={handleAddQuote} trigger={<Button size="sm" className="w-full">
                       Nova Cotação
-                    </Button>
-                  }
-                />
+                    </Button>} />
               </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
+            </Card>)}
+        </div> : <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
@@ -406,8 +321,7 @@ export default function Fornecedores() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map((supplier) => (
-                    <TableRow key={supplier.id}>
+                  {paginatedData.items.map(supplier => <TableRow key={supplier.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -452,10 +366,7 @@ export default function Fornecedores() {
                                 <Edit className="h-4 w-4 mr-2" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={() => setDeletingSupplier(supplier)}
-                              >
+                              <DropdownMenuItem className="text-destructive" onClick={() => setDeletingSupplier(supplier)}>
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Excluir
                               </DropdownMenuItem>
@@ -463,69 +374,37 @@ export default function Fornecedores() {
                           </DropdownMenu>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
             </div>
-            <DataPagination
-              currentPage={paginatedData.pagination.currentPage}
-              totalPages={paginatedData.pagination.totalPages}
-              itemsPerPage={paginatedData.pagination.itemsPerPage}
-              totalItems={paginatedData.pagination.totalItems}
-              onPageChange={paginatedData.pagination.goToPage}
-              onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-              startIndex={paginatedData.pagination.startIndex}
-              endIndex={paginatedData.pagination.endIndex}
-            />
+            <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
-      {filteredSuppliers.length === 0 && (
-        <Card>
+      {filteredSuppliers.length === 0 && <Card>
           <CardContent className="p-12 text-center">
             <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Nenhum fornecedor encontrado</h3>
             <p className="text-muted-foreground mb-4">
               Tente ajustar os filtros ou adicione novos fornecedores
             </p>
-            <AddSupplierDialog onAdd={handleAddSupplier} trigger={
-              <Button>
+            <AddSupplierDialog onAdd={handleAddSupplier} trigger={<Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar Fornecedor
-              </Button>
-            } />
+              </Button>} />
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
-      <EditSupplierDialog 
-        supplier={editingSupplier}
-        open={!!editingSupplier}
-        onOpenChange={(open) => !open && setEditingSupplier(null)}
-        onEdit={handleEditSupplier}
-      />
+      <EditSupplierDialog supplier={editingSupplier} open={!!editingSupplier} onOpenChange={open => !open && setEditingSupplier(null)} onEdit={handleEditSupplier} />
 
-      <DeleteSupplierDialog 
-        supplier={deletingSupplier}
-        open={!!deletingSupplier}
-        onOpenChange={(open) => !open && setDeletingSupplier(null)}
-        onDelete={handleDeleteSupplier}
-      />
+      <DeleteSupplierDialog supplier={deletingSupplier} open={!!deletingSupplier} onOpenChange={open => !open && setDeletingSupplier(null)} onDelete={handleDeleteSupplier} />
 
       {/* Hidden triggers for dialogs */}
       <div className="hidden">
-        <AddSupplierDialog 
-          onAdd={handleAddSupplier}
-          trigger={<button ref={addSupplierRef} />}
-        />
-        <ImportSuppliersDialog 
-          onSuppliersImported={handleSuppliersImported}
-          trigger={<button ref={importSuppliersRef} />}
-        />
+        <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
+        <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
       </div>
     </div>
-    </>
-  );
+    </>;
 }
