@@ -10,7 +10,7 @@ export function ViewToggle({
   onViewChange
 }: ViewToggleProps) {
   return <div className="flex items-center gap-1 rounded-lg border bg-background p-1">
-      <Button variant={view === "grid" ? "secondary" : "ghost"} size="sm" onClick={() => onViewChange("grid")} className="h-8 bg-white">
+      <Button variant={view === "grid" ? "secondary" : "ghost"} size="sm" onClick={() => onViewChange("grid")} className="h-8 bg-inherit">
         <LayoutGrid className="h-4 w-4" />
         <span className="ml-2 hidden sm:inline">Cards</span>
       </Button>
