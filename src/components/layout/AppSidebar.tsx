@@ -13,7 +13,7 @@ const mainItems = [{
   color: "text-primary",
   bgColor: "bg-primary/5",
   hoverBg: "hover:bg-primary/10",
-  glowColor: "group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+  glowColor: "hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
 }, {
   title: "Produtos",
   url: "/produtos",
@@ -21,7 +21,7 @@ const mainItems = [{
   color: "text-success",
   bgColor: "bg-success/5",
   hoverBg: "hover:bg-success/10",
-  glowColor: "group-hover:shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+  glowColor: "hover:shadow-[0_0_15px_rgba(34,197,94,0.3)]"
 }, {
   title: "Fornecedores",
   url: "/fornecedores",
@@ -29,7 +29,7 @@ const mainItems = [{
   color: "text-warning",
   bgColor: "bg-warning/5",
   hoverBg: "hover:bg-warning/10",
-  glowColor: "group-hover:shadow-[0_0_15px_rgba(251,146,60,0.3)]"
+  glowColor: "hover:shadow-[0_0_15px_rgba(251,146,60,0.3)]"
 }, {
   title: "Cotações",
   url: "/cotacoes",
@@ -37,7 +37,7 @@ const mainItems = [{
   color: "text-info",
   bgColor: "bg-info/5",
   hoverBg: "hover:bg-info/10",
-  glowColor: "group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+  glowColor: "hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]"
 }, {
   title: "Pedidos",
   url: "/pedidos",
@@ -45,7 +45,7 @@ const mainItems = [{
   color: "text-primary",
   bgColor: "bg-primary/5",
   hoverBg: "hover:bg-primary/10",
-  glowColor: "group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+  glowColor: "hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
 }, {
   title: "Histórico",
   url: "/historico",
@@ -53,7 +53,7 @@ const mainItems = [{
   color: "text-muted-foreground",
   bgColor: "bg-muted/5",
   hoverBg: "hover:bg-muted/10",
-  glowColor: "group-hover:shadow-[0_0_10px_rgba(100,116,139,0.2)]"
+  glowColor: "hover:shadow-[0_0_10px_rgba(100,116,139,0.2)]"
 }];
 const analyticsItems = [{
   title: "Relatórios",
@@ -62,7 +62,7 @@ const analyticsItems = [{
   color: "text-primary",
   bgColor: "bg-primary/5",
   hoverBg: "hover:bg-primary/10",
-  glowColor: "group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+  glowColor: "hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
 }, {
   title: "Analytics",
   url: "/analytics",
@@ -70,7 +70,7 @@ const analyticsItems = [{
   color: "text-primary",
   bgColor: "bg-primary/5",
   hoverBg: "hover:bg-primary/10",
-  glowColor: "group-hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+  glowColor: "hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
 }];
 const systemItems = [{
   title: "Configurações",
@@ -79,7 +79,7 @@ const systemItems = [{
   color: "text-muted-foreground",
   bgColor: "bg-muted/5",
   hoverBg: "hover:bg-muted/10",
-  glowColor: "group-hover:shadow-[0_0_10px_rgba(100,116,139,0.2)]"
+  glowColor: "hover:shadow-[0_0_10px_rgba(100,116,139,0.2)]"
 }];
 export function AppSidebar() {
   const {
@@ -90,7 +90,7 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = (path: string) => isActive(path) ? "bg-primary/10 text-primary font-semibold shadow-sm border-l-3 border-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50";
-  return <Sidebar collapsible="icon" className="border-r border-border/50 bg-card/40 backdrop-blur-md shadow-sm px-0 mx-[8px] py-px">
+  return <Sidebar collapsible="icon" className="border-r border-border/50 bg-card/40 backdrop-blur-md shadow-sm px-0 mx-[8px] py-px rounded-3xl">
       {/* Logo */}
       <div className={cn("p-4 border-b border-border/50", isCollapsed ? "flex justify-center" : "px-6")}>
         <div className={cn("flex items-center gap-3", isCollapsed && "flex-col")}>
@@ -115,9 +115,9 @@ export function AppSidebar() {
               <SidebarMenu className="py-0 my-0">
                 {mainItems.map(item => {
                 const isItemActive = isActive(item.url);
-                const navContent = <NavLink to={item.url} end className={cn("flex items-center transition-all duration-300 group", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
+                const navContent = <NavLink to={item.url} end className={cn("flex items-center transition-all duration-300", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
                       <div className={cn("rounded-lg transition-all duration-300 flex items-center justify-center", isCollapsed ? "p-2" : "p-1.5", item.bgColor, item.hoverBg, item.glowColor)}>
-                        <item.icon className={cn("transition-all duration-300 group-hover:scale-110 group-hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
+                        <item.icon className={cn("transition-all duration-300 hover:scale-110 hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
                       </div>
                       {!isCollapsed && <span className="font-medium transition-colors duration-200">{item.title}</span>}
                     </NavLink>;
@@ -147,9 +147,9 @@ export function AppSidebar() {
               <SidebarMenu>
                 {analyticsItems.map(item => {
                 const isItemActive = isActive(item.url);
-                const navContent = <NavLink to={item.url} className={cn("flex items-center transition-all duration-300 group", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
+                const navContent = <NavLink to={item.url} className={cn("flex items-center transition-all duration-300", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
                       <div className={cn("rounded-lg transition-all duration-300 flex items-center justify-center", isCollapsed ? "p-2" : "p-1.5", item.bgColor, item.hoverBg, item.glowColor)}>
-                        <item.icon className={cn("transition-all duration-300 group-hover:scale-110 group-hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
+                        <item.icon className={cn("transition-all duration-300 hover:scale-110 hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
                       </div>
                       {!isCollapsed && <span className="font-medium transition-colors duration-200">{item.title}</span>}
                     </NavLink>;
@@ -179,9 +179,9 @@ export function AppSidebar() {
               <SidebarMenu>
                 {systemItems.map(item => {
                 const isItemActive = isActive(item.url);
-                const navContent = <NavLink to={item.url} className={cn("flex items-center transition-all duration-300 group", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
+                const navContent = <NavLink to={item.url} className={cn("flex items-center transition-all duration-300", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
                       <div className={cn("rounded-lg transition-all duration-300 flex items-center justify-center", isCollapsed ? "p-2" : "p-1.5", item.bgColor, item.hoverBg, item.glowColor)}>
-                        <item.icon className={cn("transition-all duration-300 group-hover:scale-110 group-hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
+                        <item.icon className={cn("transition-all duration-300 hover:scale-110 hover:rotate-3", isCollapsed ? "h-5 w-5" : "h-4 w-4", isItemActive ? item.color : `${item.color}/70`)} />
                       </div>
                       {!isCollapsed && <span className="font-medium transition-colors duration-200">{item.title}</span>}
                     </NavLink>;
