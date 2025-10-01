@@ -238,7 +238,7 @@ export default function Relatorios() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-bold text-4xl text-[#ff4c00]">Relatórios</h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-lg text-inherit">
             Análises e relatórios detalhados do sistema
           </p>
         </div>
