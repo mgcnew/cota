@@ -185,7 +185,7 @@ export default function Pedidos() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[#ff4c00] font-bold text-4xl">Pedidos</h1>
-          <p className="text-muted-foreground">
+          <p className="text-inherit">
             Gerencie todos os pedidos realizados
           </p>
         </div>
