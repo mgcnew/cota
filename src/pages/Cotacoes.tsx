@@ -110,7 +110,7 @@ export default function Cotacoes() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold md:text-4xl text-[#ff4c00]">Cotações</h1>
-          <p className="text-sm text-black md:text-lg">
+          <p className="text-sm md:text-lg text-inherit">
             Gerencie todas as cotações da empresa
           </p>
         </div>
