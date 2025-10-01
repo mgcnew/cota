@@ -41,7 +41,7 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-[#f1753c] md:text-4xl">Dashboard</h1>
-          <p className="text-sm md:text-base text-muted-foreground">
+          <p className="text-sm text-inherit md:text-lg">
             Visão geral do sistema de cotações - {new Date().toLocaleDateString('pt-BR')}
           </p>
         </div>
