@@ -25,34 +25,39 @@ export function MetricCard({
 }: MetricCardProps) {
   const variantStyles = {
     default: {
-      gradient: "from-primary/5 to-primary-light/5",
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
-      border: "border-primary/20"
+      gradient: "from-primary/10 via-primary-light/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-primary to-primary-light",
+      iconColor: "text-primary-foreground",
+      border: "border-primary/30",
+      glow: "shadow-[0_0_20px_rgba(59,130,246,0.15)] dark:shadow-[0_0_25px_rgba(59,130,246,0.25)]"
     },
     success: {
-      gradient: "from-success/5 to-success/10",
-      iconBg: "bg-success/10",
-      iconColor: "text-success",
-      border: "border-success/20"
+      gradient: "from-success/10 via-success-light/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-success to-success-light",
+      iconColor: "text-white",
+      border: "border-success/30",
+      glow: "shadow-[0_0_20px_rgba(16,185,129,0.15)] dark:shadow-[0_0_25px_rgba(16,185,129,0.25)]"
     },
     warning: {
-      gradient: "from-warning/5 to-warning/10",
-      iconBg: "bg-warning/10",
-      iconColor: "text-warning",
-      border: "border-warning/20"
+      gradient: "from-warning/10 via-warning-light/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-warning to-warning-light",
+      iconColor: "text-white",
+      border: "border-warning/30",
+      glow: "shadow-[0_0_20px_rgba(245,158,11,0.15)] dark:shadow-[0_0_25px_rgba(245,158,11,0.25)]"
     },
     error: {
-      gradient: "from-error/5 to-error/10",
-      iconBg: "bg-error/10",
-      iconColor: "text-error",
-      border: "border-error/20"
+      gradient: "from-error/10 via-error-light/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-error to-error-light",
+      iconColor: "text-white",
+      border: "border-error/30",
+      glow: "shadow-[0_0_20px_rgba(239,68,68,0.15)] dark:shadow-[0_0_25px_rgba(239,68,68,0.25)]"
     },
     info: {
-      gradient: "from-info/5 to-info/10",
-      iconBg: "bg-info/10",
-      iconColor: "text-info",
-      border: "border-info/20"
+      gradient: "from-info/10 via-info-light/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-info to-info-light",
+      iconColor: "text-white",
+      border: "border-info/30",
+      glow: "shadow-[0_0_20px_rgba(139,92,246,0.15)] dark:shadow-[0_0_25px_rgba(139,92,246,0.25)]"
     }
   };
 
@@ -67,22 +72,31 @@ export function MetricCard({
   return (
     <Card 
       className={cn(
-        "relative overflow-hidden border-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg",
+        "relative overflow-hidden border-2 transition-all duration-500 hover:scale-[1.03] group",
         styles.border,
+        styles.glow,
+        "bg-gradient-to-br",
+        styles.gradient,
         className
       )}
     >
+      {/* Gradient overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
       <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
-        <div className={cn("p-2 rounded-lg", styles.iconBg)}>
+        <div className={cn(
+          "p-2.5 rounded-xl shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500", 
+          styles.iconBg
+        )}>
           <Icon className={cn("h-4 w-4 md:h-5 md:w-5", styles.iconColor)} />
         </div>
       </CardHeader>
       
       <CardContent className="relative">
-        <div className="text-xl md:text-2xl font-bold text-foreground">{value}</div>
+        <div className="text-xl md:text-2xl font-bold text-foreground group-hover:scale-105 transition-transform duration-300">{value}</div>
         {trend && (
           <div className="flex items-center gap-1 mt-1">
             <span className={cn("text-xs font-medium", trendColor)}>

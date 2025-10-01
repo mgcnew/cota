@@ -163,6 +163,35 @@
     transform: translateY(-2px);
     box-shadow: var(--shadow-elevated);
   }
+
+  /* Gradient Card Variants */
+  .card-gradient-primary {
+    @apply rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent;
+    @apply hover:border-primary/40 hover:shadow-[0_8px_30px_rgb(59,130,246,0.12)];
+    @apply dark:from-primary/10 dark:hover:shadow-[0_8px_30px_rgb(59,130,246,0.25)];
+    @apply transition-all duration-500 hover:-translate-y-1;
+  }
+
+  .card-gradient-success {
+    @apply rounded-xl border-2 border-success/20 bg-gradient-to-br from-success/5 via-transparent to-transparent;
+    @apply hover:border-success/40 hover:shadow-[0_8px_30px_rgb(16,185,129,0.12)];
+    @apply dark:from-success/10 dark:hover:shadow-[0_8px_30px_rgb(16,185,129,0.25)];
+    @apply transition-all duration-500 hover:-translate-y-1;
+  }
+
+  .card-gradient-warning {
+    @apply rounded-xl border-2 border-warning/20 bg-gradient-to-br from-warning/5 via-transparent to-transparent;
+    @apply hover:border-warning/40 hover:shadow-[0_8px_30px_rgb(245,158,11,0.12)];
+    @apply dark:from-warning/10 dark:hover:shadow-[0_8px_30px_rgb(245,158,11,0.25)];
+    @apply transition-all duration-500 hover:-translate-y-1;
+  }
+
+  .card-gradient-info {
+    @apply rounded-xl border-2 border-info/20 bg-gradient-to-br from-info/5 via-transparent to-transparent;
+    @apply hover:border-info/40 hover:shadow-[0_8px_30px_rgb(139,92,246,0.12)];
+    @apply dark:from-info/10 dark:hover:shadow-[0_8px_30px_rgb(139,92,246,0.25)];
+    @apply transition-all duration-500 hover:-translate-y-1;
+  }
   
   /* Dashboard Metrics Cards */
   .metrics-card {

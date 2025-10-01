@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/ui/metric-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, Legend, Tooltip } from "recharts";
-import { Package, Building2, FileText, DollarSign, Calendar, ArrowUpRight, Loader2 } from "lucide-react";
+import { Package, Building2, FileText, DollarSign, Calendar, ArrowUpRight, Loader2, TrendingUp, Users } from "lucide-react";
 import { useDashboard } from "@/hooks/useDashboard";
 
 export default function Dashboard() {
@@ -90,9 +90,14 @@ export default function Dashboard() {
       {/* Charts Section */}
       <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         {/* Pie Chart - Top Fornecedores */}
-        <Card className="card-elevated border-2 border-primary/10">
+        <Card className="card-gradient-primary group">
           <CardHeader>
-            <CardTitle className="text-base md:text-lg font-semibold">Distribuição por Fornecedores</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Building2 className="h-4 w-4 text-primary" />
+              </div>
+              <CardTitle className="text-base md:text-lg font-semibold">Distribuição por Fornecedores</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
@@ -141,9 +146,14 @@ export default function Dashboard() {
         </Card>
 
         {/* Line Chart - Desempenho Mensal */}
-        <Card className="card-elevated border-2 border-success/10">
+        <Card className="card-gradient-success group">
           <CardHeader>
-            <CardTitle className="text-base md:text-lg font-semibold">Desempenho Mensal</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-success/10 group-hover:bg-success/20 transition-colors">
+                <TrendingUp className="h-4 w-4 text-success" />
+              </div>
+              <CardTitle className="text-base md:text-lg font-semibold">Desempenho Mensal</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
@@ -225,10 +235,15 @@ export default function Dashboard() {
       {/* Content Grid */}
       <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
         {/* Recent Quotes */}
-        <Card className="lg:col-span-2 card-elevated border-2 border-primary/10">
+        <Card className="lg:col-span-2 card-gradient-info group">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base md:text-lg font-semibold">Cotações Recentes</CardTitle>
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-info/10 group-hover:bg-info/20 transition-colors">
+                  <FileText className="h-4 w-4 text-info" />
+                </div>
+                <CardTitle className="text-base md:text-lg font-semibold">Cotações Recentes</CardTitle>
+              </div>
               <Button variant="ghost" size="sm" className="h-8">
                 <span className="hidden sm:inline">Ver todas</span>
                 <ArrowUpRight className="h-4 w-4 sm:ml-1" />
@@ -237,7 +252,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentQuotes.map(quote => <div key={quote.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 md:p-4 rounded-lg border-2 border-border hover:border-primary/30 hover:bg-muted/30 transition-all gap-2">
+              {recentQuotes.map(quote => <div key={quote.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 md:p-4 rounded-lg border-2 border-border hover:border-info/40 hover:bg-gradient-to-r hover:from-info/5 hover:to-transparent hover:shadow-lg hover:scale-[1.01] transition-all duration-300 gap-2 group/item">
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-foreground text-sm md:text-base truncate">{quote.product}</span>
@@ -257,13 +272,18 @@ export default function Dashboard() {
         </Card>
 
         {/* Top Suppliers */}
-        <Card className="card-elevated border-2 border-success/10">
+        <Card className="card-gradient-warning group">
           <CardHeader>
-            <CardTitle className="text-base md:text-lg font-semibold">Top Fornecedores</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-warning/10 group-hover:bg-warning/20 transition-colors">
+                <Users className="h-4 w-4 text-warning" />
+              </div>
+              <CardTitle className="text-base md:text-lg font-semibold">Top Fornecedores</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 md:space-y-4">
-              {topSuppliers.map((supplier, index) => <div key={supplier.name} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+              {topSuppliers.map((supplier, index) => <div key={supplier.name} className="flex items-center justify-between p-3 rounded-lg hover:bg-gradient-to-r hover:from-warning/5 hover:to-transparent border border-transparent hover:border-warning/20 hover:shadow-md transition-all duration-300">
                   <div className="flex items-center gap-2 md:gap-3 min-w-0">
                     <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold text-white shrink-0 ${index === 0 ? "bg-warning" : index === 1 ? "bg-info" : "bg-primary"}`}>
                       {index + 1}
