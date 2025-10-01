@@ -208,7 +208,7 @@ export function AppSidebar() {
           <Popover>
             <PopoverTrigger asChild>
               <button className={cn("w-full flex items-center rounded-xl hover:bg-muted/50 transition-all duration-200 cursor-pointer group", isCollapsed ? "justify-center py-3" : "gap-3 px-3 py-3")}>
-                <div className="w-9 h-9 rounded-full bg-gradient-primary flex items-center justify-center shadow-md shadow-primary/20 ring-2 ring-primary/10 transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/30">
+                <div className="w-9 h-9 bg-gradient-primary flex items-center justify-center shadow-md shadow-primary/20 ring-2 ring-primary/10 transition-all duration-200 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/30 bg-indigo-950 rounded-full">
                   <Users className="h-4 w-4 text-white" />
                 </div>
                 {!isCollapsed && <div className="flex-1 min-w-0 text-left">
