@@ -321,7 +321,7 @@ export default function Analytics() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-bold text-4xl text-[#ff4c00]">Analytics</h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-lg text-inherit">
             Análises avançadas e insights do sistema
           </p>
         </div>
