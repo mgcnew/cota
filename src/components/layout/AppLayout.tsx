@@ -30,7 +30,7 @@ export function AppLayout() {
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="h-14 md:h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
+          <header className="h-14 md:h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40 mx-[23px] py-0 my-[11px]">
             <div className="flex items-center justify-between h-full px-3 md:px-6 py-0 my-0">
               <div className="flex items-center gap-2 md:gap-4 min-w-0">
                 <SidebarTrigger className="text-muted-foreground hover:text-foreground shrink-0" />
