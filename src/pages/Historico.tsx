@@ -169,7 +169,7 @@ export default function Historico() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-bold text-foreground text-4xl">Histórico</h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-lg text-inherit">
             Acompanhe todas as atividades do sistema
           </p>
         </div>
