@@ -112,7 +112,7 @@ export function AppSidebar() {
               Principal
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="py-0 my-0">
                 {mainItems.map(item => {
                 const isItemActive = isActive(item.url);
                 const navContent = <NavLink to={item.url} end className={cn("flex items-center transition-all duration-300 group", isCollapsed ? "w-full justify-center py-3 rounded-xl" : "gap-3 px-4 py-2.5 mx-2 rounded-xl", isItemActive ? `${item.bgColor} ${item.color} font-semibold shadow-sm ${!isCollapsed && `border-l-3 ${item.color.replace('text-', 'border-')}`}` : `text-muted-foreground/70 hover:text-foreground ${item.hoverBg}`)}>
