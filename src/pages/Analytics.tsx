@@ -320,7 +320,7 @@ export default function Analytics() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-bold text-foreground text-4xl">Analytics</h1>
+          <h1 className="font-bold text-4xl text-[#ff4c00]">Analytics</h1>
           <p className="text-muted-foreground text-lg">
             Análises avançadas e insights do sistema
           </p>
