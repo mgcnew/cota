@@ -109,7 +109,7 @@ export default function Produtos() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-[#f1753c] md:text-4xl">Produtos</h1>
+          <h1 className="text-2xl font-bold md:text-4xl text-[#ff4c00]">Produtos</h1>
           <p className="text-sm text-inherit md:text-lg">
             Gerencie seu catálogo de produtos e acompanhe preços
           </p>
