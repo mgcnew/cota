@@ -45,7 +45,7 @@ export default function Dashboard() {
             Visão geral do sistema de cotações - {new Date().toLocaleDateString('pt-BR')}
           </p>
         </div>
-        <Button variant="outline" size="sm" className="self-start sm:self-auto">
+        <Button variant="outline" size="sm" className="self-start sm:self-auto bg-slate-50">
           <Calendar className="h-4 w-4 mr-2" />
           <span className="hidden sm:inline">Últimos 30 dias</span>
           <span className="sm:hidden">30 dias</span>
