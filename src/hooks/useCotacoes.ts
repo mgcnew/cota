@@ -69,7 +69,7 @@ export function useCotacoes() {
           .join(", ");
 
         return {
-          id: `COT-${String(index + 1).padStart(3, '0')}`,
+          id: quote.id, // Use real UUID instead of index-based ID
           produto: produtosTexto || "Sem produtos",
           quantidade: `${items.length || 0} produto(s)`,
           status: quote.status,
@@ -79,7 +79,9 @@ export function useCotacoes() {
           melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
           melhorFornecedor: fornecedorMelhorPreco?.nome || "Aguardando",
           economia: "0%",
-          fornecedoresParticipantes
+          fornecedoresParticipantes,
+          // Add raw data for editing
+          _raw: quote
         };
       });
 
@@ -87,9 +89,153 @@ export function useCotacoes() {
     },
   });
 
+  // Mutation to update supplier value
+  const updateSupplierValue = useMutation({
+    mutationFn: async ({ quoteId, supplierId, newValue }: { quoteId: string; supplierId: string; newValue: number }) => {
+      const { error } = await supabase
+        .from("quote_suppliers")
+        .update({
+          valor_oferecido: newValue,
+          data_resposta: new Date().toISOString().split('T')[0],
+          status: 'respondido'
+        })
+        .eq("quote_id", quoteId)
+        .eq("supplier_id", supplierId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      toast({
+        title: "Valor atualizado",
+        description: "O valor oferecido foi atualizado com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao atualizar",
+        description: error.message || "Não foi possível atualizar o valor",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Mutation to delete quote
+  const deleteQuote = useMutation({
+    mutationFn: async (quoteId: string) => {
+      // Delete related records first (if not using CASCADE)
+      await supabase.from("quote_items").delete().eq("quote_id", quoteId);
+      await supabase.from("quote_suppliers").delete().eq("quote_id", quoteId);
+      
+      const { error } = await supabase
+        .from("quotes")
+        .delete()
+        .eq("id", quoteId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      toast({
+        title: "Cotação excluída",
+        description: "A cotação foi excluída com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao excluir",
+        description: error.message || "Não foi possível excluir a cotação",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Mutation to update quote
+  const updateQuote = useMutation({
+    mutationFn: async ({ quoteId, data }: { quoteId: string; data: any }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // Update quote
+      const { error: quoteError } = await supabase
+        .from("quotes")
+        .update({
+          data_inicio: data.dataInicio.toISOString().split('T')[0],
+          data_fim: data.dataFim.toISOString().split('T')[0],
+          observacoes: data.observacoes || null,
+          status: data.status
+        })
+        .eq("id", quoteId);
+
+      if (quoteError) throw quoteError;
+
+      // Delete old items
+      await supabase.from("quote_items").delete().eq("quote_id", quoteId);
+
+      // Insert new items
+      const quoteItemsData = data.produtos.map((p: any) => ({
+        quote_id: quoteId,
+        product_id: p.produtoId,
+        product_name: p.produtoNome,
+        quantidade: p.quantidade,
+        unidade: p.unidade
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("quote_items")
+        .insert(quoteItemsData);
+
+      if (itemsError) throw itemsError;
+
+      // Update suppliers if changed
+      if (data.fornecedoresIds && data.fornecedoresIds.length > 0) {
+        await supabase.from("quote_suppliers").delete().eq("quote_id", quoteId);
+
+        const { data: suppliersData } = await supabase
+          .from("suppliers")
+          .select("id, name")
+          .in("id", data.fornecedoresIds);
+
+        const quoteSuppliersData = data.fornecedoresIds.map((supplierId: string) => {
+          const supplier = suppliersData?.find(s => s.id === supplierId);
+          return {
+            quote_id: quoteId,
+            supplier_id: supplierId,
+            supplier_name: supplier?.name || "Desconhecido",
+            status: 'pendente'
+          };
+        });
+
+        const { error: suppliersError } = await supabase
+          .from("quote_suppliers")
+          .insert(quoteSuppliersData);
+
+        if (suppliersError) throw suppliersError;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      toast({
+        title: "Cotação atualizada",
+        description: "A cotação foi atualizada com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao atualizar",
+        description: error.message || "Não foi possível atualizar a cotação",
+        variant: "destructive",
+      });
+    }
+  });
+
   return {
     cotacoes,
     isLoading,
     refetch: () => queryClient.invalidateQueries({ queryKey: ['cotacoes'] }),
+    updateSupplierValue: updateSupplierValue.mutate,
+    deleteQuote: deleteQuote.mutate,
+    updateQuote: updateQuote.mutate,
+    isUpdating: updateSupplierValue.isPending || deleteQuote.isPending || updateQuote.isPending,
   };
 }

@@ -37,42 +37,12 @@ export default function Cotacoes() {
   const {
     cotacoes,
     isLoading,
-    refetch
+    refetch,
+    updateSupplierValue,
+    deleteQuote,
+    updateQuote,
+    isUpdating
   } = useCotacoes();
-
-  // Mock data temporário para EditQuoteDialog
-  const mockProducts = [{
-    id: "1",
-    name: "Coxa com Sobrecoxa"
-  }, {
-    id: "2",
-    name: "Filé de Frango"
-  }, {
-    id: "3",
-    name: "Linguiça Toscana Aurora"
-  }, {
-    id: "4",
-    name: "Contra Filé"
-  }, {
-    id: "5",
-    name: "Peito de Frango"
-  }];
-  const mockSuppliers = [{
-    id: "1",
-    name: "Holambra"
-  }, {
-    id: "2",
-    name: "Seara"
-  }, {
-    id: "3",
-    name: "Davi"
-  }, {
-    id: "4",
-    name: "Adriano/Sidio"
-  }, {
-    id: "5",
-    name: "Amandinha"
-  }];
   const getStatusBadge = (status: string) => {
     const variants = {
       ativa: "default",
@@ -229,18 +199,32 @@ export default function Cotacoes() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <ViewQuoteDialog quote={cotacao} onUpdateSupplierValue={() => {}} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Visualizar
-                        </DropdownMenuItem>} />
-                    <EditQuoteDialog quote={cotacao} onEdit={() => {}} products={[]} suppliers={mockSuppliers} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Editar
-                        </DropdownMenuItem>} />
-                    <DeleteQuoteDialog quote={cotacao} onDelete={() => {}} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Excluir
-                        </DropdownMenuItem>} />
+                    <ViewQuoteDialog 
+                      quote={cotacao} 
+                      onUpdateSupplierValue={(quoteId, supplierId, newValue) => 
+                        updateSupplierValue({ quoteId, supplierId, newValue })
+                      }
+                      trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Visualizar
+                      </DropdownMenuItem>} 
+                    />
+                    <EditQuoteDialog 
+                      quote={cotacao} 
+                      onEdit={(quoteId, data) => updateQuote({ quoteId, data })}
+                      trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </DropdownMenuItem>} 
+                    />
+                    <DeleteQuoteDialog 
+                      quote={cotacao} 
+                      onDelete={(id) => deleteQuote(id)}
+                      trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
+                      </DropdownMenuItem>} 
+                    />
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardContent>
@@ -308,18 +292,32 @@ export default function Cotacoes() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <ViewQuoteDialog quote={cotacao} onUpdateSupplierValue={() => {}} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    Visualizar
-                                  </DropdownMenuItem>} />
-                              <EditQuoteDialog quote={cotacao} onEdit={() => {}} products={[]} suppliers={mockSuppliers} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Editar
-                                  </DropdownMenuItem>} />
-                              <DeleteQuoteDialog quote={cotacao} onDelete={() => {}} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Excluir
-                                  </DropdownMenuItem>} />
+                              <ViewQuoteDialog 
+                                quote={cotacao} 
+                                onUpdateSupplierValue={(quoteId, supplierId, newValue) => 
+                                  updateSupplierValue({ quoteId, supplierId, newValue })
+                                }
+                                trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Visualizar
+                                </DropdownMenuItem>} 
+                              />
+                              <EditQuoteDialog 
+                                quote={cotacao} 
+                                onEdit={(quoteId, data) => updateQuote({ quoteId, data })}
+                                trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Editar
+                                </DropdownMenuItem>} 
+                              />
+                              <DeleteQuoteDialog 
+                                quote={cotacao} 
+                                onDelete={(id) => deleteQuote(id)}
+                                trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Excluir
+                                </DropdownMenuItem>} 
+                              />
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
