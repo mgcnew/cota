@@ -199,32 +199,25 @@ export default function Cotacoes() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <ViewQuoteDialog 
-                      quote={cotacao} 
-                      onUpdateSupplierValue={(quoteId, supplierId, newValue) => 
-                        updateSupplierValue({ quoteId, supplierId, newValue })
-                      }
-                      trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                    <ViewQuoteDialog quote={cotacao} onUpdateSupplierValue={(quoteId, supplierId, newValue) => updateSupplierValue({
+                  quoteId,
+                  supplierId,
+                  newValue
+                })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                         <Eye className="h-4 w-4 mr-2" />
                         Visualizar
-                      </DropdownMenuItem>} 
-                    />
-                    <EditQuoteDialog 
-                      quote={cotacao} 
-                      onEdit={(quoteId, data) => updateQuote({ quoteId, data })}
-                      trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                      </DropdownMenuItem>} />
+                    <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                  quoteId,
+                  data
+                })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                         <Edit className="h-4 w-4 mr-2" />
                         Editar
-                      </DropdownMenuItem>} 
-                    />
-                    <DeleteQuoteDialog 
-                      quote={cotacao} 
-                      onDelete={(id) => deleteQuote(id)}
-                      trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                      </DropdownMenuItem>} />
+                    <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir
-                      </DropdownMenuItem>} 
-                    />
+                      </DropdownMenuItem>} />
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardContent>
@@ -253,7 +246,7 @@ export default function Cotacoes() {
                             <FileText className="h-4 w-4 text-primary" />
                           </div>
                           <div>
-                            <div className="font-medium">{cotacao.id}</div>
+                            
                             <div className="text-xs text-muted-foreground md:hidden">{cotacao.produto}</div>
                           </div>
                         </div>
@@ -292,32 +285,25 @@ export default function Cotacoes() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <ViewQuoteDialog 
-                                quote={cotacao} 
-                                onUpdateSupplierValue={(quoteId, supplierId, newValue) => 
-                                  updateSupplierValue({ quoteId, supplierId, newValue })
-                                }
-                                trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                              <ViewQuoteDialog quote={cotacao} onUpdateSupplierValue={(quoteId, supplierId, newValue) => updateSupplierValue({
+                          quoteId,
+                          supplierId,
+                          newValue
+                        })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                                   <Eye className="h-4 w-4 mr-2" />
                                   Visualizar
-                                </DropdownMenuItem>} 
-                              />
-                              <EditQuoteDialog 
-                                quote={cotacao} 
-                                onEdit={(quoteId, data) => updateQuote({ quoteId, data })}
-                                trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                </DropdownMenuItem>} />
+                              <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                          quoteId,
+                          data
+                        })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Editar
-                                </DropdownMenuItem>} 
-                              />
-                              <DeleteQuoteDialog 
-                                quote={cotacao} 
-                                onDelete={(id) => deleteQuote(id)}
-                                trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                                </DropdownMenuItem>} />
+                              <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Excluir
-                                </DropdownMenuItem>} 
-                              />
+                                </DropdownMenuItem>} />
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
