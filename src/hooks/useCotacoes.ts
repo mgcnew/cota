@@ -32,31 +32,53 @@ export function useCotacoes() {
   const { data: cotacoes = [], isLoading } = useQuery({
     queryKey: ['cotacoes'],
     queryFn: async () => {
-      // OPTIMIZED: Single query with joins instead of N+1 queries
+      // Fetch quotes with related data
       const { data: quotesData, error: quotesError } = await supabase
         .from("quotes")
         .select(`
           *,
           quote_items(*),
-          quote_suppliers(*),
-          quote_supplier_items(*)
+          quote_suppliers(*)
         `)
         .order("created_at", { ascending: false });
 
       if (quotesError) throw quotesError;
 
+      // Fetch all quote_supplier_items separately
+      const { data: supplierItemsData, error: supplierItemsError } = await supabase
+        .from("quote_supplier_items")
+        .select("*");
+
+      if (supplierItemsError) throw supplierItemsError;
+
       const cotacoesCompletas = (quotesData || []).map((quote, index) => {
         const items = quote.quote_items || [];
         const suppliers = quote.quote_suppliers || [];
 
-        const fornecedoresParticipantes: FornecedorParticipante[] = suppliers.map(s => ({
-          id: s.supplier_id,
-          nome: s.supplier_name,
-          valorOferecido: Number(s.valor_oferecido) || 0,
-          dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString("pt-BR") : null,
-          observacoes: s.observacoes || "",
-          status: s.status as "pendente" | "respondido"
-        }));
+        // Get supplier items for this quote
+        const quoteSupplierItems = (supplierItemsData || []).filter(
+          item => item.quote_id === quote.id
+        );
+
+        const fornecedoresParticipantes: FornecedorParticipante[] = suppliers.map(s => {
+          // Get all values offered by this supplier for all products
+          const supplierValues = quoteSupplierItems
+            .filter(item => item.supplier_id === s.supplier_id)
+            .map(item => Number(item.valor_oferecido) || 0)
+            .filter(val => val > 0);
+
+          // Use the total or average (for now, let's sum all values)
+          const totalValue = supplierValues.reduce((sum, val) => sum + val, 0);
+
+          return {
+            id: s.supplier_id,
+            nome: s.supplier_name,
+            valorOferecido: totalValue,
+            dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString("pt-BR") : null,
+            observacoes: s.observacoes || "",
+            status: s.status as "pendente" | "respondido"
+          };
+        });
 
         const valoresRespondidos = fornecedoresParticipantes
           .filter(f => f.valorOferecido > 0)
@@ -82,7 +104,9 @@ export function useCotacoes() {
           economia: "0%",
           fornecedoresParticipantes,
           // Add raw data for editing
-          _raw: quote
+          _raw: quote,
+          // Add supplier items for detailed view
+          _supplierItems: quoteSupplierItems
         };
       });
 
