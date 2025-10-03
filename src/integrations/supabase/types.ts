@@ -220,6 +220,39 @@ export type Database = {
           },
         ]
       }
+      quote_supplier_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          product_name: string
+          quote_id: string
+          supplier_id: string
+          updated_at: string
+          valor_oferecido: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          product_name: string
+          quote_id: string
+          supplier_id: string
+          updated_at?: string
+          valor_oferecido?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          product_name?: string
+          quote_id?: string
+          supplier_id?: string
+          updated_at?: string
+          valor_oferecido?: number | null
+        }
+        Relationships: []
+      }
       quote_suppliers: {
         Row: {
           created_at: string

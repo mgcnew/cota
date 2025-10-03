@@ -1,17 +1,12 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Eye, CheckCircle, Clock, Edit2, Save, X } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign } from "lucide-react";
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
 
 interface FornecedorParticipante {
   id: string;
@@ -34,50 +29,55 @@ interface Quote {
   melhorFornecedor: string;
   economia: string;
   fornecedoresParticipantes: FornecedorParticipante[];
+  _raw?: any;
 }
 
 interface ViewQuoteDialogProps {
   quote: Quote;
-  onUpdateSupplierValue: (quoteId: string, supplierId: string, newValue: number) => void;
+  onUpdateSupplierProductValue?: (quoteId: string, supplierId: string, productId: string, newValue: number) => void;
   trigger?: React.ReactNode;
 }
 
-export default function ViewQuoteDialog({
-  quote,
-  onUpdateSupplierValue,
-  trigger,
-}: ViewQuoteDialogProps) {
+export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, trigger }: ViewQuoteDialogProps) {
   const [open, setOpen] = useState(false);
-  const [editingSupplier, setEditingSupplier] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState("");
+  const [selectedSupplier, setSelectedSupplier] = useState<string>("");
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editedValues, setEditedValues] = useState<Record<string, number>>({});
 
-  const handleStartEdit = (supplierId: string, currentValue: number) => {
-    setEditingSupplier(supplierId);
-    setEditValue(currentValue.toFixed(2));
+  const handleStartEdit = (productId: string, currentValue: number) => {
+    setEditingProductId(productId);
+    setEditedValues(prev => ({ ...prev, [productId]: currentValue }));
   };
 
-  const handleSaveEdit = (supplierId: string) => {
-    const numValue = parseFloat(editValue);
-    if (isNaN(numValue) || numValue < 0) {
-      toast({
-        title: "Valor inválido",
-        description: "Por favor, insira um valor numérico válido.",
-        variant: "destructive",
-      });
-      return;
+  const handleSaveEdit = (productId: string) => {
+    if (selectedSupplier && onUpdateSupplierProductValue && editedValues[productId] !== undefined) {
+      onUpdateSupplierProductValue(quote.id, selectedSupplier, productId, editedValues[productId]);
+      setEditingProductId(null);
     }
-
-    onUpdateSupplierValue(quote.id, supplierId, numValue);
-    setEditingSupplier(null);
-    toast({
-      title: "Valor atualizado",
-      description: "O valor oferecido foi atualizado com sucesso.",
-    });
   };
 
   const handleCancelEdit = () => {
-    setEditingSupplier(null);
-    setEditValue("");
+    setEditingProductId(null);
+    setEditedValues({});
+  };
+
+  // Get products from the quote
+  const products = quote._raw?.quote_items || [];
+  
+  // Get supplier items for selected supplier
+  const getSupplierProductValue = (supplierId: string, productId: string): number => {
+    const item = quote._raw?.quote_supplier_items?.find(
+      (item: any) => item.supplier_id === supplierId && item.product_id === productId
+    );
+    return item?.valor_oferecido || 0;
+  };
+
+  // Calculate best price for each product
+  const getBestPriceForProduct = (productId: string): number => {
+    const values = quote.fornecedoresParticipantes
+      .map(f => getSupplierProductValue(f.id, productId))
+      .filter(v => v > 0);
+    return values.length > 0 ? Math.min(...values) : 0;
   };
 
   const getMelhorValor = () => {
@@ -86,8 +86,6 @@ export default function ViewQuoteDialog({
       .map(f => f.valorOferecido);
     return valores.length > 0 ? Math.min(...valores) : 0;
   };
-
-  const melhorValor = getMelhorValor();
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -114,172 +112,248 @@ export default function ViewQuoteDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="ghost" size="sm">
-            <Eye className="h-4 w-4" />
-          </Button>
-        )}
+        {trigger}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Cotação {quote.id}</DialogTitle>
+          <DialogTitle>Detalhes da Cotação</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">Detalhes</TabsTrigger>
-            <TabsTrigger value="comparative">Comparativo de Preços</TabsTrigger>
-          </TabsList>
+        <div className="space-y-4">
+          <Tabs defaultValue="detalhes" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
+              <TabsTrigger value="atualizacao">Atualização de Valores</TabsTrigger>
+              <TabsTrigger value="comparativo">Comparativo de Preços</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="details" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Produto</label>
-                <p className="text-lg font-semibold text-foreground">{quote.produto}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Status</label>
-                <div className="mt-1">{getStatusBadge(quote.status)}</div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Quantidade</label>
-                <p className="text-lg font-semibold text-foreground">{quote.quantidade}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Fornecedores Participantes</label>
-                <p className="text-lg font-semibold text-foreground">{quote.fornecedores}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Data de Início</label>
-                <p className="text-lg font-semibold text-foreground">{quote.dataInicio}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Data de Fim</label>
-                <p className="text-lg font-semibold text-foreground">{quote.dataFim}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Melhor Preço</label>
-                <p className="text-lg font-semibold text-success">{quote.melhorPreco}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Melhor Fornecedor</label>
-                <p className="text-lg font-semibold text-foreground">{quote.melhorFornecedor}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Economia</label>
-                <p className="text-lg font-semibold text-success">{quote.economia}</p>
-              </div>
-            </div>
-          </TabsContent>
+            <TabsContent value="detalhes" className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-start gap-3">
+                  <Package className="h-5 w-5 text-muted-foreground mt-1" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Produto</p>
+                    <p className="font-semibold">{quote.produto}</p>
+                  </div>
+                </div>
 
-          <TabsContent value="comparative" className="mt-4">
-            <div className="rounded-md border">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="p-3 text-left text-sm font-medium">Fornecedor</th>
-                    <th className="p-3 text-left text-sm font-medium">Valor Oferecido</th>
-                    <th className="p-3 text-left text-sm font-medium">Status</th>
-                    <th className="p-3 text-left text-sm font-medium">Data Resposta</th>
-                    <th className="p-3 text-left text-sm font-medium">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {quote.fornecedoresParticipantes.map((fornecedor) => {
-                    const isMelhorPreco = fornecedor.valorOferecido === melhorValor && melhorValor > 0;
-                    const isEditing = editingSupplier === fornecedor.id;
+                <div className="flex items-start gap-3">
+                  <Users className="h-5 w-5 text-muted-foreground mt-1" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Fornecedores</p>
+                    <p className="font-semibold">{quote.fornecedores}</p>
+                  </div>
+                </div>
 
-                    return (
-                      <tr
-                        key={fornecedor.id}
-                        className={`border-b hover:bg-muted/30 transition-colors ${
-                          isMelhorPreco ? "bg-success/10" : ""
-                        }`}
-                      >
-                        <td className="p-3">
-                          <span className="font-medium text-foreground">{fornecedor.nome}</span>
-                        </td>
-                        <td className="p-3">
-                          {isEditing ? (
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">R$</span>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                className="w-32"
-                                autoFocus
-                              />
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground mt-1" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Data de Início</p>
+                    <p className="font-semibold">{quote.dataInicio}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground mt-1" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Data de Fim</p>
+                    <p className="font-semibold">{quote.dataFim}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <TrendingDown className="h-5 w-5 text-success mt-1" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Melhor Preço</p>
+                    <p className="font-semibold text-success">{quote.melhorPreco}</p>
+                    <p className="text-sm text-muted-foreground">{quote.melhorFornecedor}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="h-5 w-5 mt-1">
+                    {getStatusBadge(quote.status)}
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Status</p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="atualizacao" className="space-y-4">
+              <Card className="p-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Selecione o Fornecedor</label>
+                    <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolha um fornecedor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {quote.fornecedoresParticipantes.map(fornecedor => (
+                          <SelectItem key={fornecedor.id} value={fornecedor.id}>
+                            {fornecedor.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedSupplier && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        Lista de Produtos
+                      </h4>
+                      <div className="rounded-lg border">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b bg-muted/50">
+                              <th className="p-3 text-left font-medium">Produto</th>
+                              <th className="p-3 text-left font-medium">Quantidade</th>
+                              <th className="p-3 text-left font-medium">Valor Oferecido</th>
+                              <th className="p-3 text-left font-medium">Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {products.map((product: any) => {
+                              const currentValue = getSupplierProductValue(selectedSupplier, product.product_id);
+                              const isEditing = editingProductId === product.product_id;
+                              const bestPrice = getBestPriceForProduct(product.product_id);
+                              const isBestPrice = currentValue > 0 && currentValue === bestPrice;
+
+                              return (
+                                <tr key={product.product_id} className="border-b last:border-0">
+                                  <td className="p-3">{product.product_name}</td>
+                                  <td className="p-3">{product.quantidade} {product.unidade}</td>
+                                  <td className="p-3">
+                                    {isEditing ? (
+                                      <div className="flex items-center gap-2">
+                                        <Input
+                                          type="number"
+                                          value={editedValues[product.product_id] || 0}
+                                          onChange={(e) => setEditedValues(prev => ({
+                                            ...prev,
+                                            [product.product_id]: Number(e.target.value)
+                                          }))}
+                                          className="w-32"
+                                          step="0.01"
+                                          min="0"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center gap-2">
+                                        <span className={isBestPrice ? "font-semibold text-green-600" : ""}>
+                                          R$ {currentValue.toFixed(2)}
+                                        </span>
+                                        {isBestPrice && (
+                                          <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                            Melhor Preço
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="p-3">
+                                    {isEditing ? (
+                                      <div className="flex gap-2">
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => handleSaveEdit(product.product_id)}
+                                        >
+                                          <Save className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={handleCancelEdit}
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => handleStartEdit(product.product_id, currentValue)}
+                                      >
+                                        <Edit2 className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="comparativo" className="space-y-4">
+              <div className="rounded-lg border overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="p-3 text-left font-medium">Produto</th>
+                      {quote.fornecedoresParticipantes.map(fornecedor => (
+                        <th key={fornecedor.id} className="p-3 text-center font-medium">
+                          {fornecedor.nome}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.map((product: any) => {
+                      const bestPrice = getBestPriceForProduct(product.product_id);
+                      
+                      return (
+                        <tr key={product.product_id} className="border-b last:border-0">
+                          <td className="p-3">
+                            <div>
+                              <p className="font-medium">{product.product_name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {product.quantidade} {product.unidade}
+                              </p>
                             </div>
-                          ) : (
-                            <span className={`font-semibold ${isMelhorPreco ? "text-success" : "text-foreground"}`}>
-                              {fornecedor.valorOferecido > 0
-                                ? `R$ ${fornecedor.valorOferecido.toFixed(2)}`
-                                : "R$ 0,00"}
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          {fornecedor.status === "respondido" ? (
-                            <Badge variant="secondary" className="gap-1">
-                              <CheckCircle className="h-3 w-3" />
-                              Respondido
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="gap-1">
-                              <Clock className="h-3 w-3" />
-                              Pendente
-                            </Badge>
-                          )}
-                        </td>
-                        <td className="p-3 text-sm text-muted-foreground">
-                          {fornecedor.dataResposta || "-"}
-                        </td>
-                        <td className="p-3">
-                          {isEditing ? (
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleSaveEdit(fornecedor.id)}
-                              >
-                                <Save className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleCancelEdit}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleStartEdit(fornecedor.id, fornecedor.valorOferecido)}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {melhorValor > 0 && (
-              <div className="mt-4 p-4 bg-success/10 rounded-lg border border-success/20">
-                <p className="text-sm text-success font-medium">
-                  ✓ Melhor oferta: R$ {melhorValor.toFixed(2)}
-                </p>
+                          </td>
+                          {quote.fornecedoresParticipantes.map(fornecedor => {
+                            const value = getSupplierProductValue(fornecedor.id, product.product_id);
+                            const isBestPrice = value > 0 && value === bestPrice;
+                            
+                            return (
+                              <td key={fornecedor.id} className="p-3 text-center">
+                                {value > 0 ? (
+                                  <div className="flex flex-col items-center gap-1">
+                                    <span className={isBestPrice ? "font-semibold text-green-600" : ""}>
+                                      R$ {value.toFixed(2)}
+                                    </span>
+                                    {isBestPrice && (
+                                      <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                                        Melhor
+                                      </Badge>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground">-</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </div>
       </DialogContent>
     </Dialog>
   );

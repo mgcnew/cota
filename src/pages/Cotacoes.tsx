@@ -38,7 +38,7 @@ export default function Cotacoes() {
     cotacoes,
     isLoading,
     refetch,
-    updateSupplierValue,
+    updateSupplierProductValue,
     deleteQuote,
     updateQuote,
     isUpdating
@@ -199,9 +199,10 @@ export default function Cotacoes() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <ViewQuoteDialog quote={cotacao} onUpdateSupplierValue={(quoteId, supplierId, newValue) => updateSupplierValue({
+                  <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
                   quoteId,
                   supplierId,
+                  productId,
                   newValue
                 })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                         <Eye className="h-4 w-4 mr-2" />
@@ -285,9 +286,10 @@ export default function Cotacoes() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <ViewQuoteDialog quote={cotacao} onUpdateSupplierValue={(quoteId, supplierId, newValue) => updateSupplierValue({
+                              <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
                           quoteId,
                           supplierId,
+                          productId,
                           newValue
                         })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                                   <Eye className="h-4 w-4 mr-2" />

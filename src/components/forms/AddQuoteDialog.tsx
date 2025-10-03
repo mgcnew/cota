@@ -207,6 +207,26 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
 
       if (suppliersError) throw suppliersError;
 
+      // 4. Create quote_supplier_items for each product and supplier combination
+      const quoteSupplierItemsData: any[] = [];
+      data.fornecedoresIds.forEach(supplierId => {
+        data.produtos.forEach(produto => {
+          quoteSupplierItemsData.push({
+            quote_id: quote.id,
+            supplier_id: supplierId,
+            product_id: produto.produtoId,
+            product_name: produto.produtoNome,
+            valor_oferecido: 0
+          });
+        });
+      });
+
+      const { error: supplierItemsError } = await supabase
+        .from("quote_supplier_items")
+        .insert(quoteSupplierItemsData);
+
+      if (supplierItemsError) throw supplierItemsError;
+
       onAdd(data);
       toast({
         title: "Cotação criada",

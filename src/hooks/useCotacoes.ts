@@ -38,7 +38,8 @@ export function useCotacoes() {
         .select(`
           *,
           quote_items(*),
-          quote_suppliers(*)
+          quote_suppliers(*),
+          quote_supplier_items(*)
         `)
         .order("created_at", { ascending: false });
 
@@ -89,20 +90,71 @@ export function useCotacoes() {
     },
   });
 
-  // Mutation to update supplier value
-  const updateSupplierValue = useMutation({
-    mutationFn: async ({ quoteId, supplierId, newValue }: { quoteId: string; supplierId: string; newValue: number }) => {
-      const { error } = await supabase
+  // Mutation to update supplier value for a specific product
+  const updateSupplierProductValue = useMutation({
+    mutationFn: async ({ 
+      quoteId, 
+      supplierId, 
+      productId, 
+      newValue 
+    }: { 
+      quoteId: string; 
+      supplierId: string; 
+      productId: string; 
+      newValue: number;
+    }) => {
+      // First check if record exists
+      const { data: existing } = await supabase
+        .from("quote_supplier_items")
+        .select("id")
+        .eq("quote_id", quoteId)
+        .eq("supplier_id", supplierId)
+        .eq("product_id", productId)
+        .maybeSingle();
+
+      if (existing) {
+        // Update existing record
+        const { error } = await supabase
+          .from("quote_supplier_items")
+          .update({
+            valor_oferecido: newValue
+          })
+          .eq("id", existing.id);
+
+        if (error) throw error;
+      } else {
+        // Get product name
+        const { data: productData } = await supabase
+          .from("products")
+          .select("name")
+          .eq("id", productId)
+          .single();
+
+        // Create new record
+        const { error } = await supabase
+          .from("quote_supplier_items")
+          .insert({
+            quote_id: quoteId,
+            supplier_id: supplierId,
+            product_id: productId,
+            product_name: productData?.name || "Produto",
+            valor_oferecido: newValue
+          });
+
+        if (error) throw error;
+      }
+
+      // Update supplier status
+      const { error: statusError } = await supabase
         .from("quote_suppliers")
         .update({
-          valor_oferecido: newValue,
-          data_resposta: new Date().toISOString().split('T')[0],
-          status: 'respondido'
+          status: 'respondido',
+          data_resposta: new Date().toISOString().split('T')[0]
         })
         .eq("quote_id", quoteId)
         .eq("supplier_id", supplierId);
 
-      if (error) throw error;
+      if (statusError) throw statusError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
@@ -233,9 +285,9 @@ export function useCotacoes() {
     cotacoes,
     isLoading,
     refetch: () => queryClient.invalidateQueries({ queryKey: ['cotacoes'] }),
-    updateSupplierValue: updateSupplierValue.mutate,
+    updateSupplierProductValue: updateSupplierProductValue.mutate,
     deleteQuote: deleteQuote.mutate,
     updateQuote: updateQuote.mutate,
-    isUpdating: updateSupplierValue.isPending || deleteQuote.isPending || updateQuote.isPending,
+    isUpdating: updateSupplierProductValue.isPending || deleteQuote.isPending || updateQuote.isPending,
   };
 }
