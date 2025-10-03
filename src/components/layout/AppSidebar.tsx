@@ -90,7 +90,7 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = (path: string) => isActive(path) ? "bg-primary/10 text-primary font-semibold shadow-sm border-l-3 border-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50";
-  return <Sidebar collapsible="icon" className="border-r border-border/50 bg-card/40 backdrop-blur-md shadow-sm px-0 mx-[8px] py-px rounded-3xl">
+  return <Sidebar collapsible="icon" className="border-r border-border/50 bg-card/40 backdrop-blur-md shadow-sm px-0 mx-[8px] rounded-3xl py-[12px]">
       {/* Logo */}
       <div className={cn("p-4 border-b border-border/50", isCollapsed ? "flex justify-center" : "px-6")}>
         <div className={cn("flex items-center gap-3", isCollapsed && "flex-col")}>
