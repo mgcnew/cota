@@ -30,6 +30,7 @@ interface Quote {
   economia: string;
   fornecedoresParticipantes: FornecedorParticipante[];
   _raw?: any;
+  _supplierItems?: any[];
 }
 
 interface ViewQuoteDialogProps {
@@ -66,7 +67,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, t
   
   // Get supplier items for selected supplier
   const getSupplierProductValue = (supplierId: string, productId: string): number => {
-    const item = quote._raw?.quote_supplier_items?.find(
+    const supplierItems = quote._supplierItems || quote._raw?.quote_supplier_items || [];
+    const item = supplierItems.find(
       (item: any) => item.supplier_id === supplierId && item.product_id === productId
     );
     return item?.valor_oferecido || 0;
