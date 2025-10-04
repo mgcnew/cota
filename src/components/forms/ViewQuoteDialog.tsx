@@ -74,12 +74,23 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, t
     return item?.valor_oferecido || 0;
   };
 
-  // Calculate best price for each product
-  const getBestPriceForProduct = (productId: string): number => {
-    const values = quote.fornecedoresParticipantes
-      .map(f => getSupplierProductValue(f.id, productId))
-      .filter(v => v > 0);
-    return values.length > 0 ? Math.min(...values) : 0;
+  // Calculate best price for each product and return the supplier ID
+  const getBestPriceInfoForProduct = (productId: string): { bestPrice: number; bestSupplierId: string | null } => {
+    let bestPrice = Infinity;
+    let bestSupplierId: string | null = null;
+    
+    quote.fornecedoresParticipantes.forEach(f => {
+      const value = getSupplierProductValue(f.id, productId);
+      if (value > 0 && value < bestPrice) {
+        bestPrice = value;
+        bestSupplierId = f.id;
+      }
+    });
+    
+    return { 
+      bestPrice: bestPrice === Infinity ? 0 : bestPrice, 
+      bestSupplierId 
+    };
   };
 
   const getMelhorValor = () => {
@@ -222,8 +233,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, t
                             {products.map((product: any) => {
                               const currentValue = getSupplierProductValue(selectedSupplier, product.product_id);
                               const isEditing = editingProductId === product.product_id;
-                              const bestPrice = getBestPriceForProduct(product.product_id);
-                              const isBestPrice = currentValue > 0 && currentValue === bestPrice;
+                              const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
+                              const isBestPrice = currentValue > 0 && selectedSupplier === bestSupplierId;
 
                               return (
                                 <tr key={product.product_id} className="border-b last:border-0">
@@ -312,7 +323,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, t
                   </thead>
                   <tbody>
                     {products.map((product: any) => {
-                      const bestPrice = getBestPriceForProduct(product.product_id);
+                      const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
                       
                       return (
                         <tr key={product.product_id} className="border-b last:border-0">
@@ -326,7 +337,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, t
                           </td>
                           {quote.fornecedoresParticipantes.map(fornecedor => {
                             const value = getSupplierProductValue(fornecedor.id, product.product_id);
-                            const isBestPrice = value > 0 && value === bestPrice;
+                            const isBestPrice = fornecedor.id === bestSupplierId;
                             
                             return (
                               <td key={fornecedor.id} className="p-3 text-center">
