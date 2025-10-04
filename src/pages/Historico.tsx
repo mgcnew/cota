@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { usePagination } from "@/hooks/usePagination";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import ViewHistoricoDialog from "@/components/forms/ViewHistoricoDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { History, Search, Filter, Eye, Download, Calendar, TrendingUp, TrendingDown, FileText, ShoppingCart, Building2, X, Loader2 } from "lucide-react";
+import { History, Search, Filter, Eye, Download, Calendar, TrendingUp, TrendingDown, FileText, ShoppingCart, Building2, X, Loader2, Activity, Clock } from "lucide-react";
 export default function Historico() {
   const {
     toast
@@ -21,6 +23,9 @@ export default function Historico() {
   const {
     user
   } = useAuth();
+  const { paginate } = usePagination<any>({
+    initialItemsPerPage: 10
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [tipoFilter, setTipoFilter] = useState("all");
   const [usuarioFilter, setUsuarioFilter] = useState("all");
@@ -152,6 +157,9 @@ export default function Historico() {
     return matchesSearch && matchesTipo && matchesUsuario && matchesValorMin && matchesValorMax && matchesEconomia && matchesDataInicio && matchesDataFim;
   });
 
+  // Aplicar paginação aos dados filtrados
+  const paginatedData = paginate(filteredHistorico);
+
   // Estatísticas do histórico
   const stats = {
     totalAcoes: historico.length,
@@ -165,22 +173,58 @@ export default function Historico() {
       </div>;
   }
   return <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-bold text-4xl text-[#ff4c00]">Histórico</h1>
-          <p className="text-lg text-inherit">
-            Acompanhe todas as atividades do sistema
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline">
-                <Calendar className="h-4 w-4 mr-2" />
-                {dataInicio || dataFim ? "Período Selecionado" : "Filtrar Período"}
-              </Button>
-            </PopoverTrigger>
+      {/* Header Histórico com Tema Slate */}
+      <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl p-6 border border-slate-100 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-slate-600 to-gray-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <History className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="font-bold text-3xl bg-gradient-to-r from-slate-900 to-gray-700 bg-clip-text text-transparent">
+                    Histórico
+                  </h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-sm">
+                      <Clock className="h-3 w-3" />
+                      Registro de Atividades
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
+              <div className="flex items-center gap-2 text-gray-700 bg-white/60 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <Activity className="h-4 w-4 text-slate-600" />
+                <span className="font-medium">Acompanhe todas as atividades do sistema</span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-gray-600 bg-white/40 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <History className="h-4 w-4 text-gray-500" />
+                <span>
+                  {filteredHistorico.length > 0 
+                    ? `${paginatedData.pagination.startIndex + 1}-${paginatedData.pagination.endIndex} de ${filteredHistorico.length} registros`
+                    : "Nenhum registro encontrado"
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-3">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline"
+                  className="bg-white/70 backdrop-blur-sm border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  {dataInicio || dataFim ? "Período Selecionado" : "Filtrar Período"}
+                </Button>
+              </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
               <div className="p-4 space-y-4">
                 <div>
@@ -203,10 +247,14 @@ export default function Historico() {
             </PopoverContent>
           </Popover>
           
-          <Button variant="outline" onClick={exportToCSV}>
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
-          </Button>
+            <Button 
+              onClick={exportToCSV}
+              className="bg-gradient-to-r from-slate-600 to-gray-600 hover:from-slate-700 hover:to-gray-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -333,14 +381,22 @@ export default function Historico() {
         </Card>
       </div>
 
-      {/* Histórico List */}
+      {/* Histórico List com Paginação */}
       <Card>
         <CardHeader>
-          <CardTitle>Atividades Recentes ({filteredHistorico.length})</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Atividades Recentes</span>
+            <Badge variant="outline" className="text-xs">
+              {filteredHistorico.length > 0 
+                ? `Página ${paginatedData.pagination.currentPage} de ${paginatedData.pagination.totalPages}`
+                : "Sem dados"
+              }
+            </Badge>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredHistorico.map(item => {
+            {paginatedData.items.map(item => {
             const iconColorClass = item.tipo === "cotacao" ? "text-info" : item.tipo === "pedido" ? "text-warning" : item.tipo === "fornecedor" ? "text-primary" : "text-success";
             const bgColorClass = item.tipo === "cotacao" ? "bg-info/10" : item.tipo === "pedido" ? "bg-warning/10" : item.tipo === "fornecedor" ? "bg-primary/10" : "bg-success/10";
             return <div key={item.id} className="group flex items-start gap-4 p-4 rounded-lg border-2 border-border hover:border-primary/40 bg-card hover:shadow-lg dark:hover:shadow-primary/20 transition-all duration-300">
@@ -381,6 +437,22 @@ export default function Historico() {
                 Nenhuma atividade encontrada com os filtros aplicados.
               </div>}
           </div>
+
+          {/* Componente de Paginação */}
+          {filteredHistorico.length > 0 && (
+            <div className="mt-6 border-t pt-4">
+              <DataPagination
+                currentPage={paginatedData.pagination.currentPage}
+                totalPages={paginatedData.pagination.totalPages}
+                itemsPerPage={paginatedData.pagination.itemsPerPage}
+                totalItems={paginatedData.pagination.totalItems}
+                onPageChange={paginatedData.pagination.goToPage}
+                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                startIndex={paginatedData.pagination.startIndex}
+                endIndex={paginatedData.pagination.endIndex}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

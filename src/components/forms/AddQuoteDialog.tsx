@@ -39,12 +39,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
-import { Calendar as CalendarIcon, Plus, X, Check, ChevronsUpDown, Trash2 } from "lucide-react";
+import { 
+  Calendar as CalendarIcon, 
+  Plus, 
+  X, 
+  Check, 
+  ChevronsUpDown, 
+  Trash2, 
+  Package, 
+  Building2, 
+  Clock, 
+  FileText,
+  ChevronRight,
+  ChevronLeft
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -93,6 +109,8 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
   const [loading, setLoading] = useState(true);
   const [supplierSearch, setSupplierSearch] = useState("");
   const [selectedSuppliers, setSelectedSuppliers] = useState<Supplier[]>([]);
+  const [activeTab, setActiveTab] = useState("produtos");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
@@ -143,6 +161,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
   };
 
   const onSubmit = async (data: QuoteFormData) => {
+    setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -235,6 +254,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       form.reset();
       setSelectedSuppliers([]);
       setSupplierSearch("");
+      setActiveTab("produtos");
       setOpen(false);
     } catch (error: any) {
       console.error("Erro ao criar cotação:", error);
@@ -243,6 +263,8 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
         description: error.message || "Ocorreu um erro ao criar a cotação",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -266,6 +288,52 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
     supplier.name.toLowerCase().includes(supplierSearch.toLowerCase())
   );
 
+  // Funções para navegação entre tabs
+  const tabs = [
+    { id: "produtos", label: "Produtos", icon: Package },
+    { id: "periodo", label: "Período", icon: Clock },
+    { id: "fornecedores", label: "Fornecedores", icon: Building2 },
+    { id: "detalhes", label: "Detalhes", icon: FileText }
+  ];
+
+  const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
+  const progress = ((currentTabIndex + 1) / tabs.length) * 100;
+
+  const canProceedToNext = () => {
+    const formValues = form.getValues();
+    switch (activeTab) {
+      case "produtos":
+        return formValues.produtos.every(p => p.produtoId && p.quantidade && p.unidade);
+      case "periodo":
+        return formValues.dataInicio && formValues.dataFim;
+      case "fornecedores":
+        return selectedSuppliers.length > 0;
+      case "detalhes":
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const handleNext = () => {
+    if (currentTabIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentTabIndex + 1].id);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentTabIndex > 0) {
+      setActiveTab(tabs[currentTabIndex - 1].id);
+    }
+  };
+
+  const getTabStatus = (tabId: string) => {
+    const tabIndex = tabs.findIndex(tab => tab.id === tabId);
+    if (tabIndex < currentTabIndex) return "completed";
+    if (tabIndex === currentTabIndex) return "current";
+    return "pending";
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -276,332 +344,561 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Nova Cotação</DialogTitle>
-          <DialogDescription>
-            Crie uma nova cotação para seus fornecedores
+      <DialogContent className="w-[95vw] max-w-[900px] h-[90vh] max-h-[800px] p-0 gap-0 overflow-hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+          <DialogTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
+            </div>
+            <span className="truncate">Nova Cotação</span>
+          </DialogTitle>
+          <DialogDescription className="text-gray-600 text-sm sm:text-base mt-1">
+            Crie uma nova cotação seguindo os passos abaixo
           </DialogDescription>
+          
+          {/* Progress Bar Responsivo */}
+          <div className="mt-3 sm:mt-4 space-y-2">
+            <div className="flex justify-between text-xs sm:text-sm text-gray-600">
+              <span>Progresso</span>
+              <span>{Math.round(progress)}% concluído</span>
+            </div>
+            <Progress value={progress} className="h-1.5 sm:h-2" />
+          </div>
         </DialogHeader>
         
         {loading ? (
-          <div className="py-8 text-center text-muted-foreground">
-            Carregando...
+          <div className="py-12 text-center text-muted-foreground">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            Carregando dados...
           </div>
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Produtos */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <FormLabel>Produtos*</FormLabel>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+              {/* Tab Navigation Responsiva */}
+              <div className="flex-shrink-0 px-2 sm:px-4 lg:px-6 py-3 sm:py-4 border-b bg-gray-50/50 overflow-x-auto">
+                <div className="flex items-center justify-start min-w-max">
+                  <div className="flex space-x-1 sm:space-x-2">
+                    {tabs.map((tab, index) => {
+                      const Icon = tab.icon;
+                      const status = getTabStatus(tab.id);
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setActiveTab(tab.id)}
+                          className={cn(
+                            "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 lg:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap",
+                            status === "current" && "bg-blue-600 text-white shadow-lg",
+                            status === "completed" && "bg-green-100 text-green-700 hover:bg-green-200",
+                            status === "pending" && "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                          )}
+                        >
+                          <Icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                          <span className="hidden min-[480px]:inline text-xs sm:text-sm">{tab.label}</span>
+                          {status === "completed" && <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tab Content Responsivo */}
+              <div className="flex-1 overflow-y-auto">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
+                  {/* Produtos Tab */}
+                  <TabsContent value="produtos" className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 m-0 h-full overflow-y-auto">
+                    <Card className="h-full flex flex-col">
+                      <CardHeader className="flex-shrink-0 pb-3 sm:pb-4">
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                          <Package className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                          <span className="truncate">Produtos da Cotação</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex-1 space-y-3 sm:space-y-4 overflow-y-auto">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <p className="text-xs sm:text-sm text-gray-600">
+                            Adicione os produtos que deseja cotar
+                          </p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => append({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" })}
+                            className="w-full sm:w-auto"
+                          >
+                            <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            <span className="text-xs sm:text-sm">Adicionar</span>
+                          </Button>
+                        </div>
+
+                        <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
+                          {fields.map((field, index) => (
+                            <Card key={field.id} className="border-l-4 border-l-blue-500">
+                              <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="font-medium text-gray-900 text-sm sm:text-base">Produto {index + 1}</h4>
+                                  {fields.length > 1 && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => remove(index)}
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                                    >
+                                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    </Button>
+                                  )}
+                                </div>
+
+                                <FormField
+                                  control={form.control}
+                                  name={`produtos.${index}.produtoId`}
+                                  render={({ field: formField }) => (
+                                    <FormItem>
+                                      <FormLabel>Produto *</FormLabel>
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <Button
+                                              variant="outline"
+                                              role="combobox"
+                                              className={cn(
+                                                "w-full justify-between",
+                                                !formField.value && "text-muted-foreground"
+                                              )}
+                                            >
+                                              {formField.value
+                                                ? products.find((product) => product.id === formField.value)?.name
+                                                : "Selecionar produto..."}
+                                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0" align="start">
+                                          <Command>
+                                            <CommandInput placeholder="Buscar produto..." />
+                                            <CommandList>
+                                              <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
+                                              <CommandGroup>
+                                                {products.map((product) => (
+                                                  <CommandItem
+                                                    key={product.id}
+                                                    value={product.name}
+                                                    onSelect={() => {
+                                                      form.setValue(`produtos.${index}.produtoId`, product.id);
+                                                      form.setValue(`produtos.${index}.produtoNome`, product.name);
+                                                    }}
+                                                  >
+                                                    <Check
+                                                      className={cn(
+                                                        "mr-2 h-4 w-4",
+                                                        product.id === formField.value ? "opacity-100" : "opacity-0"
+                                                      )}
+                                                    />
+                                                    {product.name}
+                                                  </CommandItem>
+                                                ))}
+                                              </CommandGroup>
+                                            </CommandList>
+                                          </Command>
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                  <FormField
+                                    control={form.control}
+                                    name={`produtos.${index}.quantidade`}
+                                    render={({ field: formField }) => (
+                                      <FormItem>
+                                        <FormLabel>Quantidade *</FormLabel>
+                                        <FormControl>
+                                          <Input placeholder="Ex: 500" type="number" {...formField} />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+
+                                  <FormField
+                                    control={form.control}
+                                    name={`produtos.${index}.unidade`}
+                                    render={({ field: formField }) => (
+                                      <FormItem>
+                                        <FormLabel>Unidade *</FormLabel>
+                                        <Select onValueChange={formField.onChange} defaultValue={formField.value}>
+                                          <FormControl>
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Selecione" />
+                                            </SelectTrigger>
+                                          </FormControl>
+                                          <SelectContent>
+                                            <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                                            <SelectItem value="g">Gramas (g)</SelectItem>
+                                            <SelectItem value="un">Unidade (un)</SelectItem>
+                                            <SelectItem value="cx">Caixa (cx)</SelectItem>
+                                            <SelectItem value="pct">Pacote (pct)</SelectItem>
+                                            <SelectItem value="l">Litro (l)</SelectItem>
+                                            <SelectItem value="ml">Mililitro (ml)</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Período Tab */}
+                  <TabsContent value="periodo" className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 m-0 h-full overflow-y-auto">
+                    <Card className="h-full flex flex-col">
+                      <CardHeader className="flex-shrink-0 pb-3 sm:pb-4">
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                          <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                          <span className="truncate">Período da Cotação</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex-1 space-y-4 sm:space-y-6">
+                        <p className="text-xs sm:text-sm text-gray-600">
+                          Defina o período em que a cotação ficará aberta para receber propostas
+                        </p>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                          <FormField
+                            control={form.control}
+                            name="dataInicio"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Data de Início *</FormLabel>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <Button
+                                        variant="outline"
+                                        className={cn(
+                                          "w-full pl-3 text-left font-normal",
+                                          !field.value && "text-muted-foreground"
+                                        )}
+                                      >
+                                        {field.value ? (
+                                          format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                        ) : (
+                                          <span>Selecione a data de início</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                      mode="single"
+                                      selected={field.value}
+                                      onSelect={field.onChange}
+                                      disabled={(date) => date < new Date()}
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="dataFim"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Data de Fim *</FormLabel>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <Button
+                                        variant="outline"
+                                        className={cn(
+                                          "w-full pl-3 text-left font-normal",
+                                          !field.value && "text-muted-foreground"
+                                        )}
+                                      >
+                                        {field.value ? (
+                                          format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                        ) : (
+                                          <span>Selecione a data de fim</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                      mode="single"
+                                      selected={field.value}
+                                      onSelect={field.onChange}
+                                      disabled={(date) => {
+                                        const startDate = form.getValues("dataInicio");
+                                        return startDate ? date <= startDate : date < new Date();
+                                      }}
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Dicas de período */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <h4 className="font-medium text-blue-900 mb-2">💡 Dicas para o período</h4>
+                          <ul className="text-sm text-blue-800 space-y-1">
+                            <li>• Recomendamos um período de 3-7 dias para cotações simples</li>
+                            <li>• Para produtos especiais, considere 7-14 dias</li>
+                            <li>• Evite períodos muito longos que podem atrasar decisões</li>
+                          </ul>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Fornecedores Tab */}
+                  <TabsContent value="fornecedores" className="p-6 space-y-6 m-0">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-blue-600" />
+                          Fornecedores Participantes
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <p className="text-sm text-gray-600">
+                          Selecione os fornecedores que participarão desta cotação
+                        </p>
+
+                        <FormField
+                          control={form.control}
+                          name="fornecedoresIds"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel>Buscar e Adicionar Fornecedores *</FormLabel>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant="outline"
+                                      role="combobox"
+                                      className="w-full justify-between"
+                                    >
+                                      Buscar fornecedores...
+                                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0" align="start">
+                                  <Command>
+                                    <CommandInput 
+                                      placeholder="Digite o nome do fornecedor..." 
+                                      value={supplierSearch}
+                                      onValueChange={setSupplierSearch}
+                                    />
+                                    <CommandList>
+                                      <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
+                                      <CommandGroup>
+                                        {filteredSuppliers.map((supplier) => (
+                                          <CommandItem
+                                            key={supplier.id}
+                                            value={supplier.name}
+                                            onSelect={() => handleSupplierSelect(supplier)}
+                                          >
+                                            <Plus className="mr-2 h-4 w-4 text-green-600" />
+                                            {supplier.name}
+                                          </CommandItem>
+                                        ))}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Fornecedores Selecionados */}
+                        {selectedSuppliers.length > 0 && (
+                          <div className="space-y-3">
+                            <h4 className="font-medium text-gray-900">
+                              Fornecedores Selecionados ({selectedSuppliers.length})
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {selectedSuppliers.map((supplier) => (
+                                <div
+                                  key={supplier.id}
+                                  className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                      <Building2 className="h-4 w-4 text-green-600" />
+                                    </div>
+                                    <span className="font-medium text-green-900">{supplier.name}</span>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleSupplierRemove(supplier.id)}
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {selectedSuppliers.length === 0 && (
+                          <div className="text-center py-8 text-gray-500">
+                            <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                            <p>Nenhum fornecedor selecionado ainda</p>
+                            <p className="text-sm">Use o campo acima para buscar e adicionar fornecedores</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Detalhes Tab */}
+                  <TabsContent value="detalhes" className="p-6 space-y-6 m-0">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-blue-600" />
+                          Detalhes Adicionais
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <FormField
+                          control={form.control}
+                          name="observacoes"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Observações</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
+                                  className="resize-none min-h-[120px]" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <p className="text-xs text-gray-500">
+                                Estas informações serão enviadas junto com a cotação para todos os fornecedores
+                              </p>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Resumo da Cotação */}
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-3">📋 Resumo da Cotação</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Produtos:</span>
+                              <span className="font-medium">{fields.length} item(s)</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Fornecedores:</span>
+                              <span className="font-medium">{selectedSuppliers.length} participante(s)</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Período:</span>
+                              <span className="font-medium">
+                                {form.watch("dataInicio") && form.watch("dataFim") 
+                                  ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} - ${format(form.watch("dataFim"), "dd/MM/yyyy", { locale: ptBR })}`
+                                  : "Não definido"
+                                }
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
+
+              {/* Footer Responsivo com navegação */}
+              <div className="flex-shrink-0 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-t bg-gray-50/50">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
-                    onClick={() => append({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" })}
+                    onClick={handlePrevious}
+                    disabled={currentTabIndex === 0}
+                    className="flex items-center justify-center gap-2 order-2 sm:order-1"
                   >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Adicionar Produto
+                    <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="text-xs sm:text-sm">Anterior</span>
                   </Button>
-                </div>
 
-                {fields.map((field, index) => (
-                  <div key={field.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Produto {index + 1}</span>
-                      {fields.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      )}
-                    </div>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 order-1 sm:order-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setOpen(false);
+                        setActiveTab("produtos");
+                        form.reset();
+                        setSelectedSuppliers([]);
+                      }}
+                      className="text-xs sm:text-sm"
+                    >
+                      Cancelar
+                    </Button>
 
-                    <FormField
-                      control={form.control}
-                      name={`produtos.${index}.produtoId`}
-                      render={({ field: formField }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Produto*</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  className={cn(
-                                    "justify-between",
-                                    !formField.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {formField.value
-                                    ? products.find((product) => product.id === formField.value)?.name
-                                    : "Buscar produto..."}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[400px] p-0" align="start">
-                              <Command>
-                                <CommandInput placeholder="Digite para buscar..." />
-                                <CommandList>
-                                  <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
-                                  <CommandGroup>
-                                    {products.map((product) => (
-                                      <CommandItem
-                                        key={product.id}
-                                        value={product.name}
-                                        onSelect={() => {
-                                          form.setValue(`produtos.${index}.produtoId`, product.id);
-                                          form.setValue(`produtos.${index}.produtoNome`, product.name);
-                                        }}
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "mr-2 h-4 w-4",
-                                            product.id === formField.value ? "opacity-100" : "opacity-0"
-                                          )}
-                                        />
-                                        {product.name}
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <FormField
-                        control={form.control}
-                        name={`produtos.${index}.quantidade`}
-                        render={({ field: formField }) => (
-                          <FormItem>
-                            <FormLabel>Quantidade*</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Ex: 500" type="number" {...formField} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
+                    {currentTabIndex < tabs.length - 1 ? (
+                      <Button
+                        type="button"
+                        onClick={handleNext}
+                        disabled={!canProceedToNext()}
+                        className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
+                      >
+                        <span>Próximo</span>
+                        <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting || !canProceedToNext()}
+                        className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-xs sm:text-sm"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
+                            <span>Criando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span>Criar Cotação</span>
+                          </>
                         )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`produtos.${index}.unidade`}
-                        render={({ field: formField }) => (
-                          <FormItem>
-                            <FormLabel>Unidade*</FormLabel>
-                            <Select onValueChange={formField.onChange} defaultValue={formField.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="kg">Kg</SelectItem>
-                                <SelectItem value="g">Gramas</SelectItem>
-                                <SelectItem value="un">Unidade</SelectItem>
-                                <SelectItem value="cx">Caixa</SelectItem>
-                                <SelectItem value="pct">Pacote</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                      </Button>
+                    )}
                   </div>
-                ))}
+                </div>
               </div>
-
-              {/* Datas */}
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="dataInicio"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Data de Início*</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                              ) : (
-                                <span>Selecione a data</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date("1900-01-01")}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="dataFim"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Data de Fim*</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                              ) : (
-                                <span>Selecione a data</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date(form.getValues("dataInicio"))}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Fornecedores */}
-              <FormField
-                control={form.control}
-                name="fornecedoresIds"
-                render={() => (
-                  <FormItem>
-                    <FormLabel>Fornecedores Participantes*</FormLabel>
-                    <div className="space-y-3">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className="w-full justify-between"
-                            >
-                              Buscar fornecedores...
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0" align="start">
-                          <Command>
-                            <CommandInput 
-                              placeholder="Digite para buscar..." 
-                              value={supplierSearch}
-                              onValueChange={setSupplierSearch}
-                            />
-                            <CommandList>
-                              <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
-                              <CommandGroup>
-                                {filteredSuppliers.map((supplier) => (
-                                  <CommandItem
-                                    key={supplier.id}
-                                    value={supplier.name}
-                                    onSelect={() => handleSupplierSelect(supplier)}
-                                  >
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    {supplier.name}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-
-                      {selectedSuppliers.length > 0 && (
-                        <div className="flex flex-wrap gap-2 p-3 border rounded-md bg-muted/30">
-                          {selectedSuppliers.map((supplier) => (
-                            <Badge key={supplier.id} variant="secondary" className="gap-1">
-                              {supplier.name}
-                              <button
-                                type="button"
-                                onClick={() => handleSupplierRemove(supplier.id)}
-                                className="ml-1 hover:text-destructive"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Observações */}
-              <FormField
-                control={form.control}
-                name="observacoes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Observações</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Adicione observações sobre a cotação..." 
-                        className="resize-none" 
-                        rows={3}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit">Criar Cotação</Button>
-              </DialogFooter>
             </form>
           </Form>
         )}

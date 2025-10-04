@@ -117,43 +117,96 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput 
-        placeholder="Buscar cotações, produtos, fornecedores..." 
-        value={searchQuery}
-        onValueChange={setSearchQuery}
-      />
-      <CommandList>
+      <div className="relative">
+        {/* Header with gradient */}
+        <div className="relative border-b border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-r from-slate-50/80 to-white/80 dark:from-slate-800/80 dark:to-slate-700/80 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 dark:from-blue-400/10 dark:to-purple-400/10" />
+          <div className="relative flex items-center px-4 py-3">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 mr-3">
+              <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <CommandInput 
+              placeholder="Buscar cotações, produtos, fornecedores..." 
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+              className="flex-1 border-0 bg-transparent text-base placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:ring-0 focus:outline-none"
+            />
+            <div className="flex items-center gap-1 ml-3">
+              <kbd className="inline-flex h-6 w-6 select-none items-center justify-center rounded-md border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[10px] font-medium text-slate-500 dark:text-slate-400 shadow-sm">
+                ESC
+              </kbd>
+            </div>
+          </div>
+        </div>
+      </div>
+      <CommandList className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
         {!searchQuery && (
-          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-            <Search className="h-10 w-10 mx-auto mb-3 opacity-50" />
-            <p>Digite para buscar em todo o sistema</p>
-            <p className="text-xs mt-2 opacity-70">
-              Pressione <kbd className="px-1.5 py-0.5 rounded bg-muted">Ctrl</kbd> + <kbd className="px-1.5 py-0.5 rounded bg-muted">K</kbd> para abrir
+          <div className="px-6 py-12 text-center">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-xl opacity-60" />
+              <div className="relative p-4 rounded-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 w-20 h-20 mx-auto flex items-center justify-center">
+                <Search className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">
+              Busca Global
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 max-w-sm mx-auto">
+              Digite para buscar produtos, fornecedores, cotações e pedidos em todo o sistema
             </p>
+            <div className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-500">
+              <span>Pressione</span>
+              <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[10px] font-medium shadow-sm">
+                ⌘
+              </kbd>
+              <span>+</span>
+              <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[10px] font-medium shadow-sm">
+                K
+              </kbd>
+              <span>para abrir rapidamente</span>
+            </div>
           </div>
         )}
 
         {searchQuery && !hasResults && (
-          <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
+          <div className="px-6 py-8 text-center">
+            <div className="relative mb-4">
+              <div className="p-3 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 w-16 h-16 mx-auto flex items-center justify-center">
+                <Search className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+              </div>
+            </div>
+            <h3 className="text-base font-medium text-slate-800 dark:text-slate-200 mb-1">
+              Nenhum resultado encontrado
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Tente usar termos diferentes ou verifique a ortografia
+            </p>
+          </div>
         )}
 
         {filteredResults.produtos.length > 0 && (
-          <CommandGroup heading="Produtos">
+          <CommandGroup heading="🎯 Produtos" className="px-2">
             {filteredResults.produtos.slice(0, 5).map((produto) => (
               <CommandItem
                 key={produto.id}
                 value={`produto-${produto.id}`}
                 onSelect={() => handleSelect("produtos", produto.id)}
-                className="flex items-center gap-3 py-3"
+                className="flex items-center gap-4 py-3 px-3 mx-1 rounded-xl hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 dark:hover:from-emerald-900/20 dark:hover:to-green-900/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-emerald-200/60 dark:hover:border-emerald-700/60"
               >
-                <div className="p-2 rounded-lg bg-success/10">
-                  <Package className="h-4 w-4 text-success" />
+                <div className="relative">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/10 to-green-500/10 dark:from-emerald-400/20 dark:to-green-400/20 group-hover:from-emerald-500/20 group-hover:to-green-500/20 transition-all duration-200">
+                    <Package className="h-5 w-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-200" />
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{produto.name}</p>
-                  <p className="text-xs text-muted-foreground">{produto.category}</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors duration-200">
+                    {produto.name}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                    {produto.category}
+                  </p>
                 </div>
-                <Badge variant="outline" className="shrink-0">
+                <Badge variant="outline" className="shrink-0 bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/60 dark:border-emerald-700/60 text-emerald-700 dark:text-emerald-300 font-medium">
                   {produto.quotesCount} cotação(ões)
                 </Badge>
               </CommandItem>
@@ -162,24 +215,28 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         )}
 
         {filteredResults.fornecedores.length > 0 && (
-          <CommandGroup heading="Fornecedores">
+          <CommandGroup heading="🏢 Fornecedores" className="px-2">
             {filteredResults.fornecedores.slice(0, 5).map((fornecedor) => (
               <CommandItem
                 key={fornecedor.id}
                 value={`fornecedor-${fornecedor.id}`}
                 onSelect={() => handleSelect("fornecedores", fornecedor.id)}
-                className="flex items-center gap-3 py-3"
+                className="flex items-center gap-4 py-3 px-3 mx-1 rounded-xl hover:bg-gradient-to-r hover:from-amber-50/80 hover:to-orange-50/80 dark:hover:from-amber-900/20 dark:hover:to-orange-900/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-amber-200/60 dark:hover:border-amber-700/60"
               >
-                <div className="p-2 rounded-lg bg-warning/10">
-                  <Building2 className="h-4 w-4 text-warning" />
+                <div className="relative">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 dark:from-amber-400/20 dark:to-orange-400/20 group-hover:from-amber-500/20 group-hover:to-orange-500/20 transition-all duration-200">
+                    <Building2 className="h-5 w-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform duration-200" />
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{fornecedor.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors duration-200">
+                    {fornecedor.name}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                     {fornecedor.contact || fornecedor.email || "Sem contato"}
                   </p>
                 </div>
-                <Badge variant="outline" className="shrink-0">
+                <Badge variant="outline" className="shrink-0 bg-amber-50/80 dark:bg-amber-900/30 border-amber-200/60 dark:border-amber-700/60 text-amber-700 dark:text-amber-300 font-medium">
                   {fornecedor.activeQuotes} ativas
                 </Badge>
               </CommandItem>
@@ -188,24 +245,28 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         )}
 
         {filteredResults.cotacoes.length > 0 && (
-          <CommandGroup heading="Cotações">
+          <CommandGroup heading="📋 Cotações" className="px-2">
             {filteredResults.cotacoes.slice(0, 5).map((cotacao) => (
               <CommandItem
                 key={cotacao.id}
                 value={`cotacao-${cotacao.id}`}
                 onSelect={() => handleSelect("cotacoes", cotacao.id)}
-                className="flex items-center gap-3 py-3"
+                className="flex items-center gap-4 py-3 px-3 mx-1 rounded-xl hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-indigo-50/80 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-blue-200/60 dark:hover:border-blue-700/60"
               >
-                <div className="p-2 rounded-lg bg-info/10">
-                  <FileText className="h-4 w-4 text-info" />
+                <div className="relative">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 dark:from-blue-400/20 dark:to-indigo-400/20 group-hover:from-blue-500/20 group-hover:to-indigo-500/20 transition-all duration-200">
+                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{cotacao.id}</p>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-200">
+                    {cotacao.id}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                     {cotacao.produto} • {cotacao.melhorFornecedor}
                   </p>
                 </div>
-                <Badge variant="outline" className={cn("shrink-0", getStatusColor(cotacao.status))}>
+                <Badge variant="outline" className={cn("shrink-0 font-medium", getStatusColor(cotacao.status))}>
                   {cotacao.status}
                 </Badge>
               </CommandItem>
@@ -214,26 +275,28 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         )}
 
         {filteredResults.pedidos.length > 0 && (
-          <CommandGroup heading="Pedidos">
+          <CommandGroup heading="🛒 Pedidos" className="px-2">
             {filteredResults.pedidos.slice(0, 5).map((pedido) => (
               <CommandItem
                 key={pedido.id}
                 value={`pedido-${pedido.id}`}
                 onSelect={() => handleSelect("pedidos", pedido.id)}
-                className="flex items-center gap-3 py-3"
+                className="flex items-center gap-4 py-3 px-3 mx-1 rounded-xl hover:bg-gradient-to-r hover:from-purple-50/80 hover:to-pink-50/80 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-purple-200/60 dark:hover:border-purple-700/60"
               >
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <ShoppingCart className="h-4 w-4 text-primary" />
+                <div className="relative">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 dark:from-purple-400/20 dark:to-pink-400/20 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition-all duration-200">
+                    <ShoppingCart className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform duration-200" />
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-200">
                     {new Date(pedido.order_date).toLocaleDateString('pt-BR')}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                     {pedido.supplier_name} • {pedido.items?.length || 0} produto(s)
                   </p>
                 </div>
-                <Badge variant="outline" className={cn("shrink-0", getStatusColor(pedido.status))}>
+                <Badge variant="outline" className={cn("shrink-0 font-medium", getStatusColor(pedido.status))}>
                   {pedido.status}
                 </Badge>
               </CommandItem>
@@ -247,19 +310,41 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
 export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
   return (
-    <Button
-      variant="outline"
-      onClick={onClick}
-      className="relative w-full justify-start text-sm text-muted-foreground hover:text-foreground bg-background/50 border-border/50 hover:border-primary/50 transition-colors"
-    >
-      <Search className="mr-2 h-4 w-4 shrink-0" />
-      <span className="hidden md:inline-flex flex-1 text-left">
-        Buscar cotações, produtos, fornecedores...
-      </span>
-      <span className="md:hidden flex-1 text-left">Buscar...</span>
-      <kbd className="hidden lg:inline-flex pointer-events-none h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 ml-auto">
-        <span className="text-xs">⌘</span>K
-      </kbd>
-    </Button>
+    <div className="relative group">
+      <Button
+        variant="ghost"
+        onClick={onClick}
+        className="relative w-full justify-start text-sm bg-gradient-to-r from-slate-50/80 to-white/80 dark:from-slate-800/80 dark:to-slate-700/80 border border-slate-200/60 dark:border-slate-600/60 hover:border-blue-300/60 dark:hover:border-blue-400/60 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm rounded-xl h-11 px-4"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 dark:from-blue-400/10 dark:to-purple-400/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        <div className="relative flex items-center w-full">
+          <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 mr-3 group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-300">
+            <Search className="h-4 w-4 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+          </div>
+          
+          <div className="flex-1 text-left">
+            <span className="hidden md:inline-flex text-slate-600 dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-slate-100 font-medium transition-colors duration-300">
+              Buscar cotações, produtos, fornecedores...
+            </span>
+            <span className="md:hidden text-slate-600 dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-slate-100 font-medium transition-colors duration-300">
+              Buscar...
+            </span>
+          </div>
+          
+          <div className="hidden lg:flex items-center gap-1 ml-auto">
+            <kbd className="inline-flex h-6 w-6 select-none items-center justify-center rounded-md border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[11px] font-medium text-slate-500 dark:text-slate-400 shadow-sm group-hover:border-blue-300/60 dark:group-hover:border-blue-400/60 transition-all duration-300">
+              ⌘
+            </kbd>
+            <kbd className="inline-flex h-6 w-6 select-none items-center justify-center rounded-md border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[11px] font-medium text-slate-500 dark:text-slate-400 shadow-sm group-hover:border-blue-300/60 dark:group-hover:border-blue-400/60 transition-all duration-300">
+              K
+            </kbd>
+          </div>
+        </div>
+      </Button>
+      
+      {/* Subtle glow effect */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 -z-10" />
+    </div>
   );
 }

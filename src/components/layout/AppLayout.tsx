@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
-import { Bell, User } from "lucide-react";
+import { Bell, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
 export function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
+  
   const getPageTitle = () => {
     const path = location.pathname;
     const titles: Record<string, string> = {
@@ -24,45 +25,71 @@ export function AppLayout() {
     };
     return titles[path] || "Sistema de Cotações";
   };
-  return <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        
-        <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <header className="h-14 md:h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40 py-0 my-[11px] mx-[11px]">
-            <div className="flex items-center justify-between h-full px-3 py-0 my-0 md:px-[10px]">
-              <div className="flex items-center gap-2 md:gap-4 min-w-0">
-                <SidebarTrigger className="text-muted-foreground hover:text-foreground shrink-0" />
-                
-              </div>
-              
-              {/* Global Search */}
-              <div className="hidden lg:flex items-center gap-4 flex-1 max-w-md mx-8">
-                <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="flex items-center gap-1 md:gap-2 shrink-0">
-                <ThemeToggle />
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-9 w-9 md:h-10 md:w-10 p-0">
-                  <Bell className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-9 w-9 md:h-10 md:w-10 p-0">
-                  <User className="h-4 w-4" />
-                </Button>
+
+  return (
+    <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
+      {/* Sidebar com Hierarquia Clara */}
+      <div className="hidden md:block relative z-40">
+        <div className="fixed left-0 top-0 h-full">
+          <AppSidebar />
+        </div>
+      </div>
+      
+      {/* Main Content Area com Separação Visual */}
+      <div className="flex-1 flex flex-col md:ml-20 relative">
+        {/* Header Elevado */}
+        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-30 shadow-sm">
+          <div className="flex items-center justify-between h-full px-6">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+                <h1 className="text-xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                  {getPageTitle()}
+                </h1>
               </div>
             </div>
-          </header>
+            
+            {/* Global Search */}
+            <div className="hidden lg:flex items-center gap-4 flex-1 max-w-lg mx-8">
+              <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 shrink-0">
+              <ThemeToggle />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate('/configuracoes')}
+                className="text-gray-500 hover:text-gray-700 hover:bg-white/60 h-10 w-10 p-0 rounded-xl transition-all duration-200"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 hover:bg-white/60 h-10 w-10 p-0 rounded-xl transition-all duration-200">
+                <Bell className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700 hover:bg-white/60 h-10 w-10 p-0 rounded-xl transition-all duration-200">
+                <User className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </header>
 
-          {/* Main Content */}
-          <main className="flex-1 overflow-auto">
+        {/* Main Content com Container */}
+        <main className="flex-1 overflow-auto pb-20 md:pb-0 relative">
+          <div className="min-h-full bg-white/30 backdrop-blur-sm">
             <Outlet />
-          </main>
-        </div>
-
-        {/* Global Search Dialog */}
-        <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+          </div>
+        </main>
       </div>
-    </SidebarProvider>;
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden">
+        <AppSidebar />
+      </div>
+
+      {/* Global Search Dialog */}
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+    </div>
+  );
 }

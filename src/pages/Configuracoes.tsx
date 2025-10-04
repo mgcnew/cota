@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Sun, Moon, Monitor, Bell, Palette, Globe, Info, RotateCcw } from "lucide-react";
+import { Sun, Moon, Monitor, Bell, Palette, Globe, Info, RotateCcw, Settings } from "lucide-react";
 import { toast } from "sonner";
 export default function Configuracoes() {
   const {
@@ -30,14 +30,43 @@ export default function Configuracoes() {
     toast.success("Configurações restauradas para o padrão");
   };
   return <div className="container max-w-5xl py-6 md:py-10 space-y-6">
-      <div>
-        <h1 className="font-bold tracking-tight text-4xl text-[#ff4c00]">Configurações</h1>
-        <p className="mt-2 text-lg text-inherit">
-          Gerencie as preferências e configurações do sistema
-        </p>
+      {/* Header Configurações com Tema Violeta */}
+      <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl p-6 border border-violet-100 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Settings className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="font-bold text-3xl bg-gradient-to-r from-violet-900 to-purple-700 bg-clip-text text-transparent">
+                    Configurações
+                  </h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-violet-100 text-violet-700 border border-violet-200 shadow-sm">
+                      <Palette className="h-3 w-3" />
+                      Preferências do Sistema
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
+              <div className="flex items-center gap-2 text-gray-700 bg-white/60 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <Settings className="h-4 w-4 text-violet-600" />
+                <span className="font-medium">Gerencie as preferências e configurações do sistema</span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-gray-600 bg-white/40 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <Globe className="h-4 w-4 text-purple-500" />
+                <span>Personalização completa disponível</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <Separator />
 
       {/* Tema */}
       <Card className="card-elevated">

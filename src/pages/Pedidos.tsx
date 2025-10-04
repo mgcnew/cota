@@ -10,7 +10,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { ViewMode } from "@/types/pagination";
-import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign } from "lucide-react";
+import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package } from "lucide-react";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import EditPedidoDialog from "@/components/forms/EditPedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
@@ -181,20 +181,53 @@ export default function Pedidos() {
   const paginatedData = paginate(filteredPedidos);
   const totalValue = pedidos.filter(p => p.status !== "cancelado").reduce((acc, p) => acc + parseFloat(p.total.replace("R$ ", "").replace(".", "").replace(",", ".")), 0);
   return <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[#ff4c00] font-bold text-4xl">Pedidos</h1>
-          <p className="text-inherit">
-            Gerencie todos os pedidos realizados
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <Button className="gradient-primary" onClick={() => setAddDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Pedido
-          </Button>
+      {/* Header Pedidos com Tema Rosa */}
+      <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-100 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <ShoppingCart className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="font-bold text-3xl bg-gradient-to-r from-pink-900 to-rose-700 bg-clip-text text-transparent">
+                    Pedidos
+                  </h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-700 border border-pink-200 shadow-sm">
+                      <Truck className="h-3 w-3" />
+                      Gestão de Pedidos
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
+              <div className="flex items-center gap-2 text-gray-700 bg-white/60 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <ShoppingCart className="h-4 w-4 text-pink-600" />
+                <span className="font-medium">Gerencie todos os pedidos realizados</span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-gray-600 bg-white/40 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <Package className="h-4 w-4 text-rose-500" />
+                <span>R$ {totalValue.toLocaleString('pt-BR')} em pedidos</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-3">
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            
+            <Button 
+              className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0" 
+              onClick={() => setAddDialogOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Pedido
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -276,60 +309,110 @@ export default function Pedidos() {
       {loading ? <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div> : <>
-          {/* Statistics Cards */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card className="card-gradient-warning">
+          {/* Statistics Cards Melhorados */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-yellow-50/30">
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="p-2 rounded-lg bg-warning/10">
-                    <Clock className="h-5 w-5 text-warning" />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 relative">
+                        <Clock className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Pedidos Ativos</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
+                    <Clock className="h-3 w-3" />
+                    <span className="text-xs font-medium">Em andamento</span>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-foreground">
-                  {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-amber-600 h-2 rounded-full transition-all duration-500" style={{ width: '65%' }}></div>
+                  </div>
+                  <span className="text-xs text-gray-500">65%</span>
                 </div>
-                <p className="text-sm text-muted-foreground">Pedidos Ativos</p>
               </CardContent>
             </Card>
-            <Card className="card-gradient-success">
+
+            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="p-2 rounded-lg bg-success/10">
-                    <Truck className="h-5 w-5 text-success" />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
+                        <Truck className="h-5 w-5 text-green-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Pedidos Entregues</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {pedidos.filter(p => p.status === "entregue").length}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                    <CheckCircle className="h-3 w-3" />
+                    <span className="text-xs font-medium">Concluídos</span>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-foreground">
-                  {pedidos.filter(p => p.status === "entregue").length}
+                <div className="mt-4 text-xs text-gray-500">
+                  {Math.floor((pedidos.filter(p => p.status === "entregue").length / pedidos.length) * 100)}% de taxa de entrega
                 </div>
-                <p className="text-sm text-muted-foreground">Pedidos Entregues</p>
               </CardContent>
             </Card>
-            <Card className="card-gradient-primary">
+
+            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <DollarSign className="h-5 w-5 text-primary" />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
+                        <DollarSign className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Valor Total</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      R$ {totalValue.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    <DollarSign className="h-3 w-3" />
+                    <span className="text-xs font-medium">+15%</span>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-success">
-                  R$ {totalValue.toLocaleString('pt-BR', {
-                minimumFractionDigits: 2
-              })}
+                <div className="mt-4 text-xs text-gray-500">
+                  Valor médio: R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
                 </div>
-                <p className="text-sm text-muted-foreground">Valor Total</p>
               </CardContent>
             </Card>
-            <Card className="card-gradient-info">
+
+            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="p-2 rounded-lg bg-info/10">
-                    <ShoppingCart className="h-5 w-5 text-info" />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
+                        <Package className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Itens por Pedido</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {pedidos.length > 0 ? Math.round(pedidos.reduce((acc, p) => acc + p.itens, 0) / pedidos.length) : 0}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                    <Package className="h-3 w-3" />
+                    <span className="text-xs font-medium">Média</span>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-foreground">
-                  {pedidos.length > 0 ? Math.round(pedidos.reduce((acc, p) => acc + p.itens, 0) / pedidos.length) : 0}
+                <div className="mt-4 text-xs text-gray-500">
+                  Total de {pedidos.reduce((acc, p) => acc + p.itens, 0)} itens em {pedidos.length} pedidos
                 </div>
-                <p className="text-sm text-muted-foreground">Itens por Pedido</p>
               </CardContent>
             </Card>
           </div>
