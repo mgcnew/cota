@@ -32,39 +32,57 @@ export function useCotacoes() {
   const { data: cotacoes = [], isLoading } = useQuery({
     queryKey: ['cotacoes'],
     queryFn: async () => {
-      // Fetch quotes with related data
-      const { data: quotesData, error: quotesError } = await supabase
-        .from("quotes")
-        .select(`
-          *,
-          quote_items(*),
-          quote_suppliers(*)
-        `)
-        .order("created_at", { ascending: false });
+      try {
+        console.log("📊 Fetching quotes...");
+        
+        // Fetch quotes with related data
+        const { data: quotesData, error: quotesError } = await supabase
+          .from("quotes")
+          .select(`
+            *,
+            quote_items(*),
+            quote_suppliers(*)
+          `)
+          .order("created_at", { ascending: false });
 
-      if (quotesError) throw quotesError;
+        if (quotesError) {
+          console.error("❌ Error fetching quotes:", quotesError);
+          throw quotesError;
+        }
 
-      // Fetch all quote_supplier_items separately
-      const { data: supplierItemsData, error: supplierItemsError } = await supabase
-        .from("quote_supplier_items")
-        .select("*");
+        if (!quotesData || quotesData.length === 0) {
+          console.log("✅ No quotes found");
+          return [];
+        }
 
-      if (supplierItemsError) throw supplierItemsError;
+        console.log(`✅ Fetched ${quotesData.length} quotes`);
+
+        // Fetch all quote_supplier_items separately
+        const { data: supplierItemsData, error: supplierItemsError } = await supabase
+          .from("quote_supplier_items")
+          .select("*");
+
+        if (supplierItemsError) {
+          console.error("❌ Error fetching supplier items:", supplierItemsError);
+          throw supplierItemsError;
+        }
+
+        console.log(`✅ Fetched ${supplierItemsData?.length || 0} supplier items`);
 
       const cotacoesCompletas = (quotesData || []).map((quote, index) => {
-        const items = quote.quote_items || [];
-        const suppliers = quote.quote_suppliers || [];
+        const items = Array.isArray(quote.quote_items) ? quote.quote_items : [];
+        const suppliers = Array.isArray(quote.quote_suppliers) ? quote.quote_suppliers : [];
 
-        // Get supplier items for this quote
-        const quoteSupplierItems = (supplierItemsData || []).filter(
-          item => item.quote_id === quote.id
-        );
+        // Get supplier items for this quote with safety checks
+        const quoteSupplierItems = Array.isArray(supplierItemsData)
+          ? supplierItemsData.filter(item => item?.quote_id === quote.id)
+          : [];
 
         const fornecedoresParticipantes: FornecedorParticipante[] = suppliers.map(s => {
-          // Get all values offered by this supplier for all products
+          // Get all values offered by this supplier for all products with safety checks
           const supplierValues = quoteSupplierItems
-            .filter(item => item.supplier_id === s.supplier_id)
-            .map(item => Number(item.valor_oferecido) || 0)
+            .filter(item => item?.supplier_id === s?.supplier_id)
+            .map(item => Number(item?.valor_oferecido) || 0)
             .filter(val => val > 0);
 
           // Use the total or average (for now, let's sum all values)
@@ -111,6 +129,10 @@ export function useCotacoes() {
       });
 
       return cotacoesCompletas;
+      } catch (error) {
+        console.error("❌ Fatal error in useCotacoes:", error);
+        throw error;
+      }
     },
   });
 

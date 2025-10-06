@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 interface AuthContextType {
   user: User | null;
@@ -18,25 +19,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    let mounted = true;
+
+    const initAuth = async () => {
+      try {
+        console.log("🔐 Initializing auth...");
+        
+        // Set up auth state listener FIRST
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (_event, session) => {
+            if (mounted) {
+              console.log("🔐 Auth state changed:", _event, session?.user?.id);
+              setSession(session);
+              setUser(session?.user ?? null);
+            }
+          }
+        );
+
+        // THEN check for existing session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("❌ Error getting session:", sessionError);
+          setError(sessionError.message);
+        } else {
+          console.log("✅ Session loaded:", session?.user?.id || "no user");
+          if (mounted) {
+            setSession(session);
+            setUser(session?.user ?? null);
+          }
+        }
+        
+        if (mounted) {
+          setLoading(false);
+        }
+
+        return () => {
+          mounted = false;
+          subscription.unsubscribe();
+        };
+      } catch (err) {
+        console.error("❌ Auth initialization error:", err);
+        if (mounted) {
+          setError(err instanceof Error ? err.message : "Failed to initialize auth");
+          setLoading(false);
+        }
       }
-    );
+    };
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    initAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const signUp = async (email: string, password: string) => {
@@ -82,6 +121,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       description: "Até logo!",
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="max-w-md w-full text-center space-y-4">
+          <p className="text-destructive">Erro ao conectar: {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="text-sm text-primary hover:underline"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>
