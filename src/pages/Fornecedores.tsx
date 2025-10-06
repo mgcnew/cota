@@ -21,6 +21,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
+import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 interface Supplier {
   id: string;
@@ -57,7 +58,7 @@ export default function Fornecedores() {
     refetch
   } = useSuppliers();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const { viewMode, setViewMode } = useResponsiveViewMode();
   const {
     paginate
   } = usePagination<Supplier>({
@@ -161,7 +162,7 @@ export default function Fornecedores() {
   }
   return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
-      <div className="p-3 md:p-6 space-y-4 md:space-y-6">
+      <div className="page-container">
       {/* Header Fornecedores com Tema Índigo */}
       <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl p-6 border border-indigo-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

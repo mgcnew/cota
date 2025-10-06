@@ -168,91 +168,294 @@ export default function Historico() {
     economiaTotal: historico.filter(h => h.economia).reduce((acc, h) => acc + parseFloat(h.economia.replace("%", "")), 0)
   };
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">
+    return (
+      <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>;
+      </div>
+    );
   }
-  return <div className="p-6 space-y-6">
+  
+  return (
+    <div className="page-container">
       {/* Header Histórico com Tema Slate */}
-      <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl p-6 border border-slate-100 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-slate-600 to-gray-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <History className="h-6 w-6 text-white" />
+      <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-100 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-slate-600 to-gray-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
+                  <History className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <div>
-                  <h1 className="font-bold text-3xl bg-gradient-to-r from-slate-900 to-gray-700 bg-clip-text text-transparent">
+                <div className="flex-1 min-w-0">
+                  <h1 className="font-bold text-xl sm:text-2xl lg:text-3xl bg-gradient-to-r from-slate-900 to-gray-700 bg-clip-text text-transparent">
                     Histórico
                   </h1>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-sm">
-                      <Clock className="h-3 w-3" />
-                      Registro de Atividades
+                  <div className="flex items-center gap-1 sm:gap-2 mt-1">
+                    <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-sm">
+                      <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                      <span className="hidden sm:inline">Registro de Atividades</span>
+                      <span className="sm:hidden">Atividades</span>
                     </div>
+
+                    {(dataInicio || dataFim) && (
+                      <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
+                        <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                        <span className="hidden sm:inline">
+                          {dataInicio && dataFim 
+                            ? `${format(dataInicio, "dd/MM", { locale: ptBR })} - ${format(dataFim, "dd/MM", { locale: ptBR })}`
+                            : dataInicio 
+                              ? `A partir de ${format(dataInicio, "dd/MM", { locale: ptBR })}`
+                              : `Até ${format(dataFim!, "dd/MM", { locale: ptBR })}`
+                          }
+                        </span>
+                        <span className="sm:hidden">Filtrado</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
-              <div className="flex items-center gap-2 text-gray-700 bg-white/60 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <Activity className="h-4 w-4 text-slate-600" />
-                <span className="font-medium">Acompanhe todas as atividades do sistema</span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+              <div className="flex items-center gap-1 sm:gap-2 text-gray-700 bg-white/60 px-2 sm:px-3 py-1 sm:py-2 rounded-lg backdrop-blur-sm">
+                <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-slate-600" />
+                <span className="font-medium truncate">
+                  <span className="hidden sm:inline">Acompanhe todas as atividades do sistema</span>
+                  <span className="sm:hidden">Atividades do sistema</span>
+                </span>
               </div>
               
-              <div className="flex items-center gap-2 text-gray-600 bg-white/40 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <History className="h-4 w-4 text-gray-500" />
-                <span>
+              <div className="flex items-center gap-1 sm:gap-2 text-gray-600 bg-white/40 px-2 sm:px-3 py-1 sm:py-2 rounded-lg backdrop-blur-sm">
+                <History className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
+                <span className="truncate">
                   {filteredHistorico.length > 0 
-                    ? `${paginatedData.pagination.startIndex + 1}-${paginatedData.pagination.endIndex} de ${filteredHistorico.length} registros`
-                    : "Nenhum registro encontrado"
+                    ? `${paginatedData.pagination.startIndex + 1}-${paginatedData.pagination.endIndex} de ${filteredHistorico.length}`
+                    : "Nenhum registro"
                   }
                 </span>
               </div>
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
             <Popover>
               <PopoverTrigger asChild>
                 <Button 
                   variant="outline"
-                  className="bg-white/70 backdrop-blur-sm border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+                  size="sm"
+                  className={`bg-white/70 backdrop-blur-sm border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 text-xs sm:text-sm ${
+                    dataInicio || dataFim ? 'ring-2 ring-slate-500 bg-slate-50 border-slate-300' : ''
+                  }`}
                 >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {dataInicio || dataFim ? "Período Selecionado" : "Filtrar Período"}
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">
+                    {dataInicio && dataFim 
+                      ? `${format(dataInicio, "dd/MM", { locale: ptBR })} - ${format(dataFim, "dd/MM", { locale: ptBR })}`
+                      : dataInicio || dataFim 
+                        ? "Período Parcial"
+                        : "Filtrar Período"
+                    }
+                  </span>
+                  <span className="sm:hidden">
+                    {dataInicio || dataFim ? "Ativo" : "Período"}
+                  </span>
                 </Button>
               </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <div className="p-4 space-y-4">
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-2 block">Data Início</Label>
-                  <CalendarComponent mode="single" selected={dataInicio} onSelect={setDataInicio} locale={ptBR} className="pointer-events-auto" />
+              <PopoverContent className="w-80 p-0 bg-white border border-gray-200 shadow-xl rounded-xl" align="end">
+                <div className="p-3 border-b border-gray-100 bg-gray-50/50">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-slate-600" />
+                    <span className="font-medium text-gray-900">Filtrar por Período</span>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-2 block">Data Fim</Label>
-                  <CalendarComponent mode="single" selected={dataFim} onSelect={setDataFim} locale={ptBR} className="pointer-events-auto" />
+                
+                <div className="p-4 space-y-4">
+                  {/* Presets Rápidos */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-700">Períodos Rápidos</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          const hoje = new Date();
+                          const seteDiasAtras = new Date();
+                          seteDiasAtras.setDate(hoje.getDate() - 7);
+                          setDataInicio(seteDiasAtras);
+                          setDataFim(hoje);
+                        }}
+                        className="h-9 text-xs hover:bg-slate-50 hover:border-slate-300"
+                      >
+                        Últimos 7 dias
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          const hoje = new Date();
+                          const trintaDiasAtras = new Date();
+                          trintaDiasAtras.setDate(hoje.getDate() - 30);
+                          setDataInicio(trintaDiasAtras);
+                          setDataFim(hoje);
+                        }}
+                        className="h-9 text-xs hover:bg-slate-50 hover:border-slate-300"
+                      >
+                        Últimos 30 dias
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          const hoje = new Date();
+                          const noventaDiasAtras = new Date();
+                          noventaDiasAtras.setDate(hoje.getDate() - 90);
+                          setDataInicio(noventaDiasAtras);
+                          setDataFim(hoje);
+                        }}
+                        className="h-9 text-xs hover:bg-slate-50 hover:border-slate-300"
+                      >
+                        Últimos 90 dias
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          const hoje = new Date();
+                          const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                          setDataInicio(inicioMes);
+                          setDataFim(hoje);
+                        }}
+                        className="h-9 text-xs hover:bg-slate-50 hover:border-slate-300"
+                      >
+                        Este mês
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Seleção Manual */}
+                  <div className="space-y-3">
+                    <Label className="text-xs font-medium text-gray-700">Período Personalizado</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-xs text-gray-600">Data Início</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal h-9 text-xs",
+                                !dataInicio && "text-gray-500",
+                                dataInicio && "border-slate-300 bg-slate-50 text-slate-700"
+                              )}
+                            >
+                              <Calendar className="mr-2 h-3 w-3" />
+                              {dataInicio ? format(dataInicio, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent 
+                              mode="single" 
+                              selected={dataInicio} 
+                              onSelect={setDataInicio} 
+                              locale={ptBR} 
+                              className="pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-xs text-gray-600">Data Fim</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal h-9 text-xs",
+                                !dataFim && "text-gray-500",
+                                dataFim && "border-slate-300 bg-slate-50 text-slate-700"
+                              )}
+                            >
+                              <Calendar className="mr-2 h-3 w-3" />
+                              {dataFim ? format(dataFim, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent 
+                              mode="single" 
+                              selected={dataFim} 
+                              onSelect={setDataFim} 
+                              locale={ptBR}
+                              disabled={(date) => dataInicio ? date < dataInicio : false}
+                              className="pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Resumo do Período */}
+                  {(dataInicio || dataFim) && (
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="text-xs font-medium text-slate-900">
+                            {dataInicio && dataFim 
+                              ? `${format(dataInicio, "dd/MM/yyyy", { locale: ptBR })} - ${format(dataFim, "dd/MM/yyyy", { locale: ptBR })}`
+                              : dataInicio 
+                                ? `A partir de ${format(dataInicio, "dd/MM/yyyy", { locale: ptBR })}`
+                                : `Até ${format(dataFim!, "dd/MM/yyyy", { locale: ptBR })}`
+                            }
+                          </div>
+                          {dataInicio && dataFim && (
+                            <div className="text-xs text-slate-600">
+                              {Math.ceil((dataFim.getTime() - dataInicio.getTime()) / (1000 * 60 * 60 * 24))} dias
+                            </div>
+                          )}
+                        </div>
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-500 to-gray-500 flex items-center justify-center text-white">
+                          <Calendar className="h-4 w-4" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Ações */}
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 text-xs" 
+                      onClick={() => {
+                        setDataInicio(undefined);
+                        setDataFim(undefined);
+                      }}
+                    >
+                      Limpar
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="flex-1 bg-gradient-to-r from-slate-600 to-gray-600 hover:from-slate-700 hover:to-gray-700 text-white text-xs"
+                      onClick={() => {
+                        // Popover fecha automaticamente
+                      }}
+                    >
+                      Aplicar
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                  setDataInicio(undefined);
-                  setDataFim(undefined);
-                }}>
-                    Limpar
-                  </Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverContent>
+            </Popover>
           
             <Button 
               onClick={exportToCSV}
-              className="bg-gradient-to-r from-slate-600 to-gray-600 hover:from-slate-700 hover:to-gray-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+              size="sm"
+              className="bg-gradient-to-r from-slate-600 to-gray-600 hover:from-slate-700 hover:to-gray-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-xs sm:text-sm"
             >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar
+              <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Exportar</span>
+              <span className="sm:hidden">CSV</span>
             </Button>
           </div>
         </div>
@@ -260,27 +463,38 @@ export default function Historico() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex gap-4 flex-wrap">
-            <div className="relative flex-1 min-w-64">
+        <CardContent className="pt-4 sm:pt-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Buscar no histórico..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
+              <Input 
+                placeholder="Buscar no histórico..." 
+                value={searchTerm} 
+                onChange={e => setSearchTerm(e.target.value)} 
+                className="pl-9 text-sm" 
+              />
             </div>
-            <select value={tipoFilter} onChange={e => setTipoFilter(e.target.value)} className="px-3 py-2 border border-border rounded-md bg-background text-foreground">
-              <option value="all">Todos os Tipos</option>
-              <option value="cotacao">Cotações</option>
-              <option value="pedido">Pedidos</option>
-              <option value="fornecedor">Fornecedores</option>
-              <option value="produto">Produtos</option>
-            </select>
-            
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Mais Filtros
-                </Button>
-              </PopoverTrigger>
+            <div className="flex gap-2 sm:gap-3">
+              <select 
+                value={tipoFilter} 
+                onChange={e => setTipoFilter(e.target.value)} 
+                className="px-2 sm:px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm flex-1 sm:flex-none min-w-0"
+              >
+                <option value="all">Todos</option>
+                <option value="cotacao">Cotações</option>
+                <option value="pedido">Pedidos</option>
+                <option value="fornecedor">Fornecedores</option>
+                <option value="produto">Produtos</option>
+              </select>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                    <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Mais Filtros</span>
+                    <span className="sm:hidden">Filtros</span>
+                  </Button>
+                </PopoverTrigger>
               <PopoverContent className="w-96" align="end">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -329,54 +543,55 @@ export default function Historico() {
                 </div>
               </PopoverContent>
             </Popover>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card className="card-gradient-primary">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <History className="h-5 w-5 text-primary" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
+                <History className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
             </div>
-            <div className="text-2xl font-bold text-foreground">{stats.totalAcoes}</div>
-            <p className="text-sm text-muted-foreground">Total de Ações</p>
+            <div className="text-lg sm:text-2xl font-bold text-foreground">{stats.totalAcoes}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Total de Ações</p>
           </CardContent>
         </Card>
         <Card className="card-gradient-info">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-lg bg-info/10">
-                <FileText className="h-5 w-5 text-info" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-info/10">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-info" />
               </div>
             </div>
-            <div className="text-2xl font-bold text-foreground">{stats.cotacoesFinalizadas}</div>
-            <p className="text-sm text-muted-foreground">Cotações Finalizadas</p>
+            <div className="text-lg sm:text-2xl font-bold text-foreground">{stats.cotacoesFinalizadas}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Cotações Finalizadas</p>
           </CardContent>
         </Card>
         <Card className="card-gradient-warning">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-lg bg-warning/10">
-                <ShoppingCart className="h-5 w-5 text-warning" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-warning/10">
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
               </div>
             </div>
-            <div className="text-2xl font-bold text-foreground">{stats.pedidosCriados}</div>
-            <p className="text-sm text-muted-foreground">Pedidos Criados</p>
+            <div className="text-lg sm:text-2xl font-bold text-foreground">{stats.pedidosCriados}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Pedidos Criados</p>
           </CardContent>
         </Card>
         <Card className="card-gradient-success">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-lg bg-success/10">
-                <TrendingUp className="h-5 w-5 text-success" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-success/10">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
               </div>
             </div>
-            <div className="text-2xl font-bold text-success">{stats.economiaTotal}%</div>
-            <p className="text-sm text-muted-foreground">Economia Acumulada</p>
+            <div className="text-lg sm:text-2xl font-bold text-success">{stats.economiaTotal}%</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Economia Acumulada</p>
           </CardContent>
         </Card>
       </div>
@@ -399,36 +614,38 @@ export default function Historico() {
             {paginatedData.items.map(item => {
             const iconColorClass = item.tipo === "cotacao" ? "text-info" : item.tipo === "pedido" ? "text-warning" : item.tipo === "fornecedor" ? "text-primary" : "text-success";
             const bgColorClass = item.tipo === "cotacao" ? "bg-info/10" : item.tipo === "pedido" ? "bg-warning/10" : item.tipo === "fornecedor" ? "bg-primary/10" : "bg-success/10";
-            return <div key={item.id} className="group flex items-start gap-4 p-4 rounded-lg border-2 border-border hover:border-primary/40 bg-card hover:shadow-lg dark:hover:shadow-primary/20 transition-all duration-300">
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mt-0.5 transition-transform duration-300 group-hover:scale-110", bgColorClass)}>
+            return <div key={item.id} className="group flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 border-border hover:border-primary/40 bg-card hover:shadow-lg dark:hover:shadow-primary/20 transition-all duration-300">
+                <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center mt-0.5 transition-transform duration-300 group-hover:scale-110 flex-shrink-0", bgColorClass)}>
                   <div className={iconColorClass}>
                     {getTipoIcon(item.tipo)}
                   </div>
                 </div>
                 
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">{item.acao}</span>
-                    {getTipoBadge(item.tipo)}
-                    {item.economia && <Badge variant="outline" className="text-success border-success">
-                        -{item.economia}
-                      </Badge>}
+                <div className="flex-1 space-y-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <span className="font-medium text-foreground text-sm sm:text-base truncate">{item.acao}</span>
+                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                      {getTipoBadge(item.tipo)}
+                      {item.economia && <Badge variant="outline" className="text-success border-success text-xs">
+                          -{item.economia}
+                        </Badge>}
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                     {item.detalhes}
                   </p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>{item.data}</span>
-                    <span>por {item.usuario}</span>
-                    {item.valor && <span className="font-medium text-foreground">{item.valor}</span>}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-muted-foreground">
+                    <span className="truncate">{item.data}</span>
+                    <span className="truncate">por {item.usuario}</span>
+                    {item.valor && <span className="font-medium text-foreground text-xs sm:text-sm">{item.valor}</span>}
                   </div>
                 </div>
                 
-                <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => {
+                <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary transition-colors h-8 w-8 sm:h-9 sm:w-9 p-0 flex-shrink-0" onClick={() => {
                 setSelectedItem(item);
                 setViewDialogOpen(true);
               }}>
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>;
           })}
@@ -458,5 +675,6 @@ export default function Historico() {
 
       {/* View Dialog */}
       {selectedItem && <ViewHistoricoDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} item={selectedItem} />}
-    </div>;
+    </div>
+  );
 }

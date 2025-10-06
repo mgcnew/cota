@@ -29,7 +29,7 @@ export default function Configuracoes() {
     setHasChanges(false);
     toast.success("Configurações restauradas para o padrão");
   };
-  return <div className="container max-w-5xl py-6 md:py-10 space-y-6">
+  return <div className="page-container">
       {/* Header Configurações com Tema Violeta */}
       <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl p-6 border border-violet-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

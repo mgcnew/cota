@@ -19,10 +19,11 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
+import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import { cn } from "@/lib/utils";
 export default function Cotacoes() {
-  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const { viewMode, setViewMode } = useResponsiveViewMode();
   const {
     paginate
   } = usePagination<Quote>({
@@ -75,7 +76,7 @@ export default function Cotacoes() {
       </div>;
   }
   const paginatedData = paginate(filteredCotacoes);
-  return <div className="p-3 md:p-6 space-y-4 md:space-y-6">
+  return <div className="page-container">
       {/* Header Cotações com Tema Teal */}
       <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-6 border border-teal-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

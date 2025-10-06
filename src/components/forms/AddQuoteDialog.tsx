@@ -344,25 +344,45 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[900px] h-[90vh] max-h-[800px] p-0 gap-0 overflow-hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
-          <DialogTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
-            <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-              <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-            </div>
-            <span className="truncate">Nova Cotação</span>
-          </DialogTitle>
-          <DialogDescription className="text-gray-600 text-sm sm:text-base mt-1">
-            Crie uma nova cotação seguindo os passos abaixo
-          </DialogDescription>
+      <DialogContent className="w-[95vw] max-w-[950px] h-[95vh] max-h-[900px] p-0 gap-0 overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-6 border-b border-gray-100/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden">
+          {/* Efeito de fundo decorativo */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-pink-400/10 rounded-full translate-y-12 -translate-x-12"></div>
           
-          {/* Progress Bar Responsivo */}
-          <div className="mt-3 sm:mt-4 space-y-2">
-            <div className="flex justify-between text-xs sm:text-sm text-gray-600">
-              <span>Progresso</span>
-              <span>{Math.round(progress)}% concluído</span>
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-white/20 backdrop-blur-sm flex-shrink-0">
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 drop-shadow-sm" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent">
+                  Nova Cotação
+                </DialogTitle>
+                <DialogDescription className="text-gray-600/80 text-sm font-medium mt-1">
+                  Crie uma nova cotação seguindo os passos abaixo
+                </DialogDescription>
+              </div>
             </div>
-            <Progress value={progress} className="h-1.5 sm:h-2" />
+            
+            {/* Progress Bar Melhorado */}
+            <div className="mt-3 sm:mt-4 lg:mt-6 space-y-2 sm:space-y-3">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-700">
+                <span className="font-medium truncate">Progresso da Cotação</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 animate-pulse"></div>
+                  <span className="font-bold text-blue-700 text-xs sm:text-sm">{Math.round(progress)}% concluído</span>
+                </div>
+              </div>
+              <div className="relative">
+                <Progress 
+                  value={progress} 
+                  className="h-2 sm:h-2.5 lg:h-3 bg-gray-200/60 rounded-full overflow-hidden shadow-inner" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse rounded-full"></div>
+              </div>
+            </div>
           </div>
         </DialogHeader>
         
@@ -372,12 +392,13 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
             Carregando dados...
           </div>
         ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
-              {/* Tab Navigation Responsiva */}
-              <div className="flex-shrink-0 px-2 sm:px-4 lg:px-6 py-3 sm:py-4 border-b bg-gray-50/50 overflow-x-auto">
+          <div className="flex flex-col h-full overflow-hidden">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
+              {/* Tab Navigation Melhorada */}
+              <div className="flex-shrink-0 px-3 sm:px-4 lg:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm overflow-x-auto">
                 <div className="flex items-center justify-start min-w-max">
-                  <div className="flex space-x-1 sm:space-x-2">
+                  <div className="flex space-x-2 sm:space-x-3 bg-white/60 backdrop-blur-sm rounded-2xl p-1.5 shadow-lg border border-gray-200/40">
                     {tabs.map((tab, index) => {
                       const Icon = tab.icon;
                       const status = getTabStatus(tab.id);
@@ -387,15 +408,53 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                           type="button"
                           onClick={() => setActiveTab(tab.id)}
                           className={cn(
-                            "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 lg:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap",
-                            status === "current" && "bg-blue-600 text-white shadow-lg",
-                            status === "completed" && "bg-green-100 text-green-700 hover:bg-green-200",
-                            status === "pending" && "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                            "flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 lg:px-5 py-2.5 sm:py-3 rounded-xl text-sm font-semibold transition-all duration-300 whitespace-nowrap relative overflow-hidden group",
+                            status === "current" && "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/25 scale-105 ring-2 ring-blue-200/50",
+                            status === "completed" && "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/25 hover:shadow-xl hover:scale-105",
+                            status === "pending" && "bg-gray-100/80 text-gray-500 hover:bg-gray-200/80 hover:text-gray-700 hover:scale-105"
                           )}
                         >
-                          <Icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                          <span className="hidden min-[480px]:inline text-xs sm:text-sm">{tab.label}</span>
-                          {status === "completed" && <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />}
+                          {/* Efeito de brilho */}
+                          <div className={cn(
+                            "absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full",
+                            status === "current" || status === "completed" ? "opacity-30" : "opacity-0"
+                          )}></div>
+                          
+                          <div className={cn(
+                            "flex items-center justify-center w-6 h-6 rounded-lg transition-all duration-300 relative z-10",
+                            status === "current" && "bg-white/20 backdrop-blur-sm",
+                            status === "completed" && "bg-white/20 backdrop-blur-sm",
+                            status === "pending" && "bg-gray-200/60"
+                          )}>
+                            {status === "completed" ? (
+                              <Check className="h-3.5 w-3.5 text-white drop-shadow-sm" />
+                            ) : (
+                              <Icon className={cn(
+                                "h-3.5 w-3.5 transition-all duration-300",
+                                status === "current" && "text-white drop-shadow-sm",
+                                status === "pending" && "text-gray-500"
+                              )} />
+                            )}
+                          </div>
+                          
+                          <span className={cn(
+                            "hidden min-[480px]:inline text-sm font-bold tracking-wide relative z-10",
+                            status === "current" && "text-white drop-shadow-sm",
+                            status === "completed" && "text-white drop-shadow-sm",
+                            status === "pending" && "text-gray-600"
+                          )}>
+                            {tab.label}
+                          </span>
+                          
+                          {/* Indicador de step */}
+                          <div className={cn(
+                            "absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center transition-all duration-300",
+                            status === "current" && "bg-white text-blue-600 shadow-md",
+                            status === "completed" && "bg-white text-green-600 shadow-md",
+                            status === "pending" && "bg-gray-300 text-gray-600"
+                          )}>
+                            {index + 1}
+                          </div>
                         </button>
                       );
                     })}
@@ -404,49 +463,73 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
               </div>
 
               {/* Tab Content Responsivo */}
-              <div className="flex-1 overflow-y-auto">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
+              <div className="flex-1 overflow-hidden">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
                   {/* Produtos Tab */}
-                  <TabsContent value="produtos" className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 m-0 h-full overflow-y-auto">
-                    <Card className="h-full flex flex-col">
-                      <CardHeader className="flex-shrink-0 pb-3 sm:pb-4">
-                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                          <Package className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
-                          <span className="truncate">Produtos da Cotação</span>
+                  <TabsContent value="produtos" className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 m-0">
+                    <Card className="h-full flex flex-col border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-blue-50/20 backdrop-blur-sm">
+                      <CardHeader className="flex-shrink-0 pb-4 sm:pb-5 bg-gradient-to-r from-blue-50/60 to-indigo-50/40 rounded-t-2xl border-b border-gray-100/60">
+                        <CardTitle className="flex items-center gap-3 text-lg sm:text-xl font-bold">
+                          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
+                            <Package className="h-5 w-5 drop-shadow-sm" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="bg-gradient-to-r from-blue-900 to-indigo-800 bg-clip-text text-transparent">
+                              Produtos da Cotação
+                            </span>
+                            <span className="text-sm text-gray-600 font-normal mt-0.5">
+                              Adicione os produtos que deseja cotar
+                            </span>
+                          </div>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="flex-1 space-y-3 sm:space-y-4 overflow-y-auto">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <p className="text-xs sm:text-sm text-gray-600">
-                            Adicione os produtos que deseja cotar
-                          </p>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-gradient-to-r from-blue-50/60 to-indigo-50/40 rounded-2xl border border-blue-100/60">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg">
+                              <Package className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">Lista de Produtos</p>
+                              <p className="text-sm text-gray-600">
+                                {fields.length} produto{fields.length !== 1 ? 's' : ''} adicionado{fields.length !== 1 ? 's' : ''}
+                              </p>
+                            </div>
+                          </div>
                           <Button
                             type="button"
-                            variant="outline"
-                            size="sm"
                             onClick={() => append({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" })}
-                            className="w-full sm:w-auto"
+                            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
                           >
-                            <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                            <span className="text-xs sm:text-sm">Adicionar</span>
+                            <Plus className="h-4 w-4 mr-2" />
+                            <span>Adicionar Produto</span>
                           </Button>
                         </div>
 
                         <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
                           {fields.map((field, index) => (
-                            <Card key={field.id} className="border-l-4 border-l-blue-500">
-                              <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                            <Card key={field.id} className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50/50 backdrop-blur-sm rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300">
+                              <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+                              <CardContent className="p-4 sm:p-5 space-y-4 sm:space-y-5">
                                 <div className="flex items-center justify-between">
-                                  <h4 className="font-medium text-gray-900 text-sm sm:text-base">Produto {index + 1}</h4>
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                      {index + 1}
+                                    </div>
+                                    <div>
+                                      <h4 className="font-bold text-gray-900 text-base">Produto {index + 1}</h4>
+                                      <p className="text-sm text-gray-600">Configure os detalhes do produto</p>
+                                    </div>
+                                  </div>
                                   {fields.length > 1 && (
                                     <Button
                                       type="button"
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => remove(index)}
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-9 w-9 p-0 rounded-xl transition-all duration-200 hover:scale-110"
                                     >
-                                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                      <Trash2 className="h-4 w-4" />
                                     </Button>
                                   )}
                                 </div>
@@ -560,12 +643,21 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                   </TabsContent>
 
                   {/* Período Tab */}
-                  <TabsContent value="periodo" className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 m-0 h-full overflow-y-auto">
-                    <Card className="h-full flex flex-col">
-                      <CardHeader className="flex-shrink-0 pb-3 sm:pb-4">
-                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                          <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
-                          <span className="truncate">Período da Cotação</span>
+                  <TabsContent value="periodo" className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 m-0">
+                    <Card className="h-full flex flex-col border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-indigo-50/20 backdrop-blur-sm">
+                      <CardHeader className="flex-shrink-0 pb-4 sm:pb-5 bg-gradient-to-r from-indigo-50/60 to-purple-50/40 rounded-t-2xl border-b border-gray-100/60">
+                        <CardTitle className="flex items-center gap-3 text-lg sm:text-xl font-bold">
+                          <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+                            <Clock className="h-5 w-5 drop-shadow-sm" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="bg-gradient-to-r from-indigo-900 to-purple-800 bg-clip-text text-transparent">
+                              Período da Cotação
+                            </span>
+                            <span className="text-sm text-gray-600 font-normal mt-0.5">
+                              Defina quando a cotação ficará aberta
+                            </span>
+                          </div>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="flex-1 space-y-4 sm:space-y-6">
@@ -658,12 +750,23 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                           />
                         </div>
 
-                        {/* Dicas de período */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <h4 className="font-medium text-blue-900 mb-2">💡 Dicas para o período</h4>
-                          <ul className="text-sm text-blue-800 space-y-1">
-                            <li>• Recomendamos um período de 3-7 dias para cotações simples</li>
-                            <li>• Para produtos especiais, considere 7-14 dias</li>
+                        {/* Dicas de período melhoradas */}
+                        <div className="bg-gradient-to-br from-blue-50 via-indigo-50/60 to-purple-50/40 border border-blue-200/60 rounded-2xl p-5 shadow-lg backdrop-blur-sm">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-md">
+                              <span className="text-white font-bold text-sm">💡</span>
+                            </div>
+                            <h4 className="font-bold text-blue-900">Dicas para o período ideal</h4>
+                          </div>
+                          <ul className="text-sm text-blue-800 space-y-2 ml-11">
+                            <li className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                              Recomendamos um período de 3-7 dias para cotações simples
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                              Para produtos especiais, considere 7-14 dias
+                            </li>
                             <li>• Evite períodos muito longos que podem atrasar decisões</li>
                           </ul>
                         </div>
@@ -672,7 +775,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                   </TabsContent>
 
                   {/* Fornecedores Tab */}
-                  <TabsContent value="fornecedores" className="p-6 space-y-6 m-0">
+                  <TabsContent value="fornecedores" className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 m-0">
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -779,7 +882,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                   </TabsContent>
 
                   {/* Detalhes Tab */}
-                  <TabsContent value="detalhes" className="p-6 space-y-6 m-0">
+                  <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 m-0">
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -899,8 +1002,9 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                   </div>
                 </div>
               </div>
-            </form>
-          </Form>
+              </form>
+            </Form>
+          </div>
         )}
       </DialogContent>
     </Dialog>

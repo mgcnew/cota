@@ -144,10 +144,27 @@
     @apply bg-background text-foreground font-inter antialiased;
     font-feature-settings: 'cv11', 'ss01';
     font-variation-settings: 'opsz' 32;
+    overflow-x: hidden;
   }
   
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+  
+  /* Prevent horizontal overflow globally */
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Ensure containers don't overflow */
+  .container, 
+  [class*="container"],
+  [class*="grid"],
+  [class*="flex"] {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }
 
@@ -335,6 +352,75 @@
   
   .transition-smooth {
     transition: var(--transition-smooth);
+  }
+  
+  /* Page container utility for consistent responsive layout */
+  .page-container {
+    @apply p-4 sm:p-6 space-y-4 sm:space-y-6 md:space-y-8 w-full overflow-x-hidden;
+    /* Mobile: padding generoso com mx-auto para centralizar */
+    @apply max-w-7xl mx-auto;
+  }
+  
+  /* Desktop: padding otimizado - esquerda ultra mínimo, direita generoso */
+  @media (min-width: 768px) {
+    .page-container {
+      @apply mx-0 max-w-none pl-3 pr-12 py-8;
+    }
+  }
+  
+  /* Large screens: padding proporcional para telas grandes */
+  @media (min-width: 1024px) {
+    .page-container {
+      @apply pl-4 pr-16 py-10;
+    }
+  }
+  
+  /* Extra large screens: padding balanceado para telas muito grandes */
+  @media (min-width: 1280px) {
+    .page-container {
+      @apply pl-6 pr-20 py-12;
+    }
+  }
+  
+  /* Responsive grid utilities */
+  .responsive-grid-1-2-4 {
+    @apply grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4;
+  }
+  
+  .responsive-grid-1-2 {
+    @apply grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2;
+  }
+  
+  /* Prevent overflow utilities */
+  .no-overflow {
+    @apply w-full max-w-full overflow-x-hidden;
+  }
+  
+  /* Design System Spacing - Boas práticas de espaçamento */
+  .content-spacing {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  }
+  
+  .section-spacing {
+    @apply mb-6 sm:mb-8 lg:mb-12;
+  }
+  
+  .card-spacing {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+  
+  .button-spacing {
+    @apply px-4 py-2 sm:px-6 sm:py-3 lg:px-8 lg:py-4;
+  }
+  
+  /* Safe area para elementos interativos */
+  .safe-area {
+    @apply mx-2 sm:mx-4 lg:mx-6;
+  }
+  
+  /* Container com padding interno generoso */
+  .inner-container {
+    @apply px-4 sm:px-6 lg:px-8 xl:px-12;
   }
 }
 

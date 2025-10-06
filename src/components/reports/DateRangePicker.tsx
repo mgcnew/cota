@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, CheckCircle, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -37,57 +37,34 @@ export function DateRangePicker({
   };
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <div className="flex gap-2 flex-wrap">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => applyPreset(7)}
-        >
-          Últimos 7 dias
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => applyPreset(30)}
-        >
-          Últimos 30 dias
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => applyPreset(90)}
-        >
-          Últimos 3 meses
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => applyPreset(365)}
-        >
-          Último ano
-        </Button>
-      </div>
-      
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <label className="text-sm font-medium text-muted-foreground mb-1 block">
-            Data Início
+    <div className={cn("space-y-4", className)}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+            <CalendarIcon className="h-3 w-3" />
+            Data de Início
           </label>
           <Popover open={isStartOpen} onOpenChange={setIsStartOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !startDate && "text-muted-foreground"
+                  "w-full justify-start text-left font-normal h-10",
+                  !startDate && "text-gray-500",
+                  startDate && "border-purple-300 bg-purple-50 text-purple-700"
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {startDate ? format(startDate, "PPP", { locale: ptBR }) : "Selecionar data"}
+                {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-background border" align="start">
+            <PopoverContent className="w-auto p-0 bg-white border border-gray-200 shadow-xl rounded-xl" align="start">
+              <div className="p-3 border-b border-gray-100 bg-gray-50/50">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4 text-purple-600" />
+                  <span className="font-medium text-gray-900">Data de Início</span>
+                </div>
+              </div>
               <Calendar
                 mode="single"
                 selected={startDate}
@@ -102,24 +79,32 @@ export function DateRangePicker({
           </Popover>
         </div>
 
-        <div className="flex-1">
-          <label className="text-sm font-medium text-muted-foreground mb-1 block">
-            Data Fim
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+            <CalendarIcon className="h-3 w-3" />
+            Data de Fim
           </label>
           <Popover open={isEndOpen} onOpenChange={setIsEndOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !endDate && "text-muted-foreground"
+                  "w-full justify-start text-left font-normal h-10",
+                  !endDate && "text-gray-500",
+                  endDate && "border-purple-300 bg-purple-50 text-purple-700"
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {endDate ? format(endDate, "PPP", { locale: ptBR }) : "Selecionar data"}
+                {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-background border" align="start">
+            <PopoverContent className="w-auto p-0 bg-white border border-gray-200 shadow-xl rounded-xl" align="start">
+              <div className="p-3 border-b border-gray-100 bg-gray-50/50">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4 text-purple-600" />
+                  <span className="font-medium text-gray-900">Data de Fim</span>
+                </div>
+              </div>
               <Calendar
                 mode="single"
                 selected={endDate}
@@ -135,6 +120,23 @@ export function DateRangePicker({
           </Popover>
         </div>
       </div>
+
+      {/* Validação visual */}
+      {startDate && endDate && (
+        <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+          <CheckCircle className="h-4 w-4" />
+          <span>
+            Período válido: {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} dias
+          </span>
+        </div>
+      )}
+      
+      {startDate && !endDate && (
+        <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
+          <Clock className="h-4 w-4" />
+          <span>Selecione a data de fim para completar o período</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
+import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package } from "lucide-react";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
@@ -26,7 +27,7 @@ export default function Pedidos() {
   const {
     toast
   } = useToast();
-  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const { viewMode, setViewMode } = useResponsiveViewMode();
   const {
     paginate
   } = usePagination<any>({
@@ -180,7 +181,7 @@ export default function Pedidos() {
   });
   const paginatedData = paginate(filteredPedidos);
   const totalValue = pedidos.filter(p => p.status !== "cancelado").reduce((acc, p) => acc + parseFloat(p.total.replace("R$ ", "").replace(".", "").replace(",", ".")), 0);
-  return <div className="p-6 space-y-6">
+  return <div className="page-container">
       {/* Header Pedidos com Tema Rosa */}
       <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

@@ -197,6 +197,22 @@ export default function Analytics() {
     return `${startDate.toLocaleDateString('pt-BR')} - ${endDate.toLocaleDateString('pt-BR')}`;
   }, [startDate, endDate]);
 
+  // Efeito para simular atualização quando filtros mudam
+  useEffect(() => {
+    if (hasFilters && user) {
+      setRefreshing(true);
+      const timer = setTimeout(() => {
+        setRefreshing(false);
+        toast({
+          title: "Filtros aplicados",
+          description: "Dados atualizados com os filtros selecionados",
+        });
+      }, 800);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [selectedFornecedores, selectedProdutos, hasFilters, user, toast]);
+
   // Loading skeleton
   const LoadingSkeleton = () => (
     <div className="p-6 space-y-6">
@@ -231,7 +247,7 @@ export default function Analytics() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="page-container">
       {/* Header Analytics com Tema Verde */}
       <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -251,6 +267,28 @@ export default function Analytics() {
                       <BarChart3 className="h-3 w-3" />
                       Dados Analíticos
                     </div>
+
+                    {startDate && endDate && (
+                      <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
+                        <Calendar className="h-3 w-3" />
+                        <span className="hidden sm:inline">
+                          Período: {startDate.toLocaleDateString('pt-BR')} - {endDate.toLocaleDateString('pt-BR')}
+                        </span>
+                        <span className="sm:hidden">
+                          {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))}d
+                        </span>
+                      </div>
+                    )}
+
+                    {hasFilters && (
+                      <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200 shadow-sm">
+                        <Filter className="h-3 w-3" />
+                        <span className="hidden sm:inline">
+                          {selectedFornecedores.length + selectedProdutos.length} filtro{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''} ativo{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''}
+                        </span>
+                        <span className="sm:hidden">{selectedFornecedores.length + selectedProdutos.length}F</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -286,47 +324,178 @@ export default function Analytics() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="bg-white/70 backdrop-blur-sm border-green-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200 flex items-center gap-2"
+                  className={`bg-white/70 backdrop-blur-sm border-green-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200 flex items-center gap-2 ${
+                    startDate && endDate ? 'ring-2 ring-green-500 bg-green-50 border-green-300' : ''
+                  }`}
                 >
                   <Calendar className="h-4 w-4" />
                   {dateRangeText}
                 </Button>
               </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Selecionar Período</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" onClick={() => applyDatePreset(7)}>
-                    7 dias
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => applyDatePreset(30)}>
-                    30 dias
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => applyDatePreset(90)}>
-                    90 dias
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => applyDatePreset(365)}>
-                    1 ano
-                  </Button>
+              <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
+                <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-green-50/80 via-emerald-50/60 to-green-50/40 backdrop-blur-sm relative overflow-hidden">
+                  {/* Efeitos decorativos de fundo */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 via-emerald-500/5 to-green-500/5"></div>
+                  <div className="absolute top-0 left-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl -translate-x-16 -translate-y-16"></div>
+                  <div className="absolute bottom-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl translate-x-12 translate-y-12"></div>
+                  
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-green-600 flex items-center justify-center text-white shadow-lg ring-2 ring-green-100/50">
+                      <Calendar className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl font-bold text-gray-900">Selecionar Período</DialogTitle>
+                      <p className="text-sm text-gray-600 mt-0.5">Defina o intervalo para análise dos dados</p>
+                    </div>
+                  </div>
+                </DialogHeader>
+                
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+                  {/* Presets de Data */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                        <Clock className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900">Períodos Rápidos</h3>
+                        <p className="text-xs text-gray-600">Selecione um período predefinido</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => applyDatePreset(7)}
+                        className="h-12 flex flex-col items-center justify-center gap-1 hover:bg-green-50 hover:border-green-300"
+                      >
+                        <span className="font-medium">7 dias</span>
+                        <span className="text-xs text-gray-500">Última semana</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => applyDatePreset(30)}
+                        className="h-12 flex flex-col items-center justify-center gap-1 hover:bg-green-50 hover:border-green-300"
+                      >
+                        <span className="font-medium">30 dias</span>
+                        <span className="text-xs text-gray-500">Último mês</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => applyDatePreset(90)}
+                        className="h-12 flex flex-col items-center justify-center gap-1 hover:bg-green-50 hover:border-green-300"
+                      >
+                        <span className="font-medium">90 dias</span>
+                        <span className="text-xs text-gray-500">Último trimestre</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => applyDatePreset(365)}
+                        className="h-12 flex flex-col items-center justify-center gap-1 hover:bg-green-50 hover:border-green-300"
+                      >
+                        <span className="font-medium">1 ano</span>
+                        <span className="text-xs text-gray-500">Últimos 12 meses</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Seleção Personalizada */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                        <Calendar className="h-4 w-4 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900">Período Personalizado</h3>
+                        <p className="text-xs text-gray-600">Escolha datas específicas</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <DateRangePicker 
+                        startDate={startDate} 
+                        endDate={endDate} 
+                        onStartDateChange={setStartDate} 
+                        onEndDateChange={setEndDate} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Resumo do Período */}
+                  {startDate && endDate && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-900">Período Selecionado</h3>
+                          <p className="text-xs text-gray-600">Resumo do intervalo escolhido</p>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div className="text-sm font-medium text-green-900">
+                              {startDate.toLocaleDateString('pt-BR')} - {endDate.toLocaleDateString('pt-BR')}
+                            </div>
+                            <div className="text-xs text-green-700">
+                              {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} dias selecionados
+                            </div>
+                          </div>
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white shadow-lg">
+                            <Calendar className="h-6 w-6" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <DateRangePicker 
-                  startDate={startDate} 
-                  endDate={endDate} 
-                  onStartDateChange={setStartDate} 
-                  onEndDateChange={setEndDate} 
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
+                
+                <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    {startDate && endDate ? (
+                      <span className="flex items-center gap-1">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        Período definido
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">Selecione um período</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsDateDialogOpen(false)}
+                      className="text-gray-600 hover:text-gray-800"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={() => setIsDateDialogOpen(false)}
+                      disabled={!startDate || !endDate}
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white disabled:opacity-50"
+                    >
+                      Aplicar período
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           
             <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="bg-white/70 backdrop-blur-sm border-green-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200 flex items-center gap-2"
+                  className={`bg-white/70 backdrop-blur-sm border-green-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200 flex items-center gap-2 ${
+                    hasFilters ? 'ring-2 ring-green-500 bg-green-50 border-green-300' : ''
+                  }`}
                 >
                   <Filter className="h-4 w-4" />
                   Filtros
@@ -337,22 +506,72 @@ export default function Analytics() {
                   )}
                 </Button>
               </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Filtros Avançados</DialogTitle>
-              </DialogHeader>
-              <ReportFilters 
-                selectedFornecedores={selectedFornecedores} 
-                selectedProdutos={selectedProdutos} 
-                onFornecedoresChange={setSelectedFornecedores} 
-                onProdutosChange={setSelectedProdutos} 
-                onReset={() => {
-                  setSelectedFornecedores([]);
-                  setSelectedProdutos([]);
-                }} 
-              />
-            </DialogContent>
-          </Dialog>
+              <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
+                <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-green-50/80 via-emerald-50/60 to-green-50/40 backdrop-blur-sm relative overflow-hidden">
+                  {/* Efeitos decorativos de fundo */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 via-emerald-500/5 to-green-500/5"></div>
+                  <div className="absolute top-0 left-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl -translate-x-16 -translate-y-16"></div>
+                  <div className="absolute bottom-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl translate-x-12 translate-y-12"></div>
+                  
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-green-600 flex items-center justify-center text-white shadow-lg ring-2 ring-green-100/50">
+                      <Filter className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl font-bold text-gray-900">Filtros Avançados</DialogTitle>
+                      <p className="text-sm text-gray-600 mt-0.5">Personalize os dados das suas análises</p>
+                    </div>
+                  </div>
+                </DialogHeader>
+                
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                  <ReportFilters 
+                    selectedFornecedores={selectedFornecedores} 
+                    selectedProdutos={selectedProdutos} 
+                    onFornecedoresChange={setSelectedFornecedores} 
+                    onProdutosChange={setSelectedProdutos} 
+                    onReset={() => {
+                      setSelectedFornecedores([]);
+                      setSelectedProdutos([]);
+                    }} 
+                  />
+                </div>
+                
+                <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    {hasFilters ? (
+                      <span className="flex items-center gap-1">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        {selectedFornecedores.length + selectedProdutos.length} filtro{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''} aplicado{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">Nenhum filtro aplicado</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {hasFilters && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedFornecedores([]);
+                          setSelectedProdutos([]);
+                        }}
+                        className="text-gray-600 hover:text-gray-800"
+                      >
+                        Limpar todos
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => setIsFilterDialogOpen(false)}
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                    >
+                      Aplicar filtros
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           
             <Button 
               size="sm" 
