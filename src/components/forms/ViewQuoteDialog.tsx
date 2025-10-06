@@ -4,10 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign } from "lucide-react";
+import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import ConvertToOrderDialog from "./ConvertToOrderDialog";
 
 interface FornecedorParticipante {
   id: string;
@@ -37,14 +38,18 @@ interface Quote {
 interface ViewQuoteDialogProps {
   quote: Quote;
   onUpdateSupplierProductValue?: (quoteId: string, supplierId: string, productId: string, newValue: number) => void;
+  onConvertToOrder?: (quoteId: string, supplierId: string, deliveryDate: string, observations?: string) => void;
   trigger?: React.ReactNode;
+  isUpdating?: boolean;
 }
 
-export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, trigger }: ViewQuoteDialogProps) {
+export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, onConvertToOrder, trigger, isUpdating }: ViewQuoteDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, number>>({});
+  const [convertDialogOpen, setConvertDialogOpen] = useState(false);
+  const [selectedSupplierForConversion, setSelectedSupplierForConversion] = useState<{ id: string; name: string } | null>(null);
 
   const handleStartEdit = (productId: string, currentValue: number) => {
     setEditingProductId(productId);
@@ -106,14 +111,16 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, t
       ativa: "default",
       concluida: "secondary",
       pendente: "outline",
-      expirada: "destructive"
+      expirada: "destructive",
+      finalizada: "default"
     };
     
     const labels = {
       ativa: "Ativa",
       concluida: "Concluída",
       pendente: "Pendente",
-      expirada: "Expirada"
+      expirada: "Expirada",
+      finalizada: "Finalizada"
     };
 
     return (
@@ -121,6 +128,66 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, t
         {labels[status as keyof typeof labels]}
       </Badge>
     );
+  };
+
+  // Get best supplier based on total value
+  const getBestSupplier = () => {
+    if (quote.fornecedoresParticipantes.length === 0) return null;
+
+    let bestSupplier = null;
+    let lowestTotal = Infinity;
+
+    quote.fornecedoresParticipantes.forEach(fornecedor => {
+      let total = 0;
+      products.forEach((product: any) => {
+        const value = getSupplierProductValue(fornecedor.id, product.product_id);
+        if (value > 0) {
+          total += value;
+        }
+      });
+
+      if (total > 0 && total < lowestTotal) {
+        lowestTotal = total;
+        bestSupplier = fornecedor;
+      }
+    });
+
+    return bestSupplier ? { ...bestSupplier, totalValue: lowestTotal } : null;
+  };
+
+  const handleConvertToOrder = () => {
+    const bestSupplier = getBestSupplier();
+    if (bestSupplier) {
+      setSelectedSupplierForConversion({
+        id: bestSupplier.id,
+        name: bestSupplier.nome
+      });
+      setConvertDialogOpen(true);
+    }
+  };
+
+  const handleConfirmConversion = (deliveryDate: string, observations?: string) => {
+    if (selectedSupplierForConversion && onConvertToOrder) {
+      onConvertToOrder(quote.id, selectedSupplierForConversion.id, deliveryDate, observations);
+      setConvertDialogOpen(false);
+      setOpen(false);
+    }
+  };
+
+  const bestSupplier = getBestSupplier();
+  
+  // Get products for conversion dialog
+  const getConversionProducts = () => {
+    if (!bestSupplier) return [];
+    return products.map((product: any) => {
+      const value = getSupplierProductValue(bestSupplier.id, product.product_id);
+      return {
+        id: product.product_id,
+        name: product.product_name,
+        quantity: product.quantidade,
+        value: value
+      };
+    });
   };
 
   return (
@@ -490,9 +557,53 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, t
                   </tbody>
                 </table>
               </div>
+
+              {/* Convert to Order Button */}
+              {quote.status === 'ativa' && bestSupplier && (
+                <Card className="p-6 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-2xl border-l-4 border-l-green-500">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl">
+                        <ShoppingCart className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900">Pronto para Converter?</h3>
+                        <p className="text-sm text-gray-600">
+                          Melhor fornecedor: <span className="font-semibold text-green-700">{bestSupplier.nome}</span>
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Valor total: <span className="font-bold text-green-700">R$ {bestSupplier.totalValue.toFixed(2)}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleConvertToOrder}
+                      disabled={isUpdating}
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 text-base px-6 py-6"
+                    >
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      Converter para Pedido
+                    </Button>
+                  </div>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Convert to Order Dialog */}
+        {selectedSupplierForConversion && (
+          <ConvertToOrderDialog
+            open={convertDialogOpen}
+            onOpenChange={setConvertDialogOpen}
+            quote={quote}
+            supplier={selectedSupplierForConversion}
+            products={getConversionProducts()}
+            totalValue={bestSupplier?.totalValue || 0}
+            onConfirm={handleConfirmConversion}
+            isLoading={isUpdating}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

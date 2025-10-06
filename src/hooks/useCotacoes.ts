@@ -327,6 +327,125 @@ export function useCotacoes() {
     }
   });
 
+  // Convert quote to order mutation
+  const convertToOrder = useMutation({
+    mutationFn: async ({ 
+      quoteId, 
+      supplierId, 
+      deliveryDate, 
+      observations 
+    }: { 
+      quoteId: string; 
+      supplierId: string; 
+      deliveryDate: string;
+      observations?: string;
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // 1. Fetch complete quote data
+      const { data: quoteData, error: quoteError } = await supabase
+        .from("quotes")
+        .select(`
+          *,
+          quote_items(*),
+          quote_suppliers(*),
+          quote_supplier_items(*)
+        `)
+        .eq("id", quoteId)
+        .single();
+
+      if (quoteError) throw quoteError;
+      if (!quoteData) throw new Error("Cotação não encontrada");
+
+      // 2. Get supplier info
+      const { data: supplierData, error: supplierError } = await supabase
+        .from("suppliers")
+        .select("name")
+        .eq("id", supplierId)
+        .single();
+
+      if (supplierError) throw supplierError;
+
+      // 3. Calculate total value from supplier items
+      const supplierItems = Array.isArray(quoteData.quote_supplier_items)
+        ? quoteData.quote_supplier_items.filter((item: any) => item.supplier_id === supplierId)
+        : [];
+
+      const totalValue = supplierItems.reduce(
+        (sum: number, item: any) => sum + (item.valor_oferecido || 0), 
+        0
+      );
+
+      // 4. Create order
+      const { data: orderData, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          supplier_id: supplierId,
+          supplier_name: supplierData.name,
+          total_value: totalValue,
+          status: "pendente",
+          order_date: new Date().toISOString().split('T')[0],
+          delivery_date: deliveryDate,
+          observations: observations ? 
+            `Pedido gerado a partir da cotação ${quoteId}. ${observations}` : 
+            `Pedido gerado a partir da cotação ${quoteId}`
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // 5. Create order items
+      const orderItems = supplierItems.map((item: any) => {
+        const quoteItem = quoteData.quote_items.find((qi: any) => qi.product_id === item.product_id);
+        const quantityStr = quoteItem?.quantidade || "1";
+        const quantity = parseInt(quantityStr) || 1;
+        
+        return {
+          order_id: orderData.id,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          quantity: quantity,
+          unit_price: item.valor_oferecido || 0,
+          total_price: item.valor_oferecido || 0
+        };
+      });
+
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      // 6. Update quote status to finalizada
+      const { error: updateError } = await supabase
+        .from("quotes")
+        .update({ status: "finalizada" })
+        .eq("id", quoteId);
+
+      if (updateError) throw updateError;
+
+      return { orderId: orderData.id, totalValue };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      toast({
+        title: "✅ Pedido criado com sucesso!",
+        description: `A cotação foi finalizada e o pedido foi gerado no valor de R$ ${data.totalValue.toFixed(2)}`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao converter cotação",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
   return {
     cotacoes,
     isLoading,
@@ -334,6 +453,7 @@ export function useCotacoes() {
     updateSupplierProductValue: updateSupplierProductValue.mutate,
     deleteQuote: deleteQuote.mutate,
     updateQuote: updateQuote.mutate,
-    isUpdating: updateSupplierProductValue.isPending || deleteQuote.isPending || updateQuote.isPending,
+    convertToOrder: convertToOrder.mutate,
+    isUpdating: updateSupplierProductValue.isPending || deleteQuote.isPending || updateQuote.isPending || convertToOrder.isPending,
   };
 }

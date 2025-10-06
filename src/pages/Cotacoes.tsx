@@ -42,6 +42,7 @@ export default function Cotacoes() {
     updateSupplierProductValue,
     deleteQuote,
     updateQuote,
+    convertToOrder,
     isUpdating
   } = useCotacoes();
   const getStatusBadge = (status: string) => {
@@ -49,13 +50,15 @@ export default function Cotacoes() {
       ativa: "default",
       concluida: "secondary",
       pendente: "outline",
-      expirada: "destructive"
+      expirada: "destructive",
+      finalizada: "default"
     };
     const labels = {
       ativa: "Ativa",
       concluida: "Concluída",
       pendente: "Pendente",
-      expirada: "Expirada"
+      expirada: "Expirada",
+      finalizada: "Finalizada"
     };
     return <Badge variant={variants[status as keyof typeof variants] as any}>
         {labels[status as keyof typeof labels]}
@@ -156,6 +159,7 @@ export default function Cotacoes() {
                 <SelectItem value="pendente">Pendentes</SelectItem>
                 <SelectItem value="concluida">Concluídas</SelectItem>
                 <SelectItem value="expirada">Expiradas</SelectItem>
+                <SelectItem value="finalizada">Finalizadas</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -480,15 +484,26 @@ export default function Cotacoes() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                          quoteId,
-                          supplierId,
-                          productId,
-                          newValue
-                        })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                              <ViewQuoteDialog 
+                                quote={cotacao} 
+                                onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                                  quoteId,
+                                  supplierId,
+                                  productId,
+                                  newValue
+                                })}
+                                onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
+                                  quoteId,
+                                  supplierId,
+                                  deliveryDate,
+                                  observations
+                                })}
+                                isUpdating={isUpdating}
+                                trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                                   <Eye className="h-4 w-4 mr-2" />
                                   Visualizar
-                                </DropdownMenuItem>} />
+                                </DropdownMenuItem>} 
+                              />
                               <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
                           quoteId,
                           data
