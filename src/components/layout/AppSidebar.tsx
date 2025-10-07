@@ -1,9 +1,9 @@
 import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Settings, Home, MoreHorizontal } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // import logoImage from "@/assets/logo.png";
 const menuItems = [
   {
@@ -100,39 +100,38 @@ function MobileMoreButton({ remainingItems }: { remainingItems: any[] }) {
   const location = useLocation();
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button className="flex flex-col items-center justify-center transition-all duration-300 rounded-2xl group relative overflow-hidden backdrop-blur-sm h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] text-gray-500 hover:text-gray-700 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100/90 hover:scale-105 hover:shadow-lg active:scale-95 touch-manipulation active:bg-gray-100">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button className="mobile-nav-button flex flex-col items-center justify-center transition-all duration-200 rounded-2xl group relative overflow-hidden backdrop-blur-sm h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] text-gray-500 hover:text-gray-700 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100/90 hover:shadow-lg touch-manipulation active:bg-gray-200">
           {/* Efeito de brilho no hover */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full opacity-0 group-hover:opacity-100"></div>
           
           {/* Container do ícone com efeito */}
           <div className="flex items-center justify-center mb-1 relative z-10 transition-all duration-300 w-7 h-7 rounded-xl group-hover:bg-white/60 group-hover:shadow-md">
-            <MoreHorizontal className="h-4 w-4 transition-all duration-300 flex-shrink-0 text-gray-500 group-hover:text-gray-700 group-hover:scale-110" />
+            <MoreHorizontal className="h-4 w-4 transition-all duration-200 flex-shrink-0 text-gray-500 group-hover:text-gray-700" />
           </div>
 
           <span className="text-[9px] font-bold text-center leading-tight transition-all duration-300 truncate max-w-[65px] relative z-10 tracking-wide text-gray-600 group-hover:text-gray-800 group-hover:font-extrabold">
             Mais
           </span>
         </button>
-      </PopoverTrigger>
+      </DialogTrigger>
       
-      <PopoverContent 
-        side="top" 
-        align="center"
-        className="w-72 p-3 mb-2 bg-white/95 backdrop-blur-xl border border-gray-200/60 shadow-xl rounded-2xl"
-        sideOffset={8}
-      >
-        {/* Header compacto */}
-        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-            <MoreHorizontal className="h-3 w-3 text-white" />
+      <DialogContent className="w-[90vw] max-w-md p-0 border-0 shadow-2xl rounded-2xl bg-white/95 backdrop-blur-xl">
+        <DialogHeader className="px-4 py-3 border-b border-gray-100/60 bg-gradient-to-r from-blue-50/80 to-purple-50/80">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg">
+              <MoreHorizontal className="h-4 w-4 text-white" />
+            </div>
+            <DialogTitle className="text-lg font-bold bg-gradient-to-r from-blue-900 to-purple-800 bg-clip-text text-transparent">
+              Mais Opções
+            </DialogTitle>
           </div>
-          <span className="font-semibold text-sm text-gray-800">Mais Opções</span>
-        </div>
+        </DialogHeader>
         
-        {/* Grid compacto de itens */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="p-4">
+          {/* Grid de itens */}
+          <div className="grid grid-cols-1 gap-3">
           {remainingItems.map((item, index) => {
             const isItemActive = location.pathname === item.url || 
               (item.url === "/" && location.pathname === "/");
@@ -145,42 +144,53 @@ function MobileMoreButton({ remainingItems }: { remainingItems: any[] }) {
                 end={item.url === "/"}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-2 p-3 rounded-xl transition-all duration-200 group relative overflow-hidden",
+                  "flex items-center gap-3 p-4 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-105 active:scale-95",
                   isItemActive
-                    ? `bg-gradient-to-br ${itemColor} shadow-md text-white`
-                    : "bg-gray-50/80 hover:bg-white hover:shadow-md text-gray-700 hover:text-gray-900 border border-gray-100/50 hover:border-gray-200"
+                    ? `bg-gradient-to-br ${itemColor} shadow-lg text-white ring-2 ring-white/20`
+                    : "bg-white/80 hover:bg-white hover:shadow-lg text-gray-700 hover:text-gray-900 border border-gray-200/60 hover:border-blue-300"
                 )}
               >
-                {/* Ícone compacto */}
+                {/* Ícone */}
                 <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200",
+                  "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg",
                   isItemActive 
                     ? "bg-white/20 backdrop-blur-sm" 
-                    : "bg-white/60 group-hover:bg-white group-hover:shadow-sm"
+                    : `bg-gradient-to-br ${itemColor} group-hover:scale-110`
                 )}>
                   <item.icon className={cn(
-                    "h-4 w-4 transition-all duration-200",
+                    "h-5 w-5 transition-all duration-200",
                     isItemActive 
                       ? "text-white" 
-                      : "text-gray-600 group-hover:text-gray-700"
+                      : "text-white"
                   )} />
                 </div>
 
-                {/* Texto compacto */}
-                <span className={cn(
-                  "font-medium text-sm transition-all duration-200 truncate",
-                  isItemActive 
-                    ? "text-white" 
-                    : "text-gray-700 group-hover:text-gray-900"
-                )}>
-                  {item.title}
-                </span>
+                {/* Texto */}
+                <div className="flex-1 min-w-0">
+                  <div className={cn(
+                    "font-semibold text-base transition-all duration-200 truncate",
+                    isItemActive 
+                      ? "text-white" 
+                      : "text-gray-900 group-hover:text-blue-900"
+                  )}>
+                    {item.title}
+                  </div>
+                  <div className={cn(
+                    "text-xs transition-all duration-200 truncate mt-0.5",
+                    isItemActive 
+                      ? "text-white/80" 
+                      : "text-gray-500 group-hover:text-blue-600"
+                  )}>
+                    Navegar para {item.title}
+                  </div>
+                </div>
               </NavLink>
             );
           })}
+          </div>
         </div>
-      </PopoverContent>
-    </Popover>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -188,6 +198,17 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const isActive = (path: string) => currentPath === path;
+
+  // Reset de transformações ao mudar de página
+  useEffect(() => {
+    // Força reset de todas as transformações nos botões mobile
+    const mobileButtons = document.querySelectorAll('.mobile-nav-button');
+    mobileButtons.forEach((button) => {
+      const element = button as HTMLElement;
+      element.style.transform = '';
+      element.style.scale = '';
+    });
+  }, [location.pathname]);
 
   return (
     <>
@@ -301,11 +322,11 @@ export function AppSidebar() {
                 to={item.url}
                 end={item.url === "/"}
                 className={cn(
-                  "flex flex-col items-center justify-center transition-all duration-300 rounded-2xl group relative overflow-hidden backdrop-blur-sm active:scale-95",
+                  "mobile-nav-button flex flex-col items-center justify-center transition-all duration-200 rounded-2xl group relative overflow-hidden backdrop-blur-sm",
                   "h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] touch-manipulation",
                   isItemActive
-                    ? `bg-gradient-to-br ${itemColor} shadow-xl ring-2 ring-white/60 scale-105 transform`
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100/90 hover:scale-105 hover:shadow-lg active:bg-gray-100"
+                    ? `bg-gradient-to-br ${itemColor} shadow-xl ring-2 ring-white/60`
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100/90 hover:shadow-lg active:bg-gray-200"
                 )}
               >
                 {/* Efeito de brilho no hover */}
@@ -327,10 +348,10 @@ export function AppSidebar() {
                     : "group-hover:bg-white/60 group-hover:shadow-md"
                 )}>
                   <item.icon className={cn(
-                    "h-4 w-4 transition-all duration-300 flex-shrink-0",
+                    "h-4 w-4 transition-all duration-200 flex-shrink-0",
                     isItemActive 
                       ? "text-white drop-shadow-md" 
-                      : "text-gray-500 group-hover:text-gray-700 group-hover:scale-110"
+                      : "text-gray-500 group-hover:text-gray-700"
                   )} />
                 </div>
 
