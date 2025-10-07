@@ -8,10 +8,10 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { 
   BarChart3, TrendingUp, TrendingDown, Calendar, Filter, Download, 
   DollarSign, Package, Building2, Target, Loader2, RefreshCw, 
@@ -54,107 +54,16 @@ export default function Analytics() {
   const [selectedProdutos, setSelectedProdutos] = useState<string[]>([]);
   const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const { generateReport, progress, isGenerating } = useReports();
 
-  // Estados para dados
-  const [metricas, setMetricas] = useState([
-    {
-      titulo: "Taxa de Economia",
-      valor: "12.5%",
-      variacao: "+2.3%",
-      tipo: "positivo" as const,
-      descricao: "vs mês anterior"
-    },
-    {
-      titulo: "Tempo Médio de Cotação",
-      valor: "3.2 dias",
-      variacao: "-0.8 dias",
-      tipo: "positivo" as const,
-      descricao: "vs mês anterior"
-    },
-    {
-      titulo: "Taxa de Resposta",
-      valor: "87%",
-      variacao: "+5%",
-      tipo: "positivo" as const,
-      descricao: "fornecedores respondendo"
-    },
-    {
-      titulo: "Valor Médio por Pedido",
-      valor: "R$ 2.450",
-      variacao: "+12%",
-      tipo: "positivo" as const,
-      descricao: "vs mês anterior"
-    }
-  ]);
-
-  const [topProdutos, setTopProdutos] = useState([
-    { produto: "Frango Congelado", cotacoes: 15, economia: "18%", valor: "R$ 12.500" },
-    { produto: "Carne Bovina", cotacoes: 12, economia: "15%", valor: "R$ 8.900" },
-    { produto: "Suínos", cotacoes: 8, economia: "12%", valor: "R$ 6.200" },
-    { produto: "Peixes", cotacoes: 6, economia: "10%", valor: "R$ 4.100" },
-    { produto: "Aves", cotacoes: 4, economia: "8%", valor: "R$ 2.800" }
-  ]);
-
-  const [performanceFornecedores, setPerformanceFornecedores] = useState([
-    { fornecedor: "Frigorífico ABC", score: 95, cotacoes: 20, economia: "15%", tempo: "2.1 dias" },
-    { fornecedor: "Carnes XYZ", score: 88, cotacoes: 18, economia: "12%", tempo: "2.8 dias" },
-    { fornecedor: "Distribuidora 123", score: 82, cotacoes: 15, economia: "10%", tempo: "3.2 dias" },
-    { fornecedor: "Açougue Premium", score: 78, cotacoes: 12, economia: "8%", tempo: "3.8 dias" },
-    { fornecedor: "Carnes do Sul", score: 72, cotacoes: 10, economia: "6%", tempo: "4.1 dias" }
-  ]);
-
-  const [tendenciasMensais, setTendenciasMensais] = useState([
-    { mes: "Set", cotacoes: 45, economia: 8, valor: 125000 },
-    { mes: "Out", cotacoes: 52, economia: 10, valor: 142000 },
-    { mes: "Nov", cotacoes: 48, economia: 12, valor: 138000 },
-    { mes: "Dez", cotacoes: 55, economia: 15, valor: 165000 }
-  ]);
-
-  // Funções otimizadas
-  const loadAnalytics = useCallback(async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-
-      const startDateStr = startDate?.toISOString().split('T')[0];
-      const endDateStr = endDate?.toISOString().split('T')[0];
-
-      // Simular carregamento para demo
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Aqui você pode adicionar a lógica real de carregamento dos dados
-      // const [quotesResult, ordersResult] = await Promise.all([...]);
-
-      toast({
-        title: "Dados atualizados",
-        description: "Analytics carregado com sucesso",
-      });
-
-    } catch (error) {
-      console.error("Erro ao carregar analytics:", error);
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Tente novamente em alguns instantes",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [startDate, endDate, toast]);
-
-  useEffect(() => {
-    if (user && startDate && endDate) {
-      loadAnalytics();
-    }
-  }, [user, loadAnalytics]);
+  // Use the analytics hook with real data
+  const { metricas, topProdutos, performanceFornecedores, tendenciasMensais, isLoading } = useAnalytics({
+    startDate,
+    endDate,
+    selectedFornecedores,
+    selectedProdutos
+  });
 
   const handleExportAnalytics = useCallback(async () => {
     try {
@@ -184,8 +93,11 @@ export default function Analytics() {
   }, []);
 
   const handleRefresh = useCallback(() => {
-    loadAnalytics(true);
-  }, [loadAnalytics]);
+    toast({
+      title: "Dados atualizados",
+      description: "Analytics recarregado com sucesso",
+    });
+  }, [toast]);
 
   const hasFilters = useMemo(() => 
     selectedFornecedores.length > 0 || selectedProdutos.length > 0, 
@@ -196,22 +108,6 @@ export default function Analytics() {
     if (!startDate || !endDate) return 'Últimos 30 dias';
     return `${startDate.toLocaleDateString('pt-BR')} - ${endDate.toLocaleDateString('pt-BR')}`;
   }, [startDate, endDate]);
-
-  // Efeito para simular atualização quando filtros mudam
-  useEffect(() => {
-    if (hasFilters && user) {
-      setRefreshing(true);
-      const timer = setTimeout(() => {
-        setRefreshing(false);
-        toast({
-          title: "Filtros aplicados",
-          description: "Dados atualizados com os filtros selecionados",
-        });
-      }, 800);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [selectedFornecedores, selectedProdutos, hasFilters, user, toast]);
 
   // Loading skeleton
   const LoadingSkeleton = () => (
@@ -242,7 +138,7 @@ export default function Analytics() {
     </div>
   );
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSkeleton />;
   }
 
@@ -262,7 +158,6 @@ export default function Analytics() {
                     Analytics
                   </h1>
                   <div className="flex items-center gap-2 mt-1">
-                    {refreshing && <Loader2 className="h-4 w-4 animate-spin text-green-600" />}
                     <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200 shadow-sm">
                       <BarChart3 className="h-3 w-3" />
                       Dados Analíticos
@@ -312,10 +207,9 @@ export default function Analytics() {
               variant="outline" 
               size="sm" 
               onClick={handleRefresh}
-              disabled={refreshing}
               className="bg-white/70 backdrop-blur-sm border-green-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200 flex items-center gap-2"
             >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className="h-4 w-4" />
               Atualizar
             </Button>
           
