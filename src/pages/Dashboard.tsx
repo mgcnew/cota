@@ -693,29 +693,29 @@ export default function Dashboard() {
       )}
 
       {/* Métricas Principais com Indicadores de Tempo Real */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
         <Card className={`hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 ${autoRefresh && isOnline ? 'ring-1 ring-blue-200' : ''
           }`}>
-          <CardContent className="pt-4 sm:pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1 sm:space-y-2 flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-blue-100 relative">
+          <CardContent className="p-3 sm:pt-6 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+              <div className="space-y-1 flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="p-1 sm:p-2 rounded-lg bg-blue-100 relative">
                     <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                     {autoRefresh && isOnline && (
-                      <div className="absolute -top-1 -right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
                     )}
                   </div>
-                  <span className="text-xs sm:text-sm font-medium text-gray-600 truncate">Cotações Ativas</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-600 truncate">Cotações</span>
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">{metrics.cotacoesAtivas}</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-900">{metrics.cotacoesAtivas}</div>
               </div>
-              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-1.5 sm:px-2 py-1 rounded-full">
+              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full self-start sm:self-auto">
                 <ArrowUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 <span className="text-xs font-medium">+12%</span>
               </div>
             </div>
-            <div className="mt-3 sm:mt-4 flex items-center gap-2">
+            <div className="mt-2 sm:mt-4 flex items-center gap-2">
               <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                 <div className="bg-blue-600 h-1.5 sm:h-2 rounded-full transition-all duration-500" style={{ width: '75%' }}></div>
               </div>
@@ -726,23 +726,23 @@ export default function Dashboard() {
 
         <Card className={`hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 ${autoRefresh && isOnline ? 'ring-1 ring-green-200' : ''
           }`}>
-          <CardContent className="pt-4 sm:pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1 sm:space-y-2 flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-green-100 relative">
+          <CardContent className="p-3 sm:pt-6 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+              <div className="space-y-1 flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="p-1 sm:p-2 rounded-lg bg-green-100 relative">
                     <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                     {autoRefresh && isOnline && (
-                      <div className="absolute -top-1 -right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
                     )}
                   </div>
-                  <span className="text-xs sm:text-sm font-medium text-gray-600 truncate">Economia Gerada</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-600 truncate">Economia</span>
                 </div>
-                <div className="text-lg sm:text-2xl font-bold text-gray-900">
-                  R$ {metrics.economiaGerada.toLocaleString('pt-BR')}
+                <div className="text-sm sm:text-2xl font-bold text-gray-900">
+                  R$ {(metrics.economiaGerada / 1000).toFixed(0)}k
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-1.5 sm:px-2 py-1 rounded-full">
+              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full self-start sm:self-auto">
                 <ArrowUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 <span className="text-xs font-medium">+8%</span>
               </div>
@@ -755,26 +755,26 @@ export default function Dashboard() {
 
         <Card className={`hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 ${autoRefresh && isOnline ? 'ring-1 ring-purple-200' : ''
           }`}>
-          <CardContent className="pt-4 sm:pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1 sm:space-y-2 flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-purple-100 relative">
+          <CardContent className="p-3 sm:pt-6 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+              <div className="space-y-1 flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="p-1 sm:p-2 rounded-lg bg-purple-100 relative">
                     <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
                     {autoRefresh && isOnline && (
-                      <div className="absolute -top-1 -right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
                     )}
                   </div>
                   <span className="text-xs sm:text-sm font-medium text-gray-600 truncate">Fornecedores</span>
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">{metrics.fornecedores}</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-900">{metrics.fornecedores}</div>
               </div>
-              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-1.5 sm:px-2 py-1 rounded-full">
+              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full self-start sm:self-auto">
                 <ArrowUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 <span className="text-xs font-medium">+3</span>
               </div>
             </div>
-            <div className="mt-3 sm:mt-4 text-xs text-gray-500">
+            <div className="mt-2 sm:mt-4 text-xs text-gray-500">
               {Math.floor(metrics.fornecedores * 0.8)} ativos • {Math.floor(metrics.fornecedores * 0.2)} inativos
             </div>
           </CardContent>
@@ -782,26 +782,26 @@ export default function Dashboard() {
 
         <Card className={`hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 ${autoRefresh && isOnline ? 'ring-1 ring-orange-200' : ''
           }`}>
-          <CardContent className="pt-4 sm:pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1 sm:space-y-2 flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-orange-100 relative">
+          <CardContent className="p-3 sm:pt-6 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+              <div className="space-y-1 flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="p-1 sm:p-2 rounded-lg bg-orange-100 relative">
                     <Package className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
                     {autoRefresh && isOnline && (
-                      <div className="absolute -top-1 -right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
                     )}
                   </div>
                   <span className="text-xs sm:text-sm font-medium text-gray-600 truncate">Produtos</span>
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">{metrics.produtosCotados}</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-900">{metrics.produtosCotados}</div>
               </div>
-              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-1.5 sm:px-2 py-1 rounded-full">
+              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full self-start sm:self-auto">
                 <ArrowUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 <span className="text-xs font-medium">+5%</span>
               </div>
             </div>
-            <div className="mt-3 sm:mt-4 text-xs text-gray-500">
+            <div className="mt-2 sm:mt-4 text-xs text-gray-500">
               {Math.floor(metrics.produtosCotados * 0.6)} cotados este mês
             </div>
           </CardContent>
@@ -810,41 +810,40 @@ export default function Dashboard() {
 
       {/* Ações Rápidas */}
       <Card className="overflow-visible h-auto">
-        <CardHeader className="pb-3 sm:pb-6 flex-shrink-0">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+        <CardHeader className="pb-2 sm:pb-6 px-3 sm:px-6 pt-3 sm:pt-6 flex-shrink-0">
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Ações Rápidas
           </CardTitle>
         </CardHeader>
-        <CardContent className="overflow-visible h-auto flex-shrink-0">
-          <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 overflow-visible">
+        <CardContent className="overflow-visible h-auto flex-shrink-0 px-3 sm:px-6 pb-3 sm:pb-6">
+          <div className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 overflow-visible">
             {quickActions.map((action, index) => (
               <button
                 key={index}
                 onClick={() => handleQuickAction(action.action, index)}
                 disabled={clickedAction === index}
-                className={`flex flex-col sm:flex-row items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 text-center sm:text-left group bg-white hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 disabled:opacity-75 ${
+                className={`flex flex-col items-center gap-1.5 sm:gap-3 p-2.5 sm:p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 text-center group bg-white hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 disabled:opacity-75 ${
                   clickedAction === index ? 'scale-95 bg-blue-50' : 'hover:scale-105 active:scale-95'
                 }`}
               >
-                <div className={`p-2 sm:p-2.5 rounded-xl text-white ${action.color} group-hover:scale-110 transition-all duration-200 shadow-lg flex-shrink-0 ${
+                <div className={`p-1.5 sm:p-2.5 rounded-xl text-white ${action.color} group-hover:scale-110 transition-all duration-200 shadow-lg flex-shrink-0 ${
                   clickedAction === index ? 'animate-pulse' : ''
                 }`}>
                   {clickedAction === index ? (
-                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 sm:h-5 sm:w-5 animate-spin" />
                   ) : (
-                    <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <action.icon className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0 space-y-0.5">
-                  <div className="font-semibold text-gray-900 text-sm sm:text-base truncate group-hover:text-blue-900 transition-colors">
+                  <div className="font-semibold text-gray-900 text-xs sm:text-base truncate group-hover:text-blue-900 transition-colors leading-tight">
                     {action.title}
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-500 truncate group-hover:text-blue-600 transition-colors">
+                  <div className="text-xs text-gray-500 truncate group-hover:text-blue-600 transition-colors leading-tight hidden sm:block">
                     {action.description}
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0 hidden sm:block" />
               </button>
             ))}
           </div>
@@ -853,37 +852,37 @@ export default function Dashboard() {
 
       {/* Tabs para Organização */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+        <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10">
+          <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
             <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Visão Geral</span>
             <span className="sm:hidden">Visão</span>
           </TabsTrigger>
-          <TabsTrigger value="performance" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+          <TabsTrigger value="performance" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
             <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Performance</span>
             <span className="sm:hidden">Perf.</span>
           </TabsTrigger>
-          <TabsTrigger value="activity" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+          <TabsTrigger value="activity" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
             <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Atividades</span>
             <span className="sm:hidden">Ativ.</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+        <TabsContent value="overview" className="space-y-3 sm:space-y-6 mt-3 sm:mt-6">
           {/* Gráficos Principais */}
-          <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
+          <div className="grid gap-3 sm:gap-6 grid-cols-1 lg:grid-cols-2">
             {/* Gráfico de Área - Economia */}
             <Card className="hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <CardHeader className="pb-2 sm:pb-6 px-3 sm:px-6 pt-3 sm:pt-6">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
                   <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                   <span className="truncate">Evolução da Economia</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="h-64 sm:h-80 w-full">
+              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+                <div className="h-48 sm:h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={areaChartData}>
                       <defs>
@@ -945,14 +944,14 @@ export default function Dashboard() {
 
             {/* Gráfico de Pizza - Fornecedores */}
             <Card className="hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <CardHeader className="pb-2 sm:pb-6 px-3 sm:px-6 pt-3 sm:pt-6">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
                   <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                   <span className="truncate">Distribuição por Fornecedores</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="h-64 sm:h-80 w-full">
+              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+                <div className="h-48 sm:h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -991,34 +990,34 @@ export default function Dashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value="performance" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+        <TabsContent value="performance" className="space-y-3 sm:space-y-6 mt-3 sm:mt-6">
           {/* Top Fornecedores Melhorado */}
           <Card className="hover:shadow-lg transition-shadow duration-200">
-            <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <CardHeader className="pb-2 sm:pb-6 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
                 <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                 <span className="truncate">Top Fornecedores do Mês</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3 sm:space-y-4">
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+              <div className="space-y-2 sm:space-y-4">
                 {topSuppliers.map((supplier, index) => (
-                  <div key={supplier.name} className="flex items-center justify-between p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+                  <div key={supplier.name} className="flex items-center justify-between p-2.5 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base ${index === 0 ? "bg-yellow-500" :
+                      <div className={`w-6 h-6 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-base ${index === 0 ? "bg-yellow-500" :
                         index === 1 ? "bg-gray-400" :
                           index === 2 ? "bg-orange-500" : "bg-blue-500"
                         }`}>
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 text-sm sm:text-base truncate">{supplier.name}</div>
-                        <div className="text-xs sm:text-sm text-gray-500 truncate">{supplier.quotes} cotações realizadas</div>
+                        <div className="font-medium text-gray-900 text-xs sm:text-base truncate">{supplier.name}</div>
+                        <div className="text-xs text-gray-500 truncate">{supplier.quotes} cotações</div>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="text-base sm:text-lg font-bold text-green-600">-{supplier.savings}</div>
-                      <div className="text-xs text-gray-500">economia gerada</div>
+                      <div className="text-sm sm:text-lg font-bold text-green-600">-{supplier.savings}</div>
+                      <div className="text-xs text-gray-500 hidden sm:block">economia gerada</div>
                     </div>
                   </div>
                 ))}
@@ -1027,42 +1026,42 @@ export default function Dashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="activity" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+        <TabsContent value="activity" className="space-y-3 sm:space-y-6 mt-3 sm:mt-6">
           {/* Cotações Recentes Melhoradas */}
           <Card className="hover:shadow-lg transition-shadow duration-200">
-            <CardHeader className="pb-3 sm:pb-6">
+            <CardHeader className="pb-2 sm:pb-6 px-3 sm:px-6 pt-3 sm:pt-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
                   <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                   <span className="truncate">Atividades Recentes</span>
                 </CardTitle>
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 text-xs sm:text-sm">
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 text-xs sm:text-sm px-2 sm:px-3">
                   <span className="hidden sm:inline">Ver todas</span>
                   <span className="sm:hidden">Ver</span>
                   <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3 sm:space-y-4">
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+              <div className="space-y-2 sm:space-y-4">
                 {recentQuotes.map(quote => (
-                  <div key={quote.id} className="flex items-center justify-between p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 group">
+                  <div key={quote.id} className="flex items-center justify-between p-2.5 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 group">
                     <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                      <div className="w-6 h-6 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                        <FileText className="h-3 w-3 sm:h-5 sm:w-5 text-blue-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 text-sm sm:text-base truncate">{quote.product}</div>
-                        <div className="text-xs sm:text-sm text-gray-500 truncate">
+                        <div className="font-medium text-gray-900 text-xs sm:text-base truncate">{quote.product}</div>
+                        <div className="text-xs text-gray-500 truncate">
                           {quote.quantity} • {quote.supplier} • {quote.date}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                    <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
                       <StatusBadge status={quote.status as any} />
                       <div className="text-right">
-                        <div className="font-bold text-green-600 text-sm sm:text-base">{quote.bestPrice}</div>
-                        <div className="text-xs text-gray-500">melhor preço</div>
+                        <div className="font-bold text-green-600 text-xs sm:text-base">{quote.bestPrice}</div>
+                        <div className="text-xs text-gray-500 hidden sm:block">melhor preço</div>
                       </div>
                     </div>
                   </div>

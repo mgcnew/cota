@@ -151,11 +151,12 @@ export function AppLayout() {
               <div className="hidden md:block">
                 <ThemeToggle />
               </div>
+              {/* Configurações - Apenas Desktop */}
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => navigate('/configuracoes')}
-                className="text-gray-500 hover:text-gray-700 hover:bg-white/60 h-9 w-9 md:h-10 md:w-10 p-0 rounded-xl transition-all duration-200"
+                className="hidden md:flex text-gray-500 hover:text-gray-700 hover:bg-white/60 h-9 w-9 md:h-10 md:w-10 p-0 rounded-xl transition-all duration-200"
               >
                 <Settings className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
