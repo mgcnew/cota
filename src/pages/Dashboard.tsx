@@ -444,7 +444,198 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
+          {/* Mobile: Layout otimizado com melhor hierarquia */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {/* Linha 1: Ação principal + Atualizar */}
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => setShowReportModal(true)}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 border-0 text-sm font-medium px-4 py-2.5 h-10"
+              >
+                <Eye className="h-4 w-4" />
+                <span>Ver Relatório</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={refreshing || !isOnline}
+                className="bg-white/80 backdrop-blur-sm border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 flex items-center gap-2 text-sm px-4 py-2.5 h-10 min-w-[100px]"
+              >
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <span>Atualizar</span>
+              </Button>
+            </div>
+
+            {/* Linha 2: Período + Filtros */}
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 bg-white/80 backdrop-blur-sm border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 flex items-center justify-center gap-2 text-sm px-4 py-2.5 h-10"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span>{getSelectedPeriodText().shortLabel}</span>
+                  </Button>
+                </PopoverTrigger>
+              <PopoverContent className="w-56 p-2" align="end">
+                <div className="space-y-1">
+                  <div className="px-2 py-1.5 text-sm font-semibold text-gray-900">
+                    Período de análise
+                  </div>
+                  {dateFilterOptions.map((option) => (
+                    <Button
+                      key={option.value}
+                      variant={dateFilter === option.value ? "default" : "ghost"}
+                      size="sm"
+                      className={`w-full justify-start text-sm ${dateFilter === option.value
+                        ? "bg-blue-500 text-white hover:bg-blue-600"
+                        : "hover:bg-gray-100"
+                        }`}
+                      onClick={() => setDateFilter(option.value)}
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`flex-1 bg-white/80 backdrop-blur-sm border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 flex items-center justify-center gap-2 text-sm px-4 py-2.5 h-10 ${getActiveFiltersCount() > 0 ? 'ring-2 ring-blue-500 bg-blue-50 border-blue-300' : ''
+                    }`}
+                >
+                  <Filter className="h-4 w-4" />
+                  <span>
+                    {getActiveFiltersCount() > 0 ? `Filtros (${getActiveFiltersCount()})` : 'Filtros'}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="end">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-900">Filtros Avançados</h3>
+                    {getActiveFiltersCount() > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={resetFilters}
+                        className="text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        Limpar todos
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Filtro por Status */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-700">Status da Cotação</label>
+                    <Select
+                      value={activeFilters.status}
+                      onValueChange={(value) => setActiveFilters(prev => ({ ...prev, status: value }))}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions.status.map((option) => (
+                          <SelectItem key={option.value} value={option.value} className="text-xs">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por Fornecedor */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-700">Fornecedor</label>
+                    <Select
+                      value={activeFilters.supplier}
+                      onValueChange={(value) => setActiveFilters(prev => ({ ...prev, supplier: value }))}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions.supplier.map((option) => (
+                          <SelectItem key={option.value} value={option.value} className="text-xs">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por Categoria */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-700">Categoria</label>
+                    <Select
+                      value={activeFilters.category}
+                      onValueChange={(value) => setActiveFilters(prev => ({ ...prev, category: value }))}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions.category.map((option) => (
+                          <SelectItem key={option.value} value={option.value} className="text-xs">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por Valor */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-700">Faixa de Valor</label>
+                    <Select
+                      value={activeFilters.value}
+                      onValueChange={(value) => setActiveFilters(prev => ({ ...prev, value: value }))}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions.value.map((option) => (
+                          <SelectItem key={option.value} value={option.value} className="text-xs">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            </div>
+
+            {/* Linha 3: Controle de tempo real */}
+            <div className="flex items-center gap-3 px-4 py-3 bg-white/80 backdrop-blur-sm border border-blue-200 rounded-xl shadow-sm">
+              <div className="flex items-center gap-2 flex-1">
+                {autoRefresh ? <Play className="h-4 w-4 text-green-600" /> : <Pause className="h-4 w-4 text-gray-500" />}
+                <span className="text-sm font-medium text-gray-700">Tempo Real</span>
+              </div>
+              <Switch
+                checked={autoRefresh}
+                onCheckedChange={toggleAutoRefresh}
+                disabled={!isOnline}
+              />
+            </div>
+          </div>
+
+          {/* Desktop: Layout original */}
+          <div className="hidden sm:flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
             {/* Controle de Auto-refresh Melhorado */}
             <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 bg-white/70 backdrop-blur-sm border border-blue-200 rounded-lg sm:rounded-xl shadow-sm">
               <div className="flex items-center gap-1 sm:gap-2">
@@ -866,13 +1057,11 @@ export default function Dashboard() {
                 key={index}
                 onClick={() => handleQuickAction(action.action, index)}
                 disabled={clickedAction === index}
-                className={`flex flex-col items-center gap-1.5 sm:gap-3 p-2.5 sm:p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 text-center group bg-white hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 disabled:opacity-75 ${
-                  clickedAction === index ? 'scale-95 bg-blue-50' : 'hover:scale-105 active:scale-95'
-                }`}
+                className={`flex flex-col items-center gap-1.5 sm:gap-3 p-2.5 sm:p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 text-center group bg-white hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 disabled:opacity-75 ${clickedAction === index ? 'scale-95 bg-blue-50' : 'hover:scale-105 active:scale-95'
+                  }`}
               >
-                <div className={`p-1.5 sm:p-2.5 rounded-xl text-white ${action.color} group-hover:scale-110 transition-all duration-200 shadow-lg flex-shrink-0 ${
-                  clickedAction === index ? 'animate-pulse' : ''
-                }`}>
+                <div className={`p-1.5 sm:p-2.5 rounded-xl text-white ${action.color} group-hover:scale-110 transition-all duration-200 shadow-lg flex-shrink-0 ${clickedAction === index ? 'animate-pulse' : ''
+                  }`}>
                   {clickedAction === index ? (
                     <Loader2 className="h-3.5 w-3.5 sm:h-5 sm:w-5 animate-spin" />
                   ) : (
@@ -924,8 +1113,8 @@ export default function Dashboard() {
                   <span className="truncate">Evolução da Economia</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-                <div className="h-48 sm:h-80 w-full">
+              <CardContent className="px-2 sm:px-6 pb-4 sm:pb-6">
+                <div className="h-56 sm:h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={areaChartData}>
                       <defs>
@@ -939,13 +1128,15 @@ export default function Dashboard() {
                         dataKey="month"
                         className="text-xs"
                         stroke="#6b7280"
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
+                        height={window.innerWidth < 640 ? 40 : 60}
                       />
                       <YAxis
                         className="text-xs"
                         stroke="#6b7280"
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
                         tickFormatter={value => `R$ ${(value / 1000).toFixed(0)}k`}
+                        width={window.innerWidth < 640 ? 40 : 60}
                       />
                       <Tooltip
                         content={({ active, payload, label }) => {
@@ -993,17 +1184,17 @@ export default function Dashboard() {
                   <span className="truncate">Distribuição por Fornecedores</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-                <div className="h-48 sm:h-80 w-full">
+              <CardContent className="px-2 sm:px-6 pb-4 sm:pb-6">
+                <div className="h-56 sm:h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={pieChartData}
                         cx="50%"
-                        cy="50%"
+                        cy="45%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={100}
+                        label={({ name, percent }) => window.innerWidth < 640 ? `${(percent * 100).toFixed(0)}%` : `${name} ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={window.innerWidth < 640 ? 70 : 100}
                         fill="#8884d8"
                         dataKey="value"
                       >
