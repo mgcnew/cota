@@ -22,6 +22,8 @@ import * as XLSX from 'xlsx';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
+import { queryClient } from "@/lib/queryClient";
 
 interface Supplier {
   id: string;
@@ -203,7 +205,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
     }
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (parsedData.length === 0) {
       toast({
         title: "Nenhum fornecedor para importar",
@@ -212,34 +214,59 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
       return;
     }
 
-    const suppliersToImport: Supplier[] = parsedData.map((s, index) => ({
-      id: `imported-${Date.now()}-${index}`,
-      name: s.name,
-      contact: s.contact,
-      phone: s.phone,
-      email: s.email,
-      address: s.address,
-      limit: s.limit || 'R$ 0',
-      status: s.status || 'active',
-      rating: s.rating || 0,
-      activeQuotes: 0,
-      totalQuotes: 0,
-      avgPrice: 'R$ 0.00',
-      lastOrder: new Date().toLocaleDateString('pt-BR')
-    }));
+    setIsProcessing(true);
 
-    onSuppliersImported(suppliersToImport);
+    try {
+      // 1. Verificar autenticação
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
 
-    toast({
-      title: "Importação concluída",
-      description: `${suppliersToImport.length} fornecedores importados com sucesso`,
-    });
+      // 2. Preparar dados para inserção
+      const suppliersToInsert = parsedData.map(s => ({
+        name: s.name,
+        contact: s.contact,
+        phone: s.phone || null,
+        email: s.email || null,
+        address: s.address || null,
+        cnpj: null, // CNPJ não está no template, mas pode ser adicionado
+        user_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
 
-    // Reset
-    setOpen(false);
-    setFile(null);
-    setParsedData([]);
-    setValidationErrors([]);
+      // 3. Inserir fornecedores no banco de dados
+      const { data, error } = await supabase
+        .from('suppliers')
+        .insert(suppliersToInsert)
+        .select();
+
+      if (error) throw error;
+
+      // 4. Invalidar queries para atualizar UI
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+
+      toast({
+        title: "Importação concluída",
+        description: `${data?.length || parsedData.length} fornecedores importados com sucesso`,
+      });
+
+      // Reset e fechar
+      setOpen(false);
+      setFile(null);
+      setParsedData([]);
+      setValidationErrors([]);
+    } catch (error: any) {
+      console.error('Erro ao importar fornecedores:', error);
+      toast({
+        title: "Erro na importação",
+        description: error.message || "Não foi possível importar os fornecedores",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const resetImport = () => {

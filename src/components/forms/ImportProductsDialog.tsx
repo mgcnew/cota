@@ -22,6 +22,8 @@ import * as XLSX from 'xlsx';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
+import { queryClient } from "@/lib/queryClient";
 
 interface Product {
   id: string;
@@ -175,7 +177,7 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
     }
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (parsedData.length === 0) {
       toast({
         title: "Nenhum produto para importar",
@@ -184,34 +186,56 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
       return;
     }
 
-    const productsToImport: Product[] = parsedData.map((p, index) => ({
-      id: `imported-${Date.now()}-${index}`,
-      name: p.name,
-      category: p.category,
-      weight: p.weight || 'N/A',
-      lastQuotePrice: p.lastQuotePrice || 'R$ 0.00',
-      bestSupplier: p.bestSupplier || 'N/A',
-      quotesCount: p.quotesCount || 0,
-      lastUpdate: p.lastUpdate || new Date().toLocaleDateString('pt-BR'),
-      trend: "stable"
-    }));
+    setIsProcessing(true);
 
-    // Adicionar novas categorias
-    const uniqueCategories = [...new Set(parsedData.map(p => p.category))];
-    uniqueCategories.forEach(cat => onCategoryAdded(cat));
+    try {
+      // 1. Verificar autenticação
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
 
-    onProductsImported(productsToImport);
+      // 2. Preparar dados para inserção
+      const productsToInsert = parsedData.map(p => ({
+        name: p.name,
+        category: p.category,
+        weight: p.weight || null,
+        user_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
 
-    toast({
-      title: "Importação concluída",
-      description: `${productsToImport.length} produtos importados com sucesso`,
-    });
+      // 3. Inserir produtos no banco de dados
+      const { data, error } = await supabase
+        .from('products')
+        .insert(productsToInsert)
+        .select();
 
-    // Reset
-    setOpen(false);
-    setFile(null);
-    setParsedData([]);
-    setValidationErrors([]);
+      if (error) throw error;
+
+      // 4. Invalidar queries para atualizar UI
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+
+      toast({
+        title: "Importação concluída",
+        description: `${data?.length || parsedData.length} produtos importados com sucesso`,
+      });
+
+      // Reset e fechar
+      setOpen(false);
+      setFile(null);
+      setParsedData([]);
+      setValidationErrors([]);
+    } catch (error: any) {
+      console.error('Erro ao importar produtos:', error);
+      toast({
+        title: "Erro na importação",
+        description: error.message || "Não foi possível importar os produtos",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const resetImport = () => {
