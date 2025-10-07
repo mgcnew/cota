@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,6 +30,7 @@ import {
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useActivityLog } from "@/hooks/useActivityLog";
+import { useQueryClient } from '@tanstack/react-query';
 
 const productSchema = z.object({
   name: z.string()
@@ -59,8 +60,11 @@ interface AddProductDialogProps {
 export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProductDialogProps) {
   const [open, setOpen] = useState(false);
   const [showNewCategory, setShowNewCategory] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const { toast } = useToast();
   const { logActivity } = useActivityLog();
+  const queryClient = useQueryClient();
   
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -72,9 +76,35 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
     },
   });
 
-  const categories = ["Frango", "Embutidos", "Frios", "Bovino", "Suíno"];
-  
-  const watchCategory = form.watch("category");
+  // Carregar categorias dinamicamente do banco de dados
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const { data, error } = await supabase
+          .from('products')
+          .select('category');
+
+        if (error) throw error;
+
+        const uniqueCategories = Array.from(new Set(data.map(p => p.category)))
+          .filter(category => category && category.trim() !== '') // Remove categorias vazias
+          .sort(); // Ordena alfabeticamente
+
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+        // Fallback para categorias padrão em caso de erro
+        setCategories(["Frango", "Embutidos", "Frios", "Bovino", "Suíno"]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    if (open) {
+      loadCategories();
+    }
+  }, [open]);
 
   const onSubmit = async (data: ProductFormData) => {
     // Determinar a categoria final
@@ -115,9 +145,20 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
         detalhes: `${data.name} - Categoria: ${finalCategory}${data.weight ? `, Peso: ${data.weight}` : ""}`
       });
 
-      // Adicionar nova categoria à lista se necessário
-      if (data.category === "nova" && data.newCategory && onCategoryAdded) {
-        onCategoryAdded(data.newCategory);
+      // Invalidar queries para atualizar dados em tempo real
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product-categories'] });
+
+      // Adicionar nova categoria à lista local se necessário
+      if (data.category === "nova" && data.newCategory) {
+        setCategories(prev => {
+          const newCategories = [...prev, data.newCategory!].sort();
+          return Array.from(new Set(newCategories)); // Remove duplicatas
+        });
+        
+        if (onCategoryAdded) {
+          onCategoryAdded(data.newCategory);
+        }
       }
       
       toast({
@@ -242,27 +283,39 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                             }
                           }} 
                           defaultValue={field.value}
+                          disabled={loadingCategories}
                         >
                           <FormControl>
                             <SelectTrigger className="bg-background rounded-xl border-gray-200 focus:border-orange-400">
-                              <SelectValue placeholder="Selecione uma categoria existente" />
+                              <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Selecione uma categoria existente"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-background border z-50 rounded-xl">
-                            {categories.map((category) => (
-                              <SelectItem key={category} value={category} className="rounded-lg">
+                            {loadingCategories ? (
+                              <SelectItem value="loading" disabled className="rounded-lg">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                  {category}
+                                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                                  Carregando categorias...
                                 </div>
                               </SelectItem>
-                            ))}
-                            <SelectItem value="nova" className="text-primary font-medium rounded-lg border-t mt-1 pt-2">
-                              <div className="flex items-center gap-2">
-                                <Plus className="h-3 w-3" />
-                                Criar nova categoria
-                              </div>
-                            </SelectItem>
+                            ) : (
+                              <>
+                                {categories.map((category) => (
+                                  <SelectItem key={category} value={category} className="rounded-lg">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                      {category}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                                <SelectItem value="nova" className="text-primary font-medium rounded-lg border-t mt-1 pt-2">
+                                  <div className="flex items-center gap-2">
+                                    <Plus className="h-3 w-3" />
+                                    Criar nova categoria
+                                  </div>
+                                </SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />

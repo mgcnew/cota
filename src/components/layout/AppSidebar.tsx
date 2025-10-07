@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+// import logoImage from "@/assets/logo.png";
 const menuItems = [
   {
     title: "Home",
@@ -51,6 +52,34 @@ const menuItems = [
     icon: Settings,
   },
 ];
+
+// Componente da Logo com fallback robusto - SEM SCROLL
+function LogoComponent() {
+  const [showFallback, setShowFallback] = useState(false);
+  
+  return (
+    <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
+      {!showFallback ? (
+        <img 
+          src="/logo.png" 
+          alt="Logo da Empresa" 
+          className="w-12 h-12 object-contain flex-shrink-0"
+          onLoad={() => {
+            console.log('✅ Logo carregada com sucesso!');
+          }}
+          onError={(e) => {
+            console.log('❌ Logo não carregou, usando fallback');
+            setShowFallback(true);
+          }}
+        />
+      ) : (
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-500 to-gray-600 flex items-center justify-center shadow-lg flex-shrink-0">
+          <TrendingUp className="h-5 w-5 text-white drop-shadow-sm" />
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Cores para os gradientes dos botões
 const colors = [
@@ -163,12 +192,15 @@ export function AppSidebar() {
   return (
     <>
       {/* Desktop Sidebar - Apenas para desktop */}
-      <div className="hidden md:flex w-20 h-screen bg-gradient-to-b from-white via-gray-50 to-slate-100 flex-col z-50 shadow-xl border-r border-gray-200/60">
-        {/* Logo com Destaque */}
-        <div className="flex items-center justify-center h-16 border-b border-gray-200/60 bg-gradient-to-r from-blue-50/80 to-purple-50/80">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-blue-600 flex items-center justify-center shadow-md shadow-blue-500/20 ring-1 ring-blue-100/50">
-            <TrendingUp className="h-4 w-4 text-white" />
-          </div>
+      <div className="hidden md:flex w-20 h-screen bg-gradient-to-b from-white via-slate-50 to-gray-100 flex-col z-50 shadow-xl border-r border-gray-200/60 overflow-hidden">
+        {/* Logo da Empresa */}
+        <div className="flex items-center justify-center h-16 border-b border-gray-200/60 bg-gradient-to-r from-slate-50/80 to-gray-50/80 px-2 flex-shrink-0">
+          <NavLink 
+            to="/" 
+            className="w-14 h-14 rounded-xl bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-gray-500/20 ring-1 ring-gray-100/50 overflow-hidden hover:scale-105 transition-all duration-200 hover:shadow-xl hover:shadow-gray-500/30"
+          >
+            <LogoComponent />
+          </NavLink>
         </div>
 
         {/* Menu Items com Hierarquia */}
@@ -253,9 +285,9 @@ export function AppSidebar() {
       </div>
 
       {/* Mobile Bottom Navigation com Tema Claro */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-white/96 via-gray-50/96 to-slate-100/96 border-t border-gray-200/50 shadow-2xl backdrop-blur-xl">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-white/96 via-slate-50/96 to-gray-100/96 border-t border-gray-200/50 shadow-2xl backdrop-blur-xl">
         {/* Linha decorativa superior */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-200/60 to-transparent"></div>
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200/60 to-transparent"></div>
         
         <div className="flex items-center justify-around px-2 py-3 relative">
           {/* Botões principais (4 primeiros) */}

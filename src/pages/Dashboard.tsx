@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,7 @@ interface Alert {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { metrics, recentQuotes, topSuppliers, monthlyData, isLoading } = useDashboard();
   const [activeTab, setActiveTab] = useState("overview");
   const [refreshing, setRefreshing] = useState(false);
@@ -52,6 +54,7 @@ export default function Dashboard() {
     category: "all",
     value: "all"
   });
+  const [clickedAction, setClickedAction] = useState<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Opções de filtro de data
@@ -171,36 +174,44 @@ export default function Dashboard() {
     }
   ], []);
 
+  const handleQuickAction = useCallback((action: () => void, index: number) => {
+    setClickedAction(index);
+    setTimeout(() => {
+      action();
+      setClickedAction(null);
+    }, 150);
+  }, []);
+
   const quickActions: QuickAction[] = useMemo(() => [
     {
       title: "Nova Cotação",
       description: "Criar cotação rápida",
       icon: FileText,
       color: "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700",
-      action: () => console.log("Nova cotação")
+      action: () => navigate("/cotacoes")
     },
     {
       title: "Adicionar Fornecedor",
       description: "Cadastrar novo fornecedor",
       icon: Building2,
       color: "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
-      action: () => console.log("Novo fornecedor")
+      action: () => navigate("/fornecedores")
     },
     {
       title: "Relatório Rápido",
       description: "Gerar relatório do mês",
-      icon: BarChart,
+      icon: BarChart3,
       color: "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700",
-      action: () => setShowReportModal(true)
+      action: () => navigate("/relatorios")
     },
     {
       title: "Análise de Preços",
       description: "Comparar preços atuais",
       icon: TrendingUp,
       color: "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700",
-      action: () => console.log("Análise")
+      action: () => navigate("/analytics")
     }
-  ], []);
+  ], [navigate]);
 
   // Dados dos gráficos otimizados
   const pieChartData = useMemo(() =>
@@ -798,29 +809,42 @@ export default function Dashboard() {
       </div>
 
       {/* Ações Rápidas */}
-      <Card>
-        <CardHeader className="pb-3 sm:pb-6">
+      <Card className="overflow-visible h-auto">
+        <CardHeader className="pb-3 sm:pb-6 flex-shrink-0">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             Ações Rápidas
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <CardContent className="overflow-visible h-auto flex-shrink-0">
+          <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 overflow-visible">
             {quickActions.map((action, index) => (
               <button
                 key={index}
-                onClick={action.action}
-                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-left group"
+                onClick={() => handleQuickAction(action.action, index)}
+                disabled={clickedAction === index}
+                className={`flex flex-col sm:flex-row items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 text-center sm:text-left group bg-white hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 disabled:opacity-75 ${
+                  clickedAction === index ? 'scale-95 bg-blue-50' : 'hover:scale-105 active:scale-95'
+                }`}
               >
-                <div className={`p-1.5 sm:p-2 rounded-lg text-white ${action.color} group-hover:scale-110 transition-transform`}>
-                  <action.icon className="h-3 w-3 sm:h-4 sm:w-4" />
+                <div className={`p-2 sm:p-2.5 rounded-xl text-white ${action.color} group-hover:scale-110 transition-all duration-200 shadow-lg flex-shrink-0 ${
+                  clickedAction === index ? 'animate-pulse' : ''
+                }`}>
+                  {clickedAction === index ? (
+                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                  ) : (
+                    <action.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-gray-900 text-sm sm:text-base truncate">{action.title}</div>
-                  <div className="text-xs text-gray-500 truncate">{action.description}</div>
+                <div className="flex-1 min-w-0 space-y-0.5">
+                  <div className="font-semibold text-gray-900 text-sm sm:text-base truncate group-hover:text-blue-900 transition-colors">
+                    {action.title}
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-500 truncate group-hover:text-blue-600 transition-colors">
+                    {action.description}
+                  </div>
                 </div>
-                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 ml-auto group-hover:text-blue-600 flex-shrink-0" />
+                <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0 hidden sm:block" />
               </button>
             ))}
           </div>

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart } from "lucide-react";
+import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText } from "lucide-react";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -357,10 +357,29 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                   {selectedSupplier && (
                     <div className="space-y-3">
-                      <h4 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
-                        <DollarSign className="h-4 w-4" />
-                        Lista de Produtos
-                      </h4>
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
+                          <DollarSign className="h-4 w-4" />
+                          Lista de Produtos
+                        </h4>
+                        {quote.status === "concluida" && (
+                          <Badge variant="secondary" className="bg-gray-100 text-gray-600 border border-gray-300">
+                            <FileText className="h-3 w-3 mr-1" />
+                            Cotação Finalizada
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {quote.status === "concluida" && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                          <div className="flex items-center gap-2 text-amber-800">
+                            <ShoppingCart className="h-4 w-4" />
+                            <span className="text-sm font-medium">
+                              Esta cotação foi finalizada e convertida em pedido. Os valores não podem mais ser editados.
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       <div className="rounded-xl sm:rounded-2xl border-0 shadow-lg overflow-hidden bg-white/60 backdrop-blur-sm overflow-x-auto">
                         <table className="w-full min-w-[600px]">
                           <thead>
@@ -460,7 +479,14 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                         size="sm"
                                         variant="outline"
                                         onClick={() => handleStartEdit(product.product_id, currentValue)}
-                                        className="rounded-lg sm:rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 h-8 w-8 sm:h-9 sm:w-9 p-0"
+                                        disabled={quote.status === "concluida"}
+                                        className={cn(
+                                          "rounded-lg sm:rounded-xl h-8 w-8 sm:h-9 sm:w-9 p-0",
+                                          quote.status === "concluida" 
+                                            ? "border-gray-200 text-gray-400 cursor-not-allowed" 
+                                            : "border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
+                                        )}
+                                        title={quote.status === "concluida" ? "Cotação finalizada - Edição não permitida" : "Editar valor"}
                                       >
                                         <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
                                       </Button>

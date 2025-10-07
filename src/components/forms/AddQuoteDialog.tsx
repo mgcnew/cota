@@ -344,8 +344,8 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[950px] h-[95vh] max-h-[900px] p-0 gap-0 overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-6 border-b border-gray-100/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden">
+      <DialogContent className="w-[95vw] max-w-[1000px] h-[95vh] max-h-[950px] p-0 gap-0 overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden">
           {/* Efeito de fundo decorativo */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full -translate-y-16 translate-x-16"></div>
@@ -367,7 +367,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
             </div>
             
             {/* Progress Bar Melhorado */}
-            <div className="mt-3 sm:mt-4 lg:mt-6 space-y-2 sm:space-y-3">
+            <div className="mt-2 sm:mt-3 space-y-1.5 sm:space-y-2">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-700">
                 <span className="font-medium truncate">Progresso da Cotação</span>
                 <div className="flex items-center gap-2">
@@ -396,7 +396,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
               {/* Tab Navigation Melhorada */}
-              <div className="flex-shrink-0 px-3 sm:px-4 lg:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm overflow-x-auto">
+              <div className="flex-shrink-0 px-3 sm:px-4 lg:px-6 py-2 sm:py-3 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm overflow-x-auto">
                 <div className="flex items-center justify-start min-w-max">
                   <div className="flex space-x-2 sm:space-x-3 bg-white/60 backdrop-blur-sm rounded-2xl p-1.5 shadow-lg border border-gray-200/40">
                     {tabs.map((tab, index) => {
@@ -466,59 +466,58 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
               <div className="flex-1 overflow-hidden">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
                   {/* Produtos Tab */}
-                  <TabsContent value="produtos" className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 m-0">
-                    <Card className="h-full flex flex-col border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-blue-50/20 backdrop-blur-sm">
-                      <CardHeader className="flex-shrink-0 pb-4 sm:pb-5 bg-gradient-to-r from-blue-50/60 to-indigo-50/40 rounded-t-2xl border-b border-gray-100/60">
-                        <CardTitle className="flex items-center gap-3 text-lg sm:text-xl font-bold">
-                          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
-                            <Package className="h-5 w-5 drop-shadow-sm" />
+                  <TabsContent value="produtos" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 m-0">
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white via-gray-50/30 to-blue-50/20 backdrop-blur-sm">
+                      <CardHeader className="pb-3 bg-gradient-to-r from-blue-50/60 to-indigo-50/40 rounded-t-xl border-b border-gray-100/60">
+                        <CardTitle className="flex items-center gap-3 text-base font-bold">
+                          <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
+                            <Package className="h-4 w-4 drop-shadow-sm" />
                           </div>
                           <div className="flex flex-col">
                             <span className="bg-gradient-to-r from-blue-900 to-indigo-800 bg-clip-text text-transparent">
                               Produtos da Cotação
                             </span>
-                            <span className="text-sm text-gray-600 font-normal mt-0.5">
-                              Adicione os produtos que deseja cotar
+                            <span className="text-xs text-gray-600 font-normal mt-0.5">
+                              {fields.length} produto{fields.length !== 1 ? 's' : ''} adicionado{fields.length !== 1 ? 's' : ''}
                             </span>
                           </div>
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="flex-1 space-y-3 sm:space-y-4 overflow-y-auto">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-gradient-to-r from-blue-50/60 to-indigo-50/40 rounded-2xl border border-blue-100/60">
+                      <CardContent className="p-3 space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-gradient-to-r from-blue-50/60 to-indigo-50/40 rounded-lg border border-blue-100/60">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg">
-                              <Package className="h-5 w-5 text-white" />
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg">
+                              <Package className="h-4 w-4 text-white" />
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-900">Lista de Produtos</p>
-                              <p className="text-sm text-gray-600">
-                                {fields.length} produto{fields.length !== 1 ? 's' : ''} adicionado{fields.length !== 1 ? 's' : ''}
+                              <p className="font-semibold text-gray-900 text-sm">Lista de Produtos</p>
+                              <p className="text-xs text-gray-600">
+                                Configure os produtos para cotação
                               </p>
                             </div>
                           </div>
                           <Button
                             type="button"
                             onClick={() => append({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" })}
-                            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+                            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg text-sm h-9"
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             <span>Adicionar Produto</span>
                           </Button>
                         </div>
 
-                        <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
+                        <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
                           {fields.map((field, index) => (
-                            <Card key={field.id} className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50/50 backdrop-blur-sm rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300">
-                              <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
-                              <CardContent className="p-4 sm:p-5 space-y-4 sm:space-y-5">
+                            <Card key={field.id} className="border-0 shadow-md bg-gradient-to-br from-white to-gray-50/50 backdrop-blur-sm rounded-lg overflow-hidden group hover:shadow-lg transition-all duration-300">
+                              <div className="h-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+                              <CardContent className="p-3 space-y-3">
                                 <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-xs shadow-md">
                                       {index + 1}
                                     </div>
                                     <div>
-                                      <h4 className="font-bold text-gray-900 text-base">Produto {index + 1}</h4>
-                                      <p className="text-sm text-gray-600">Configure os detalhes do produto</p>
+                                      <h4 className="font-bold text-gray-900 text-sm">Produto {index + 1}</h4>
                                     </div>
                                   </div>
                                   {fields.length > 1 && (
@@ -527,112 +526,117 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => remove(index)}
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-9 w-9 p-0 rounded-xl transition-all duration-200 hover:scale-110"
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0 rounded-lg transition-all duration-200 hover:scale-110"
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-3 w-3" />
                                     </Button>
                                   )}
                                 </div>
 
-                                <FormField
-                                  control={form.control}
-                                  name={`produtos.${index}.produtoId`}
-                                  render={({ field: formField }) => (
-                                    <FormItem>
-                                      <FormLabel>Produto *</FormLabel>
-                                      <Popover>
-                                        <PopoverTrigger asChild>
+                                {/* Layout otimizado */}
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                                  <div className="lg:col-span-2">
+                                    <FormField
+                                      control={form.control}
+                                      name={`produtos.${index}.produtoId`}
+                                      render={({ field: formField }) => (
+                                        <FormItem>
+                                          <FormLabel className="text-sm font-medium">Produto *</FormLabel>
+                                          <Popover>
+                                            <PopoverTrigger asChild>
+                                              <FormControl>
+                                                <Button
+                                                  variant="outline"
+                                                  role="combobox"
+                                                  className={cn(
+                                                    "w-full justify-between h-9 text-sm",
+                                                    !formField.value && "text-muted-foreground"
+                                                  )}
+                                                >
+                                                  {formField.value
+                                                    ? products.find((product) => product.id === formField.value)?.name
+                                                    : "Selecionar produto..."}
+                                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                              </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0" align="start">
+                                              <Command>
+                                                <CommandInput placeholder="Buscar produto..." />
+                                                <CommandList>
+                                                  <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
+                                                  <CommandGroup>
+                                                    {products.map((product) => (
+                                                      <CommandItem
+                                                        key={product.id}
+                                                        value={product.name}
+                                                        onSelect={() => {
+                                                          form.setValue(`produtos.${index}.produtoId`, product.id);
+                                                          form.setValue(`produtos.${index}.produtoNome`, product.name);
+                                                        }}
+                                                      >
+                                                        <Check
+                                                          className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            product.id === formField.value ? "opacity-100" : "opacity-0"
+                                                          )}
+                                                        />
+                                                        {product.name}
+                                                      </CommandItem>
+                                                    ))}
+                                                  </CommandGroup>
+                                                </CommandList>
+                                              </Command>
+                                            </PopoverContent>
+                                          </Popover>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-2">
+                                    <FormField
+                                      control={form.control}
+                                      name={`produtos.${index}.quantidade`}
+                                      render={({ field: formField }) => (
+                                        <FormItem>
+                                          <FormLabel className="text-sm font-medium">Quantidade *</FormLabel>
                                           <FormControl>
-                                            <Button
-                                              variant="outline"
-                                              role="combobox"
-                                              className={cn(
-                                                "w-full justify-between",
-                                                !formField.value && "text-muted-foreground"
-                                              )}
-                                            >
-                                              {formField.value
-                                                ? products.find((product) => product.id === formField.value)?.name
-                                                : "Selecionar produto..."}
-                                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
+                                            <Input placeholder="Ex: 500" type="number" className="h-9 text-sm" {...formField} />
                                           </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-full p-0" align="start">
-                                          <Command>
-                                            <CommandInput placeholder="Buscar produto..." />
-                                            <CommandList>
-                                              <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
-                                              <CommandGroup>
-                                                {products.map((product) => (
-                                                  <CommandItem
-                                                    key={product.id}
-                                                    value={product.name}
-                                                    onSelect={() => {
-                                                      form.setValue(`produtos.${index}.produtoId`, product.id);
-                                                      form.setValue(`produtos.${index}.produtoNome`, product.name);
-                                                    }}
-                                                  >
-                                                    <Check
-                                                      className={cn(
-                                                        "mr-2 h-4 w-4",
-                                                        product.id === formField.value ? "opacity-100" : "opacity-0"
-                                                      )}
-                                                    />
-                                                    {product.name}
-                                                  </CommandItem>
-                                                ))}
-                                              </CommandGroup>
-                                            </CommandList>
-                                          </Command>
-                                        </PopoverContent>
-                                      </Popover>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                  <FormField
-                                    control={form.control}
-                                    name={`produtos.${index}.quantidade`}
-                                    render={({ field: formField }) => (
-                                      <FormItem>
-                                        <FormLabel>Quantidade *</FormLabel>
-                                        <FormControl>
-                                          <Input placeholder="Ex: 500" type="number" {...formField} />
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-
-                                  <FormField
-                                    control={form.control}
-                                    name={`produtos.${index}.unidade`}
-                                    render={({ field: formField }) => (
-                                      <FormItem>
-                                        <FormLabel>Unidade *</FormLabel>
-                                        <Select onValueChange={formField.onChange} defaultValue={formField.value}>
-                                          <FormControl>
-                                            <SelectTrigger>
-                                              <SelectValue placeholder="Selecione" />
-                                            </SelectTrigger>
-                                          </FormControl>
-                                          <SelectContent>
-                                            <SelectItem value="kg">Quilograma (kg)</SelectItem>
-                                            <SelectItem value="g">Gramas (g)</SelectItem>
-                                            <SelectItem value="un">Unidade (un)</SelectItem>
-                                            <SelectItem value="cx">Caixa (cx)</SelectItem>
-                                            <SelectItem value="pct">Pacote (pct)</SelectItem>
-                                            <SelectItem value="l">Litro (l)</SelectItem>
-                                            <SelectItem value="ml">Mililitro (ml)</SelectItem>
-                                          </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
+                                    <FormField
+                                      control={form.control}
+                                      name={`produtos.${index}.unidade`}
+                                      render={({ field: formField }) => (
+                                        <FormItem>
+                                          <FormLabel className="text-sm font-medium">Unidade *</FormLabel>
+                                          <Select onValueChange={formField.onChange} defaultValue={formField.value}>
+                                            <FormControl>
+                                              <SelectTrigger className="h-9 text-sm">
+                                                <SelectValue placeholder="Selecione" />
+                                              </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                              <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                                              <SelectItem value="g">Gramas (g)</SelectItem>
+                                              <SelectItem value="un">Unidade (un)</SelectItem>
+                                              <SelectItem value="cx">Caixa (cx)</SelectItem>
+                                              <SelectItem value="pct">Pacote (pct)</SelectItem>
+                                              <SelectItem value="l">Litro (l)</SelectItem>
+                                              <SelectItem value="ml">Mililitro (ml)</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
                                 </div>
                               </CardContent>
                             </Card>
@@ -643,29 +647,26 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                   </TabsContent>
 
                   {/* Período Tab */}
-                  <TabsContent value="periodo" className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 m-0">
-                    <Card className="h-full flex flex-col border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-indigo-50/20 backdrop-blur-sm">
-                      <CardHeader className="flex-shrink-0 pb-4 sm:pb-5 bg-gradient-to-r from-indigo-50/60 to-purple-50/40 rounded-t-2xl border-b border-gray-100/60">
-                        <CardTitle className="flex items-center gap-3 text-lg sm:text-xl font-bold">
-                          <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
-                            <Clock className="h-5 w-5 drop-shadow-sm" />
+                  <TabsContent value="periodo" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 m-0">
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white via-gray-50/30 to-indigo-50/20 backdrop-blur-sm">
+                      <CardHeader className="pb-3 bg-gradient-to-r from-indigo-50/60 to-purple-50/40 rounded-t-xl border-b border-gray-100/60">
+                        <CardTitle className="flex items-center gap-3 text-base font-bold">
+                          <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+                            <Clock className="h-4 w-4 drop-shadow-sm" />
                           </div>
                           <div className="flex flex-col">
                             <span className="bg-gradient-to-r from-indigo-900 to-purple-800 bg-clip-text text-transparent">
                               Período da Cotação
                             </span>
-                            <span className="text-sm text-gray-600 font-normal mt-0.5">
+                            <span className="text-xs text-gray-600 font-normal mt-0.5">
                               Defina quando a cotação ficará aberta
                             </span>
                           </div>
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="flex-1 space-y-4 sm:space-y-6">
-                        <p className="text-xs sm:text-sm text-gray-600">
-                          Defina o período em que a cotação ficará aberta para receber propostas
-                        </p>
+                      <CardContent className="p-3 space-y-4">
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
                             name="dataInicio"
@@ -673,117 +674,175 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                               <FormItem className="flex flex-col">
                                 <FormLabel>Data de Início *</FormLabel>
                                 <Popover>
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button
-                                        variant="outline"
-                                        className={cn(
-                                          "w-full pl-3 text-left font-normal",
-                                          !field.value && "text-muted-foreground"
-                                        )}
-                                      >
-                                        {field.value ? (
-                                          format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                        ) : (
-                                          <span>Selecione a data de início</span>
-                                        )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                      mode="single"
-                                      selected={field.value}
-                                      onSelect={field.onChange}
-                                      disabled={(date) => date < new Date()}
-                                      initialFocus
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant="outline"
+                                      className={cn(
+                                        "w-full pl-3 text-left font-normal",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                      ) : (
+                                        <span>Selecione a data de início</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    disabled={(date) => date < new Date()}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <FormField
-                            control={form.control}
-                            name="dataFim"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-col">
-                                <FormLabel>Data de Fim *</FormLabel>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button
-                                        variant="outline"
-                                        className={cn(
-                                          "w-full pl-3 text-left font-normal",
-                                          !field.value && "text-muted-foreground"
-                                        )}
-                                      >
-                                        {field.value ? (
-                                          format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                        ) : (
-                                          <span>Selecione a data de fim</span>
-                                        )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                      mode="single"
-                                      selected={field.value}
-                                      onSelect={field.onChange}
-                                      disabled={(date) => {
-                                        const startDate = form.getValues("dataInicio");
-                                        return startDate ? date <= startDate : date < new Date();
-                                      }}
-                                      initialFocus
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          control={form.control}
+                          name="dataFim"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormLabel>Data de Fim *</FormLabel>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant="outline"
+                                      className={cn(
+                                        "w-full pl-3 text-left font-normal",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                      ) : (
+                                        <span>Selecione a data de fim</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    disabled={(date) => {
+                                      const startDate = form.getValues("dataInicio");
+                                      return startDate ? date <= startDate : date < new Date();
+                                    }}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-                        {/* Dicas de período melhoradas */}
-                        <div className="bg-gradient-to-br from-blue-50 via-indigo-50/60 to-purple-50/40 border border-blue-200/60 rounded-2xl p-5 shadow-lg backdrop-blur-sm">
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-md">
-                              <span className="text-white font-bold text-sm">💡</span>
-                            </div>
-                            <h4 className="font-bold text-blue-900">Dicas para o período ideal</h4>
+                      {/* Dicas compactas */}
+                      <div className="bg-gradient-to-r from-blue-50/60 to-indigo-50/40 border border-blue-200/60 rounded-lg p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                            <span className="text-white text-xs">💡</span>
                           </div>
-                          <ul className="text-sm text-blue-800 space-y-2 ml-11">
-                            <li className="flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                              Recomendamos um período de 3-7 dias para cotações simples
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                              Para produtos especiais, considere 7-14 dias
-                            </li>
-                            <li>• Evite períodos muito longos que podem atrasar decisões</li>
-                          </ul>
+                          <h4 className="font-bold text-blue-900 text-xs">Dicas de Período</h4>
                         </div>
+                        <ul className="text-xs text-blue-800 space-y-1">
+                          <li>• 3-7 dias para cotações simples</li>
+                          <li>• 7-14 dias para produtos especiais</li>
+                          <li>• Evite períodos muito longos</li>
+                        </ul>
+                      </div>
+
+                      {/* Presets rápidos */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const hoje = new Date();
+                            const fim = new Date(hoje);
+                            fim.setDate(hoje.getDate() + 3);
+                            form.setValue("dataInicio", hoje);
+                            form.setValue("dataFim", fim);
+                          }}
+                          className="h-8 text-xs"
+                        >
+                          3 dias
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const hoje = new Date();
+                            const fim = new Date(hoje);
+                            fim.setDate(hoje.getDate() + 7);
+                            form.setValue("dataInicio", hoje);
+                            form.setValue("dataFim", fim);
+                          }}
+                          className="h-8 text-xs"
+                        >
+                          7 dias
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const hoje = new Date();
+                            const fim = new Date(hoje);
+                            fim.setDate(hoje.getDate() + 14);
+                            form.setValue("dataInicio", hoje);
+                            form.setValue("dataFim", fim);
+                          }}
+                          className="h-8 text-xs"
+                        >
+                          14 dias
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const hoje = new Date();
+                            const fim = new Date(hoje);
+                            fim.setDate(hoje.getDate() + 30);
+                            form.setValue("dataInicio", hoje);
+                            form.setValue("dataFim", fim);
+                          }}
+                          className="h-8 text-xs"
+                        >
+                          30 dias
+                        </Button>
+                      </div>
                       </CardContent>
                     </Card>
                   </TabsContent>
 
                   {/* Fornecedores Tab */}
-                  <TabsContent value="fornecedores" className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 m-0">
+                  <TabsContent value="fornecedores" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 m-0">
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Building2 className="h-5 w-5 text-blue-600" />
+                          <Building2 className="h-5 w-5 text-green-600" />
                           Fornecedores Participantes
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-4">
                         <p className="text-sm text-gray-600">
                           Selecione os fornecedores que participarão desta cotação
                         </p>
@@ -843,7 +902,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                             <h4 className="font-medium text-gray-900">
                               Fornecedores Selecionados ({selectedSuppliers.length})
                             </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto">
                               {selectedSuppliers.map((supplier) => (
                                 <div
                                   key={supplier.id}
@@ -882,15 +941,15 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                   </TabsContent>
 
                   {/* Detalhes Tab */}
-                  <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 m-0">
+                  <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 m-0">
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-blue-600" />
+                          <FileText className="h-5 w-5 text-purple-600" />
                           Detalhes Adicionais
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-4">
                         <FormField
                           control={form.control}
                           name="observacoes"
@@ -900,7 +959,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                               <FormControl>
                                 <Textarea 
                                   placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
-                                  className="resize-none min-h-[120px]" 
+                                  className="resize-none min-h-[100px]" 
                                   {...field} 
                                 />
                               </FormControl>
@@ -941,31 +1000,32 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                 </Tabs>
               </div>
 
-              {/* Footer Responsivo com navegação */}
-              <div className="flex-shrink-0 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-t bg-gray-50/50">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              {/* Footer compacto com navegação */}
+              <div className="flex-shrink-0 px-3 sm:px-4 py-2.5 sm:py-3 border-t bg-gray-50/50">
+                <div className="flex items-center justify-between gap-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handlePrevious}
                     disabled={currentTabIndex === 0}
-                    className="flex items-center justify-center gap-2 order-2 sm:order-1"
+                    className="flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 text-xs sm:text-sm"
                   >
                     <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="text-xs sm:text-sm">Anterior</span>
+                    <span className="hidden sm:inline">Anterior</span>
+                    <span className="sm:hidden">Ant</span>
                   </Button>
 
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 order-1 sm:order-2">
+                  <div className="flex items-center gap-2">
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => {
                         setOpen(false);
                         setActiveTab("produtos");
                         form.reset();
                         setSelectedSuppliers([]);
                       }}
-                      className="text-xs sm:text-sm"
+                      className="h-8 sm:h-9 px-3 text-xs sm:text-sm"
                     >
                       Cancelar
                     </Button>
@@ -975,26 +1035,29 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                         type="button"
                         onClick={handleNext}
                         disabled={!canProceedToNext()}
-                        className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
+                        className="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 h-8 sm:h-9 px-3 text-xs sm:text-sm"
                       >
-                        <span>Próximo</span>
+                        <span className="hidden sm:inline">Próximo</span>
+                        <span className="sm:hidden">Próx</span>
                         <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     ) : (
                       <Button
                         type="submit"
                         disabled={isSubmitting || !canProceedToNext()}
-                        className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-xs sm:text-sm"
+                        className="flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 h-8 sm:h-9 px-3 text-xs sm:text-sm"
                       >
                         {isSubmitting ? (
                           <>
-                            <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
-                            <span>Criando...</span>
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                            <span className="hidden sm:inline">Criando...</span>
+                            <span className="sm:hidden">...</span>
                           </>
                         ) : (
                           <>
                             <Check className="h-3 w-3 sm:h-4 sm:w-4" />
-                            <span>Criar Cotação</span>
+                            <span className="hidden sm:inline">Criar Cotação</span>
+                            <span className="sm:hidden">Criar</span>
                           </>
                         )}
                       </Button>

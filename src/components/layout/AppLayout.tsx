@@ -1,14 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
-import { Bell, User, Settings } from "lucide-react";
+import { Bell, User, Settings, Sun, Moon, Sunset } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
+import { useAuth } from "@/components/auth/AuthProvider";
 export function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // Atualiza o horário a cada minuto
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Atualiza a cada minuto
+    
+    return () => clearInterval(timer);
+  }, []);
+  
+  const getGreeting = () => {
+    const hour = currentTime.getHours();
+    
+    if (hour >= 5 && hour < 12) {
+      return { text: "Bom dia", icon: Sun, color: "text-yellow-600" };
+    } else if (hour >= 12 && hour < 18) {
+      return { text: "Boa tarde", icon: Sunset, color: "text-orange-600" };
+    } else {
+      return { text: "Boa noite", icon: Moon, color: "text-indigo-600" };
+    }
+  };
+  
+  const getUserName = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name.split(' ')[0]; // Primeiro nome
+    }
+    if (user?.email) {
+      return user.email.split('@')[0]; // Nome do email
+    }
+    return "Usuário";
+  };
   
   const getPageTitle = () => {
     const path = location.pathname;
@@ -27,7 +61,7 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 overflow-x-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-slate-50 to-stone-50 overflow-x-hidden">
       {/* Desktop Sidebar - Apenas para desktop */}
       <div className="hidden md:block fixed left-0 top-0 h-full z-40">
         <AppSidebar />
@@ -38,12 +72,60 @@ export function AppLayout() {
         {/* Header Elevado - Responsivo */}
         <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-30 shadow-sm">
           <div className="flex items-center justify-between h-full pl-3 pr-6 md:pl-3 md:pr-12 w-full max-w-full overflow-hidden">
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
-                <h1 className="text-xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
-                  {getPageTitle()}
-                </h1>
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Saudação dinâmica com nome do usuário */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-2 h-8 bg-gradient-to-b from-gray-500 to-slate-600 rounded-full flex-shrink-0"></div>
+                
+                {user ? (
+                  <>
+                    {/* Desktop - Saudação completa */}
+                    <div className="hidden sm:flex items-center gap-2 animate-in fade-in-0 slide-in-from-left-4 duration-500">
+                      {(() => {
+                        const greeting = getGreeting();
+                        const GreetingIcon = greeting.icon;
+                        return (
+                          <>
+                            <div className="p-1.5 rounded-lg bg-white/60 backdrop-blur-sm shadow-sm">
+                              <GreetingIcon className={`h-3.5 w-3.5 ${greeting.color} flex-shrink-0`} />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 truncate">
+                              {greeting.text}, <span className="font-semibold text-gray-900">{getUserName()}</span>
+                            </span>
+                          </>
+                        );
+                      })()}
+                    </div>
+                    
+                    {/* Mobile - Só o nome com ícone */}
+                    <div className="sm:hidden flex items-center gap-1 animate-in fade-in-0 slide-in-from-left-4 duration-500">
+                      {(() => {
+                        const greeting = getGreeting();
+                        const GreetingIcon = greeting.icon;
+                        return (
+                          <>
+                            <div className="p-1 rounded-md bg-white/60 backdrop-blur-sm shadow-sm">
+                              <GreetingIcon className={`h-3 w-3 ${greeting.color} flex-shrink-0`} />
+                            </div>
+                            <span className="text-xs font-semibold text-gray-900 truncate max-w-[80px]">
+                              {getUserName()}
+                            </span>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </>
+                ) : (
+                  /* Fallback quando não logado */
+                  <div className="hidden sm:flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-white/60 backdrop-blur-sm shadow-sm">
+                      <User className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-500 truncate">
+                      Sistema de Cotações
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -89,7 +171,7 @@ export function AppLayout() {
 
         {/* Main Content - Responsivo com padding para mobile navigation */}
         <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative">
-          <div className="min-h-full bg-white/30 backdrop-blur-sm w-full max-w-full">
+          <div className="min-h-full bg-white/40 backdrop-blur-sm w-full max-w-full">
             <div className="w-full max-w-full overflow-x-hidden">
               <Outlet />
             </div>

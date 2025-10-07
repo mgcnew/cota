@@ -332,14 +332,32 @@ export default function Cotacoes() {
                         <Eye className="h-4 w-4 mr-2" />
                         Ver Detalhes
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Excluir
-                      </DropdownMenuItem>
+                      
+                      {/* Só permite editar se não estiver concluída */}
+                      {cotacao.status !== "concluida" ? (
+                        <DropdownMenuItem>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem disabled className="text-muted-foreground">
+                          <Edit className="h-4 w-4 mr-2 opacity-50" />
+                          Editar (Indisponível)
+                        </DropdownMenuItem>
+                      )}
+                      
+                      {/* Só permite excluir se não estiver concluída */}
+                      {cotacao.status !== "concluida" ? (
+                        <DropdownMenuItem className="text-destructive">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem disabled className="text-muted-foreground">
+                          <Trash2 className="h-4 w-4 mr-2 opacity-50" />
+                          Excluir (Indisponível)
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -397,26 +415,42 @@ export default function Cotacoes() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                  <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                  quoteId,
-                  supplierId,
-                  productId,
-                  newValue
-                })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Visualizar
-                      </DropdownMenuItem>} />
-                    <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                  quoteId,
-                  data
-                })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                    <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                      quoteId,
+                      supplierId,
+                      productId,
+                      newValue
+                    })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Visualizar
+                    </DropdownMenuItem>} />
+                    
+                    {/* Só permite editar se não estiver concluída */}
+                    {cotacao.status !== "concluida" && (
+                      <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                        quoteId,
+                        data
+                      })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                         <Edit className="h-4 w-4 mr-2" />
                         Editar
                       </DropdownMenuItem>} />
-                    <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                    )}
+                    
+                    {/* Só permite excluir se não estiver concluída */}
+                    {cotacao.status !== "concluida" && (
+                      <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir
                       </DropdownMenuItem>} />
+                    )}
+                    
+                    {/* Mostra mensagem informativa para cotações concluídas */}
+                    {cotacao.status === "concluida" && (
+                      <DropdownMenuItem disabled className="text-muted-foreground">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Cotação finalizada
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardContent>
@@ -492,29 +526,38 @@ export default function Cotacoes() {
                                   productId,
                                   newValue
                                 })}
-                                onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
-                                  quoteId,
-                                  supplierId,
-                                  deliveryDate,
-                                  observations
-                                })}
-                                isUpdating={isUpdating}
                                 trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                                   <Eye className="h-4 w-4 mr-2" />
                                   Visualizar
                                 </DropdownMenuItem>} 
                               />
-                              <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                          quoteId,
-                          data
-                        })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                              
+                              {/* Só permite editar se não estiver concluída */}
+                              {cotacao.status !== "concluida" && (
+                                <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                                  quoteId,
+                                  data
+                                })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Editar
                                 </DropdownMenuItem>} />
-                              <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                              )}
+                              
+                              {/* Só permite excluir se não estiver concluída */}
+                              {cotacao.status !== "concluida" && (
+                                <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Excluir
                                 </DropdownMenuItem>} />
+                              )}
+                              
+                              {/* Mostra mensagem informativa para cotações concluídas */}
+                              {cotacao.status === "concluida" && (
+                                <DropdownMenuItem disabled className="text-muted-foreground">
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Cotação finalizada - Apenas visualização
+                                </DropdownMenuItem>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>

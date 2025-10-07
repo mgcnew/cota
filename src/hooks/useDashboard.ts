@@ -39,8 +39,11 @@ export function useDashboard() {
     data.quotes.forEach((quote: any) => {
       if (quote.quote_suppliers && quote.quote_suppliers.length >= 2) {
         const valores = quote.quote_suppliers
-          .filter((qs: any) => qs.valor_oferecido > 0)
-          .map((qs: any) => qs.valor_oferecido);
+          .map((qs: any) => {
+            // Busca robusta por preços
+            return qs.valor_oferecido || qs.price || qs.valor || qs.preco || 0;
+          })
+          .filter((valor: number) => valor > 0);
         
         if (valores.length >= 2) {
           const melhorPreco = Math.min(...valores);
@@ -69,18 +72,71 @@ export function useDashboard() {
     if (!data) return [];
 
     return data.quotes.slice(0, 4).map((quote: any) => {
-      const melhorOferta = quote.quote_suppliers
-        ?.filter((qs: any) => qs.valor_oferecido > 0)
-        .sort((a: any, b: any) => a.valor_oferecido - b.valor_oferecido)[0];
+      // Debug: Log da estrutura da cotação (remover após identificar o problema)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Analisando cotação:', {
+          id: quote.id,
+          quote_suppliers: quote.quote_suppliers,
+          quote_items: quote.quote_items,
+          campos_diretos: {
+            valor_total: quote.valor_total,
+            total: quote.total,
+            price: quote.price
+          }
+        });
+      }
+      // Busca mais robusta por preços em diferentes campos possíveis
+      let melhorOferta = null;
+      let melhorPreco = Infinity;
+      let fornecedorMelhorOferta = null;
+
+      // Verifica quote_suppliers
+      if (quote.quote_suppliers && quote.quote_suppliers.length > 0) {
+        quote.quote_suppliers.forEach((qs: any) => {
+          // Tenta diferentes campos onde o preço pode estar armazenado
+          const preco = qs.valor_oferecido || qs.price || qs.valor || qs.preco || 0;
+          
+          if (preco > 0 && preco < melhorPreco) {
+            melhorPreco = preco;
+            melhorOferta = qs;
+            fornecedorMelhorOferta = qs.supplier_name || qs.fornecedor || qs.name;
+          }
+        });
+      }
+
+      // Se não encontrou em quote_suppliers, verifica quote_items
+      if (!melhorOferta && quote.quote_items && quote.quote_items.length > 0) {
+        quote.quote_items.forEach((item: any) => {
+          const preco = item.preco_unitario || item.price || item.valor || item.preco || 0;
+          
+          if (preco > 0 && preco < melhorPreco) {
+            melhorPreco = preco;
+            melhorOferta = { valor_oferecido: preco };
+            fornecedorMelhorOferta = item.supplier_name || item.fornecedor || "Fornecedor";
+          }
+        });
+      }
+
+      // Se ainda não encontrou, verifica campos diretos na cotação
+      if (!melhorOferta) {
+        const precoQuote = quote.valor_total || quote.total || quote.price || 0;
+        if (precoQuote > 0) {
+          melhorPreco = precoQuote;
+          melhorOferta = { valor_oferecido: precoQuote };
+          fornecedorMelhorOferta = quote.supplier_name || quote.fornecedor || "Fornecedor";
+        }
+      }
 
       const firstItem = quote.quote_items?.[0];
 
       return {
         id: quote.id.substring(0, 8),
-        product: firstItem?.product_name || "Produto",
-        quantity: firstItem?.quantidade || "0",
-        bestPrice: melhorOferta ? `R$ ${melhorOferta.valor_oferecido.toFixed(2)}` : "Sem ofertas",
-        supplier: melhorOferta?.supplier_name || "-",
+        product: firstItem?.product_name || firstItem?.nome || firstItem?.name || "Produto",
+        quantity: firstItem?.quantidade || firstItem?.quantity || "0",
+        bestPrice: melhorOferta && melhorPreco !== Infinity 
+          ? `R$ ${melhorPreco.toFixed(2)}` 
+          : "Sem ofertas",
+        supplier: fornecedorMelhorOferta || "-",
         date: new Date(quote.created_at).toLocaleDateString('pt-BR'),
         status: quote.status
       };
@@ -93,18 +149,24 @@ export function useDashboard() {
     const supplierStats = new Map();
     data.quotes.forEach((quote: any) => {
       quote.quote_suppliers?.forEach((qs: any) => {
-        if (!supplierStats.has(qs.supplier_id)) {
-          supplierStats.set(qs.supplier_id, {
-            name: qs.supplier_name,
+        const supplierId = qs.supplier_id || qs.id || qs.fornecedor_id;
+        const supplierName = qs.supplier_name || qs.name || qs.fornecedor || 'Fornecedor';
+        
+        if (!supplierStats.has(supplierId)) {
+          supplierStats.set(supplierId, {
+            name: supplierName,
             quotes: 0,
             totalValue: 0,
             count: 0
           });
         }
-        const stats = supplierStats.get(qs.supplier_id);
+        const stats = supplierStats.get(supplierId);
         stats.quotes += 1;
-        if (qs.valor_oferecido > 0) {
-          stats.totalValue += qs.valor_oferecido;
+        
+        // Busca robusta por valor
+        const valor = qs.valor_oferecido || qs.price || qs.valor || qs.preco || 0;
+        if (valor > 0) {
+          stats.totalValue += valor;
           stats.count += 1;
         }
       });
@@ -143,8 +205,11 @@ export function useDashboard() {
       quotesDoMes.forEach((quote: any) => {
         if (quote.quote_suppliers && quote.quote_suppliers.length >= 2) {
           const valores = quote.quote_suppliers
-            .filter((qs: any) => qs.valor_oferecido > 0)
-            .map((qs: any) => qs.valor_oferecido);
+            .map((qs: any) => {
+              // Busca robusta por preços
+              return qs.valor_oferecido || qs.price || qs.valor || qs.preco || 0;
+            })
+            .filter((valor: number) => valor > 0);
           
           if (valores.length >= 2) {
             const melhorPreco = Math.min(...valores);
