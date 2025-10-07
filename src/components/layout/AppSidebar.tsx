@@ -129,64 +129,117 @@ function MobileMoreButton({ remainingItems }: { remainingItems: any[] }) {
           </div>
         </DialogHeader>
         
-        <div className="p-4">
-          {/* Grid de itens */}
-          <div className="grid grid-cols-1 gap-3">
-          {remainingItems.map((item, index) => {
-            const isItemActive = location.pathname === item.url || 
-              (item.url === "/" && location.pathname === "/");
-            const itemColor = colors[(index + 4) % colors.length];
-            
-            return (
-              <NavLink
-                key={item.title}
-                to={item.url}
-                end={item.url === "/"}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 p-4 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-105 active:scale-95",
-                  isItemActive
-                    ? `bg-gradient-to-br ${itemColor} shadow-lg text-white ring-2 ring-white/20`
-                    : "bg-white/80 hover:bg-white hover:shadow-lg text-gray-700 hover:text-gray-900 border border-gray-200/60 hover:border-blue-300"
-                )}
-              >
-                {/* Ícone */}
-                <div className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg",
-                  isItemActive 
-                    ? "bg-white/20 backdrop-blur-sm" 
-                    : `bg-gradient-to-br ${itemColor} group-hover:scale-110`
-                )}>
-                  <item.icon className={cn(
-                    "h-5 w-5 transition-all duration-200",
-                    isItemActive 
-                      ? "text-white" 
-                      : "text-white"
-                  )} />
-                </div>
+        <div className="p-4 max-h-[70vh] overflow-y-auto">
+          {/* Seção Principal - Navegação */}
+          <div className="mb-6">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
+              Navegação
+            </h3>
+            <div className="grid grid-cols-1 gap-2">
+              {remainingItems.map((item, index) => {
+                const isItemActive = location.pathname === item.url || 
+                  (item.url === "/" && location.pathname === "/");
+                const itemColor = colors[(index + 4) % colors.length];
+                
+                return (
+                  <NavLink
+                    key={item.title}
+                    to={item.url}
+                    end={item.url === "/"}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-[1.02] active:scale-95",
+                      isItemActive
+                        ? `bg-gradient-to-br ${itemColor} shadow-lg text-white ring-2 ring-white/20`
+                        : "bg-white/80 hover:bg-white hover:shadow-md text-gray-700 hover:text-gray-900 border border-gray-200/60 hover:border-blue-300"
+                    )}
+                  >
+                    {/* Ícone */}
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm",
+                      isItemActive 
+                        ? "bg-white/20 backdrop-blur-sm" 
+                        : `bg-gradient-to-br ${itemColor} group-hover:scale-110`
+                    )}>
+                      <item.icon className={cn(
+                        "h-4 w-4 transition-all duration-200",
+                        isItemActive 
+                          ? "text-white" 
+                          : "text-white"
+                      )} />
+                    </div>
 
-                {/* Texto */}
-                <div className="flex-1 min-w-0">
-                  <div className={cn(
-                    "font-semibold text-base transition-all duration-200 truncate",
-                    isItemActive 
-                      ? "text-white" 
-                      : "text-gray-900 group-hover:text-blue-900"
-                  )}>
-                    {item.title}
-                  </div>
-                  <div className={cn(
-                    "text-xs transition-all duration-200 truncate mt-0.5",
-                    isItemActive 
-                      ? "text-white/80" 
-                      : "text-gray-500 group-hover:text-blue-600"
-                  )}>
-                    Navegar para {item.title}
-                  </div>
+                    {/* Texto */}
+                    <div className="flex-1 min-w-0">
+                      <div className={cn(
+                        "font-medium text-sm transition-all duration-200 truncate",
+                        isItemActive 
+                          ? "text-white" 
+                          : "text-gray-900 group-hover:text-blue-900"
+                      )}>
+                        {item.title}
+                      </div>
+                    </div>
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Seção Ações Rápidas */}
+          <div className="mb-6">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
+              Ações Rápidas
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  // Simular ação de nova cotação
+                  window.location.href = '/cotacoes';
+                }}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <FileText className="h-5 w-5" />
+                <span className="text-xs font-medium">Nova Cotação</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  // Simular ação de relatório
+                  window.location.href = '/relatorios';
+                }}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <BarChart3 className="h-5 w-5" />
+                <span className="text-xs font-medium">Relatório</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Seção Configurações */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
+              Sistema
+            </h3>
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  window.location.href = '/configuracoes';
+                }}
+                className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/80 hover:bg-white hover:shadow-md text-gray-700 hover:text-gray-900 border border-gray-200/60 hover:border-gray-300 transition-all duration-200 hover:scale-[1.02] active:scale-95"
+              >
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
+                  <Settings className="h-4 w-4 text-white" />
                 </div>
-              </NavLink>
-            );
-          })}
+                <div className="flex-1 text-left">
+                  <div className="font-medium text-sm text-gray-900">Configurações</div>
+                  <div className="text-xs text-gray-500">Ajustes do sistema</div>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </DialogContent>

@@ -347,28 +347,48 @@ export default function Dashboard() {
                   <h1 className="font-bold text-xl sm:text-2xl lg:text-3xl bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text text-transparent">
                     Dashboard
                   </h1>
-                  <div className="flex items-center gap-1 sm:gap-2 mt-1">
-                    {refreshing && <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-blue-600" />}
-                    <div className={`flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium shadow-sm ${isOnline ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'
+                  {/* Mobile: Layout compacto com indicadores */}
+                  <div className="flex items-center gap-1 sm:gap-2 mt-1 sm:hidden">
+                    {refreshing && <Loader2 className="h-3 w-3 animate-spin text-blue-600" />}
+                    <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium shadow-sm ${isOnline ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'
                       }`}>
-                      {isOnline ? <Wifi className="h-2 w-2 sm:h-3 sm:w-3" /> : <WifiOff className="h-2 w-2 sm:h-3 sm:w-3" />}
-                      <span className="hidden sm:inline">{isOnline ? 'Sistema Online' : 'Sistema Offline'}</span>
-                      <span className="sm:hidden">{isOnline ? 'Online' : 'Offline'}</span>
+                      {isOnline ? <Wifi className="h-2 w-2" /> : <WifiOff className="h-2 w-2" />}
+                      <span>{isOnline ? 'Online' : 'Offline'}</span>
                     </div>
 
-                    <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
-                      <BarChart3 className="h-2 w-2 sm:h-3 sm:w-3" />
-                      <span className="hidden sm:inline">Período: {getSelectedPeriodText().label}</span>
-                      <span className="sm:hidden">{getSelectedPeriodText().shortLabel}</span>
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
+                      <BarChart3 className="h-2 w-2" />
+                      <span>{getSelectedPeriodText().shortLabel}</span>
                     </div>
 
                     {getActiveFiltersCount() > 0 && (
-                      <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200 shadow-sm">
-                        <Filter className="h-2 w-2 sm:h-3 sm:w-3" />
-                        <span className="hidden sm:inline">
+                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200 shadow-sm">
+                        <Filter className="h-2 w-2" />
+                        <span>{getActiveFiltersCount()}F</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Desktop: Layout original */}
+                  <div className="hidden sm:flex items-center gap-2 mt-1">
+                    {refreshing && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+                    <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium shadow-sm ${isOnline ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'
+                      }`}>
+                      {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+                      <span>{isOnline ? 'Sistema Online' : 'Sistema Offline'}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
+                      <BarChart3 className="h-3 w-3" />
+                      <span>Período: {getSelectedPeriodText().label}</span>
+                    </div>
+
+                    {getActiveFiltersCount() > 0 && (
+                      <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200 shadow-sm">
+                        <Filter className="h-3 w-3" />
+                        <span>
                           {getActiveFiltersCount()} filtro{getActiveFiltersCount() > 1 ? 's' : ''} ativo{getActiveFiltersCount() > 1 ? 's' : ''}
                         </span>
-                        <span className="sm:hidden">{getActiveFiltersCount()}F</span>
                       </div>
                     )}
                   </div>
@@ -376,9 +396,33 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-              <div className="flex items-center gap-1 sm:gap-2 text-gray-700 bg-white/60 px-2 sm:px-3 py-1 sm:py-2 rounded-lg backdrop-blur-sm">
-                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+            {/* Mobile: Layout compacto */}
+            <div className="flex items-center justify-between gap-2 text-xs sm:hidden">
+              <div className="flex items-center gap-1 text-gray-700 bg-white/60 px-2 py-1 rounded-lg backdrop-blur-sm">
+                <Calendar className="h-3 w-3 text-blue-600" />
+                <span className="font-medium">
+                  {new Date().toLocaleDateString('pt-BR', {
+                    day: 'numeric',
+                    month: 'short'
+                  })}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1 text-gray-600 bg-white/40 px-2 py-1 rounded-lg backdrop-blur-sm">
+                <Clock className="h-3 w-3 text-blue-500" />
+                <span>
+                  {lastUpdated.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+            </div>
+
+            {/* Desktop: Layout original */}
+            <div className="hidden sm:flex flex-row items-center gap-3 text-sm">
+              <div className="flex items-center gap-2 text-gray-700 bg-white/60 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <Calendar className="h-4 w-4 text-blue-600" />
                 <span className="font-medium truncate">
                   {new Date().toLocaleDateString('pt-BR', {
                     weekday: 'short',
@@ -388,11 +432,10 @@ export default function Dashboard() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-1 sm:gap-2 text-gray-600 bg-white/40 px-2 sm:px-3 py-1 sm:py-2 rounded-lg backdrop-blur-sm">
-                <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+              <div className="flex items-center gap-2 text-gray-600 bg-white/40 px-3 py-2 rounded-lg backdrop-blur-sm">
+                <Clock className="h-4 w-4 text-blue-500" />
                 <span className="truncate">
-                  <span className="hidden sm:inline">Última atualização: </span>
-                  {lastUpdated.toLocaleTimeString('pt-BR', {
+                  Última atualização: {lastUpdated.toLocaleTimeString('pt-BR', {
                     hour: '2-digit',
                     minute: '2-digit'
                   })}
