@@ -7,20 +7,28 @@ export function useDashboard() {
     queryKey: ['dashboard'],
     queryFn: async () => {
       // OPTIMIZED: Fetch all data in parallel
-      const [quotesResult, suppliersResult, productsResult, ordersResult] = await Promise.all([
+      const [quotesResult, suppliersResult, productsResult, ordersResult, quoteSupplierItemsResult] = await Promise.all([
         supabase.from("quotes").select(`*, quote_items(*), quote_suppliers(*)`).order("created_at", { ascending: false }),
         supabase.from("suppliers").select("*"),
         supabase.from("products").select("*"),
         supabase.from("orders").select("*").order("order_date", { ascending: false }),
+        supabase.from("quote_supplier_items").select("*"),
       ]);
 
       if (quotesResult.error) throw quotesResult.error;
       if (suppliersResult.error) throw suppliersResult.error;
       if (productsResult.error) throw productsResult.error;
       if (ordersResult.error) throw ordersResult.error;
+      if (quoteSupplierItemsResult.error) throw quoteSupplierItemsResult.error;
+
+      // Integrate quote_supplier_items into quotes
+      const quotesWithSupplierItems = quotesResult.data?.map(quote => ({
+        ...quote,
+        quote_supplier_items: quoteSupplierItemsResult.data?.filter(item => item.quote_id === quote.id) || []
+      })) || [];
 
       return {
-        quotes: quotesResult.data || [],
+        quotes: quotesWithSupplierItems,
         suppliers: suppliersResult.data || [],
         products: productsResult.data || [],
         orders: ordersResult.data || [],
@@ -37,19 +45,27 @@ export function useDashboard() {
     
     let economiaTotal = 0;
     data.quotes.forEach((quote: any) => {
-      if (quote.quote_suppliers && quote.quote_suppliers.length >= 2) {
-        const valores = quote.quote_suppliers
-          .map((qs: any) => {
-            // Busca robusta por preços
-            return qs.valor_oferecido || qs.price || qs.valor || qs.preco || 0;
-          })
-          .filter((valor: number) => valor > 0);
-        
-        if (valores.length >= 2) {
-          const melhorPreco = Math.min(...valores);
-          const piorPreco = Math.max(...valores);
-          economiaTotal += piorPreco - melhorPreco;
-        }
+      // Use quote_supplier_items for accurate price comparison
+      if (quote.quote_supplier_items && quote.quote_supplier_items.length >= 2) {
+        // Group by product to compare prices per product
+        const produtosMap = new Map();
+        quote.quote_supplier_items.forEach((item: any) => {
+          if (!produtosMap.has(item.product_id)) {
+            produtosMap.set(item.product_id, []);
+          }
+          if (item.valor_oferecido > 0) {
+            produtosMap.get(item.product_id).push(item.valor_oferecido);
+          }
+        });
+
+        // Calculate savings per product
+        produtosMap.forEach((valores: number[]) => {
+          if (valores.length >= 2) {
+            const melhorPreco = Math.min(...valores);
+            const piorPreco = Math.max(...valores);
+            economiaTotal += piorPreco - melhorPreco;
+          }
+        });
       }
     });
 
@@ -72,116 +88,48 @@ export function useDashboard() {
     if (!data) return [];
 
     return data.quotes.slice(0, 4).map((quote: any) => {
-      // Debug: Log detalhado da estrutura da cotação
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔍 [DASHBOARD] Analisando cotação:', {
-          id: quote.id,
-          status: quote.status,
-          quote_suppliers: quote.quote_suppliers?.map((qs: any) => ({
-            supplier_id: qs.supplier_id,
-            supplier_name: qs.supplier_name,
-            valor_oferecido: qs.valor_oferecido,
-            price: qs.price,
-            valor: qs.valor,
-            preco: qs.preco,
-            todos_campos: Object.keys(qs)
-          })),
-          quote_items: quote.quote_items?.map((item: any) => ({
-            product_name: item.product_name,
-            preco_unitario: item.preco_unitario,
-            price: item.price,
-            valor: item.valor,
-            preco: item.preco,
-            todos_campos: Object.keys(item)
-          })),
-          campos_diretos: {
-            valor_total: quote.valor_total,
-            total: quote.total,
-            price: quote.price,
-            todos_campos_quote: Object.keys(quote)
-          }
-        });
+      const firstItem = quote.quote_items?.[0];
+      
+      if (!firstItem) {
+        return {
+          id: quote.id.substring(0, 8),
+          product: "Produto",
+          quantity: "0",
+          bestPrice: "Sem ofertas",
+          supplier: "-",
+          date: new Date(quote.created_at).toLocaleDateString('pt-BR'),
+          status: quote.status
+        };
       }
-      // Busca mais robusta por preços em diferentes campos possíveis
-      let melhorOferta = null;
+
+      // Find best price from quote_supplier_items for the first product
       let melhorPreco = Infinity;
       let fornecedorMelhorOferta = null;
 
-      // Verifica quote_suppliers
-      if (quote.quote_suppliers && quote.quote_suppliers.length > 0) {
-        console.log('🔍 [DASHBOARD] Processando quote_suppliers para cotação:', quote.id);
-        quote.quote_suppliers.forEach((qs: any, index: number) => {
-          // Tenta diferentes campos onde o preço pode estar armazenado
-          const preco = qs.valor_oferecido || qs.price || qs.valor || qs.preco || 0;
-          
-          console.log(`📊 [DASHBOARD] Fornecedor ${index + 1}:`, {
-            supplier_name: qs.supplier_name,
-            valor_oferecido: qs.valor_oferecido,
-            price: qs.price,
-            valor: qs.valor,
-            preco: qs.preco,
-            preco_calculado: preco
-          });
-          
-          if (preco > 0 && preco < melhorPreco) {
-            melhorPreco = preco;
-            melhorOferta = qs;
-            fornecedorMelhorOferta = qs.supplier_name || qs.fornecedor || qs.name;
-            console.log('✅ [DASHBOARD] Novo melhor preço encontrado:', {
-              preco: melhorPreco,
-              fornecedor: fornecedorMelhorOferta
-            });
+      if (quote.quote_supplier_items && quote.quote_supplier_items.length > 0) {
+        const ofertasProduto = quote.quote_supplier_items.filter(
+          (item: any) => item.product_id === firstItem.product_id && item.valor_oferecido > 0
+        );
+
+        ofertasProduto.forEach((item: any) => {
+          if (item.valor_oferecido < melhorPreco) {
+            melhorPreco = item.valor_oferecido;
+            // Find supplier name from quote_suppliers
+            const supplier = quote.quote_suppliers?.find((qs: any) => qs.supplier_id === item.supplier_id);
+            fornecedorMelhorOferta = supplier?.supplier_name || "Fornecedor";
           }
         });
       }
 
-      // Se não encontrou em quote_suppliers, verifica quote_items
-      if (!melhorOferta && quote.quote_items && quote.quote_items.length > 0) {
-        quote.quote_items.forEach((item: any) => {
-          const preco = item.preco_unitario || item.price || item.valor || item.preco || 0;
-          
-          if (preco > 0 && preco < melhorPreco) {
-            melhorPreco = preco;
-            melhorOferta = { valor_oferecido: preco };
-            fornecedorMelhorOferta = item.supplier_name || item.fornecedor || "Fornecedor";
-          }
-        });
-      }
-
-      // Se ainda não encontrou, verifica campos diretos na cotação
-      if (!melhorOferta) {
-        const precoQuote = quote.valor_total || quote.total || quote.price || 0;
-        if (precoQuote > 0) {
-          melhorPreco = precoQuote;
-          melhorOferta = { valor_oferecido: precoQuote };
-          fornecedorMelhorOferta = quote.supplier_name || quote.fornecedor || "Fornecedor";
-        }
-      }
-
-      const firstItem = quote.quote_items?.[0];
-
-      const resultado = {
+      return {
         id: quote.id.substring(0, 8),
-        product: firstItem?.product_name || firstItem?.nome || firstItem?.name || "Produto",
-        quantity: firstItem?.quantidade || firstItem?.quantity || "0",
-        bestPrice: melhorOferta && melhorPreco !== Infinity 
-          ? `R$ ${melhorPreco.toFixed(2)}` 
-          : "Sem ofertas",
+        product: firstItem.product_name || "Produto",
+        quantity: firstItem.quantidade || "0",
+        bestPrice: melhorPreco !== Infinity ? `R$ ${melhorPreco.toFixed(2)}` : "Sem ofertas",
         supplier: fornecedorMelhorOferta || "-",
         date: new Date(quote.created_at).toLocaleDateString('pt-BR'),
         status: quote.status
       };
-
-      console.log('🎯 [DASHBOARD] Resultado final para atividades recentes:', {
-        cotacao_id: quote.id,
-        produto: resultado.product,
-        melhor_preco: resultado.bestPrice,
-        fornecedor: resultado.supplier,
-        tinha_ofertas: melhorOferta !== null,
-        preco_infinito: melhorPreco === Infinity
-      });
-
-      return resultado;
     });
   }, [data]);
 
@@ -245,19 +193,26 @@ export function useDashboard() {
 
       let economiaDoMes = 0;
       quotesDoMes.forEach((quote: any) => {
-        if (quote.quote_suppliers && quote.quote_suppliers.length >= 2) {
-          const valores = quote.quote_suppliers
-            .map((qs: any) => {
-              // Busca robusta por preços
-              return qs.valor_oferecido || qs.price || qs.valor || qs.preco || 0;
-            })
-            .filter((valor: number) => valor > 0);
-          
-          if (valores.length >= 2) {
-            const melhorPreco = Math.min(...valores);
-            const piorPreco = Math.max(...valores);
-            economiaDoMes += piorPreco - melhorPreco;
-          }
+        if (quote.quote_supplier_items && quote.quote_supplier_items.length >= 2) {
+          // Group by product to compare prices per product
+          const produtosMap = new Map();
+          quote.quote_supplier_items.forEach((item: any) => {
+            if (!produtosMap.has(item.product_id)) {
+              produtosMap.set(item.product_id, []);
+            }
+            if (item.valor_oferecido > 0) {
+              produtosMap.get(item.product_id).push(item.valor_oferecido);
+            }
+          });
+
+          // Calculate savings per product
+          produtosMap.forEach((valores: number[]) => {
+            if (valores.length >= 2) {
+              const melhorPreco = Math.min(...valores);
+              const piorPreco = Math.max(...valores);
+              economiaDoMes += piorPreco - melhorPreco;
+            }
+          });
         }
       });
 
