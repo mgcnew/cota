@@ -43,7 +43,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon, Edit, Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
+import { Calendar as CalendarIcon, Edit, Plus, Trash2, Check, ChevronsUpDown, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -216,13 +216,29 @@ export default function EditQuoteDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Editar Cotação</DialogTitle>
-          <DialogDescription>
-            Atualize as informações da cotação
-          </DialogDescription>
+      <DialogContent className="w-[90vw] sm:max-w-[700px] max-h-[85vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-teal-50/80 via-cyan-50/60 to-teal-50/40 backdrop-blur-sm relative overflow-hidden">
+          {/* Efeitos decorativos de fundo */}
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-400/5 via-cyan-400/5 to-teal-400/5"></div>
+          <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 rounded-full -translate-x-16 -translate-y-16"></div>
+          <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-cyan-400/10 to-teal-400/10 rounded-full translate-x-12 translate-y-12"></div>
+          
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
+              <FileText className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <DialogTitle className="text-lg font-bold bg-gradient-to-r from-teal-900 to-cyan-700 bg-clip-text text-transparent">
+                Editar Cotação
+              </DialogTitle>
+              <DialogDescription className="text-sm text-teal-600/80 mt-0.5">
+                Atualize as informações da cotação
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
+        
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 bg-gradient-to-br from-white to-teal-50/30">
 
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">
@@ -548,15 +564,26 @@ export default function EditQuoteDialog({
                 )}
               />
 
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setOpen(false)}
+                  className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
+                >
                   Cancelar
                 </Button>
-                <Button type="submit">Salvar Alterações</Button>
-              </DialogFooter>
+                <Button 
+                  type="submit"
+                  className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  Salvar Alterações
+                </Button>
+              </div>
             </form>
           </Form>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   );

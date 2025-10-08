@@ -306,7 +306,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-xl">
         <DialogHeader>
           <DialogTitle>Importar Fornecedores em Massa</DialogTitle>
           <DialogDescription>

@@ -188,7 +188,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
           Novo Produto
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[600px] h-[95vh] max-h-[800px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
+      <DialogContent className="w-[90vw] max-w-[600px] h-[85vh] max-h-[800px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-orange-50/80 via-amber-50/60 to-yellow-50/40 backdrop-blur-sm relative overflow-hidden">
           {/* Efeitos decorativos de fundo */}
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-amber-500/5 to-yellow-500/5"></div>

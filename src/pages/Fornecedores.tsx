@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -48,6 +49,7 @@ type SupplierFormData = {
   status: "active" | "inactive" | "pending";
 };
 export default function Fornecedores() {
+  const navigate = useNavigate();
   const {
     user,
     loading
@@ -375,7 +377,7 @@ export default function Fornecedores() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate(`/cotacoes?fornecedor=${encodeURIComponent(supplier.name)}`)}>
                         <Eye className="h-4 w-4 mr-2" />
                         Ver Cotações
                       </DropdownMenuItem>
@@ -515,7 +517,7 @@ export default function Fornecedores() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate(`/cotacoes?fornecedor=${encodeURIComponent(supplier.name)}`)}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Ver Cotações
                               </DropdownMenuItem>

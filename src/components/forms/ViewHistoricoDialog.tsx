@@ -57,7 +57,7 @@ export default function ViewHistoricoDialog({ open, onOpenChange, item }: ViewHi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-[90vw] max-w-2xl rounded-xl">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">

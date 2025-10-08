@@ -1,4 +1,5 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
@@ -23,6 +24,7 @@ import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import { cn } from "@/lib/utils";
 export default function Cotacoes() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { viewMode, setViewMode } = useResponsiveViewMode();
   const {
     paginate
@@ -32,7 +34,21 @@ export default function Cotacoes() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [supplierFilter, setSupplierFilter] = useState("all");
   const addQuoteRef = useRef<HTMLButtonElement>(null);
+
+  // Ler parâmetros da URL ao carregar a página
+  useEffect(() => {
+    const fornecedor = searchParams.get('fornecedor');
+    const produto = searchParams.get('produto');
+    
+    if (fornecedor) {
+      setSupplierFilter(fornecedor);
+    }
+    if (produto) {
+      setSearchTerm(produto);
+    }
+  }, [searchParams]);
 
   // OPTIMIZED: Use React Query with single optimized query (no N+1)
   const {
@@ -70,9 +86,16 @@ export default function Cotacoes() {
     return cotacoes.filter(cotacao => {
       const matchesSearch = cotacao.produto.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || cotacao.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       const matchesStatus = statusFilter === "all" || cotacao.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      
+      // Filtro por fornecedor - verifica se algum fornecedor participante corresponde
+      const matchesSupplier = supplierFilter === "all" || 
+        cotacao.fornecedoresParticipantes?.some(fornecedor => 
+          fornecedor.nome.toLowerCase().includes(supplierFilter.toLowerCase())
+        );
+      
+      return matchesSearch && matchesStatus && matchesSupplier;
     });
-  }, [cotacoes, debouncedSearchTerm, statusFilter]);
+  }, [cotacoes, debouncedSearchTerm, statusFilter, supplierFilter]);
   if (isLoading) {
     return <div className="p-6 flex items-center justify-center min-h-screen">
         <p className="text-muted-foreground">Carregando cotações...</p>
@@ -149,6 +172,7 @@ export default function Cotacoes() {
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Buscar por produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
             </div>
+            
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Status" />
@@ -162,7 +186,53 @@ export default function Cotacoes() {
                 <SelectItem value="finalizada">Finalizadas</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Filtro por Fornecedor */}
+            <Select value={supplierFilter} onValueChange={setSupplierFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Fornecedor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Fornecedores</SelectItem>
+                {/* Extrair fornecedores únicos das cotações */}
+                {Array.from(new Set(
+                  cotacoes.flatMap(cotacao => 
+                    cotacao.fornecedoresParticipantes?.map(f => f.nome) || []
+                  )
+                )).sort().map(fornecedor => (
+                  <SelectItem key={fornecedor} value={fornecedor}>
+                    {fornecedor}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Botão para limpar filtros se houver filtro ativo */}
+            {(supplierFilter !== "all" || statusFilter !== "all" || searchTerm) && (
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSupplierFilter("all");
+                  setStatusFilter("all");
+                  setSearchTerm("");
+                  setSearchParams({});
+                }}
+                className="whitespace-nowrap"
+              >
+                Limpar Filtros
+              </Button>
+            )}
           </div>
+
+          {/* Indicador de filtro ativo por fornecedor */}
+          {supplierFilter !== "all" && (
+            <div className="mt-3 flex items-center gap-2">
+              <Badge variant="secondary" className="bg-teal-100 text-teal-700 border-teal-300">
+                <Building2 className="h-3 w-3 mr-1" />
+                Fornecedor: {supplierFilter}
+              </Badge>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -321,45 +391,64 @@ export default function Cotacoes() {
                       </div>
                     </div>
                   </div>
+                  {/* Desktop: Menu dropdown tradicional */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-teal-100">
+                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-teal-100 hidden md:flex">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Ver Detalhes
-                      </DropdownMenuItem>
+                      <ViewQuoteDialog 
+                        quote={cotacao} 
+                        onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                          quoteId,
+                          supplierId,
+                          productId,
+                          newValue
+                        })} 
+                        trigger={
+                          <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Detalhes
+                          </DropdownMenuItem>
+                        } 
+                      />
                       
                       {/* Só permite editar se não estiver concluída */}
-                      {cotacao.status !== "concluida" ? (
-                        <DropdownMenuItem>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Editar
-                        </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem disabled className="text-muted-foreground">
-                          <Edit className="h-4 w-4 mr-2 opacity-50" />
-                          Editar (Indisponível)
-                        </DropdownMenuItem>
+                      {cotacao.status !== "concluida" && (
+                        <EditQuoteDialog 
+                          quote={cotacao} 
+                          onEdit={(quoteId, data) => updateQuote({
+                            quoteId,
+                            data
+                          })} 
+                          trigger={
+                            <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                          } 
+                        />
                       )}
                       
                       {/* Só permite excluir se não estiver concluída */}
-                      {cotacao.status !== "concluida" ? (
-                        <DropdownMenuItem className="text-destructive">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Excluir
-                        </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem disabled className="text-muted-foreground">
-                          <Trash2 className="h-4 w-4 mr-2 opacity-50" />
-                          Excluir (Indisponível)
-                        </DropdownMenuItem>
+                      {cotacao.status !== "concluida" && (
+                        <DeleteQuoteDialog 
+                          quote={cotacao} 
+                          onDelete={id => deleteQuote(id)} 
+                          trigger={
+                            <DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          } 
+                        />
                       )}
                     </DropdownMenuContent>
                   </DropdownMenu>
+
+
                 </div>
               </CardHeader>
               
@@ -371,7 +460,12 @@ export default function Cotacoes() {
                         <FileText className="h-4 w-4 text-gray-500" />
                         <span className="text-sm font-medium text-gray-600">ID</span>
                       </div>
-                      <p className="text-sm font-bold text-gray-800">{cotacao.id}</p>
+                      <p className="text-sm font-bold text-gray-800 font-mono">
+                        {cotacao.id.length > 12 
+                          ? `${cotacao.id.substring(0, 6)}...${cotacao.id.substring(cotacao.id.length - 4)}`
+                          : cotacao.id
+                        }
+                      </p>
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-2">
@@ -408,51 +502,120 @@ export default function Cotacoes() {
                   </div>
                 </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="ml-auto">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                      quoteId,
-                      supplierId,
-                      productId,
-                      newValue
-                    })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      Visualizar
-                    </DropdownMenuItem>} />
-                    
-                    {/* Só permite editar se não estiver concluída */}
-                    {cotacao.status !== "concluida" && (
-                      <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                {/* Mobile: Botões de ação diretos e intuitivos */}
+                <div className="md:hidden pt-3 border-t border-gray-200/60">
+                  <div className="flex items-center gap-2">
+                    {/* Botão principal - Ver Detalhes */}
+                    <ViewQuoteDialog 
+                      quote={cotacao} 
+                      onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
                         quoteId,
-                        data
+                        supplierId,
+                        productId,
+                        newValue
+                      })} 
+                      trigger={
+                        <Button 
+                          size="sm" 
+                          className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                        >
+                          <Eye className="h-3 w-3 mr-2" />
+                          Ver Detalhes
+                        </Button>
+                      } 
+                    />
+
+                    {/* Botões secundários baseados no status */}
+                    {cotacao.status !== "concluida" ? (
+                      <>
+                        <EditQuoteDialog 
+                          quote={cotacao} 
+                          onEdit={(quoteId, data) => updateQuote({
+                            quoteId,
+                            data
+                          })} 
+                          trigger={
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="bg-white/80 hover:bg-blue-50 border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          } 
+                        />
+                        
+                        <DeleteQuoteDialog 
+                          quote={cotacao} 
+                          onDelete={id => deleteQuote(id)} 
+                          trigger={
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="bg-white/80 hover:bg-red-50 border-red-200 hover:border-red-300 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          } 
+                        />
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-1 px-3 py-1.5 bg-green-50 border border-green-200 rounded-md">
+                        <FileText className="h-3 w-3 text-green-600" />
+                        <span className="text-xs font-medium text-green-700">Concluída</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Desktop: Menu dropdown tradicional (mantido para compatibilidade) */}
+                <div className="hidden md:block">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="ml-auto">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                        quoteId,
+                        supplierId,
+                        productId,
+                        newValue
                       })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
+                        <Eye className="h-4 w-4 mr-2" />
+                        Visualizar
                       </DropdownMenuItem>} />
-                    )}
-                    
-                    {/* Só permite excluir se não estiver concluída */}
-                    {cotacao.status !== "concluida" && (
-                      <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Excluir
-                      </DropdownMenuItem>} />
-                    )}
-                    
-                    {/* Mostra mensagem informativa para cotações concluídas */}
-                    {cotacao.status === "concluida" && (
-                      <DropdownMenuItem disabled className="text-muted-foreground">
-                        <FileText className="h-4 w-4 mr-2" />
-                        Cotação finalizada
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      
+                      {/* Só permite editar se não estiver concluída */}
+                      {cotacao.status !== "concluida" && (
+                        <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                          quoteId,
+                          data
+                        })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>} />
+                      )}
+                      
+                      {/* Só permite excluir se não estiver concluída */}
+                      {cotacao.status !== "concluida" && (
+                        <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </DropdownMenuItem>} />
+                      )}
+                      
+                      {/* Mostra mensagem informativa para cotações concluídas */}
+                      {cotacao.status === "concluida" && (
+                        <DropdownMenuItem disabled className="text-muted-foreground">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Cotação finalizada
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </CardContent>
             </Card>;
       })}
@@ -479,7 +642,12 @@ export default function Cotacoes() {
                             <FileText className="h-4 w-4 text-primary" />
                           </div>
                           <div>
-                            
+                            <div className="font-medium font-mono text-sm">
+                              {cotacao.id.length > 12 
+                                ? `${cotacao.id.substring(0, 6)}...${cotacao.id.substring(cotacao.id.length - 4)}`
+                                : cotacao.id
+                              }
+                            </div>
                             <div className="text-xs text-muted-foreground md:hidden">{cotacao.produto}</div>
                           </div>
                         </div>

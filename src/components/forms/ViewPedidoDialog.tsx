@@ -94,7 +94,7 @@ export default function ViewPedidoDialog({ pedido, trigger, open: externalOpen, 
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-6xl h-[90vh] max-h-[900px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 animate-in fade-in-0 zoom-in-95 duration-300">
+      <DialogContent className="w-[90vw] max-w-6xl h-[85vh] max-h-[900px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 animate-in fade-in-0 zoom-in-95 duration-300">
         <DialogHeader className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-pink-50/80 via-rose-50/60 to-red-50/40 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
           {/* Efeitos decorativos de fundo */}
           <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 via-rose-500/5 to-red-500/5"></div>

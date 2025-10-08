@@ -72,16 +72,33 @@ export function useDashboard() {
     if (!data) return [];
 
     return data.quotes.slice(0, 4).map((quote: any) => {
-      // Debug: Log da estrutura da cotação (remover após identificar o problema)
+      // Debug: Log detalhado da estrutura da cotação
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔍 Analisando cotação:', {
+        console.log('🔍 [DASHBOARD] Analisando cotação:', {
           id: quote.id,
-          quote_suppliers: quote.quote_suppliers,
-          quote_items: quote.quote_items,
+          status: quote.status,
+          quote_suppliers: quote.quote_suppliers?.map((qs: any) => ({
+            supplier_id: qs.supplier_id,
+            supplier_name: qs.supplier_name,
+            valor_oferecido: qs.valor_oferecido,
+            price: qs.price,
+            valor: qs.valor,
+            preco: qs.preco,
+            todos_campos: Object.keys(qs)
+          })),
+          quote_items: quote.quote_items?.map((item: any) => ({
+            product_name: item.product_name,
+            preco_unitario: item.preco_unitario,
+            price: item.price,
+            valor: item.valor,
+            preco: item.preco,
+            todos_campos: Object.keys(item)
+          })),
           campos_diretos: {
             valor_total: quote.valor_total,
             total: quote.total,
-            price: quote.price
+            price: quote.price,
+            todos_campos_quote: Object.keys(quote)
           }
         });
       }
@@ -92,14 +109,28 @@ export function useDashboard() {
 
       // Verifica quote_suppliers
       if (quote.quote_suppliers && quote.quote_suppliers.length > 0) {
-        quote.quote_suppliers.forEach((qs: any) => {
+        console.log('🔍 [DASHBOARD] Processando quote_suppliers para cotação:', quote.id);
+        quote.quote_suppliers.forEach((qs: any, index: number) => {
           // Tenta diferentes campos onde o preço pode estar armazenado
           const preco = qs.valor_oferecido || qs.price || qs.valor || qs.preco || 0;
+          
+          console.log(`📊 [DASHBOARD] Fornecedor ${index + 1}:`, {
+            supplier_name: qs.supplier_name,
+            valor_oferecido: qs.valor_oferecido,
+            price: qs.price,
+            valor: qs.valor,
+            preco: qs.preco,
+            preco_calculado: preco
+          });
           
           if (preco > 0 && preco < melhorPreco) {
             melhorPreco = preco;
             melhorOferta = qs;
             fornecedorMelhorOferta = qs.supplier_name || qs.fornecedor || qs.name;
+            console.log('✅ [DASHBOARD] Novo melhor preço encontrado:', {
+              preco: melhorPreco,
+              fornecedor: fornecedorMelhorOferta
+            });
           }
         });
       }
@@ -129,7 +160,7 @@ export function useDashboard() {
 
       const firstItem = quote.quote_items?.[0];
 
-      return {
+      const resultado = {
         id: quote.id.substring(0, 8),
         product: firstItem?.product_name || firstItem?.nome || firstItem?.name || "Produto",
         quantity: firstItem?.quantidade || firstItem?.quantity || "0",
@@ -140,6 +171,17 @@ export function useDashboard() {
         date: new Date(quote.created_at).toLocaleDateString('pt-BR'),
         status: quote.status
       };
+
+      console.log('🎯 [DASHBOARD] Resultado final para atividades recentes:', {
+        cotacao_id: quote.id,
+        produto: resultado.product,
+        melhor_preco: resultado.bestPrice,
+        fornecedor: resultado.supplier,
+        tinha_ofertas: melhorOferta !== null,
+        preco_infinito: melhorPreco === Infinity
+      });
+
+      return resultado;
     });
   }, [data]);
 

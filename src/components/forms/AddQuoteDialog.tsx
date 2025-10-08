@@ -344,7 +344,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[1000px] h-[95vh] max-h-[950px] p-0 gap-0 overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col">
+      <DialogContent className="w-[90vw] max-w-[1000px] h-[85vh] max-h-[950px] p-0 gap-0 overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col">
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden">
           {/* Efeito de fundo decorativo */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5"></div>

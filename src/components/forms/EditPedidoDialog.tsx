@@ -185,7 +185,7 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-5xl h-[90vh] max-h-[900px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 animate-in fade-in-0 zoom-in-95 duration-300">
+      <DialogContent className="w-[90vw] max-w-5xl h-[85vh] max-h-[900px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 animate-in fade-in-0 zoom-in-95 duration-300">
         <DialogHeader className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
           {/* Efeitos decorativos de fundo */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5"></div>

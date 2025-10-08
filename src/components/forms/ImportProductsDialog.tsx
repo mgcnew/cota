@@ -255,7 +255,7 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
           Importar
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-xl">
         <DialogHeader>
           <DialogTitle>Importar Produtos em Massa</DialogTitle>
           <DialogDescription>

@@ -181,7 +181,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-[900px] max-h-[95vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
+      <DialogContent className="w-[90vw] max-w-[900px] max-h-[85vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-pink-50/80 via-rose-50/60 to-pink-50/40 backdrop-blur-sm relative overflow-hidden">
           {/* Efeitos decorativos de fundo */}
           <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 via-rose-500/5 to-pink-500/5"></div>
