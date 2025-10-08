@@ -38,73 +38,95 @@ export function useProducts() {
           quotes(
             id,
             status,
-            created_at,
-            quote_suppliers(
-              supplier_name,
-              valor_oferecido,
-              status
-            )
+            created_at
           )
         `);
 
       if (qiError) throw qiError;
+
+      // Fetch quote_supplier_items for real prices
+      const { data: quoteSupplierItems, error: qsiError } = await supabase
+        .from('quote_supplier_items')
+        .select(`
+          product_id,
+          quote_id,
+          supplier_id,
+          product_name,
+          valor_oferecido,
+          created_at
+        `);
+
+      if (qsiError) throw qsiError;
+
+      // Fetch suppliers to get names
+      const { data: suppliers, error: suppliersError } = await supabase
+        .from('suppliers')
+        .select('id, name');
+
+      if (suppliersError) throw suppliersError;
+
+      // Create a map for quick supplier name lookup
+      const supplierMap = new Map(suppliers?.map(s => [s.id, s.name]) || []);
 
       const formattedProducts: Product[] = data.map(p => {
         // Get all quotes for this product
         const productQuotes = quoteItems?.filter(qi => qi.product_id === p.id) || [];
         const quotesCount = new Set(productQuotes.map(qi => qi.quote_id)).size;
 
-        // Get the most recent quote with valid prices
-        const quotesWithPrices = productQuotes
-          .filter(qi => {
-            const suppliers = qi.quotes?.quote_suppliers || [];
-            return suppliers.some(s => s.valor_oferecido && s.valor_oferecido > 0);
-          })
-          .sort((a, b) => {
-            const dateA = new Date(a.quotes?.created_at || 0).getTime();
-            const dateB = new Date(b.quotes?.created_at || 0).getTime();
-            return dateB - dateA;
-          });
+        // Get all price offers for this product from quote_supplier_items
+        const productPriceOffers = quoteSupplierItems?.filter(qsi => qsi.product_id === p.id) || [];
+
+        // Group offers by quote_id and find best price per quote
+        const quotesBestPrices: Array<{
+          quote_id: string;
+          created_at: string;
+          bestPrice: number;
+          supplierName: string;
+        }> = [];
+
+        productQuotes.forEach(qi => {
+          const quoteOffers = productPriceOffers.filter(po => po.quote_id === qi.quote_id);
+          const validOffers = quoteOffers.filter(o => o.valor_oferecido && Number(o.valor_oferecido) > 0);
+
+          if (validOffers.length > 0) {
+            const bestOffer = validOffers.reduce((min, o) =>
+              Number(o.valor_oferecido) < Number(min.valor_oferecido) ? o : min
+            );
+            quotesBestPrices.push({
+              quote_id: qi.quote_id,
+              created_at: qi.quotes?.created_at || '',
+              bestPrice: Number(bestOffer.valor_oferecido),
+              supplierName: supplierMap.get(bestOffer.supplier_id) || '-'
+            });
+          }
+        });
+
+        // Sort by date to get most recent quotes
+        quotesBestPrices.sort((a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
 
         let lastQuotePrice = "R$ 0,00";
         let bestSupplier = "-";
         let trend: "up" | "down" | "stable" = "stable";
 
-        if (quotesWithPrices.length > 0) {
-          const latestQuote = quotesWithPrices[0];
-          const suppliers = latestQuote.quotes?.quote_suppliers || [];
-          
-          // Find best price and supplier
-          const validSuppliers = suppliers.filter(s => s.valor_oferecido && s.valor_oferecido > 0);
-          if (validSuppliers.length > 0) {
-            const bestOffer = validSuppliers.reduce((min, s) => 
-              Number(s.valor_oferecido) < Number(min.valor_oferecido) ? s : min
-            );
-            lastQuotePrice = `R$ ${Number(bestOffer.valor_oferecido).toFixed(2)}`;
-            bestSupplier = bestOffer.supplier_name;
+        if (quotesBestPrices.length > 0) {
+          const latestBestPrice = quotesBestPrices[0];
+          lastQuotePrice = `R$ ${latestBestPrice.bestPrice.toFixed(2)}`;
+          bestSupplier = latestBestPrice.supplierName;
 
-            // Calculate trend if we have at least 2 quotes
-            if (quotesWithPrices.length >= 2) {
-              const previousQuote = quotesWithPrices[1];
-              const prevSuppliers = previousQuote.quotes?.quote_suppliers || [];
-              const prevValidSuppliers = prevSuppliers.filter(s => s.valor_oferecido && s.valor_oferecido > 0);
-              
-              if (prevValidSuppliers.length > 0) {
-                const prevBest = prevValidSuppliers.reduce((min, s) => 
-                  Number(s.valor_oferecido) < Number(min.valor_oferecido) ? s : min
-                );
-                const currentPrice = Number(bestOffer.valor_oferecido);
-                const previousPrice = Number(prevBest.valor_oferecido);
-                
-                if (currentPrice < previousPrice * 0.95) trend = "down";
-                else if (currentPrice > previousPrice * 1.05) trend = "up";
-              }
-            }
+          // Calculate trend if we have at least 2 quotes
+          if (quotesBestPrices.length >= 2) {
+            const currentPrice = latestBestPrice.bestPrice;
+            const previousPrice = quotesBestPrices[1].bestPrice;
+
+            if (currentPrice < previousPrice * 0.95) trend = "down";
+            else if (currentPrice > previousPrice * 1.05) trend = "up";
           }
         }
 
-        const lastUpdate = quotesWithPrices.length > 0
-          ? new Date(quotesWithPrices[0].quotes?.created_at || p.created_at).toLocaleDateString('pt-BR')
+        const lastUpdate = quotesBestPrices.length > 0
+          ? new Date(quotesBestPrices[0].created_at).toLocaleDateString('pt-BR')
           : new Date(p.created_at).toLocaleDateString('pt-BR');
 
         return {
