@@ -86,16 +86,32 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
     
     switch (type) {
       case "produtos":
-        navigate("/produtos");
+        if (id) {
+          navigate(`/produtos?id=${id}`);
+        } else {
+          navigate("/produtos");
+        }
         break;
       case "fornecedores":
-        navigate("/fornecedores");
+        if (id) {
+          navigate(`/fornecedores?id=${id}`);
+        } else {
+          navigate("/fornecedores");
+        }
         break;
       case "cotacoes":
-        navigate("/cotacoes");
+        if (id) {
+          navigate(`/cotacoes?id=${id}`);
+        } else {
+          navigate("/cotacoes");
+        }
         break;
       case "pedidos":
-        navigate("/pedidos");
+        if (id) {
+          navigate(`/pedidos?id=${id}`);
+        } else {
+          navigate("/pedidos");
+        }
         break;
     }
   };
@@ -139,7 +155,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
           </div>
         </div>
       </div>
-      <CommandList className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
+      <CommandList className="max-h-[400px] overflow-hidden">
         {!searchQuery && (
           <div className="px-6 py-12 text-center">
             <div className="relative mb-6">
