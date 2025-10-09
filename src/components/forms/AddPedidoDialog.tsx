@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { Plus, Trash2, Loader2, ShoppingCart, Package, Building2, Calendar, DollarSign, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +16,7 @@ interface PedidoItem {
   produto: string;
   quantidade: number;
   valorUnitario: number;
+  unidade: string;
 }
 
 interface AddPedidoDialogProps {
@@ -30,7 +32,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
   const [fornecedor, setFornecedor] = useState("");
   const [dataEntrega, setDataEntrega] = useState("");
   const [observacoes, setObservacoes] = useState("");
-  const [itens, setItens] = useState<PedidoItem[]>([{ produto: "", quantidade: 1, valorUnitario: 0 }]);
+  const [itens, setItens] = useState<PedidoItem[]>([{ produto: "", quantidade: 1, valorUnitario: 0, unidade: "un" }]);
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -69,7 +71,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
   };
 
   const handleAddItem = () => {
-    setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0 }]);
+    setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0, unidade: "un" }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -137,6 +139,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
           quantity: item.quantidade,
           unit_price: item.valorUnitario,
           total_price: item.quantidade * item.valorUnitario,
+          unit: item.unidade,
         };
       });
 
@@ -165,7 +168,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
       setFornecedor("");
       setDataEntrega("");
       setObservacoes("");
-      setItens([{ produto: "", quantidade: 1, valorUnitario: 0 }]);
+      setItens([{ produto: "", quantidade: 1, valorUnitario: 0, unidade: "un" }]);
       onOpenChange(false);
     } catch (error: any) {
       console.error('Error creating order:', error);
@@ -218,16 +221,15 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
                   <Building2 className="h-3 w-3" />
                   Fornecedor *
                 </Label>
-                <Select value={fornecedor} onValueChange={setFornecedor}>
-                  <SelectTrigger className={`h-10 ${fornecedor ? 'border-pink-300 bg-pink-50 text-pink-700' : 'border-gray-200'}`}>
-                    <SelectValue placeholder="Selecione o fornecedor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Combobox
+                  options={suppliers.map(s => ({ value: s.id, label: s.name }))}
+                  value={fornecedor}
+                  onValueChange={setFornecedor}
+                  placeholder="Selecione o fornecedor"
+                  searchPlaceholder="Buscar fornecedor..."
+                  emptyText="Nenhum fornecedor encontrado"
+                  className={`h-10 ${fornecedor ? 'border-pink-300 bg-pink-50 text-pink-700' : 'border-gray-200'}`}
+                />
               </div>
 
               <div className="space-y-2">
@@ -293,22 +295,18 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                     <div className="lg:col-span-2 space-y-2">
                       <Label className="text-xs font-medium text-gray-700">Produto</Label>
-                      <Select
+                      <Combobox
+                        options={products.map(p => ({ value: p.name, label: p.name }))}
                         value={item.produto}
                         onValueChange={(value) => handleItemChange(index, 'produto', value)}
-                      >
-                        <SelectTrigger className={`h-9 ${item.produto ? 'border-green-300 bg-green-50' : 'border-gray-200'}`}>
-                          <SelectValue placeholder="Selecione o produto" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {products.map((p) => (
-                            <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        placeholder="Selecione o produto"
+                        searchPlaceholder="Buscar produto..."
+                        emptyText="Nenhum produto encontrado"
+                        className={`h-9 ${item.produto ? 'border-green-300 bg-green-50' : 'border-gray-200'}`}
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -320,6 +318,26 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
                         onChange={(e) => handleItemChange(index, 'quantidade', parseInt(e.target.value) || 0)}
                         className="h-9"
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-gray-700">Unidade</Label>
+                      <Select
+                        value={item.unidade}
+                        onValueChange={(value) => handleItemChange(index, 'unidade', value)}
+                      >
+                        <SelectTrigger className="h-9 border-gray-200">
+                          <SelectValue placeholder="un" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="un">Unidade (un)</SelectItem>
+                          <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                          <SelectItem value="pc">Peça (pc)</SelectItem>
+                          <SelectItem value="caixa">Caixa</SelectItem>
+                          <SelectItem value="litro">Litro (L)</SelectItem>
+                          <SelectItem value="metro">Metro (m)</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="space-y-2">

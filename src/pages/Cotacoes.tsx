@@ -577,15 +577,26 @@ export default function Cotacoes() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                        quoteId,
-                        supplierId,
-                        productId,
-                        newValue
-                      })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Visualizar
-                      </DropdownMenuItem>} />
+                      <ViewQuoteDialog 
+                        quote={cotacao} 
+                        onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                          quoteId,
+                          supplierId,
+                          productId,
+                          newValue
+                        })}
+                        onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
+                          quoteId,
+                          supplierId,
+                          deliveryDate,
+                          observations
+                        })}
+                        isUpdating={isUpdating}
+                        trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Visualizar
+                        </DropdownMenuItem>} 
+                      />
                       
                       {/* Só permite editar se não estiver concluída */}
                       {cotacao.status !== "concluida" && (
@@ -694,6 +705,13 @@ export default function Cotacoes() {
                                   productId,
                                   newValue
                                 })}
+                                onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
+                                  quoteId,
+                                  supplierId,
+                                  deliveryDate,
+                                  observations
+                                })}
+                                isUpdating={isUpdating}
                                 trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                                   <Eye className="h-4 w-4 mr-2" />
                                   Visualizar
