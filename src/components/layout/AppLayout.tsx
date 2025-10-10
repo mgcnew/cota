@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
+import { SmoothPageTransition } from "./SmoothPageTransition";
 import { Bell, User, Settings, Sun, Moon, Sunset } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -203,7 +204,9 @@ export function AppLayout() {
         <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative pt-16 pl-0 md:pl-24">
           <div className="min-h-full bg-white/40 backdrop-blur-sm w-full max-w-full">
             <div className="w-full max-w-full overflow-x-hidden">
-              <Outlet />
+              <SmoothPageTransition>
+                <Outlet />
+              </SmoothPageTransition>
             </div>
           </div>
         </main>

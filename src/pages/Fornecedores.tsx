@@ -16,6 +16,7 @@ import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
 import DeleteSupplierDialog from "@/components/forms/DeleteSupplierDialog";
 import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
 import { ImportSuppliersDialog } from "@/components/forms/ImportSuppliersDialog";
+import { SupplierQuoteHistoryDialog } from "@/components/forms/SupplierQuoteHistoryDialog";
 import { toast } from "@/hooks/use-toast";
 import { MetricCard } from "@/components/ui/metric-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -24,6 +25,8 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
+import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
+
 interface Supplier {
   id: string;
   name: string;
@@ -377,10 +380,16 @@ export default function Fornecedores() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(`/cotacoes?fornecedor=${encodeURIComponent(supplier.name)}`)}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Ver Cotações
-                      </DropdownMenuItem>
+                      <SupplierQuoteHistoryDialog
+                        supplierName={supplier.name}
+                        supplierId={supplier.id}
+                        trigger={
+                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Histórico de Cotações
+                          </DropdownMenuItem>
+                        }
+                      />
                       <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
                         <Edit className="h-4 w-4 mr-2" />
                         Editar
@@ -517,10 +526,16 @@ export default function Fornecedores() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => navigate(`/cotacoes?fornecedor=${encodeURIComponent(supplier.name)}`)}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                Ver Cotações
-                              </DropdownMenuItem>
+                              <SupplierQuoteHistoryDialog
+                                supplierName={supplier.name}
+                                supplierId={supplier.id}
+                                trigger={
+                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    Ver Histórico de Cotações
+                                  </DropdownMenuItem>
+                                }
+                              />
                               <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Editar

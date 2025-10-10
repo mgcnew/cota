@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -111,6 +111,8 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
   const [selectedSuppliers, setSelectedSuppliers] = useState<Supplier[]>([]);
   const [activeTab, setActiveTab] = useState("produtos");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const productsContainerRef = useRef<HTMLDivElement>(null);
+  const [newlyAddedIndex, setNewlyAddedIndex] = useState<number | null>(null);
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
@@ -127,6 +129,31 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
     control: form.control,
     name: "produtos",
   });
+
+  // Função para adicionar produto com scroll automático
+  const handleAddProduct = () => {
+    const newIndex = fields.length;
+    append({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" });
+    
+    // Marcar como recém-adicionado para animação
+    setNewlyAddedIndex(newIndex);
+    
+    // Scroll automático para o novo produto após um pequeno delay
+    setTimeout(() => {
+      if (productsContainerRef.current) {
+        const container = productsContainerRef.current;
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+
+    // Remover a marcação após a animação
+    setTimeout(() => {
+      setNewlyAddedIndex(null);
+    }, 2000);
+  };
 
   useEffect(() => {
     if (open) {
@@ -477,13 +504,21 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                             <span className="bg-gradient-to-r from-blue-900 to-indigo-800 bg-clip-text text-transparent">
                               Produtos da Cotação
                             </span>
-                            <span className="text-xs text-gray-600 font-normal mt-0.5">
-                              {fields.length} produto{fields.length !== 1 ? 's' : ''} adicionado{fields.length !== 1 ? 's' : ''}
-                            </span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs text-gray-600 font-normal">
+                                {fields.length} produto{fields.length !== 1 ? 's' : ''} adicionado{fields.length !== 1 ? 's' : ''}
+                              </span>
+                              {fields.length > 1 && (
+                                <div className="flex items-center gap-1">
+                                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                  <span className="text-xs text-green-600 font-medium">Lista ativa</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-3 space-y-3">
+                      <CardContent className="p-3 space-y-3 relative">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-gradient-to-r from-blue-50/60 to-indigo-50/40 rounded-lg border border-blue-100/60">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg">
@@ -498,7 +533,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                           </div>
                           <Button
                             type="button"
-                            onClick={() => append({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" })}
+                            onClick={handleAddProduct}
                             className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg text-sm h-9"
                           >
                             <Plus className="h-4 w-4 mr-2" />
@@ -506,9 +541,12 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                           </Button>
                         </div>
 
-                        <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                        <div ref={productsContainerRef} className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
                           {fields.map((field, index) => (
-                            <Card key={field.id} className="border-0 shadow-md bg-gradient-to-br from-white to-gray-50/50 backdrop-blur-sm rounded-lg overflow-hidden group hover:shadow-lg transition-all duration-300">
+                            <Card key={field.id} className={cn(
+                              "border-0 shadow-md bg-gradient-to-br from-white to-gray-50/50 backdrop-blur-sm rounded-lg overflow-hidden group hover:shadow-lg transition-all duration-300",
+                              newlyAddedIndex === index && "ring-2 ring-blue-400 ring-opacity-75 animate-pulse"
+                            )}>
                               <div className="h-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
                               <CardContent className="p-3 space-y-3">
                                 <div className="flex items-center justify-between">
@@ -641,7 +679,35 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                               </CardContent>
                             </Card>
                           ))}
+                          
+                          {/* Botão adicionar produto na parte inferior */}
+                          <div className="flex justify-center pt-2">
+                            <Button
+                              type="button"
+                              onClick={handleAddProduct}
+                              variant="outline"
+                              className="w-full sm:w-auto border-2 border-dashed border-blue-300 hover:border-blue-500 hover:bg-blue-50 text-blue-600 hover:text-blue-700 transition-all duration-300 rounded-lg text-sm h-10"
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              <span>Adicionar Outro Produto</span>
+                            </Button>
+                          </div>
                         </div>
+
+                        {/* Botão flutuante para adicionar produto (aparece quando há 3+ produtos) */}
+                        {fields.length >= 3 && (
+                          <div className="absolute bottom-4 right-4 z-10">
+                            <Button
+                              type="button"
+                              onClick={handleAddProduct}
+                              size="sm"
+                              className="rounded-full w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110"
+                              title="Adicionar produto rapidamente"
+                            >
+                              <Plus className="h-5 w-5" />
+                            </Button>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   </TabsContent>

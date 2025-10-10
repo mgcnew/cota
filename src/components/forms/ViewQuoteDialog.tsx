@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText } from "lucide-react";
+import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock } from "lucide-react";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -73,7 +73,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
   // Get products from the quote
   const products = quote._raw?.quote_items || [];
-  
+
   // Get supplier items for selected supplier
   const getSupplierProductValue = (supplierId: string, productId: string): number => {
     const supplierItems = quote._supplierItems || quote._raw?.quote_supplier_items || [];
@@ -87,7 +87,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   const getBestPriceInfoForProduct = (productId: string): { bestPrice: number; bestSupplierId: string | null } => {
     let bestPrice = Infinity;
     let bestSupplierId: string | null = null;
-    
+
     quote.fornecedoresParticipantes.forEach(f => {
       const value = getSupplierProductValue(f.id, productId);
       if (value > 0 && value < bestPrice) {
@@ -95,10 +95,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         bestSupplierId = f.id;
       }
     });
-    
-    return { 
-      bestPrice: bestPrice === Infinity ? 0 : bestPrice, 
-      bestSupplierId 
+
+    return {
+      bestPrice: bestPrice === Infinity ? 0 : bestPrice,
+      bestSupplierId
     };
   };
 
@@ -117,7 +117,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       expirada: "destructive",
       finalizada: "default"
     };
-    
+
     const labels = {
       ativa: "Ativa",
       concluida: "Concluída",
@@ -168,7 +168,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
             const supplierItem = (quote._supplierItems || quote._raw?.quote_supplier_items || []).find(
               (si: any) => si.supplier_id === fornecedor.id && si.product_id === item.product_id
             );
-            
+
             return {
               supplierId: fornecedor.id,
               supplierName: fornecedor.nome,
@@ -203,10 +203,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       });
 
       setSelectedSuppliers(new Map(productSelections.map((p: any) => [
-        p.productId, 
+        p.productId,
         { supplierId: p.selectedSupplierId, supplierName: p.selectedSupplierName }
       ])));
-      
+
       setShowSelectSupplierDialog(true);
     } else {
       // Um único produto, usar fluxo simples
@@ -224,7 +224,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   const handleSupplierSelectionConfirm = (selections: Map<string, { supplierId: string; supplierName: string }>) => {
     setSelectedSuppliers(selections);
     setShowSelectSupplierDialog(false);
-    
+
     // Agrupar por fornecedor para decidir o fluxo
     const supplierGroups = new Map<string, string[]>();
     selections.forEach((selection, productId) => {
@@ -238,7 +238,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
     // Depois podemos implementar múltiplos pedidos
     const mainSupplier = Array.from(supplierGroups.entries())
       .sort((a, b) => b[1].length - a[1].length)[0];
-    
+
     if (mainSupplier) {
       const selection = selections.get(mainSupplier[1][0]);
       if (selection) {
@@ -260,7 +260,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   };
 
   const bestSupplier = getBestSupplier();
-  
+
   // Get products for conversion dialog
   const getConversionProducts = () => {
     if (!bestSupplier) return [];
@@ -280,13 +280,13 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-6xl h-[85vh] max-h-[900px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0">
-        <DialogHeader className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
+      <DialogContent className="w-[90vw] max-w-6xl h-[90vh] max-h-[950px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0">
+        <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
           {/* Efeitos decorativos de fundo */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full -translate-y-16 translate-x-16"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-pink-400/10 rounded-full translate-y-12 -translate-x-12"></div>
-          
+
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
               <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-white/20 backdrop-blur-sm flex-shrink-0">
@@ -309,25 +309,25 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
         <div className="flex flex-col h-full overflow-hidden">
           <Tabs defaultValue="detalhes" className="w-full flex flex-col h-full">
-            <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm flex-shrink-0">
-              <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-1 sm:p-1.5 shadow-lg border border-gray-200/40">
-                <TabsTrigger 
-                  value="detalhes" 
-                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-blue-500/25 px-2 sm:px-3 py-2 sm:py-2.5"
+            <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm flex-shrink-0">
+              <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-1 shadow-lg border border-gray-200/40">
+                <TabsTrigger
+                  value="detalhes"
+                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-500 ease-out data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-blue-500/25 data-[state=active]:scale-105 hover:scale-102 px-2 sm:px-3 py-1.5 sm:py-2"
                 >
                   <span className="hidden sm:inline">📋 Detalhes</span>
                   <span className="sm:hidden">📋</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="atualizacao" 
-                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-green-500/25 px-2 sm:px-3 py-2 sm:py-2.5"
+                <TabsTrigger
+                  value="atualizacao"
+                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-500 ease-out data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-green-500/25 data-[state=active]:scale-105 hover:scale-102 px-2 sm:px-3 py-1.5 sm:py-2"
                 >
                   <span className="hidden sm:inline">💰 Valores</span>
                   <span className="sm:hidden">💰</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="comparativo" 
-                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-purple-500/25 px-2 sm:px-3 py-2 sm:py-2.5"
+                <TabsTrigger
+                  value="comparativo"
+                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-500 ease-out data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-purple-500/25 data-[state=active]:scale-105 hover:scale-102 px-2 sm:px-3 py-1.5 sm:py-2"
                 >
                   <span className="hidden sm:inline">📊 Comparativo</span>
                   <span className="sm:hidden">📊</span>
@@ -335,12 +335,12 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </TabsList>
             </div>
 
-            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <Card className="p-4 sm:p-5 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-indigo-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg flex-shrink-0">
-                      <Package className="h-4 w-4 sm:h-5 sm:w-5" />
+            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+                <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-indigo-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg flex-shrink-0">
+                      <Package className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs sm:text-sm font-medium text-gray-600">Produto Principal</p>
@@ -350,10 +350,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   </div>
                 </Card>
 
-                <Card className="p-4 sm:p-5 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
-                      <Users className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
+                      <Users className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs sm:text-sm font-medium text-gray-600">Fornecedores Participantes</p>
@@ -363,10 +363,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   </div>
                 </Card>
 
-                <Card className="p-4 sm:p-5 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-pink-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg flex-shrink-0">
-                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-pink-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg flex-shrink-0">
+                      <Calendar className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs sm:text-sm font-medium text-gray-600">Período da Cotação</p>
@@ -376,10 +376,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   </div>
                 </Card>
 
-                <Card className="p-4 sm:p-5 border-0 shadow-lg bg-gradient-to-br from-orange-50/60 to-red-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-lg flex-shrink-0">
-                      <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-orange-50/60 to-red-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-lg flex-shrink-0">
+                      <TrendingDown className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs sm:text-sm font-medium text-gray-600">Melhor Oferta</p>
@@ -391,11 +391,11 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </div>
 
               {/* Resumo da economia */}
-              <Card className="p-4 sm:p-6 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl border-l-4 border-l-green-500">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                    <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl flex-shrink-0">
-                      <DollarSign className="h-5 w-5 sm:h-6 sm:w-6" />
+              <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl border-l-4 border-l-green-500">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl flex-shrink-0">
+                      <DollarSign className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-lg sm:text-xl text-gray-900">Economia Estimada</h3>
@@ -411,14 +411,105 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   </div>
                 </div>
               </Card>
+
+              {/* Estatísticas da Cotação */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-cyan-50/40 backdrop-blur-sm rounded-xl">
+                  <div className="text-center">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-lg mx-auto w-fit mb-2">
+                      <Package className="h-4 w-4" />
+                    </div>
+                    <p className="text-xs text-gray-600 mb-1">Total de Produtos</p>
+                    <p className="font-bold text-lg text-gray-900">{products.length}</p>
+                  </div>
+                </Card>
+
+                <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-pink-50/40 backdrop-blur-sm rounded-xl">
+                  <div className="text-center">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg mx-auto w-fit mb-2">
+                      <Users className="h-4 w-4" />
+                    </div>
+                    <p className="text-xs text-gray-600 mb-1">Fornecedores Ativos</p>
+                    <p className="font-bold text-lg text-gray-900">
+                      {quote.fornecedoresParticipantes.filter(f => f.status === 'respondido').length}
+                    </p>
+                  </div>
+                </Card>
+
+                <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl">
+                  <div className="text-center">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg mx-auto w-fit mb-2">
+                      <TrendingDown className="h-4 w-4" />
+                    </div>
+                    <p className="text-xs text-gray-600 mb-1">Melhor Valor</p>
+                    <p className="font-bold text-lg text-green-600">
+                      R$ {getMelhorValor().toFixed(2)}
+                    </p>
+                  </div>
+                </Card>
+
+                <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-orange-50/60 to-red-50/40 backdrop-blur-sm rounded-xl">
+                  <div className="text-center">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-lg mx-auto w-fit mb-2">
+                      <Calendar className="h-4 w-4" />
+                    </div>
+                    <p className="text-xs text-gray-600 mb-1">Status</p>
+                    <div className="flex justify-center">
+                      {getStatusBadge(quote.status)}
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Lista de Fornecedores Participantes */}
+              <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-slate-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg">
+                    <Users className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-bold text-lg text-gray-900">Fornecedores Participantes</h3>
+                </div>
+                <div className="space-y-3">
+                  {quote.fornecedoresParticipantes.map(fornecedor => (
+                    <div key={fornecedor.id} className="flex items-center justify-between p-3 bg-white/60 rounded-xl border border-gray-100/60">
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-3 h-3 rounded-full",
+                          fornecedor.status === 'respondido' ? "bg-green-500" : "bg-yellow-500"
+                        )}></div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{fornecedor.nome}</p>
+                          <p className="text-xs text-gray-600">
+                            {fornecedor.status === 'respondido'
+                              ? `Respondeu em ${fornecedor.dataResposta}`
+                              : 'Aguardando resposta'
+                            }
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {fornecedor.valorOferecido > 0 ? (
+                          <p className="font-bold text-green-600">
+                            R$ {fornecedor.valorOferecido.toFixed(2)}
+                          </p>
+                        ) : (
+                          <Badge variant="outline" className="text-xs">
+                            Pendente
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
             </TabsContent>
 
-            <TabsContent value="atualizacao" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-              <Card className="p-4 sm:p-6 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-green-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-green-50/60 to-emerald-50/40 rounded-xl sm:rounded-2xl border border-green-100/60">
-                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
-                      <Users className="h-4 w-4 sm:h-5 sm:w-5" />
+            <TabsContent value="atualizacao" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500">
+              <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-green-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 bg-gradient-to-r from-green-50/60 to-emerald-50/40 rounded-xl border border-green-100/60">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
+                      <Users className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <label className="text-xs sm:text-sm font-bold text-gray-900 block mb-2">Selecione o Fornecedor</label>
@@ -454,7 +545,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           </Badge>
                         )}
                       </div>
-                      
+
                       {quote.status === "concluida" && (
                         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
                           <div className="flex items-center gap-2 text-amber-800">
@@ -465,23 +556,23 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           </div>
                         </div>
                       )}
-                      <div className="rounded-xl sm:rounded-2xl border-0 shadow-lg overflow-hidden bg-white/60 backdrop-blur-sm overflow-x-auto">
+                      <div className="rounded-xl border-0 shadow-lg overflow-hidden bg-white/60 backdrop-blur-sm overflow-x-auto">
                         <table className="w-full min-w-[600px]">
                           <thead>
                             <tr className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-                              <th className="p-3 sm:p-4 text-left font-bold text-xs sm:text-sm">
+                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
                                 <span className="hidden sm:inline">📦 Produto</span>
                                 <span className="sm:hidden">📦</span>
                               </th>
-                              <th className="p-3 sm:p-4 text-left font-bold text-xs sm:text-sm">
+                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
                                 <span className="hidden sm:inline">📏 Quantidade</span>
                                 <span className="sm:hidden">📏</span>
                               </th>
-                              <th className="p-3 sm:p-4 text-left font-bold text-xs sm:text-sm">
+                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
                                 <span className="hidden sm:inline">💰 Valor Oferecido</span>
                                 <span className="sm:hidden">💰</span>
                               </th>
-                              <th className="p-3 sm:p-4 text-left font-bold text-xs sm:text-sm">
+                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
                                 <span className="hidden sm:inline">⚙️ Ações</span>
                                 <span className="sm:hidden">⚙️</span>
                               </th>
@@ -496,18 +587,18 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                               return (
                                 <tr key={product.product_id} className="border-b border-gray-100 last:border-0 hover:bg-green-50/30 transition-colors">
-                                  <td className="p-3 sm:p-4">
+                                  <td className="p-2 sm:p-3">
                                     <div className="font-semibold text-gray-900 text-xs sm:text-sm truncate max-w-[150px] sm:max-w-none" title={product.product_name}>
                                       {product.product_name}
                                     </div>
                                   </td>
-                                  <td className="p-3 sm:p-4">
+                                  <td className="p-2 sm:p-3">
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                                       <span className="font-medium text-xs sm:text-sm">{product.quantidade}</span>
                                       <Badge variant="outline" className="text-xs w-fit">{product.unidade}</Badge>
                                     </div>
                                   </td>
-                                  <td className="p-3 sm:p-4">
+                                  <td className="p-2 sm:p-3">
                                     {isEditing ? (
                                       <div className="flex items-center gap-2">
                                         <Input
@@ -540,7 +631,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                       </div>
                                     )}
                                   </td>
-                                  <td className="p-3 sm:p-4">
+                                  <td className="p-2 sm:p-3">
                                     {isEditing ? (
                                       <div className="flex gap-1 sm:gap-2">
                                         <Button
@@ -567,8 +658,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                         disabled={quote.status === "concluida"}
                                         className={cn(
                                           "rounded-lg sm:rounded-xl h-8 w-8 sm:h-9 sm:w-9 p-0",
-                                          quote.status === "concluida" 
-                                            ? "border-gray-200 text-gray-400 cursor-not-allowed" 
+                                          quote.status === "concluida"
+                                            ? "border-gray-200 text-gray-400 cursor-not-allowed"
                                             : "border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
                                         )}
                                         title={quote.status === "concluida" ? "Cotação finalizada - Edição não permitida" : "Editar valor"}
@@ -589,17 +680,92 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </Card>
             </TabsContent>
 
-            <TabsContent value="comparativo" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-              <div className="rounded-xl sm:rounded-2xl border-0 shadow-xl overflow-hidden bg-white/60 backdrop-blur-sm overflow-x-auto">
+            <TabsContent value="comparativo" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500">
+              {/* Resumo dos Fornecedores */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
+                {quote.fornecedoresParticipantes.map(fornecedor => {
+                  const totalValue = products.reduce((sum: number, product: any) => {
+                    const value = getSupplierProductValue(fornecedor.id, product.product_id);
+                    return sum + (value || 0);
+                  }, 0);
+
+                  const respondedProducts = products.filter((product: any) =>
+                    getSupplierProductValue(fornecedor.id, product.product_id) > 0
+                  ).length;
+
+                  const isWinning = bestSupplier?.id === fornecedor.id;
+
+                  return (
+                    <Card key={fornecedor.id} className={cn(
+                      "p-3 sm:p-4 border-0 shadow-lg backdrop-blur-sm rounded-xl sm:rounded-2xl transition-all duration-300",
+                      isWinning
+                        ? "bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 border-l-4 border-l-green-500 scale-105"
+                        : "bg-gradient-to-br from-white via-gray-50/30 to-slate-50/20"
+                    )}>
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "p-2.5 rounded-xl shadow-lg flex-shrink-0",
+                          isWinning
+                            ? "bg-gradient-to-br from-green-600 to-emerald-600 text-white"
+                            : "bg-gradient-to-br from-gray-600 to-slate-600 text-white"
+                        )}>
+                          <Users className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-gray-900 text-sm sm:text-base truncate" title={fornecedor.nome}>
+                              {fornecedor.nome}
+                            </h3>
+                            {isWinning && (
+                              <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow-lg text-xs">
+                                🏆 Vencedor
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="space-y-1 mt-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-gray-600">Total:</span>
+                              <span className={cn(
+                                "font-bold text-sm",
+                                isWinning ? "text-green-600" : "text-gray-900"
+                              )}>
+                                R$ {totalValue.toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-gray-600">Produtos:</span>
+                              <span className="text-xs font-medium">
+                                {respondedProducts}/{products.length} respondidos
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                              <div
+                                className={cn(
+                                  "h-1.5 rounded-full transition-all duration-300",
+                                  isWinning ? "bg-gradient-to-r from-green-500 to-emerald-500" : "bg-gray-400"
+                                )}
+                                style={{ width: `${(respondedProducts / products.length) * 100}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Tabela Comparativa */}
+              <div className="rounded-xl border-0 shadow-xl overflow-hidden bg-white/60 backdrop-blur-sm overflow-x-auto">
                 <table className="w-full min-w-[700px]">
                   <thead>
                     <tr className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                      <th className="p-3 sm:p-4 text-left font-bold text-xs sm:text-sm">
+                      <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
                         <span className="hidden sm:inline">📦 Produto</span>
                         <span className="sm:hidden">📦</span>
                       </th>
                       {quote.fornecedoresParticipantes.map(fornecedor => (
-                        <th key={fornecedor.id} className="p-3 sm:p-4 text-center font-bold text-xs sm:text-sm min-w-[120px]">
+                        <th key={fornecedor.id} className="p-2 sm:p-3 text-center font-bold text-xs sm:text-sm min-w-[120px]">
                           <div className="truncate" title={fornecedor.nome}>
                             <span className="hidden sm:inline">🏢 {fornecedor.nome}</span>
                             <span className="sm:hidden">{fornecedor.nome.substring(0, 8)}...</span>
@@ -611,10 +777,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   <tbody>
                     {products.map((product: any) => {
                       const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
-                      
+
                       return (
                         <tr key={product.product_id} className="border-b border-gray-100 last:border-0 hover:bg-purple-50/30 transition-colors">
-                          <td className="p-3 sm:p-4">
+                          <td className="p-2 sm:p-3">
                             <div className="flex items-center gap-2 sm:gap-3">
                               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
                                 📦
@@ -633,15 +799,15 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           {quote.fornecedoresParticipantes.map(fornecedor => {
                             const value = getSupplierProductValue(fornecedor.id, product.product_id);
                             const isBestPrice = fornecedor.id === bestSupplierId;
-                            
+
                             return (
-                              <td key={fornecedor.id} className="p-3 sm:p-4 text-center">
+                              <td key={fornecedor.id} className="p-2 sm:p-3 text-center">
                                 {value > 0 ? (
                                   <div className="flex flex-col items-center gap-1 sm:gap-2">
                                     <div className={cn(
                                       "px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm lg:text-base shadow-lg transition-all duration-300",
-                                      isBestPrice 
-                                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-500/25 scale-105 sm:scale-110" 
+                                      isBestPrice
+                                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-500/25 scale-105 sm:scale-110"
                                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     )}>
                                       R$ {value.toFixed(2)}
@@ -669,35 +835,116 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                 </table>
               </div>
 
-              {/* Convert to Order Button */}
-              {quote.status === 'ativa' && bestSupplier && (
-                <Card className="p-6 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-2xl border-l-4 border-l-green-500">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="p-4 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl">
-                        <ShoppingCart className="h-6 w-6" />
+              {/* Ações da Cotação */}
+              <div className="space-y-4">
+                {/* Convert to Order Button */}
+                {quote.status === 'ativa' && bestSupplier && (
+                  <Card className="p-4 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-2xl border-l-4 border-l-green-500">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl">
+                          <ShoppingCart className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-lg text-gray-900">Pronto para Converter?</h3>
+                          <p className="text-sm text-gray-600">
+                            Melhor fornecedor: <span className="font-semibold text-green-700">{bestSupplier.nome}</span>
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Valor total: <span className="font-bold text-green-700">R$ {bestSupplier.totalValue.toFixed(2)}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleConvertToOrder}
+                        disabled={isUpdating}
+                        className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 text-sm px-4 py-3"
+                      >
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        Converter para Pedido
+                      </Button>
+                    </div>
+                  </Card>
+                )}
+
+                {/* Ações Adicionais */}
+                <Card className="p-4 border-0 shadow-lg bg-gradient-to-br from-white via-gray-50/30 to-slate-50/20 backdrop-blur-sm rounded-xl">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg">
+                        <FileText className="h-4 w-4" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-gray-900">Pronto para Converter?</h3>
-                        <p className="text-sm text-gray-600">
-                          Melhor fornecedor: <span className="font-semibold text-green-700">{bestSupplier.nome}</span>
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Valor total: <span className="font-bold text-green-700">R$ {bestSupplier.totalValue.toFixed(2)}</span>
+                        <h4 className="font-semibold text-gray-900">Ações da Cotação</h4>
+                        <p className="text-xs text-gray-600">Exportar dados ou compartilhar informações</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-xl"
+                        onClick={() => {
+                          // Função para exportar dados da cotação
+                          const data = {
+                            cotacao: quote,
+                            produtos: products,
+                            fornecedores: quote.fornecedoresParticipantes
+                          };
+                          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `cotacao-${quote.id}.json`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                        }}
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        <span className="hidden sm:inline">Exportar</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-purple-200 text-purple-600 hover:bg-purple-50 rounded-xl"
+                        onClick={() => {
+                          // Função para compartilhar cotação
+                          if (navigator.share) {
+                            navigator.share({
+                              title: `Cotação - ${quote.produto}`,
+                              text: `Cotação para ${quote.produto} com ${quote.fornecedores} fornecedores participantes`,
+                              url: window.location.href
+                            });
+                          } else {
+                            // Fallback para copiar link
+                            navigator.clipboard.writeText(window.location.href);
+                          }
+                        }}
+                      >
+                        <Share2 className="h-4 w-4 mr-1" />
+                        <span className="hidden sm:inline">Compartilhar</span>
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Informações de Tempo */}
+                {quote.status === 'ativa' && (
+                  <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-amber-50/60 to-orange-50/40 backdrop-blur-sm rounded-xl border-l-4 border-l-amber-500">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-amber-600 to-orange-600 text-white shadow-lg">
+                        <Clock className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-amber-800">Cotação em Andamento</p>
+                        <p className="text-xs text-amber-700">
+                          Prazo final: {quote.dataFim} • Aguardando respostas dos fornecedores
                         </p>
                       </div>
                     </div>
-                    <Button
-                      onClick={handleConvertToOrder}
-                      disabled={isUpdating}
-                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 text-base px-6 py-6"
-                    >
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      Converter para Pedido
-                    </Button>
-                  </div>
-                </Card>
-              )}
+                  </Card>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </div>
@@ -713,7 +960,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   const supplierItem = (quote._supplierItems || quote._raw?.quote_supplier_items || []).find(
                     (si: any) => si.supplier_id === fornecedor.id && si.product_id === item.product_id
                   );
-                  
+
                   return {
                     supplierId: fornecedor.id,
                     supplierName: fornecedor.nome,

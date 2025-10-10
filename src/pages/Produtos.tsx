@@ -16,12 +16,15 @@ import { AddProductDialog } from "@/components/forms/AddProductDialog";
 import { EditProductDialog } from "@/components/forms/EditProductDialog";
 import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
 import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
+import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import type { Product } from "@/hooks/useProducts";
+import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
+
 export default function Produtos() {
   const navigate = useNavigate();
   const {
@@ -106,7 +109,8 @@ export default function Produtos() {
   }
   return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
-      <div className="page-container">
+      <PageWrapper>
+        <div className="page-container">
       {/* Header Produtos com Tema Laranja */}
       <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -324,10 +328,16 @@ export default function Produtos() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-background border z-50">
-                      <DropdownMenuItem onClick={() => navigate(`/cotacoes?produto=${encodeURIComponent(product.name)}`)}>
-                        <Quote className="h-4 w-4 mr-2" />
-                        Ver Cotações
-                      </DropdownMenuItem>
+                      <ProductPriceHistoryDialog
+                        productName={product.name}
+                        productId={product.id}
+                        trigger={
+                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <Quote className="h-4 w-4 mr-2" />
+                            Ver Histórico de Preços
+                          </DropdownMenuItem>
+                        }
+                      />
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => setEditingProduct(product)}>
                         <Edit className="h-4 w-4 mr-2" />
@@ -389,14 +399,19 @@ export default function Produtos() {
                   </div>
                 </div>
 
-                <Button 
-                  variant="outline" 
-                  className="w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 text-orange-700 hover:text-orange-800 transition-all duration-300"
-                  onClick={() => navigate(`/cotacoes?produto=${encodeURIComponent(product.name)}`)}
-                >
-                  <Quote className="h-4 w-4 mr-2" />
-                  Ver Cotações
-                </Button>
+                <ProductPriceHistoryDialog
+                  productName={product.name}
+                  productId={product.id}
+                  trigger={
+                    <Button 
+                      variant="outline" 
+                      className="w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 text-orange-700 hover:text-orange-800 transition-all duration-300"
+                    >
+                      <Quote className="h-4 w-4 mr-2" />
+                      Ver Histórico de Preços
+                    </Button>
+                  }
+                />
               </CardContent>
             </Card>)}
         </div> : <Card>
@@ -450,10 +465,16 @@ export default function Produtos() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-background border z-50">
-                              <DropdownMenuItem onClick={() => navigate(`/cotacoes?produto=${encodeURIComponent(product.name)}`)}>
-                                <Quote className="h-4 w-4 mr-2" />
-                                Ver Cotações
-                              </DropdownMenuItem>
+                              <ProductPriceHistoryDialog
+                                productName={product.name}
+                                productId={product.id}
+                                trigger={
+                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <Quote className="h-4 w-4 mr-2" />
+                                    Ver Histórico de Preços
+                                  </DropdownMenuItem>
+                                }
+                              />
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => setEditingProduct(product)}>
                                 <Edit className="h-4 w-4 mr-2" />
@@ -502,6 +523,7 @@ export default function Produtos() {
       <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={() => {}} onCategoryAdded={() => {}} categories={categories} />
 
       <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={() => {}} />
-      </div>
+        </div>
+      </PageWrapper>
     </>;
 }
