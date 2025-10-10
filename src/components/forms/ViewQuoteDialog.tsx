@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import ConvertToOrderDialog from "./ConvertToOrderDialog";
+import { SelectSupplierPerProductDialog } from "./SelectSupplierPerProductDialog";
 
 interface FornecedorParticipante {
   id: string;
@@ -50,6 +51,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   const [editedValues, setEditedValues] = useState<Record<string, number>>({});
   const [convertDialogOpen, setConvertDialogOpen] = useState(false);
   const [selectedSupplierForConversion, setSelectedSupplierForConversion] = useState<{ id: string; name: string } | null>(null);
+  const [showSelectSupplierDialog, setShowSelectSupplierDialog] = useState(false);
+  const [selectedSuppliers, setSelectedSuppliers] = useState<Map<string, { supplierId: string; supplierName: string }>>(new Map());
 
   const handleStartEdit = (productId: string, currentValue: number) => {
     setEditingProductId(productId);
@@ -156,13 +159,95 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   };
 
   const handleConvertToOrder = () => {
-    const bestSupplier = getBestSupplier();
-    if (bestSupplier) {
-      setSelectedSupplierForConversion({
-        id: bestSupplier.id,
-        name: bestSupplier.nome
+    // Verificar se há múltiplos produtos
+    if (products && products.length > 1) {
+      // Preparar dados para seleção individual de fornecedores
+      const productSelections = products.map((item: any) => {
+        const supplierOptions = quote.fornecedoresParticipantes
+          .map(fornecedor => {
+            const supplierItem = (quote._supplierItems || quote._raw?.quote_supplier_items || []).find(
+              (si: any) => si.supplier_id === fornecedor.id && si.product_id === item.product_id
+            );
+            
+            return {
+              supplierId: fornecedor.id,
+              supplierName: fornecedor.nome,
+              price: supplierItem?.valor_oferecido || 0,
+              isBest: false
+            };
+          })
+          .filter(s => s.price > 0);
+
+        // Marcar o melhor preço
+        if (supplierOptions.length > 0) {
+          const minPrice = Math.min(...supplierOptions.map(s => s.price));
+          supplierOptions.forEach(s => {
+            if (s.price === minPrice) {
+              s.isBest = true;
+            }
+          });
+        }
+
+        // Selecionar automaticamente o fornecedor com melhor preço
+        const bestSupplier = supplierOptions.find(s => s.isBest);
+
+        return {
+          productId: item.product_id,
+          productName: item.product_name,
+          quantity: item.quantidade,
+          unit: item.unidade,
+          selectedSupplierId: bestSupplier?.supplierId || '',
+          selectedSupplierName: bestSupplier?.supplierName || '',
+          supplierOptions
+        };
       });
-      setConvertDialogOpen(true);
+
+      setSelectedSuppliers(new Map(productSelections.map((p: any) => [
+        p.productId, 
+        { supplierId: p.selectedSupplierId, supplierName: p.selectedSupplierName }
+      ])));
+      
+      setShowSelectSupplierDialog(true);
+    } else {
+      // Um único produto, usar fluxo simples
+      const bestSupplier = getBestSupplier();
+      if (bestSupplier) {
+        setSelectedSupplierForConversion({
+          id: bestSupplier.id,
+          name: bestSupplier.nome
+        });
+        setConvertDialogOpen(true);
+      }
+    }
+  };
+
+  const handleSupplierSelectionConfirm = (selections: Map<string, { supplierId: string; supplierName: string }>) => {
+    setSelectedSuppliers(selections);
+    setShowSelectSupplierDialog(false);
+    
+    // Agrupar por fornecedor para decidir o fluxo
+    const supplierGroups = new Map<string, string[]>();
+    selections.forEach((selection, productId) => {
+      if (!supplierGroups.has(selection.supplierId)) {
+        supplierGroups.set(selection.supplierId, []);
+      }
+      supplierGroups.get(selection.supplierId)!.push(productId);
+    });
+
+    // Por enquanto, usar apenas o primeiro fornecedor (mais produtos)
+    // Depois podemos implementar múltiplos pedidos
+    const mainSupplier = Array.from(supplierGroups.entries())
+      .sort((a, b) => b[1].length - a[1].length)[0];
+    
+    if (mainSupplier) {
+      const selection = selections.get(mainSupplier[1][0]);
+      if (selection) {
+        setSelectedSupplierForConversion({
+          id: selection.supplierId,
+          name: selection.supplierName
+        });
+        setConvertDialogOpen(true);
+      }
     }
   };
 
@@ -616,6 +701,53 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Select Supplier Per Product Dialog */}
+        {products && products.length > 1 && (
+          <SelectSupplierPerProductDialog
+            open={showSelectSupplierDialog}
+            onOpenChange={setShowSelectSupplierDialog}
+            products={products.map((item: any) => {
+              const supplierOptions = quote.fornecedoresParticipantes
+                .map(fornecedor => {
+                  const supplierItem = (quote._supplierItems || quote._raw?.quote_supplier_items || []).find(
+                    (si: any) => si.supplier_id === fornecedor.id && si.product_id === item.product_id
+                  );
+                  
+                  return {
+                    supplierId: fornecedor.id,
+                    supplierName: fornecedor.nome,
+                    price: supplierItem?.valor_oferecido || 0,
+                    isBest: false
+                  };
+                })
+                .filter(s => s.price > 0);
+
+              if (supplierOptions.length > 0) {
+                const minPrice = Math.min(...supplierOptions.map(s => s.price));
+                supplierOptions.forEach(s => {
+                  if (s.price === minPrice) {
+                    s.isBest = true;
+                  }
+                });
+              }
+
+              const bestSupplier = supplierOptions.find(s => s.isBest);
+              const selection = selectedSuppliers.get(item.product_id);
+
+              return {
+                productId: item.product_id,
+                productName: item.product_name,
+                quantity: item.quantidade,
+                unit: item.unidade,
+                selectedSupplierId: selection?.supplierId || bestSupplier?.supplierId || '',
+                selectedSupplierName: selection?.supplierName || bestSupplier?.supplierName || '',
+                supplierOptions
+              };
+            })}
+            onConfirm={handleSupplierSelectionConfirm}
+          />
+        )}
 
         {/* Convert to Order Dialog */}
         {selectedSupplierForConversion && (

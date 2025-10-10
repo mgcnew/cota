@@ -982,7 +982,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="mt-3 sm:mt-4 text-xs text-gray-500">
-              Meta mensal: R$ 50.000 • Restam R$ 12.500
+              Meta mensal: R$ {(50000).toLocaleString('pt-BR')} • 
+              Restam R$ {Math.max(0, 50000 - metrics.economiaGerada).toLocaleString('pt-BR')} 
+              ({((metrics.economiaGerada / 50000) * 100).toFixed(1)}% atingido)
             </div>
           </CardContent>
         </Card>

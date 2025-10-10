@@ -137,39 +137,73 @@ export function useDashboard() {
     if (!data) return [];
 
     const supplierStats = new Map();
+    
+    // Para cada cotação
     data.quotes.forEach((quote: any) => {
-      quote.quote_suppliers?.forEach((qs: any) => {
-        const supplierId = qs.supplier_id || qs.id || qs.fornecedor_id;
-        const supplierName = qs.supplier_name || qs.name || qs.fornecedor || 'Fornecedor';
-        
-        if (!supplierStats.has(supplierId)) {
-          supplierStats.set(supplierId, {
-            name: supplierName,
-            quotes: 0,
-            totalValue: 0,
-            count: 0
-          });
+      // Agrupar itens por produto
+      const produtosMap = new Map();
+      
+      quote.quote_supplier_items?.forEach((item: any) => {
+        if (!produtosMap.has(item.product_id)) {
+          produtosMap.set(item.product_id, []);
         }
-        const stats = supplierStats.get(supplierId);
-        stats.quotes += 1;
-        
-        // Busca robusta por valor
-        const valor = qs.valor_oferecido || qs.price || qs.valor || qs.preco || 0;
-        if (valor > 0) {
-          stats.totalValue += valor;
-          stats.count += 1;
+        produtosMap.get(item.product_id).push({
+          supplier_id: item.supplier_id,
+          valor: item.valor_oferecido || 0
+        });
+      });
+
+      // Para cada produto, calcular economia por fornecedor
+      produtosMap.forEach((ofertas) => {
+        if (ofertas.length >= 2) {
+          const valores = ofertas.map((o: any) => o.valor).filter((v: number) => v > 0);
+          if (valores.length >= 2) {
+            const maxPreco = Math.max(...valores);
+            
+            ofertas.forEach((oferta: any) => {
+              if (oferta.valor > 0 && oferta.valor < maxPreco) {
+                // Este fornecedor gerou economia neste produto
+                const supplier = quote.quote_suppliers?.find(
+                  (qs: any) => qs.supplier_id === oferta.supplier_id
+                );
+                
+                if (supplier) {
+                  const supplierId = supplier.supplier_id;
+                  const supplierName = supplier.supplier_name;
+                  
+                  if (!supplierStats.has(supplierId)) {
+                    supplierStats.set(supplierId, {
+                      name: supplierName,
+                      quotes: 0,
+                      economiaTotal: 0,
+                      valorTotal: 0
+                    });
+                  }
+                  
+                  const stats = supplierStats.get(supplierId);
+                  stats.quotes += 1;
+                  stats.economiaTotal += maxPreco - oferta.valor;
+                  stats.valorTotal += maxPreco;
+                }
+              }
+            });
+          }
         }
       });
     });
 
     return Array.from(supplierStats.values())
-      .sort((a, b) => b.quotes - a.quotes)
+      .sort((a: any, b: any) => b.quotes - a.quotes)
       .slice(0, 4)
-      .map(supplier => ({
+      .map((supplier: any) => ({
         name: supplier.name,
         quotes: supplier.quotes,
-        avgPrice: supplier.count > 0 ? `R$ ${(supplier.totalValue / supplier.count).toFixed(2)}` : "R$ 0.00",
-        savings: "0%"
+        avgPrice: supplier.valorTotal > 0 
+          ? `R$ ${(supplier.valorTotal / supplier.quotes).toFixed(2)}` 
+          : "R$ 0.00",
+        savings: supplier.valorTotal > 0 
+          ? `${((supplier.economiaTotal / supplier.valorTotal) * 100).toFixed(1)}%`
+          : "0%"
       }));
   }, [data]);
 

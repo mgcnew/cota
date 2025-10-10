@@ -105,6 +105,40 @@ export function useCotacoes() {
         const melhorValor = valoresRespondidos.length > 0 ? Math.min(...valoresRespondidos) : 0;
         const fornecedorMelhorPreco = fornecedoresParticipantes.find(f => f.valorOferecido === melhorValor);
 
+        // Calcular economia real usando quote_supplier_items
+        const calcularEconomia = () => {
+          if (!quoteSupplierItems || quoteSupplierItems.length < 2) {
+            return "0%";
+          }
+
+          // Agrupar por produto
+          const produtosMap = new Map();
+          quoteSupplierItems.forEach((item: any) => {
+            if (!produtosMap.has(item.product_id)) {
+              produtosMap.set(item.product_id, []);
+            }
+            if (item.valor_oferecido > 0) {
+              produtosMap.get(item.product_id).push(item.valor_oferecido);
+            }
+          });
+
+          let economiaTotal = 0;
+          let valorTotal = 0;
+
+          produtosMap.forEach((valores) => {
+            if (valores.length >= 2) {
+              const max = Math.max(...valores);
+              const min = Math.min(...valores);
+              economiaTotal += max - min;
+              valorTotal += max;
+            }
+          });
+
+          return valorTotal > 0 
+            ? `${((economiaTotal / valorTotal) * 100).toFixed(1)}%`
+            : "0%";
+        };
+
         const produtosTexto = items
           .map(item => `${item.product_name} (${item.quantidade}${item.unidade})`)
           .join(", ");
@@ -119,7 +153,7 @@ export function useCotacoes() {
           fornecedores: fornecedoresParticipantes.length,
           melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
           melhorFornecedor: fornecedorMelhorPreco?.nome || "Aguardando",
-          economia: "0%",
+          economia: calcularEconomia(),
           fornecedoresParticipantes,
           // Add raw data for editing
           _raw: quote,
