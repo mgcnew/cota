@@ -80,7 +80,7 @@ export function AppLayout() {
       {/* Main Content Area - Responsivo sem margem fixa */}
       <div className="flex flex-col w-full min-h-screen relative">
         {/* Header Fixo Sempre Compacto - Respeitando espaço do menu */}
-        <header className="fixed top-2 right-2 left-28 z-40 h-12 bg-white/20 backdrop-blur-2xl shadow-2xl rounded-2xl border border-white/40 ring-1 ring-white/20 transition-all duration-500 ease-out">
+        <header className="fixed top-2 right-2 left-2 md:left-28 z-40 h-12 bg-white/20 backdrop-blur-2xl shadow-2xl rounded-2xl border border-white/40 ring-1 ring-white/20 transition-all duration-500 ease-out">
           {/* Efeito de vidro sempre aplicado */}
           <>
             {/* Gradiente de fundo para efeito vidro */}
@@ -200,7 +200,7 @@ export function AppLayout() {
         </header>
 
         {/* Main Content - Responsivo com padding para header fixo e mobile navigation */}
-        <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative pt-16 md:pl-24">
+        <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative pt-16 pl-0 md:pl-24">
           <div className="min-h-full bg-white/40 backdrop-blur-sm w-full max-w-full">
             <div className="w-full max-w-full overflow-x-hidden">
               <Outlet />

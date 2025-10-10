@@ -214,7 +214,7 @@ export function AppSidebar() {
       {/* Desktop Sidebar Sempre Flutuante - Estilo Canva */}
       <div className="hidden md:flex fixed z-50 w-20 left-4 top-2 bottom-4 transition-all duration-500 ease-out">
         {/* Container sempre flutuante */}
-        <div className="w-full flex flex-col bg-white/98 backdrop-blur-3xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-gray-200/60 hover:shadow-[0_12px_48px_rgba(0,0,0,0.15)] hover:border-gray-300/70 hover:bg-white transition-all duration-500">
+        <div className="w-full flex flex-col bg-white/98 backdrop-blur-3xl rounded-2xl shadow-2xl border border-gray-200/60 hover:shadow-3xl hover:border-gray-300/70 hover:bg-white transition-all duration-500">
           {/* Efeitos de vidro sempre aplicados */}
           <>
             {/* Efeito de vidro refinado */}

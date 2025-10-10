@@ -7,7 +7,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import type { Quote, FornecedorParticipante } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown } from "lucide-react";
+import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -630,73 +630,131 @@ export default function Cotacoes() {
               </CardContent>
             </Card>;
       })}
-        </div> : <Card>
+        </div> : <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <div className="overflow-hidden">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Cotação</TableHead>
-                    <TableHead className="hidden md:table-cell">Produto</TableHead>
-                    <TableHead className="hidden lg:table-cell">Período</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Melhor Preço</TableHead>
-                    <TableHead className="hidden sm:table-cell">Fornecedores</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                <TableHeader className="bg-gradient-to-r from-teal-50/80 to-cyan-50/80 border-b border-teal-100">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-semibold text-teal-900 py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Cotação
+                      </div>
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-teal-900 py-4">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        Produto
+                      </div>
+                    </TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-teal-900 py-4">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Período
+                      </div>
+                    </TableHead>
+                    <TableHead className="font-semibold text-teal-900 py-4">Status</TableHead>
+                    <TableHead className="font-semibold text-teal-900 py-4">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        Melhor Preço
+                      </div>
+                    </TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-teal-900 py-4">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4" />
+                        Fornecedores
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-right font-semibold text-teal-900 py-4 px-6">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map(cotacao => <TableRow key={cotacao.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <FileText className="h-4 w-4 text-primary" />
+                  {paginatedData.items.map((cotacao, index) => (
+                    <TableRow 
+                      key={cotacao.id}
+                      className={cn(
+                        "hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-cyan-50/30 transition-all duration-200 border-b border-gray-100/60",
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                      )}
+                    >
+                      <TableCell className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 border border-teal-200/50">
+                            <FileText className="h-4 w-4 text-teal-600" />
                           </div>
-                          <div>
-                            <div className="font-medium font-mono text-sm">
-                              {cotacao.id.length > 12 
-                                ? `${cotacao.id.substring(0, 6)}...${cotacao.id.substring(cotacao.id.length - 4)}`
-                                : cotacao.id
-                              }
+                          <div className="min-w-0">
+                            <div className="font-semibold font-mono text-sm text-gray-900 truncate">
+                              #{cotacao.id.substring(0, 4)}
                             </div>
-                            <div className="text-xs text-muted-foreground md:hidden">{cotacao.produto}</div>
+                            <div className="text-xs text-gray-500 md:hidden mt-1 truncate">{cotacao.produto}</div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <div>
-                          <div className="font-medium">{cotacao.produto}</div>
-                          <div className="text-xs text-muted-foreground">{cotacao.quantidade}</div>
+                      
+                      <TableCell className="hidden md:table-cell py-4">
+                        <div className="min-w-0 max-w-[150px]">
+                          <div className="font-medium text-gray-900 truncate">{cotacao.produto}</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
+                              <Package className="h-3 w-3" />
+                              {cotacao.quantidade}
+                            </span>
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        <div className="text-sm">
-                          <div>{cotacao.dataInicio}</div>
-                          <div className="text-muted-foreground">{cotacao.dataFim}</div>
+                      
+                      <TableCell className="hidden lg:table-cell py-4">
+                        <div className="text-sm space-y-1">
+                          <div className="flex items-center gap-1 text-gray-900">
+                            <Calendar className="h-3 w-3 text-teal-600" />
+                            {cotacao.dataInicio}
+                          </div>
+                          <div className="flex items-center gap-1 text-gray-500">
+                            <Calendar className="h-3 w-3" />
+                            {cotacao.dataFim}
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      
+                      <TableCell className="py-4">
                         {getStatusBadge(cotacao.status)}
                       </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-semibold text-success">{cotacao.melhorPreco}</div>
-                          <div className="text-xs text-muted-foreground">{cotacao.melhorFornecedor}</div>
-                          <div className="text-xs text-success">-{cotacao.economia}</div>
+                      <TableCell className="py-4">
+                        <div className="space-y-1">
+                          <div className="font-bold text-green-600 text-base">{cotacao.melhorPreco}</div>
+                          <div className="text-xs text-gray-600 truncate max-w-[100px]">{cotacao.melhorFornecedor}</div>
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium">
+                            <DollarSign className="h-3 w-3" />
+                            -{cotacao.economia}
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        <Badge variant="outline">{cotacao.fornecedores}</Badge>
+                      
+                      <TableCell className="hidden sm:table-cell py-4">
+                        <Badge 
+                          variant="outline" 
+                          className="bg-blue-50 border-blue-200 text-blue-700 font-medium"
+                        >
+                          <Building2 className="h-3 w-3 mr-1" />
+                          {cotacao.fornecedores}
+                        </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-4 px-6">
                         <div className="flex justify-end">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200"
+                              >
                                 <MoreVertical className="h-4 w-4" />
+                                <span className="sr-only">Abrir menu de ações</span>
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="w-48">
                               <ViewQuoteDialog 
                                 quote={cotacao} 
                                 onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
@@ -712,10 +770,12 @@ export default function Cotacoes() {
                                   observations
                                 })}
                                 isUpdating={isUpdating}
-                                trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  Visualizar
-                                </DropdownMenuItem>} 
+                                trigger={
+                                  <DropdownMenuItem onSelect={e => e.preventDefault()} className="cursor-pointer">
+                                    <Eye className="h-4 w-4 mr-2 text-blue-600" />
+                                    <span>Visualizar</span>
+                                  </DropdownMenuItem>
+                                } 
                               />
                               
                               {/* Só permite editar se não estiver concluída */}
@@ -748,11 +808,25 @@ export default function Cotacoes() {
                           </DropdownMenu>
                         </div>
                       </TableCell>
-                    </TableRow>)}
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>
-            <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
+            
+            {/* Paginação com melhor espaçamento */}
+            <div className="border-t border-gray-100 bg-gray-50/30 px-6 py-4">
+              <DataPagination 
+                currentPage={paginatedData.pagination.currentPage} 
+                totalPages={paginatedData.pagination.totalPages} 
+                itemsPerPage={paginatedData.pagination.itemsPerPage} 
+                totalItems={paginatedData.pagination.totalItems} 
+                onPageChange={paginatedData.pagination.goToPage} 
+                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
+                startIndex={paginatedData.pagination.startIndex} 
+                endIndex={paginatedData.pagination.endIndex} 
+              />
+            </div>
           </CardContent>
         </Card>}
 

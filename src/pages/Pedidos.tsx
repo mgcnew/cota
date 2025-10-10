@@ -11,7 +11,7 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
-import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package } from "lucide-react";
+import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar } from "lucide-react";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import EditPedidoDialog from "@/components/forms/EditPedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
@@ -419,80 +419,178 @@ export default function Pedidos() {
           </div>
 
           {/* Pedidos View */}
-          {viewMode === "table" ? <Card>
+          {viewMode === "table" ? <Card className="overflow-hidden">
               <CardContent className="p-0">
-                <div className="overflow-x-auto">
+                <div className="overflow-hidden">
                   <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Pedido</TableHead>
-                        <TableHead>Fornecedor</TableHead>
-                        <TableHead>Produtos</TableHead>
-                        <TableHead>Data Entrega</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Valor</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
+                    <TableHeader className="bg-gradient-to-r from-purple-50/80 to-pink-50/80 border-b border-purple-100">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="font-semibold text-purple-900 py-4 px-6">
+                          <div className="flex items-center gap-2">
+                            <ShoppingCart className="h-4 w-4" />
+                            Pedido
+                          </div>
+                        </TableHead>
+                        <TableHead className="font-semibold text-purple-900 py-4">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4" />
+                            Fornecedor
+                          </div>
+                        </TableHead>
+                        <TableHead className="hidden md:table-cell font-semibold text-purple-900 py-4">
+                          <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            Produtos
+                          </div>
+                        </TableHead>
+                        <TableHead className="hidden lg:table-cell font-semibold text-purple-900 py-4">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            Data Entrega
+                          </div>
+                        </TableHead>
+                        <TableHead className="font-semibold text-purple-900 py-4">Status</TableHead>
+                        <TableHead className="text-right font-semibold text-purple-900 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <DollarSign className="h-4 w-4" />
+                            Valor
+                          </div>
+                        </TableHead>
+                        <TableHead className="text-right font-semibold text-purple-900 py-4 px-6">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedData.items.map(pedido => <TableRow key={pedido.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <ShoppingCart className="h-4 w-4 text-primary" />
+                      {paginatedData.items.map((pedido, index) => (
+                        <TableRow 
+                          key={pedido.id}
+                          className={cn(
+                            "hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/30 transition-all duration-200 border-b border-gray-100/60",
+                            index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                          )}
+                        >
+                          <TableCell className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center flex-shrink-0 border border-purple-200/50">
+                                <ShoppingCart className="h-4 w-4 text-purple-600" />
                               </div>
-                              <div>
-                                
-                                <div className="text-xs text-muted-foreground">{pedido.dataPedido}</div>
+                              <div className="min-w-0">
+                                <div className="font-semibold font-mono text-sm text-gray-900 truncate">
+                                  #{pedido.id.substring(0, 4)}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {pedido.dataPedido}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="font-medium">{pedido.fornecedor}</div>
-                            <div className="text-xs text-muted-foreground">{pedido.itens} itens</div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm max-w-xs truncate">
-                              {pedido.produtos.slice(0, 2).join(", ")}
-                              {pedido.produtos.length > 2 && ` +${pedido.produtos.length - 2}`}
+                          
+                          <TableCell className="py-4">
+                            <div className="min-w-0">
+                              <div className="font-medium text-gray-900 truncate">{pedido.fornecedor}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
+                                  <Package className="h-3 w-3" />
+                                  {pedido.itens} itens
+                                </span>
+                              </div>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="text-sm">{pedido.dataEntrega}</div>
+                          
+                          <TableCell className="hidden md:table-cell py-4">
+                            <div className="min-w-0">
+                              <div className="text-sm text-gray-900 truncate max-w-[150px]">
+                                {pedido.produtos[0]}
+                                {pedido.produtos.length > 1 && (
+                                  <span className="text-gray-500"> +{pedido.produtos.length - 1}</span>
+                                )}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {pedido.produtos.length} produto{pedido.produtos.length !== 1 ? 's' : ''}
+                              </div>
+                            </div>
                           </TableCell>
-                          <TableCell>
+                          
+                          <TableCell className="hidden lg:table-cell py-4">
+                            <div className="text-sm space-y-1">
+                              <div className="flex items-center gap-1 text-gray-900">
+                                <Truck className="h-3 w-3 text-purple-600" />
+                                {pedido.dataEntrega}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Entrega prevista
+                              </div>
+                            </div>
+                          </TableCell>
+                          
+                          <TableCell className="py-4">
                             {getStatusBadge(pedido.status)}
                           </TableCell>
-                          <TableCell className="text-right">
-                            <div className="font-semibold">{pedido.total}</div>
+                          
+                          <TableCell className="text-right py-4">
+                            <div className="font-bold text-green-600 text-base">{pedido.total}</div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="py-4 px-6">
                             <div className="flex justify-end gap-1">
-                              <Button variant="ghost" size="sm" onClick={() => {
-                        setSelectedPedido(pedido);
-                        setViewDialogOpen(true);
-                      }}>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedPedido(pedido);
+                                  setViewDialogOpen(true);
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200"
+                              >
                                 <Eye className="h-4 w-4" />
+                                <span className="sr-only">Visualizar pedido</span>
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => {
-                        setSelectedPedido(pedido);
-                        setEditDialogOpen(true);
-                      }}>
+                              
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedPedido(pedido);
+                                  setEditDialogOpen(true);
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-amber-100 hover:text-amber-700 transition-colors duration-200"
+                              >
                                 <Edit className="h-4 w-4" />
+                                <span className="sr-only">Editar pedido</span>
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => {
-                        setSelectedPedido(pedido);
-                        setDeleteDialogOpen(true);
-                      }}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
+                              
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedPedido(pedido);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-700 transition-colors duration-200"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Excluir pedido</span>
                               </Button>
                             </div>
                           </TableCell>
-                        </TableRow>)}
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
-                <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
+                
+                {/* Paginação com melhor espaçamento */}
+                <div className="border-t border-gray-100 bg-gray-50/30 px-6 py-4">
+                  <DataPagination 
+                    currentPage={paginatedData.pagination.currentPage} 
+                    totalPages={paginatedData.pagination.totalPages} 
+                    itemsPerPage={paginatedData.pagination.itemsPerPage} 
+                    totalItems={paginatedData.pagination.totalItems} 
+                    onPageChange={paginatedData.pagination.goToPage} 
+                    onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
+                    startIndex={paginatedData.pagination.startIndex} 
+                    endIndex={paginatedData.pagination.endIndex} 
+                  />
+                </div>
               </CardContent>
             </Card> : <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {paginatedData.items.map(pedido => {

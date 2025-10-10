@@ -326,41 +326,34 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
 export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
   return (
-    <div className="relative group">
+    <div className="relative group mx-2">
       <Button
         variant="ghost"
         onClick={onClick}
-        className="relative w-full justify-start text-sm bg-gradient-to-r from-slate-50/80 to-white/80 dark:from-slate-800/80 dark:to-slate-700/80 border border-slate-200/60 dark:border-slate-600/60 hover:border-blue-300/60 dark:hover:border-blue-400/60 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm rounded-xl h-11 px-4"
+        className="relative w-full justify-start text-sm bg-gradient-to-r from-white/90 to-white/95 border border-gray-200/50 hover:border-gray-300/60 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm rounded-lg h-9 px-3 overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 dark:from-blue-400/10 dark:to-purple-400/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/8 to-purple-500/8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
         <div className="relative flex items-center w-full">
-          <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 mr-3 group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-300">
-            <Search className="h-4 w-4 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+          <div className="p-1 rounded-md bg-gradient-to-br from-blue-500/15 to-purple-500/15 mr-2 group-hover:from-blue-500/25 group-hover:to-purple-500/25 transition-all duration-300">
+            <Search className="h-3.5 w-3.5 text-blue-600 group-hover:scale-105 transition-transform duration-300" />
           </div>
           
           <div className="flex-1 text-left">
-            <span className="hidden md:inline-flex text-slate-600 dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-slate-100 font-medium transition-colors duration-300">
+            <span className="hidden md:inline-flex text-gray-600 group-hover:text-gray-800 font-medium text-xs transition-colors duration-300">
               Buscar cotações, produtos, fornecedores...
             </span>
-            <span className="md:hidden text-slate-600 dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-slate-100 font-medium transition-colors duration-300">
+            <span className="md:hidden text-gray-600 group-hover:text-gray-800 font-medium text-xs transition-colors duration-300">
               Buscar...
             </span>
           </div>
           
-          <div className="hidden lg:flex items-center gap-1 ml-auto">
-            <kbd className="inline-flex h-6 w-6 select-none items-center justify-center rounded-md border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[11px] font-medium text-slate-500 dark:text-slate-400 shadow-sm group-hover:border-blue-300/60 dark:group-hover:border-blue-400/60 transition-all duration-300">
-              ⌘
-            </kbd>
-            <kbd className="inline-flex h-6 w-6 select-none items-center justify-center rounded-md border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[11px] font-medium text-slate-500 dark:text-slate-400 shadow-sm group-hover:border-blue-300/60 dark:group-hover:border-blue-400/60 transition-all duration-300">
-              K
-            </kbd>
-          </div>
+
         </div>
       </Button>
       
       {/* Subtle glow effect */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 -z-10" />
+      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/15 to-purple-500/15 opacity-0 group-hover:opacity-20 blur-lg transition-opacity duration-500 -z-10" />
     </div>
   );
 }
