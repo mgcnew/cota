@@ -22,9 +22,8 @@ const pageVariants = {
 };
 
 const pageTransition = {
-  type: "tween",
-  ease: [0.4, 0.0, 0.2, 1],
   duration: 0.3,
+  ease: [0.4, 0.0, 0.2, 1] as const,
 };
 
 export function PageTransition({ children }: PageTransitionProps) {
