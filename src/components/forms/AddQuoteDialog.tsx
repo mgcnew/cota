@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -114,11 +113,16 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
   const [activeTab, setActiveTab] = useState("produtos");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const productsContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Estados para o novo formulário de produto único
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [newProductQuantity, setNewProductQuantity] = useState("");
+  const [newProductUnit, setNewProductUnit] = useState("");
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
     defaultValues: {
-      produtos: [{ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" }],
+      produtos: [],
       dataInicio: new Date(),
       dataFim: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       fornecedoresIds: [],
@@ -131,8 +135,20 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
     name: "produtos",
   });
 
-  const handleAddProduct = () => {
-    append({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" });
+  const handleAddNewProduct = () => {
+    if (selectedProduct && newProductQuantity && newProductUnit) {
+      append({ 
+        produtoId: selectedProduct.id, 
+        produtoNome: selectedProduct.name, 
+        quantidade: newProductQuantity, 
+        unidade: newProductUnit 
+      });
+      
+      // Limpar o formulário após adicionar
+      setSelectedProduct(null);
+      setNewProductQuantity("");
+      setNewProductUnit("");
+    }
   };
 
   useEffect(() => {
@@ -344,35 +360,94 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
         )}
       </DialogTrigger>
       <DialogContent className="w-[95vw] sm:w-[90vw] max-w-[1000px] h-[90vh] sm:h-[85vh] max-h-[900px] p-0 gap-0 overflow-hidden border-teal-200/40 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-300">
-        {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-teal-100/60 bg-gradient-to-br from-teal-50/80 via-cyan-50/60 to-blue-50/40 backdrop-blur-sm relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-blue-500/5"></div>
+        <DialogHeader className="relative px-4 sm:px-6 py-3 bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 border-b border-teal-100/60 overflow-hidden">
+          <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 rounded-full -translate-y-12 -translate-x-12"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 rounded-full -translate-y-16 translate-x-16"></div>
           
           <div className="relative z-10">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 text-white shadow-lg shadow-teal-500/25 ring-2 ring-white/20 flex-shrink-0">
-                <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
+            {/* Compact Header */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 text-white shadow-lg shadow-teal-500/25 ring-2 ring-white/20 flex-shrink-0">
+                  <FileText className="h-5 w-5" />
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <DialogTitle className="text-lg font-bold bg-gradient-to-r from-teal-900 via-cyan-800 to-blue-800 bg-clip-text text-transparent">
+                    Nova Cotação
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-600/80 text-xs">
+                    {Math.round(progress)}% concluído
+                  </DialogDescription>
+                </div>
+
+                {/* Navigation Controls - Moved to left side */}
+                <div className="flex items-center gap-2 sm:gap-3">
+                  {currentTabIndex > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePrevious}
+                      className="border-gray-300 hover:bg-gray-100 h-8 px-3"
+                    >
+                      <ChevronLeft className="h-3 w-3 mr-1" />
+                      <span className="hidden sm:inline">Voltar</span>
+                    </Button>
+                  )}
+                  
+                  {currentTabIndex < tabs.length - 1 ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleNext}
+                      disabled={!canProceedToNext()}
+                      className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
+                    >
+                      <span className="hidden sm:inline">Próximo</span>
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={isSubmitting}
+                      className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
+                      form="quote-form"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
+                          <span className="hidden sm:inline">Criando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-3 w-3 mr-1" />
+                          <span className="hidden sm:inline">Criar</span>
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
-              
-              <div className="flex-1 min-w-0">
-                <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-teal-900 via-cyan-800 to-blue-800 bg-clip-text text-transparent">
-                  Nova Cotação
-                </DialogTitle>
-                <DialogDescription className="text-gray-600/80 text-sm mt-1">
-                  Crie uma nova cotação seguindo os passos abaixo
-                </DialogDescription>
-              </div>
+
+              {/* Close Button - Isolated on the right */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setOpen(false)}
+                className="text-gray-600 hover:bg-gray-100 h-8 w-8 p-0 flex-shrink-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
             
-            <div className="mt-3 sm:mt-4 space-y-2">
-              <div className="flex justify-between items-center text-sm">
-                <span className="font-medium text-teal-900">Progresso da Cotação</span>
-                <span className="font-bold text-teal-700">{Math.round(progress)}% concluído</span>
-              </div>
+            {/* Compact Progress Bar */}
+            <div className="mt-2">
               <Progress 
                 value={progress} 
-                className="h-3 bg-teal-100/60 [&>div]:bg-gradient-to-r [&>div]:from-teal-500 [&>div]:to-cyan-500"
+                className="h-2 bg-teal-100/60 [&>div]:bg-gradient-to-r [&>div]:from-teal-500 [&>div]:to-cyan-500"
               />
             </div>
           </div>
@@ -388,10 +463,10 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
         ) : (
           <div className="flex flex-col h-full overflow-hidden">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
-                {/* Tab Navigation */}
-                <div className="flex-shrink-0 px-3 sm:px-6 py-3 border-b border-teal-100/60 bg-gradient-to-r from-teal-50/40 to-cyan-50/30 backdrop-blur-sm overflow-x-auto scrollbar-thin">
-                  <div className="flex space-x-2 bg-white/80 backdrop-blur-sm rounded-2xl p-1.5 shadow-lg border border-teal-200/40 min-w-max sm:min-w-0">
+              <form id="quote-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
+                {/* Compact Tab Navigation */}
+                <div className="flex-shrink-0 px-3 sm:px-6 py-2 border-b border-teal-100/60 bg-gradient-to-r from-teal-50/40 to-cyan-50/30 backdrop-blur-sm">
+                  <div className="flex space-x-1 bg-white/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-teal-200/40">
                     {tabs.map((tab) => {
                       const Icon = tab.icon;
                       const status = getTabStatus(tab.id);
@@ -401,7 +476,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                           type="button"
                           onClick={() => setActiveTab(tab.id)}
                           className={cn(
-                            "flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-300 relative overflow-hidden group",
+                            "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 relative overflow-hidden group",
                             status === "current" && "bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-xl shadow-teal-500/25 scale-105",
                             status === "completed" && "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg",
                             status === "pending" && "bg-gray-100 text-gray-500 hover:bg-teal-50 hover:text-teal-700"
@@ -410,14 +485,14 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                           
                           <div className={cn(
-                            "flex items-center justify-center w-6 h-6 rounded-lg transition-all",
+                            "flex items-center justify-center w-4 h-4 rounded transition-all",
                             status === "current" && "bg-white/20",
                             status === "completed" && "bg-white/20"
                           )}>
                             {status === "completed" ? (
-                              <Check className="h-4 w-4 text-white" />
+                              <Check className="h-3 w-3 text-white" />
                             ) : (
-                              <Icon className="h-4 w-4" />
+                              <Icon className="h-3 w-3" />
                             )}
                           </div>
                           
@@ -428,7 +503,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                   </div>
                 </div>
 
-                {/* Tab Content with Animations */}
+                {/* Content Area - Now with more space */}
                 <div className="flex-1 overflow-hidden">
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -442,161 +517,156 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
                         {/* Produtos Tab */}
                         <TabsContent value="produtos" className="h-full m-0">
-                          <ScrollArea className="h-full">
-                            <div className="p-4 sm:p-6 space-y-4">
+                          <div className="h-full p-4 sm:p-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+                              {/* Formulário de Adição - Lado Esquerdo */}
+                              <Card className="border-teal-100 bg-gradient-to-br from-white to-teal-50/20 shadow-sm h-fit">
+                                <CardHeader className="pb-3 border-b border-teal-100/60">
+                                  <CardTitle className="flex items-center gap-2 text-teal-900">
+                                    <Plus className="h-5 w-5 text-teal-600" />
+                                    Adicionar Produto
+                                  </CardTitle>
+                                </CardHeader>
+                                 <CardContent className="pt-4 space-y-4">
+                                  {/* Seletor de Produto */}
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Produto *</label>
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          role="combobox"
+                                          className="w-full justify-between border-teal-200 focus:ring-teal-500/20"
+                                        >
+                                          {selectedProduct ? selectedProduct.name : "Selecionar produto..."}
+                                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-full p-0 border-teal-200" align="start">
+                                        <Command>
+                                          <CommandInput placeholder="Buscar produto..." />
+                                          <CommandList>
+                                            <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
+                                            <CommandGroup>
+                                              {products.map((product) => (
+                                                <CommandItem
+                                                  key={product.id}
+                                                  value={product.name}
+                                                  onSelect={() => setSelectedProduct(product)}
+                                                >
+                                                  <Check
+                                                    className={cn(
+                                                      "mr-2 h-4 w-4",
+                                                      selectedProduct?.id === product.id ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                  />
+                                                  {product.name}
+                                                </CommandItem>
+                                              ))}
+                                            </CommandGroup>
+                                          </CommandList>
+                                        </Command>
+                                      </PopoverContent>
+                                    </Popover>
+                                  </div>
+
+                                  {/* Quantidade e Unidade */}
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-700 mb-2 block">Quantidade *</label>
+                                      <Input 
+                                        placeholder="Ex: 500" 
+                                        type="number" 
+                                        value={newProductQuantity}
+                                        onChange={(e) => setNewProductQuantity(e.target.value)}
+                                        className="border-teal-200 focus:border-teal-500 focus:ring-teal-500/20"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-gray-700 mb-2 block">Unidade *</label>
+                                      <Select value={newProductUnit} onValueChange={setNewProductUnit}>
+                                        <SelectTrigger className="border-teal-200">
+                                          <SelectValue placeholder="Selecione" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="kg">kg</SelectItem>
+                                          <SelectItem value="g">g</SelectItem>
+                                          <SelectItem value="un">un</SelectItem>
+                                          <SelectItem value="cx">cx</SelectItem>
+                                          <SelectItem value="pct">pct</SelectItem>
+                                          <SelectItem value="l">l</SelectItem>
+                                          <SelectItem value="ml">ml</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
+
+                                  {/* Botão Adicionar */}
+                                  <Button
+                                    type="button"
+                                    onClick={handleAddNewProduct}
+                                    disabled={!selectedProduct || !newProductQuantity || !newProductUnit}
+                                    className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg disabled:opacity-50"
+                                  >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Adicionar à Lista
+                                  </Button>
+                                </CardContent>
+                              </Card>
+
+                              {/* Lista de Produtos - Lado Direito */}
                               <Card className="border-teal-100 bg-gradient-to-br from-white to-teal-50/20 shadow-sm">
                                 <CardHeader className="pb-3 border-b border-teal-100/60">
                                   <CardTitle className="flex items-center gap-2 text-teal-900">
                                     <Package className="h-5 w-5 text-teal-600" />
-                                    Produtos da Cotação
+                                    Produtos Adicionados ({fields.length})
                                   </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-4">
-                                  <Button
-                                    type="button"
-                                    autoFocus
-                                    onClick={handleAddProduct}
-                                    className="w-full mb-4 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg"
-                                  >
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Adicionar Produto
-                                  </Button>
-
-                                  <div ref={productsContainerRef} className="space-y-3">
-                                    {fields.map((field, index) => (
-                                      <Card key={field.id} className="border-teal-200 hover:border-teal-400 transition-all">
-                                        <div className="h-1 bg-gradient-to-r from-teal-500 to-cyan-500"></div>
-                                        <CardContent className="p-4 space-y-3">
-                                          <div className="flex items-center justify-between">
-                                            <h4 className="font-semibold text-gray-900">Produto {index + 1}</h4>
-                                            {fields.length > 1 && (
-                                              <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => remove(index)}
-                                                className="text-red-600 hover:bg-red-50"
-                                              >
-                                                <Trash2 className="h-4 w-4" />
-                                              </Button>
-                                            )}
-                                          </div>
-
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <FormField
-                                              control={form.control}
-                                              name={`produtos.${index}.produtoId`}
-                                              render={({ field: formField }) => (
-                                                <FormItem>
-                                                  <FormLabel>Produto *</FormLabel>
-                                                  <Popover>
-                                                    <PopoverTrigger asChild>
-                                                      <FormControl>
-                                                        <Button
-                                                          variant="outline"
-                                                          role="combobox"
-                                                          className={cn(
-                                                            "w-full justify-between border-teal-200 focus:ring-teal-500/20",
-                                                            !formField.value && "text-muted-foreground"
-                                                          )}
-                                                        >
-                                                          {formField.value
-                                                            ? products.find((p) => p.id === formField.value)?.name
-                                                            : "Selecionar produto..."}
-                                                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                        </Button>
-                                                      </FormControl>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-full p-0 border-teal-200" align="start">
-                                                      <Command>
-                                                        <CommandInput placeholder="Buscar produto..." />
-                                                        <CommandList>
-                                                          <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
-                                                          <CommandGroup>
-                                                            {products.map((product) => (
-                                                              <CommandItem
-                                                                key={product.id}
-                                                                value={product.name}
-                                                                onSelect={() => {
-                                                                  form.setValue(`produtos.${index}.produtoId`, product.id);
-                                                                  form.setValue(`produtos.${index}.produtoNome`, product.name);
-                                                                }}
-                                                              >
-                                                                <Check
-                                                                  className={cn(
-                                                                    "mr-2 h-4 w-4",
-                                                                    product.id === formField.value ? "opacity-100" : "opacity-0"
-                                                                  )}
-                                                                />
-                                                                {product.name}
-                                                              </CommandItem>
-                                                            ))}
-                                                          </CommandGroup>
-                                                        </CommandList>
-                                                      </Command>
-                                                    </PopoverContent>
-                                                  </Popover>
-                                                  <FormMessage />
-                                                </FormItem>
-                                              )}
-                                            />
-
-                                            <div className="grid grid-cols-2 gap-3">
-                                              <FormField
-                                                control={form.control}
-                                                name={`produtos.${index}.quantidade`}
-                                                render={({ field: formField }) => (
-                                                  <FormItem>
-                                                    <FormLabel>Quantidade *</FormLabel>
-                                                    <FormControl>
-                                                      <Input 
-                                                        placeholder="Ex: 500" 
-                                                        type="number" 
-                                                        className="border-teal-200 focus:border-teal-500 focus:ring-teal-500/20"
-                                                        {...formField} 
-                                                      />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                  </FormItem>
-                                                )}
-                                              />
-
-                                              <FormField
-                                                control={form.control}
-                                                name={`produtos.${index}.unidade`}
-                                                render={({ field: formField }) => (
-                                                  <FormItem>
-                                                    <FormLabel>Unidade *</FormLabel>
-                                                    <Select onValueChange={formField.onChange} defaultValue={formField.value}>
-                                                      <FormControl>
-                                                        <SelectTrigger className="border-teal-200">
-                                                          <SelectValue placeholder="Selecione" />
-                                                        </SelectTrigger>
-                                                      </FormControl>
-                                                      <SelectContent>
-                                                        <SelectItem value="kg">kg</SelectItem>
-                                                        <SelectItem value="g">g</SelectItem>
-                                                        <SelectItem value="un">un</SelectItem>
-                                                        <SelectItem value="cx">cx</SelectItem>
-                                                        <SelectItem value="pct">pct</SelectItem>
-                                                        <SelectItem value="l">l</SelectItem>
-                                                        <SelectItem value="ml">ml</SelectItem>
-                                                      </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                  </FormItem>
-                                                )}
-                                              />
-                                            </div>
-                                          </div>
-                                        </CardContent>
-                                      </Card>
-                                    ))}
-                                  </div>
+                                  {fields.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                      <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                                      <p>Nenhum produto adicionado ainda</p>
+                                      <p className="text-sm">Use o formulário ao lado para adicionar produtos</p>
+                                    </div>
+                                  ) : (
+                                    <ScrollArea className="h-[400px]">
+                                      <div className="space-y-3">
+                                        {fields.map((field, index) => (
+                                          <Card key={field.id} className="border-teal-200 hover:border-teal-400 transition-all">
+                                            <div className="h-1 bg-gradient-to-r from-teal-500 to-cyan-500"></div>
+                                            <CardContent className="p-3">
+                                              <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                  <h4 className="font-semibold text-gray-900 text-sm">
+                                                    {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
+                                                  </h4>
+                                                  <div className="text-sm text-gray-600 mt-1">
+                                                    <span className="font-medium">{form.watch(`produtos.${index}.quantidade`)}</span>
+                                                    <span className="mx-1">×</span>
+                                                    <span>{form.watch(`produtos.${index}.unidade`)}</span>
+                                                  </div>
+                                                </div>
+                                                <Button
+                                                  type="button"
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => remove(index)}
+                                                  className="text-red-600 hover:bg-red-50 h-8 w-8 p-0"
+                                                >
+                                                  <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                              </div>
+                                            </CardContent>
+                                          </Card>
+                                        ))}
+                                      </div>
+                                    </ScrollArea>
+                                  )}
                                 </CardContent>
                               </Card>
                             </div>
-                          </ScrollArea>
+                          </div>
                         </TabsContent>
 
                         {/* Período Tab */}
@@ -787,231 +857,277 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                         </TabsContent>
 
                         {/* Fornecedores Tab */}
-                        <TabsContent value="fornecedores" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 m-0">
-                          <Card>
-                            <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <Building2 className="h-5 w-5 text-green-600" />
-                                Fornecedores Participantes
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                              <p className="text-sm text-gray-600">
-                                Selecione os fornecedores que participarão desta cotação
-                              </p>
+                        <TabsContent value="fornecedores" className="flex-1 overflow-y-auto p-3 sm:p-4 m-0">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+                            {/* Formulário de Adição de Fornecedores - Lado Esquerdo */}
+                            <Card className="h-fit">
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <Building2 className="h-5 w-5 text-green-600" />
+                                  Adicionar Fornecedores
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-4">
+                                <p className="text-sm text-gray-600">
+                                  Selecione os fornecedores que participarão desta cotação
+                                </p>
 
-                              <FormField
-                                control={form.control}
-                                name="fornecedoresIds"
-                                render={() => (
-                                  <FormItem>
-                                    <FormLabel>Buscar e Adicionar Fornecedores *</FormLabel>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <FormControl>
-                                          <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            className="w-full justify-between"
-                                          >
-                                            Buscar fornecedores...
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                          </Button>
-                                        </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-full p-0" align="start">
-                                        <Command>
-                                          <CommandInput 
-                                            placeholder="Digite o nome do fornecedor..." 
-                                            value={supplierSearch}
-                                            onValueChange={setSupplierSearch}
-                                          />
-                                          <CommandList>
-                                            <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
-                                            <CommandGroup>
-                                              {filteredSuppliers.map((supplier) => (
-                                                <CommandItem
-                                                  key={supplier.id}
-                                                  value={supplier.name}
-                                                  onSelect={() => handleSupplierSelect(supplier)}
-                                                >
-                                                  <Plus className="mr-2 h-4 w-4 text-green-600" />
-                                                  {supplier.name}
-                                                </CommandItem>
-                                              ))}
-                                            </CommandGroup>
-                                          </CommandList>
-                                        </Command>
-                                      </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                                <FormField
+                                  control={form.control}
+                                  name="fornecedoresIds"
+                                  render={() => (
+                                    <FormItem>
+                                      <FormLabel>Buscar e Adicionar Fornecedores *</FormLabel>
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <Button
+                                              variant="outline"
+                                              role="combobox"
+                                              className="w-full justify-between"
+                                            >
+                                              Buscar fornecedores...
+                                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0" align="start">
+                                          <Command>
+                                            <CommandInput 
+                                              placeholder="Digite o nome do fornecedor..." 
+                                              value={supplierSearch}
+                                              onValueChange={setSupplierSearch}
+                                            />
+                                            <CommandList>
+                                              <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
+                                              <CommandGroup>
+                                                {filteredSuppliers.map((supplier) => (
+                                                  <CommandItem
+                                                    key={supplier.id}
+                                                    value={supplier.name}
+                                                    onSelect={() => handleSupplierSelect(supplier)}
+                                                  >
+                                                    <Plus className="mr-2 h-4 w-4 text-green-600" />
+                                                    {supplier.name}
+                                                  </CommandItem>
+                                                ))}
+                                              </CommandGroup>
+                                            </CommandList>
+                                          </Command>
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </CardContent>
+                            </Card>
 
-                              {/* Fornecedores Selecionados */}
-                              {selectedSuppliers.length > 0 && (
-                                <div className="space-y-3">
-                                  <h4 className="font-medium text-gray-900">
-                                    Fornecedores Selecionados ({selectedSuppliers.length})
-                                  </h4>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto">
-                                    {selectedSuppliers.map((supplier) => (
-                                      <div
-                                        key={supplier.id}
-                                        className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
-                                      >
-                                        <div className="flex items-center gap-3">
-                                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                            <Building2 className="h-4 w-4 text-green-600" />
-                                          </div>
-                                          <span className="font-medium text-green-900">{supplier.name}</span>
-                                        </div>
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => handleSupplierRemove(supplier.id)}
-                                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            {/* Lista de Fornecedores Selecionados - Lado Direito */}
+                            <Card className="h-fit">
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <Building2 className="h-5 w-5 text-blue-600" />
+                                  Fornecedores Selecionados
+                                  {selectedSuppliers.length > 0 && (
+                                    <Badge variant="secondary" className="ml-auto">
+                                      {selectedSuppliers.length}
+                                    </Badge>
+                                  )}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                {selectedSuppliers.length > 0 ? (
+                                  <ScrollArea className="h-[400px] pr-4">
+                                    <div className="space-y-3">
+                                      {selectedSuppliers.map((supplier) => (
+                                        <div
+                                          key={supplier.id}
+                                          className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
                                         >
-                                          <X className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                    ))}
+                                          <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                              <Building2 className="h-4 w-4 text-green-600" />
+                                            </div>
+                                            <span className="font-medium text-green-900">{supplier.name}</span>
+                                          </div>
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleSupplierRemove(supplier.id)}
+                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </Button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </ScrollArea>
+                                ) : (
+                                  <div className="text-center py-8 text-gray-500">
+                                    <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                                    <p>Nenhum fornecedor selecionado ainda</p>
+                                    <p className="text-sm">Use o formulário ao lado para buscar e adicionar fornecedores</p>
                                   </div>
-                                </div>
-                              )}
-
-                              {selectedSuppliers.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
-                                  <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                  <p>Nenhum fornecedor selecionado ainda</p>
-                                  <p className="text-sm">Use o campo acima para buscar e adicionar fornecedores</p>
-                                </div>
-                              )}
-                            </CardContent>
-                          </Card>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </div>
                         </TabsContent>
 
                         {/* Detalhes Tab */}
-                        <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 m-0">
-                          <Card>
-                            <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-purple-600" />
-                                Detalhes Adicionais
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                              <FormField
-                                control={form.control}
-                                name="observacoes"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Observações</FormLabel>
-                                    <FormControl>
-                                      <Textarea 
-                                        placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
-                                        className="resize-none min-h-[100px]" 
-                                        {...field} 
-                                      />
-                                    </FormControl>
-                                    <p className="text-xs text-gray-500">
-                                      Estas informações serão enviadas junto com a cotação para todos os fornecedores
-                                    </p>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                        <TabsContent value="detalhes" className="flex-1 m-0 min-h-0">
+                          <ScrollArea className="h-full w-full [&>div>div[style]]:!pr-0">
+                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 lg:gap-4 p-2 sm:p-3">
+                              {/* Coluna Esquerda - Formulário de Detalhes */}
+                              <Card className="border-purple-100 bg-gradient-to-br from-white to-purple-50/20 shadow-sm h-fit">
+                                <CardHeader className="pb-2 border-b border-purple-100/60">
+                                  <CardTitle className="flex items-center gap-2 text-purple-900 text-sm">
+                                    <FileText className="h-4 w-4 text-purple-600" />
+                                    Detalhes Adicionais
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent className="pt-3 space-y-3">
+                                <FormField
+                                  control={form.control}
+                                  name="observacoes"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel className="text-sm">Observações</FormLabel>
+                                      <FormControl>
+                                        <Textarea 
+                                          placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
+                                          className="resize-none min-h-[100px] text-sm" 
+                                          {...field} 
+                                        />
+                                      </FormControl>
+                                      <p className="text-xs text-gray-500">
+                                        Estas informações serão enviadas junto com a cotação para todos os fornecedores
+                                      </p>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
 
-                              {/* Resumo da Cotação */}
-                              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                <h4 className="font-medium text-gray-900 mb-3">📋 Resumo da Cotação</h4>
-                                <div className="space-y-2 text-sm">
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-600">Produtos:</span>
-                                    <span className="font-medium">{fields.length} item(s)</span>
+                                {/* Informações Adicionais */}
+                                <div className="bg-purple-50/50 border border-purple-100 rounded-lg p-3">
+                                  <h4 className="font-medium text-purple-900 mb-2 flex items-center gap-2 text-sm">
+                                    <FileText className="h-3 w-3" />
+                                    Dicas para uma boa cotação
+                                  </h4>
+                                  <ul className="space-y-1 text-xs text-purple-700">
+                                    <li className="flex items-start gap-2">
+                                      <span className="text-purple-500 mt-0.5">•</span>
+                                      <span>Seja específico nas observações para evitar dúvidas</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                      <span className="text-purple-500 mt-0.5">•</span>
+                                      <span>Inclua especificações técnicas quando necessário</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                      <span className="text-purple-500 mt-0.5">•</span>
+                                      <span>Defina condições de pagamento e entrega</span>
+                                    </li>
+                                  </ul>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            {/* Coluna Direita - Resumo da Cotação */}
+                            <Card className="border-blue-100 bg-gradient-to-br from-white to-blue-50/20 shadow-sm h-fit">
+                              <CardHeader className="pb-2 border-b border-blue-100/60">
+                                <CardTitle className="flex items-center gap-2 text-blue-900 text-sm">
+                                  <Package className="h-4 w-4 text-blue-600" />
+                                  Resumo da Cotação
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="pt-3 space-y-3">
+                                {/* Estatísticas Principais */}
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-2 text-center">
+                                    <div className="text-xl font-bold text-blue-600">{fields.length}</div>
+                                    <div className="text-xs text-blue-700 font-medium">Produtos</div>
                                   </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-600">Fornecedores:</span>
-                                    <span className="font-medium">{selectedSuppliers.length} participante(s)</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-gray-600">Período:</span>
-                                    <span className="font-medium">
-                                      {form.watch("dataInicio") && form.watch("dataFim") 
-                                        ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} - ${format(form.watch("dataFim"), "dd/MM/yyyy", { locale: ptBR })}`
-                                        : "Não definido"
-                                      }
-                                    </span>
+                                  <div className="bg-green-50/50 border border-green-100 rounded-lg p-2 text-center">
+                                    <div className="text-xl font-bold text-green-600">{selectedSuppliers.length}</div>
+                                    <div className="text-xs text-green-700 font-medium">Fornecedores</div>
                                   </div>
                                 </div>
-                              </div>
-                            </CardContent>
-                          </Card>
+
+                                {/* Detalhes do Período */}
+                                <div className="bg-gray-50/50 border border-gray-100 rounded-lg p-3">
+                                  <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
+                                    <Clock className="h-3 w-3 text-gray-600" />
+                                    Período da Cotação
+                                  </h4>
+                                  <div className="text-xs">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-gray-600">Período:</span>
+                                      <span className="font-medium text-gray-900">
+                                        {form.watch("dataInicio") && form.watch("dataFim") 
+                                          ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} - ${format(form.watch("dataFim"), "dd/MM/yyyy", { locale: ptBR })}`
+                                          : "Não definido"
+                                        }
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Lista de Produtos */}
+                                {fields.length > 0 && (
+                                  <div className="bg-gray-50/50 border border-gray-100 rounded-lg p-3">
+                                    <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
+                                      <Package className="h-3 w-3 text-gray-600" />
+                                      Produtos Selecionados
+                                    </h4>
+                                    <ScrollArea className="max-h-[120px] lg:max-h-[150px]">
+                                      <div className="space-y-1">
+                                        {fields.map((field, index) => (
+                                          <div key={field.id} className="flex items-center justify-between p-2 bg-white rounded border border-gray-100">
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-medium text-gray-900 truncate">
+                                                {form.watch(`produtos.${index}.produtoNome`) || "Produto não selecionado"}
+                                              </p>
+                                              <p className="text-xs text-gray-500">
+                                                {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </ScrollArea>
+                                  </div>
+                                )}
+
+                                {/* Lista de Fornecedores */}
+                                {selectedSuppliers.length > 0 && (
+                                  <div className="bg-gray-50/50 border border-gray-100 rounded-lg p-3">
+                                    <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
+                                      <Building2 className="h-3 w-3 text-gray-600" />
+                                      Fornecedores Participantes
+                                    </h4>
+                                    <ScrollArea className="max-h-[100px] lg:max-h-[120px]">
+                                      <div className="space-y-1">
+                                        {selectedSuppliers.map((supplier) => (
+                                          <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white rounded border border-gray-100">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                            <span className="text-xs font-medium text-gray-900">{supplier.name}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </ScrollArea>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                            </div>
+                          </ScrollArea>
                         </TabsContent>
                       </Tabs>
                     </motion.div>
                   </AnimatePresence>
                 </div>
-
-                {/* Footer */}
-                <DialogFooter className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-teal-100/60 bg-gradient-to-r from-gray-50 to-teal-50/30">
-                  <div className="flex justify-between w-full gap-3">
-                    {currentTabIndex > 0 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handlePrevious}
-                        className="border-gray-300 hover:bg-gray-100"
-                      >
-                        <ChevronLeft className="h-4 w-4 mr-2" />
-                        Voltar
-                      </Button>
-                    )}
-                    
-                    <div className="flex gap-3 ml-auto">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setOpen(false)}
-                        className="text-gray-600 hover:bg-gray-100"
-                      >
-                        Cancelar
-                      </Button>
-                      
-                      {currentTabIndex < tabs.length - 1 ? (
-                        <Button
-                          type="button"
-                          onClick={handleNext}
-                          disabled={!canProceedToNext()}
-                          className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg"
-                        >
-                          Próximo
-                          <ChevronRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      ) : (
-                        <Button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                              Criando...
-                            </>
-                          ) : (
-                            <>
-                              <Check className="h-4 w-4 mr-2" />
-                              Criar Cotação
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </DialogFooter>
               </form>
             </Form>
           </div>

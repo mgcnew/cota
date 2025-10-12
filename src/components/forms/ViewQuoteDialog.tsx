@@ -280,7 +280,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-6xl h-[90vh] max-h-[950px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0">
+      <DialogContent className="w-[90vw] max-w-6xl h-[90vh] max-h-[950px] border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
         <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
           {/* Efeitos decorativos de fundo */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5"></div>
@@ -307,8 +307,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
           </div>
         </DialogHeader>
 
-        <div className="flex flex-col h-full overflow-hidden">
-          <Tabs defaultValue="detalhes" className="w-full flex flex-col h-full">
+        <div className="flex flex-col flex-1 min-h-0">
+          <Tabs defaultValue="detalhes" className="w-full flex flex-col flex-1 min-h-0">
             <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm flex-shrink-0">
               <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-1 shadow-lg border border-gray-200/40">
                 <TabsTrigger
@@ -335,176 +335,186 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </TabsList>
             </div>
 
-            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-                <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-indigo-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg flex-shrink-0">
-                      <Package className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-600">Produto Principal</p>
-                      <p className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg truncate">{quote.produto}</p>
-                      <p className="text-xs sm:text-sm text-blue-600 font-medium truncate">{quote.quantidade}</p>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
-                      <Users className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-600">Fornecedores Participantes</p>
-                      <p className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">{quote.fornecedores}</p>
-                      <p className="text-xs sm:text-sm text-green-600 font-medium">fornecedores convidados</p>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-pink-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg flex-shrink-0">
-                      <Calendar className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-600">Período da Cotação</p>
-                      <p className="font-bold text-gray-900 text-sm sm:text-base truncate">{quote.dataInicio}</p>
-                      <p className="text-xs sm:text-sm text-purple-600 font-medium truncate">até {quote.dataFim}</p>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-orange-50/60 to-red-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-lg flex-shrink-0">
-                      <TrendingDown className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-600">Melhor Oferta</p>
-                      <p className="font-bold text-green-600 text-sm sm:text-base lg:text-lg truncate">{quote.melhorPreco}</p>
-                      <p className="text-xs sm:text-sm text-orange-600 font-medium truncate">{quote.melhorFornecedor}</p>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-
-              {/* Resumo da economia */}
-              <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl border-l-4 border-l-green-500">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl flex-shrink-0">
-                      <DollarSign className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg sm:text-xl text-gray-900">Economia Estimada</h3>
-                      <p className="text-green-600 font-bold text-xl sm:text-2xl truncate">{quote.economia}</p>
-                      <p className="text-xs sm:text-sm text-gray-600">em relação ao preço médio de mercado</p>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-100 rounded-full">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-green-700 font-semibold text-xs sm:text-sm">Economia Ativa</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Estatísticas da Cotação */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-cyan-50/40 backdrop-blur-sm rounded-xl">
-                  <div className="text-center">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-lg mx-auto w-fit mb-2">
-                      <Package className="h-4 w-4" />
-                    </div>
-                    <p className="text-xs text-gray-600 mb-1">Total de Produtos</p>
-                    <p className="font-bold text-lg text-gray-900">{products.length}</p>
-                  </div>
-                </Card>
-
-                <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-pink-50/40 backdrop-blur-sm rounded-xl">
-                  <div className="text-center">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg mx-auto w-fit mb-2">
-                      <Users className="h-4 w-4" />
-                    </div>
-                    <p className="text-xs text-gray-600 mb-1">Fornecedores Ativos</p>
-                    <p className="font-bold text-lg text-gray-900">
-                      {quote.fornecedoresParticipantes.filter(f => f.status === 'respondido').length}
-                    </p>
-                  </div>
-                </Card>
-
-                <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl">
-                  <div className="text-center">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg mx-auto w-fit mb-2">
-                      <TrendingDown className="h-4 w-4" />
-                    </div>
-                    <p className="text-xs text-gray-600 mb-1">Melhor Valor</p>
-                    <p className="font-bold text-lg text-green-600">
-                      R$ {getMelhorValor().toFixed(2)}
-                    </p>
-                  </div>
-                </Card>
-
-                <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-orange-50/60 to-red-50/40 backdrop-blur-sm rounded-xl">
-                  <div className="text-center">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-lg mx-auto w-fit mb-2">
-                      <Calendar className="h-4 w-4" />
-                    </div>
-                    <p className="text-xs text-gray-600 mb-1">Status</p>
-                    <div className="flex justify-center">
-                      {getStatusBadge(quote.status)}
-                    </div>
-                  </div>
-                </Card>
-              </div>
-
-              {/* Lista de Fornecedores Participantes */}
-              <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-slate-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg">
-                    <Users className="h-4 w-4" />
-                  </div>
-                  <h3 className="font-bold text-lg text-gray-900">Fornecedores Participantes</h3>
-                </div>
-                <div className="space-y-3">
-                  {quote.fornecedoresParticipantes.map(fornecedor => (
-                    <div key={fornecedor.id} className="flex items-center justify-between p-3 bg-white/60 rounded-xl border border-gray-100/60">
-                      <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "w-3 h-3 rounded-full",
-                          fornecedor.status === 'respondido' ? "bg-green-500" : "bg-yellow-500"
-                        )}></div>
-                        <div>
-                          <p className="font-semibold text-gray-900">{fornecedor.nome}</p>
-                          <p className="text-xs text-gray-600">
-                            {fornecedor.status === 'respondido'
-                              ? `Respondeu em ${fornecedor.dataResposta}`
-                              : 'Aguardando resposta'
-                            }
-                          </p>
+            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500 min-h-0">
+              {/* Layout lado a lado - duas colunas principais */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                
+                {/* Coluna Esquerda - Informações Principais */}
+                <div className="space-y-4">
+                  {/* Cards principais em grid 2x2 */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-indigo-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg flex-shrink-0">
+                          <Package className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-gray-600">Produto Principal</p>
+                          <p className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg truncate">{quote.produto}</p>
+                          <p className="text-xs sm:text-sm text-blue-600 font-medium truncate">{quote.quantidade}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        {fornecedor.valorOferecido > 0 ? (
-                          <p className="font-bold text-green-600">
-                            R$ {fornecedor.valorOferecido.toFixed(2)}
-                          </p>
-                        ) : (
-                          <Badge variant="outline" className="text-xs">
-                            Pendente
-                          </Badge>
-                        )}
+                    </Card>
+
+                    <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
+                          <Users className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-gray-600">Fornecedores Participantes</p>
+                          <p className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">{quote.fornecedores}</p>
+                          <p className="text-xs sm:text-sm text-green-600 font-medium">fornecedores convidados</p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-pink-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg flex-shrink-0">
+                          <Calendar className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-gray-600">Período da Cotação</p>
+                          <p className="font-bold text-gray-900 text-sm sm:text-base truncate">{quote.dataInicio}</p>
+                          <p className="text-xs sm:text-sm text-purple-600 font-medium truncate">até {quote.dataFim}</p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-orange-50/60 to-red-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-lg flex-shrink-0">
+                          <TrendingDown className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-gray-600">Melhor Oferta</p>
+                          <p className="font-bold text-green-600 text-sm sm:text-base lg:text-lg truncate">{quote.melhorPreco}</p>
+                          <p className="text-xs sm:text-sm text-orange-600 font-medium truncate">{quote.melhorFornecedor}</p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Resumo da economia */}
+                  <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl border-l-4 border-l-green-500">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl flex-shrink-0">
+                          <DollarSign className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-lg sm:text-xl text-gray-900">Economia Estimada</h3>
+                          <p className="text-green-600 font-bold text-xl sm:text-2xl truncate">{quote.economia}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">em relação ao preço médio de mercado</p>
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-100 rounded-full">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                          <span className="text-green-700 font-semibold text-xs sm:text-sm">Economia Ativa</span>
+                        </div>
                       </div>
                     </div>
-                  ))}
+                  </Card>
+
+                  {/* Estatísticas da Cotação */}
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-cyan-50/40 backdrop-blur-sm rounded-xl">
+                      <div className="text-center">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-lg mx-auto w-fit mb-2">
+                          <Package className="h-4 w-4" />
+                        </div>
+                        <p className="text-xs text-gray-600 mb-1">Total de Produtos</p>
+                        <p className="font-bold text-lg text-gray-900">{products.length}</p>
+                      </div>
+                    </Card>
+
+                    <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-pink-50/40 backdrop-blur-sm rounded-xl">
+                      <div className="text-center">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg mx-auto w-fit mb-2">
+                          <Users className="h-4 w-4" />
+                        </div>
+                        <p className="text-xs text-gray-600 mb-1">Fornecedores Ativos</p>
+                        <p className="font-bold text-lg text-gray-900">
+                          {quote.fornecedoresParticipantes.filter(f => f.status === 'respondido').length}
+                        </p>
+                      </div>
+                    </Card>
+
+                    <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl">
+                      <div className="text-center">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg mx-auto w-fit mb-2">
+                          <TrendingDown className="h-4 w-4" />
+                        </div>
+                        <p className="text-xs text-gray-600 mb-1">Melhor Valor</p>
+                        <p className="font-bold text-lg text-green-600">
+                          R$ {getMelhorValor().toFixed(2)}
+                        </p>
+                      </div>
+                    </Card>
+
+                    <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-orange-50/60 to-red-50/40 backdrop-blur-sm rounded-xl">
+                      <div className="text-center">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-lg mx-auto w-fit mb-2">
+                          <Calendar className="h-4 w-4" />
+                        </div>
+                        <p className="text-xs text-gray-600 mb-1">Status</p>
+                        <div className="flex justify-center">
+                          {getStatusBadge(quote.status)}
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
                 </div>
-              </Card>
+
+                {/* Coluna Direita - Lista de Fornecedores */}
+                <div className="space-y-4">
+                  <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-slate-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl h-fit">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg">
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <h3 className="font-bold text-lg text-gray-900">Fornecedores Participantes</h3>
+                    </div>
+                    <div className="space-y-3 max-h-[400px] lg:max-h-[600px] overflow-y-auto">
+                      {quote.fornecedoresParticipantes.map(fornecedor => (
+                        <div key={fornecedor.id} className="flex items-center justify-between p-3 bg-white/60 rounded-xl border border-gray-100/60">
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "w-3 h-3 rounded-full",
+                              fornecedor.status === 'respondido' ? "bg-green-500" : "bg-yellow-500"
+                            )}></div>
+                            <div>
+                              <p className="font-semibold text-gray-900">{fornecedor.nome}</p>
+                              <p className="text-xs text-gray-600">
+                                {fornecedor.status === 'respondido'
+                                  ? `Respondeu em ${fornecedor.dataResposta}`
+                                  : 'Aguardando resposta'
+                                }
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            {fornecedor.valorOferecido > 0 ? (
+                              <p className="font-bold text-green-600">
+                                R$ {fornecedor.valorOferecido.toFixed(2)}
+                              </p>
+                            ) : (
+                              <Badge variant="outline" className="text-xs">
+                                Pendente
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="atualizacao" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500">
+            <TabsContent value="atualizacao" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500 min-h-0">
               <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-green-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 bg-gradient-to-r from-green-50/60 to-emerald-50/40 rounded-xl border border-green-100/60">
@@ -680,7 +690,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </Card>
             </TabsContent>
 
-            <TabsContent value="comparativo" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500">
+            <TabsContent value="comparativo" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500 min-h-0">
               {/* Resumo dos Fornecedores */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
                 {quote.fornecedoresParticipantes.map(fornecedor => {
