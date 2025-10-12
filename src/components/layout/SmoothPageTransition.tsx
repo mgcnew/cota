@@ -5,26 +5,37 @@ interface SmoothPageTransitionProps {
   children: ReactNode;
 }
 
-// Constantes padronizadas para todas as páginas
-const TRANSITION_DURATION = 250; // ms - Material Design Standard
-const TRANSITION_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)'; // Material Design Standard Easing
+// Constantes otimizadas para transições mais suaves
+const TRANSITION_DURATION = 300; // ms - Ligeiramente mais longo para suavidade
+const FADE_IN_DELAY = 50; // ms - Pequeno delay para entrada mais natural
+const TRANSITION_EASING = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'; // Easing mais suave
 
 export function SmoothPageTransition({ children }: SmoothPageTransitionProps) {
   const location = useLocation();
   const [displayLocation, setDisplayLocation] = useState(location);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isEntering, setIsEntering] = useState(false);
 
   useEffect(() => {
     if (location !== displayLocation) {
       setIsTransitioning(true);
+      setIsEntering(false);
       
-      // Timing padronizado para todas as páginas
+      // Timing otimizado para transição mais natural
       const timer = setTimeout(() => {
         setDisplayLocation(location);
         setIsTransitioning(false);
-      }, TRANSITION_DURATION);
+        
+        // Pequeno delay para entrada mais suave
+        setTimeout(() => {
+          setIsEntering(true);
+        }, FADE_IN_DELAY);
+      }, TRANSITION_DURATION / 2);
 
       return () => clearTimeout(timer);
+    } else {
+      // Página inicial - entrada imediata mas suave
+      setIsEntering(true);
     }
   }, [location, displayLocation]);
 
@@ -32,14 +43,20 @@ export function SmoothPageTransition({ children }: SmoothPageTransitionProps) {
     <div
       className={`w-full h-full transition-all ${
         isTransitioning 
-          ? "opacity-0 translate-x-4" 
-          : "opacity-100 translate-x-0"
+          ? "opacity-0 translate-y-2 scale-[0.98]" 
+          : isEntering
+          ? "opacity-100 translate-y-0 scale-100"
+          : "opacity-0 translate-y-1 scale-[0.99]"
       }`}
       style={{ 
         transitionDuration: `${TRANSITION_DURATION}ms`,
         transitionTimingFunction: TRANSITION_EASING,
-        willChange: isTransitioning ? 'transform, opacity' : 'auto',
-        backfaceVisibility: 'hidden'
+        willChange: isTransitioning || !isEntering ? 'transform, opacity' : 'auto',
+        backfaceVisibility: 'hidden',
+        transformOrigin: 'center top',
+        // Adiciona um filtro sutil para suavizar a transição
+        filter: isTransitioning ? 'blur(0.5px)' : 'blur(0px)',
+        transitionProperty: 'opacity, transform, filter'
       }}
     >
       {children}

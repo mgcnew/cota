@@ -667,7 +667,7 @@ export default function Cotacoes() {
                         Fornecedores
                       </div>
                     </TableHead>
-                    <TableHead className="text-right font-semibold text-teal-900 py-4 px-6">Ações</TableHead>
+                    <TableHead className="text-right font-semibold text-teal-900 py-4 px-6 w-32">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -742,7 +742,36 @@ export default function Cotacoes() {
                         </Badge>
                       </TableCell>
                       <TableCell className="py-4 px-6">
-                        <div className="flex justify-end">
+                        <div className="flex items-center justify-end gap-2">
+                          {/* Botão Detalhes - Direto na tabela */}
+                          <ViewQuoteDialog 
+                            quote={cotacao} 
+                            onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                              quoteId,
+                              supplierId,
+                              productId,
+                              newValue
+                            })}
+                            onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
+                              quoteId,
+                              supplierId,
+                              deliveryDate,
+                              observations
+                            })}
+                            isUpdating={isUpdating}
+                            trigger={
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="h-8 px-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 text-blue-700 hover:text-blue-800 transition-all duration-200 font-medium"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                <span className="text-xs">Detalhes</span>
+                              </Button>
+                            } 
+                          />
+                          
+                          {/* Menu de ações secundárias */}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button 
@@ -755,29 +784,6 @@ export default function Cotacoes() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
-                              <ViewQuoteDialog 
-                                quote={cotacao} 
-                                onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                                  quoteId,
-                                  supplierId,
-                                  productId,
-                                  newValue
-                                })}
-                                onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
-                                  quoteId,
-                                  supplierId,
-                                  deliveryDate,
-                                  observations
-                                })}
-                                isUpdating={isUpdating}
-                                trigger={
-                                  <DropdownMenuItem onSelect={e => e.preventDefault()} className="cursor-pointer">
-                                    <Eye className="h-4 w-4 mr-2 text-blue-600" />
-                                    <span>Visualizar</span>
-                                  </DropdownMenuItem>
-                                } 
-                              />
-                              
                               {/* Só permite editar se não estiver concluída */}
                               {cotacao.status !== "concluida" && (
                                 <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({

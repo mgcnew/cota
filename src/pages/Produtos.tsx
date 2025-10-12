@@ -102,6 +102,45 @@ export default function Produtos() {
     if (trend === "down") return <TrendingUp className="h-4 w-4 text-error rotate-180" />;
     return <span className="h-4 w-4 rounded-full bg-muted-foreground/50" />;
   };
+
+  // Função para determinar status do produto baseado em dados
+  const getProductStatus = (product: any) => {
+    if (product.quotesCount === 0) return "sem_cotacao";
+    if (product.lastQuotePrice === "R$ 0,00") return "pendente";
+    if (product.quotesCount >= 3) return "ativo";
+    return "cotado";
+  };
+
+  // Função para renderizar badge de status com cores diferenciadas
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      ativo: { 
+        label: "Ativo", 
+        className: "bg-green-100 text-green-700 border-green-300 hover:bg-green-200 transition-colors" 
+      },
+      cotado: { 
+        label: "Cotado", 
+        className: "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200 transition-colors" 
+      },
+      pendente: { 
+        label: "Pendente", 
+        className: "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 transition-colors" 
+      },
+      sem_cotacao: { 
+        label: "Sem Cotação", 
+        className: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 transition-colors" 
+      }
+    };
+    
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.sem_cotacao;
+    
+    return (
+      <Badge variant="outline" className={`text-xs font-medium ${config.className}`}>
+        {config.label}
+      </Badge>
+    );
+  };
+
   if (loading || productsLoading) {
     return <div className="flex items-center justify-center h-screen">
         <div className="text-center">Carregando...</div>
@@ -319,36 +358,50 @@ export default function Produtos() {
                       <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium">
                         {product.weight}
                       </Badge>
+                      {getStatusBadge(getProductStatus(product))}
                     </div>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-orange-100">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md"
+                      >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-background border z-50">
+                    <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
+                      <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
                       <ProductPriceHistoryDialog
                         productName={product.name}
                         productId={product.id}
                         trigger={
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                            <Quote className="h-4 w-4 mr-2" />
+                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
+                            <Quote className="h-4 w-4 mr-2 text-blue-600" />
                             Ver Histórico de Preços
                           </DropdownMenuItem>
                         }
                       />
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setEditingProduct(product)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
+                      <DropdownMenuItem 
+                        onClick={() => setEditingProduct(product)}
+                        className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer"
+                      >
+                        <Edit className="h-4 w-4 mr-2 text-amber-600" />
+                        Editar Produto
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive" onClick={() => setDeletingProduct(product)}>
+                      <DropdownMenuItem 
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" 
+                        onClick={() => setDeletingProduct(product)}
+                      >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Excluir
+                        Excluir Produto
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+
                 </div>
               </CardHeader>
               
@@ -414,73 +467,102 @@ export default function Produtos() {
                 />
               </CardContent>
             </Card>)}
-        </div> : <Card>
+        </div> : <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-orange-50/20">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Produto</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell">Peso</TableHead>
-                    <TableHead>Melhor Preço</TableHead>
-                    <TableHead className="hidden lg:table-cell">Fornecedor</TableHead>
-                    <TableHead className="hidden sm:table-cell">Cotações</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-100">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-semibold text-gray-700 py-4">Produto</TableHead>
+                    <TableHead className="font-semibold text-gray-700">Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700">Melhor Preço</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700">Fornecedor</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700">Cotações</TableHead>
+                    <TableHead className="text-right font-semibold text-gray-700">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map(product => <TableRow key={product.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <Package className="h-4 w-4 text-primary" />
+                  {paginatedData.items.map(product => <TableRow key={product.id} className="hover:bg-orange-50/30 transition-colors border-b border-gray-100/60">
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <Package className="h-4 w-4 text-orange-600" />
                           </div>
                           <div>
-                            <div className="font-medium">{product.name}</div>
-                            <div className="text-xs text-muted-foreground md:hidden">{product.category}</div>
+                            <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
+                            <div className="text-xs text-gray-500 md:hidden mt-1">{product.category}</div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <Badge variant="outline">{product.category}</Badge>
+                      <TableCell className="hidden md:table-cell py-4">
+                        <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium text-xs">{product.category}</Badge>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <Badge variant="secondary">{product.weight}</Badge>
+                      <TableCell className="hidden md:table-cell py-4">
+                        <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium text-xs">{product.weight}</Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell py-4">
+                        {getStatusBadge(getProductStatus(product))}
+                      </TableCell>
+                      <TableCell className="py-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-success">{product.lastQuotePrice}</span>
+                          <span className="font-bold text-green-700 text-sm">{product.lastQuotePrice}</span>
                           {getTrendIcon(product.trend)}
                         </div>
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell">{product.bestSupplier}</TableCell>
-                      <TableCell className="hidden sm:table-cell">{product.quotesCount}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end">
+                      <TableCell className="hidden lg:table-cell py-4">
+                        <span className="text-gray-700 font-medium text-sm">{product.bestSupplier}</span>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell py-4">
+                        <div className="flex items-center gap-1">
+                          <Quote className="h-3 w-3 text-blue-600" />
+                          <span className="font-semibold text-blue-700 text-sm">{product.quotesCount}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <div className="flex justify-end gap-2">
+                          {/* Botão principal - Ver Histórico */}
+                          <ProductPriceHistoryDialog
+                            productName={product.name}
+                            productId={product.id}
+                            trigger={
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 shadow-sm hover:shadow-md"
+                              >
+                                <Quote className="h-3 w-3 mr-1" />
+                                Histórico
+                              </Button>
+                            }
+                          />
+                          
+                          {/* Menu de ações secundárias */}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="hover:bg-gray-100 hover:text-gray-700 border border-transparent hover:border-gray-200 transition-all duration-200 shadow-sm hover:shadow-md"
+                              >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-background border z-50">
-                              <ProductPriceHistoryDialog
-                                productName={product.name}
-                                productId={product.id}
-                                trigger={
-                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                    <Quote className="h-4 w-4 mr-2" />
-                                    Ver Histórico de Preços
-                                  </DropdownMenuItem>
-                                }
-                              />
+                            <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                              <DropdownMenuLabel className="text-gray-600 font-medium">Mais Ações</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => setEditingProduct(product)}>
-                                <Edit className="h-4 w-4 mr-2" />
+                              <DropdownMenuItem 
+                                onClick={() => setEditingProduct(product)}
+                                className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer"
+                              >
+                                <Edit className="h-4 w-4 mr-2 text-amber-600" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive" onClick={() => setDeletingProduct(product)}>
+                              <DropdownMenuItem 
+                                className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" 
+                                onClick={() => setDeletingProduct(product)}
+                              >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Excluir
                               </DropdownMenuItem>
@@ -492,7 +574,18 @@ export default function Produtos() {
                 </TableBody>
               </Table>
             </div>
-            <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
+            <div className="border-t border-orange-100/60 bg-gradient-to-r from-orange-50/30 to-amber-50/30 px-6 py-4">
+              <DataPagination 
+                currentPage={paginatedData.pagination.currentPage} 
+                totalPages={paginatedData.pagination.totalPages} 
+                itemsPerPage={paginatedData.pagination.itemsPerPage} 
+                totalItems={paginatedData.pagination.totalItems} 
+                onPageChange={paginatedData.pagination.goToPage} 
+                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
+                startIndex={paginatedData.pagination.startIndex} 
+                endIndex={paginatedData.pagination.endIndex} 
+              />
+            </div>
           </CardContent>
         </Card>}
 

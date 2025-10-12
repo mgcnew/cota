@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { PageWrapper } from "@/components/layout/PageWrapper";
 export default function Pedidos() {
   const {
     user
@@ -102,6 +103,30 @@ export default function Pedidos() {
       setLoading(false);
     }
   };
+  // Função para abreviar nomes longos de fornecedores
+  const abbreviateSupplierName = (name: string, maxLength: number = 20) => {
+    if (name.length <= maxLength) return name;
+    
+    const words = name.split(' ');
+    if (words.length === 1) {
+      return name.substring(0, maxLength - 3) + '...';
+    }
+    
+    // Se tem múltiplas palavras, tenta manter primeira e última palavra
+    if (words.length >= 2) {
+      const firstWord = words[0];
+      const lastWord = words[words.length - 1];
+      const abbreviated = `${firstWord} ... ${lastWord}`;
+      
+      if (abbreviated.length <= maxLength) {
+        return abbreviated;
+      }
+    }
+    
+    // Se ainda for muito longo, trunca simples
+    return name.substring(0, maxLength - 3) + '...';
+  };
+
   const handleAddPedido = () => {
     loadOrders();
   };
@@ -138,23 +163,44 @@ export default function Pedidos() {
     document.body.removeChild(link);
   };
   const getStatusBadge = (status: string) => {
-    const variants = {
-      pendente: "outline",
-      processando: "default",
-      confirmado: "secondary",
-      entregue: "secondary",
-      cancelado: "destructive"
+    const statusConfig = {
+      pendente: {
+        variant: "outline" as const,
+        className: "border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium",
+        label: "Pendente"
+      },
+      processando: {
+        variant: "outline" as const,
+        className: "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium",
+        label: "Processando"
+      },
+      confirmado: {
+        variant: "outline" as const,
+        className: "border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium",
+        label: "Confirmado"
+      },
+      entregue: {
+        variant: "outline" as const,
+        className: "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium",
+        label: "Entregue"
+      },
+      cancelado: {
+        variant: "outline" as const,
+        className: "border-red-300 bg-red-50 text-red-700 hover:bg-red-100 font-medium",
+        label: "Cancelado"
+      }
     };
-    const labels = {
-      pendente: "Pendente",
-      processando: "Processando",
-      confirmado: "Confirmado",
-      entregue: "Entregue",
-      cancelado: "Cancelado"
-    };
-    return <Badge variant={variants[status as keyof typeof variants] as any}>
-        {labels[status as keyof typeof labels]}
-      </Badge>;
+
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendente;
+    
+    return (
+      <Badge 
+        variant={config.variant} 
+        className={cn("transition-all duration-200", config.className)}
+      >
+        {config.label}
+      </Badge>
+    );
   };
   const getStatusIcon = (status: string) => {
     const icons = {
@@ -181,7 +227,9 @@ export default function Pedidos() {
   });
   const paginatedData = paginate(filteredPedidos);
   const totalValue = pedidos.filter(p => p.status !== "cancelado").reduce((acc, p) => acc + parseFloat(p.total.replace("R$ ", "").replace(".", "").replace(",", ".")), 0);
-  return <div className="page-container">
+  return (
+    <PageWrapper>
+      <div className="page-container">
       {/* Header Pedidos com Tema Rosa */}
       <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -423,40 +471,40 @@ export default function Pedidos() {
               <CardContent className="p-0">
                 <div className="overflow-hidden">
                   <Table>
-                    <TableHeader className="bg-gradient-to-r from-purple-50/80 to-pink-50/80 border-b border-purple-100">
+                    <TableHeader className="bg-gradient-to-r from-pink-50/80 to-rose-50/80 border-b border-pink-100">
                       <TableRow className="hover:bg-transparent">
-                        <TableHead className="font-semibold text-purple-900 py-4 px-6">
+                        <TableHead className="font-semibold text-pink-900 py-5 px-6">
                           <div className="flex items-center gap-2">
                             <ShoppingCart className="h-4 w-4" />
                             Pedido
                           </div>
                         </TableHead>
-                        <TableHead className="font-semibold text-purple-900 py-4">
+                        <TableHead className="font-semibold text-pink-900 py-5">
                           <div className="flex items-center gap-2">
                             <Building2 className="h-4 w-4" />
                             Fornecedor
                           </div>
                         </TableHead>
-                        <TableHead className="hidden md:table-cell font-semibold text-purple-900 py-4">
+                        <TableHead className="hidden md:table-cell font-semibold text-pink-900 py-5">
                           <div className="flex items-center gap-2">
                             <Package className="h-4 w-4" />
                             Produtos
                           </div>
                         </TableHead>
-                        <TableHead className="hidden lg:table-cell font-semibold text-purple-900 py-4">
+                        <TableHead className="hidden lg:table-cell font-semibold text-pink-900 py-5">
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
-                            Data Entrega
+                            Entrega
                           </div>
                         </TableHead>
-                        <TableHead className="font-semibold text-purple-900 py-4">Status</TableHead>
-                        <TableHead className="text-right font-semibold text-purple-900 py-4">
+                        <TableHead className="font-semibold text-pink-900 py-5">Status</TableHead>
+                        <TableHead className="text-right font-semibold text-pink-900 py-5">
                           <div className="flex items-center justify-end gap-2">
                             <DollarSign className="h-4 w-4" />
                             Valor
                           </div>
                         </TableHead>
-                        <TableHead className="text-right font-semibold text-purple-900 py-4 px-6">Ações</TableHead>
+                        <TableHead className="text-right font-semibold text-pink-900 py-5 px-6">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -464,18 +512,18 @@ export default function Pedidos() {
                         <TableRow 
                           key={pedido.id}
                           className={cn(
-                            "hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/30 transition-all duration-200 border-b border-gray-100/60",
+                            "hover:bg-gradient-to-r hover:from-pink-50/50 hover:to-rose-50/30 transition-all duration-200 border-b border-gray-100/60",
                             index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                           )}
                         >
-                          <TableCell className="py-4 px-6">
+                          <TableCell className="py-5 px-6">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center flex-shrink-0 border border-purple-200/50">
-                                <ShoppingCart className="h-4 w-4 text-purple-600" />
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 flex items-center justify-center flex-shrink-0 border border-pink-200/50">
+                                <ShoppingCart className="h-4 w-4 text-pink-600" />
                               </div>
                               <div className="min-w-0">
                                 <div className="font-semibold font-mono text-sm text-gray-900 truncate">
-                                  #{pedido.id.substring(0, 4)}
+                                  #{pedido.id.substring(0, 8)}
                                 </div>
                                 <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                                   <Calendar className="h-3 w-3" />
@@ -485,9 +533,11 @@ export default function Pedidos() {
                             </div>
                           </TableCell>
                           
-                          <TableCell className="py-4">
+                          <TableCell className="py-5">
                             <div className="min-w-0">
-                              <div className="font-medium text-gray-900 truncate">{pedido.fornecedor}</div>
+                              <div className="font-medium text-gray-900 truncate" title={pedido.fornecedor}>
+                                {abbreviateSupplierName(pedido.fornecedor)}
+                              </div>
                               <div className="text-xs text-gray-500 mt-1">
                                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
                                   <Package className="h-3 w-3" />
@@ -497,7 +547,7 @@ export default function Pedidos() {
                             </div>
                           </TableCell>
                           
-                          <TableCell className="hidden md:table-cell py-4">
+                          <TableCell className="hidden md:table-cell py-5">
                             <div className="min-w-0">
                               <div className="text-sm text-gray-900 truncate max-w-[150px]">
                                 {pedido.produtos[0]}
@@ -511,10 +561,10 @@ export default function Pedidos() {
                             </div>
                           </TableCell>
                           
-                          <TableCell className="hidden lg:table-cell py-4">
+                          <TableCell className="hidden lg:table-cell py-5">
                             <div className="text-sm space-y-1">
                               <div className="flex items-center gap-1 text-gray-900">
-                                <Truck className="h-3 w-3 text-purple-600" />
+                                <Truck className="h-3 w-3 text-pink-600" />
                                 {pedido.dataEntrega}
                               </div>
                               <div className="text-xs text-gray-500">
@@ -523,49 +573,52 @@ export default function Pedidos() {
                             </div>
                           </TableCell>
                           
-                          <TableCell className="py-4">
+                          <TableCell className="py-5">
                             {getStatusBadge(pedido.status)}
                           </TableCell>
                           
-                          <TableCell className="text-right py-4">
-                            <div className="font-bold text-green-600 text-base">{pedido.total}</div>
+                          <TableCell className="text-right py-5">
+                            <div className="font-bold text-emerald-600 text-base">{pedido.total}</div>
                           </TableCell>
-                          <TableCell className="py-4 px-6">
-                            <div className="flex justify-end gap-1">
+                          <TableCell className="py-5 px-6">
+                            <div className="flex justify-end gap-2">
+                              {/* Botão Visualizar - Primário */}
                               <Button 
-                                variant="ghost" 
+                                variant="outline" 
                                 size="sm"
                                 onClick={() => {
                                   setSelectedPedido(pedido);
                                   setViewDialogOpen(true);
                                 }}
-                                className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200"
+                                className="h-9 px-3 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
                               >
-                                <Eye className="h-4 w-4" />
-                                <span className="sr-only">Visualizar pedido</span>
+                                <Eye className="h-4 w-4 mr-1.5" />
+                                Ver
                               </Button>
                               
+                              {/* Botão Editar - Secundário */}
                               <Button 
-                                variant="ghost" 
+                                variant="outline" 
                                 size="sm"
                                 onClick={() => {
                                   setSelectedPedido(pedido);
                                   setEditDialogOpen(true);
                                 }}
-                                className="h-8 w-8 p-0 hover:bg-amber-100 hover:text-amber-700 transition-colors duration-200"
+                                className="h-9 w-9 p-0 border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all duration-200 shadow-sm hover:shadow-md"
                               >
                                 <Edit className="h-4 w-4" />
                                 <span className="sr-only">Editar pedido</span>
                               </Button>
                               
+                              {/* Botão Excluir - Destrutivo */}
                               <Button 
-                                variant="ghost" 
+                                variant="outline" 
                                 size="sm"
                                 onClick={() => {
                                   setSelectedPedido(pedido);
                                   setDeleteDialogOpen(true);
                                 }}
-                                className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-700 transition-colors duration-200"
+                                className="h-9 w-9 p-0 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-200 shadow-sm hover:shadow-md"
                               >
                                 <Trash2 className="h-4 w-4" />
                                 <span className="sr-only">Excluir pedido</span>
@@ -605,7 +658,9 @@ export default function Pedidos() {
                           </div>
                         </div>
                         <div>
-                          <CardTitle className="text-lg leading-tight">{pedido.fornecedor}</CardTitle>
+                          <CardTitle className="text-lg leading-tight" title={pedido.fornecedor}>
+                            {abbreviateSupplierName(pedido.fornecedor, 25)}
+                          </CardTitle>
                           <p className="text-sm text-muted-foreground">#{pedido.id}</p>
                         </div>
                       </div>
@@ -663,5 +718,7 @@ export default function Pedidos() {
           
           <ViewPedidoDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} pedido={selectedPedido} />
         </>}
-    </div>;
+      </div>
+    </PageWrapper>
+  );
 }

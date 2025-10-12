@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock } from "lucide-react";
+import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus } from "lucide-react";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -287,7 +287,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full -translate-y-16 translate-x-16"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-pink-400/10 rounded-full translate-y-12 -translate-x-12"></div>
 
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
               <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-white/20 backdrop-blur-sm flex-shrink-0">
                 <Package className="h-5 w-5 sm:h-6 sm:w-6 drop-shadow-sm" />
@@ -297,169 +297,179 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   Detalhes da Cotação
                 </DialogTitle>
                 <p className="text-gray-600/80 text-xs sm:text-sm font-medium mt-0.5 truncate">
-                  Visualize e gerencie informações da cotação
+                  {quote.produto} • {getStatusBadge(quote.status)}
                 </p>
               </div>
             </div>
-            <div className="flex-shrink-0 self-start sm:self-center">
-              {getStatusBadge(quote.status)}
-            </div>
+            
+            {/* Close Button - Isolated on the right */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 rounded-full border border-transparent hover:border-slate-300 transition-colors flex-shrink-0"
+              onClick={() => setOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
 
         <div className="flex flex-col flex-1 min-h-0">
           <Tabs defaultValue="detalhes" className="w-full flex flex-col flex-1 min-h-0">
-            <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm flex-shrink-0">
-              <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-1 shadow-lg border border-gray-200/40">
+            <div className="px-4 sm:px-6 py-2 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm flex-shrink-0">
+              <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm rounded-lg p-1 shadow-sm border border-gray-200/40 h-9">
                 <TabsTrigger
                   value="detalhes"
-                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-500 ease-out data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-blue-500/25 data-[state=active]:scale-105 hover:scale-102 px-2 sm:px-3 py-1.5 sm:py-2"
+                  className="rounded-md font-medium text-xs transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-2 py-1"
                 >
-                  <span className="hidden sm:inline">📋 Detalhes</span>
-                  <span className="sm:hidden">📋</span>
+                  Detalhes
                 </TabsTrigger>
                 <TabsTrigger
                   value="atualizacao"
-                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-500 ease-out data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-green-500/25 data-[state=active]:scale-105 hover:scale-102 px-2 sm:px-3 py-1.5 sm:py-2"
+                  className="rounded-md font-medium text-xs transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-2 py-1"
                 >
-                  <span className="hidden sm:inline">💰 Valores</span>
-                  <span className="sm:hidden">💰</span>
+                  Valores
                 </TabsTrigger>
                 <TabsTrigger
                   value="comparativo"
-                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-500 ease-out data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-purple-500/25 data-[state=active]:scale-105 hover:scale-102 px-2 sm:px-3 py-1.5 sm:py-2"
+                  className="rounded-md font-medium text-xs transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-2 py-1"
                 >
-                  <span className="hidden sm:inline">📊 Comparativo</span>
-                  <span className="sm:hidden">📊</span>
+                  Comparativo
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500 min-h-0">
-              {/* Layout lado a lado - duas colunas principais */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-4 space-y-5 animate-in fade-in-0 duration-300 min-h-0">
+              {/* Layout vertical único - informações organizadas sequencialmente */}
+              <div className="max-w-4xl mx-auto space-y-6">
                 
-                {/* Coluna Esquerda - Informações Principais */}
-                <div className="space-y-4">
-                  {/* Cards principais em grid 2x2 */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-indigo-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg flex-shrink-0">
+                {/* Seção 1: Informações Principais da Cotação */}
+                <div className="space-y-5">
+                  <h2 className="text-base font-bold text-slate-900 border-b-2 border-slate-300 pb-2 mb-4">Informações da Cotação</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Card className="p-4 border-2 border-blue-200 shadow-md bg-blue-50/30 hover:border-blue-300 transition-all duration-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-lg bg-blue-100 text-blue-700 flex-shrink-0 shadow-sm">
                           <Package className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-gray-600">Produto Principal</p>
-                          <p className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg truncate">{quote.produto}</p>
-                          <p className="text-xs sm:text-sm text-blue-600 font-medium truncate">{quote.quantidade}</p>
+                          <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1.5">Produto Principal</p>
+                          <p className="font-bold text-slate-900 text-base truncate">{quote.produto}</p>
+                          <p className="text-xs text-slate-700 font-medium truncate mt-1">{quote.quantidade}</p>
                         </div>
                       </div>
                     </Card>
 
-                    <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
+                    <Card className="p-4 border border-slate-200 shadow-sm bg-white hover:border-slate-300 transition-colors duration-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-lg bg-purple-50 text-purple-600/80 flex-shrink-0">
                           <Users className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-gray-600">Fornecedores Participantes</p>
-                          <p className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">{quote.fornecedores}</p>
-                          <p className="text-xs sm:text-sm text-green-600 font-medium">fornecedores convidados</p>
+                          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Fornecedores Participantes</p>
+                          <p className="font-bold text-slate-900 text-base">{quote.fornecedores}</p>
+                          <p className="text-xs text-slate-700 font-medium mt-1">fornecedores convidados</p>
                         </div>
                       </div>
                     </Card>
 
-                    <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-pink-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg flex-shrink-0">
+                    <Card className="p-4 border border-slate-200 shadow-sm bg-white hover:border-slate-300 transition-colors duration-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600/80 flex-shrink-0">
                           <Calendar className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-gray-600">Período da Cotação</p>
-                          <p className="font-bold text-gray-900 text-sm sm:text-base truncate">{quote.dataInicio}</p>
-                          <p className="text-xs sm:text-sm text-purple-600 font-medium truncate">até {quote.dataFim}</p>
+                          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Período da Cotação</p>
+                          <p className="font-bold text-slate-900 text-base truncate">{quote.dataInicio}</p>
+                          <p className="text-xs text-slate-700 font-medium truncate mt-1">até {quote.dataFim}</p>
                         </div>
                       </div>
                     </Card>
 
-                    <Card className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-orange-50/60 to-red-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-lg flex-shrink-0">
+                    <Card className="p-4 border border-slate-200 shadow-sm bg-white hover:border-slate-300 transition-colors duration-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-lg bg-slate-100 text-slate-600/80 flex-shrink-0">
                           <TrendingDown className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-gray-600">Melhor Oferta</p>
-                          <p className="font-bold text-green-600 text-sm sm:text-base lg:text-lg truncate">{quote.melhorPreco}</p>
-                          <p className="text-xs sm:text-sm text-orange-600 font-medium truncate">{quote.melhorFornecedor}</p>
+                          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Melhor Oferta</p>
+                          <p className="font-bold text-slate-700 text-base truncate">{quote.melhorPreco}</p>
+                          <p className="text-xs text-slate-700 font-medium truncate mt-1">{quote.melhorFornecedor}</p>
                         </div>
                       </div>
                     </Card>
                   </div>
+                </div>
 
-                  {/* Resumo da economia */}
-                  <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl border-l-4 border-l-green-500">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl flex-shrink-0">
-                          <DollarSign className="h-5 w-5" />
+                {/* Seção 2: Economia Estimada */}
+                <div className="space-y-5">
+                  <h2 className="text-2xl font-bold text-emerald-800 border-b-2 border-emerald-200 pb-4 mb-6">Economia e Resultados</h2>
+                  <Card className="p-6 border-2 border-emerald-200 shadow-lg bg-gradient-to-br from-emerald-50 to-green-50 hover:border-emerald-300 transition-all duration-200 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="p-4 rounded-lg bg-emerald-100 text-emerald-700 flex-shrink-0 shadow-md">
+                          <DollarSign className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-lg sm:text-xl text-gray-900">Economia Estimada</h3>
-                          <p className="text-green-600 font-bold text-xl sm:text-2xl truncate">{quote.economia}</p>
-                          <p className="text-xs sm:text-sm text-gray-600">em relação ao preço médio de mercado</p>
+                          <p className="text-sm font-bold text-emerald-800 uppercase tracking-wide mb-3">Economia Estimada</p>
+                          <p className="text-emerald-900 font-bold text-4xl mb-2">{quote.economia}</p>
+                          <p className="text-base text-emerald-700 font-medium">em relação ao preço médio de mercado</p>
                         </div>
                       </div>
                       <div className="flex-shrink-0">
-                        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-100 rounded-full">
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                          <span className="text-green-700 font-semibold text-xs sm:text-sm">Economia Ativa</span>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 border border-emerald-200 rounded-full shadow-sm">
+                          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                          <span className="text-emerald-800 font-semibold text-sm">Economia Ativa</span>
                         </div>
                       </div>
                     </div>
                   </Card>
+                </div>
 
-                  {/* Estatísticas da Cotação */}
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                    <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-cyan-50/40 backdrop-blur-sm rounded-xl">
+                {/* Seção 3: Estatísticas da Cotação */}
+                <div className="space-y-3">
+                  <h3 className="text-base font-semibold text-slate-700 border-b border-slate-200 pb-2 mb-4">Estatísticas</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <Card className="p-4 border border-slate-200 shadow-sm bg-white hover:border-slate-300 transition-colors duration-200 rounded-lg">
                       <div className="text-center">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-lg mx-auto w-fit mb-2">
+                        <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600/70 mx-auto w-fit mb-2">
                           <Package className="h-4 w-4" />
                         </div>
-                        <p className="text-xs text-gray-600 mb-1">Total de Produtos</p>
-                        <p className="font-bold text-lg text-gray-900">{products.length}</p>
+                        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Total de Produtos</p>
+                        <p className="font-bold text-xl text-slate-900">{products.length}</p>
                       </div>
                     </Card>
 
-                    <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-pink-50/40 backdrop-blur-sm rounded-xl">
+                    <Card className="p-4 border border-slate-200 shadow-sm bg-white hover:border-slate-300 transition-colors duration-200 rounded-lg">
                       <div className="text-center">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg mx-auto w-fit mb-2">
+                        <div className="p-2.5 rounded-lg bg-purple-50 text-purple-600/70 mx-auto w-fit mb-2">
                           <Users className="h-4 w-4" />
                         </div>
-                        <p className="text-xs text-gray-600 mb-1">Fornecedores Ativos</p>
-                        <p className="font-bold text-lg text-gray-900">
+                        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Fornecedores Ativos</p>
+                        <p className="font-bold text-xl text-slate-900">
                           {quote.fornecedoresParticipantes.filter(f => f.status === 'respondido').length}
                         </p>
                       </div>
                     </Card>
 
-                    <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl">
+                    <Card className="p-4 border border-slate-200 shadow-sm bg-white hover:border-slate-300 transition-colors duration-200 rounded-lg">
                       <div className="text-center">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg mx-auto w-fit mb-2">
+                        <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600/75 mx-auto w-fit mb-2">
                           <TrendingDown className="h-4 w-4" />
                         </div>
-                        <p className="text-xs text-gray-600 mb-1">Melhor Valor</p>
-                        <p className="font-bold text-lg text-green-600">
+                        <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-1.5">Melhor Valor</p>
+                        <p className="font-bold text-xl text-emerald-700">
                           R$ {getMelhorValor().toFixed(2)}
                         </p>
                       </div>
                     </Card>
 
-                    <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-orange-50/60 to-red-50/40 backdrop-blur-sm rounded-xl">
+                    <Card className="p-4 border border-slate-200 shadow-sm bg-white hover:border-slate-300 transition-colors duration-200 rounded-lg">
                       <div className="text-center">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-orange-600 to-red-600 text-white shadow-lg mx-auto w-fit mb-2">
+                        <div className="p-2.5 rounded-lg bg-slate-100 text-slate-600/80 mx-auto w-fit mb-2">
                           <Calendar className="h-4 w-4" />
                         </div>
-                        <p className="text-xs text-gray-600 mb-1">Status</p>
+                        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Status</p>
                         <div className="flex justify-center">
                           {getStatusBadge(quote.status)}
                         </div>
@@ -468,26 +478,34 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   </div>
                 </div>
 
-                {/* Coluna Direita - Lista de Fornecedores */}
-                <div className="space-y-4">
-                  <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-slate-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl h-fit">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg">
-                        <Users className="h-4 w-4" />
+                {/* Seção 4: Fornecedores Participantes */}
+                <div className="space-y-3">
+                  <h3 className="text-base font-semibold text-slate-700 border-b border-slate-200 pb-2 mb-4">Fornecedores Participantes</h3>
+                  <Card className="p-5 border border-slate-200 shadow-sm bg-white hover:border-slate-300 transition-colors duration-200 rounded-lg">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="p-2.5 rounded-lg bg-purple-50 text-purple-600/80">
+                        <Users className="h-5 w-5" />
                       </div>
-                      <h3 className="font-bold text-lg text-gray-900">Fornecedores Participantes</h3>
+                      <div className="flex-1">
+                        <p className="text-base font-semibold text-slate-700 border-b border-slate-200 pb-2 mb-4">Lista de Participantes</p>
+                        <p className="text-sm text-slate-600 font-medium">Fornecedores que enviaram propostas</p>
+                      </div>
+                      <span className="bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold">
+                        {quote.fornecedoresParticipantes.length} participantes
+                      </span>
                     </div>
-                    <div className="space-y-3 max-h-[400px] lg:max-h-[600px] overflow-y-auto">
+
+                    <div className="space-y-3 max-h-80 overflow-y-auto">
                       {quote.fornecedoresParticipantes.map(fornecedor => (
-                        <div key={fornecedor.id} className="flex items-center justify-between p-3 bg-white/60 rounded-xl border border-gray-100/60">
-                          <div className="flex items-center gap-3">
+                        <div key={fornecedor.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors duration-200">
+                          <div className="flex items-center gap-4">
                             <div className={cn(
-                              "w-3 h-3 rounded-full",
-                              fornecedor.status === 'respondido' ? "bg-green-500" : "bg-yellow-500"
+                              "w-4 h-4 rounded-full border-2 border-white shadow-sm",
+                              fornecedor.status === 'respondido' ? "bg-emerald-400" : "bg-amber-400"
                             )}></div>
                             <div>
-                              <p className="font-semibold text-gray-900">{fornecedor.nome}</p>
-                              <p className="text-xs text-gray-600">
+                              <p className="font-bold text-lg text-slate-900">{fornecedor.nome}</p>
+                              <p className="text-sm text-slate-600 mt-2 font-medium">
                                 {fornecedor.status === 'respondido'
                                   ? `Respondeu em ${fornecedor.dataResposta}`
                                   : 'Aguardando resposta'
@@ -497,11 +515,11 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           </div>
                           <div className="text-right">
                             {fornecedor.valorOferecido > 0 ? (
-                              <p className="font-bold text-green-600">
+                              <p className="font-bold text-xl text-emerald-700">
                                 R$ {fornecedor.valorOferecido.toFixed(2)}
                               </p>
                             ) : (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-sm border-amber-300 text-amber-700 bg-amber-50">
                                 Pendente
                               </Badge>
                             )}
@@ -514,24 +532,28 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </div>
             </TabsContent>
 
-            <TabsContent value="atualizacao" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500 min-h-0">
-              <Card className="p-3 sm:p-4 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-green-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 bg-gradient-to-r from-green-50/60 to-emerald-50/40 rounded-xl border border-green-100/60">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
-                      <Users className="h-4 w-4" />
+            <TabsContent value="atualizacao" className="flex-1 overflow-y-auto p-3 space-y-3 animate-in fade-in-0 duration-500 min-h-0">
+              <Card className="p-3 border-0 shadow-md bg-gradient-to-br from-white via-gray-50/30 to-green-50/20 backdrop-blur-sm rounded-lg">
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gradient-to-r from-green-50/60 to-emerald-50/40 rounded-lg border border-green-100/60">
+                    <div className="p-1.5 rounded-md bg-blue-50 text-blue-600/80 shadow-sm flex-shrink-0">
+                      <Users className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <label className="text-xs sm:text-sm font-bold text-gray-900 block mb-2">Selecione o Fornecedor</label>
+                      <label className="text-sm font-bold text-slate-800 block mb-2">Selecione o Fornecedor</label>
                       <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
                         <SelectTrigger className="bg-white/80 backdrop-blur-sm border-green-200 focus:border-green-400 rounded-xl">
                           <SelectValue placeholder="Escolha um fornecedor para editar valores" />
                         </SelectTrigger>
                         <SelectContent>
                           {quote.fornecedoresParticipantes.map(fornecedor => (
-                            <SelectItem key={fornecedor.id} value={fornecedor.id}>
+                            <SelectItem 
+                              key={fornecedor.id} 
+                              value={fornecedor.id}
+                              className="focus:bg-emerald-50 focus:text-emerald-800 data-[highlighted]:bg-emerald-50 data-[highlighted]:text-emerald-800"
+                            >
                               <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                                 {fornecedor.nome}
                               </div>
                             </SelectItem>
@@ -544,8 +566,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   {selectedSupplier && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
-                          <DollarSign className="h-4 w-4" />
+                        <h4 className="font-bold flex items-center gap-2 text-lg border-b border-slate-200 pb-2 mb-3">
+                          <DollarSign className="h-5 w-5 text-slate-600" />
                           Lista de Produtos
                         </h4>
                         {quote.status === "concluida" && (
@@ -566,46 +588,69 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           </div>
                         </div>
                       )}
-                      <div className="rounded-xl border-0 shadow-lg overflow-hidden bg-white/60 backdrop-blur-sm overflow-x-auto">
+                      <div className="rounded-xl border border-slate-200/40 shadow-lg overflow-hidden bg-white/60 backdrop-blur-sm overflow-x-auto">
                         <table className="w-full min-w-[600px]">
                           <thead>
-                            <tr className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
-                                <span className="hidden sm:inline">📦 Produto</span>
-                                <span className="sm:hidden">📦</span>
+                            <tr className="bg-gradient-to-r from-slate-100/80 to-blue-50/60 border-b border-slate-300/50">
+                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm text-slate-800">
+                                <span className="hidden sm:inline flex items-center gap-2">
+                                  <Package className="h-4 w-4 text-blue-500" />
+                                  Produto
+                                </span>
+                                <span className="sm:hidden">
+                                  <Package className="h-4 w-4 text-blue-500" />
+                                </span>
                               </th>
-                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
-                                <span className="hidden sm:inline">📏 Quantidade</span>
-                                <span className="sm:hidden">📏</span>
+                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm text-slate-800">
+                                <span className="hidden sm:inline flex items-center gap-2">
+                                  <TrendingDown className="h-4 w-4 text-blue-500" />
+                                  Quantidade
+                                </span>
+                                <span className="sm:hidden">
+                                  <TrendingDown className="h-4 w-4 text-blue-500" />
+                                </span>
                               </th>
-                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
-                                <span className="hidden sm:inline">💰 Valor Oferecido</span>
-                                <span className="sm:hidden">💰</span>
+                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm text-slate-800">
+                                <span className="hidden sm:inline flex items-center gap-2">
+                                  <DollarSign className="h-4 w-4 text-blue-500" />
+                                  Valor Oferecido
+                                </span>
+                                <span className="sm:hidden">
+                                  <DollarSign className="h-4 w-4 text-blue-500" />
+                                </span>
                               </th>
-                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
-                                <span className="hidden sm:inline">⚙️ Ações</span>
-                                <span className="sm:hidden">⚙️</span>
+                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm text-slate-800">
+                                <span className="hidden sm:inline flex items-center gap-2">
+                                  <Edit2 className="h-4 w-4 text-blue-500" />
+                                  Ações
+                                </span>
+                                <span className="sm:hidden">
+                                  <Edit2 className="h-4 w-4 text-blue-500" />
+                                </span>
                               </th>
                             </tr>
                           </thead>
                           <tbody>
-                            {products.map((product: any) => {
+                            {products.map((product: any, index: number) => {
                               const currentValue = getSupplierProductValue(selectedSupplier, product.product_id);
                               const isEditing = editingProductId === product.product_id;
                               const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
                               const isBestPrice = currentValue > 0 && selectedSupplier === bestSupplierId;
 
                               return (
-                                <tr key={product.product_id} className="border-b border-gray-100 last:border-0 hover:bg-green-50/30 transition-colors">
+                                <tr key={product.product_id} className={cn(
+                                  "border-b border-slate-200/60 last:border-0 hover:bg-blue-50/40 transition-colors",
+                                  index % 2 === 0 ? "bg-white/80" : "bg-slate-50/30"
+                                )}>
                                   <td className="p-2 sm:p-3">
-                                    <div className="font-semibold text-gray-900 text-xs sm:text-sm truncate max-w-[150px] sm:max-w-none" title={product.product_name}>
+                                    <div className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[150px] sm:max-w-none" title={product.product_name}>
                                       {product.product_name}
                                     </div>
                                   </td>
                                   <td className="p-2 sm:p-3">
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                      <span className="font-medium text-xs sm:text-sm">{product.quantidade}</span>
-                                      <Badge variant="outline" className="text-xs w-fit">{product.unidade}</Badge>
+                                      <span className="font-semibold text-slate-700 text-xs sm:text-sm">{product.quantidade}</span>
+                                      <Badge variant="outline" className="text-xs w-fit text-slate-500 border-slate-300">{product.unidade}</Badge>
                                     </div>
                                   </td>
                                   <td className="p-2 sm:p-3">
@@ -627,15 +672,20 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                     ) : (
                                       <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                                         <span className={cn(
-                                          "font-bold text-sm sm:text-base lg:text-lg",
-                                          isBestPrice ? "text-green-600" : "text-gray-900"
+                                          "font-bold text-sm sm:text-base",
+                                          isBestPrice ? "text-emerald-600" : "text-slate-800"
                                         )}>
                                           R$ {currentValue.toFixed(2)}
                                         </span>
                                         {isBestPrice && (
-                                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg text-xs w-fit">
-                                            <span className="hidden sm:inline">🏆 Melhor Preço</span>
-                                            <span className="sm:hidden">🏆</span>
+                                          <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm text-xs w-fit">
+                                            <span className="hidden sm:inline flex items-center gap-1">
+                                              <TrendingDown className="h-3 w-3" />
+                                              Melhor Preço
+                                            </span>
+                                            <span className="sm:hidden">
+                                              <TrendingDown className="h-3 w-3" />
+                                            </span>
                                           </Badge>
                                         )}
                                       </div>
@@ -707,52 +757,65 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                   return (
                     <Card key={fornecedor.id} className={cn(
-                      "p-3 sm:p-4 border-0 shadow-lg backdrop-blur-sm rounded-xl sm:rounded-2xl transition-all duration-300",
+                      "p-4 sm:p-6 border transition-all duration-200 hover:shadow-md",
                       isWinning
-                        ? "bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 border-l-4 border-l-green-500 scale-105"
-                        : "bg-gradient-to-br from-white via-gray-50/30 to-slate-50/20"
+                        ? "bg-white border-emerald-200 shadow-emerald-50 shadow-lg"
+                        : "bg-white border-slate-200 hover:border-slate-300"
                     )}>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-start gap-4">
                         <div className={cn(
-                          "p-2.5 rounded-xl shadow-lg flex-shrink-0",
+                          "p-3 rounded-lg flex-shrink-0 border",
                           isWinning
-                            ? "bg-gradient-to-br from-green-600 to-emerald-600 text-white"
-                            : "bg-gradient-to-br from-gray-600 to-slate-600 text-white"
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                            : "bg-slate-50 border-slate-200 text-slate-600"
                         )}>
-                          <Users className="h-4 w-4" />
+                          <Building2 className="h-5 w-5" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-gray-900 text-sm sm:text-base truncate" title={fornecedor.nome}>
+                        <div className="flex-1 min-w-0 space-y-4">
+                          {/* H1 - Título Principal: Nome do Fornecedor */}
+                          <div className="flex items-center justify-between">
+                            <h1 className="text-base font-bold text-slate-900 truncate" title={fornecedor.nome}>
                               {fornecedor.nome}
-                            </h3>
+                            </h1>
                             {isWinning && (
-                              <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow-lg text-xs">
-                                🏆 Vencedor
+                              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold text-xs">
+                                🏆 Melhor Oferta
                               </Badge>
                             )}
                           </div>
-                          <div className="space-y-1 mt-2">
-                            <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-600">Total:</span>
-                              <span className={cn(
-                                "font-bold text-sm",
-                                isWinning ? "text-green-600" : "text-gray-900"
+                          
+                          {/* H3 - Destaques: Valores Principais */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Valor Total</span>
+                              <div className={cn(
+                                "text-lg font-bold leading-tight",
+                                isWinning ? "text-emerald-700" : "text-slate-900"
                               )}>
                                 R$ {totalValue.toFixed(2)}
-                              </span>
+                              </div>
                             </div>
+                            <div className="space-y-2">
+                              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Produtos</span>
+                              <div className="text-sm font-bold text-slate-800">
+                                {respondedProducts} <span className="text-xs font-medium text-slate-600">de {products.length}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Body - Conteúdo: Informações Complementares */}
+                          <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-600">Produtos:</span>
-                              <span className="text-xs font-medium">
-                                {respondedProducts}/{products.length} respondidos
+                              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Taxa de Participação</span>
+                              <span className="text-xs font-bold text-slate-800">
+                                {Math.round((respondedProducts / products.length) * 100)}%
                               </span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                            <div className="w-full bg-slate-100 rounded-full h-2.5">
                               <div
                                 className={cn(
-                                  "h-1.5 rounded-full transition-all duration-300",
-                                  isWinning ? "bg-gradient-to-r from-green-500 to-emerald-500" : "bg-gray-400"
+                                  "h-2.5 rounded-full transition-all duration-500",
+                                  isWinning ? "bg-emerald-500" : "bg-slate-400"
                                 )}
                                 style={{ width: `${(respondedProducts / products.length) * 100}%` }}
                               ></div>
@@ -766,134 +829,159 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </div>
 
               {/* Tabela Comparativa */}
-              <div className="rounded-xl border-0 shadow-xl overflow-hidden bg-white/60 backdrop-blur-sm overflow-x-auto">
-                <table className="w-full min-w-[700px]">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                      <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm">
-                        <span className="hidden sm:inline">📦 Produto</span>
-                        <span className="sm:hidden">📦</span>
-                      </th>
-                      {quote.fornecedoresParticipantes.map(fornecedor => (
-                        <th key={fornecedor.id} className="p-2 sm:p-3 text-center font-bold text-xs sm:text-sm min-w-[120px]">
-                          <div className="truncate" title={fornecedor.nome}>
-                            <span className="hidden sm:inline">🏢 {fornecedor.nome}</span>
-                            <span className="sm:hidden">{fornecedor.nome.substring(0, 8)}...</span>
+              <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[600px]">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        {/* H2 - Subtítulo: Header da Tabela */}
+                        <th className="p-4 text-left min-w-[200px]">
+                          <div className="flex items-center gap-3">
+                            <div className="p-1.5 bg-slate-100 rounded-md">
+                              <Package className="h-4 w-4 text-slate-600" />
+                            </div>
+                            <span className="text-base font-bold text-slate-800">Produtos</span>
                           </div>
                         </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((product: any) => {
-                      const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
-
-                      return (
-                        <tr key={product.product_id} className="border-b border-gray-100 last:border-0 hover:bg-purple-50/30 transition-colors">
-                          <td className="p-2 sm:p-3">
-                            <div className="flex items-center gap-2 sm:gap-3">
-                              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
-                                📦
+                        {quote.fornecedoresParticipantes.map(fornecedor => (
+                          <th key={fornecedor.id} className="p-4 text-center min-w-[120px] max-w-[140px]">
+                            <div className="flex flex-col items-center gap-2">
+                              <div className="p-1.5 bg-slate-100 rounded-md">
+                                <Building2 className="h-4 w-4 text-slate-600" />
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-bold text-gray-900 text-xs sm:text-sm lg:text-base truncate" title={product.product_name}>
-                                  {product.product_name}
-                                </p>
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
-                                  <span className="text-xs sm:text-sm text-gray-600">{product.quantidade}</span>
-                                  <Badge variant="outline" className="text-xs w-fit">{product.unidade}</Badge>
+                              {/* H2 - Subtítulo: Nome do Fornecedor no Header */}
+                              <span className="truncate text-xs font-bold text-slate-800 leading-tight" title={fornecedor.nome}>
+                                {fornecedor.nome.length > 14 ? `${fornecedor.nome.substring(0, 14)}...` : fornecedor.nome}
+                              </span>
+                            </div>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.map((product: any, index: number) => {
+                        const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
+
+                        return (
+                          <tr key={product.product_id} className={cn(
+                            "border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors duration-150",
+                            index % 2 === 0 ? "bg-white" : "bg-slate-50/30"
+                          )}>
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 border border-slate-200">
+                                  <Package className="h-4 w-4 text-slate-600" />
+                                </div>
+                                <div className="flex-1 min-w-0 space-y-2">
+                                  {/* H3 - Destaque: Nome do Produto */}
+                                  <p className="font-bold text-slate-900 text-sm truncate" title={product.product_name}>
+                                    {product.product_name}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    {/* Body - Conteúdo: Quantidade */}
+                                    <span className="text-xs text-slate-700 font-semibold">{product.quantidade}</span>
+                                    {/* Caption - Informação Secundária: Unidade */}
+                                    <Badge variant="outline" className="text-xs px-2 py-0.5 h-5 border-slate-300 text-slate-600 bg-white font-medium">
+                                      {product.unidade}
+                                    </Badge>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </td>
-                          {quote.fornecedoresParticipantes.map(fornecedor => {
-                            const value = getSupplierProductValue(fornecedor.id, product.product_id);
-                            const isBestPrice = fornecedor.id === bestSupplierId;
+                            </td>
+                            {quote.fornecedoresParticipantes.map(fornecedor => {
+                              const value = getSupplierProductValue(fornecedor.id, product.product_id);
+                              const isBestPrice = fornecedor.id === bestSupplierId;
 
-                            return (
-                              <td key={fornecedor.id} className="p-2 sm:p-3 text-center">
-                                {value > 0 ? (
-                                  <div className="flex flex-col items-center gap-1 sm:gap-2">
-                                    <div className={cn(
-                                      "px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm lg:text-base shadow-lg transition-all duration-300",
-                                      isBestPrice
-                                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-500/25 scale-105 sm:scale-110"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    )}>
-                                      R$ {value.toFixed(2)}
+                              return (
+                                <td key={fornecedor.id} className="p-4 text-center">
+                                  {value > 0 ? (
+                                    <div className="flex flex-col items-center gap-2">
+                                      {/* H3 - Destaque: Valor do Produto */}
+                                      <div className={cn(
+                                        "px-3 py-2 rounded-lg transition-all duration-200 min-w-[100px]",
+                                        isBestPrice
+                                          ? "bg-emerald-500 text-white shadow-sm font-bold text-sm"
+                                          : "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 font-semibold text-xs"
+                                      )}>
+                                        R$ {value.toFixed(2)}
+                                      </div>
+                                      {isBestPrice && (
+                                        <div className="flex items-center gap-1 text-emerald-600">
+                                          <Star className="h-3 w-3 fill-current" />
+                                          <span className="text-xs font-semibold">Melhor preço</span>
+                                        </div>
+                                      )}
                                     </div>
-                                    {isBestPrice && (
-                                      <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow-lg animate-pulse text-xs">
-                                        <span className="hidden sm:inline">🏆 Melhor Oferta</span>
-                                        <span className="sm:hidden">🏆</span>
-                                      </Badge>
+                                  ) : (
+                                      <div className="px-3 py-2 rounded-lg bg-slate-50 text-slate-400 font-medium text-xs border border-slate-200 min-w-[100px] flex items-center justify-center">
+                                        <Minus className="h-4 w-4" />
+                                      </div>
                                     )}
-                                  </div>
-                                ) : (
-                                  <div className="px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl bg-gray-100 text-gray-400 font-medium text-xs sm:text-sm">
-                                    <span className="hidden sm:inline">Sem oferta</span>
-                                    <span className="sm:hidden">-</span>
-                                  </div>
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Ações da Cotação */}
               <div className="space-y-4">
                 {/* Convert to Order Button */}
                 {quote.status === 'ativa' && bestSupplier && (
-                  <Card className="p-4 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-2xl border-l-4 border-l-green-500">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <Card className="p-4 sm:p-5 border border-blue-200/50 shadow-lg bg-gradient-to-br from-blue-50/80 via-sky-50/60 to-blue-100/40 backdrop-blur-sm rounded-xl border-l-4 border-l-blue-500">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
                       <div className="flex items-center gap-3">
-                        <div className="p-3 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
                           <ShoppingCart className="h-5 w-5" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-lg text-gray-900">Pronto para Converter?</h3>
-                          <p className="text-sm text-gray-600">
-                            Melhor fornecedor: <span className="font-semibold text-green-700">{bestSupplier.nome}</span>
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Valor total: <span className="font-bold text-green-700">R$ {bestSupplier.totalValue.toFixed(2)}</span>
-                          </p>
+                          {/* H2 - Subtítulo: Título da Seção */}
+                          <h3 className="font-bold text-xl text-slate-900 mb-2">Pronto para Converter?</h3>
+                          <div className="space-y-1">
+                            {/* Body - Conteúdo: Informação do Fornecedor */}
+                            <p className="text-xs text-slate-700">
+                              Melhor fornecedor: <span className="font-bold text-blue-700">{bestSupplier.nome}</span>
+                            </p>
+                            {/* H3 - Destaque: Valor Total */}
+                            <p className="text-sm text-slate-700">
+                              Valor total: <span className="font-bold text-blue-700 text-base">R$ {bestSupplier.totalValue.toFixed(2)}</span>
+                            </p>
+                          </div>
                         </div>
                       </div>
                       <Button
                         onClick={handleConvertToOrder}
                         disabled={isUpdating}
-                        className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 text-sm px-4 py-3"
+                        className="bg-blue-600 border border-blue-600 hover:bg-blue-700 hover:border-blue-700 text-white transition-colors duration-200 text-sm px-6 py-2.5 h-auto min-h-[44px] whitespace-nowrap"
                       >
-                        <ShoppingCart className="h-5 w-5 mr-2" />
-                        Converter para Pedido
+                        <ShoppingCart className="h-5 w-5 mr-2 flex-shrink-0" />
+                        <span className="font-medium">Converter para Pedido</span>
                       </Button>
                     </div>
                   </Card>
                 )}
 
                 {/* Ações Adicionais */}
-                <Card className="p-4 border-0 shadow-lg bg-gradient-to-br from-white via-gray-50/30 to-slate-50/20 backdrop-blur-sm rounded-xl">
+                <Card className="p-4 border border-slate-200/50 shadow-md bg-gradient-to-br from-white via-slate-50/30 to-blue-50/20 backdrop-blur-sm rounded-xl">
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-sm">
                         <FileText className="h-4 w-4" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900">Ações da Cotação</h4>
-                        <p className="text-xs text-gray-600">Exportar dados ou compartilhar informações</p>
+                        <h4 className="font-semibold text-sm text-slate-900">Ações da Cotação</h4>
+                        <p className="text-xs text-slate-600">Exportar dados ou compartilhar informações</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-xl"
+                        className="border-slate-300 text-slate-600 hover:border-slate-400 hover:bg-slate-50 transition-colors duration-200 rounded-lg"
                         onClick={() => {
                           // Função para exportar dados da cotação
                           const data = {
@@ -916,7 +1004,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-purple-200 text-purple-600 hover:bg-purple-50 rounded-xl"
+                        className="border-slate-300 text-slate-600 hover:border-slate-400 hover:bg-slate-50 transition-colors duration-200 rounded-lg"
                         onClick={() => {
                           // Função para compartilhar cotação
                           if (navigator.share) {
@@ -940,14 +1028,14 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                 {/* Informações de Tempo */}
                 {quote.status === 'ativa' && (
-                  <Card className="p-3 border-0 shadow-lg bg-gradient-to-br from-amber-50/60 to-orange-50/40 backdrop-blur-sm rounded-xl border-l-4 border-l-amber-500">
+                  <Card className="p-3 border border-blue-200/50 shadow-md bg-gradient-to-br from-blue-50/60 to-sky-50/40 backdrop-blur-sm rounded-xl border-l-4 border-l-blue-400">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-amber-600 to-orange-600 text-white shadow-lg">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm">
                         <Clock className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-semibold text-amber-800">Cotação em Andamento</p>
-                        <p className="text-xs text-amber-700">
+                        <p className="font-semibold text-sm text-blue-800">Cotação em Andamento</p>
+                        <p className="text-xs text-blue-700">
                           Prazo final: {quote.dataFim} • Aguardando respostas dos fornecedores
                         </p>
                       </div>

@@ -123,19 +123,32 @@ export default function Fornecedores() {
   });
   const paginatedData = paginate(filteredSuppliers);
   const getStatusBadge = (status: string) => {
-    const variants = {
-      active: "default",
-      inactive: "secondary",
-      pending: "outline"
-    } as const;
-    const labels = {
-      active: "Ativo",
-      inactive: "Inativo",
-      pending: "Pendente"
+    const statusConfig = {
+      active: {
+        variant: "default" as const,
+        label: "Ativo",
+        className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 font-semibold shadow-sm"
+      },
+      inactive: {
+        variant: "secondary" as const,
+        label: "Inativo", 
+        className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200 font-semibold shadow-sm"
+      },
+      pending: {
+        variant: "outline" as const,
+        label: "Pendente",
+        className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 font-semibold shadow-sm"
+      }
     };
-    return <Badge variant={variants[status as keyof typeof variants]}>
-        {labels[status as keyof typeof labels]}
-      </Badge>;
+
+    const config = statusConfig[status as keyof typeof statusConfig];
+    if (!config) return null;
+
+    return (
+      <Badge variant={config.variant} className={config.className}>
+        {config.label}
+      </Badge>
+    );
   };
   const renderStarRating = (rating: number) => {
     return <div className="flex items-center gap-1">
@@ -165,9 +178,11 @@ export default function Fornecedores() {
         <div className="text-center">Carregando...</div>
       </div>;
   }
-  return <>
+  return (
+    <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
-      <div className="page-container">
+      <PageWrapper>
+        <div className="page-container">
       {/* Header Fornecedores com Tema Índigo */}
       <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl p-6 border border-indigo-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -384,17 +399,23 @@ export default function Fornecedores() {
                         supplierName={supplier.name}
                         supplierId={supplier.id}
                         trigger={
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                            <Eye className="h-4 w-4 mr-2" />
+                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors">
+                            <Eye className="h-4 w-4 mr-2 text-blue-600" />
                             Ver Histórico de Cotações
                           </DropdownMenuItem>
                         }
                       />
-                      <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                        <Edit className="h-4 w-4 mr-2" />
+                      <DropdownMenuItem 
+                        onClick={() => setEditingSupplier(supplier)}
+                        className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors"
+                      >
+                        <Edit className="h-4 w-4 mr-2 text-green-600" />
                         Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive" onClick={() => setDeletingSupplier(supplier)}>
+                      <DropdownMenuItem 
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors" 
+                        onClick={() => setDeletingSupplier(supplier)}
+                      >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir
                       </DropdownMenuItem>
@@ -473,76 +494,100 @@ export default function Fornecedores() {
                 } />
               </CardContent>
             </Card>)}
-        </div> : <Card>
+        </div> : <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-indigo-50/30">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fornecedor</TableHead>
-                    <TableHead className="hidden md:table-cell">Status</TableHead>
-                    <TableHead className="hidden lg:table-cell">Limite</TableHead>
-                    <TableHead>Preço Médio</TableHead>
-                    <TableHead className="hidden sm:table-cell">Cotações</TableHead>
-                    <TableHead className="hidden lg:table-cell">Avaliação</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                <TableHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-100">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-bold text-indigo-900 py-4">Fornecedor</TableHead>
+                    <TableHead className="hidden md:table-cell font-bold text-indigo-900 py-4">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell font-bold text-indigo-900 py-4">Limite</TableHead>
+                    <TableHead className="font-bold text-indigo-900 py-4">Preço Médio</TableHead>
+                    <TableHead className="hidden sm:table-cell font-bold text-indigo-900 py-4">Cotações</TableHead>
+                    <TableHead className="hidden lg:table-cell font-bold text-indigo-900 py-4">Avaliação</TableHead>
+                    <TableHead className="text-right font-bold text-indigo-900 py-4">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map(supplier => <TableRow key={supplier.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <Building2 className="h-4 w-4 text-primary" />
+                  {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="hover:bg-indigo-50/30 transition-colors border-b border-gray-100/60">
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <Building2 className="h-4 w-4 text-indigo-600" />
                           </div>
                           <div>
-                            <div className="font-medium">{supplier.name}</div>
-                            <div className="text-xs text-muted-foreground">{supplier.contact}</div>
+                            <div className="font-semibold text-gray-900 text-sm">{supplier.name}</div>
+                            <div className="text-xs text-gray-500 mt-1">{supplier.contact}</div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <StatusBadge status={supplier.status} />
+                      <TableCell className="hidden md:table-cell py-4">
+                        {getStatusBadge(supplier.status)}
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell">{supplier.limit}</TableCell>
-                      <TableCell>
-                        <span className="font-semibold text-success">{supplier.avgPrice}</span>
+                      <TableCell className="hidden lg:table-cell py-4">
+                        <Badge variant="outline" className="bg-blue-50/80 border-blue-200/60 text-blue-700 font-medium text-xs">{supplier.limit}</Badge>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        <div className="text-sm">
-                          <div className="font-medium text-primary">{supplier.activeQuotes} ativas</div>
-                          <div className="text-muted-foreground">{supplier.totalQuotes} total</div>
+                      <TableCell className="py-4">
+                        <span className="font-bold text-green-700 text-sm">{supplier.avgPrice}</span>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell py-4">
+                        <div className="text-sm space-y-1">
+                          <div className="flex items-center gap-1">
+                            <FileText className="h-3 w-3 text-indigo-600" />
+                            <span className="font-semibold text-indigo-700 text-xs">{supplier.activeQuotes} ativas</span>
+                          </div>
+                          <div className="text-xs text-gray-500">{supplier.totalQuotes} total</div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell">
+                      <TableCell className="hidden lg:table-cell py-4">
                         {renderStarRating(supplier.rating)}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end">
+                      <TableCell className="py-4">
+                        <div className="flex justify-end gap-2">
+                          {/* Botão principal - Ver Histórico */}
+                          <SupplierQuoteHistoryDialog
+                            supplierName={supplier.name}
+                            supplierId={supplier.id}
+                            trigger={
+                              <Button 
+                                size="sm" 
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200 border-0 text-xs px-3"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                Histórico
+                              </Button>
+                            }
+                          />
+                          
+                          {/* Menu de ações secundárias */}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-200 shadow-sm hover:shadow-md text-xs px-2"
+                              >
+                                <MoreVertical className="h-3 w-3" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <SupplierQuoteHistoryDialog
-                                supplierName={supplier.name}
-                                supplierId={supplier.id}
-                                trigger={
-                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    Ver Histórico de Cotações
-                                  </DropdownMenuItem>
-                                }
-                              />
-                              <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Editar
+                            <DropdownMenuContent 
+                              align="end" 
+                              className="w-48 shadow-xl border-0 bg-white/95 backdrop-blur-sm"
+                            >
+                              <DropdownMenuItem 
+                                onClick={() => setEditingSupplier(supplier)}
+                                className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors py-2"
+                              >
+                                <Edit className="h-4 w-4 mr-2 text-green-600" />
+                                <span className="font-medium">Editar Fornecedor</span>
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive" onClick={() => setDeletingSupplier(supplier)}>
+                              <DropdownMenuItem 
+                                className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors py-2" 
+                                onClick={() => setDeletingSupplier(supplier)}
+                              >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
+                                <span className="font-medium">Excluir Fornecedor</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -552,10 +597,21 @@ export default function Fornecedores() {
                 </TableBody>
               </Table>
             </div>
-            <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
+            <div className="border-t border-indigo-100/60 bg-gradient-to-r from-indigo-50/30 to-blue-50/30 px-6 py-4">
+              <DataPagination 
+                currentPage={paginatedData.pagination.currentPage} 
+                totalPages={paginatedData.pagination.totalPages} 
+                itemsPerPage={paginatedData.pagination.itemsPerPage} 
+                totalItems={paginatedData.pagination.totalItems} 
+                onPageChange={paginatedData.pagination.goToPage} 
+                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
+                startIndex={paginatedData.pagination.startIndex} 
+                endIndex={paginatedData.pagination.endIndex} 
+              />
+            </div>
           </CardContent>
         </Card>}
-
+      
       {filteredSuppliers.length === 0 && <Card>
           <CardContent className="p-12 text-center">
             <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -579,6 +635,8 @@ export default function Fornecedores() {
         <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
         <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
       </div>
-    </div>
-    </>;
+        </div>
+      </PageWrapper>
+    </>
+  );
 }
