@@ -3,42 +3,11 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,62 +17,49 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Calendar as CalendarIcon, 
-  Plus, 
-  X, 
-  Check, 
-  ChevronsUpDown, 
-  Trash2, 
-  Package, 
-  Building2, 
-  Clock, 
-  FileText,
-  ChevronRight,
-  ChevronLeft
-} from "lucide-react";
+import { Calendar as CalendarIcon, Plus, X, Check, ChevronsUpDown, Trash2, Package, Building2, Clock, FileText, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-
 const productLineSchema = z.object({
   produtoId: z.string().min(1, "Produto é obrigatório"),
   produtoNome: z.string().min(1, "Produto é obrigatório"),
   quantidade: z.string().min(1, "Quantidade é obrigatória"),
-  unidade: z.string().min(1, "Unidade é obrigatória"),
+  unidade: z.string().min(1, "Unidade é obrigatória")
 });
-
 const quoteSchema = z.object({
   produtos: z.array(productLineSchema).min(1, "Adicione pelo menos um produto"),
-  dataInicio: z.date({ required_error: "Data de início é obrigatória" }),
-  dataFim: z.date({ required_error: "Data de fim é obrigatória" }),
+  dataInicio: z.date({
+    required_error: "Data de início é obrigatória"
+  }),
+  dataFim: z.date({
+    required_error: "Data de fim é obrigatória"
+  }),
   fornecedoresIds: z.array(z.string()).min(1, "Selecione pelo menos um fornecedor"),
-  observacoes: z.string().optional(),
-}).refine((data) => data.dataFim > data.dataInicio, {
+  observacoes: z.string().optional()
+}).refine(data => data.dataFim > data.dataInicio, {
   message: "Data de fim deve ser posterior à data de início",
-  path: ["dataFim"],
+  path: ["dataFim"]
 });
-
 type QuoteFormData = z.infer<typeof quoteSchema>;
-
 interface Product {
   id: string;
   name: string;
 }
-
 interface Supplier {
   id: string;
   name: string;
 }
-
 interface AddQuoteDialogProps {
   onAdd: (quote: QuoteFormData) => void;
   trigger?: React.ReactNode;
 }
-
-export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) {
+export default function AddQuoteDialog({
+  onAdd,
+  trigger
+}: AddQuoteDialogProps) {
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -113,12 +69,11 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
   const [activeTab, setActiveTab] = useState("produtos");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const productsContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Estados para o novo formulário de produto único
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("");
-
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
     defaultValues: {
@@ -126,45 +81,41 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       dataInicio: new Date(),
       dataFim: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       fornecedoresIds: [],
-      observacoes: "",
-    },
+      observacoes: ""
+    }
   });
-
-  const { fields, append, remove } = useFieldArray({
+  const {
+    fields,
+    append,
+    remove
+  } = useFieldArray({
     control: form.control,
-    name: "produtos",
+    name: "produtos"
   });
-
   const handleAddNewProduct = () => {
     if (selectedProduct && newProductQuantity && newProductUnit) {
-      append({ 
-        produtoId: selectedProduct.id, 
-        produtoNome: selectedProduct.name, 
-        quantidade: newProductQuantity, 
-        unidade: newProductUnit 
+      append({
+        produtoId: selectedProduct.id,
+        produtoNome: selectedProduct.name,
+        quantidade: newProductQuantity,
+        unidade: newProductUnit
       });
-      
+
       // Limpar o formulário após adicionar
       setSelectedProduct(null);
       setNewProductQuantity("");
       setNewProductUnit("");
     }
   };
-
   useEffect(() => {
     if (open) {
       loadData();
     }
   }, [open]);
-
   const loadData = async () => {
     setLoading(true);
     try {
-      const [productsRes, suppliersRes] = await Promise.all([
-        supabase.from("products").select("id, name").order("name"),
-        supabase.from("suppliers").select("id, name").order("name"),
-      ]);
-
+      const [productsRes, suppliersRes] = await Promise.all([supabase.from("products").select("id, name").order("name"), supabase.from("suppliers").select("id, name").order("name")]);
       if (productsRes.data) setProducts(productsRes.data);
       if (suppliersRes.data) setSuppliers(suppliersRes.data);
     } catch (error) {
@@ -172,41 +123,39 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       toast({
         title: "Erro",
         description: "Não foi possível carregar produtos e fornecedores",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const onSubmit = async (data: QuoteFormData) => {
     setIsSubmitting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Erro",
           description: "Você precisa estar logado para criar uma cotação",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
-
-      const { data: quote, error: quoteError } = await supabase
-        .from("quotes")
-        .insert({
-          user_id: user.id,
-          data_inicio: data.dataInicio.toISOString().split('T')[0],
-          data_fim: data.dataFim.toISOString().split('T')[0],
-          observacoes: data.observacoes || null,
-          status: 'ativa'
-        })
-        .select()
-        .single();
-
+      const {
+        data: quote,
+        error: quoteError
+      } = await supabase.from("quotes").insert({
+        user_id: user.id,
+        data_inicio: data.dataInicio.toISOString().split('T')[0],
+        data_fim: data.dataFim.toISOString().split('T')[0],
+        observacoes: data.observacoes || null,
+        status: 'ativa'
+      }).select().single();
       if (quoteError) throw quoteError;
-
       const quoteItemsData = data.produtos.map(p => ({
         quote_id: quote.id,
         product_id: p.produtoId,
@@ -214,18 +163,13 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
         quantidade: p.quantidade,
         unidade: p.unidade
       }));
-
-      const { error: itemsError } = await supabase
-        .from("quote_items")
-        .insert(quoteItemsData);
-
+      const {
+        error: itemsError
+      } = await supabase.from("quote_items").insert(quoteItemsData);
       if (itemsError) throw itemsError;
-
-      const { data: suppliersData } = await supabase
-        .from("suppliers")
-        .select("id, name")
-        .in("id", data.fornecedoresIds);
-
+      const {
+        data: suppliersData
+      } = await supabase.from("suppliers").select("id, name").in("id", data.fornecedoresIds);
       const quoteSuppliersData = data.fornecedoresIds.map(supplierId => {
         const supplier = suppliersData?.find(s => s.id === supplierId);
         return {
@@ -235,13 +179,10 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           status: 'pendente'
         };
       });
-
-      const { error: suppliersError } = await supabase
-        .from("quote_suppliers")
-        .insert(quoteSuppliersData);
-
+      const {
+        error: suppliersError
+      } = await supabase.from("quote_suppliers").insert(quoteSuppliersData);
       if (suppliersError) throw suppliersError;
-
       const quoteSupplierItemsData: any[] = [];
       data.fornecedoresIds.forEach(supplierId => {
         data.produtos.forEach(produto => {
@@ -254,18 +195,15 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           });
         });
       });
-
-      const { error: supplierItemsError } = await supabase
-        .from("quote_supplier_items")
-        .insert(quoteSupplierItemsData);
-
+      const {
+        error: supplierItemsError
+      } = await supabase.from("quote_supplier_items").insert(quoteSupplierItemsData);
       if (supplierItemsError) throw supplierItemsError;
-
       onAdd(data);
       toast({
         title: "✅ Cotação criada com sucesso",
         description: "A cotação foi adicionada ao sistema.",
-        className: "border-green-200 bg-green-50",
+        className: "border-green-200 bg-green-50"
       });
       form.reset();
       setSelectedSuppliers([]);
@@ -277,13 +215,12 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       toast({
         title: "❌ Erro ao criar cotação",
         description: error.message || "Ocorreu um erro ao criar a cotação",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleSupplierSelect = (supplier: Supplier) => {
     if (!selectedSuppliers.find(s => s.id === supplier.id)) {
       const newSuppliers = [...selectedSuppliers, supplier];
@@ -292,28 +229,31 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
     }
     setSupplierSearch("");
   };
-
   const handleSupplierRemove = (supplierId: string) => {
     const newSuppliers = selectedSuppliers.filter(s => s.id !== supplierId);
     setSelectedSuppliers(newSuppliers);
     form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
   };
-
-  const filteredSuppliers = suppliers.filter(supplier =>
-    !selectedSuppliers.find(s => s.id === supplier.id) &&
-    supplier.name.toLowerCase().includes(supplierSearch.toLowerCase())
-  );
-
-  const tabs = [
-    { id: "produtos", label: "Produtos", icon: Package },
-    { id: "periodo", label: "Período", icon: Clock },
-    { id: "fornecedores", label: "Fornecedores", icon: Building2 },
-    { id: "detalhes", label: "Detalhes", icon: FileText }
-  ];
-
+  const filteredSuppliers = suppliers.filter(supplier => !selectedSuppliers.find(s => s.id === supplier.id) && supplier.name.toLowerCase().includes(supplierSearch.toLowerCase()));
+  const tabs = [{
+    id: "produtos",
+    label: "Produtos",
+    icon: Package
+  }, {
+    id: "periodo",
+    label: "Período",
+    icon: Clock
+  }, {
+    id: "fornecedores",
+    label: "Fornecedores",
+    icon: Building2
+  }, {
+    id: "detalhes",
+    label: "Detalhes",
+    icon: FileText
+  }];
   const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
-  const progress = ((currentTabIndex + 1) / tabs.length) * 100;
-
+  const progress = (currentTabIndex + 1) / tabs.length * 100;
   const canProceedToNext = () => {
     const formValues = form.getValues();
     switch (activeTab) {
@@ -329,35 +269,28 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
         return false;
     }
   };
-
   const handleNext = () => {
     if (currentTabIndex < tabs.length - 1) {
       setActiveTab(tabs[currentTabIndex + 1].id);
     }
   };
-
   const handlePrevious = () => {
     if (currentTabIndex > 0) {
       setActiveTab(tabs[currentTabIndex - 1].id);
     }
   };
-
   const getTabStatus = (tabId: string) => {
     const tabIndex = tabs.findIndex(tab => tab.id === tabId);
     if (tabIndex < currentTabIndex) return "completed";
     if (tabIndex === currentTabIndex) return "current";
     return "pending";
   };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
+  return <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger || (
-          <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white">
+        {trigger || <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white">
             <Plus className="h-4 w-4 mr-2" />
             Nova Cotação
-          </Button>
-        )}
+          </Button>}
       </DialogTrigger>
       <DialogContent className="w-[95vw] sm:w-[90vw] max-w-[1000px] h-[90vh] sm:h-[85vh] max-h-[900px] p-0 gap-0 overflow-hidden border-teal-200/40 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-300">
         <DialogHeader className="relative px-4 sm:px-6 py-3 bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 border-b border-teal-100/60 overflow-hidden">
@@ -383,137 +316,80 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
 
                 {/* Navigation Controls - Moved to left side */}
                 <div className="flex items-center gap-2 sm:gap-3">
-                  {currentTabIndex > 0 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handlePrevious}
-                      className="border-gray-300 hover:bg-gray-100 h-8 px-3"
-                    >
+                  {currentTabIndex > 0 && <Button type="button" variant="outline" size="sm" onClick={handlePrevious} className="border-gray-300 hover:bg-gray-100 h-8 px-3">
                       <ChevronLeft className="h-3 w-3 mr-1" />
                       <span className="hidden sm:inline">Voltar</span>
-                    </Button>
-                  )}
+                    </Button>}
                   
-                  {currentTabIndex < tabs.length - 1 ? (
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleNext}
-                      disabled={!canProceedToNext()}
-                      className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
-                    >
+                  {currentTabIndex < tabs.length - 1 ? <Button type="button" size="sm" onClick={handleNext} disabled={!canProceedToNext()} className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3">
                       <span className="hidden sm:inline">Próximo</span>
                       <ChevronRight className="h-3 w-3 ml-1" />
-                    </Button>
-                  ) : (
-                    <Button
-                      type="submit"
-                      size="sm"
-                      disabled={isSubmitting}
-                      className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
-                      form="quote-form"
-                    >
-                      {isSubmitting ? (
-                        <>
+                    </Button> : <Button type="submit" size="sm" disabled={isSubmitting} className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3" form="quote-form">
+                      {isSubmitting ? <>
                           <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
                           <span className="hidden sm:inline">Criando...</span>
-                        </>
-                      ) : (
-                        <>
+                        </> : <>
                           <Check className="h-3 w-3 mr-1" />
                           <span className="hidden sm:inline">Criar</span>
-                        </>
-                      )}
-                    </Button>
-                  )}
+                        </>}
+                    </Button>}
                 </div>
               </div>
 
               {/* Close Button - Isolated on the right */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setOpen(false)}
-                className="text-gray-600 hover:bg-gray-100 h-8 w-8 p-0 flex-shrink-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              
             </div>
             
             {/* Compact Progress Bar */}
             <div className="mt-2">
-              <Progress 
-                value={progress} 
-                className="h-2 bg-teal-100/60 [&>div]:bg-gradient-to-r [&>div]:from-teal-500 [&>div]:to-cyan-500"
-              />
+              <Progress value={progress} className="h-2 bg-teal-100/60 [&>div]:bg-gradient-to-r [&>div]:from-teal-500 [&>div]:to-cyan-500" />
             </div>
           </div>
         </DialogHeader>
         
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
+        {loading ? <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin h-12 w-12 border-4 border-teal-200 border-t-teal-600 rounded-full mx-auto mb-4"></div>
               <p className="text-sm font-medium text-teal-900">Carregando dados...</p>
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col h-full overflow-hidden">
+          </div> : <div className="flex flex-col h-full overflow-hidden">
             <Form {...form}>
               <form id="quote-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
                 {/* Compact Tab Navigation */}
                 <div className="flex-shrink-0 px-3 sm:px-6 py-2 border-b border-teal-100/60 bg-gradient-to-r from-teal-50/40 to-cyan-50/30 backdrop-blur-sm">
                   <div className="flex space-x-1 bg-white/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-teal-200/40">
-                    {tabs.map((tab) => {
-                      const Icon = tab.icon;
-                      const status = getTabStatus(tab.id);
-                      return (
-                        <button
-                          key={tab.id}
-                          type="button"
-                          onClick={() => setActiveTab(tab.id)}
-                          className={cn(
-                            "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 relative overflow-hidden group",
-                            status === "current" && "bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-xl shadow-teal-500/25 scale-105",
-                            status === "completed" && "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg",
-                            status === "pending" && "bg-gray-100 text-gray-500 hover:bg-teal-50 hover:text-teal-700"
-                          )}
-                        >
+                    {tabs.map(tab => {
+                  const Icon = tab.icon;
+                  const status = getTabStatus(tab.id);
+                  return <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={cn("flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 relative overflow-hidden group", status === "current" && "bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-xl shadow-teal-500/25 scale-105", status === "completed" && "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg", status === "pending" && "bg-gray-100 text-gray-500 hover:bg-teal-50 hover:text-teal-700")}>
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                           
-                          <div className={cn(
-                            "flex items-center justify-center w-4 h-4 rounded transition-all",
-                            status === "current" && "bg-white/20",
-                            status === "completed" && "bg-white/20"
-                          )}>
-                            {status === "completed" ? (
-                              <Check className="h-3 w-3 text-white" />
-                            ) : (
-                              <Icon className="h-3 w-3" />
-                            )}
+                          <div className={cn("flex items-center justify-center w-4 h-4 rounded transition-all", status === "current" && "bg-white/20", status === "completed" && "bg-white/20")}>
+                            {status === "completed" ? <Check className="h-3 w-3 text-white" /> : <Icon className="h-3 w-3" />}
                           </div>
                           
                           <span className="relative z-10 hidden sm:inline">{tab.label}</span>
-                        </button>
-                      );
-                    })}
+                        </button>;
+                })}
                   </div>
                 </div>
 
                 {/* Content Area - Now with more space */}
                 <div className="flex-1 overflow-hidden">
                   <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeTab}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="h-full"
-                    >
+                    <motion.div key={activeTab} initial={{
+                  opacity: 0,
+                  y: 20
+                }} animate={{
+                  opacity: 1,
+                  y: 0
+                }} exit={{
+                  opacity: 0,
+                  y: -20
+                }} transition={{
+                  duration: 0.25,
+                  ease: "easeOut"
+                }} className="h-full">
                       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
                         {/* Produtos Tab */}
                         <TabsContent value="produtos" className="h-full m-0">
@@ -533,11 +409,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                     <label className="text-sm font-medium text-gray-700 mb-2 block">Produto *</label>
                                     <Popover>
                                       <PopoverTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          role="combobox"
-                                          className="w-full justify-between border-teal-200 focus:ring-teal-500/20"
-                                        >
+                                        <Button variant="outline" role="combobox" className="w-full justify-between border-teal-200 focus:ring-teal-500/20">
                                           {selectedProduct ? selectedProduct.name : "Selecionar produto..."}
                                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
@@ -548,21 +420,10 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                           <CommandList>
                                             <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                                             <CommandGroup>
-                                              {products.map((product) => (
-                                                <CommandItem
-                                                  key={product.id}
-                                                  value={product.name}
-                                                  onSelect={() => setSelectedProduct(product)}
-                                                >
-                                                  <Check
-                                                    className={cn(
-                                                      "mr-2 h-4 w-4",
-                                                      selectedProduct?.id === product.id ? "opacity-100" : "opacity-0"
-                                                    )}
-                                                  />
+                                              {products.map(product => <CommandItem key={product.id} value={product.name} onSelect={() => setSelectedProduct(product)}>
+                                                  <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")} />
                                                   {product.name}
-                                                </CommandItem>
-                                              ))}
+                                                </CommandItem>)}
                                             </CommandGroup>
                                           </CommandList>
                                         </Command>
@@ -574,13 +435,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                   <div className="grid grid-cols-2 gap-3">
                                     <div>
                                       <label className="text-sm font-medium text-gray-700 mb-2 block">Quantidade *</label>
-                                      <Input 
-                                        placeholder="Ex: 500" 
-                                        type="number" 
-                                        value={newProductQuantity}
-                                        onChange={(e) => setNewProductQuantity(e.target.value)}
-                                        className="border-teal-200 focus:border-teal-500 focus:ring-teal-500/20"
-                                      />
+                                      <Input placeholder="Ex: 500" type="number" value={newProductQuantity} onChange={e => setNewProductQuantity(e.target.value)} className="border-teal-200 focus:border-teal-500 focus:ring-teal-500/20" />
                                     </div>
                                     <div>
                                       <label className="text-sm font-medium text-gray-700 mb-2 block">Unidade *</label>
@@ -602,12 +457,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                   </div>
 
                                   {/* Botão Adicionar */}
-                                  <Button
-                                    type="button"
-                                    onClick={handleAddNewProduct}
-                                    disabled={!selectedProduct || !newProductQuantity || !newProductUnit}
-                                    className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg disabled:opacity-50"
-                                  >
+                                  <Button type="button" onClick={handleAddNewProduct} disabled={!selectedProduct || !newProductQuantity || !newProductUnit} className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg disabled:opacity-50">
                                     <Plus className="h-4 w-4 mr-2" />
                                     Adicionar à Lista
                                   </Button>
@@ -623,17 +473,13 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                   </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-4">
-                                  {fields.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500">
+                                  {fields.length === 0 ? <div className="text-center py-8 text-gray-500">
                                       <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
                                       <p>Nenhum produto adicionado ainda</p>
                                       <p className="text-sm">Use o formulário ao lado para adicionar produtos</p>
-                                    </div>
-                                  ) : (
-                                    <ScrollArea className="h-[400px]">
+                                    </div> : <ScrollArea className="h-[400px]">
                                       <div className="space-y-3">
-                                        {fields.map((field, index) => (
-                                          <Card key={field.id} className="border-teal-200 hover:border-teal-400 transition-all">
+                                        {fields.map((field, index) => <Card key={field.id} className="border-teal-200 hover:border-teal-400 transition-all">
                                             <div className="h-1 bg-gradient-to-r from-teal-500 to-cyan-500"></div>
                                             <CardContent className="p-3">
                                               <div className="flex items-start justify-between">
@@ -647,22 +493,14 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                                     <span>{form.watch(`produtos.${index}.unidade`)}</span>
                                                   </div>
                                                 </div>
-                                                <Button
-                                                  type="button"
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  onClick={() => remove(index)}
-                                                  className="text-red-600 hover:bg-red-50 h-8 w-8 p-0"
-                                                >
+                                                <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)} className="text-red-600 hover:bg-red-50 h-8 w-8 p-0">
                                                   <Trash2 className="h-4 w-4" />
                                                 </Button>
                                               </div>
                                             </CardContent>
-                                          </Card>
-                                        ))}
+                                          </Card>)}
                                       </div>
-                                    </ScrollArea>
-                                  )}
+                                    </ScrollArea>}
                                 </CardContent>
                               </Card>
                             </div>
@@ -690,88 +528,52 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                             <CardContent className="p-3 space-y-4">
 
                               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                <FormField
-                                  control={form.control}
-                                  name="dataInicio"
-                                  render={({ field }) => (
-                                    <FormItem className="flex flex-col">
+                                <FormField control={form.control} name="dataInicio" render={({
+                              field
+                            }) => <FormItem className="flex flex-col">
                                       <FormLabel>Data de Início *</FormLabel>
                                       <Popover>
                                       <PopoverTrigger asChild>
                                         <FormControl>
-                                          <Button
-                                            variant="outline"
-                                            className={cn(
-                                              "w-full pl-3 text-left font-normal",
-                                              !field.value && "text-muted-foreground"
-                                            )}
-                                          >
-                                            {field.value ? (
-                                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                            ) : (
-                                              <span>Selecione a data de início</span>
-                                            )}
+                                          <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                            {field.value ? format(field.value, "dd/MM/yyyy", {
+                                        locale: ptBR
+                                      }) : <span>Selecione a data de início</span>}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                           </Button>
                                         </FormControl>
                                       </PopoverTrigger>
                                       <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                          mode="single"
-                                          selected={field.value}
-                                          onSelect={field.onChange}
-                                          disabled={(date) => date < new Date()}
-                                          initialFocus
-                                        />
+                                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => date < new Date()} initialFocus />
                                       </PopoverContent>
                                     </Popover>
                                     <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                                  </FormItem>} />
 
-                              <FormField
-                                control={form.control}
-                                name="dataFim"
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-col">
+                              <FormField control={form.control} name="dataFim" render={({
+                              field
+                            }) => <FormItem className="flex flex-col">
                                     <FormLabel>Data de Fim *</FormLabel>
                                     <Popover>
                                       <PopoverTrigger asChild>
                                         <FormControl>
-                                          <Button
-                                            variant="outline"
-                                            className={cn(
-                                              "w-full pl-3 text-left font-normal",
-                                              !field.value && "text-muted-foreground"
-                                            )}
-                                          >
-                                            {field.value ? (
-                                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                            ) : (
-                                              <span>Selecione a data de fim</span>
-                                            )}
+                                          <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                            {field.value ? format(field.value, "dd/MM/yyyy", {
+                                        locale: ptBR
+                                      }) : <span>Selecione a data de fim</span>}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                           </Button>
                                         </FormControl>
                                       </PopoverTrigger>
                                       <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                          mode="single"
-                                          selected={field.value}
-                                          onSelect={field.onChange}
-                                          disabled={(date) => {
-                                            const startDate = form.getValues("dataInicio");
-                                            return startDate ? date <= startDate : date < new Date();
-                                          }}
-                                          initialFocus
-                                        />
+                                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={date => {
+                                    const startDate = form.getValues("dataInicio");
+                                    return startDate ? date <= startDate : date < new Date();
+                                  }} initialFocus />
                                       </PopoverContent>
                                     </Popover>
                                     <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                                  </FormItem>} />
                             </div>
 
                             {/* Dicas compactas */}
@@ -791,64 +593,40 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
 
                             {/* Presets rápidos */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const hoje = new Date();
-                                  const fim = new Date(hoje);
-                                  fim.setDate(hoje.getDate() + 3);
-                                  form.setValue("dataInicio", hoje);
-                                  form.setValue("dataFim", fim);
-                                }}
-                                className="h-8 text-xs"
-                              >
+                              <Button type="button" variant="outline" size="sm" onClick={() => {
+                              const hoje = new Date();
+                              const fim = new Date(hoje);
+                              fim.setDate(hoje.getDate() + 3);
+                              form.setValue("dataInicio", hoje);
+                              form.setValue("dataFim", fim);
+                            }} className="h-8 text-xs">
                                 3 dias
                               </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const hoje = new Date();
-                                  const fim = new Date(hoje);
-                                  fim.setDate(hoje.getDate() + 7);
-                                  form.setValue("dataInicio", hoje);
-                                  form.setValue("dataFim", fim);
-                                }}
-                                className="h-8 text-xs"
-                              >
+                              <Button type="button" variant="outline" size="sm" onClick={() => {
+                              const hoje = new Date();
+                              const fim = new Date(hoje);
+                              fim.setDate(hoje.getDate() + 7);
+                              form.setValue("dataInicio", hoje);
+                              form.setValue("dataFim", fim);
+                            }} className="h-8 text-xs">
                                 7 dias
                               </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const hoje = new Date();
-                                  const fim = new Date(hoje);
-                                  fim.setDate(hoje.getDate() + 14);
-                                  form.setValue("dataInicio", hoje);
-                                  form.setValue("dataFim", fim);
-                                }}
-                                className="h-8 text-xs"
-                              >
+                              <Button type="button" variant="outline" size="sm" onClick={() => {
+                              const hoje = new Date();
+                              const fim = new Date(hoje);
+                              fim.setDate(hoje.getDate() + 14);
+                              form.setValue("dataInicio", hoje);
+                              form.setValue("dataFim", fim);
+                            }} className="h-8 text-xs">
                                 14 dias
                               </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const hoje = new Date();
-                                  const fim = new Date(hoje);
-                                  fim.setDate(hoje.getDate() + 30);
-                                  form.setValue("dataInicio", hoje);
-                                  form.setValue("dataFim", fim);
-                                }}
-                                className="h-8 text-xs"
-                              >
+                              <Button type="button" variant="outline" size="sm" onClick={() => {
+                              const hoje = new Date();
+                              const fim = new Date(hoje);
+                              fim.setDate(hoje.getDate() + 30);
+                              form.setValue("dataInicio", hoje);
+                              form.setValue("dataFim", fim);
+                            }} className="h-8 text-xs">
                                 30 dias
                               </Button>
                             </div>
@@ -872,20 +650,12 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                   Selecione os fornecedores que participarão desta cotação
                                 </p>
 
-                                <FormField
-                                  control={form.control}
-                                  name="fornecedoresIds"
-                                  render={() => (
-                                    <FormItem>
+                                <FormField control={form.control} name="fornecedoresIds" render={() => <FormItem>
                                       <FormLabel>Buscar e Adicionar Fornecedores *</FormLabel>
                                       <Popover>
                                         <PopoverTrigger asChild>
                                           <FormControl>
-                                            <Button
-                                              variant="outline"
-                                              role="combobox"
-                                              className="w-full justify-between"
-                                            >
+                                            <Button variant="outline" role="combobox" className="w-full justify-between">
                                               Buscar fornecedores...
                                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                             </Button>
@@ -893,33 +663,21 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                         </PopoverTrigger>
                                         <PopoverContent className="w-full p-0" align="start">
                                           <Command>
-                                            <CommandInput 
-                                              placeholder="Digite o nome do fornecedor..." 
-                                              value={supplierSearch}
-                                              onValueChange={setSupplierSearch}
-                                            />
+                                            <CommandInput placeholder="Digite o nome do fornecedor..." value={supplierSearch} onValueChange={setSupplierSearch} />
                                             <CommandList>
                                               <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
                                               <CommandGroup>
-                                                {filteredSuppliers.map((supplier) => (
-                                                  <CommandItem
-                                                    key={supplier.id}
-                                                    value={supplier.name}
-                                                    onSelect={() => handleSupplierSelect(supplier)}
-                                                  >
+                                                {filteredSuppliers.map(supplier => <CommandItem key={supplier.id} value={supplier.name} onSelect={() => handleSupplierSelect(supplier)}>
                                                     <Plus className="mr-2 h-4 w-4 text-green-600" />
                                                     {supplier.name}
-                                                  </CommandItem>
-                                                ))}
+                                                  </CommandItem>)}
                                               </CommandGroup>
                                             </CommandList>
                                           </Command>
                                         </PopoverContent>
                                       </Popover>
                                       <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
+                                    </FormItem>} />
                               </CardContent>
                             </Card>
 
@@ -929,48 +687,31 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                 <CardTitle className="flex items-center gap-2">
                                   <Building2 className="h-5 w-5 text-blue-600" />
                                   Fornecedores Selecionados
-                                  {selectedSuppliers.length > 0 && (
-                                    <Badge variant="secondary" className="ml-auto">
+                                  {selectedSuppliers.length > 0 && <Badge variant="secondary" className="ml-auto">
                                       {selectedSuppliers.length}
-                                    </Badge>
-                                  )}
+                                    </Badge>}
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                {selectedSuppliers.length > 0 ? (
-                                  <ScrollArea className="h-[400px] pr-4">
+                                {selectedSuppliers.length > 0 ? <ScrollArea className="h-[400px] pr-4">
                                     <div className="space-y-3">
-                                      {selectedSuppliers.map((supplier) => (
-                                        <div
-                                          key={supplier.id}
-                                          className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
-                                        >
+                                      {selectedSuppliers.map(supplier => <div key={supplier.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
                                           <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                                               <Building2 className="h-4 w-4 text-green-600" />
                                             </div>
                                             <span className="font-medium text-green-900">{supplier.name}</span>
                                           </div>
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => handleSupplierRemove(supplier.id)}
-                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                          >
+                                          <Button type="button" variant="ghost" size="sm" onClick={() => handleSupplierRemove(supplier.id)} className="text-red-600 hover:text-red-700 hover:bg-red-50">
                                             <X className="h-4 w-4" />
                                           </Button>
-                                        </div>
-                                      ))}
+                                        </div>)}
                                     </div>
-                                  </ScrollArea>
-                                ) : (
-                                  <div className="text-center py-8 text-gray-500">
+                                  </ScrollArea> : <div className="text-center py-8 text-gray-500">
                                     <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
                                     <p>Nenhum fornecedor selecionado ainda</p>
                                     <p className="text-sm">Use o formulário ao lado para buscar e adicionar fornecedores</p>
-                                  </div>
-                                )}
+                                  </div>}
                               </CardContent>
                             </Card>
                           </div>
@@ -989,26 +730,18 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                   </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-3 space-y-3">
-                                <FormField
-                                  control={form.control}
-                                  name="observacoes"
-                                  render={({ field }) => (
-                                    <FormItem>
+                                <FormField control={form.control} name="observacoes" render={({
+                                field
+                              }) => <FormItem>
                                       <FormLabel className="text-sm">Observações</FormLabel>
                                       <FormControl>
-                                        <Textarea 
-                                          placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
-                                          className="resize-none min-h-[100px] text-sm" 
-                                          {...field} 
-                                        />
+                                        <Textarea placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." className="resize-none min-h-[100px] text-sm" {...field} />
                                       </FormControl>
                                       <p className="text-xs text-gray-500">
                                         Estas informações serão enviadas junto com a cotação para todos os fornecedores
                                       </p>
                                       <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
+                                    </FormItem>} />
 
                                 {/* Informações Adicionais */}
                                 <div className="bg-purple-50/50 border border-purple-100 rounded-lg p-3">
@@ -1065,26 +798,25 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                     <div className="flex justify-between items-center">
                                       <span className="text-gray-600">Período:</span>
                                       <span className="font-medium text-gray-900">
-                                        {form.watch("dataInicio") && form.watch("dataFim") 
-                                          ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} - ${format(form.watch("dataFim"), "dd/MM/yyyy", { locale: ptBR })}`
-                                          : "Não definido"
-                                        }
+                                        {form.watch("dataInicio") && form.watch("dataFim") ? `${format(form.watch("dataInicio"), "dd/MM", {
+                                        locale: ptBR
+                                      })} - ${format(form.watch("dataFim"), "dd/MM/yyyy", {
+                                        locale: ptBR
+                                      })}` : "Não definido"}
                                       </span>
                                     </div>
                                   </div>
                                 </div>
 
                                 {/* Lista de Produtos */}
-                                {fields.length > 0 && (
-                                  <div className="bg-gray-50/50 border border-gray-100 rounded-lg p-3">
+                                {fields.length > 0 && <div className="bg-gray-50/50 border border-gray-100 rounded-lg p-3">
                                     <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
                                       <Package className="h-3 w-3 text-gray-600" />
                                       Produtos Selecionados
                                     </h4>
                                     <ScrollArea className="max-h-[120px] lg:max-h-[150px]">
                                       <div className="space-y-1">
-                                        {fields.map((field, index) => (
-                                          <div key={field.id} className="flex items-center justify-between p-2 bg-white rounded border border-gray-100">
+                                        {fields.map((field, index) => <div key={field.id} className="flex items-center justify-between p-2 bg-white rounded border border-gray-100">
                                             <div className="flex-1 min-w-0">
                                               <p className="text-xs font-medium text-gray-900 truncate">
                                                 {form.watch(`produtos.${index}.produtoNome`) || "Produto não selecionado"}
@@ -1093,32 +825,26 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                                 {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
                                               </p>
                                             </div>
-                                          </div>
-                                        ))}
+                                          </div>)}
                                       </div>
                                     </ScrollArea>
-                                  </div>
-                                )}
+                                  </div>}
 
                                 {/* Lista de Fornecedores */}
-                                {selectedSuppliers.length > 0 && (
-                                  <div className="bg-gray-50/50 border border-gray-100 rounded-lg p-3">
+                                {selectedSuppliers.length > 0 && <div className="bg-gray-50/50 border border-gray-100 rounded-lg p-3">
                                     <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2 text-sm">
                                       <Building2 className="h-3 w-3 text-gray-600" />
                                       Fornecedores Participantes
                                     </h4>
                                     <ScrollArea className="max-h-[100px] lg:max-h-[120px]">
                                       <div className="space-y-1">
-                                        {selectedSuppliers.map((supplier) => (
-                                          <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white rounded border border-gray-100">
+                                        {selectedSuppliers.map(supplier => <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white rounded border border-gray-100">
                                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                                             <span className="text-xs font-medium text-gray-900">{supplier.name}</span>
-                                          </div>
-                                        ))}
+                                          </div>)}
                                       </div>
                                     </ScrollArea>
-                                  </div>
-                                )}
+                                  </div>}
                               </CardContent>
                             </Card>
                             </div>
@@ -1130,18 +856,14 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                 </div>
               </form>
             </Form>
-          </div>
-        )}
+          </div>}
 
-        {isSubmitting && (
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+        {isSubmitting && <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
             <div className="text-center space-y-3">
               <div className="animate-spin h-12 w-12 border-4 border-teal-200 border-t-teal-600 rounded-full mx-auto"></div>
               <p className="text-sm font-medium text-teal-900">Criando cotação...</p>
             </div>
-          </div>
-        )}
+          </div>}
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 }
