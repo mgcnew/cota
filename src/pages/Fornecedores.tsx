@@ -60,6 +60,8 @@ export default function Fornecedores() {
   const {
     suppliers,
     isLoading: suppliersLoading,
+    deleteSupplier,
+    updateSupplier,
     refetch
   } = useSuppliers();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -84,10 +86,10 @@ export default function Fornecedores() {
     refetch();
   };
   const handleEditSupplier = (id: string, data: SupplierFormData) => {
-    refetch();
+    updateSupplier({ supplierId: id, data });
   };
   const handleDeleteSupplier = (id: string) => {
-    refetch();
+    deleteSupplier(id);
   };
   const handleSuppliersImported = (importedSuppliers: Supplier[]) => {
     refetch();

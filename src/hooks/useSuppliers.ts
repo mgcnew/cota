@@ -124,11 +124,53 @@ export function useSuppliers() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ supplierId, data }: { 
+      supplierId: string, 
+      data: {
+        name: string,
+        contact: string,
+        phone?: string,
+        email?: string,
+        address?: string,
+      } 
+    }) => {
+      const { error } = await supabase
+        .from('suppliers')
+        .update({
+          name: data.name,
+          contact: data.contact,
+          phone: data.phone || null,
+          email: data.email || null,
+          address: data.address || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', supplierId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      toast({
+        title: "Sucesso",
+        description: "Fornecedor atualizado com sucesso",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o fornecedor",
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     suppliers,
     isLoading,
     error,
     deleteSupplier: deleteMutation.mutate,
+    updateSupplier: updateMutation.mutate,
     refetch: () => queryClient.invalidateQueries({ queryKey: ['suppliers'] }),
   };
 }
