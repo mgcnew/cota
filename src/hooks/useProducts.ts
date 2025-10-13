@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { fetchUserProducts } from '@/utils/productUtils';
 
 export interface Product {
   id: string;
@@ -21,62 +22,13 @@ export function useProducts() {
   const { data: products = [], isLoading, error } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      // Verificar autenticação primeiro
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
+      console.log('[PRODUCTS DEBUG] Fetching products using utility function');
 
-      console.log('[PRODUCTS DEBUG] Fetching products for user:', user.id);
+      // Usar a função utilitária para carregar produtos
+      const data = await fetchUserProducts();
 
-      // Primeiro, obter a contagem total de produtos do usuário
-      const { count: totalCount, error: countError } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      if (countError) throw countError;
-
-      console.log('[PRODUCTS DEBUG] Total products count for user:', totalCount);
-
-      // Se não há produtos, retornar array vazio
-      if (!totalCount || totalCount === 0) {
-        console.log('[PRODUCTS DEBUG] No products found for user');
-        return [];
-      }
-
-      // Implementar paginação para carregar todos os produtos
-      const pageSize = 1000; // Tamanho máximo por página
-      const totalPages = Math.ceil(totalCount / pageSize);
-      const allProducts = [];
-
-      console.log('[PRODUCTS DEBUG] Loading products in', totalPages, 'pages of', pageSize, 'items each');
-
-      // Carregar todos os produtos em lotes
-      for (let page = 0; page < totalPages; page++) {
-        const from = page * pageSize;
-        const to = from + pageSize - 1;
-
-        console.log(`[PRODUCTS DEBUG] Loading page ${page + 1}/${totalPages} (items ${from}-${to})`);
-
-        const { data: pageData, error: pageError } = await supabase
-          .from('products')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .range(from, to);
-
-        if (pageError) throw pageError;
-
-        if (pageData && pageData.length > 0) {
-          allProducts.push(...pageData);
-          console.log(`[PRODUCTS DEBUG] Loaded ${pageData.length} products from page ${page + 1}`);
-        }
-      }
-
-      console.log('[PRODUCTS DEBUG] Total products loaded:', allProducts.length);
-      console.log('[PRODUCTS DEBUG] First 5 products:', allProducts.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
-
-      // Usar allProducts em vez de data
-      const data = allProducts;
+      console.log('[PRODUCTS DEBUG] Total products loaded:', data.length);
+      console.log('[PRODUCTS DEBUG] First 5 products:', data.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
 
       // Fetch all quote items to calculate real metrics
       const { data: quoteItems, error: qiError } = await supabase

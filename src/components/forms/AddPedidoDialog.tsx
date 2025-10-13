@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { fetchUserProducts, fetchUserSuppliers } from "@/utils/productUtils";
 import { useActivityLog } from "@/hooks/useActivityLog";
 
 interface PedidoItem {
@@ -58,29 +59,56 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
   }, [open]);
 
   const loadSuppliers = async () => {
-    const { data, error } = await supabase
-      .from('suppliers')
-      .select('*')
-      .order('name');
-    
-    if (error) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Erro",
+          description: "Você precisa estar logado para acessar os dados",
+          variant: "destructive",
+        });
+        return;
+      }
+      const suppliers = await fetchUserSuppliers(user.id);
+      setSuppliers(suppliers);
+    } catch (error) {
       console.error('Error loading suppliers:', error);
-      return;
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os fornecedores",
+        variant: "destructive",
+      });
     }
-    setSuppliers(data || []);
   };
 
   const loadProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('name');
-    
-    if (error) {
+    try {
+      // Verificar autenticação primeiro
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Erro",
+          description: "Você precisa estar logado para acessar os dados",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        const productsData = await fetchUserProducts(user.id);
+        setProducts(productsData);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os produtos",
+          variant: "destructive",
+        });
+        return;
+      }
+    } catch (error) {
       console.error('Error loading products:', error);
-      return;
     }
-    setProducts(data || []);
   };
 
   const handleAddItem = () => {
@@ -406,8 +434,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
           </div>
         </div>
 
-        {/* Content Area - Now with more space */}
-        <div className="flex-1 overflow-hidden">
+        {/* Content Area - Now with scrollable space */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -417,11 +445,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="h-full"
             >
-              <div className="h-full p-4 sm:p-6">
+              <div className="min-h-0 p-4 sm:p-6">
                 {activeTab === 'produtos' && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4 h-full">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
                     {/* Left Column - Add Product Form */}
-                    <Card className="border-pink-100 shadow-sm order-1 lg:order-1 h-fit">
+                    <Card className="border-pink-100 shadow-sm order-1 lg:order-1">
                       <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50">
                         <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
                           <Package className="h-4 w-4 text-pink-500" />
@@ -442,6 +470,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
                             searchPlaceholder="Buscar produto..."
                             emptyText="Nenhum produto encontrado"
                             className="w-full border-pink-200 hover:border-pink-300"
+                            showAllOnOpen={false}
+                            minChars={2}
+                            autoFocusInput={true}
                           />
                         </div>
 
@@ -501,7 +532,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
                     </Card>
 
                     {/* Right Column - Products List */}
-                    <Card className="border-pink-100 shadow-sm order-2 lg:order-2 flex flex-col">
+                    <Card className="border-pink-100 shadow-sm order-2 lg:order-2 flex flex-col min-h-0">
                       <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50 flex-shrink-0">
                         <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
                           <Package className="h-4 w-4 text-pink-500" />

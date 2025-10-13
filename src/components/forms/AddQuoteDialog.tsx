@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Combobox } from "@/components/ui/combobox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -67,6 +68,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchUserProducts, fetchUserSuppliers } from "@/utils/productUtils";
 
 const productLineSchema = z.object({
   produtoId: z.string().min(1, "Produto é obrigatório"),
@@ -160,13 +162,24 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [productsRes, suppliersRes] = await Promise.all([
-        supabase.from("products").select("id, name").order("name"),
-        supabase.from("suppliers").select("id, name").order("name"),
+      // Verificar autenticação primeiro
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Erro",
+          description: "Você precisa estar logado para acessar os dados",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const [productsData, suppliersData] = await Promise.all([
+        fetchUserProducts(user.id),
+        fetchUserSuppliers(user.id),
       ]);
 
-      if (productsRes.data) setProducts(productsRes.data);
-      if (suppliersRes.data) setSuppliers(suppliersRes.data);
+      setProducts(productsData);
+      setSuppliers(suppliersData);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       toast({
@@ -531,43 +544,21 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                   {/* Seletor de Produto */}
                                   <div>
                                     <label className="text-sm font-medium text-gray-700 mb-2 block">Produto *</label>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          role="combobox"
-                                          className="w-full justify-between border-teal-200 focus:ring-teal-500/20"
-                                        >
-                                          {selectedProduct ? selectedProduct.name : "Selecionar produto..."}
-                                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-full p-0 border-teal-200" align="start">
-                                        <Command>
-                                          <CommandInput placeholder="Buscar produto..." />
-                                          <CommandList>
-                                            <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
-                                            <CommandGroup>
-                                              {products.map((product) => (
-                                                <CommandItem
-                                                  key={product.id}
-                                                  value={product.name}
-                                                  onSelect={() => setSelectedProduct(product)}
-                                                >
-                                                  <Check
-                                                    className={cn(
-                                                      "mr-2 h-4 w-4",
-                                                      selectedProduct?.id === product.id ? "opacity-100" : "opacity-0"
-                                                    )}
-                                                  />
-                                                  {product.name}
-                                                </CommandItem>
-                                              ))}
-                                            </CommandGroup>
-                                          </CommandList>
-                                        </Command>
-                                      </PopoverContent>
-                                    </Popover>
+                                    <Combobox
+                                      options={products.map(p => ({ value: p.id, label: p.name }))}
+                                      value={selectedProduct ? selectedProduct.id : ""}
+                                      onValueChange={(value) => {
+                                        const product = products.find(p => p.id === value);
+                                        setSelectedProduct(product || null);
+                                      }}
+                                      placeholder="Selecionar produto..."
+                                      searchPlaceholder="Buscar produto..."
+                                      emptyText="Nenhum produto encontrado."
+                                      className="w-full border-teal-200 focus:ring-teal-500/20"
+                                      showAllOnOpen={false}
+                                      minChars={2}
+                                      autoFocusInput={true}
+                                    />
                                   </div>
 
                                   {/* Quantidade e Unidade */}

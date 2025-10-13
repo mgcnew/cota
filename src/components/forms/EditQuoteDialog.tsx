@@ -49,6 +49,7 @@ import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchUserProducts, fetchUserSuppliers } from "@/utils/productUtils";
 
 const productLineSchema = z.object({
   produtoId: z.string().min(1, "Produto é obrigatório"),
@@ -125,14 +126,34 @@ export default function EditQuoteDialog({
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load products and suppliers
-      const [productsRes, suppliersRes] = await Promise.all([
-        supabase.from("products").select("id, name").order("name"),
-        supabase.from("suppliers").select("id, name").order("name"),
-      ]);
+      // Verificar se o usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Erro",
+          description: "Usuário não autenticado",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      if (productsRes.data) setProducts(productsRes.data);
-      if (suppliersRes.data) setSuppliers(suppliersRes.data);
+      // Load products and suppliers using utility functions
+      try {
+        const [productsData, suppliersData] = await Promise.all([
+          fetchUserProducts(user.id),
+          fetchUserSuppliers(user.id),
+        ]);
+
+        setProducts(productsData);
+        setSuppliers(suppliersData);
+      } catch (error) {
+        console.error("Erro ao carregar produtos e fornecedores:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar produtos e fornecedores",
+          variant: "destructive",
+        });
+      }
 
       // Load quote details
       const { data: quoteData } = await supabase
