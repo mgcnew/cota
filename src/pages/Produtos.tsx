@@ -62,6 +62,21 @@ export default function Produtos() {
     deleteProduct,
     updateProduct
   } = useProducts();
+
+  useEffect(() => {
+    console.log('[FILTER] Categoria selecionada:', selectedCategory);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    console.log('[CATEGORIES DEBUG] Disponíveis:', categories);
+    console.log('[CATEGORIES DEBUG] Produtos por categoria:', 
+      categories.map(cat => ({
+        category: cat,
+        count: products.filter(p => (p.category || '').trim().toLowerCase() === (cat || '').trim().toLowerCase()).length
+      }))
+    );
+  }, [categories, products]);
+
   useEffect(() => {
     if (!loading && !user) {
       setAuthDialogOpen(true);
@@ -70,9 +85,20 @@ export default function Produtos() {
 
   // OPTIMIZED: Memoize filtered products to avoid unnecessary recalculations
   const filteredProducts = useMemo(() => {
+    console.log('[FILTER DEBUG] selectedCategory:', selectedCategory);
+    console.log('[FILTER DEBUG] Total products:', products.length);
+    
     return products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+      
+      // Normalizar categorias para comparação
+      const productCategory = (product.category || '').trim().toLowerCase();
+      const selectedCategoryNormalized = (selectedCategory || '').trim().toLowerCase();
+      
+      const matchesCategory = selectedCategoryNormalized === "all" || productCategory === selectedCategoryNormalized;
+      
+      console.log('[FILTER DEBUG] Product:', product.name, '| Category:', product.category, '| Matches:', matchesCategory);
+      
       return matchesSearch && matchesCategory;
     });
   }, [products, debouncedSearchQuery, selectedCategory]);
@@ -228,15 +254,34 @@ export default function Produtos() {
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Categoria" />
               </SelectTrigger>
-              <SelectContent className="bg-background border z-50">
-                {categories.map(category => <SelectItem key={category} value={category}>
+              <SelectContent className="z-[100] bg-background">
+                {categories.map(category => (
+                  <SelectItem key={category} value={category}>
                     {category === "all" ? "Todas as categorias" : category}
-                  </SelectItem>)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
+
+      {/* Visual Feedback do Filtro */}
+      {selectedCategory !== "all" && (
+        <div className="mb-4 flex items-center gap-2 px-4">
+          <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+            Categoria: {selectedCategory}
+          </Badge>
+          <span className="text-sm text-muted-foreground">
+            {filteredProducts.length} produtos encontrados
+          </span>
+          {filteredProducts.length === 0 && (
+            <span className="text-sm text-amber-600">
+              ⚠️ Nenhum produto nesta categoria
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Stats Cards Melhorados */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

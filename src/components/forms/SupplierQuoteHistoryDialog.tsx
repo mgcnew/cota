@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Calendar, Package, Award, Search, DollarSign } from "lucide-react";
+import { Calendar, Package, Award, Search, DollarSign, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSupplierQuoteHistory } from "@/hooks/useSupplierQuoteHistory";
 
