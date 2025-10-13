@@ -255,16 +255,11 @@ export default function Produtos() {
                 <SelectValue placeholder="Categoria" />
               </SelectTrigger>
               <SelectContent className="z-[100] bg-background">
-                {categories.map(category => {
-                  const normalizedCategory = (category || '').trim().toLowerCase();
-                  const displayName = category === "all" ? "Todas as categorias" : category;
-                  
-                  return (
-                    <SelectItem key={category} value={normalizedCategory}>
-                      {displayName}
-                    </SelectItem>
-                  );
-                })}
+                {categories.map(category => (
+                  <SelectItem key={category} value={category}>
+                    {category === "all" ? "Todas as categorias" : category}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

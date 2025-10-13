@@ -21,11 +21,12 @@ export function useProducts() {
   const { data: products = [], isLoading, error } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      // Fetch products
+      // Fetch products - Remove limit to get all products
       const { data, error } = await supabase
         .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(0, 10000); // Increase range to get all products
 
       if (error) throw error;
 
