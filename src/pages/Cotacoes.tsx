@@ -636,38 +636,38 @@ export default function Cotacoes() {
               <Table>
                 <TableHeader className="bg-gradient-to-r from-teal-50/80 to-cyan-50/80 border-b border-teal-100">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-semibold text-teal-900 py-4 px-6">
+                    <TableHead className="font-semibold text-teal-900 py-3 px-4 text-sm">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
                         Cotação
                       </div>
                     </TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-teal-900 py-4">
+                    <TableHead className="hidden md:table-cell font-semibold text-teal-900 py-3 text-sm">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4" />
                         Produto
                       </div>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-teal-900 py-4">
+                    <TableHead className="hidden lg:table-cell font-semibold text-teal-900 py-3 text-sm">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         Período
                       </div>
                     </TableHead>
-                    <TableHead className="font-semibold text-teal-900 py-4">Status</TableHead>
-                    <TableHead className="font-semibold text-teal-900 py-4">
+                    <TableHead className="font-semibold text-teal-900 py-3 text-sm">Status</TableHead>
+                    <TableHead className="font-semibold text-teal-900 py-3 text-sm">
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4" />
                         Melhor Preço
                       </div>
                     </TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-teal-900 py-4">
+                    <TableHead className="hidden sm:table-cell font-semibold text-teal-900 py-3 text-sm">
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4" />
                         Fornecedores
                       </div>
                     </TableHead>
-                    <TableHead className="text-right font-semibold text-teal-900 py-4 px-6 w-32">Ações</TableHead>
+                    <TableHead className="text-right font-semibold text-teal-900 py-3 px-4 w-32 text-sm">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -679,13 +679,13 @@ export default function Cotacoes() {
                         index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                       )}
                     >
-                      <TableCell className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 border border-teal-200/50">
-                            <FileText className="h-4 w-4 text-teal-600" />
+                      <TableCell className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 border border-teal-200/50">
+                            <FileText className="h-3 w-3 text-teal-600" />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-semibold font-mono text-sm text-gray-900 truncate">
+                            <div className="font-semibold font-mono text-xs text-gray-900 truncate">
                               #{cotacao.id.substring(0, 4)}
                             </div>
                             <div className="text-xs text-gray-500 md:hidden mt-1 truncate">{cotacao.produto}</div>
@@ -693,11 +693,11 @@ export default function Cotacoes() {
                         </div>
                       </TableCell>
                       
-                      <TableCell className="hidden md:table-cell py-4">
+                      <TableCell className="hidden md:table-cell py-3">
                         <div className="min-w-0 max-w-[150px]">
-                          <div className="font-medium text-gray-900 truncate">{cotacao.produto}</div>
+                          <div className="font-medium text-sm text-gray-900 truncate">{cotacao.produto}</div>
                           <div className="text-xs text-gray-500 mt-1">
-                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md">
                               <Package className="h-3 w-3" />
                               {cotacao.quantidade}
                             </span>
@@ -706,7 +706,7 @@ export default function Cotacoes() {
                       </TableCell>
                       
                       <TableCell className="hidden lg:table-cell py-4">
-                        <div className="text-sm space-y-1">
+                        <div className="text-xs space-y-1">
                           <div className="flex items-center gap-1 text-gray-900">
                             <Calendar className="h-3 w-3 text-teal-600" />
                             {cotacao.dataInicio}
@@ -719,11 +719,13 @@ export default function Cotacoes() {
                       </TableCell>
                       
                       <TableCell className="py-4">
-                        {getStatusBadge(cotacao.status)}
+                        <div className="text-xs">
+                          {getStatusBadge(cotacao.status)}
+                        </div>
                       </TableCell>
                       <TableCell className="py-4">
                         <div className="space-y-1">
-                          <div className="font-bold text-green-600 text-base">{cotacao.melhorPreco}</div>
+                          <div className="font-bold text-green-600 text-sm">{cotacao.melhorPreco}</div>
                           <div className="text-xs text-gray-600 truncate max-w-[100px]">{cotacao.melhorFornecedor}</div>
                           <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium">
                             <DollarSign className="h-3 w-3" />
@@ -741,7 +743,7 @@ export default function Cotacoes() {
                           {cotacao.fornecedores}
                         </Badge>
                       </TableCell>
-                      <TableCell className="py-4 px-6">
+                      <TableCell className="py-3 px-4">
                         <div className="flex items-center justify-end gap-2">
                           {/* Botão Detalhes - Direto na tabela */}
                           <ViewQuoteDialog 
@@ -763,7 +765,7 @@ export default function Cotacoes() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="h-8 px-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 text-blue-700 hover:text-blue-800 transition-all duration-200 font-medium"
+                                className="h-7 px-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 text-blue-700 hover:text-blue-800 transition-all duration-200 font-medium"
                               >
                                 <Eye className="h-3 w-3 mr-1" />
                                 <span className="text-xs">Detalhes</span>
@@ -777,9 +779,9 @@ export default function Cotacoes() {
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200"
+                                className="h-7 w-7 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200"
                               >
-                                <MoreVertical className="h-4 w-4" />
+                                <MoreVertical className="h-3 w-3" />
                                 <span className="sr-only">Abrir menu de ações</span>
                               </Button>
                             </DropdownMenuTrigger>
