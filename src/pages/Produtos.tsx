@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, Scale, FileUp, Quote, Building2, Clock } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CategorySelect } from "@/components/ui/category-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AddProductDialog } from "@/components/forms/AddProductDialog";
 import { EditProductDialog } from "@/components/forms/EditProductDialog";
@@ -24,6 +24,7 @@ import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
+
 
 export default function Produtos() {
   const navigate = useNavigate();
@@ -255,22 +256,18 @@ export default function Produtos() {
               <Input placeholder="Buscar produtos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
             
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
-              <SelectContent className="z-[100] bg-background">
-                {categories.map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category === "all" ? "Todas as categorias" : category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CategorySelect
+              categories={categories}
+              products={products}
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              className="w-full sm:w-auto"
+            />
           </div>
         </CardContent>
       </Card>
+
+
 
       {/* Visual Feedback do Filtro */}
       {selectedCategory !== "all" && (

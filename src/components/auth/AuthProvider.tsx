@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useInactivityDetector } from "@/hooks/useInactivityDetector";
+import { useUpdateDetector } from "@/hooks/useUpdateDetector";
+import { ReAuthDialog } from "./ReAuthDialog";
 import { Loader2 } from "lucide-react";
 
 interface AuthContextType {
@@ -11,6 +14,7 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  forceReAuth: (reason: 'inactivity' | 'update' | 'security') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,7 +24,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reAuthRequired, setReAuthRequired] = useState(false);
+  const [reAuthReason, setReAuthReason] = useState<'inactivity' | 'update' | 'security'>('security');
   const { toast } = useToast();
+
+  // Constantes de configuração
+  const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 horas em milissegundos
 
   useEffect(() => {
     let mounted = true;
@@ -112,15 +121,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    
-    if (error) throw error;
-    
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Logout realizado com sucesso!",
+        description: "Você foi desconectado do sistema.",
+      });
+    } catch (error: any) {
+      console.error("Erro ao fazer logout:", error);
+      toast({
+        title: "Erro ao fazer logout",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const forceReAuth = (reason: 'inactivity' | 'update' | 'security') => {
+    console.log(`Re-autenticação forçada por: ${reason}`);
+    setReAuthReason(reason);
+    setReAuthRequired(true);
+  };
+
+  const handleReAuthSuccess = () => {
+    setReAuthRequired(false);
     toast({
-      title: "Logout realizado",
-      description: "Até logo!",
+      title: "Re-autenticação bem-sucedida!",
+      description: "Você pode continuar usando o sistema normalmente.",
     });
   };
+
+  // Hook para detectar inatividade (apenas se usuário estiver logado)
+  useInactivityDetector({
+    timeout: INACTIVITY_TIMEOUT,
+    onInactivity: () => {
+      if (user && session) {
+        forceReAuth('inactivity');
+      }
+    },
+    enabled: !!user && !!session && !reAuthRequired
+  });
+
+  // Hook para detectar atualizações do sistema
+  useUpdateDetector({
+    onUpdateDetected: () => {
+      if (user && session) {
+        forceReAuth('update');
+      }
+    },
+    enabled: !!user && !!session && !reAuthRequired
+  });
 
   if (loading) {
     return (
@@ -150,8 +202,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        signUp,
+        signIn,
+        signOut,
+        forceReAuth,
+      }}
+    >
       {children}
+      
+      {/* Modal de re-autenticação */}
+      <ReAuthDialog
+        open={reAuthRequired}
+        reason={reAuthReason}
+        onSuccess={handleReAuthSuccess}
+      />
     </AuthContext.Provider>
   );
 }
