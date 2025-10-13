@@ -171,6 +171,7 @@ export function useProducts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product-categories'] });
       toast({
         title: "Sucesso",
         description: "Produto excluído com sucesso",
@@ -185,11 +186,46 @@ export function useProducts() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ productId, data }: { 
+      productId: string, 
+      data: { name: string, category: string, weight: string } 
+    }) => {
+      const { error } = await supabase
+        .from('products')
+        .update({
+          name: data.name,
+          category: data.category,
+          weight: data.weight || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', productId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product-categories'] });
+      toast({
+        title: "Sucesso",
+        description: "Produto atualizado com sucesso",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o produto",
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     products,
     categories,
     isLoading,
     error,
     deleteProduct: deleteMutation.mutate,
+    updateProduct: updateMutation.mutate,
   };
 }

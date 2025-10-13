@@ -59,7 +59,8 @@ export default function Produtos() {
     products,
     categories,
     isLoading: productsLoading,
-    deleteProduct
+    deleteProduct,
+    updateProduct
   } = useProducts();
   useEffect(() => {
     if (!loading && !user) {
@@ -612,9 +613,18 @@ export default function Produtos() {
         </div>
       </div>
 
-      <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={() => {}} onCategoryAdded={() => {}} categories={categories} />
+      <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={(updatedProduct) => {
+        updateProduct({
+          productId: updatedProduct.id,
+          data: {
+            name: updatedProduct.name,
+            category: updatedProduct.category,
+            weight: updatedProduct.weight
+          }
+        });
+      }} onCategoryAdded={() => {}} categories={categories} />
 
-      <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={() => {}} />
+      <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={(id) => deleteProduct(id)} />
         </div>
       </PageWrapper>
     </>;

@@ -341,7 +341,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="text-right space-y-1">
-                        <p className="font-bold text-emerald-600 text-lg">R$ {supplier.savings?.toLocaleString('pt-BR') || '0'}</p>
+                        <p className="font-bold text-emerald-600 text-lg">R$ {supplier.savings ? String(supplier.savings) : '0'}</p>
                         <div className="flex items-center justify-end gap-1">
                           <span className="text-xs text-slate-500">Economia gerada</span>
                         </div>
@@ -399,7 +399,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="text-right space-y-1">
-                        <p className="font-bold text-slate-900">R$ {quote.value?.toLocaleString ? quote.value.toLocaleString('pt-BR') : quote.value || '0'}</p>
+                        <p className="font-bold text-slate-900">R$ {quote.bestPrice || '0'}</p>
                         <Badge className={`text-xs font-medium ${
                           quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
                           quote.status === 'pendente' || quote.status === 'pending' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :

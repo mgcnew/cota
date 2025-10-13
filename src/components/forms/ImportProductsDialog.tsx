@@ -17,6 +17,7 @@ import {
   Download,
   X
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,6 +59,13 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
   const [parsedData, setParsedData] = useState<ParsedProduct[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [importProgress, setImportProgress] = useState(0);
+  const [importStats, setImportStats] = useState({
+    total: 0,
+    imported: 0,
+    errors: 0,
+    duplicates: 0
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -187,49 +195,129 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
     }
 
     setIsProcessing(true);
+    setImportProgress(0);
+    setImportStats({ total: parsedData.length, imported: 0, errors: 0, duplicates: 0 });
 
     try {
+      console.log(`[IMPORT] Iniciando importação de ${parsedData.length} produtos`);
+
       // 1. Verificar autenticação
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error("Usuário não autenticado");
       }
 
-      // 2. Preparar dados para inserção
-      const productsToInsert = parsedData.map(p => ({
-        name: p.name,
-        category: p.category,
-        weight: p.weight || null,
-        user_id: user.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }));
-
-      // 3. Inserir produtos no banco de dados
-      const { data, error } = await supabase
+      // 2. Buscar produtos existentes para evitar duplicatas
+      const { data: existingProducts } = await supabase
         .from('products')
-        .insert(productsToInsert)
-        .select();
+        .select('name, category')
+        .eq('user_id', user.id);
 
-      if (error) throw error;
+      const existingSet = new Set(
+        existingProducts?.map(p => `${p.name.toLowerCase()}|${p.category.toLowerCase()}`) || []
+      );
 
-      // 4. Invalidar queries para atualizar UI
+      // 3. Preparar dados para inserção (filtrar duplicatas)
+      const productsToInsert = parsedData
+        .filter(p => {
+          const key = `${p.name.toLowerCase()}|${p.category.toLowerCase()}`;
+          if (existingSet.has(key)) {
+            setImportStats(prev => ({ ...prev, duplicates: prev.duplicates + 1 }));
+            return false;
+          }
+          return true;
+        })
+        .map(p => ({
+          name: p.name,
+          category: p.category,
+          weight: p.weight || null,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }));
+
+      if (productsToInsert.length === 0) {
+        toast({
+          title: "Todos os produtos já existem",
+          description: "Nenhum produto novo foi encontrado para importar",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      // 4. Dividir em lotes
+      const BATCH_SIZE = 100;
+      const batches = [];
+      for (let i = 0; i < productsToInsert.length; i += BATCH_SIZE) {
+        batches.push(productsToInsert.slice(i, i + BATCH_SIZE));
+      }
+
+      console.log(`[IMPORT] Processando ${batches.length} lotes de até ${BATCH_SIZE} produtos`);
+
+      // 5. Processar lotes sequencialmente
+      let totalImported = 0;
+      const errors: string[] = [];
+
+      for (let i = 0; i < batches.length; i++) {
+        try {
+          const { data, error } = await supabase
+            .from('products')
+            .insert(batches[i])
+            .select();
+
+          if (error) throw error;
+
+          totalImported += data?.length || 0;
+          setImportStats(prev => ({ ...prev, imported: totalImported }));
+          setImportProgress(((i + 1) / batches.length) * 100);
+
+          console.log(`[IMPORT] Lote ${i + 1}/${batches.length} concluído: ${data?.length || 0} produtos`);
+
+          // Pequeno delay para não sobrecarregar
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error: any) {
+          console.error(`Erro no lote ${i + 1}:`, error);
+          errors.push(`Lote ${i + 1} (${batches[i].length} produtos): ${error.message}`);
+          setImportStats(prev => ({ ...prev, errors: prev.errors + batches[i].length }));
+        }
+      }
+
+      console.log(`[IMPORT] Concluído: ${totalImported} importados, ${errors.length} erros, ${importStats.duplicates} duplicatas`);
+
+      // 6. Invalidar queries para atualizar UI
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product-categories'] });
 
-      toast({
-        title: "Importação concluída",
-        description: `${data?.length || parsedData.length} produtos importados com sucesso`,
-      });
+      // 7. Feedback final
+      if (errors.length === 0) {
+        toast({
+          title: "✅ Importação concluída com sucesso!",
+          description: `${totalImported} produtos importados${importStats.duplicates > 0 ? ` (${importStats.duplicates} duplicatas ignoradas)` : ''}`,
+        });
+      } else {
+        toast({
+          title: "⚠️ Importação parcial",
+          description: `${totalImported} produtos importados, ${errors.length} lotes com erro`,
+          variant: "destructive"
+        });
+        console.error("Erros de importação:", errors);
+      }
 
       // Reset e fechar
-      setOpen(false);
-      setFile(null);
-      setParsedData([]);
-      setValidationErrors([]);
+      setTimeout(() => {
+        setOpen(false);
+        setFile(null);
+        setParsedData([]);
+        setValidationErrors([]);
+        setImportProgress(0);
+        setImportStats({ total: 0, imported: 0, errors: 0, duplicates: 0 });
+      }, 2000);
+
     } catch (error: any) {
       console.error('Erro ao importar produtos:', error);
       toast({
-        title: "Erro na importação",
+        title: "❌ Erro na importação",
         description: error.message || "Não foi possível importar os produtos",
         variant: "destructive"
       });
@@ -343,6 +431,16 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
                         </Badge>
                       </div>
 
+                      {parsedData.length > 1000 && (
+                        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 flex items-start gap-2">
+                          <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
+                          <div className="text-sm text-amber-800 dark:text-amber-200">
+                            <p className="font-medium">Grande volume detectado</p>
+                            <p>Serão importados {parsedData.length} produtos em lotes de 100. Isso pode levar alguns minutos.</p>
+                          </div>
+                        </div>
+                      )}
+
                       {validationErrors.length > 0 && (
                         <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
                           <div className="flex items-start gap-2">
@@ -414,16 +512,40 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
           </Card>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancelar
-          </Button>
-          <Button 
-            onClick={handleImport}
-            disabled={parsedData.length === 0 || isProcessing}
-          >
-            {isProcessing ? "Processando..." : `Importar ${parsedData.length} Produtos`}
-          </Button>
+        <DialogFooter className="flex-col sm:flex-row gap-4">
+          {isProcessing && importProgress > 0 && (
+            <div className="w-full space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="font-medium">Importando produtos...</span>
+                <span className="text-muted-foreground">
+                  {importStats.imported}/{importStats.total} ({Math.round(importProgress)}%)
+                </span>
+              </div>
+              <Progress value={importProgress} className="h-2" />
+              {importStats.duplicates > 0 && (
+                <p className="text-xs text-amber-600 dark:text-amber-500">
+                  ⚠️ {importStats.duplicates} produtos duplicados foram ignorados
+                </p>
+              )}
+              {importStats.errors > 0 && (
+                <p className="text-xs text-destructive">
+                  ❌ {importStats.errors} produtos com erro
+                </p>
+              )}
+            </div>
+          )}
+          
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={isProcessing}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleImport}
+              disabled={parsedData.length === 0 || isProcessing}
+            >
+              {isProcessing ? "Processando..." : `Importar ${parsedData.length} Produtos`}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
