@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown } from "lucide-react";
+import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown, Clock, MessageCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -91,6 +91,43 @@ export default function Fornecedores() {
   };
   const handleSuppliersImported = (importedSuppliers: Supplier[]) => {
     refetch();
+  };
+
+  // Função para gerar mensagem personalizada do WhatsApp
+  const generateWhatsAppMessage = (supplierName: string, contactName: string) => {
+    const currentHour = new Date().getHours();
+    let greeting = "";
+    
+    if (currentHour >= 5 && currentHour < 12) {
+      greeting = "Bom dia";
+    } else if (currentHour >= 12 && currentHour < 18) {
+      greeting = "Boa tarde";
+    } else {
+      greeting = "Boa noite";
+    }
+    
+    const message = `${greeting}, ${contactName}! Sou da equipe de compras da empresa. Gostaria de conversar sobre uma oportunidade de negócio com ${supplierName}. Podemos conversar?`;
+    
+    return encodeURIComponent(message);
+  };
+
+  // Função para abrir WhatsApp
+  const openWhatsApp = (supplier: Supplier) => {
+    if (!supplier.phone) {
+      toast({
+        title: "Telefone não encontrado",
+        description: "Este fornecedor não possui telefone cadastrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Remove caracteres não numéricos do telefone
+    const cleanPhone = supplier.phone.replace(/\D/g, '');
+    const message = generateWhatsAppMessage(supplier.name, supplier.contact);
+    const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${message}`;
+    
+    window.open(whatsappUrl, '_blank');
   };
 
   // Mock data de produtos para cotações
@@ -500,39 +537,39 @@ export default function Fornecedores() {
               <Table>
                 <TableHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-100">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-bold text-indigo-900 py-4">Fornecedor</TableHead>
-                    <TableHead className="hidden md:table-cell font-bold text-indigo-900 py-4">Status</TableHead>
-                    <TableHead className="hidden lg:table-cell font-bold text-indigo-900 py-4">Limite</TableHead>
-                    <TableHead className="font-bold text-indigo-900 py-4">Preço Médio</TableHead>
-                    <TableHead className="hidden sm:table-cell font-bold text-indigo-900 py-4">Cotações</TableHead>
-                    <TableHead className="hidden lg:table-cell font-bold text-indigo-900 py-4">Avaliação</TableHead>
-                    <TableHead className="text-right font-bold text-indigo-900 py-4">Ações</TableHead>
+                    <TableHead className="font-bold text-indigo-900 py-4 px-4 text-xs">Fornecedor</TableHead>
+                    <TableHead className="hidden md:table-cell font-bold text-indigo-900 py-4 px-4 text-xs">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell font-bold text-indigo-900 py-4 px-4 text-xs">Limite</TableHead>
+                    <TableHead className="font-bold text-indigo-900 py-4 px-4 text-xs">Preço Médio</TableHead>
+                    <TableHead className="hidden sm:table-cell font-bold text-indigo-900 py-4 px-4 text-xs">Cotações</TableHead>
+                    <TableHead className="hidden lg:table-cell font-bold text-indigo-900 py-4 px-4 text-xs">Avaliação</TableHead>
+                    <TableHead className="text-right font-bold text-indigo-900 py-4 px-4 text-xs">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="hover:bg-indigo-50/30 transition-colors border-b border-gray-100/60">
-                      <TableCell className="py-4">
+                  {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="hover:bg-gray-50/50 transition-all duration-200 hover:border hover:border-gray-300 mb-6 mx-2 hover:rounded-xl group hover:shadow-xl bg-white">
+                      <TableCell className="py-4 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
-                            <Building2 className="h-4 w-4 text-indigo-600" />
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <Building2 className="h-3 w-3 text-indigo-600" />
                           </div>
                           <div>
-                            <div className="font-semibold text-gray-900 text-sm">{supplier.name}</div>
+                            <div className="font-semibold text-gray-900 text-xs">{supplier.name}</div>
                             <div className="text-xs text-gray-500 mt-1">{supplier.contact}</div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell py-4">
+                      <TableCell className="hidden md:table-cell py-4 px-4">
                         {getStatusBadge(supplier.status)}
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell py-4">
+                      <TableCell className="hidden lg:table-cell py-4 px-4">
                         <Badge variant="outline" className="bg-blue-50/80 border-blue-200/60 text-blue-700 font-medium text-xs">{supplier.limit}</Badge>
                       </TableCell>
-                      <TableCell className="py-4">
-                        <span className="font-bold text-green-700 text-sm">{supplier.avgPrice}</span>
+                      <TableCell className="py-4 px-4">
+                        <span className="font-bold text-green-700 text-xs">{supplier.avgPrice}</span>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell py-4">
-                        <div className="text-sm space-y-1">
+                      <TableCell className="hidden sm:table-cell py-4 px-4">
+                        <div className="text-xs space-y-1">
                           <div className="flex items-center gap-1">
                             <FileText className="h-3 w-3 text-indigo-600" />
                             <span className="font-semibold text-indigo-700 text-xs">{supplier.activeQuotes} ativas</span>
@@ -540,10 +577,10 @@ export default function Fornecedores() {
                           <div className="text-xs text-gray-500">{supplier.totalQuotes} total</div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell py-4">
+                      <TableCell className="hidden lg:table-cell py-4 px-4">
                         {renderStarRating(supplier.rating)}
                       </TableCell>
-                      <TableCell className="py-4">
+                      <TableCell className="py-4 px-4">
                         <div className="flex justify-end gap-2">
                           {/* Botão principal - Ver Histórico */}
                           <SupplierQuoteHistoryDialog
@@ -551,22 +588,33 @@ export default function Fornecedores() {
                             supplierId={supplier.id}
                             trigger={
                               <Button 
-                                size="sm" 
-                                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200 border-0 text-xs px-3"
+                                variant="ghost" 
+                                size="sm"
+                                className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 group flex items-center justify-center"
                               >
-                                <Eye className="h-3 w-3 mr-1" />
-                                Histórico
+                                <Clock className="h-3.5 w-3.5 group-hover:animate-pulse" />
                               </Button>
                             }
                           />
+                          
+                          {/* Botão WhatsApp */}
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => openWhatsApp(supplier)}
+                            className="text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-green-300 group flex items-center justify-center"
+                            title={`Conversar com ${supplier.contact} no WhatsApp`}
+                          >
+                            <MessageCircle className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                          </Button>
                           
                           {/* Menu de ações secundárias */}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button 
-                                variant="outline" 
+                                variant="ghost" 
                                 size="sm" 
-                                className="border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-200 shadow-sm hover:shadow-md text-xs px-2"
+                                className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 px-2 py-1 h-7"
                               >
                                 <MoreVertical className="h-3 w-3" />
                               </Button>

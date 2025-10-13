@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Building2, TrendingUp, TrendingDown, Calendar, Package, DollarSign, Minus, Loader2, Award, Target } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Calendar, Package, Award, Search, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSupplierQuoteHistory } from "@/hooks/useSupplierQuoteHistory";
 
@@ -13,43 +13,48 @@ interface SupplierQuoteHistoryDialogProps {
 }
 
 export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }: SupplierQuoteHistoryDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   
-  // Buscar dados reais do histórico de cotações
   const { data: quoteHistory = [], isLoading, error } = useSupplierQuoteHistory(supplierId);
 
-  // Calcular variação de preço para o mesmo produto
-  const calculatePriceVariation = (currentPrice: number, previousPrice: number | null) => {
-    if (!previousPrice) return { type: "stable" as const, percentage: 0 };
-    
-    const variation = ((currentPrice - previousPrice) / previousPrice) * 100;
-    
-    if (Math.abs(variation) < 1) return { type: "stable" as const, percentage: variation };
-    if (variation > 0) return { type: "up" as const, percentage: variation };
-    return { type: "down" as const, percentage: variation };
-  };
-
-  const getVariationIcon = (type: "up" | "down" | "stable", percentage: number) => {
-    const iconClass = "h-4 w-4";
-    
+  const getVariationIcon = (type: 'up' | 'down' | 'stable') => {
     switch (type) {
-      case "up":
-        return <TrendingUp className={cn(iconClass, "text-red-500")} />;
-      case "down":
-        return <TrendingDown className={cn(iconClass, "text-green-500")} />;
+      case 'up':
+        return <TrendingUp className="h-5 w-5 font-bold text-red-700" />;
+      case 'down':
+        return <TrendingDown className="h-5 w-5 font-bold text-green-700" />;
       default:
-        return <Minus className={cn(iconClass, "text-gray-400")} />;
+        return <Minus className="h-5 w-5 font-bold text-gray-600" />;
     }
   };
 
-  const getVariationColor = (type: "up" | "down" | "stable") => {
-    switch (type) {
-      case "up":
-        return "text-red-600 bg-red-50 border-red-200";
-      case "down":
-        return "text-green-600 bg-green-50 border-green-200";
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'concluida':
+        return (
+          <Badge className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-emerald-300 shadow-md px-2 py-1 text-xs font-semibold">
+            Concluída
+          </Badge>
+        );
+      case 'ativa':
+        return (
+          <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-300 shadow-md px-2 py-1 text-xs font-semibold">
+            Ativa
+          </Badge>
+        );
+      case 'expirada':
+        return (
+          <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-red-300 shadow-md px-2 py-1 text-xs font-semibold">
+            Expirada
+          </Badge>
+        );
       default:
-        return "text-gray-600 bg-gray-50 border-gray-200";
+        return (
+          <Badge className="bg-gradient-to-r from-gray-500 to-gray-600 text-white border-gray-300 shadow-md px-2 py-1 text-xs font-semibold">
+            {status}
+          </Badge>
+        );
     }
   };
 
@@ -61,225 +66,204 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
     });
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      concluida: { label: "Concluída", class: "bg-green-100 text-green-700 border-green-300" },
-      ativa: { label: "Ativa", class: "bg-blue-100 text-blue-700 border-blue-300" },
-      expirada: { label: "Expirada", class: "bg-gray-100 text-gray-700 border-gray-300" }
-    };
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.expirada;
-    
-    return (
-      <Badge variant="outline" className={cn("text-xs", config.class)}>
-        {config.label}
-      </Badge>
-    );
-  };
-
-  // Agrupar por produto para calcular variações
-  const productGroups = new Map<string, typeof quoteHistory>();
-  quoteHistory.forEach(entry => {
-    if (!productGroups.has(entry.productId)) {
-      productGroups.set(entry.productId, []);
-    }
-    productGroups.get(entry.productId)!.push(entry);
-  });
-
-  // Calcular estatísticas
-  const stats = {
+  const stats = quoteHistory.length > 0 ? {
     totalQuotes: quoteHistory.length,
     wonQuotes: quoteHistory.filter(q => q.isWinner).length,
-    winRate: quoteHistory.length > 0 ? (quoteHistory.filter(q => q.isWinner).length / quoteHistory.length) * 100 : 0,
-    avgPrice: quoteHistory.length > 0 ? quoteHistory.reduce((sum, q) => sum + q.price, 0) / quoteHistory.length : 0,
-    uniqueProducts: new Set(quoteHistory.map(q => q.productId)).size
+    winRate: (quoteHistory.filter(q => q.isWinner).length / quoteHistory.length) * 100,
+    uniqueProducts: new Set(quoteHistory.map(q => q.product)).size,
+    avgPrice: quoteHistory.reduce((sum, q) => sum + q.price, 0) / quoteHistory.length
+  } : {
+    totalQuotes: 0,
+    wonQuotes: 0,
+    winRate: 0,
+    uniqueProducts: 0,
+    avgPrice: 0
   };
 
+  // Agrupar produtos únicos com suas informações
+  const baseUniqueProducts = useMemo(() => {
+    if (quoteHistory.length === 0) return [];
+    
+    return Array.from(new Set(quoteHistory.map(q => q.product))).map(productName => {
+      const productQuotes = quoteHistory.filter(q => q.product === productName);
+      const wonQuotes = productQuotes.filter(q => q.isWinner);
+      const totalQuoted = productQuotes.length;
+      const totalWon = wonQuotes.length;
+      const avgPrice = productQuotes.reduce((sum, q) => sum + q.price, 0) / productQuotes.length;
+      const minPrice = Math.min(...productQuotes.map(q => q.price));
+      const maxPrice = Math.max(...productQuotes.map(q => q.price));
+      
+      return {
+        name: productName,
+        totalQuoted,
+        totalWon,
+        winRate: (totalWon / totalQuoted) * 100,
+        avgPrice,
+        minPrice,
+        maxPrice,
+        lastQuoteDate: productQuotes.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].date
+      };
+    });
+  }, [quoteHistory]);
+
+  // Aplicar filtro de busca
+  const filteredAndSortedProducts = useMemo(() => {
+    let filtered = [...baseUniqueProducts];
+
+    // Aplicar busca por nome do produto
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [baseUniqueProducts, searchTerm]);
+
+  // Manter compatibilidade com o código existente
+  const uniqueProducts = filteredAndSortedProducts;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {trigger}
+        {trigger || (
+          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            Ver Histórico
+          </button>
+        )}
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden">
-        <DialogHeader className="pb-4 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex items-center justify-center border border-blue-200/50">
-              <Building2 className="h-5 w-5 text-blue-600" />
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0 border-b border-gray-100 pb-4">
+          <DialogTitle className="flex items-center gap-3 text-xl font-bold text-gray-900">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
+              <Package className="h-5 w-5 text-white" />
             </div>
-            <div>
-              <DialogTitle className="text-lg font-bold text-gray-900">
-                Histórico de Cotações
-              </DialogTitle>
-              <p className="text-sm text-gray-600 mt-1 truncate">
-                {supplierName}
-              </p>
-            </div>
-          </div>
+            Histórico de Cotações - Produtos
+          </DialogTitle>
         </DialogHeader>
 
-        {/* Estatísticas rápidas */}
-        {!isLoading && !error && quoteHistory.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4 border-b border-gray-100">
-            <div className="text-center p-3 bg-blue-50 rounded-lg">
-              <div className="text-lg font-bold text-blue-600">{stats.totalQuotes}</div>
-              <div className="text-xs text-blue-700">Total de Cotações</div>
-            </div>
-            <div className="text-center p-3 bg-green-50 rounded-lg">
-              <div className="text-lg font-bold text-green-600">{stats.wonQuotes}</div>
-              <div className="text-xs text-green-700">Cotações Ganhas</div>
-            </div>
-            <div className="text-center p-3 bg-purple-50 rounded-lg">
-              <div className="text-lg font-bold text-purple-600">{stats.winRate.toFixed(1)}%</div>
-              <div className="text-xs text-purple-700">Taxa de Sucesso</div>
-            </div>
-            <div className="text-center p-3 bg-orange-50 rounded-lg">
-              <div className="text-lg font-bold text-orange-600">{stats.uniqueProducts}</div>
-              <div className="text-xs text-orange-700">Produtos Únicos</div>
+        {/* Conteúdo principal */}
+        <div className="flex-1 overflow-auto p-6">
+          {/* Barra de busca */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Buscar produtos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
           </div>
-        )}
 
-        <div className="flex-1 overflow-y-auto space-y-3 py-4">
+          {/* Tabela de produtos */}
           {isLoading ? (
-            <div className="text-center py-8">
-              <Loader2 className="h-8 w-8 text-blue-500 mx-auto mb-3 animate-spin" />
-              <p className="text-gray-500 font-medium">Carregando histórico...</p>
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : error ? (
-            <div className="text-center py-8">
-              <Building2 className="h-12 w-12 text-red-300 mx-auto mb-3" />
-              <p className="text-red-500 font-medium">Erro ao carregar histórico</p>
-              <p className="text-sm text-red-400">Tente novamente mais tarde</p>
+            <div className="text-center py-12">
+              <div className="text-red-600 mb-2">Erro ao carregar dados</div>
+              <div className="text-sm text-gray-500">{error.message}</div>
             </div>
-          ) : quoteHistory.length === 0 ? (
-            <div className="text-center py-8">
-              <Building2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhum histórico encontrado</p>
-              <p className="text-sm text-gray-400">Este fornecedor ainda não participou de cotações</p>
+          ) : filteredAndSortedProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <div className="text-gray-600 mb-2">
+                {baseUniqueProducts.length === 0 ? "Nenhum produto cotado" : "Nenhum produto encontrado"}
+              </div>
+              {baseUniqueProducts.length > 0 && (
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                  }}
+                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Limpar filtros
+                </button>
+              )}
             </div>
           ) : (
-            quoteHistory.map((entry, index) => {
-              // Buscar entrada anterior do mesmo produto para calcular variação
-              const sameProductEntries = productGroups.get(entry.productId) || [];
-              const currentIndex = sameProductEntries.findIndex(e => e.id === entry.id);
-              const previousEntry = currentIndex < sameProductEntries.length - 1 ? sameProductEntries[currentIndex + 1] : null;
-              const variation = calculatePriceVariation(entry.price, previousEntry?.price || null);
-              
-              return (
-                <Card key={entry.id} className={cn(
-                  "hover:shadow-md transition-all duration-200 border-l-4",
-                  entry.isWinner 
-                    ? "border-l-green-500 bg-green-50/30" 
-                    : "border-l-gray-300 bg-white"
-                )}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      {/* Informações principais */}
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center border flex-shrink-0",
-                          entry.isWinner 
-                            ? "bg-green-100 border-green-200 text-green-700"
-                            : "bg-gray-100 border-gray-200 text-gray-600"
-                        )}>
-                          {entry.isWinner ? (
-                            <Award className="h-4 w-4" />
-                          ) : (
-                            <Package className="h-4 w-4" />
+            <div className="overflow-hidden rounded-lg border border-gray-200">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gradient-to-r from-blue-50/80 to-purple-50/80 border-b border-blue-100">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          Data
+                        </div>
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4" />
+                          Nome do Produto
+                        </div>
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Preço
+                        </div>
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">
+                        <div className="flex items-center gap-2">
+                          <Award className="h-4 w-4" />
+                          Status da Cotação
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredAndSortedProducts.map((product, index) => {
+                      // Para cada produto, mostrar todas as cotações
+                      const productQuotes = quoteHistory.filter(q => q.product === product.name);
+                      
+                      return productQuotes.map((quote, quoteIndex) => (
+                        <tr 
+                          key={`${product.name}-${quoteIndex}`}
+                          className={cn(
+                            "hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/30 transition-all duration-200",
+                            (index + quoteIndex) % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                           )}
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-gray-900 truncate">
-                              {entry.product}
-                            </span>
-                            <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
-                              {entry.quotationId.substring(0, 8)}...
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="font-medium text-gray-900">
+                              {formatDate(String(quote.date))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="font-medium text-gray-900">{quote.product}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="font-medium text-gray-900">
+                              R$ {quote.price.toFixed(2)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Badge 
+                              variant={quote.isWinner ? "default" : "secondary"}
+                              className={cn(
+                                "font-medium",
+                                quote.isWinner 
+                                  ? "bg-green-100 text-green-700 border-green-200" 
+                                  : "bg-gray-100 text-gray-700 border-gray-200"
+                              )}
+                            >
+                              {quote.isWinner ? "Ganha" : "Não ganha"}
                             </Badge>
-                            {getStatusBadge(entry.status)}
-                            {entry.isWinner && (
-                              <Badge className="bg-green-100 text-green-700 border-green-300">
-                                <Award className="h-3 w-3 mr-1" />
-                                Vencedor
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar className="h-3 w-3" />
-                            <span>{formatDate(entry.date)}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Preço e variação */}
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        {/* Indicador de variação (apenas se houver entrada anterior do mesmo produto) */}
-                        {previousEntry && (
-                          <div className={cn(
-                            "flex items-center gap-1 px-2 py-1 rounded-full border text-xs font-medium",
-                            getVariationColor(variation.type)
-                          )}>
-                            {getVariationIcon(variation.type, variation.percentage)}
-                            <span>
-                              {variation.type === "stable" 
-                                ? "0%" 
-                                : `${variation.percentage > 0 ? '+' : ''}${variation.percentage.toFixed(1)}%`
-                              }
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Preço */}
-                        <div className="text-right">
-                          <div className={cn(
-                            "flex items-center gap-1 text-lg font-bold",
-                            entry.isWinner ? "text-green-600" : "text-gray-900"
-                          )}>
-                            <DollarSign className="h-4 w-4" />
-                            <span>R$ {entry.price.toFixed(2)}</span>
-                          </div>
-                          {index === 0 && (
-                            <Badge className="bg-blue-100 text-blue-700 text-xs mt-1">
-                              Mais recente
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
-        </div>
-
-        {/* Resumo estatístico */}
-        {quoteHistory.length > 0 && (
-          <div className="pt-4 border-t border-gray-100 bg-gray-50/50 -mx-6 -mb-6 px-6 pb-6 mt-4">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Menor Oferta</div>
-                <div className="font-bold text-green-600">
-                  R$ {Math.min(...quoteHistory.map(h => h.price)).toFixed(2)}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Maior Oferta</div>
-                <div className="font-bold text-red-600">
-                  R$ {Math.max(...quoteHistory.map(h => h.price)).toFixed(2)}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Oferta Média</div>
-                <div className="font-bold text-blue-600">
-                  R$ {stats.avgPrice.toFixed(2)}
-                </div>
+                          </td>
+                        </tr>
+                      ));
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -66,15 +66,15 @@ export function ProductPriceHistoryDialog({ productName, productId, trigger }: P
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      concluida: { label: "Concluída", class: "bg-green-100 text-green-700 border-green-300" },
-      ativa: { label: "Ativa", class: "bg-blue-100 text-blue-700 border-blue-300" },
-      expirada: { label: "Expirada", class: "bg-gray-100 text-gray-700 border-gray-300" }
+      concluida: { label: "Concluída", class: "bg-green-50 text-green-700 border-green-200" },
+      ativa: { label: "Ativa", class: "bg-blue-50 text-blue-700 border-blue-200" },
+      expirada: { label: "Expirada", class: "bg-gray-50 text-gray-600 border-gray-200" }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.expirada;
     
     return (
-      <Badge variant="outline" className={cn("text-xs", config.class)}>
+      <Badge variant="outline" className={cn("text-xs px-1.5 py-0", config.class)}>
         {config.label}
       </Badge>
     );
@@ -85,40 +85,40 @@ export function ProductPriceHistoryDialog({ productName, productId, trigger }: P
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
-        <DialogHeader className="pb-4 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex items-center justify-center border border-blue-200/50">
-              <Package className="h-5 w-5 text-blue-600" />
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden">
+        <DialogHeader className="pb-3 border-b border-gray-100/80">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100">
+              <Package className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <DialogTitle className="text-lg font-bold text-gray-900">
+              <DialogTitle className="text-base font-semibold text-gray-900">
                 Histórico de Preços
               </DialogTitle>
-              <p className="text-sm text-gray-600 mt-1 truncate">
+              <p className="text-xs text-gray-500 mt-0.5 truncate">
                 {productName}
               </p>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-3 py-4">
+        <div className="flex-1 overflow-y-auto space-y-2 py-3">
           {isLoading ? (
-            <div className="text-center py-8">
-              <Loader2 className="h-8 w-8 text-blue-500 mx-auto mb-3 animate-spin" />
-              <p className="text-gray-500 font-medium">Carregando histórico...</p>
+            <div className="text-center py-6">
+              <Loader2 className="h-6 w-6 text-blue-500 mx-auto mb-2 animate-spin" />
+              <p className="text-gray-500 text-sm font-medium">Carregando histórico...</p>
             </div>
           ) : error ? (
-            <div className="text-center py-8">
-              <Package className="h-12 w-12 text-red-300 mx-auto mb-3" />
-              <p className="text-red-500 font-medium">Erro ao carregar histórico</p>
-              <p className="text-sm text-red-400">Tente novamente mais tarde</p>
+            <div className="text-center py-6">
+              <Package className="h-8 w-8 text-red-300 mx-auto mb-2" />
+              <p className="text-red-500 text-sm font-medium">Erro ao carregar histórico</p>
+              <p className="text-xs text-red-400">Tente novamente mais tarde</p>
             </div>
           ) : sortedHistory.length === 0 ? (
-            <div className="text-center py-8">
-              <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhum histórico encontrado</p>
-              <p className="text-sm text-gray-400">Este produto ainda não possui cotações finalizadas</p>
+            <div className="text-center py-6">
+              <Package className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+              <p className="text-gray-500 text-sm font-medium">Nenhum histórico encontrado</p>
+              <p className="text-xs text-gray-400">Este produto ainda não possui cotações finalizadas</p>
             </div>
           ) : (
             sortedHistory.map((entry, index) => {
@@ -126,27 +126,27 @@ export function ProductPriceHistoryDialog({ productName, productId, trigger }: P
               const variation = calculatePriceVariation(entry.price, previousEntry?.price || null);
               
               return (
-                <Card key={entry.id} className="hover:shadow-md transition-all duration-200">
-                  <CardContent className="p-4">
+                <Card key={entry.id} className="hover:shadow-sm hover:bg-gray-50/50 transition-all duration-200 border-gray-200/60">
+                  <CardContent className="p-3">
                     <div className="flex items-center justify-between">
                       {/* Informações principais */}
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 flex items-center justify-center border border-green-200/50 flex-shrink-0">
-                          <Building2 className="h-4 w-4 text-green-600" />
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <div className="w-7 h-7 rounded-md bg-green-50 flex items-center justify-center border border-green-100 flex-shrink-0">
+                          <Building2 className="h-3.5 w-3.5 text-green-600" />
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-gray-900 truncate">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className="font-medium text-gray-900 text-sm truncate">
                               {entry.supplier}
                             </span>
-                            <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
-                              {entry.quotationId.substring(0, 8)}...
+                            <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600 border-gray-200 px-1.5 py-0">
+                              {entry.quotationId.substring(0, 6)}...
                             </Badge>
                             {getStatusBadge(entry.status)}
                           </div>
                           
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-1.5 text-xs text-gray-500">
                             <Calendar className="h-3 w-3" />
                             <span>{formatDate(entry.date)}</span>
                           </div>
@@ -154,11 +154,11 @@ export function ProductPriceHistoryDialog({ productName, productId, trigger }: P
                       </div>
 
                       {/* Preço e variação */}
-                      <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="flex items-center gap-2.5 flex-shrink-0">
                         {/* Indicador de variação */}
                         {index < sortedHistory.length - 1 && (
                           <div className={cn(
-                            "flex items-center gap-1 px-2 py-1 rounded-full border text-xs font-medium",
+                            "flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-xs font-medium",
                             getVariationColor(variation.type)
                           )}>
                             {getVariationIcon(variation.type, variation.percentage)}
@@ -173,12 +173,12 @@ export function ProductPriceHistoryDialog({ productName, productId, trigger }: P
 
                         {/* Preço */}
                         <div className="text-right">
-                          <div className="flex items-center gap-1 text-lg font-bold text-gray-900">
-                            <DollarSign className="h-4 w-4 text-green-600" />
+                          <div className="flex items-center gap-1 text-base font-semibold text-gray-900">
+                            <DollarSign className="h-3.5 w-3.5 text-green-600" />
                             <span>R$ {entry.price.toFixed(2)}</span>
                           </div>
                           {index === 0 && (
-                            <Badge className="bg-blue-100 text-blue-700 text-xs mt-1">
+                            <Badge className="bg-blue-50 text-blue-700 text-xs mt-0.5 px-1.5 py-0">
                               Mais recente
                             </Badge>
                           )}
@@ -194,23 +194,23 @@ export function ProductPriceHistoryDialog({ productName, productId, trigger }: P
 
         {/* Resumo estatístico */}
         {sortedHistory.length > 0 && (
-          <div className="pt-4 border-t border-gray-100 bg-gray-50/50 -mx-6 -mb-6 px-6 pb-6 mt-4">
-            <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="pt-3 border-t border-gray-100/80 bg-gray-50/30 -mx-6 -mb-6 px-6 pb-6 mt-3">
+            <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <div className="text-xs text-gray-500 mb-1">Menor Preço</div>
-                <div className="font-bold text-green-600">
+                <div className="text-xs text-gray-500 mb-0.5">Menor Preço</div>
+                <div className="font-semibold text-green-600 text-sm">
                   R$ {Math.min(...sortedHistory.map(h => h.price)).toFixed(2)}
                 </div>
               </div>
               <div>
-                <div className="text-xs text-gray-500 mb-1">Maior Preço</div>
-                <div className="font-bold text-red-600">
+                <div className="text-xs text-gray-500 mb-0.5">Maior Preço</div>
+                <div className="font-semibold text-red-600 text-sm">
                   R$ {Math.max(...sortedHistory.map(h => h.price)).toFixed(2)}
                 </div>
               </div>
               <div>
-                <div className="text-xs text-gray-500 mb-1">Preço Médio</div>
-                <div className="font-bold text-blue-600">
+                <div className="text-xs text-gray-500 mb-0.5">Preço Médio</div>
+                <div className="font-semibold text-blue-600 text-sm">
                   R$ {(sortedHistory.reduce((sum, h) => sum + h.price, 0) / sortedHistory.length).toFixed(2)}
                 </div>
               </div>

@@ -471,56 +471,56 @@ export default function Produtos() {
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-100">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-semibold text-gray-700 py-4">Produto</TableHead>
-                    <TableHead className="font-semibold text-gray-700">Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700">Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700">Status</TableHead>
-                    <TableHead className="font-semibold text-gray-700">Melhor Preço</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700">Fornecedor</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700">Cotações</TableHead>
-                    <TableHead className="text-right font-semibold text-gray-700">Ações</TableHead>
+                <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
+                  <TableRow className="border-b-2 border-gray-100">
+                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Melhor Preço</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Fornecedor</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Cotações</TableHead>
+                    <TableHead className="text-right font-semibold text-gray-700 py-4 px-4 text-xs">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map(product => <TableRow key={product.id} className="hover:bg-orange-50/30 transition-colors border-b border-gray-100/60">
-                      <TableCell className="py-4">
+                  {paginatedData.items.map(product => <TableRow key={product.id} className="hover:bg-gray-50/50 transition-all duration-200 hover:border hover:border-gray-300 mb-6 mx-2 hover:rounded-xl group hover:shadow-xl bg-white">
+                      <TableCell className="py-4 px-4 rounded-l-xl">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
-                            <Package className="h-4 w-4 text-orange-600" />
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
+                            <Package className="h-3 w-3 text-orange-600" />
                           </div>
                           <div>
-                            <div className="font-semibold text-gray-900 text-sm">{product.name}</div>
+                            <div className="font-medium text-gray-900 text-xs">{product.name}</div>
                             <div className="text-xs text-gray-500 md:hidden mt-1">{product.category}</div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell py-4">
-                        <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium text-xs">{product.category}</Badge>
+                      <TableCell className="hidden md:table-cell py-4 px-4">
+                        <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium text-xs group-hover:bg-orange-100/80 transition-colors">{product.category}</Badge>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell py-4">
-                        <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium text-xs">{product.weight}</Badge>
+                      <TableCell className="hidden md:table-cell py-4 px-4">
+                        <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium text-xs group-hover:bg-gray-200 transition-colors">{product.weight}</Badge>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell py-4">
+                      <TableCell className="hidden sm:table-cell py-4 px-4">
                         {getStatusBadge(getProductStatus(product))}
                       </TableCell>
-                      <TableCell className="py-4">
+                      <TableCell className="py-4 px-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-green-700 text-sm">{product.lastQuotePrice}</span>
+                          <span className="font-bold text-green-700 text-xs">{product.lastQuotePrice}</span>
                           {getTrendIcon(product.trend)}
                         </div>
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell py-4">
-                        <span className="text-gray-700 font-medium text-sm">{product.bestSupplier}</span>
+                      <TableCell className="hidden lg:table-cell py-4 px-4">
+                        <span className="text-gray-700 font-medium text-xs">{product.bestSupplier}</span>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell py-4">
+                      <TableCell className="hidden sm:table-cell py-4 px-4">
                         <div className="flex items-center gap-1">
                           <Quote className="h-3 w-3 text-blue-600" />
-                          <span className="font-semibold text-blue-700 text-sm">{product.quotesCount}</span>
+                          <span className="font-semibold text-blue-700 text-xs">{product.quotesCount}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="py-4">
+                      <TableCell className="py-4 px-4 rounded-r-xl">
                         <div className="flex justify-end gap-2">
                           {/* Botão principal - Ver Histórico */}
                           <ProductPriceHistoryDialog
@@ -528,12 +528,11 @@ export default function Produtos() {
                             productId={product.id}
                             trigger={
                               <Button 
-                                variant="outline" 
+                                variant="ghost" 
                                 size="sm"
-                                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 shadow-sm hover:shadow-md"
+                                className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 group flex items-center justify-center"
                               >
-                                <Quote className="h-3 w-3 mr-1" />
-                                Histórico
+                                <Clock className="h-3.5 w-3.5 group-hover:animate-pulse" />
                               </Button>
                             }
                           />
@@ -544,9 +543,9 @@ export default function Produtos() {
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                className="hover:bg-gray-100 hover:text-gray-700 border border-transparent hover:border-gray-200 transition-all duration-200 shadow-sm hover:shadow-md"
+                                className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 px-2 py-1 h-7"
                               >
-                                <MoreVertical className="h-4 w-4" />
+                                <MoreVertical className="h-3 w-3" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
@@ -574,7 +573,7 @@ export default function Produtos() {
                 </TableBody>
               </Table>
             </div>
-            <div className="border-t border-orange-100/60 bg-gradient-to-r from-orange-50/30 to-amber-50/30 px-6 py-4">
+            <div className="border-t border-orange-100/80 bg-gradient-to-r from-orange-50/30 to-amber-50/30 px-6 py-4">
               <DataPagination 
                 currentPage={paginatedData.pagination.currentPage} 
                 totalPages={paginatedData.pagination.totalPages} 
