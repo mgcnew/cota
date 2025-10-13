@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { cn } from "@/lib/utils";
-import { fetchUserProducts, fetchUserSuppliers } from "@/utils/productUtils";
 
 interface PedidoItem {
   produto: string;
@@ -56,31 +55,29 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
   }, [pedido, open]);
 
   const loadSuppliers = async () => {
-    try {
-      const data = await fetchUserSuppliers();
-      setSuppliers(data);
-    } catch (error) {
+    const { data, error } = await supabase
+      .from('suppliers')
+      .select('*')
+      .order('name');
+    
+    if (error) {
       console.error('Error loading suppliers:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os fornecedores",
-        variant: "destructive",
-      });
+      return;
     }
+    setSuppliers(data || []);
   };
 
   const loadProducts = async () => {
-    try {
-      const data = await fetchUserProducts();
-      setProducts(data);
-    } catch (error) {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('name');
+    
+    if (error) {
       console.error('Error loading products:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os produtos",
-        variant: "destructive",
-      });
+      return;
     }
+    setProducts(data || []);
   };
 
   const handleAddItem = () => {

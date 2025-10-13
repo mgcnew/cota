@@ -30,9 +30,6 @@ interface ComboboxProps {
   emptyText?: string
   className?: string
   disabled?: boolean
-  showAllOnOpen?: boolean
-  minChars?: number
-  autoFocusInput?: boolean
 }
 
 export function Combobox({
@@ -44,23 +41,10 @@ export function Combobox({
   emptyText = "Nenhum resultado encontrado.",
   className,
   disabled = false,
-  showAllOnOpen = true,
-  minChars = 1,
-  autoFocusInput = true,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
-  const [query, setQuery] = React.useState("")
 
   const selectedOption = options.find((option) => option.value === value)
-
-  React.useEffect(() => {
-    if (open) {
-      // Limpa consulta ao abrir para evitar mostrar lista completa quando configurado
-      setQuery("")
-    }
-  }, [open])
-
-  const canShowOptions = showAllOnOpen || query.trim().length >= minChars
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -78,38 +62,29 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput
-            placeholder={searchPlaceholder}
-            value={query}
-            onValueChange={setQuery}
-            autoFocus={autoFocusInput}
-          />
+          <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
-            <CommandEmpty>
-              {canShowOptions ? emptyText : "Digite para buscar..."}
-            </CommandEmpty>
-            {canShowOptions && (
-              <CommandGroup>
-                {options.map((option) => (
-                  <CommandItem
-                    key={option.value}
-                    value={option.label}
-                    onSelect={() => {
-                      onValueChange(option.value)
-                      setOpen(false)
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value === option.value ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {option.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.label}
+                  onSelect={() => {
+                    onValueChange(option.value)
+                    setOpen(false)
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === option.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {option.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
