@@ -285,9 +285,15 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
 
       console.log(`[IMPORT] Concluído: ${totalImported} importados, ${errors.length} erros, ${importStats.duplicates} duplicatas`);
 
-      // 6. Invalidar queries para atualizar UI
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.invalidateQueries({ queryKey: ['product-categories'] });
+    // 6. Invalidar queries para atualizar UI
+    await queryClient.invalidateQueries({ queryKey: ['products'] });
+    await queryClient.invalidateQueries({ queryKey: ['product-categories'] });
+
+    // Aguardar queries serem refetchadas
+    await queryClient.refetchQueries({ queryKey: ['products'] });
+    await queryClient.refetchQueries({ queryKey: ['product-categories'] });
+
+    console.log('[IMPORT] Queries invalidadas e refetchadas');
 
       // 7. Feedback final
       if (errors.length === 0) {
@@ -304,15 +310,15 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
         console.error("Erros de importação:", errors);
       }
 
-      // Reset e fechar
-      setTimeout(() => {
-        setOpen(false);
-        setFile(null);
-        setParsedData([]);
-        setValidationErrors([]);
-        setImportProgress(0);
-        setImportStats({ total: 0, imported: 0, errors: 0, duplicates: 0 });
-      }, 2000);
+    // Reset e fechar com delay maior para garantir UI atualizada
+    setTimeout(() => {
+      setOpen(false);
+      setFile(null);
+      setParsedData([]);
+      setValidationErrors([]);
+      setImportProgress(0);
+      setImportStats({ total: 0, imported: 0, errors: 0, duplicates: 0 });
+    }, 3000);
 
     } catch (error: any) {
       console.error('Erro ao importar produtos:', error);

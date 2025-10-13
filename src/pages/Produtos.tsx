@@ -62,6 +62,15 @@ export default function Produtos() {
     deleteProduct,
     updateProduct
   } = useProducts();
+
+  useEffect(() => {
+    console.log('[FILTER] Categoria selecionada:', selectedCategory);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    console.log('[CATEGORIES] Disponíveis:', categories);
+  }, [categories]);
+
   useEffect(() => {
     if (!loading && !user) {
       setAuthDialogOpen(true);
@@ -228,7 +237,7 @@ export default function Produtos() {
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Categoria" />
               </SelectTrigger>
-              <SelectContent className="bg-background border z-50">
+              <SelectContent className="z-[100] bg-background">
                 {categories.map(category => <SelectItem key={category} value={category}>
                     {category === "all" ? "Todas as categorias" : category}
                   </SelectItem>)}
