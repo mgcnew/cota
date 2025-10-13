@@ -21,14 +21,20 @@ export function useProducts() {
   const { data: products = [], isLoading, error } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      // Fetch products - Remove limit to get all products
+      // Verificar autenticação primeiro
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Fetch all products without any limitations
       const { data, error } = await supabase
         .from('products')
         .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(0, 10000); // Increase range to get all products
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      console.log('[PRODUCTS DEBUG] Total products from DB:', data?.length);
+      console.log('[PRODUCTS DEBUG] First 5 products:', data?.slice(0, 5).map(p => ({ id: p.id, name: p.name })));
 
       // Fetch all quote items to calculate real metrics
       const { data: quoteItems, error: qiError } = await supabase
@@ -143,6 +149,14 @@ export function useProducts() {
         };
       });
 
+      console.log('[PRODUCTS DEBUG] Total formatted products:', formattedProducts.length);
+      console.log('[PRODUCTS DEBUG] Sample formatted products:', formattedProducts.slice(0, 3).map(p => ({ 
+        id: p.id, 
+        name: p.name, 
+        category: p.category,
+        quotesCount: p.quotesCount 
+      })));
+
       return formattedProducts;
     },
   });
@@ -221,6 +235,11 @@ export function useProducts() {
     },
   });
 
+  const invalidateCache = () => {
+    queryClient.invalidateQueries({ queryKey: ['products'] });
+    queryClient.invalidateQueries({ queryKey: ['product-categories'] });
+  };
+
   return {
     products,
     categories,
@@ -228,5 +247,6 @@ export function useProducts() {
     error,
     deleteProduct: deleteMutation.mutate,
     updateProduct: updateMutation.mutate,
+    invalidateCache,
   };
 }

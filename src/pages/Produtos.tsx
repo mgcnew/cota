@@ -60,7 +60,8 @@ export default function Produtos() {
     categories,
     isLoading: productsLoading,
     deleteProduct,
-    updateProduct
+    updateProduct,
+    invalidateCache
   } = useProducts();
 
   useEffect(() => {
@@ -233,6 +234,11 @@ export default function Produtos() {
                 <DropdownMenuItem onClick={triggerImportDialog}>
                   <FileUp className="h-4 w-4 mr-2" />
                   Importar Produtos
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={invalidateCache}>
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Atualizar Cache
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
