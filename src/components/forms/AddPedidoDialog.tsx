@@ -434,7 +434,7 @@ export default function AddPedidoDialog({
                           Adicionar Produto
                         </h3>
                       </div>
-                      <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
+                      <div className="p-2 sm:p-3 space-y-2 sm:space-y-3 py-0">
                         <div className="space-y-2">
                           
                           <Combobox options={filteredProducts.map(p => ({
