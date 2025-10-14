@@ -129,9 +129,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
     }
   };
 
-  // Filter products with debounce
+  // Filter products with debounce - só mostra ao digitar
   const filteredProducts = useMemo(() => {
-    if (!debouncedProductSearch) return products.slice(0, 50);
+    if (!debouncedProductSearch) return []; // Não mostra nada até começar a digitar
     return products.filter(p => 
       p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase())
     );
@@ -494,7 +494,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
                             }}
                             placeholder="Digite para buscar produtos..."
                             searchPlaceholder={`Buscar entre ${products.length} produtos...`}
-                            emptyText="Nenhum produto encontrado"
+                            emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."}
                             className="w-full border-pink-200 hover:border-pink-300"
                             onSearchChange={setProductSearch}
                           />

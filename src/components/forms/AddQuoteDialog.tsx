@@ -226,9 +226,9 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
     }
   };
 
-  // Filter products with debounce
+  // Filter products with debounce - só mostra ao digitar
   const filteredProducts = useMemo(() => {
-    if (!debouncedProductSearch) return products.slice(0, 100);
+    if (!debouncedProductSearch) return []; // Não mostra nada até começar a digitar
     return products.filter(p => 
       p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase())
     );
@@ -604,14 +604,14 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                             value={productSearch}
                                             onValueChange={setProductSearch}
                                           />
-                                          <CommandList>
-                                            <CommandEmpty>
-                                              {productSearch 
-                                                ? "Nenhum produto encontrado." 
-                                                : `Digite para buscar entre ${products.length} produtos`
-                                              }
-                                            </CommandEmpty>
-                                            <CommandGroup>
+                                           <CommandList>
+                                             <CommandEmpty>
+                                               {debouncedProductSearch 
+                                                 ? "Nenhum produto encontrado." 
+                                                 : `Digite para buscar entre ${products.length} produtos...`
+                                               }
+                                             </CommandEmpty>
+                                             <CommandGroup>
                                               {filteredProducts.map((product) => (
                                                 <CommandItem
                                                   key={product.id}
