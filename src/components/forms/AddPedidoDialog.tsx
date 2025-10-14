@@ -428,7 +428,7 @@ export default function AddPedidoDialog({
                 {activeTab === 'produtos' && <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4 h-full">
                     {/* Left Column - Add Product Form */}
                     <Card className="border-pink-100 shadow-sm order-1 lg:order-1 h-fit">
-                      <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50">
+                      <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50 py-0">
                         <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
                           <Package className="h-4 w-4 text-pink-500" />
                           Adicionar Produto
