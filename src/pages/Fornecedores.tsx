@@ -26,7 +26,6 @@ import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
-
 interface Supplier {
   id: string;
   name: string;
@@ -65,7 +64,10 @@ export default function Fornecedores() {
     refetch
   } = useSuppliers();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const { viewMode, setViewMode } = useResponsiveViewMode();
+  const {
+    viewMode,
+    setViewMode
+  } = useResponsiveViewMode();
   const {
     paginate
   } = usePagination<Supplier>({
@@ -86,7 +88,10 @@ export default function Fornecedores() {
     refetch();
   };
   const handleEditSupplier = (id: string, data: SupplierFormData) => {
-    updateSupplier({ supplierId: id, data });
+    updateSupplier({
+      supplierId: id,
+      data
+    });
   };
   const handleDeleteSupplier = (id: string) => {
     deleteSupplier(id);
@@ -99,7 +104,6 @@ export default function Fornecedores() {
   const generateWhatsAppMessage = (supplierName: string, contactName: string) => {
     const currentHour = new Date().getHours();
     let greeting = "";
-    
     if (currentHour >= 5 && currentHour < 12) {
       greeting = "Bom dia";
     } else if (currentHour >= 12 && currentHour < 18) {
@@ -107,9 +111,7 @@ export default function Fornecedores() {
     } else {
       greeting = "Boa noite";
     }
-    
     const message = `${greeting}, ${contactName}! Sou da equipe de compras da empresa. Gostaria de conversar sobre uma oportunidade de negócio com ${supplierName}. Podemos conversar?`;
-    
     return encodeURIComponent(message);
   };
 
@@ -119,16 +121,15 @@ export default function Fornecedores() {
       toast({
         title: "Telefone não encontrado",
         description: "Este fornecedor não possui telefone cadastrado.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-    
+
     // Remove caracteres não numéricos do telefone
     const cleanPhone = supplier.phone.replace(/\D/g, '');
     const message = generateWhatsAppMessage(supplier.name, supplier.contact);
     const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${message}`;
-    
     window.open(whatsappUrl, '_blank');
   };
 
@@ -170,7 +171,7 @@ export default function Fornecedores() {
       },
       inactive: {
         variant: "secondary" as const,
-        label: "Inativo", 
+        label: "Inativo",
         className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200 font-semibold shadow-sm"
       },
       pending: {
@@ -179,15 +180,11 @@ export default function Fornecedores() {
         className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 font-semibold shadow-sm"
       }
     };
-
     const config = statusConfig[status as keyof typeof statusConfig];
     if (!config) return null;
-
-    return (
-      <Badge variant={config.variant} className={config.className}>
+    return <Badge variant={config.variant} className={config.className}>
         {config.label}
-      </Badge>
-    );
+      </Badge>;
   };
   const renderStarRating = (rating: number) => {
     return <div className="flex items-center gap-1">
@@ -217,8 +214,7 @@ export default function Fornecedores() {
         <div className="text-center">Carregando...</div>
       </div>;
   }
-  return (
-    <>
+  return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
@@ -245,17 +241,7 @@ export default function Fornecedores() {
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
-              <div className="flex items-center gap-2 text-gray-700 bg-white/60 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <TrendingUp className="h-4 w-4 text-indigo-600" />
-                <span className="font-medium">Gerencie fornecedores e acompanhe performance</span>
-              </div>
-              
-              <div className="flex items-center gap-2 text-gray-600 bg-white/40 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <Building2 className="h-4 w-4 text-blue-500" />
-                <span>{filteredSuppliers.length} fornecedores ativos</span>
-              </div>
-            </div>
+            
           </div>
           
           <div className="flex flex-wrap gap-3">
@@ -328,7 +314,9 @@ export default function Fornecedores() {
             </div>
             <div className="mt-4 flex items-center gap-2">
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-indigo-600 h-2 rounded-full transition-all duration-500" style={{ width: '90%' }}></div>
+                <div className="bg-indigo-600 h-2 rounded-full transition-all duration-500" style={{
+                    width: '90%'
+                  }}></div>
               </div>
               <span className="text-xs text-gray-500">90%</span>
             </div>
@@ -353,7 +341,7 @@ export default function Fornecedores() {
               </div>
             </div>
             <div className="mt-4 text-xs text-gray-500">
-              {Math.floor((stats.active / stats.total) * 100)}% da base ativa • {stats.total - stats.active} inativos
+              {Math.floor(stats.active / stats.total * 100)}% da base ativa • {stats.total - stats.active} inativos
             </div>
           </CardContent>
         </Card>
@@ -434,27 +422,15 @@ export default function Fornecedores() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <SupplierQuoteHistoryDialog
-                        supplierName={supplier.name}
-                        supplierId={supplier.id}
-                        trigger={
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors">
+                      <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors">
                             <Eye className="h-4 w-4 mr-2 text-blue-600" />
                             Ver Histórico de Cotações
-                          </DropdownMenuItem>
-                        }
-                      />
-                      <DropdownMenuItem 
-                        onClick={() => setEditingSupplier(supplier)}
-                        className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors"
-                      >
+                          </DropdownMenuItem>} />
+                      <DropdownMenuItem onClick={() => setEditingSupplier(supplier)} className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors">
                         <Edit className="h-4 w-4 mr-2 text-green-600" />
                         Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors" 
-                        onClick={() => setDeletingSupplier(supplier)}
-                      >
+                      <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors" onClick={() => setDeletingSupplier(supplier)}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir
                       </DropdownMenuItem>
@@ -522,15 +498,10 @@ export default function Fornecedores() {
                   </div>
                 </div>
 
-                <AddQuoteDialog onAdd={handleAddQuote} trigger={
-                  <Button 
-                    size="sm" 
-                    className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
+                <AddQuoteDialog onAdd={handleAddQuote} trigger={<Button size="sm" className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
                     <Plus className="h-4 w-4 mr-2" />
                     Nova Cotação
-                  </Button>
-                } />
+                  </Button>} />
               </CardContent>
             </Card>)}
         </div> : <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-indigo-50/30">
@@ -585,57 +556,28 @@ export default function Fornecedores() {
                       <TableCell className="py-4 px-4">
                         <div className="flex justify-end gap-2">
                           {/* Botão principal - Ver Histórico */}
-                          <SupplierQuoteHistoryDialog
-                            supplierName={supplier.name}
-                            supplierId={supplier.id}
-                            trigger={
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 group flex items-center justify-center"
-                              >
+                          <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 group flex items-center justify-center">
                                 <Clock className="h-3.5 w-3.5 group-hover:animate-pulse" />
-                              </Button>
-                            }
-                          />
+                              </Button>} />
                           
                           {/* Botão WhatsApp */}
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => openWhatsApp(supplier)}
-                            className="text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-green-300 group flex items-center justify-center"
-                            title={`Conversar com ${supplier.contact} no WhatsApp`}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => openWhatsApp(supplier)} className="text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-green-300 group flex items-center justify-center" title={`Conversar com ${supplier.contact} no WhatsApp`}>
                             <MessageCircle className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
                           </Button>
                           
                           {/* Menu de ações secundárias */}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 px-2 py-1 h-7"
-                              >
+                              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 px-2 py-1 h-7">
                                 <MoreVertical className="h-3 w-3" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent 
-                              align="end" 
-                              className="w-48 shadow-xl border-0 bg-white/95 backdrop-blur-sm"
-                            >
-                              <DropdownMenuItem 
-                                onClick={() => setEditingSupplier(supplier)}
-                                className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors py-2"
-                              >
+                            <DropdownMenuContent align="end" className="w-48 shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+                              <DropdownMenuItem onClick={() => setEditingSupplier(supplier)} className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors py-2">
                                 <Edit className="h-4 w-4 mr-2 text-green-600" />
                                 <span className="font-medium">Editar Fornecedor</span>
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors py-2" 
-                                onClick={() => setDeletingSupplier(supplier)}
-                              >
+                              <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors py-2" onClick={() => setDeletingSupplier(supplier)}>
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 <span className="font-medium">Excluir Fornecedor</span>
                               </DropdownMenuItem>
@@ -648,16 +590,7 @@ export default function Fornecedores() {
               </Table>
             </div>
             <div className="border-t border-indigo-100/60 bg-gradient-to-r from-indigo-50/30 to-blue-50/30 px-6 py-4">
-              <DataPagination 
-                currentPage={paginatedData.pagination.currentPage} 
-                totalPages={paginatedData.pagination.totalPages} 
-                itemsPerPage={paginatedData.pagination.itemsPerPage} 
-                totalItems={paginatedData.pagination.totalItems} 
-                onPageChange={paginatedData.pagination.goToPage} 
-                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
-                startIndex={paginatedData.pagination.startIndex} 
-                endIndex={paginatedData.pagination.endIndex} 
-              />
+              <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>
         </Card>}
@@ -687,6 +620,5 @@ export default function Fornecedores() {
       </div>
         </div>
       </PageWrapper>
-    </>
-  );
+    </>;
 }
