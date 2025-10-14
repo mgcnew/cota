@@ -121,7 +121,7 @@ export function ReAuthDialog({ open, reason, onSuccess, timeRemaining }: ReAuthD
 
   return (
     <Dialog open={open} onOpenChange={() => {}} modal>
-      <DialogContent className="sm:max-w-md" hideCloseButton>
+      <DialogContent className="sm:max-w-md [&>button]:hidden">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
             {reasonInfo.icon}

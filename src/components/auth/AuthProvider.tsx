@@ -156,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Hook para detectar inatividade (apenas se usuário estiver logado)
   useInactivityDetector({
     timeout: INACTIVITY_TIMEOUT,
-    onInactivity: () => {
+    onInactive: () => {
       if (user && session) {
         forceReAuth('inactivity');
       }

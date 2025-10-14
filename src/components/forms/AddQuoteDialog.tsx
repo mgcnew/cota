@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   Dialog,
   DialogContent,
@@ -109,6 +110,8 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [supplierSearch, setSupplierSearch] = useState("");
+  const [productSearch, setProductSearch] = useState("");
+  const debouncedProductSearch = useDebounce(productSearch, 300);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Supplier[]>([]);
   const [activeTab, setActiveTab] = useState("produtos");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -160,13 +163,57 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [productsRes, suppliersRes] = await Promise.all([
-        supabase.from("products").select("id, name").order("name"),
-        supabase.from("suppliers").select("id, name").order("name"),
-      ]);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
 
-      if (productsRes.data) setProducts(productsRes.data);
+      // Load suppliers (usually few)
+      const suppliersRes = await supabase
+        .from("suppliers")
+        .select("id, name")
+        .eq('user_id', user.id)
+        .order("name");
+
       if (suppliersRes.data) setSuppliers(suppliersRes.data);
+
+      // Load products in batches
+      const { count: totalCount, error: countError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (countError) throw countError;
+      
+      if (!totalCount || totalCount === 0) {
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
+
+      const pageSize = 1000;
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const allProducts = [];
+
+      console.log(`[ADD QUOTE] Loading ${totalCount} products in ${totalPages} pages`);
+
+      for (let page = 0; page < totalPages; page++) {
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data: pageData, error: pageError } = await supabase
+          .from('products')
+          .select('id, name')
+          .eq('user_id', user.id)
+          .order('name')
+          .range(from, to);
+
+        if (pageError) throw pageError;
+        if (pageData && pageData.length > 0) {
+          allProducts.push(...pageData);
+        }
+      }
+
+      console.log(`[ADD QUOTE] Loaded ${allProducts.length} products total`);
+      setProducts(allProducts);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       toast({
@@ -178,6 +225,14 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       setLoading(false);
     }
   };
+
+  // Filter products with debounce
+  const filteredProducts = useMemo(() => {
+    if (!debouncedProductSearch) return products.slice(0, 100);
+    return products.filter(p => 
+      p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase())
+    );
+  }, [products, debouncedProductSearch]);
 
   const onSubmit = async (data: QuoteFormData) => {
     setIsSubmitting(true);
@@ -544,15 +599,27 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                       </PopoverTrigger>
                                       <PopoverContent className="w-full p-0 border-teal-200" align="start">
                                         <Command>
-                                          <CommandInput placeholder="Buscar produto..." />
+                                          <CommandInput 
+                                            placeholder={`Buscar entre ${products.length} produtos...`}
+                                            value={productSearch}
+                                            onValueChange={setProductSearch}
+                                          />
                                           <CommandList>
-                                            <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
+                                            <CommandEmpty>
+                                              {productSearch 
+                                                ? "Nenhum produto encontrado." 
+                                                : `Digite para buscar entre ${products.length} produtos`
+                                              }
+                                            </CommandEmpty>
                                             <CommandGroup>
-                                              {products.map((product) => (
+                                              {filteredProducts.map((product) => (
                                                 <CommandItem
                                                   key={product.id}
                                                   value={product.name}
-                                                  onSelect={() => setSelectedProduct(product)}
+                                                  onSelect={() => {
+                                                    setSelectedProduct(product);
+                                                    setProductSearch("");
+                                                  }}
                                                 >
                                                   <Check
                                                     className={cn(

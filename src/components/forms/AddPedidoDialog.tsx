@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [productSearch, setProductSearch] = useState("");
+  const debouncedProductSearch = useDebounce(productSearch, 300);
   
   // Tab system states
   const [activeTab, setActiveTab] = useState("produtos");
@@ -71,17 +74,68 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
   };
 
   const loadProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('name');
-    
-    if (error) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      // Get total count
+      const { count: totalCount, error: countError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (countError) throw countError;
+      if (!totalCount || totalCount === 0) {
+        setProducts([]);
+        return;
+      }
+
+      // Load in batches of 1000
+      const pageSize = 1000;
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const allProducts = [];
+
+      console.log(`[ADD PEDIDO] Loading ${totalCount} products in ${totalPages} pages`);
+
+      for (let page = 0; page < totalPages; page++) {
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data: pageData, error: pageError } = await supabase
+          .from('products')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('name')
+          .range(from, to);
+
+        if (pageError) throw pageError;
+        if (pageData && pageData.length > 0) {
+          allProducts.push(...pageData);
+        }
+      }
+
+      console.log(`[ADD PEDIDO] Loaded ${allProducts.length} products total`);
+      setProducts(allProducts);
+    } catch (error) {
       console.error('Error loading products:', error);
-      return;
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar produtos",
+        variant: "destructive",
+      });
     }
-    setProducts(data || []);
   };
+
+  // Filter products with debounce
+  const filteredProducts = useMemo(() => {
+    if (!debouncedProductSearch) return products.slice(0, 50);
+    return products.filter(p => 
+      p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase())
+    );
+  }, [products, debouncedProductSearch]);
 
   const handleAddItem = () => {
     setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0, unidade: "un" }]);
@@ -432,16 +486,17 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd }: AddPedido
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-gray-700">Produto</Label>
                           <Combobox
-                            options={products.map(p => ({ value: p.name, label: p.name }))}
+                            options={filteredProducts.map(p => ({ value: p.name, label: p.name }))}
                             value={selectedProduct ? selectedProduct.name : ""}
                             onValueChange={(value) => {
                               const product = products.find(p => p.name === value);
                               setSelectedProduct(product || null);
                             }}
-                            placeholder="Selecione um produto..."
-                            searchPlaceholder="Buscar produto..."
+                            placeholder="Digite para buscar produtos..."
+                            searchPlaceholder={`Buscar entre ${products.length} produtos...`}
                             emptyText="Nenhum produto encontrado"
                             className="w-full border-pink-200 hover:border-pink-300"
+                            onSearchChange={setProductSearch}
                           />
                         </div>
 
