@@ -261,7 +261,7 @@ export default function Dashboard() {
                 </ResponsiveContainer> : <div className="flex items-center justify-center h-[280px] text-slate-500">
                   <div className="text-center">
                     <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>Dados insuficientes para gráfico</p>
+                    <p className="rounded-sm bg-white">Dados insuficientes para gráfico</p>
                   </div>
                 </div>}
             </CardContent>
