@@ -25,7 +25,10 @@ import { ViewMode } from "@/types/pagination";
 import { cn } from "@/lib/utils";
 export default function Cotacoes() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { viewMode, setViewMode } = useResponsiveViewMode();
+  const {
+    viewMode,
+    setViewMode
+  } = useResponsiveViewMode();
   const {
     paginate
   } = usePagination<Quote>({
@@ -41,7 +44,6 @@ export default function Cotacoes() {
   useEffect(() => {
     const fornecedor = searchParams.get('fornecedor');
     const produto = searchParams.get('produto');
-    
     if (fornecedor) {
       setSupplierFilter(fornecedor);
     }
@@ -86,13 +88,9 @@ export default function Cotacoes() {
     return cotacoes.filter(cotacao => {
       const matchesSearch = cotacao.produto.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || cotacao.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       const matchesStatus = statusFilter === "all" || cotacao.status === statusFilter;
-      
+
       // Filtro por fornecedor - verifica se algum fornecedor participante corresponde
-      const matchesSupplier = supplierFilter === "all" || 
-        cotacao.fornecedoresParticipantes?.some(fornecedor => 
-          fornecedor.nome.toLowerCase().includes(supplierFilter.toLowerCase())
-        );
-      
+      const matchesSupplier = supplierFilter === "all" || cotacao.fornecedoresParticipantes?.some(fornecedor => fornecedor.nome.toLowerCase().includes(supplierFilter.toLowerCase()));
       return matchesSearch && matchesStatus && matchesSupplier;
     });
   }, [cotacoes, debouncedSearchTerm, statusFilter, supplierFilter]);
@@ -126,17 +124,7 @@ export default function Cotacoes() {
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
-              <div className="flex items-center gap-2 text-gray-700 bg-white/60 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <FileText className="h-4 w-4 text-teal-600" />
-                <span className="font-medium">Gerencie todas as cotações da empresa</span>
-              </div>
-              
-              <div className="flex items-center gap-2 text-gray-600 bg-white/40 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <Calendar className="h-4 w-4 text-cyan-500" />
-                <span>{filteredCotacoes.length} cotações no sistema</span>
-              </div>
-            </div>
+            
           </div>
           
           <div className="flex flex-wrap gap-3">
@@ -195,44 +183,30 @@ export default function Cotacoes() {
               <SelectContent>
                 <SelectItem value="all">Todos os Fornecedores</SelectItem>
                 {/* Extrair fornecedores únicos das cotações */}
-                {Array.from(new Set(
-                  cotacoes.flatMap(cotacao => 
-                    cotacao.fornecedoresParticipantes?.map(f => f.nome) || []
-                  )
-                )).sort().map(fornecedor => (
-                  <SelectItem key={fornecedor} value={fornecedor}>
+                {Array.from(new Set(cotacoes.flatMap(cotacao => cotacao.fornecedoresParticipantes?.map(f => f.nome) || []))).sort().map(fornecedor => <SelectItem key={fornecedor} value={fornecedor}>
                     {fornecedor}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
 
             {/* Botão para limpar filtros se houver filtro ativo */}
-            {(supplierFilter !== "all" || statusFilter !== "all" || searchTerm) && (
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setSupplierFilter("all");
-                  setStatusFilter("all");
-                  setSearchTerm("");
-                  setSearchParams({});
-                }}
-                className="whitespace-nowrap"
-              >
+            {(supplierFilter !== "all" || statusFilter !== "all" || searchTerm) && <Button variant="outline" onClick={() => {
+            setSupplierFilter("all");
+            setStatusFilter("all");
+            setSearchTerm("");
+            setSearchParams({});
+          }} className="whitespace-nowrap">
                 Limpar Filtros
-              </Button>
-            )}
+              </Button>}
           </div>
 
           {/* Indicador de filtro ativo por fornecedor */}
-          {supplierFilter !== "all" && (
-            <div className="mt-3 flex items-center gap-2">
+          {supplierFilter !== "all" && <div className="mt-3 flex items-center gap-2">
               <Badge variant="secondary" className="bg-teal-100 text-teal-700 border-teal-300">
                 <Building2 className="h-3 w-3 mr-1" />
                 Fornecedor: {supplierFilter}
               </Badge>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
@@ -257,7 +231,9 @@ export default function Cotacoes() {
             </div>
             <div className="mt-4 flex items-center gap-2">
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-teal-600 h-2 rounded-full transition-all duration-500" style={{ width: '75%' }}></div>
+                <div className="bg-teal-600 h-2 rounded-full transition-all duration-500" style={{
+                width: '75%'
+              }}></div>
               </div>
               <span className="text-xs text-gray-500">75%</span>
             </div>
@@ -369,9 +345,7 @@ export default function Cotacoes() {
               };
           }
         };
-        
         const colors = getStatusColors(cotacao.status);
-        
         return <Card key={cotacao.id} className={cn("group hover:shadow-xl transition-all duration-300 border border-gray-200/60 hover:", colors.border, "bg-gradient-to-br", colors.bg, "backdrop-blur-sm")}>
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
@@ -399,52 +373,30 @@ export default function Cotacoes() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <ViewQuoteDialog 
-                        quote={cotacao} 
-                        onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                          quoteId,
-                          supplierId,
-                          productId,
-                          newValue
-                        })} 
-                        trigger={
-                          <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                      <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                    quoteId,
+                    supplierId,
+                    productId,
+                    newValue
+                  })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                             <Eye className="h-4 w-4 mr-2" />
                             Ver Detalhes
-                          </DropdownMenuItem>
-                        } 
-                      />
+                          </DropdownMenuItem>} />
                       
                       {/* Só permite editar se não estiver concluída */}
-                      {cotacao.status !== "concluida" && (
-                        <EditQuoteDialog 
-                          quote={cotacao} 
-                          onEdit={(quoteId, data) => updateQuote({
-                            quoteId,
-                            data
-                          })} 
-                          trigger={
-                            <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                      {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                    quoteId,
+                    data
+                  })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                               <Edit className="h-4 w-4 mr-2" />
                               Editar
-                            </DropdownMenuItem>
-                          } 
-                        />
-                      )}
+                            </DropdownMenuItem>} />}
                       
                       {/* Só permite excluir se não estiver concluída */}
-                      {cotacao.status !== "concluida" && (
-                        <DeleteQuoteDialog 
-                          quote={cotacao} 
-                          onDelete={id => deleteQuote(id)} 
-                          trigger={
-                            <DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                      {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
                               <Trash2 className="h-4 w-4 mr-2" />
                               Excluir
-                            </DropdownMenuItem>
-                          } 
-                        />
-                      )}
+                            </DropdownMenuItem>} />}
                     </DropdownMenuContent>
                   </DropdownMenu>
 
@@ -461,10 +413,7 @@ export default function Cotacoes() {
                         <span className="text-sm font-medium text-gray-600">ID</span>
                       </div>
                       <p className="text-sm font-bold text-gray-800 font-mono">
-                        {cotacao.id.length > 12 
-                          ? `${cotacao.id.substring(0, 6)}...${cotacao.id.substring(cotacao.id.length - 4)}`
-                          : cotacao.id
-                        }
+                        {cotacao.id.length > 12 ? `${cotacao.id.substring(0, 6)}...${cotacao.id.substring(cotacao.id.length - 4)}` : cotacao.id}
                       </p>
                     </div>
                     <div>
@@ -506,65 +455,32 @@ export default function Cotacoes() {
                 <div className="md:hidden pt-3 border-t border-gray-200/60">
                   <div className="flex items-center gap-2">
                     {/* Botão principal - Ver Detalhes */}
-                    <ViewQuoteDialog 
-                      quote={cotacao} 
-                      onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                        quoteId,
-                        supplierId,
-                        productId,
-                        newValue
-                      })} 
-                      trigger={
-                        <Button 
-                          size="sm" 
-                          className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
-                        >
+                    <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                  quoteId,
+                  supplierId,
+                  productId,
+                  newValue
+                })} trigger={<Button size="sm" className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
                           <Eye className="h-3 w-3 mr-2" />
                           Ver Detalhes
-                        </Button>
-                      } 
-                    />
+                        </Button>} />
 
                     {/* Botões secundários baseados no status */}
-                    {cotacao.status !== "concluida" ? (
-                      <>
-                        <EditQuoteDialog 
-                          quote={cotacao} 
-                          onEdit={(quoteId, data) => updateQuote({
-                            quoteId,
-                            data
-                          })} 
-                          trigger={
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="bg-white/80 hover:bg-blue-50 border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800"
-                            >
+                    {cotacao.status !== "concluida" ? <>
+                        <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                    quoteId,
+                    data
+                  })} trigger={<Button size="sm" variant="outline" className="bg-white/80 hover:bg-blue-50 border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800">
                               <Edit className="h-3 w-3" />
-                            </Button>
-                          } 
-                        />
+                            </Button>} />
                         
-                        <DeleteQuoteDialog 
-                          quote={cotacao} 
-                          onDelete={id => deleteQuote(id)} 
-                          trigger={
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="bg-white/80 hover:bg-red-50 border-red-200 hover:border-red-300 text-red-600 hover:text-red-700"
-                            >
+                        <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button size="sm" variant="outline" className="bg-white/80 hover:bg-red-50 border-red-200 hover:border-red-300 text-red-600 hover:text-red-700">
                               <Trash2 className="h-3 w-3" />
-                            </Button>
-                          } 
-                        />
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-1 px-3 py-1.5 bg-green-50 border border-green-200 rounded-md">
+                            </Button>} />
+                      </> : <div className="flex items-center gap-1 px-3 py-1.5 bg-green-50 border border-green-200 rounded-md">
                         <FileText className="h-3 w-3 text-green-600" />
                         <span className="text-xs font-medium text-green-700">Concluída</span>
-                      </div>
-                    )}
+                      </div>}
                   </div>
                 </div>
 
@@ -577,53 +493,41 @@ export default function Cotacoes() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <ViewQuoteDialog 
-                        quote={cotacao} 
-                        onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                          quoteId,
-                          supplierId,
-                          productId,
-                          newValue
-                        })}
-                        onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
-                          quoteId,
-                          supplierId,
-                          deliveryDate,
-                          observations
-                        })}
-                        isUpdating={isUpdating}
-                        trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                      <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                    quoteId,
+                    supplierId,
+                    productId,
+                    newValue
+                  })} onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
+                    quoteId,
+                    supplierId,
+                    deliveryDate,
+                    observations
+                  })} isUpdating={isUpdating} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                           <Eye className="h-4 w-4 mr-2" />
                           Visualizar
-                        </DropdownMenuItem>} 
-                      />
+                        </DropdownMenuItem>} />
                       
                       {/* Só permite editar se não estiver concluída */}
-                      {cotacao.status !== "concluida" && (
-                        <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                          quoteId,
-                          data
-                        })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                      {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                    quoteId,
+                    data
+                  })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                           <Edit className="h-4 w-4 mr-2" />
                           Editar
-                        </DropdownMenuItem>} />
-                      )}
+                        </DropdownMenuItem>} />}
                       
                       {/* Só permite excluir se não estiver concluída */}
-                      {cotacao.status !== "concluida" && (
-                        <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                      {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
                           <Trash2 className="h-4 w-4 mr-2" />
                           Excluir
-                        </DropdownMenuItem>} />
-                      )}
+                        </DropdownMenuItem>} />}
                       
                       {/* Mostra mensagem informativa para cotações concluídas */}
-                      {cotacao.status === "concluida" && (
-                        <DropdownMenuItem disabled className="text-muted-foreground">
+                      {cotacao.status === "concluida" && <DropdownMenuItem disabled className="text-muted-foreground">
                           <FileText className="h-4 w-4 mr-2" />
                           Cotação finalizada
-                        </DropdownMenuItem>
-                      )}
+                        </DropdownMenuItem>}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -671,14 +575,7 @@ export default function Cotacoes() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map((cotacao, index) => (
-                    <TableRow 
-                      key={cotacao.id}
-                      className={cn(
-                        "hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-cyan-50/30 transition-all duration-200 border-b border-gray-100/60",
-                        index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
-                      )}
-                    >
+                  {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className={cn("hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-cyan-50/30 transition-all duration-200 border-b border-gray-100/60", index % 2 === 0 ? "bg-white" : "bg-gray-50/30")}>
                       <TableCell className="py-3 px-4">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 border border-teal-200/50">
@@ -735,10 +632,7 @@ export default function Cotacoes() {
                       </TableCell>
                       
                       <TableCell className="hidden sm:table-cell py-4">
-                        <Badge 
-                          variant="outline" 
-                          className="bg-blue-50 border-blue-200 text-blue-700 font-medium"
-                        >
+                        <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 font-medium">
                           <Building2 className="h-3 w-3 mr-1" />
                           {cotacao.fornecedores}
                         </Badge>
@@ -746,94 +640,62 @@ export default function Cotacoes() {
                       <TableCell className="py-3 px-4">
                         <div className="flex items-center justify-end gap-2">
                           {/* Botão Detalhes - Direto na tabela */}
-                          <ViewQuoteDialog 
-                            quote={cotacao} 
-                            onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                              quoteId,
-                              supplierId,
-                              productId,
-                              newValue
-                            })}
-                            onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
-                              quoteId,
-                              supplierId,
-                              deliveryDate,
-                              observations
-                            })}
-                            isUpdating={isUpdating}
-                            trigger={
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="h-7 px-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 text-blue-700 hover:text-blue-800 transition-all duration-200 font-medium"
-                              >
+                          <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                      quoteId,
+                      supplierId,
+                      productId,
+                      newValue
+                    })} onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
+                      quoteId,
+                      supplierId,
+                      deliveryDate,
+                      observations
+                    })} isUpdating={isUpdating} trigger={<Button variant="outline" size="sm" className="h-7 px-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 text-blue-700 hover:text-blue-800 transition-all duration-200 font-medium">
                                 <Eye className="h-3 w-3 mr-1" />
                                 <span className="text-xs">Detalhes</span>
-                              </Button>
-                            } 
-                          />
+                              </Button>} />
                           
                           {/* Menu de ações secundárias */}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="h-7 w-7 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200"
-                              >
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200">
                                 <MoreVertical className="h-3 w-3" />
                                 <span className="sr-only">Abrir menu de ações</span>
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
                               {/* Só permite editar se não estiver concluída */}
-                              {cotacao.status !== "concluida" && (
-                                <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                                  quoteId,
-                                  data
-                                })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                              {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                          quoteId,
+                          data
+                        })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Editar
-                                </DropdownMenuItem>} />
-                              )}
+                                </DropdownMenuItem>} />}
                               
                               {/* Só permite excluir se não estiver concluída */}
-                              {cotacao.status !== "concluida" && (
-                                <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                              {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Excluir
-                                </DropdownMenuItem>} />
-                              )}
+                                </DropdownMenuItem>} />}
                               
                               {/* Mostra mensagem informativa para cotações concluídas */}
-                              {cotacao.status === "concluida" && (
-                                <DropdownMenuItem disabled className="text-muted-foreground">
+                              {cotacao.status === "concluida" && <DropdownMenuItem disabled className="text-muted-foreground">
                                   <FileText className="h-4 w-4 mr-2" />
                                   Cotação finalizada - Apenas visualização
-                                </DropdownMenuItem>
-                              )}
+                                </DropdownMenuItem>}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
             </div>
             
             {/* Paginação com melhor espaçamento */}
             <div className="border-t border-gray-100 bg-gray-50/30 px-6 py-4">
-              <DataPagination 
-                currentPage={paginatedData.pagination.currentPage} 
-                totalPages={paginatedData.pagination.totalPages} 
-                itemsPerPage={paginatedData.pagination.itemsPerPage} 
-                totalItems={paginatedData.pagination.totalItems} 
-                onPageChange={paginatedData.pagination.goToPage} 
-                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
-                startIndex={paginatedData.pagination.startIndex} 
-                endIndex={paginatedData.pagination.endIndex} 
-              />
+              <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>
         </Card>}
