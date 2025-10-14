@@ -436,7 +436,7 @@ export default function AddPedidoDialog({
                       </div>
                       <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium text-gray-700">Produto</Label>
+                          
                           <Combobox options={filteredProducts.map(p => ({
                         value: p.name,
                         label: p.name
