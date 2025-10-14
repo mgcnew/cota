@@ -36,13 +36,13 @@ export function AppLayout() {
               <div className="hidden md:block">
                 <ThemeToggle />
               </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/configuracoes')} className="hidden md:flex p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500 text-slate-950">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/configuracoes')} className="hidden md:flex p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500 text-gray-500">
                 <Settings className="h-3.5 w-3.5 transition-all duration-300" />
               </Button>
-              <Button variant="ghost" size="sm" className="p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500 text-indigo-600">
+              <Button variant="ghost" size="sm" className="p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500 text-gray-600">
                 <Bell className="h-3.5 w-3.5 transition-all duration-500" />
               </Button>
-              <Button variant="ghost" size="sm" className="p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500 text-indigo-600">
+              <Button variant="ghost" size="sm" className="p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500 text-gray-600">
                 <User className="h-3.5 w-3.5 transition-all duration-500" />
               </Button>
             </div>
