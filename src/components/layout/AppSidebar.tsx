@@ -1,4 +1,4 @@
-﻿import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Settings, Home, MoreHorizontal } from "lucide-react";
+import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Settings, Home, MoreHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -266,7 +266,7 @@ export function AppSidebar() {
             {/* Menu Items sempre flutuantes - Estilo Canva */}
             <div className="flex-1 flex flex-col justify-start py-2 px-2 transition-all duration-500 overflow-visible">
               <TooltipProvider delayDuration={200}>
-                <div className="space-y-1">
+                <div className="space-y-1 px-[10px]">
                   {menuItems.map((item, index) => {
                   const isItemActive = isActive(item.url);
                   const itemColor = colors[index] || colors[0];
