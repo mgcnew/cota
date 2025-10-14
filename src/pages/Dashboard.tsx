@@ -2,24 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   TrendingUp, 
-  TrendingDown, 
   DollarSign, 
   ShoppingCart, 
   Users, 
-  Package,
   BarChart3,
-  PieChart,
-  Calendar,
   Download,
   Loader2,
-  ArrowUpRight,
-  ArrowDownRight,
   Target,
   Award,
   Clock,
@@ -27,23 +19,40 @@ import {
   AlertCircle,
   XCircle
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
 
-const COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
-
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6m');
+  const [evolutionPeriod, setEvolutionPeriod] = useState('6m');
+  const [economyPeriod, setEconomyPeriod] = useState('6m');
   const [showReportModal, setShowReportModal] = useState(false);
 
-  // Dados reais do sistema
   const { metrics, recentQuotes, topSuppliers, monthlyData, isLoading } = useDashboard();
 
-  // Calcular taxa de aprovação baseada nos dados reais
   const taxaAprovacao = recentQuotes.length > 0 
     ? Math.round((recentQuotes.filter(q => q.status === 'aprovada' || q.status === 'approved').length / recentQuotes.length) * 100)
     : 0;
+
+  // Função para filtrar dados por período
+  const filterDataByPeriod = (data: any[], period: string) => {
+    if (!data || data.length === 0) return [];
+    
+    const monthsMap: Record<string, number> = {
+      '1m': 1,
+      '3m': 3,
+      '6m': 6,
+      '1y': 12
+    };
+    
+    const months = monthsMap[period] || 6;
+    return data.slice(-months);
+  };
+
+  // Dados filtrados por período
+  const evolutionData = filterDataByPeriod(monthlyData, evolutionPeriod);
+  const economyData = filterDataByPeriod(monthlyData, economyPeriod);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -68,19 +77,6 @@ export default function Dashboard() {
         return 'Rejeitada';
       default:
         return 'Desconhecido';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -115,9 +111,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Métricas Principais - Otimizadas para 4 Cards Essenciais */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Card 1: Cotações Ativas */}
+        {/* Métricas Principais */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
@@ -142,7 +137,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Card 2: Economia Gerada */}
           <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
@@ -167,7 +161,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Card 3: Fornecedores */}
           <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
@@ -192,7 +185,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Card 4: Taxa de Aprovação */}
           <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
@@ -218,35 +210,87 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Gráficos e Análises */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Gráfico de Evolução */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
-                Evolução das Cotações
-              </CardTitle>
+        {/* Gráficos lado a lado - Gráfico maior, Card menor */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Gráfico de Evolução - 2 colunas */}
+          <Card className="lg:col-span-2 bg-gradient-to-br from-purple-50/50 via-white to-blue-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-purple-300/70 shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg shadow-md">
+                    <BarChart3 className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-bold">
+                    Evolução das Cotações
+                  </span>
+                </CardTitle>
+                <Select value={evolutionPeriod} onValueChange={setEvolutionPeriod}>
+                  <SelectTrigger className="w-[140px] h-9 text-xs border-gray-200/60 hover:border-purple-300/70">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1m">Último mês</SelectItem>
+                    <SelectItem value="3m">3 meses</SelectItem>
+                    <SelectItem value="6m">6 meses</SelectItem>
+                    <SelectItem value="1y">1 ano</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="flex items-center justify-center h-[300px]">
+                <div className="flex items-center justify-center h-[280px]">
                   <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
                 </div>
-              ) : monthlyData && monthlyData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
+              ) : evolutionData && evolutionData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={evolutionData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                    <defs>
+                      <linearGradient id="colorCotacoes" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorFornecedores" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                    <XAxis 
+                      dataKey="month" 
+                      stroke="#6b7280" 
+                      style={{ fontSize: '12px', fontWeight: 500 }}
+                      tickLine={false}
+                    />
+                    <YAxis 
+                      stroke="#6b7280" 
+                      style={{ fontSize: '12px', fontWeight: 500 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        padding: '8px 12px'
+                      }}
+                      labelStyle={{ fontWeight: 600, color: '#374151' }}
+                    />
+                    <Legend 
+                      wrapperStyle={{ paddingTop: '10px' }}
+                      iconType="circle"
+                    />
                     <Line 
                       type="monotone" 
                       dataKey="cotacoes" 
                       stroke="#8b5cf6" 
                       strokeWidth={3}
                       name="Cotações"
+                      dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, strokeWidth: 2 }}
+                      fill="url(#colorCotacoes)"
                     />
                     <Line 
                       type="monotone" 
@@ -254,11 +298,14 @@ export default function Dashboard() {
                       stroke="#06b6d4" 
                       strokeWidth={3}
                       name="Fornecedores"
+                      dot={{ fill: '#06b6d4', strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, strokeWidth: 2 }}
+                      fill="url(#colorFornecedores)"
                     />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex items-center justify-center h-[300px] text-slate-500">
+                <div className="flex items-center justify-center h-[280px] text-slate-500">
                   <div className="text-center">
                     <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
                     <p>Dados insuficientes para gráfico</p>
@@ -268,31 +315,132 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Gráfico de Economia */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-green-600" />
-                Economia Mensal
+          {/* Top Fornecedores - 1 coluna */}
+          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-lg">
+                <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg">
+                  <Award className="h-4 w-4 text-white" />
+                </div>
+                <span className="bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent font-bold">
+                  Top Fornecedores
+                </span>
               </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-yellow-500" />
+                </div>
+              ) : topSuppliers.length > 0 ? (
+                topSuppliers.slice(0, 5).map((supplier, index) => (
+                  <div key={index} className="group">
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-slate-200/60 hover:shadow-md hover:border-slate-300/70 transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md ${
+                          index === 0 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' :
+                          index === 1 ? 'bg-gradient-to-r from-gray-400 to-gray-500' :
+                          index === 2 ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
+                          'bg-gradient-to-r from-slate-500 to-slate-600'
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-700 transition-colors">{supplier.name}</p>
+                          <p className="text-xs text-slate-600">{supplier.quotes} cotações</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-emerald-600 text-sm">R$ {supplier.savings ? String(supplier.savings) : '0'}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-slate-500">
+                  <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Nenhum fornecedor encontrado</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Economia Mensal e Cotações Recentes - Gráfico maior, Card menor */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Gráfico de Economia - 2 colunas */}
+          <Card className="lg:col-span-2 bg-gradient-to-br from-emerald-50/50 via-white to-green-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-emerald-300/70 shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg shadow-md">
+                    <DollarSign className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent font-bold">
+                    Economia Mensal
+                  </span>
+                </CardTitle>
+                <Select value={economyPeriod} onValueChange={setEconomyPeriod}>
+                  <SelectTrigger className="w-[140px] h-9 text-xs border-gray-200/60 hover:border-emerald-300/70">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1m">Último mês</SelectItem>
+                    <SelectItem value="3m">3 meses</SelectItem>
+                    <SelectItem value="6m">6 meses</SelectItem>
+                    <SelectItem value="1y">1 ano</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="flex items-center justify-center h-[300px]">
+                <div className="flex items-center justify-center h-[280px]">
                   <Loader2 className="h-8 w-8 animate-spin text-green-500" />
                 </div>
-              ) : monthlyData && monthlyData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`R$ ${value?.toLocaleString('pt-BR') || '0'}`, 'Economia']} />
-                    <Bar dataKey="economia" fill="#10b981" radius={[4, 4, 0, 0]} />
+              ) : economyData && economyData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={economyData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                    <defs>
+                      <linearGradient id="colorEconomia" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.9}/>
+                        <stop offset="95%" stopColor="#34d399" stopOpacity={0.6}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                    <XAxis 
+                      dataKey="month" 
+                      stroke="#6b7280" 
+                      style={{ fontSize: '12px', fontWeight: 500 }}
+                      tickLine={false}
+                    />
+                    <YAxis 
+                      stroke="#6b7280" 
+                      style={{ fontSize: '12px', fontWeight: 500 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip 
+                      formatter={(value) => [`R$ ${value?.toLocaleString('pt-BR') || '0'}`, 'Economia']}
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        padding: '8px 12px'
+                      }}
+                      labelStyle={{ fontWeight: 600, color: '#374151' }}
+                    />
+                    <Bar 
+                      dataKey="economia" 
+                      fill="url(#colorEconomia)" 
+                      radius={[8, 8, 0, 0]}
+                      maxBarSize={60}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex items-center justify-center h-[300px] text-slate-500">
+                <div className="flex items-center justify-center h-[280px] text-slate-500">
                   <div className="text-center">
                     <DollarSign className="h-12 w-12 mx-auto mb-2 opacity-50" />
                     <p>Dados insuficientes para gráfico</p>
@@ -301,69 +449,13 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Top Fornecedores e Cotações Recentes - Design Diferenciado */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* Top Fornecedores - Design Aprimorado */}
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-slate-50 to-slate-100">
+          {/* Cotações Recentes - 1 coluna */}
+          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3 text-xl">
-                <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg">
-                  <Award className="h-5 w-5 text-white" />
-                </div>
-                <span className="bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent font-bold">
-                  Top Fornecedores
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-yellow-500" />
-                </div>
-              ) : topSuppliers.length > 0 ? (
-                topSuppliers.slice(0, 5).map((supplier, index) => (
-                  <div key={index} className="group relative">
-                    <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-slate-300 transition-all duration-300">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg ${
-                          index === 0 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' :
-                          index === 1 ? 'bg-gradient-to-r from-gray-400 to-gray-500' :
-                          index === 2 ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
-                          'bg-gradient-to-r from-slate-500 to-slate-600'
-                        }`}>
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-900 group-hover:text-slate-700 transition-colors">{supplier.name}</p>
-                          <p className="text-sm text-slate-600">{supplier.quotes} cotações realizadas</p>
-                        </div>
-                      </div>
-                      <div className="text-right space-y-1">
-                        <p className="font-bold text-emerald-600 text-lg">R$ {supplier.savings ? String(supplier.savings) : '0'}</p>
-                        <div className="flex items-center justify-end gap-1">
-                          <span className="text-xs text-slate-500">Economia gerada</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-slate-500">
-                  <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Nenhum fornecedor encontrado</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Cotações Recentes - Design Aprimorado */}
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-slate-50 to-slate-100">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3 text-xl">
+              <CardTitle className="flex items-center gap-3 text-lg">
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">
-                  <Clock className="h-5 w-5 text-white" />
+                  <Clock className="h-4 w-4 text-white" />
                 </div>
                 <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent font-bold">
                   Cotações Recentes
@@ -378,9 +470,9 @@ export default function Dashboard() {
               ) : recentQuotes.length > 0 ? (
                 recentQuotes.slice(0, 5).map((quote, index) => (
                   <div key={quote.id || index} className="group">
-                    <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-slate-300 transition-all duration-300">
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-slate-200/60 hover:shadow-md hover:border-slate-300/70 transition-all duration-300">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className={`p-1.5 rounded-lg ${
                           quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-green-100' :
                           quote.status === 'pendente' || quote.status === 'pending' ? 'bg-yellow-100' :
                           'bg-red-100'
@@ -391,19 +483,15 @@ export default function Dashboard() {
                           <p className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-700 transition-colors">
                             {quote.product}
                           </p>
-                          <p className="text-xs text-slate-600 flex items-center gap-2">
-                            <span>{quote.supplier}</span>
-                            <span className="text-slate-400">•</span>
-                            <span>{quote.date ? new Date(quote.date).toLocaleDateString('pt-BR') : 'Data não disponível'}</span>
-                          </p>
+                          <p className="text-xs text-slate-600 truncate">{quote.supplier}</p>
                         </div>
                       </div>
-                      <div className="text-right space-y-1">
-                        <p className="font-bold text-slate-900">R$ {quote.bestPrice || '0'}</p>
-                        <Badge className={`text-xs font-medium ${
-                          quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
-                          quote.status === 'pendente' || quote.status === 'pending' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
-                          'bg-red-100 text-red-800 hover:bg-red-200'
+                      <div className="text-right ml-2">
+                        <p className="font-bold text-slate-900 text-sm">R$ {quote.bestPrice || '0'}</p>
+                        <Badge className={`text-xs font-medium mt-1 ${
+                          quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          quote.status === 'pendente' || quote.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
                         }`}>
                           {getStatusText(quote.status)}
                         </Badge>
@@ -414,7 +502,7 @@ export default function Dashboard() {
               ) : (
                 <div className="text-center py-8 text-slate-500">
                   <ShoppingCart className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Nenhuma cotação encontrada</p>
+                  <p className="text-sm">Nenhuma cotação encontrada</p>
                 </div>
               )}
             </CardContent>

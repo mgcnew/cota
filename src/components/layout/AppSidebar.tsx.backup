@@ -1,4 +1,4 @@
-﻿import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Settings, Home, MoreHorizontal } from "lucide-react";
+import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Settings, Home, MoreHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -29,7 +29,7 @@ const menuItems = [{
   url: "/fornecedores",
   icon: Building2
 }, {
-  title: "CotaÃ§Ãµes",
+  title: "Cotações",
   url: "/cotacoes",
   icon: FileText
 }, {
@@ -37,11 +37,11 @@ const menuItems = [{
   url: "/pedidos",
   icon: ShoppingCart
 }, {
-  title: "HistÃ³rico",
+  title: "Histórico",
   url: "/historico",
   icon: History
 }, {
-  title: "RelatÃ³rios",
+  title: "Relatórios",
   url: "/relatorios",
   icon: BarChart3
 }, {
@@ -109,7 +109,7 @@ const colors = [{
   glow: 'shadow-green-400/50'
 }];
 
-// Componente do botÃ£o "Mais" para mobile
+// Componente do botão "Mais" para mobile
 function MobileMoreButton({
   remainingItems
 }: {
@@ -139,16 +139,16 @@ function MobileMoreButton({
               <MoreHorizontal className="h-4 w-4 text-white" />
             </div>
             <DialogTitle className="text-lg font-bold bg-gradient-to-r from-blue-900 to-purple-800 bg-clip-text text-transparent">
-              Mais OpÃ§Ãµes
+              Mais Opções
             </DialogTitle>
           </div>
         </DialogHeader>
 
         <div className="p-4 max-h-[70vh] overflow-y-auto">
-          {/* SeÃ§Ã£o Principal - NavegaÃ§Ã£o */}
+          {/* Seção Principal - Navegação */}
           <div className="mb-6">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
-              NavegaÃ§Ã£o
+              Navegação
             </h3>
             <div className="grid grid-cols-1 gap-2">
               {remainingItems.map((item, index) => {
@@ -168,10 +168,10 @@ function MobileMoreButton({
             </div>
           </div>
 
-          {/* SeÃ§Ã£o AÃ§Ãµes RÃ¡pidas */}
+          {/* Seção Ações Rápidas */}
           <div className="mb-6">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
-              AÃ§Ãµes RÃ¡pidas
+              Ações Rápidas
             </h3>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => {
@@ -179,7 +179,7 @@ function MobileMoreButton({
               window.location.href = '/cotacoes';
             }} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95">
                 <FileText className="h-5 w-5" />
-                <span className="text-xs font-medium">Nova CotaÃ§Ã£o</span>
+                <span className="text-xs font-medium">Nova Cotação</span>
               </button>
 
               <button onClick={() => {
@@ -187,12 +187,12 @@ function MobileMoreButton({
               window.location.href = '/relatorios';
             }} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95">
                 <BarChart3 className="h-5 w-5" />
-                <span className="text-xs font-medium">RelatÃ³rio</span>
+                <span className="text-xs font-medium">Relatório</span>
               </button>
             </div>
           </div>
 
-          {/* SeÃ§Ã£o ConfiguraÃ§Ãµes */}
+          {/* Seção Configurações */}
           <div>
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
               Sistema
@@ -206,7 +206,7 @@ function MobileMoreButton({
                   <Settings className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="font-medium text-sm text-gray-900">ConfiguraÃ§Ãµes</div>
+                  <div className="font-medium text-sm text-gray-900">Configurações</div>
                   <div className="text-xs text-gray-500">Ajustes do sistema</div>
                 </div>
               </button>
@@ -222,7 +222,7 @@ export function AppSidebar() {
   const isActive = (path: string) => currentPath === path;
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Hook para detectar scroll e aplicar animaÃ§Ãµes no sidebar
+  // Hook para detectar scroll e aplicar animações no sidebar
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
@@ -234,7 +234,7 @@ export function AppSidebar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Reset de transformaÃ§Ãµes ao mudar de pÃ¡gina
+  // Reset de transformações ao mudar de página
   useEffect(() => {
     const mobileButtons = document.querySelectorAll('.mobile-nav-button');
     mobileButtons.forEach(button => {
@@ -247,14 +247,16 @@ export function AppSidebar() {
       {/* Desktop Sidebar Sempre Flutuante - Estilo Canva */}
       <div className="hidden md:flex fixed z-50 w-20 left-4 top-2 bottom-4 transition-all duration-500 ease-out bg-white">
         {/* Container sempre flutuante */}
-        <div className="w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-xl border border-gray-200/60 hover:border-gray-300/70 transition-all duration-500 overflow-visible">
+        <div className="w-full flex flex-col bg-white/98 backdrop-blur-3xl rounded-2xl shadow-2xl border border-gray-200/60 hover:shadow-3xl hover:border-gray-300/70 hover:bg-white transition-all duration-500">
           {/* Efeitos de vidro sempre aplicados */}
           <>
-            {/* Efeito de vidro gloss */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 rounded-xl pointer-events-none"></div>
-            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 pointer-events-none"></div>
+            {/* Efeito de vidro refinado */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-white/20 to-white/40 rounded-2xl"></div>
+            {/* Borda interna sutil */}
+            <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/60"></div>
           </>
-          {/* ConteÃºdo principal */}
+
+          {/* Conteúdo principal */}
           <div className="relative z-10 flex flex-col h-full">
             {/* Logo sempre flutuante */}
             <div className="flex items-center justify-center h-16 px-2 border-b border-gray-200/40 bg-gradient-to-b from-white/60 to-white/30 backdrop-blur-sm flex-shrink-0 transition-all duration-500">
@@ -264,7 +266,7 @@ export function AppSidebar() {
             </div>
 
             {/* Menu Items sempre flutuantes - Estilo Canva */}
-            <div className="flex-1 flex flex-col justify-start py-2 px-2 transition-all duration-500 overflow-visible">
+            <div className="flex-1 flex flex-col justify-start py-2 px-2 transition-all duration-500">
               <TooltipProvider delayDuration={200}>
                 <div className="space-y-1">
                   {menuItems.map((item, index) => {
@@ -278,11 +280,18 @@ export function AppSidebar() {
 
 
 
-                            {/* Ícone - Estilo Minimalista */}
-                            <item.icon className={cn("transition-all duration-500 flex-shrink-0 h-5 w-5", isItemActive ? "text-white drop-shadow-lg" : "text-gray-600 group-hover:text-gray-800")} />
+                            {/* Ícone responsivo - Estilo Canva */}
+                            <div className="flex items-center justify-center mb-1">
+                              <item.icon className={cn("transition-all duration-500 flex-shrink-0 h-4.5 w-4.5", isItemActive ? "text-white drop-shadow-lg" : "text-gray-600 group-hover:text-gray-800")} />
+                            </div>
+
+                            {/* Texto responsivo - Estilo Canva */}
+                            <span className={cn("font-semibold text-center leading-tight transition-all duration-500 text-[8.5px]", "w-full truncate px-0.5 tracking-wide", isItemActive ? "text-white drop-shadow-lg" : "text-gray-600 group-hover:text-gray-800")}>
+                              {item.title}
+                            </span>
                           </NavLink>
                         </TooltipTrigger>
-                        <TooltipContent side="right" sideOffset={15} className="font-medium bg-white text-gray-900 border-gray-200 shadow-xl z-[99999]">
+                        <TooltipContent side="right" className="font-medium bg-white text-gray-900 border-gray-200 shadow-xl">
                           {item.title}
                         </TooltipContent>
                       </Tooltip>;
@@ -299,7 +308,7 @@ export function AppSidebar() {
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200/60 to-transparent"></div>
 
         <div className="flex items-center justify-around px-2 py-3 relative">
-          {/* BotÃµes principais (4 primeiros) */}
+          {/* Botões principais (4 primeiros) */}
           {menuItems.slice(0, 4).map((item, index) => {
           const isItemActive = isActive(item.url);
           const itemColor = colors[index];
@@ -320,7 +329,7 @@ export function AppSidebar() {
               </NavLink>;
         })}
 
-          {/* BotÃ£o Mais */}
+          {/* Botão Mais */}
           <MobileMoreButton remainingItems={menuItems.slice(4)} />
         </div>
       </div>

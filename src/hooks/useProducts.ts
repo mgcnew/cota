@@ -93,65 +93,53 @@ export function useProducts() {
 
       if (qiError) throw qiError;
 
-      // Fetch quote_supplier_items for real prices
-      const { data: quoteSupplierItems, error: qsiError } = await supabase
-        .from('quote_supplier_items')
+      // Fetch order_items for real prices from closed orders
+      const { data: orderItems, error: oiError } = await supabase
+        .from('order_items')
         .select(`
           product_id,
-          quote_id,
-          supplier_id,
-          product_name,
-          valor_oferecido,
-          created_at
+          order_id,
+          unit_price,
+          created_at,
+          orders!inner(
+            id,
+            supplier_name,
+            status,
+            created_at
+          )
         `);
 
-      if (qsiError) throw qsiError;
-
-      // Fetch suppliers to get names
-      const { data: suppliers, error: suppliersError } = await supabase
-        .from('suppliers')
-        .select('id, name');
-
-      if (suppliersError) throw suppliersError;
-
-      // Create a map for quick supplier name lookup
-      const supplierMap = new Map(suppliers?.map(s => [s.id, s.name]) || []);
+      if (oiError) throw oiError;
 
       const formattedProducts: Product[] = data.map(p => {
         // Get all quotes for this product
         const productQuotes = quoteItems?.filter(qi => qi.product_id === p.id) || [];
         const quotesCount = new Set(productQuotes.map(qi => qi.quote_id)).size;
 
-        // Get all price offers for this product from quote_supplier_items
-        const productPriceOffers = quoteSupplierItems?.filter(qsi => qsi.product_id === p.id) || [];
+        // Get all order items for this product
+        const productOrderItems = orderItems?.filter(oi => oi.product_id === p.id) || [];
 
-        // Group offers by quote_id and find best price per quote
-        const quotesBestPrices: Array<{
-          quote_id: string;
+        // Group order items by order and get prices
+        const orderPrices: Array<{
+          order_id: string;
           created_at: string;
-          bestPrice: number;
+          price: number;
           supplierName: string;
         }> = [];
 
-        productQuotes.forEach(qi => {
-          const quoteOffers = productPriceOffers.filter(po => po.quote_id === qi.quote_id);
-          const validOffers = quoteOffers.filter(o => o.valor_oferecido && Number(o.valor_oferecido) > 0);
-
-          if (validOffers.length > 0) {
-            const bestOffer = validOffers.reduce((min, o) =>
-              Number(o.valor_oferecido) < Number(min.valor_oferecido) ? o : min
-            );
-            quotesBestPrices.push({
-              quote_id: qi.quote_id,
-              created_at: qi.quotes?.created_at || '',
-              bestPrice: Number(bestOffer.valor_oferecido),
-              supplierName: supplierMap.get(bestOffer.supplier_id) || '-'
+        productOrderItems.forEach(oi => {
+          if (oi.unit_price && Number(oi.unit_price) > 0) {
+            orderPrices.push({
+              order_id: oi.order_id,
+              created_at: oi.orders?.created_at || oi.created_at,
+              price: Number(oi.unit_price),
+              supplierName: oi.orders?.supplier_name || '-'
             });
           }
         });
 
-        // Sort by date to get most recent quotes
-        quotesBestPrices.sort((a, b) =>
+        // Sort by date to get most recent orders
+        orderPrices.sort((a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
 
@@ -159,23 +147,23 @@ export function useProducts() {
         let bestSupplier = "-";
         let trend: "up" | "down" | "stable" = "stable";
 
-        if (quotesBestPrices.length > 0) {
-          const latestBestPrice = quotesBestPrices[0];
-          lastQuotePrice = `R$ ${latestBestPrice.bestPrice.toFixed(2)}`;
-          bestSupplier = latestBestPrice.supplierName;
+        if (orderPrices.length > 0) {
+          const latestOrderPrice = orderPrices[0];
+          lastQuotePrice = `R$ ${latestOrderPrice.price.toFixed(2)}`;
+          bestSupplier = latestOrderPrice.supplierName;
 
-          // Calculate trend if we have at least 2 quotes
-          if (quotesBestPrices.length >= 2) {
-            const currentPrice = latestBestPrice.bestPrice;
-            const previousPrice = quotesBestPrices[1].bestPrice;
+          // Calculate trend if we have at least 2 orders
+          if (orderPrices.length >= 2) {
+            const currentPrice = latestOrderPrice.price;
+            const previousPrice = orderPrices[1].price;
 
             if (currentPrice < previousPrice * 0.95) trend = "down";
             else if (currentPrice > previousPrice * 1.05) trend = "up";
           }
         }
 
-        const lastUpdate = quotesBestPrices.length > 0
-          ? new Date(quotesBestPrices[0].created_at).toLocaleDateString('pt-BR')
+        const lastUpdate = orderPrices.length > 0
+          ? new Date(orderPrices[0].created_at).toLocaleDateString('pt-BR')
           : new Date(p.created_at).toLocaleDateString('pt-BR');
 
         return {

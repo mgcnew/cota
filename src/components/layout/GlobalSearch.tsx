@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Package, Building2, FileText, ShoppingCart } from "lucide-react";
 import {
@@ -122,8 +122,8 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
       "pendente": "bg-warning/10 text-warning border-warning/20",
       "ativa": "bg-info/10 text-info border-info/20",
       "aprovada": "bg-success/10 text-success border-success/20",
-      "concluída": "bg-success/10 text-success border-success/20",
-      "concluído": "bg-success/10 text-success border-success/20",
+      "concluÃ­da": "bg-success/10 text-success border-success/20",
+      "concluÃ­do": "bg-success/10 text-success border-success/20",
       "cancelada": "bg-destructive/10 text-destructive border-destructive/20",
       "recusada": "bg-destructive/10 text-destructive border-destructive/20",
       "em andamento": "bg-info/10 text-info border-info/20",
@@ -142,7 +142,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
               <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <CommandInput 
-              placeholder="Buscar cotações, produtos, fornecedores..." 
+              placeholder="Buscar cotaÃ§Ãµes, produtos, fornecedores..." 
               value={searchQuery}
               onValueChange={setSearchQuery}
               className="flex-1 border-0 bg-transparent text-base placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:ring-0 focus:outline-none"
@@ -168,12 +168,12 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
               Busca Global
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 max-w-sm mx-auto">
-              Digite para buscar produtos, fornecedores, cotações e pedidos em todo o sistema
+              Digite para buscar produtos, fornecedores, cotaÃ§Ãµes e pedidos em todo o sistema
             </p>
             <div className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-500">
               <span>Pressione</span>
               <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[10px] font-medium shadow-sm">
-                ⌘
+                âŒ˜
               </kbd>
               <span>+</span>
               <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[10px] font-medium shadow-sm">
@@ -201,7 +201,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         )}
 
         {filteredResults.produtos.length > 0 && (
-          <CommandGroup heading="🎯 Produtos" className="px-2">
+          <CommandGroup heading="ðŸŽ¯ Produtos" className="px-2">
             {filteredResults.produtos.slice(0, 5).map((produto) => (
               <CommandItem
                 key={produto.id}
@@ -223,7 +223,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   </p>
                 </div>
                 <Badge variant="outline" className="shrink-0 bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/60 dark:border-emerald-700/60 text-emerald-700 dark:text-emerald-300 font-medium">
-                  {produto.quotesCount} cotação(ões)
+                  {produto.quotesCount} cotaÃ§Ã£o(Ãµes)
                 </Badge>
               </CommandItem>
             ))}
@@ -231,7 +231,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         )}
 
         {filteredResults.fornecedores.length > 0 && (
-          <CommandGroup heading="🏢 Fornecedores" className="px-2">
+          <CommandGroup heading="ðŸ¢ Fornecedores" className="px-2">
             {filteredResults.fornecedores.slice(0, 5).map((fornecedor) => (
               <CommandItem
                 key={fornecedor.id}
@@ -261,7 +261,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         )}
 
         {filteredResults.cotacoes.length > 0 && (
-          <CommandGroup heading="📋 Cotações" className="px-2">
+          <CommandGroup heading="ðŸ“‹ CotaÃ§Ãµes" className="px-2">
             {filteredResults.cotacoes.slice(0, 5).map((cotacao) => (
               <CommandItem
                 key={cotacao.id}
@@ -279,7 +279,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                     {cotacao.id}
                   </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                    {cotacao.produto} • {cotacao.melhorFornecedor}
+                    {cotacao.produto} â€¢ {cotacao.melhorFornecedor}
                   </p>
                 </div>
                 <Badge variant="outline" className={cn("shrink-0 font-medium", getStatusColor(cotacao.status))}>
@@ -291,7 +291,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         )}
 
         {filteredResults.pedidos.length > 0 && (
-          <CommandGroup heading="🛒 Pedidos" className="px-2">
+          <CommandGroup heading="ðŸ›’ Pedidos" className="px-2">
             {filteredResults.pedidos.slice(0, 5).map((pedido) => (
               <CommandItem
                 key={pedido.id}
@@ -309,7 +309,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                     {new Date(pedido.order_date).toLocaleDateString('pt-BR')}
                   </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                    {pedido.supplier_name} • {pedido.items?.length || 0} produto(s)
+                    {pedido.supplier_name} â€¢ {pedido.items?.length || 0} produto(s)
                   </p>
                 </div>
                 <Badge variant="outline" className={cn("shrink-0 font-medium", getStatusColor(pedido.status))}>
@@ -326,34 +326,45 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
 export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
   return (
-    <div className="relative group mx-2">
+    <div className="relative group w-full">
       <Button
         variant="ghost"
         onClick={onClick}
-        className="relative w-full justify-start text-sm bg-gradient-to-r from-white/90 to-white/95 border border-gray-200/50 hover:border-gray-300/60 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm rounded-lg h-9 px-3 overflow-hidden"
+        className="relative w-full justify-start text-sm bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl h-10 px-4 overflow-hidden group-hover:bg-white/90"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/8 to-purple-500/8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* Efeito de vidro gloss */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 rounded-xl pointer-events-none" />
         
-        <div className="relative flex items-center w-full">
-          <div className="p-1 rounded-md bg-gradient-to-br from-blue-500/15 to-purple-500/15 mr-2 group-hover:from-blue-500/25 group-hover:to-purple-500/25 transition-all duration-300">
-            <Search className="h-3.5 w-3.5 text-blue-600 group-hover:scale-105 transition-transform duration-300" />
+        {/* Borda interna sutil */}
+        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 pointer-events-none" />
+        
+        {/* Hover gradient effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        <div className="relative flex items-center w-full z-10">
+          <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 mr-2.5 group-hover:from-blue-500/15 group-hover:to-purple-500/15 transition-all duration-300 shadow-sm">
+            <Search className="h-4 w-4 text-blue-600 group-hover:scale-105 transition-transform duration-300" />
           </div>
           
           <div className="flex-1 text-left">
-            <span className="hidden md:inline-flex text-gray-600 group-hover:text-gray-800 font-medium text-xs transition-colors duration-300">
+            <span className="hidden md:inline-flex text-gray-600 group-hover:text-gray-800 font-medium text-sm transition-colors duration-300">
               Buscar cotações, produtos, fornecedores...
             </span>
-            <span className="md:hidden text-gray-600 group-hover:text-gray-800 font-medium text-xs transition-colors duration-300">
+            <span className="md:hidden text-gray-600 group-hover:text-gray-800 font-medium text-sm transition-colors duration-300">
               Buscar...
             </span>
           </div>
           
-
+          <div className="flex items-center gap-1 ml-2">
+            <kbd className="hidden sm:inline-flex h-6 min-w-[24px] select-none items-center justify-center rounded-md border border-gray-200/60 bg-gradient-to-b from-white to-gray-50/80 px-1.5 font-mono text-[10px] font-medium text-gray-500 shadow-sm backdrop-blur-sm">
+              K
+            </kbd>
+          </div>
         </div>
       </Button>
       
       {/* Subtle glow effect */}
-      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/15 to-purple-500/15 opacity-0 group-hover:opacity-20 blur-lg transition-opacity duration-500 -z-10" />
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/10 to-purple-400/10 opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 -z-10" />
     </div>
   );
 }
