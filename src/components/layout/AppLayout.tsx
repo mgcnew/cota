@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
@@ -6,13 +6,10 @@ import { Bell, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
-
 export function AppLayout() {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
-
-  return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-slate-50 to-stone-50 overflow-x-hidden">
+  return <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-slate-50 to-stone-50 overflow-x-hidden">
       {/* Desktop Sidebar Flutuante */}
       <AppSidebar />
       
@@ -39,26 +36,13 @@ export function AppLayout() {
               <div className="hidden md:block">
                 <ThemeToggle />
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => navigate('/configuracoes')}
-                className="hidden md:flex text-gray-500 hover:text-gray-700 p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500"
-              >
+              <Button variant="ghost" size="sm" onClick={() => navigate('/configuracoes')} className="hidden md:flex p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500 text-slate-950">
                 <Settings className="h-3.5 w-3.5 transition-all duration-300" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-gray-500 hover:text-gray-700 p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500"
-              >
+              <Button variant="ghost" size="sm" className="p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500 text-indigo-600">
                 <Bell className="h-3.5 w-3.5 transition-all duration-500" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-gray-500 hover:text-gray-700 p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500"
-              >
+              <Button variant="ghost" size="sm" className="p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg backdrop-blur-sm transition-all duration-500 text-indigo-600">
                 <User className="h-3.5 w-3.5 transition-all duration-500" />
               </Button>
             </div>
@@ -79,6 +63,5 @@ export function AppLayout() {
 
       {/* Global Search Dialog */}
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
-    </div>
-  );
+    </div>;
 }
