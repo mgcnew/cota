@@ -575,117 +575,130 @@ export default function Cotacoes() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className={cn("hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-cyan-50/30 transition-all duration-200 border-b border-gray-100/60", index % 2 === 0 ? "bg-white" : "bg-gray-50/30")}>
-                      <TableCell className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 border border-teal-200/50">
-                            <FileText className="h-3 w-3 text-teal-600" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-semibold font-mono text-xs text-gray-900 truncate">
-                              #{cotacao.id.substring(0, 4)}
+                  {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group">
+                      <TableCell colSpan={7} className="p-3">
+                        <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-250/70 hover:shadow-md hover:border-slate-350/70 transition-all duration-300">
+                          {/* Cotação - Largura fixa */}
+                          <div className="w-[18%] flex items-center gap-3 pr-4">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50">
+                              <FileText className="h-4 w-4 text-teal-600" />
                             </div>
-                            <div className="text-xs text-gray-500 md:hidden mt-1 truncate">{cotacao.produto}</div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-semibold font-mono text-sm text-gray-900 truncate">
+                                #{cotacao.id.substring(0, 8)}
+                              </div>
+                              <div className="text-xs text-gray-500 md:hidden mt-1 truncate">{cotacao.produto}</div>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell className="hidden md:table-cell py-3">
-                        <div className="min-w-0 max-w-[150px]">
-                          <div className="font-medium text-sm text-gray-900 truncate">{cotacao.produto}</div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md">
-                              <Package className="h-3 w-3" />
-                              {cotacao.quantidade}
-                            </span>
+
+                          {/* Produto - Largura fixa, hidden on mobile */}
+                          <div className="hidden md:block w-[20%] px-2">
+                            <div className="min-w-0 max-w-[150px]">
+                              <div className="font-medium text-sm text-gray-900 truncate">{cotacao.produto}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md">
+                                  <Package className="h-3 w-3" />
+                                  {cotacao.quantidade}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell className="hidden lg:table-cell py-4">
-                        <div className="text-xs space-y-1">
-                          <div className="flex items-center gap-1 text-gray-900">
-                            <Calendar className="h-3 w-3 text-teal-600" />
-                            {cotacao.dataInicio}
+
+                          {/* Período - Largura fixa, hidden on large screens */}
+                          <div className="hidden lg:block w-[15%] px-2">
+                            <div className="text-xs space-y-1">
+                              <div className="flex items-center gap-1 text-gray-900">
+                                <Calendar className="h-3 w-3 text-teal-600" />
+                                {cotacao.dataInicio}
+                              </div>
+                              <div className="flex items-center gap-1 text-gray-500">
+                                <Calendar className="h-3 w-3" />
+                                {cotacao.dataFim}
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1 text-gray-500">
-                            <Calendar className="h-3 w-3" />
-                            {cotacao.dataFim}
+
+                          {/* Status - Largura fixa */}
+                          <div className="w-[12%] px-2">
+                            <div className="flex justify-center">
+                              {getStatusBadge(cotacao.status)}
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell className="py-4">
-                        <div className="text-xs">
-                          {getStatusBadge(cotacao.status)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-4">
-                        <div className="space-y-1">
-                          <div className="font-bold text-green-600 text-sm">{cotacao.melhorPreco}</div>
-                          <div className="text-xs text-gray-600 truncate max-w-[100px]">{cotacao.melhorFornecedor}</div>
-                          <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium">
-                            <DollarSign className="h-3 w-3" />
-                            -{cotacao.economia}
+
+                          {/* Melhor Preço - Largura fixa */}
+                          <div className="w-[15%] px-2">
+                            <div className="space-y-1">
+                              <div className="font-bold text-green-600 text-sm">{cotacao.melhorPreco}</div>
+                              <div className="text-xs text-gray-600 truncate max-w-[100px]">{cotacao.melhorFornecedor}</div>
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium justify-center">
+                                <DollarSign className="h-3 w-3" />
+                                -{cotacao.economia}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell className="hidden sm:table-cell py-4">
-                        <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 font-medium">
-                          <Building2 className="h-3 w-3 mr-1" />
-                          {cotacao.fornecedores}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="py-3 px-4">
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Botão Detalhes - Direto na tabela */}
-                          <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                      quoteId,
-                      supplierId,
-                      productId,
-                      newValue
-                    })} onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
-                      quoteId,
-                      supplierId,
-                      deliveryDate,
-                      observations
-                    })} isUpdating={isUpdating} trigger={<Button variant="outline" size="sm" className="h-7 px-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 text-blue-700 hover:text-blue-800 transition-all duration-200 font-medium">
-                                <Eye className="h-3 w-3 mr-1" />
-                                <span className="text-xs">Detalhes</span>
-                              </Button>} />
-                          
-                          {/* Menu de ações secundárias */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200">
-                                <MoreVertical className="h-3 w-3" />
-                                <span className="sr-only">Abrir menu de ações</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              {/* Só permite editar se não estiver concluída */}
-                              {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                          quoteId,
-                          data
-                        })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Editar
-                                </DropdownMenuItem>} />}
-                              
-                              {/* Só permite excluir se não estiver concluída */}
-                              {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Excluir
-                                </DropdownMenuItem>} />}
-                              
-                              {/* Mostra mensagem informativa para cotações concluídas */}
-                              {cotacao.status === "concluida" && <DropdownMenuItem disabled className="text-muted-foreground">
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Cotação finalizada - Apenas visualização
-                                </DropdownMenuItem>}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+
+                          {/* Fornecedores - Largura fixa, hidden on small screens */}
+                          <div className="hidden sm:block w-[10%] px-2">
+                            <div className="flex justify-center">
+                              <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 font-medium">
+                                <Building2 className="h-3 w-3 mr-1" />
+                                {cotacao.fornecedores}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* Ações - Largura fixa */}
+                          <div className="w-[10%] pl-4">
+                            <div className="flex items-center justify-end gap-2">
+                              {/* Botão Detalhes - Direto na tabela */}
+                              <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                            quoteId,
+                            supplierId,
+                            productId,
+                            newValue
+                          })} onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
+                            quoteId,
+                            supplierId,
+                            deliveryDate,
+                            observations
+                          })} isUpdating={isUpdating} trigger={<Button variant="outline" size="sm" className="h-7 px-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 text-blue-700 hover:text-blue-800 transition-all duration-200 font-medium">
+                                    <Eye className="h-3 w-3 mr-1" />
+                                    <span className="text-xs">Detalhes</span>
+                                  </Button>} />
+
+                              {/* Menu de ações secundárias */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200">
+                                    <MoreVertical className="h-3 w-3" />
+                                    <span className="sr-only">Abrir menu de ações</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  {/* Só permite editar se não estiver concluída */}
+                                  {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                              quoteId,
+                              data
+                            })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Editar
+                                      </DropdownMenuItem>} />}
+
+                                  {/* Só permite excluir se não estiver concluída */}
+                                  {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Excluir
+                                    </DropdownMenuItem>} />}
+
+                                  {/* Mostra mensagem informativa para cotações concluídas */}
+                                  {cotacao.status === "concluida" && <DropdownMenuItem disabled className="text-muted-foreground">
+                                      <FileText className="h-4 w-4 mr-2" />
+                                      Cotação finalizada - Apenas visualização
+                                    </DropdownMenuItem>}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>)}
