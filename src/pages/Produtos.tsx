@@ -164,7 +164,7 @@ export default function Produtos() {
   }
   return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
-      <PageWrapper className="bg-background min-h-screen">
+      <PageWrapper>
         <div className="page-container">
       {/* Header Produtos com Tema Laranja */}
       <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100 shadow-sm">
