@@ -483,7 +483,7 @@ export default function Produtos() {
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group">
                       <TableCell colSpan={8} className="p-3">
-                        <div className="flex items-center p-3 bg-card/95 backdrop-blur-sm rounded-lg shadow-sm border border-border/50 hover:shadow-lg hover:border-border hover:-translate-y-0.5 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-card/95 backdrop-blur-sm rounded-lg shadow-sm border border-border/50 hover:shadow-lg hover:border-border hover:-translate-y-0.5 transition-all duration-300 px-[4px]">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -538,44 +538,24 @@ export default function Produtos() {
                           {/* Ações - Largura fixa */}
                           <div className="w-[10%] pl-4">
                             <div className="flex items-center justify-end gap-2">
-                              <ProductPriceHistoryDialog
-                                productName={product.name}
-                                productId={product.id}
-                                trigger={
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 flex items-center justify-center"
-                                  >
+                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 flex items-center justify-center">
                                     <Clock className="h-4 w-4" />
-                                  </Button>
-                                }
-                              />
+                                  </Button>} />
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full"
-                                  >
+                                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
                                   <DropdownMenuLabel className="text-gray-600 font-medium">Mais Ações</DropdownMenuLabel>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => setEditingProduct(product)}
-                                    className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer"
-                                  >
+                                  <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
                                     <Edit className="h-4 w-4 mr-2 text-amber-600" />
                                     Editar
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
-                                    onClick={() => setDeletingProduct(product)}
-                                  >
+                                  <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" onClick={() => setDeletingProduct(product)}>
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Excluir
                                   </DropdownMenuItem>
