@@ -15,11 +15,8 @@ import Relatorios from "./pages/Relatorios";
 import Analytics from "./pages/Analytics";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <TooltipProvider>
         <Toaster />
@@ -30,7 +27,7 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="produtos" element={<Produtos />} />
               <Route path="fornecedores" element={<Fornecedores />} />
-              <Route path="cotacoes" element={<Cotacoes />} />
+              <Route path="cotacoes" element={<Cotacoes />} className="py-[8px]" />
               <Route path="pedidos" element={<Pedidos />} />
               <Route path="historico" element={<Historico />} />
               <Route path="relatorios" element={<Relatorios />} />
@@ -43,7 +40,5 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
-  </QueryClientProvider>
-);
-
+  </QueryClientProvider>;
 export default App;
