@@ -27,7 +27,7 @@ const App = () => <QueryClientProvider client={queryClient}>
               <Route index element={<Dashboard />} />
               <Route path="produtos" element={<Produtos />} />
               <Route path="fornecedores" element={<Fornecedores />} />
-              <Route path="cotacoes" element={<Cotacoes />} className="py-[8px]" />
+              <Route path="cotacoes" element={<Cotacoes />} />
               <Route path="pedidos" element={<Pedidos />} />
               <Route path="historico" element={<Historico />} />
               <Route path="relatorios" element={<Relatorios />} />
