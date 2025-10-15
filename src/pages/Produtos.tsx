@@ -385,7 +385,8 @@ export default function Produtos() {
       </div>
 
       {/* Products View */}
-      {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {viewMode === "grid" ?
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedData.items.map(product => <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 border border-gray-200/60 hover:border-orange-300/60 bg-gradient-to-br from-white to-orange-50/30 backdrop-blur-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
@@ -412,9 +413,9 @@ export default function Produtos() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md"
                       >
                         <MoreVertical className="h-4 w-4" />
@@ -434,15 +435,15 @@ export default function Produtos() {
                         }
                       />
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => setEditingProduct(product)}
                         className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer"
                       >
                         <Edit className="h-4 w-4 mr-2 text-amber-600" />
                         Editar Produto
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" 
+                      <DropdownMenuItem
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
                         onClick={() => setDeletingProduct(product)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -453,7 +454,7 @@ export default function Produtos() {
 
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 <div className="p-4 rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 border border-green-200/60">
                   <div className="flex items-center justify-between">
@@ -481,7 +482,7 @@ export default function Produtos() {
                     </div>
                     <span className="font-semibold text-gray-900 truncate max-w-[120px]">{product.bestSupplier}</span>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-blue-50/80 border border-blue-200/60 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
@@ -490,7 +491,7 @@ export default function Produtos() {
                       </div>
                       <span className="text-lg font-bold text-blue-800">{product.quotesCount}</span>
                     </div>
-                    
+
                     <div className="p-3 rounded-lg bg-purple-50/80 border border-purple-200/60 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         <Clock className="h-4 w-4 text-purple-600" />
@@ -505,8 +506,8 @@ export default function Produtos() {
                   productName={product.name}
                   productId={product.id}
                   trigger={
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 text-orange-700 hover:text-orange-800 transition-all duration-300"
                     >
                       <Quote className="h-4 w-4 mr-2" />
@@ -516,106 +517,127 @@ export default function Produtos() {
                 />
               </CardContent>
             </Card>)}
-        </div> : <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-orange-50/20">
+        </div>
+        :
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-orange-50/20">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
+            <div className="max-w-full overflow-hidden">
+              <Table className="w-full">
                 <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
                   <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Produto</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Status</TableHead>
-                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Melhor Preço</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Fornecedor</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Cotações</TableHead>
-                    <TableHead className="text-right font-semibold text-gray-700 py-4 px-4 text-xs">Ações</TableHead>
+                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs w-[25%]">Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[15%]">Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[12%]">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[13%]">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs w-[12%]">Melhor Preço</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[15%]">Fornecedor</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[8%]">Cotações</TableHead>
+                    <TableHead className="text-right font-semibold text-gray-700 py-4 px-4 text-xs w-[10%]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map(product => <TableRow key={product.id} className="hover:bg-gray-50/50 transition-all duration-200 hover:border hover:border-gray-300 mb-6 mx-2 hover:rounded-xl group hover:shadow-xl bg-white">
-                      <TableCell className="py-4 px-4 rounded-l-xl">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
-                            <Package className="h-3 w-3 text-orange-600" />
+                  {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group">
+                      <TableCell colSpan={8} className="p-3">
+                        <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-250/70 hover:shadow-md hover:border-slate-350/70 transition-all duration-300">
+                          {/* Produto - Largura fixa */}
+                          <div className="w-[25%] flex items-center gap-3 pr-4">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <Package className="h-4 w-4 text-orange-600" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-semibold text-gray-900 text-sm truncate">{product.name}</div>
+                              <div className="text-xs text-gray-500 md:hidden mt-1">{product.category}</div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="font-medium text-gray-900 text-xs">{product.name}</div>
-                            <div className="text-xs text-gray-500 md:hidden mt-1">{product.category}</div>
+
+                          {/* Categoria - Largura fixa, hidden on mobile */}
+                          <div className="hidden md:block w-[15%] px-2">
+                            <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium text-xs w-full justify-center">{product.category}</Badge>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell py-4 px-4">
-                        <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium text-xs group-hover:bg-orange-100/80 transition-colors">{product.category}</Badge>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell py-4 px-4">
-                        <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium text-xs group-hover:bg-gray-200 transition-colors">{product.weight}</Badge>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell py-4 px-4">
-                        {getStatusBadge(getProductStatus(product))}
-                      </TableCell>
-                      <TableCell className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-green-700 text-xs">{product.lastQuotePrice}</span>
-                          {getTrendIcon(product.trend)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell py-4 px-4">
-                        <span className="text-gray-700 font-medium text-xs">{product.bestSupplier}</span>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell py-4 px-4">
-                        <div className="flex items-center gap-1">
-                          <Quote className="h-3 w-3 text-blue-600" />
-                          <span className="font-semibold text-blue-700 text-xs">{product.quotesCount}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-4 px-4 rounded-r-xl">
-                        <div className="flex justify-end gap-2">
-                          {/* Botão principal - Ver Histórico */}
-                          <ProductPriceHistoryDialog
-                            productName={product.name}
-                            productId={product.id}
-                            trigger={
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 group flex items-center justify-center"
-                              >
-                                <Clock className="h-3.5 w-3.5 group-hover:animate-pulse" />
-                              </Button>
-                            }
-                          />
-                          
-                          {/* Menu de ações secundárias */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 px-2 py-1 h-7"
-                              >
-                                <MoreVertical className="h-3 w-3" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
-                              <DropdownMenuLabel className="text-gray-600 font-medium">Mais Ações</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => setEditingProduct(product)}
-                                className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer"
-                              >
-                                <Edit className="h-4 w-4 mr-2 text-amber-600" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" 
-                                onClick={() => setDeletingProduct(product)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+
+                          {/* Peso - Largura fixa, hidden on mobile */}
+                          <div className="hidden md:block w-[12%] px-2">
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium text-xs w-full justify-center">{product.weight}</Badge>
+                          </div>
+
+                          {/* Status - Largura fixa, hidden on small screens */}
+                          <div className="hidden sm:block w-[13%] px-2">
+                            <div className="flex justify-center">
+                              {getStatusBadge(getProductStatus(product))}
+                            </div>
+                          </div>
+
+                          {/* Melhor Preço - Largura fixa */}
+                          <div className="w-[12%] px-2">
+                            <div className="flex items-center justify-center gap-2">
+                              <span className="font-bold text-green-700 text-sm">{product.lastQuotePrice}</span>
+                              {getTrendIcon(product.trend)}
+                            </div>
+                          </div>
+
+                          {/* Fornecedor - Largura fixa, hidden on mobile */}
+                          <div className="hidden lg:block w-[15%] px-2">
+                            <div className="text-center">
+                              <span className="text-gray-700 font-medium text-sm truncate block">{product.bestSupplier}</span>
+                            </div>
+                          </div>
+
+                          {/* Cotações - Largura fixa, hidden on small screens */}
+                          <div className="hidden sm:block w-[8%] px-2">
+                            <div className="flex items-center justify-center gap-1">
+                              <Quote className="h-4 w-4 text-blue-600" />
+                              <span className="font-semibold text-blue-700 text-sm">{product.quotesCount}</span>
+                            </div>
+                          </div>
+
+                          {/* Ações - Largura fixa */}
+                          <div className="w-[10%] pl-4">
+                            <div className="flex items-center justify-end gap-2">
+                              <ProductPriceHistoryDialog
+                                productName={product.name}
+                                productId={product.id}
+                                trigger={
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 flex items-center justify-center"
+                                  >
+                                    <Clock className="h-4 w-4" />
+                                  </Button>
+                                }
+                              />
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full"
+                                  >
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                                  <DropdownMenuLabel className="text-gray-600 font-medium">Mais Ações</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => setEditingProduct(product)}
+                                    className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer"
+                                  >
+                                    <Edit className="h-4 w-4 mr-2 text-amber-600" />
+                                    Editar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
+                                    onClick={() => setDeletingProduct(product)}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Excluir
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>)}
@@ -623,19 +645,20 @@ export default function Produtos() {
               </Table>
             </div>
             <div className="border-t border-orange-100/80 bg-gradient-to-r from-orange-50/30 to-amber-50/30 px-6 py-4">
-              <DataPagination 
-                currentPage={paginatedData.pagination.currentPage} 
-                totalPages={paginatedData.pagination.totalPages} 
-                itemsPerPage={paginatedData.pagination.itemsPerPage} 
-                totalItems={paginatedData.pagination.totalItems} 
-                onPageChange={paginatedData.pagination.goToPage} 
-                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
-                startIndex={paginatedData.pagination.startIndex} 
-                endIndex={paginatedData.pagination.endIndex} 
+              <DataPagination
+                currentPage={paginatedData.pagination.currentPage}
+                totalPages={paginatedData.pagination.totalPages}
+                itemsPerPage={paginatedData.pagination.itemsPerPage}
+                totalItems={paginatedData.pagination.totalItems}
+                onPageChange={paginatedData.pagination.goToPage}
+                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                startIndex={paginatedData.pagination.startIndex}
+                endIndex={paginatedData.pagination.endIndex}
               />
             </div>
           </CardContent>
-        </Card>}
+        </Card>
+      }
 
       {filteredProducts.length === 0 && <Card>
           <CardContent className="p-12 text-center">

@@ -406,7 +406,8 @@ export default function Fornecedores() {
       </div>
 
       {/* Suppliers View */}
-      {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {viewMode === "grid" ?
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedData.items.map(supplier => <Card key={supplier.id} className="group hover:shadow-xl transition-all duration-300 border border-gray-200/60 hover:border-indigo-300/60 bg-gradient-to-br from-white to-indigo-50/30 backdrop-blur-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
@@ -444,15 +445,15 @@ export default function Fornecedores() {
                           </DropdownMenuItem>
                         }
                       />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => setEditingSupplier(supplier)}
                         className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors"
                       >
                         <Edit className="h-4 w-4 mr-2 text-green-600" />
                         Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors" 
+                      <DropdownMenuItem
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors"
                         onClick={() => setDeletingSupplier(supplier)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -462,7 +463,7 @@ export default function Fornecedores() {
                   </DropdownMenu>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50/80 to-cyan-50/80 border border-blue-200/60">
                   <div className="grid grid-cols-2 gap-4">
@@ -491,7 +492,7 @@ export default function Fornecedores() {
                     </div>
                     <span className="text-lg font-bold text-indigo-800">{supplier.activeQuotes}</span>
                   </div>
-                  
+
                   <div className="p-3 rounded-lg bg-purple-50/80 border border-purple-200/60 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Star className="h-4 w-4 text-purple-600" />
@@ -523,8 +524,8 @@ export default function Fornecedores() {
                 </div>
 
                 <AddQuoteDialog onAdd={handleAddQuote} trigger={
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -533,135 +534,155 @@ export default function Fornecedores() {
                 } />
               </CardContent>
             </Card>)}
-        </div> : <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-indigo-50/30">
+        </div>
+        :
+        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-indigo-50/20">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-100">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-bold text-indigo-900 py-4 px-4 text-xs">Fornecedor</TableHead>
-                    <TableHead className="hidden md:table-cell font-bold text-indigo-900 py-4 px-4 text-xs">Status</TableHead>
-                    <TableHead className="hidden lg:table-cell font-bold text-indigo-900 py-4 px-4 text-xs">Limite</TableHead>
-                    <TableHead className="font-bold text-indigo-900 py-4 px-4 text-xs">Preço Médio</TableHead>
-                    <TableHead className="hidden sm:table-cell font-bold text-indigo-900 py-4 px-4 text-xs">Cotações</TableHead>
-                    <TableHead className="hidden lg:table-cell font-bold text-indigo-900 py-4 px-4 text-xs">Avaliação</TableHead>
-                    <TableHead className="text-right font-bold text-indigo-900 py-4 px-4 text-xs">Ações</TableHead>
+            <div className="max-w-full overflow-hidden">
+              <Table className="w-full">
+                <TableHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-200">
+                  <TableRow className="border-b-2 border-gray-100">
+                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[30%]">Fornecedor</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[12%]">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">Limite</TableHead>
+                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">Preço Médio</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[10%]">Cotações</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[8%]">Avaliação</TableHead>
+                    <TableHead className="text-right font-semibold text-indigo-900 py-4 px-4 text-xs w-[10%]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="hover:bg-gray-50/50 transition-all duration-200 hover:border hover:border-gray-300 mb-6 mx-2 hover:rounded-xl group hover:shadow-xl bg-white">
-                      <TableCell className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
-                            <Building2 className="h-3 w-3 text-indigo-600" />
+                  {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="group">
+                      <TableCell colSpan={7} className="p-3">
+                        <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-250/70 hover:shadow-md hover:border-slate-350/70 transition-all duration-300">
+                          {/* Fornecedor - Largura fixa */}
+                          <div className="w-[30%] flex items-center gap-3 pr-4">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <Building2 className="h-4 w-4 text-indigo-600" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-semibold text-gray-900 text-sm truncate">{supplier.name}</div>
+                              <div className="text-xs text-gray-500 mt-1">{supplier.contact}</div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="font-semibold text-gray-900 text-xs">{supplier.name}</div>
-                            <div className="text-xs text-gray-500 mt-1">{supplier.contact}</div>
+
+                          {/* Status - Largura fixa, hidden on mobile */}
+                          <div className="hidden md:block w-[12%] px-2">
+                            <div className="flex justify-center">
+                              {getStatusBadge(supplier.status)}
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell py-4 px-4">
-                        {getStatusBadge(supplier.status)}
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell py-4 px-4">
-                        <Badge variant="outline" className="bg-blue-50/80 border-blue-200/60 text-blue-700 font-medium text-xs">{supplier.limit}</Badge>
-                      </TableCell>
-                      <TableCell className="py-4 px-4">
-                        <span className="font-bold text-green-700 text-xs">{supplier.avgPrice}</span>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell py-4 px-4">
-                        <div className="text-xs space-y-1">
-                          <div className="flex items-center gap-1">
-                            <FileText className="h-3 w-3 text-indigo-600" />
-                            <span className="font-semibold text-indigo-700 text-xs">{supplier.activeQuotes} ativas</span>
+
+                          {/* Limite - Largura fixa, hidden on large screens */}
+                          <div className="hidden lg:block w-[15%] px-2">
+                            <div className="flex justify-center">
+                              <Badge variant="outline" className="bg-blue-50/80 border-blue-200/60 text-blue-700 font-medium text-xs">{supplier.limit}</Badge>
+                            </div>
                           </div>
-                          <div className="text-xs text-gray-500">{supplier.totalQuotes} total</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell py-4 px-4">
-                        {renderStarRating(supplier.rating)}
-                      </TableCell>
-                      <TableCell className="py-4 px-4">
-                        <div className="flex justify-end gap-2">
-                          {/* Botão principal - Ver Histórico */}
-                          <SupplierQuoteHistoryDialog
-                            supplierName={supplier.name}
-                            supplierId={supplier.id}
-                            trigger={
-                              <Button 
-                                variant="ghost" 
+
+                          {/* Preço Médio - Largura fixa */}
+                          <div className="w-[15%] px-2">
+                            <div className="flex justify-center">
+                              <span className="font-bold text-green-700 text-sm">{supplier.avgPrice}</span>
+                            </div>
+                          </div>
+
+                          {/* Cotações - Largura fixa, hidden on small screens */}
+                          <div className="hidden sm:block w-[10%] px-2">
+                            <div className="text-center">
+                              <div className="flex items-center justify-center gap-1 mb-1">
+                                <FileText className="h-3 w-3 text-indigo-600" />
+                                <span className="font-semibold text-indigo-700 text-xs">{supplier.activeQuotes}</span>
+                              </div>
+                              <div className="text-xs text-gray-500">{supplier.totalQuotes}</div>
+                            </div>
+                          </div>
+
+                          {/* Avaliação - Largura fixa, hidden on large screens */}
+                          <div className="hidden lg:block w-[8%] px-2">
+                            <div className="flex justify-center">
+                              {renderStarRating(supplier.rating)}
+                            </div>
+                          </div>
+
+                          {/* Ações - Largura fixa */}
+                          <div className="w-[10%] pl-4">
+                            <div className="flex items-center justify-end gap-2">
+                              <SupplierQuoteHistoryDialog
+                                supplierName={supplier.name}
+                                supplierId={supplier.id}
+                                trigger={
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 flex items-center justify-center"
+                                  >
+                                    <Clock className="h-4 w-4" />
+                                  </Button>
+                                }
+                              />
+
+                              <Button
+                                variant="ghost"
                                 size="sm"
-                                className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 group flex items-center justify-center"
+                                onClick={() => openWhatsApp(supplier)}
+                                className="text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-green-300 flex items-center justify-center"
+                                title={`Conversar com ${supplier.contact} no WhatsApp`}
                               >
-                                <Clock className="h-3.5 w-3.5 group-hover:animate-pulse" />
+                                <MessageCircle className="h-4 w-4" />
                               </Button>
-                            }
-                          />
-                          
-                          {/* Botão WhatsApp */}
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => openWhatsApp(supplier)}
-                            className="text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-green-300 group flex items-center justify-center"
-                            title={`Conversar com ${supplier.contact} no WhatsApp`}
-                          >
-                            <MessageCircle className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
-                          </Button>
-                          
-                          {/* Menu de ações secundárias */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 px-2 py-1 h-7"
-                              >
-                                <MoreVertical className="h-3 w-3" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent 
-                              align="end" 
-                              className="w-48 shadow-xl border-0 bg-white/95 backdrop-blur-sm"
-                            >
-                              <DropdownMenuItem 
-                                onClick={() => setEditingSupplier(supplier)}
-                                className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors py-2"
-                              >
-                                <Edit className="h-4 w-4 mr-2 text-green-600" />
-                                <span className="font-medium">Editar Fornecedor</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors py-2" 
-                                onClick={() => setDeletingSupplier(supplier)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                <span className="font-medium">Excluir Fornecedor</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full"
+                                  >
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                                  <DropdownMenuItem
+                                    onClick={() => setEditingSupplier(supplier)}
+                                    className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors py-2"
+                                  >
+                                    <Edit className="h-4 w-4 mr-2 text-green-600" />
+                                    <span className="font-medium">Editar Fornecedor</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors py-2"
+                                    onClick={() => setDeletingSupplier(supplier)}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    <span className="font-medium">Excluir Fornecedor</span>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>)}
                 </TableBody>
               </Table>
             </div>
-            <div className="border-t border-indigo-100/60 bg-gradient-to-r from-indigo-50/30 to-blue-50/30 px-6 py-4">
-              <DataPagination 
-                currentPage={paginatedData.pagination.currentPage} 
-                totalPages={paginatedData.pagination.totalPages} 
-                itemsPerPage={paginatedData.pagination.itemsPerPage} 
-                totalItems={paginatedData.pagination.totalItems} 
-                onPageChange={paginatedData.pagination.goToPage} 
-                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
-                startIndex={paginatedData.pagination.startIndex} 
-                endIndex={paginatedData.pagination.endIndex} 
+            <div className="border-t border-indigo-100/80 bg-gradient-to-r from-indigo-50/30 to-blue-50/30 px-6 py-4">
+              <DataPagination
+                currentPage={paginatedData.pagination.currentPage}
+                totalPages={paginatedData.pagination.totalPages}
+                itemsPerPage={paginatedData.pagination.itemsPerPage}
+                totalItems={paginatedData.pagination.totalItems}
+                onPageChange={paginatedData.pagination.goToPage}
+                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                startIndex={paginatedData.pagination.startIndex}
+                endIndex={paginatedData.pagination.endIndex}
               />
             </div>
           </CardContent>
-        </Card>}
-      
+        </Card>
+      }
+
       {filteredSuppliers.length === 0 && <Card>
           <CardContent className="p-12 text-center">
             <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
