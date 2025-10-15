@@ -531,7 +531,7 @@ export default function Fornecedores() {
                 </TableHeader>
                 <TableBody>
                   {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="group">
-                      <TableCell colSpan={7} className="p-1">
+                      <TableCell colSpan={7} className="p-2">
                         <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-250/70 hover:shadow-md hover:border-slate-350/70 transition-all duration-300">
                           {/* Fornecedor - Largura fixa */}
                           <div className="w-[30%] flex items-center gap-3 pr-4">
