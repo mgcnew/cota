@@ -464,7 +464,7 @@ export default function Produtos() {
                     </Button>} />
               </CardContent>
             </Card>)}
-        </div> : <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-orange-50/20">
+        </div> : <Card className="shadow-lg border-0 bg-background">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
@@ -483,7 +483,7 @@ export default function Produtos() {
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group">
                       <TableCell colSpan={8} className="p-3">
-                        <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-250/70 hover:shadow-md hover:border-slate-350/70 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-card rounded-lg shadow-sm border border-border/50 hover:shadow-lg hover:border-border hover:-translate-y-0.5 transition-all duration-300">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
