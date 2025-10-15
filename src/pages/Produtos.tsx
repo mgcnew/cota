@@ -470,10 +470,10 @@ export default function Produtos() {
               <Table>
                 <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
                   <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs">Produto</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Categoria</TableHead>
+                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs">              Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">                          Categoria</TableHead>
                     <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Status</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">           Status</TableHead>
                     <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Melhor Preço</TableHead>
                     <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Fornecedor</TableHead>
                     <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Cotações</TableHead>
