@@ -164,7 +164,7 @@ export default function Produtos() {
   }
   return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
-      <PageWrapper>
+      <PageWrapper className="bg-background min-h-screen">
         <div className="page-container">
       {/* Header Produtos com Tema Laranja */}
       <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100 shadow-sm">
@@ -464,7 +464,7 @@ export default function Produtos() {
                     </Button>} />
               </CardContent>
             </Card>)}
-        </div> : <Card className="shadow-lg border-0 bg-background">
+        </div> : <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
@@ -483,7 +483,7 @@ export default function Produtos() {
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group">
                       <TableCell colSpan={8} className="p-3">
-                        <div className="flex items-center p-3 bg-card rounded-lg shadow-sm border border-border/50 hover:shadow-lg hover:border-border hover:-translate-y-0.5 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-card/95 backdrop-blur-sm rounded-lg shadow-sm border border-border/50 hover:shadow-lg hover:border-border hover:-translate-y-0.5 transition-all duration-300">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
