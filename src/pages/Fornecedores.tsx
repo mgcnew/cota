@@ -520,7 +520,7 @@ export default function Fornecedores() {
               <Table className="w-full">
                 <TableHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-200">
                   <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[30%]">Fornecedor</TableHead>
+                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[30%]">            Fornecedor</TableHead>
                     <TableHead className="hidden md:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[12%]">Status</TableHead>
                     <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">Limite</TableHead>
                     <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">Preço Médio</TableHead>
