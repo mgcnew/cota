@@ -661,42 +661,25 @@ export default function Cotacoes() {
                             supplierId,
                             deliveryDate,
                             observations
-                          })} isUpdating={isUpdating} trigger={<Button variant="outline" size="sm" className="h-7 px-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 text-blue-700 hover:text-blue-800 transition-all duration-200 font-medium">
-                                    <Eye className="h-3 w-3 mr-1" />
-                                    <span className="text-xs">Detalhes</span>
+                          })} isUpdating={isUpdating} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 shadow-sm hover:shadow-md">
+                                    <Eye className="h-3 w-3" />
+                                    <span className="sr-only">Ver detalhes da cotação</span>
                                   </Button>} />
 
-                              {/* Menu de ações secundárias */}
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200">
-                                    <MoreVertical className="h-3 w-3" />
-                                    <span className="sr-only">Abrir menu de ações</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                  {/* Só permite editar se não estiver concluída */}
-                                  {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                              quoteId,
-                              data
-                            })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                        <Edit className="h-4 w-4 mr-2" />
-                                        Editar
-                                      </DropdownMenuItem>} />}
+                              {/* Botão Editar - Só aparece se não estiver concluída */}
+                              {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
+                            quoteId,
+                            data
+                          })} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                                      <Edit className="h-3 w-3" />
+                                      <span className="sr-only">Editar cotação</span>
+                                    </Button>} />}
 
-                                  {/* Só permite excluir se não estiver concluída */}
-                                  {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Excluir
-                                    </DropdownMenuItem>} />}
-
-                                  {/* Mostra mensagem informativa para cotações concluídas */}
-                                  {cotacao.status === "concluida" && <DropdownMenuItem disabled className="text-muted-foreground">
-                                      <FileText className="h-4 w-4 mr-2" />
-                                      Cotação finalizada - Apenas visualização
-                                    </DropdownMenuItem>}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              {/* Botão Excluir - Só aparece se não estiver concluída */}
+                              {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                                      <Trash2 className="h-3 w-3" />
+                                      <span className="sr-only">Excluir cotação</span>
+                                    </Button>} />}
                             </div>
                           </div>
                         </div>

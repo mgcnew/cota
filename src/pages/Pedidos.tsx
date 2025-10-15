@@ -491,97 +491,109 @@ export default function Pedidos() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedData.items.map((pedido, index) => <TableRow key={pedido.id} className={cn("hover:bg-gradient-to-r hover:from-pink-50/50 hover:to-rose-50/30 transition-all duration-200 border-b border-gray-100/60", index % 2 === 0 ? "bg-white" : "bg-gray-50/30")}>
-                          <TableCell className="py-5 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 flex items-center justify-center flex-shrink-0 border border-pink-200/50">
-                                <ShoppingCart className="h-4 w-4 text-pink-600" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold font-mono text-sm text-gray-900 truncate">
-                                  #{pedido.id.substring(0, 8)}
+                      {paginatedData.items.map((pedido, index) => <TableRow key={pedido.id} className="group">
+                          <TableCell colSpan={7} className="p-3">
+                            <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-250/70 hover:shadow-md hover:border-slate-350/70 transition-all duration-300">
+                              {/* Pedido - Largura fixa */}
+                              <div className="w-[15%] flex items-center gap-3 pr-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 flex items-center justify-center flex-shrink-0 border border-pink-200/50">
+                                  <ShoppingCart className="h-4 w-4 text-pink-600" />
                                 </div>
-                                <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
-                                  {pedido.dataPedido}
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-semibold font-mono text-sm text-gray-900 truncate">
+                                    #{pedido.id.substring(0, 8)}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {pedido.dataPedido}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          
-                          <TableCell className="py-5">
-                            <div className="min-w-0">
-                              <div className="font-medium text-gray-900 truncate" title={pedido.fornecedor}>
-                                {abbreviateSupplierName(pedido.fornecedor)}
+
+                              {/* Fornecedor - Largura fixa */}
+                              <div className="w-[18%] px-2">
+                                <div className="min-w-0">
+                                  <div className="font-medium text-gray-900 truncate" title={pedido.fornecedor}>
+                                    {abbreviateSupplierName(pedido.fornecedor)}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
+                                      <Package className="h-3 w-3" />
+                                      {pedido.itens} itens
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
-                                  <Package className="h-3 w-3" />
-                                  {pedido.itens} itens
-                                </span>
+
+                              {/* Produtos - Largura fixa, hidden on mobile */}
+                              <div className="hidden md:block w-[18%] px-2">
+                                <div className="min-w-0">
+                                  <div className="text-sm text-gray-900 truncate max-w-[150px]">
+                                    {pedido.produtos[0]}
+                                    {pedido.produtos.length > 1 && <span className="text-gray-500"> +{pedido.produtos.length - 1}</span>}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {pedido.produtos.length} produto{pedido.produtos.length !== 1 ? 's' : ''}
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          
-                          <TableCell className="hidden md:table-cell py-5">
-                            <div className="min-w-0">
-                              <div className="text-sm text-gray-900 truncate max-w-[150px]">
-                                {pedido.produtos[0]}
-                                {pedido.produtos.length > 1 && <span className="text-gray-500"> +{pedido.produtos.length - 1}</span>}
+
+                              {/* Entrega - Largura fixa, hidden on large screens */}
+                              <div className="hidden lg:block w-[15%] px-2">
+                                <div className="text-sm space-y-1">
+                                  <div className="flex items-center gap-1 text-gray-900">
+                                    <Truck className="h-3 w-3 text-pink-600" />
+                                    {pedido.dataEntrega}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    Entrega prevista
+                                  </div>
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                {pedido.produtos.length} produto{pedido.produtos.length !== 1 ? 's' : ''}
+
+                              {/* Status - Largura fixa */}
+                              <div className="w-[12%] px-2">
+                                <div className="flex justify-center">
+                                  {getStatusBadge(pedido.status)}
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          
-                          <TableCell className="hidden lg:table-cell py-5">
-                            <div className="text-sm space-y-1">
-                              <div className="flex items-center gap-1 text-gray-900">
-                                <Truck className="h-3 w-3 text-pink-600" />
-                                {pedido.dataEntrega}
+
+                              {/* Valor - Largura fixa */}
+                              <div className="w-[12%] px-2">
+                                <div className="text-center">
+                                  <div className="font-bold text-emerald-600 text-base">{pedido.total}</div>
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-500">
-                                Entrega prevista
+
+                              {/* Ações - Largura fixa */}
+                              <div className="w-[10%] pl-4">
+                                <div className="flex justify-end gap-2">
+                                  {/* Botão Visualizar - Primário */}
+                                  <Button variant="outline" size="sm" onClick={() => {
+                                setSelectedPedido(pedido);
+                                setViewDialogOpen(true);
+                              }} className="h-8 w-8 p-0 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 shadow-sm hover:shadow-md">
+                                    <Eye className="h-3 w-3" />
+                                    <span className="sr-only">Ver pedido</span>
+                                  </Button>
+
+                                  {/* Botão Editar - Secundário */}
+                                  <Button variant="outline" size="sm" onClick={() => {
+                                setSelectedPedido(pedido);
+                                setEditDialogOpen(true);
+                              }} className="h-8 w-8 p-0 border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                                    <Edit className="h-3 w-3" />
+                                  </Button>
+
+                                  {/* Botão Excluir - Destrutivo */}
+                                  <Button variant="outline" size="sm" onClick={() => {
+                                setSelectedPedido(pedido);
+                                setDeleteDialogOpen(true);
+                              }} className="h-8 w-8 p-0 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          
-                          <TableCell className="py-5">
-                            {getStatusBadge(pedido.status)}
-                          </TableCell>
-                          
-                          <TableCell className="text-right py-5">
-                            <div className="font-bold text-emerald-600 text-base">{pedido.total}</div>
-                          </TableCell>
-                          <TableCell className="py-5 px-6">
-                            <div className="flex justify-end gap-2">
-                              {/* Botão Visualizar - Primário */}
-                              <Button variant="outline" size="sm" onClick={() => {
-                          setSelectedPedido(pedido);
-                          setViewDialogOpen(true);
-                        }} className="h-9 px-3 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 font-medium shadow-sm hover:shadow-md">
-                                <Eye className="h-4 w-4 mr-1.5" />
-                                Ver
-                              </Button>
-                              
-                              {/* Botão Editar - Secundário */}
-                              <Button variant="outline" size="sm" onClick={() => {
-                          setSelectedPedido(pedido);
-                          setEditDialogOpen(true);
-                        }} className="h-9 w-9 p-0 border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all duration-200 shadow-sm hover:shadow-md">
-                                <Edit className="h-4 w-4" />
-                                <span className="sr-only">Editar pedido</span>
-                              </Button>
-                              
-                              {/* Botão Excluir - Destrutivo */}
-                              <Button variant="outline" size="sm" onClick={() => {
-                          setSelectedPedido(pedido);
-                          setDeleteDialogOpen(true);
-                        }} className="h-9 w-9 p-0 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-200 shadow-sm hover:shadow-md">
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Excluir pedido</span>
-                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>)}
