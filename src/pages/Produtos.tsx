@@ -24,8 +24,6 @@ import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
-
-
 export default function Produtos() {
   const navigate = useNavigate();
   const {
@@ -33,7 +31,10 @@ export default function Produtos() {
     loading
   } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const { viewMode, setViewMode } = useResponsiveViewMode();
+  const {
+    viewMode,
+    setViewMode
+  } = useResponsiveViewMode();
   const {
     paginate
   } = usePagination<Product>({
@@ -64,21 +65,16 @@ export default function Produtos() {
     updateProduct,
     invalidateCache
   } = useProducts();
-
   useEffect(() => {
     console.log('[FILTER] Categoria selecionada:', selectedCategory);
   }, [selectedCategory]);
-
   useEffect(() => {
     console.log('[CATEGORIES DEBUG] Disponíveis:', categories);
-    console.log('[CATEGORIES DEBUG] Produtos por categoria:', 
-      categories.map(cat => ({
-        category: cat,
-        count: products.filter(p => (p.category || '').trim().toLowerCase() === (cat || '').trim().toLowerCase()).length
-      }))
-    );
+    console.log('[CATEGORIES DEBUG] Produtos por categoria:', categories.map(cat => ({
+      category: cat,
+      count: products.filter(p => (p.category || '').trim().toLowerCase() === (cat || '').trim().toLowerCase()).length
+    })));
   }, [categories, products]);
-
   useEffect(() => {
     if (!loading && !user) {
       setAuthDialogOpen(true);
@@ -89,18 +85,14 @@ export default function Produtos() {
   const filteredProducts = useMemo(() => {
     console.log('[FILTER DEBUG] selectedCategory:', selectedCategory);
     console.log('[FILTER DEBUG] Total products:', products.length);
-    
     return products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
-      
+
       // Normalizar categorias para comparação
       const productCategory = (product.category || '').trim().toLowerCase();
       const selectedCategoryNormalized = (selectedCategory || '').trim().toLowerCase();
-      
       const matchesCategory = selectedCategoryNormalized === "all" || productCategory === selectedCategoryNormalized;
-      
       console.log('[FILTER DEBUG] Product:', product.name, '| Category:', product.category, '| Matches:', matchesCategory);
-      
       return matchesSearch && matchesCategory;
     });
   }, [products, debouncedSearchQuery, selectedCategory]);
@@ -143,33 +135,28 @@ export default function Produtos() {
   // Função para renderizar badge de status com cores diferenciadas
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      ativo: { 
-        label: "Ativo", 
-        className: "bg-green-100 text-green-700 border-green-300 hover:bg-green-200 transition-colors" 
+      ativo: {
+        label: "Ativo",
+        className: "bg-green-100 text-green-700 border-green-300 hover:bg-green-200 transition-colors"
       },
-      cotado: { 
-        label: "Cotado", 
-        className: "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200 transition-colors" 
+      cotado: {
+        label: "Cotado",
+        className: "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200 transition-colors"
       },
-      pendente: { 
-        label: "Pendente", 
-        className: "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 transition-colors" 
+      pendente: {
+        label: "Pendente",
+        className: "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 transition-colors"
       },
-      sem_cotacao: { 
-        label: "Sem Cotação", 
-        className: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 transition-colors" 
+      sem_cotacao: {
+        label: "Sem Cotação",
+        className: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 transition-colors"
       }
     };
-    
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.sem_cotacao;
-    
-    return (
-      <Badge variant="outline" className={`text-xs font-medium ${config.className}`}>
+    return <Badge variant="outline" className={`text-xs font-medium ${config.className}`}>
         {config.label}
-      </Badge>
-    );
+      </Badge>;
   };
-
   if (loading || productsLoading) {
     return <div className="flex items-center justify-center h-screen">
         <div className="text-center">Carregando...</div>
@@ -203,15 +190,9 @@ export default function Produtos() {
             </div>
             
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
-              <div className="flex items-center gap-2 text-gray-700 bg-white/60 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <TrendingUp className="h-4 w-4 text-orange-600" />
-                <span className="font-medium">Gerencie seu catálogo e acompanhe preços</span>
-              </div>
               
-              <div className="flex items-center gap-2 text-gray-600 bg-white/40 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <Package className="h-4 w-4 text-amber-500" />
-                <span>{filteredProducts.length} produtos cadastrados</span>
-              </div>
+              
+              
             </div>
           </div>
           
@@ -256,13 +237,7 @@ export default function Produtos() {
               <Input placeholder="Buscar produtos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
             
-            <CategorySelect
-              categories={categories}
-              products={products}
-              selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-              className="w-full sm:w-auto"
-            />
+            <CategorySelect categories={categories} products={products} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} className="w-full sm:w-auto" />
           </div>
         </CardContent>
       </Card>
@@ -270,21 +245,17 @@ export default function Produtos() {
 
 
       {/* Visual Feedback do Filtro */}
-      {selectedCategory !== "all" && (
-        <div className="mb-4 flex items-center gap-2 px-4">
+      {selectedCategory !== "all" && <div className="mb-4 flex items-center gap-2 px-4">
           <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
             Categoria: {selectedCategory}
           </Badge>
           <span className="text-sm text-muted-foreground">
             {filteredProducts.length} produtos encontrados
           </span>
-          {filteredProducts.length === 0 && (
-            <span className="text-sm text-amber-600">
+          {filteredProducts.length === 0 && <span className="text-sm text-amber-600">
               ⚠️ Nenhum produto nesta categoria
-            </span>
-          )}
-        </div>
-      )}
+            </span>}
+        </div>}
 
       {/* Stats Cards Melhorados */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -307,7 +278,9 @@ export default function Produtos() {
             </div>
             <div className="mt-4 flex items-center gap-2">
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-orange-600 h-2 rounded-full transition-all duration-500" style={{ width: '85%' }}></div>
+                <div className="bg-orange-600 h-2 rounded-full transition-all duration-500" style={{
+                    width: '85%'
+                  }}></div>
               </div>
               <span className="text-xs text-gray-500">85%</span>
             </div>
@@ -385,8 +358,7 @@ export default function Produtos() {
       </div>
 
       {/* Products View */}
-      {viewMode === "grid" ?
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedData.items.map(product => <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 border border-gray-200/60 hover:border-orange-300/60 bg-gradient-to-br from-white to-orange-50/30 backdrop-blur-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
@@ -413,39 +385,23 @@ export default function Produtos() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md"
-                      >
+                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
                       <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <ProductPriceHistoryDialog
-                        productName={product.name}
-                        productId={product.id}
-                        trigger={
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
+                      <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
                             <Quote className="h-4 w-4 mr-2 text-blue-600" />
                             Ver Histórico de Preços
-                          </DropdownMenuItem>
-                        }
-                      />
+                          </DropdownMenuItem>} />
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => setEditingProduct(product)}
-                        className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer"
-                      >
+                      <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
                         <Edit className="h-4 w-4 mr-2 text-amber-600" />
                         Editar Produto
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
-                        onClick={() => setDeletingProduct(product)}
-                      >
+                      <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" onClick={() => setDeletingProduct(product)}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir Produto
                       </DropdownMenuItem>
@@ -454,7 +410,7 @@ export default function Produtos() {
 
                 </div>
               </CardHeader>
-
+              
               <CardContent className="space-y-4">
                 <div className="p-4 rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 border border-green-200/60">
                   <div className="flex items-center justify-between">
@@ -482,7 +438,7 @@ export default function Produtos() {
                     </div>
                     <span className="font-semibold text-gray-900 truncate max-w-[120px]">{product.bestSupplier}</span>
                   </div>
-
+                  
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-blue-50/80 border border-blue-200/60 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
@@ -491,7 +447,7 @@ export default function Produtos() {
                       </div>
                       <span className="text-lg font-bold text-blue-800">{product.quotesCount}</span>
                     </div>
-
+                    
                     <div className="p-3 rounded-lg bg-purple-50/80 border border-purple-200/60 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         <Clock className="h-4 w-4 text-purple-600" />
@@ -502,37 +458,26 @@ export default function Produtos() {
                   </div>
                 </div>
 
-                <ProductPriceHistoryDialog
-                  productName={product.name}
-                  productId={product.id}
-                  trigger={
-                    <Button
-                      variant="outline"
-                      className="w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 text-orange-700 hover:text-orange-800 transition-all duration-300"
-                    >
+                <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="outline" className="w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 text-orange-700 hover:text-orange-800 transition-all duration-300">
                       <Quote className="h-4 w-4 mr-2" />
                       Ver Histórico de Preços
-                    </Button>
-                  }
-                />
+                    </Button>} />
               </CardContent>
             </Card>)}
-        </div>
-        :
-        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-orange-50/20">
+        </div> : <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-orange-50/20">
           <CardContent className="p-0">
-            <div className="max-w-full overflow-hidden">
-              <Table className="w-full">
+            <div className="overflow-x-auto">
+              <Table>
                 <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
                   <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs w-[25%]">Produto</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[15%]">Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[12%]">Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[13%]">Status</TableHead>
-                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs w-[12%]">Melhor Preço</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[15%]">Fornecedor</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs w-[8%]">Cotações</TableHead>
-                    <TableHead className="text-right font-semibold text-gray-700 py-4 px-4 text-xs w-[10%]">Ações</TableHead>
+                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs">Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Melhor Preço</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Fornecedor</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Cotações</TableHead>
+                    <TableHead className="text-right font-semibold text-gray-700 py-4 px-4 text-xs">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -645,20 +590,10 @@ export default function Produtos() {
               </Table>
             </div>
             <div className="border-t border-orange-100/80 bg-gradient-to-r from-orange-50/30 to-amber-50/30 px-6 py-4">
-              <DataPagination
-                currentPage={paginatedData.pagination.currentPage}
-                totalPages={paginatedData.pagination.totalPages}
-                itemsPerPage={paginatedData.pagination.itemsPerPage}
-                totalItems={paginatedData.pagination.totalItems}
-                onPageChange={paginatedData.pagination.goToPage}
-                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                startIndex={paginatedData.pagination.startIndex}
-                endIndex={paginatedData.pagination.endIndex}
-              />
+              <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>
-        </Card>
-      }
+        </Card>}
 
       {filteredProducts.length === 0 && <Card>
           <CardContent className="p-12 text-center">
@@ -684,18 +619,18 @@ export default function Produtos() {
         </div>
       </div>
 
-      <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={(updatedProduct) => {
-        updateProduct({
-          productId: updatedProduct.id,
-          data: {
-            name: updatedProduct.name,
-            category: updatedProduct.category,
-            weight: updatedProduct.weight
-          }
-        });
-      }} onCategoryAdded={() => {}} categories={categories} />
+      <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={updatedProduct => {
+          updateProduct({
+            productId: updatedProduct.id,
+            data: {
+              name: updatedProduct.name,
+              category: updatedProduct.category,
+              weight: updatedProduct.weight
+            }
+          });
+        }} onCategoryAdded={() => {}} categories={categories} />
 
-      <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={(id) => deleteProduct(id)} />
+      <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={id => deleteProduct(id)} />
         </div>
       </PageWrapper>
     </>;
