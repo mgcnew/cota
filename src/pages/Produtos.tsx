@@ -259,9 +259,9 @@ export default function Produtos() {
 
       {/* Stats Cards Melhorados */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50/50 to-amber-50/30">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 relative">
@@ -285,11 +285,12 @@ export default function Produtos() {
               <span className="text-xs text-gray-500">85%</span>
             </div>
           </CardContent>
+          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-300 rounded-full opacity-20"></div>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
@@ -308,11 +309,12 @@ export default function Produtos() {
               {Math.floor(stats.totalCategories * 0.7)} ativas • {Math.floor(stats.totalCategories * 0.3)} com poucos produtos
             </div>
           </CardContent>
+          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-blue-300 rounded-full opacity-20"></div>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 via-green-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
@@ -331,11 +333,12 @@ export default function Produtos() {
               {Math.floor(stats.activeQuotes * 0.6)} aguardando • {Math.floor(stats.activeQuotes * 0.4)} em análise
             </div>
           </CardContent>
+          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-green-300 rounded-full opacity-20"></div>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-purple-100 to-pink-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
@@ -354,18 +357,19 @@ export default function Produtos() {
               Baseado em {products.filter(p => p.lastQuotePrice !== "R$ 0,00").length} produtos com preços
             </div>
           </CardContent>
+          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-purple-300 rounded-full opacity-20"></div>
         </Card>
       </div>
 
       {/* Products View */}
       {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map(product => <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 border border-gray-200/60 hover:border-orange-300/60 bg-gradient-to-br from-white to-orange-50/30 backdrop-blur-sm">
+          {paginatedData.items.map(product => <Card key={product.id} className="group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-3 flex-1">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 group-hover:from-orange-500/20 group-hover:to-amber-500/20 transition-all duration-300">
-                        <Package className="h-5 w-5 text-orange-600 group-hover:scale-110 transition-transform duration-300" />
+                      <div className="p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                        <Package className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-orange-700 transition-colors duration-300 truncate">
@@ -374,10 +378,10 @@ export default function Produtos() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium">
+                      <Badge variant="outline" className="bg-orange-100/80 border-orange-300/60 text-orange-700 font-medium">
                         {product.category}
                       </Badge>
-                      <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium">
+                      <Badge variant="secondary" className="bg-gray-100/80 text-gray-700 font-medium">
                         {product.weight}
                       </Badge>
                       {getStatusBadge(getProductStatus(product))}
@@ -385,7 +389,7 @@ export default function Produtos() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md">
+                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -410,7 +414,7 @@ export default function Produtos() {
 
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 <div className="p-4 rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 border border-green-200/60">
                   <div className="flex items-center justify-between">
@@ -438,7 +442,7 @@ export default function Produtos() {
                     </div>
                     <span className="font-semibold text-gray-900 truncate max-w-[120px]">{product.bestSupplier}</span>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-blue-50/80 border border-blue-200/60 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
@@ -447,7 +451,7 @@ export default function Produtos() {
                       </div>
                       <span className="text-lg font-bold text-blue-800">{product.quotesCount}</span>
                     </div>
-                    
+
                     <div className="p-3 rounded-lg bg-purple-50/80 border border-purple-200/60 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         <Clock className="h-4 w-4 text-purple-600" />
@@ -463,6 +467,9 @@ export default function Produtos() {
                       Ver Histórico de Preços
                     </Button>} />
               </CardContent>
+
+              {/* Elemento decorativo */}
+              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-200 rounded-full opacity-20"></div>
             </Card>)}
         </div> : <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
@@ -470,6 +477,10 @@ export default function Produtos() {
               <Table>
                 <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
                   <TableRow className="border-b-2 border-gray-100">
+                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs">            Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">                      Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">       Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">            Status</TableHead>
                     <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs">              Produto</TableHead>
                     <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">                          Categoria</TableHead>
                     <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">       Peso</TableHead>
