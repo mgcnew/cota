@@ -525,7 +525,7 @@ export default function Fornecedores() {
                     <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">          Limite</TableHead>
                     <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">      Preço Médio</TableHead>
                     <TableHead className="hidden sm:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[10%]"> Cotações</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[8%]">  Avaliação</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[8%]"> Avaliação</TableHead>
                     <TableHead className="text-right font-semibold text-indigo-900 py-4 px-4 text-xs w-[10%]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
