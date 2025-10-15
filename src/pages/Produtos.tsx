@@ -473,18 +473,14 @@ export default function Produtos() {
             </Card>)}
         </div> : <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
+            <div className="overflow-x-auto w-full">
+              <Table className="w-full">
                 <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
                   <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs">            Produto</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">                      Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">       Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">            Status</TableHead>
-                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs">              Produto</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">                          Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">       Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">           Status</TableHead>
+                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs min-w-0">Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Status</TableHead>
                     <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Melhor Preço</TableHead>
                     <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Fornecedor</TableHead>
                     <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Cotações</TableHead>
@@ -492,9 +488,9 @@ export default function Produtos() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group">
-                      <TableCell colSpan={8} className="p-3">
-                        <div className="flex items-center p-3 bg-card/95 backdrop-blur-sm rounded-lg shadow-sm border border-border/50 hover:shadow-lg hover:border-border hover:-translate-y-0.5 transition-all duration-300 px-[4px]">
+                  {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
+                      <TableCell colSpan={8} className="p-2">
+                        <div className="flex items-center p-2 bg-card/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-300/80 hover:shadow-lg hover:border-gray-400/90 hover:-translate-y-0.5 transition-all duration-300">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -508,12 +504,16 @@ export default function Produtos() {
 
                           {/* Categoria - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[15%] px-2">
-                            <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium text-xs w-full justify-center">{product.category}</Badge>
+                            <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium text-xs w-full justify-center">
+                              {product.category}
+                            </Badge>
                           </div>
 
                           {/* Peso - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[12%] px-2">
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium text-xs w-full justify-center">{product.weight}</Badge>
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium text-xs w-full justify-center">
+                              {product.weight}
+                            </Badge>
                           </div>
 
                           {/* Status - Largura fixa, hidden on small screens */}
