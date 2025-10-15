@@ -450,50 +450,50 @@ export default function Pedidos() {
           </div>
 
           {/* Pedidos View */}
-          {viewMode === "table" ? <Card className="overflow-hidden">
+          {viewMode === "table" ? <Card className="border-0 bg-transparent">
               <CardContent className="p-0">
                 <div className="overflow-hidden">
                   <Table>
-                    <TableHeader className="bg-gradient-to-r from-pink-50/80 to-rose-50/80 border-b border-pink-100">
-                      <TableRow className="hover:bg-transparent">
-                        <TableHead className="font-semibold text-pink-900 py-5 px-6">
+                    <TableHeader className="bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-200">
+                      <TableRow className="border-b-2 border-gray-100">
+                        <TableHead className="font-semibold text-pink-900 py-4 px-4 text-xs">
                           <div className="flex items-center gap-2">
                             <ShoppingCart className="h-4 w-4" />
                             Pedido
                           </div>
                         </TableHead>
-                        <TableHead className="font-semibold text-pink-900 py-5">
+                        <TableHead className="font-semibold text-pink-900 py-4 px-4 text-xs">
                           <div className="flex items-center gap-2">
                             <Building2 className="h-4 w-4" />
                             Fornecedor
                           </div>
                         </TableHead>
-                        <TableHead className="hidden md:table-cell font-semibold text-pink-900 py-5">
+                        <TableHead className="hidden md:table-cell font-semibold text-pink-900 py-4 px-4 text-xs">
                           <div className="flex items-center gap-2">
                             <Package className="h-4 w-4" />
                             Produtos
                           </div>
                         </TableHead>
-                        <TableHead className="hidden lg:table-cell font-semibold text-pink-900 py-5">
+                        <TableHead className="hidden lg:table-cell font-semibold text-pink-900 py-4 px-4 text-xs">
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
                             Entrega
                           </div>
                         </TableHead>
-                        <TableHead className="font-semibold text-pink-900 py-5">Status</TableHead>
-                        <TableHead className="text-right font-semibold text-pink-900 py-5">
+                        <TableHead className="font-semibold text-pink-900 py-4 px-4 text-xs">Status</TableHead>
+                        <TableHead className="text-right font-semibold text-pink-900 py-4 px-4 text-xs">
                           <div className="flex items-center justify-end gap-2">
                             <DollarSign className="h-4 w-4" />
                             Valor
                           </div>
                         </TableHead>
-                        <TableHead className="text-right font-semibold text-pink-900 py-5 px-6">Ações</TableHead>
+                        <TableHead className="text-right font-semibold text-pink-900 py-4 px-4 w-32 text-xs">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedData.items.map((pedido, index) => <TableRow key={pedido.id} className="group">
+                      {paginatedData.items.map((pedido, index) => <TableRow key={pedido.id} className="group border-none">
                           <TableCell colSpan={7} className="p-3">
-                            <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-250/70 hover:shadow-md hover:border-slate-350/70 transition-all duration-300">
+                            <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300">
                               {/* Pedido - Largura fixa */}
                               <div className="w-[15%] flex items-center gap-3 pr-4">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 flex items-center justify-center flex-shrink-0 border border-pink-200/50">
@@ -602,7 +602,7 @@ export default function Pedidos() {
                 </div>
                 
                 {/* Paginação com melhor espaçamento */}
-                <div className="border-t border-gray-100 bg-gray-50/30 px-6 py-4">
+                <div className="border-t border-pink-100/80 bg-gradient-to-r from-pink-50/30 to-rose-50/30 px-6 py-4">
                   <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
                 </div>
               </CardContent>

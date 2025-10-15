@@ -511,25 +511,25 @@ export default function Fornecedores() {
                   </Button>} />
               </CardContent>
             </Card>)}
-        </div> : <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-indigo-50/20">
+        </div> : <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
-            <div className="max-w-full overflow-hidden">
+            <div className="overflow-x-auto w-full">
               <Table className="w-full">
                 <TableHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-200">
                   <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[30%]">                  Fornecedor</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[12%]">         Status</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">          Limite</TableHead>
-                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">      Preço Médio</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[10%]"> Cotações</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[8%]"> Avaliação</TableHead>
+                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[30%]">Fornecedor</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[12%]">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">Limite</TableHead>
+                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">Preço Médio</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[10%]">Cotações</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[8%]">Avaliação</TableHead>
                     <TableHead className="text-right font-semibold text-indigo-900 py-4 px-4 text-xs w-[10%]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="group">
+                  {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-250/70 hover:shadow-md hover:border-slate-350/70 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300">
                           {/* Fornecedor - Largura fixa */}
                           <div className="w-[30%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">

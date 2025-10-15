@@ -534,50 +534,50 @@ export default function Cotacoes() {
               </CardContent>
             </Card>;
       })}
-        </div> : <Card className="overflow-hidden">
+        </div> : <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
-            <div className="overflow-hidden">
-              <Table>
-                <TableHeader className="bg-gradient-to-r from-teal-50/80 to-cyan-50/80 border-b border-teal-100">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-semibold text-teal-900 py-3 px-4 text-sm">
+            <div className="overflow-x-auto w-full">
+              <Table className="w-full">
+                <TableHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 border-b border-teal-200">
+                  <TableRow className="border-b-2 border-gray-100">
+                    <TableHead className="font-semibold text-teal-900 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
                         Cotação
                       </div>
                     </TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-teal-900 py-3 text-sm">
+                    <TableHead className="hidden md:table-cell font-semibold text-teal-900 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4" />
                         Produto
                       </div>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-teal-900 py-3 text-sm">
+                    <TableHead className="hidden lg:table-cell font-semibold text-teal-900 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         Período
                       </div>
                     </TableHead>
-                    <TableHead className="font-semibold text-teal-900 py-3 text-sm">Status</TableHead>
-                    <TableHead className="font-semibold text-teal-900 py-3 text-sm">
+                    <TableHead className="font-semibold text-teal-900 py-4 px-4 text-xs">Status</TableHead>
+                    <TableHead className="font-semibold text-teal-900 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4" />
                         Melhor Preço
                       </div>
                     </TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-teal-900 py-3 text-sm">
+                    <TableHead className="hidden sm:table-cell font-semibold text-teal-900 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4" />
                         Fornecedores
                       </div>
                     </TableHead>
-                    <TableHead className="text-right font-semibold text-teal-900 py-3 px-4 w-32 text-sm">Ações</TableHead>
+                    <TableHead className="text-right font-semibold text-teal-900 py-4 px-4 w-32 text-xs">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group">
+                  {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-250/70 hover:shadow-md hover:border-slate-350/70 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300">
                           {/* Cotação - Largura fixa */}
                           <div className="w-[18%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50">
@@ -690,7 +690,7 @@ export default function Cotacoes() {
             </div>
             
             {/* Paginação com melhor espaçamento */}
-            <div className="border-t border-gray-100 bg-gray-50/30 px-6 py-4">
+            <div className="border-t border-teal-100/80 bg-gradient-to-r from-teal-50/30 to-cyan-50/30 px-6 py-4">
               <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>

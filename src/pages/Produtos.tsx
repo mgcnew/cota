@@ -197,65 +197,9 @@ export default function Produtos() {
           </div>
           
           <div className="flex flex-wrap gap-3">
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Ações
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border z-50 w-48">
-                <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={triggerAddDialog}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Produto
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={triggerImportDialog}>
-                  <FileUp className="h-4 w-4 mr-2" />
-                  Importar Produtos
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={invalidateCache}>
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Atualizar Cache
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-3 md:p-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input placeholder="Buscar produtos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
-            </div>
-            
-            <CategorySelect categories={categories} products={products} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} className="w-full sm:w-auto" />
-          </div>
-        </CardContent>
-      </Card>
-
-
-
-      {/* Visual Feedback do Filtro */}
-      {selectedCategory !== "all" && <div className="mb-4 flex items-center gap-2 px-4">
-          <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
-            Categoria: {selectedCategory}
-          </Badge>
-          <span className="text-sm text-muted-foreground">
-            {filteredProducts.length} produtos encontrados
-          </span>
-          {filteredProducts.length === 0 && <span className="text-sm text-amber-600">
-              ⚠️ Nenhum produto nesta categoria
-            </span>}
-        </div>}
 
       {/* Stats Cards Melhorados */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -360,6 +304,65 @@ export default function Produtos() {
           <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-purple-300 rounded-full opacity-20"></div>
         </Card>
       </div>
+
+      {/* Filters - Between stats cards and products table */}
+      <Card>
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                <Input placeholder="Buscar produtos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-orange-300/70 focus:border-orange-400 focus:ring-2 focus:ring-orange-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300" />
+              </div>
+
+              <CategorySelect categories={categories} products={products} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} className="w-full sm:w-auto h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-orange-300/70 focus:border-orange-400 focus:ring-2 focus:ring-orange-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300" />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Ações
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                  <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={triggerAddDialog}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Produto
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={triggerImportDialog}>
+                    <FileUp className="h-4 w-4 mr-2" />
+                    Importar Produtos
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={invalidateCache}>
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Atualizar Cache
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+
+
+      {/* Visual Feedback do Filtro */}
+      {selectedCategory !== "all" && <div className="mb-4 flex items-center gap-2 px-4">
+          <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+            Categoria: {selectedCategory}
+          </Badge>
+          <span className="text-sm text-muted-foreground">
+            {filteredProducts.length} produtos encontrados
+          </span>
+          {filteredProducts.length === 0 && <span className="text-sm text-amber-600">
+              ⚠️ Nenhum produto nesta categoria
+            </span>}
+        </div>}
 
       {/* Products View */}
       {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -489,8 +492,8 @@ export default function Produtos() {
                 </TableHeader>
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
-                      <TableCell colSpan={8} className="p-2">
-                        <div className="flex items-center p-2 bg-card/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-300/80 hover:shadow-lg hover:border-gray-400/90 hover:-translate-y-0.5 transition-all duration-300">
+                      <TableCell colSpan={8} className="p-3">
+                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">

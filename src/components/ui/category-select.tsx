@@ -111,7 +111,7 @@ export function CategorySelect({
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-orange-600" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0" align="start">
+        <PopoverContent className="w-[320px] p-0" align="start">
           <Command className="bg-gradient-to-br from-white via-orange-50/20 to-amber-50/30">
             <div className="flex items-center border-b border-orange-200/40 px-3 bg-gradient-to-r from-orange-50/30 to-amber-50/30">
               <Search className="mr-2 h-4 w-4 shrink-0 opacity-50 text-orange-600" />
@@ -122,7 +122,7 @@ export function CategorySelect({
                 className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-orange-600/70 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
-            <CommandList className="max-h-[300px] overflow-y-auto scrollbar-hide">
+            <CommandList className="max-h-[min(500px,80vh)] overflow-y-auto">
               <CommandEmpty>
                 <div className="flex flex-col items-center gap-2 py-6 text-center">
                   <Package className="h-8 w-8 text-orange-400" />

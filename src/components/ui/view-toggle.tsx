@@ -12,32 +12,30 @@ export function ViewToggle({
   onViewChange
 }: ViewToggleProps) {
   return (
-    <div className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/60 p-1 shadow-sm">
+    <div className="flex items-center gap-0.5 rounded-lg bg-gray-50 border border-gray-200 p-0.5">
       <Button
         variant={view === "grid" ? "default" : "ghost"}
         size="sm"
         onClick={() => onViewChange("grid")}
-        className={`h-9 px-3 rounded-lg transition-all duration-200 ${
+        className={`h-7 w-7 p-0 rounded-md transition-all duration-200 ${
           view === "grid"
-            ? "bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-md hover:shadow-lg"
-            : "hover:bg-orange-100 hover:text-orange-700"
+            ? "bg-orange-600 hover:bg-orange-700 text-white"
+            : "hover:bg-gray-100 text-gray-600 hover:text-orange-600"
         }`}
       >
-        <LayoutGrid className="h-4 w-4" />
-        <span className="ml-2 hidden sm:inline font-medium">Cards</span>
+        <LayoutGrid className="h-3.5 w-3.5" />
       </Button>
       <Button
         variant={view === "table" ? "default" : "ghost"}
         size="sm"
         onClick={() => onViewChange("table")}
-        className={`h-9 px-3 rounded-lg transition-all duration-200 ${
+        className={`h-7 w-7 p-0 rounded-md transition-all duration-200 ${
           view === "table"
-            ? "bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-md hover:shadow-lg"
-            : "hover:bg-orange-100 hover:text-orange-700"
+            ? "bg-orange-600 hover:bg-orange-700 text-white"
+            : "hover:bg-gray-100 text-gray-600 hover:text-orange-600"
         }`}
       >
-        <Table className="h-4 w-4" />
-        <span className="ml-2 hidden sm:inline font-medium">Tabela</span>
+        <Table className="h-3.5 w-3.5" />
       </Button>
     </div>
   );
