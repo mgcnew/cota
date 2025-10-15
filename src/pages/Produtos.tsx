@@ -197,47 +197,169 @@ export default function Produtos() {
           </div>
           
           <div className="flex flex-wrap gap-3">
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Ações
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border z-50 w-48">
-                <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={triggerAddDialog}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Produto
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={triggerImportDialog}>
-                  <FileUp className="h-4 w-4 mr-2" />
-                  Importar Produtos
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={invalidateCache}>
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Atualizar Cache
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
 
+      {/* Stats Cards Melhorados */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 p-2">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="text-orange-700 text-sm font-semibold tracking-wide uppercase">Total de Produtos</p>
+                <p className="text-2xl font-bold text-orange-900">{stats.totalProducts}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
+                    <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+                    <span className="text-xs font-medium text-green-700">+{Math.floor(stats.totalProducts * 0.1)}</span>
+                  </div>
+                  <span className="text-xs text-orange-600">vs mês anterior</span>
+                </div>
+              </div>
+              <div className="p-2 bg-orange-600 rounded-xl shadow-lg">
+                <Package className="h-5 w-5 text-white" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-2">
+              <div className="w-full bg-orange-200/50 rounded-full h-2">
+                <div className="bg-orange-600 h-2 rounded-full transition-all duration-500" style={{
+                    width: '85%'
+                  }}></div>
+              </div>
+              <span className="text-xs text-orange-600 font-medium">85%</span>
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-300 rounded-full opacity-20"></div>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="text-blue-700 text-sm font-semibold tracking-wide uppercase">Categorias</p>
+                <p className="text-2xl font-bold text-blue-900">{stats.totalCategories}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
+                    <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+                    <span className="text-xs font-medium text-green-700">+2</span>
+                  </div>
+                  <span className="text-xs text-blue-600">novas este mês</span>
+                </div>
+              </div>
+              <div className="p-2 bg-blue-600 rounded-xl shadow-lg">
+                <Filter className="h-5 w-5 text-white" />
+              </div>
+            </div>
+            <div className="mt-3 text-xs text-blue-600">
+              {Math.floor(stats.totalCategories * 0.7)} ativas • {Math.floor(stats.totalCategories * 0.3)} com poucos produtos
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-blue-300 rounded-full opacity-20"></div>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="text-emerald-700 text-sm font-semibold tracking-wide uppercase">Cotações Ativas</p>
+                <p className="text-2xl font-bold text-emerald-900">{stats.activeQuotes}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
+                    <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+                    <span className="text-xs font-medium text-green-700">+15%</span>
+                  </div>
+                  <span className="text-xs text-emerald-600">vs mês anterior</span>
+                </div>
+              </div>
+              <div className="p-2 bg-emerald-600 rounded-xl shadow-lg">
+                <Quote className="h-5 w-5 text-white" />
+              </div>
+            </div>
+            <div className="mt-3 text-xs text-emerald-600">
+              {Math.floor(stats.activeQuotes * 0.6)} aguardando • {Math.floor(stats.activeQuotes * 0.4)} em análise
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-emerald-300 rounded-full opacity-20"></div>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-lg hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="text-violet-700 text-sm font-semibold tracking-wide uppercase">Valor Médio</p>
+                <p className="text-2xl font-bold text-violet-900">{stats.averageValue}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
+                    <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+                    <span className="text-xs font-medium text-green-700">+8%</span>
+                  </div>
+                  <span className="text-xs text-violet-600">vs mês anterior</span>
+                </div>
+              </div>
+              <div className="p-2 bg-violet-600 rounded-xl shadow-lg">
+                <Scale className="h-5 w-5 text-white" />
+              </div>
+            </div>
+            <div className="mt-3 text-xs text-violet-600">
+              Baseado em {products.filter(p => p.lastQuotePrice !== "R$ 0,00").length} produtos com preços
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-violet-300 rounded-full opacity-20"></div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Filters */}
       <Card>
-        <CardContent className="p-3 md:p-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input placeholder="Buscar produtos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
+        <CardContent className="p-2 md:p-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 md:gap-3 min-w-0">
+            <div className="flex items-center min-w-0">
+              <ViewToggle view={viewMode} onViewChange={setViewMode} />
             </div>
-            
-            <CategorySelect categories={categories} products={products} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} className="w-full sm:w-auto" />
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-3 min-w-0">
+              <div className="relative min-w-0">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+                  <Search className="h-4 w-4 text-orange-500" />
+                </div>
+                <Input
+                  placeholder="Buscar produtos..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 h-10 text-sm font-medium bg-gradient-to-r from-white via-orange-50/20 to-amber-50/20 border-2 border-orange-200/60 hover:border-orange-300/80 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 focus:bg-white transition-all duration-200 rounded-lg shadow-sm hover:shadow-md"
+                />
+              </div>
+
+              <CategorySelect categories={categories} products={products} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} className="w-full sm:w-36 md:w-40" />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 overflow-hidden">
+                    <Plus className="h-4 w-4 mr-1 flex-shrink-0" />
+                    <span className="hidden sm:inline truncate">Ações</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-gradient-to-br from-white via-orange-50/30 to-amber-50/50 backdrop-blur-xl border border-orange-200/60 shadow-2xl z-50 w-56 rounded-xl">
+                  <DropdownMenuLabel className="text-orange-800 font-bold text-sm bg-gradient-to-r from-orange-100/50 to-amber-100/50 py-3 px-4 rounded-t-xl border-b border-orange-200/40">
+                    Gerenciar Produtos
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-orange-200/60" />
+                  <DropdownMenuItem onClick={triggerAddDialog} className="hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 hover:text-orange-800 transition-all duration-200 cursor-pointer py-3 px-4">
+                    <Plus className="h-4 w-4 mr-3 text-orange-600" />
+                    <span className="font-medium">Novo Produto</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={triggerImportDialog} className="hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 hover:text-orange-800 transition-all duration-200 cursor-pointer py-3 px-4">
+                    <FileUp className="h-4 w-4 mr-3 text-orange-600" />
+                    <span className="font-medium">Importar Produtos</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-orange-200/60" />
+                  <DropdownMenuItem onClick={invalidateCache} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-800 transition-all duration-200 cursor-pointer py-3 px-4">
+                    <TrendingUp className="h-4 w-4 mr-3 text-blue-600" />
+                    <span className="font-medium">Atualizar Cache</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -256,106 +378,6 @@ export default function Produtos() {
               ⚠️ Nenhum produto nesta categoria
             </span>}
         </div>}
-
-      {/* Stats Cards Melhorados */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50/50 to-amber-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 relative">
-                    <Package className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Total de Produtos</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.totalProducts}</div>
-              </div>
-              <div className="flex items-center gap-1 text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+{Math.floor(stats.totalProducts * 0.1)}</span>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center gap-2">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-orange-600 h-2 rounded-full transition-all duration-500" style={{
-                    width: '85%'
-                  }}></div>
-              </div>
-              <span className="text-xs text-gray-500">85%</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
-                    <Filter className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Categorias</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.totalCategories}</div>
-              </div>
-              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+2</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(stats.totalCategories * 0.7)} ativas • {Math.floor(stats.totalCategories * 0.3)} com poucos produtos
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
-                    <Quote className="h-5 w-5 text-green-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Cotações Ativas</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.activeQuotes}</div>
-              </div>
-              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+15%</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(stats.activeQuotes * 0.6)} aguardando • {Math.floor(stats.activeQuotes * 0.4)} em análise
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
-                    <Scale className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Valor Médio</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.averageValue}</div>
-              </div>
-              <div className="flex items-center gap-1 text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+8%</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              Baseado em {products.filter(p => p.lastQuotePrice !== "R$ 0,00").length} produtos com preços
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Products View */}
       {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -470,14 +492,14 @@ export default function Produtos() {
               <Table>
                 <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
                   <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs">Produto</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Status</TableHead>
-                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Melhor Preço</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Fornecedor</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Cotações</TableHead>
-                    <TableHead className="text-right font-semibold text-gray-700 py-4 px-4 text-xs">Ações</TableHead>
+                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-sm">Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-sm">Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-sm">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-sm">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-sm">Melhor Preço</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-sm">Fornecedor</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-sm">Cotações</TableHead>
+                    <TableHead className="text-right font-semibold text-gray-700 py-4 px-4 text-sm">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -490,7 +512,7 @@ export default function Produtos() {
                               <Package className="h-4 w-4 text-orange-600" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-gray-900 text-sm truncate">{product.name}</div>
+                              <div className="font-semibold text-gray-900 text-xs truncate">{product.name}</div>
                               <div className="text-xs text-gray-500 md:hidden mt-1">{product.category}</div>
                             </div>
                           </div>
@@ -515,7 +537,7 @@ export default function Produtos() {
                           {/* Melhor Preço - Largura fixa */}
                           <div className="w-[12%] px-2">
                             <div className="flex items-center justify-center gap-2">
-                              <span className="font-bold text-green-700 text-sm">{product.lastQuotePrice}</span>
+                              <span className="font-bold text-green-700 text-xs">{product.lastQuotePrice}</span>
                               {getTrendIcon(product.trend)}
                             </div>
                           </div>
@@ -523,7 +545,7 @@ export default function Produtos() {
                           {/* Fornecedor - Largura fixa, hidden on mobile */}
                           <div className="hidden lg:block w-[15%] px-2">
                             <div className="text-center">
-                              <span className="text-gray-700 font-medium text-sm truncate block">{product.bestSupplier}</span>
+                              <span className="text-gray-700 font-medium text-xs truncate block">{product.bestSupplier}</span>
                             </div>
                           </div>
 
@@ -531,7 +553,7 @@ export default function Produtos() {
                           <div className="hidden sm:block w-[8%] px-2">
                             <div className="flex items-center justify-center gap-1">
                               <Quote className="h-4 w-4 text-blue-600" />
-                              <span className="font-semibold text-blue-700 text-sm">{product.quotesCount}</span>
+                              <span className="font-semibold text-blue-700 text-xs">{product.quotesCount}</span>
                             </div>
                           </div>
 

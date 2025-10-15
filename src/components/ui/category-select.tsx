@@ -39,7 +39,7 @@ export function CategorySelect({
   // Calcular contagem de produtos por categoria
   const categoryStats = useMemo(() => {
     const stats = new Map<string, number>();
-    
+
     // Contar produtos por categoria
     products.forEach(product => {
       const category = (product.category || '').trim();
@@ -95,38 +95,38 @@ export function CategorySelect({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full sm:w-[280px] justify-between bg-background hover:bg-muted/50 transition-colors"
+            className="w-full sm:w-[280px] justify-between bg-gradient-to-r from-white via-orange-50/30 to-amber-50/30 hover:from-orange-100/50 hover:to-amber-100/50 border-orange-200/60 hover:border-orange-300/70 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span className="truncate">
+              <Filter className="h-4 w-4 text-orange-600 flex-shrink-0" />
+              <span className="truncate text-sm font-medium text-gray-700">
                 {getCategoryLabel(selectedCategory)}
               </span>
               {selectedCategory !== "all" && (
-                <Badge variant="secondary" className="ml-auto flex-shrink-0 text-xs">
+                <Badge variant="secondary" className="ml-auto flex-shrink-0 text-xs bg-orange-100 text-orange-700 border-orange-200">
                   {getCategoryCount(selectedCategory)}
                 </Badge>
               )}
             </div>
-            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-orange-600" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-0" align="start">
-          <Command>
-            <div className="flex items-center border-b px-3">
-              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+        <PopoverContent className="w-[300px] p-0" align="start">
+          <Command className="bg-gradient-to-br from-white via-orange-50/20 to-amber-50/30">
+            <div className="flex items-center border-b border-orange-200/40 px-3 bg-gradient-to-r from-orange-50/30 to-amber-50/30">
+              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50 text-orange-600" />
               <CommandInput
                 placeholder="Buscar categoria..."
                 value={searchValue}
                 onValueChange={setSearchValue}
-                className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-orange-600/70 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
-            <CommandList className="max-h-[300px] overflow-y-auto">
+            <CommandList className="max-h-[300px] overflow-y-auto scrollbar-hide">
               <CommandEmpty>
                 <div className="flex flex-col items-center gap-2 py-6 text-center">
-                  <Package className="h-8 w-8 text-muted-foreground" />
-                  <div className="text-sm text-muted-foreground">
+                  <Package className="h-8 w-8 text-orange-400" />
+                  <div className="text-sm text-orange-600">
                     Nenhuma categoria encontrada
                   </div>
                 </div>
@@ -137,33 +137,33 @@ export function CategorySelect({
                     key={category}
                     value={category}
                     onSelect={() => handleSelect(category)}
-                    className="flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between cursor-pointer hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-amber-50/80 transition-all duration-200 py-3 px-4"
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <Check
                         className={cn(
-                          "h-4 w-4 flex-shrink-0",
+                          "h-4 w-4 flex-shrink-0 text-orange-600",
                           selectedCategory === category ? "opacity-100" : "opacity-0"
                         )}
                       />
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         {category === "all" ? (
-                          <Package className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                          <Package className="h-4 w-4 text-orange-600 flex-shrink-0" />
                         ) : (
                           <div className="w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 flex-shrink-0" />
                         )}
-                        <span className="truncate text-sm">
+                        <span className="truncate text-sm font-medium text-gray-700">
                           {getCategoryLabel(category)}
                         </span>
                       </div>
                     </div>
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className={cn(
-                        "ml-2 text-xs flex-shrink-0",
-                        category === "all" 
-                          ? "bg-orange-50 text-orange-700 border-orange-200" 
-                          : "bg-muted text-muted-foreground"
+                        "ml-2 text-xs flex-shrink-0 font-medium",
+                        category === "all"
+                          ? "bg-orange-100 text-orange-700 border-orange-300"
+                          : "bg-gray-100 text-gray-600 border-gray-200"
                       )}
                     >
                       {getCategoryCount(category)}
@@ -182,7 +182,7 @@ export function CategorySelect({
           variant="ghost"
           size="sm"
           onClick={clearSelection}
-          className="h-9 px-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="h-9 px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-100/50 transition-colors"
           title="Limpar filtro de categoria"
         >
           <X className="h-4 w-4" />
