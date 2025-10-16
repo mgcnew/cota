@@ -1,185 +1,631 @@
-import { useState } from "react";
-import { Plus, Search, Filter } from "lucide-react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { useProducts } from "@/hooks/useProducts";
+import { useDebounce } from "@/hooks/useDebounce";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, Scale, FileUp, Quote, Building2, Clock } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { CategorySelect } from "@/components/ui/category-select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AddProductDialog } from "@/components/forms/AddProductDialog";
 import { EditProductDialog } from "@/components/forms/EditProductDialog";
 import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
 import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
-import { useProducts, Product } from "@/hooks/useProducts";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { PageWrapper } from "@/components/layout/PageWrapper";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const Produtos = () => {
-  const { products, categories, isLoading, deleteProduct } = useProducts();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+import { ViewToggle } from "@/components/ui/view-toggle";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { usePagination } from "@/hooks/usePagination";
+import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
+import { ViewMode } from "@/types/pagination";
+import type { Product } from "@/hooks/useProducts";
+import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
+export default function Produtos() {
+  const navigate = useNavigate();
+  const {
+    user,
+    loading
+  } = useAuth();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const {
+    viewMode,
+    setViewMode
+  } = useResponsiveViewMode();
+  const {
+    paginate
+  } = usePagination<Product>({
+    initialItemsPerPage: 10
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
-  const [priceHistoryProduct, setPriceHistoryProduct] = useState<Product | null>(null);
+  const addDialogTriggerRef = useRef<HTMLDivElement>(null);
+  const importDialogTriggerRef = useRef<HTMLDivElement>(null);
+  const triggerAddDialog = () => {
+    const button = addDialogTriggerRef.current?.querySelector('button');
+    button?.click();
+  };
+  const triggerImportDialog = () => {
+    const button = importDialogTriggerRef.current?.querySelector('button');
+    button?.click();
+  };
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-    console.info(`[FILTER DEBUG] Product: ${product.name} | Category: ${product.category} | Matches: ${matchesSearch && matchesCategory}`);
-    return matchesSearch && matchesCategory;
-  });
+  // OPTIMIZED: Use React Query for data fetching with caching
+  const {
+    products,
+    categories,
+    isLoading: productsLoading,
+    deleteProduct,
+    updateProduct,
+    invalidateCache
+  } = useProducts();
+  useEffect(() => {
+    console.log('[FILTER] Categoria selecionada:', selectedCategory);
+  }, [selectedCategory]);
+  useEffect(() => {
+    console.log('[CATEGORIES DEBUG] Disponíveis:', categories);
+    console.log('[CATEGORIES DEBUG] Produtos por categoria:', categories.map(cat => ({
+      category: cat,
+      count: products.filter(p => (p.category || '').trim().toLowerCase() === (cat || '').trim().toLowerCase()).length
+    })));
+  }, [categories, products]);
+  useEffect(() => {
+    if (!loading && !user) {
+      setAuthDialogOpen(true);
+    }
+  }, [loading, user]);
 
-  if (isLoading) {
-    return (
-      <PageWrapper>
-        <div className="space-y-6 p-6">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-64 w-full" />
-        </div>
-      </PageWrapper>
-    );
+  // OPTIMIZED: Memoize filtered products to avoid unnecessary recalculations
+  const filteredProducts = useMemo(() => {
+    console.log('[FILTER DEBUG] selectedCategory:', selectedCategory);
+    console.log('[FILTER DEBUG] Total products:', products.length);
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+
+      // Normalizar categorias para comparação
+      const productCategory = (product.category || '').trim().toLowerCase();
+      const selectedCategoryNormalized = (selectedCategory || '').trim().toLowerCase();
+      const matchesCategory = selectedCategoryNormalized === "all" || productCategory === selectedCategoryNormalized;
+      console.log('[FILTER DEBUG] Product:', product.name, '| Category:', product.category, '| Matches:', matchesCategory);
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, debouncedSearchQuery, selectedCategory]);
+  const paginatedData = paginate(filteredProducts);
+
+  // Cálculos de métricas reais
+  const stats = useMemo(() => {
+    const totalCategories = categories.length - 1; // -1 para remover "all"
+    const activeQuotes = products.reduce((sum, p) => sum + p.quotesCount, 0);
+    const productsWithPrices = products.filter(p => p.lastQuotePrice !== "R$ 0,00");
+    let averageValue = "R$ 0,00";
+    if (productsWithPrices.length > 0) {
+      const total = productsWithPrices.reduce((sum, p) => {
+        const price = parseFloat(p.lastQuotePrice.replace(/[^\d,]/g, '').replace(',', '.'));
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+      averageValue = `R$ ${(total / productsWithPrices.length).toFixed(2)}`;
+    }
+    return {
+      totalProducts: products.length,
+      totalCategories,
+      activeQuotes,
+      averageValue
+    };
+  }, [products, categories]);
+  const getTrendIcon = (trend: "up" | "down" | "stable") => {
+    if (trend === "up") return <TrendingUp className="h-4 w-4 text-success" />;
+    if (trend === "down") return <TrendingUp className="h-4 w-4 text-error rotate-180" />;
+    return <span className="h-4 w-4 rounded-full bg-muted-foreground/50" />;
+  };
+
+  // Função para determinar status do produto baseado em dados
+  const getProductStatus = (product: any) => {
+    if (product.quotesCount === 0) return "sem_cotacao";
+    if (product.lastQuotePrice === "R$ 0,00") return "pendente";
+    if (product.quotesCount >= 3) return "ativo";
+    return "cotado";
+  };
+
+  // Função para renderizar badge de status com cores diferenciadas
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      ativo: {
+        label: "Ativo",
+        className: "bg-green-100 text-green-700 border-green-300 hover:bg-green-200 transition-colors"
+      },
+      cotado: {
+        label: "Cotado",
+        className: "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200 transition-colors"
+      },
+      pendente: {
+        label: "Pendente",
+        className: "bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200 transition-colors"
+      },
+      sem_cotacao: {
+        label: "Sem Cotação",
+        className: "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 transition-colors"
+      }
+    };
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.sem_cotacao;
+    return <Badge variant="outline" className={`text-xs font-medium ${config.className}`}>
+        {config.label}
+      </Badge>;
+  };
+  if (loading || productsLoading) {
+    return <div className="flex items-center justify-center h-screen">
+        <div className="text-center">Carregando...</div>
+      </div>;
   }
-
-  return (
-    <PageWrapper>
-      <div className="space-y-6 p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Produtos</h1>
-            <p className="text-muted-foreground mt-1">
-              Gerencie seu catálogo de produtos
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsImportDialogOpen(true)}
-            >
-              Importar
-            </Button>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Produto
-            </Button>
-          </div>
-        </div>
-
-        <Card className="p-4 bg-transparent">
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Buscar produtos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category === "all" ? "Todas" : category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-card/95 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all"
-              >
-                <div className="flex-1">
-                  <h3 className="font-semibold">{product.name}</h3>
-                  <div className="flex gap-2 mt-1">
-                    <Badge variant="outline">{product.category}</Badge>
-                    {product.quotesCount > 0 && (
-                      <Badge variant="secondary">
-                        {product.quotesCount} cotações
-                      </Badge>
-                    )}
+  return <>
+      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
+      <PageWrapper>
+        <div className="page-container">
+      {/* Header Produtos com Tema Laranja */}
+      <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Package className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="font-bold text-3xl bg-gradient-to-r from-orange-900 to-amber-700 bg-clip-text text-transparent">
+                    Produtos
+                  </h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 border border-orange-200 shadow-sm">
+                      <Scale className="h-3 w-3" />
+                      Catálogo de Produtos
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPriceHistoryProduct(product)}
-                  >
-                    Histórico
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditingProduct(product)}
-                  >
-                    Editar
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDeletingProduct(product)}
-                  >
-                    Excluir
-                  </Button>
-                </div>
               </div>
-            ))}
+            </div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
+              
+              
+              
+            </div>
           </div>
+          
+          <div className="flex flex-wrap gap-3">
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards Melhorados */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 relative">
+                    <Package className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">Total de Produtos</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">{stats.totalProducts}</div>
+              </div>
+              <div className="flex items-center gap-1 text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                <TrendingUp className="h-3 w-3" />
+                <span className="text-xs font-medium">+{Math.floor(stats.totalProducts * 0.1)}</span>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-orange-600 h-2 rounded-full transition-all duration-500" style={{
+                    width: '85%'
+                  }}></div>
+              </div>
+              <span className="text-xs text-gray-500">85%</span>
+            </div>
+          </CardContent>
+          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-300 rounded-full opacity-20"></div>
         </Card>
 
-        <AddProductDialog
-          onProductAdded={() => {}}
-        />
+        <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
+                    <Filter className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">Categorias</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">{stats.totalCategories}</div>
+              </div>
+              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                <TrendingUp className="h-3 w-3" />
+                <span className="text-xs font-medium">+2</span>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              {Math.floor(stats.totalCategories * 0.7)} ativas • {Math.floor(stats.totalCategories * 0.3)} com poucos produtos
+            </div>
+          </CardContent>
+          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-blue-300 rounded-full opacity-20"></div>
+        </Card>
 
-        <ImportProductsDialog
-          onProductsImported={() => {}}
-          onCategoryAdded={() => {}}
-        />
+        <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 via-green-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
+                    <Quote className="h-5 w-5 text-green-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">Cotações Ativas</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">{stats.activeQuotes}</div>
+              </div>
+              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                <TrendingUp className="h-3 w-3" />
+                <span className="text-xs font-medium">+15%</span>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              {Math.floor(stats.activeQuotes * 0.6)} aguardando • {Math.floor(stats.activeQuotes * 0.4)} em análise
+            </div>
+          </CardContent>
+          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-green-300 rounded-full opacity-20"></div>
+        </Card>
 
-        {editingProduct && (
-          <EditProductDialog
-            product={editingProduct}
-            open={!!editingProduct}
-            onOpenChange={(open) => !open && setEditingProduct(null)}
-            onProductUpdated={() => {}}
-            categories={categories}
-          />
-        )}
-
-        {deletingProduct && (
-          <DeleteProductDialog
-            product={deletingProduct}
-            open={!!deletingProduct}
-            onOpenChange={(open) => !open && setDeletingProduct(null)}
-            onProductDeleted={(id) => deleteProduct(id)}
-          />
-        )}
-
-        {priceHistoryProduct && (
-          <ProductPriceHistoryDialog
-            productName={priceHistoryProduct.name}
-            productId={priceHistoryProduct.id}
-          />
-        )}
+        <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-purple-100 to-pink-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
+                    <Scale className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">Valor Médio</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">{stats.averageValue}</div>
+              </div>
+              <div className="flex items-center gap-1 text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                <TrendingUp className="h-3 w-3" />
+                <span className="text-xs font-medium">+8%</span>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              Baseado em {products.filter(p => p.lastQuotePrice !== "R$ 0,00").length} produtos com preços
+            </div>
+          </CardContent>
+          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-purple-300 rounded-full opacity-20"></div>
+        </Card>
       </div>
-    </PageWrapper>
-  );
-};
 
-export default Produtos;
+      {/* Filters - Between stats cards and products table */}
+      <Card>
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                <Input placeholder="Buscar produtos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-orange-300/70 focus:border-orange-400 focus:ring-2 focus:ring-orange-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300" />
+              </div>
+
+              <CategorySelect categories={categories} products={products} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} className="w-full sm:w-auto h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-orange-300/70 focus:border-orange-400 focus:ring-2 focus:ring-orange-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300" />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Ações
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                  <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={triggerAddDialog}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Produto
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={triggerImportDialog}>
+                    <FileUp className="h-4 w-4 mr-2" />
+                    Importar Produtos
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={invalidateCache}>
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Atualizar Cache
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+
+
+      {/* Visual Feedback do Filtro */}
+      {selectedCategory !== "all" && <div className="mb-4 flex items-center gap-2 px-4">
+          <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+            Categoria: {selectedCategory}
+          </Badge>
+          <span className="text-sm text-muted-foreground">
+            {filteredProducts.length} produtos encontrados
+          </span>
+          {filteredProducts.length === 0 && <span className="text-sm text-amber-600">
+              ⚠️ Nenhum produto nesta categoria
+            </span>}
+        </div>}
+
+      {/* Products View */}
+      {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedData.items.map(product => <Card key={product.id} className="group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-3 flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                        <Package className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-orange-700 transition-colors duration-300 truncate">
+                          {product.name}
+                        </CardTitle>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="outline" className="bg-orange-100/80 border-orange-300/60 text-orange-700 font-medium">
+                        {product.category}
+                      </Badge>
+                      <Badge variant="secondary" className="bg-gray-100/80 text-gray-700 font-medium">
+                        {product.weight}
+                      </Badge>
+                      {getStatusBadge(getProductStatus(product))}
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
+                      <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
+                            <Quote className="h-4 w-4 mr-2 text-blue-600" />
+                            Ver Histórico de Preços
+                          </DropdownMenuItem>} />
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
+                        <Edit className="h-4 w-4 mr-2 text-amber-600" />
+                        Editar Produto
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" onClick={() => setDeletingProduct(product)}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir Produto
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                <div className="p-4 rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 border border-green-200/60">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-700 mb-1">Melhor Preço</p>
+                      <p className="text-2xl font-bold text-green-800">{product.lastQuotePrice}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center gap-1 mb-1">
+                        {getTrendIcon(product.trend)}
+                        <span className="text-sm font-medium text-green-600">Tendência</span>
+                      </div>
+                      <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                        Atualizado
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 border border-gray-200/60">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm font-medium text-gray-600">Fornecedor</span>
+                    </div>
+                    <span className="font-semibold text-gray-900 truncate max-w-[120px]">{product.bestSupplier}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg bg-blue-50/80 border border-blue-200/60 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <Quote className="h-4 w-4 text-blue-600" />
+                        <span className="text-xs font-medium text-blue-600">Cotações</span>
+                      </div>
+                      <span className="text-lg font-bold text-blue-800">{product.quotesCount}</span>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-purple-50/80 border border-purple-200/60 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <Clock className="h-4 w-4 text-purple-600" />
+                        <span className="text-xs font-medium text-purple-600">Atualizado</span>
+                      </div>
+                      <span className="text-xs font-semibold text-purple-800">{product.lastUpdate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="outline" className="w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 text-orange-700 hover:text-orange-800 transition-all duration-300">
+                      <Quote className="h-4 w-4 mr-2" />
+                      Ver Histórico de Preços
+                    </Button>} />
+              </CardContent>
+
+              {/* Elemento decorativo */}
+              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-200 rounded-full opacity-20"></div>
+            </Card>)}
+        </div> : <Card className="border-0 bg-transparent">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto w-full">
+              <Table className="w-full">
+                <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
+                  <TableRow className="border-b-2 border-gray-100">
+                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs min-w-0">Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Melhor Preço</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Fornecedor</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Cotações</TableHead>
+                    <TableHead className="text-right font-semibold text-gray-700 py-4 px-4 text-xs">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
+                      <TableCell colSpan={8} className="p-3">
+                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300">
+                          {/* Produto - Largura fixa */}
+                          <div className="w-[25%] flex items-center gap-3 pr-4">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <Package className="h-4 w-4 text-orange-600" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-semibold text-gray-900 text-sm truncate">{product.name}</div>
+                              <div className="text-xs text-gray-500 md:hidden mt-1">{product.category}</div>
+                            </div>
+                          </div>
+
+                          {/* Categoria - Largura fixa, hidden on mobile */}
+                          <div className="hidden md:block w-[15%] px-2">
+                            <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium text-xs w-full justify-center">
+                              {product.category}
+                            </Badge>
+                          </div>
+
+                          {/* Peso - Largura fixa, hidden on mobile */}
+                          <div className="hidden md:block w-[12%] px-2">
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium text-xs w-full justify-center">
+                              {product.weight}
+                            </Badge>
+                          </div>
+
+                          {/* Status - Largura fixa, hidden on small screens */}
+                          <div className="hidden sm:block w-[13%] px-2">
+                            <div className="flex justify-center">
+                              {getStatusBadge(getProductStatus(product))}
+                            </div>
+                          </div>
+
+                          {/* Melhor Preço - Largura fixa */}
+                          <div className="w-[12%] px-2">
+                            <div className="flex items-center justify-center gap-2">
+                              <span className="font-bold text-green-700 text-sm">{product.lastQuotePrice}</span>
+                              {getTrendIcon(product.trend)}
+                            </div>
+                          </div>
+
+                          {/* Fornecedor - Largura fixa, hidden on mobile */}
+                          <div className="hidden lg:block w-[15%] px-2">
+                            <div className="text-center">
+                              <span className="text-gray-700 font-medium text-sm truncate block">{product.bestSupplier}</span>
+                            </div>
+                          </div>
+
+                          {/* Cotações - Largura fixa, hidden on small screens */}
+                          <div className="hidden sm:block w-[8%] px-2">
+                            <div className="flex items-center justify-center gap-1">
+                              <Quote className="h-4 w-4 text-blue-600" />
+                              <span className="font-semibold text-blue-700 text-sm">{product.quotesCount}</span>
+                            </div>
+                          </div>
+
+                          {/* Ações - Largura fixa */}
+                          <div className="w-[10%] pl-4">
+                            <div className="flex items-center justify-end gap-2">
+                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 flex items-center justify-center">
+                                    <Clock className="h-4 w-4" />
+                                  </Button>} />
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                                  <DropdownMenuLabel className="text-gray-600 font-medium">Mais Ações</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
+                                    <Edit className="h-4 w-4 mr-2 text-amber-600" />
+                                    Editar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" onClick={() => setDeletingProduct(product)}>
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Excluir
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>)}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="border-t border-orange-100/80 bg-gradient-to-r from-orange-50/30 to-amber-50/30 px-6 py-4">
+              <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
+            </div>
+          </CardContent>
+        </Card>}
+
+      {filteredProducts.length === 0 && <Card>
+          <CardContent className="p-12 text-center">
+            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Nenhum produto encontrado</h3>
+            <p className="text-muted-foreground mb-4">
+              Tente ajustar os filtros ou adicione novos produtos
+            </p>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Produto
+            </Button>
+          </CardContent>
+        </Card>}
+
+      {/* Dialogs - Hidden triggers for dropdown actions */}
+      <div className="sr-only">
+        <div ref={addDialogTriggerRef}>
+          <AddProductDialog onProductAdded={() => {}} onCategoryAdded={() => {}} />
+        </div>
+        <div ref={importDialogTriggerRef}>
+          <ImportProductsDialog onProductsImported={() => {}} onCategoryAdded={() => {}} />
+        </div>
+      </div>
+
+      <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={updatedProduct => {
+          updateProduct({
+            productId: updatedProduct.id,
+            data: {
+              name: updatedProduct.name,
+              category: updatedProduct.category,
+              weight: updatedProduct.weight
+            }
+          });
+        }} onCategoryAdded={() => {}} categories={categories} />
+
+      <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={id => deleteProduct(id)} />
+        </div>
+      </PageWrapper>
+    </>;
+}
