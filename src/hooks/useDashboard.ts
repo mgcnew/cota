@@ -260,11 +260,61 @@ export function useDashboard() {
     return monthlyDataArray;
   }, [data]);
 
+  const dailyData = useMemo(() => {
+    if (!data) return [];
+
+    const now = new Date();
+    const dailyDataArray = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const day = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const dayInicio = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+      const dayFim = new Date(dayInicio.getTime() + 24 * 60 * 60 * 1000 - 1);
+
+      const quotesDoDia = data.quotes.filter((q: any) => {
+        const dataCriacao = new Date(q.created_at);
+        return dataCriacao >= dayInicio && dataCriacao <= dayFim;
+      });
+
+      let economiaDoDia = 0;
+      quotesDoDia.forEach((quote: any) => {
+        if (quote.quote_supplier_items && quote.quote_supplier_items.length >= 2) {
+          const produtosMap = new Map();
+          quote.quote_supplier_items.forEach((item: any) => {
+            if (!produtosMap.has(item.product_id)) {
+              produtosMap.set(item.product_id, []);
+            }
+            if (item.valor_oferecido > 0) {
+              produtosMap.get(item.product_id).push(item.valor_oferecido);
+            }
+          });
+
+          produtosMap.forEach((valores: number[]) => {
+            if (valores.length >= 2) {
+              const melhorPreco = Math.min(...valores);
+              const piorPreco = Math.max(...valores);
+              economiaDoDia += piorPreco - melhorPreco;
+            }
+          });
+        }
+      });
+
+      dailyDataArray.push({
+        day: day.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        economia: economiaDoDia,
+        cotacoes: quotesDoDia.length
+      });
+    }
+
+    return dailyDataArray;
+  }, [data]);
+
   return {
     metrics,
     recentQuotes,
     topSuppliers,
     monthlyData,
+    dailyData,
     isLoading,
   };
 }

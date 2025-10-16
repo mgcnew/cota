@@ -8,23 +8,27 @@ import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loade
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
+
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6m');
   const [evolutionPeriod, setEvolutionPeriod] = useState('6m');
   const [economyPeriod, setEconomyPeriod] = useState('6m');
   const [showReportModal, setShowReportModal] = useState(false);
   const {
-    metrics,
-    recentQuotes,
-    topSuppliers,
-    monthlyData,
-    isLoading
-  } = useDashboard();
+    metrics = { cotacoesAtivas: 0, fornecedores: 0, economiaGerada: 0, produtosCotados: 0 },
+    recentQuotes = [],
+    topSuppliers = [],
+    monthlyData = [],
+    dailyData = [],
+    isLoading = false
+  } = useDashboard() || {};
   const taxaAprovacao = recentQuotes.length > 0 ? Math.round(recentQuotes.filter(q => q.status === 'aprovada' || q.status === 'approved').length / recentQuotes.length * 100) : 0;
 
   // Função para filtrar dados por período
-  const filterDataByPeriod = (data: any[], period: string) => {
-    if (!data || data.length === 0) return [];
+  const filterDataByPeriod = (period: string) => {
+    if (period === '7d') {
+      return dailyData;
+    }
     const monthsMap: Record<string, number> = {
       '1m': 1,
       '3m': 3,
@@ -32,12 +36,20 @@ export default function Dashboard() {
       '1y': 12
     };
     const months = monthsMap[period] || 6;
-    return data.slice(-months);
+    let filteredData = monthlyData.slice(-months);
+    // For larger periods, filter to October onwards
+    if (period === '1y') {
+      filteredData = filteredData.filter((item: any) => {
+        const monthIndex = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].indexOf(item.month);
+        return monthIndex >= 9; // October is index 9
+      });
+    }
+    return filteredData;
   };
 
   // Dados filtrados por período
-  const evolutionData = filterDataByPeriod(monthlyData, evolutionPeriod);
-  const economyData = filterDataByPeriod(monthlyData, economyPeriod);
+  const evolutionData = filterDataByPeriod(evolutionPeriod);
+  const economyData = filterDataByPeriod(economyPeriod);
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
@@ -74,8 +86,8 @@ export default function Dashboard() {
         </div>
 
         {/* Métricas Principais */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 px-4">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -99,7 +111,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -123,7 +135,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -147,7 +159,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -191,6 +203,7 @@ export default function Dashboard() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="7d">Últimos 7 dias</SelectItem>
                     <SelectItem value="1m">Último mês</SelectItem>
                     <SelectItem value="3m">3 meses</SelectItem>
                     <SelectItem value="6m">6 meses</SelectItem>
@@ -220,7 +233,7 @@ export default function Dashboard() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                    <XAxis dataKey="month" stroke="#6b7280" style={{
+                    <XAxis dataKey={evolutionPeriod === '7d' ? 'day' : 'month'} stroke="#6b7280" style={{
                   fontSize: '12px',
                   fontWeight: 500
                 }} tickLine={false} />
@@ -324,6 +337,7 @@ export default function Dashboard() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="7d">Últimos 7 dias</SelectItem>
                     <SelectItem value="1m">Último mês</SelectItem>
                     <SelectItem value="3m">3 meses</SelectItem>
                     <SelectItem value="6m">6 meses</SelectItem>
@@ -349,7 +363,7 @@ export default function Dashboard() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                    <XAxis dataKey="month" stroke="#6b7280" style={{
+                    <XAxis dataKey={economyPeriod === '7d' ? 'day' : 'month'} stroke="#6b7280" style={{
                   fontSize: '12px',
                   fontWeight: 500
                 }} tickLine={false} />
