@@ -426,15 +426,15 @@ export default function AddPedidoDialog({
           }} className="h-full">
               <div className="h-full p-4 sm:p-6 py-0">
                 {activeTab === 'produtos' && <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4 h-full">
-                    {/* Left Column - Add Product Form */}
+                  {/* Left Column - Add Product Form */}
                     <Card className="border-pink-100 shadow-sm order-1 lg:order-1 h-fit">
-                      <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50 py-0">
+                      <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50">
                         <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
                           <Package className="h-4 w-4 text-pink-500" />
                           Adicionar Produto
                         </h3>
                       </div>
-                      <div className="p-2 sm:p-3 space-y-2 sm:space-y-3 py-0">
+                      <div className="p-2 sm:p-3 space-y-2 sm:space-y-3 pb-3 sm:pb-4">
                         <div className="space-y-2">
                           
                           <Combobox options={filteredProducts.map(p => ({
