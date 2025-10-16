@@ -77,7 +77,7 @@ export default function Dashboard() {
   return <PageWrapper>
       <div className="page-container">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 p-4 border border-gray-200/60 rounded-lg backdrop-blur-sm hover:border hover:border-gray-300/20 shadow-sm transition-all duration-300">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">Visão geral do sistema de cotações</p>
@@ -87,7 +87,7 @@ export default function Dashboard() {
 
         {/* Métricas Principais */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 px-4">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 hover:border hover:border-gray-300/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -111,7 +111,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 hover:border hover:border-gray-300/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -135,7 +135,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 hover:border hover:border-gray-300/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -159,7 +159,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 hover:border hover:border-gray-300/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -187,7 +187,7 @@ export default function Dashboard() {
         {/* Gráficos lado a lado - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Gráfico de Evolução - 2 colunas */}
-          <Card className="lg:col-span-2 bg-gradient-to-br from-purple-50/50 via-white to-blue-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-purple-300/70 shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-2 bg-gradient-to-br from-purple-50/50 via-white to-blue-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-purple-300/70 hover:border shadow-lg hover:shadow-md rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -281,7 +281,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Top Fornecedores - 1 coluna */}
-          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 hover:border shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-3 text-lg">
                 <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg">
@@ -321,7 +321,7 @@ export default function Dashboard() {
         {/* Economia Mensal e Cotações Recentes - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Gráfico de Economia - 2 colunas */}
-          <Card className="lg:col-span-2 bg-gradient-to-br from-emerald-50/50 via-white to-green-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-emerald-300/70 shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-2 bg-gradient-to-br from-emerald-50/50 via-white to-green-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-emerald-300/70 hover:border shadow-lg hover:shadow-md rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -393,7 +393,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Cotações Recentes - 1 coluna */}
-          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 hover:border shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-3 text-lg">
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">

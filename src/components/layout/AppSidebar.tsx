@@ -245,7 +245,7 @@ export function AppSidebar() {
   }, [location.pathname]);
   return <>
       {/* Desktop Sidebar Sempre Flutuante - Estilo Canva */}
-      <div className="hidden md:flex fixed z-50 w-20 left-4 top-2 bottom-4 transition-all duration-500 ease-out bg-white">
+      <div className="hidden md:flex fixed z-50 w-20 left-4 top-2 bottom-4 transition-all duration-500 ease-out bg-white shadow-lg">
         {/* Container sempre flutuante */}
         <div className="w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-xl border border-gray-200/60 hover:border-gray-300/70 transition-all duration-500 overflow-visible">
           {/* Efeitos de vidro sempre aplicados */}
