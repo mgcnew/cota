@@ -167,7 +167,7 @@ export default function Produtos() {
       <PageWrapper>
         <div className="page-container">
       {/* Header Produtos com Tema Laranja */}
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100 shadow-sm">
+      <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-4 border border-orange-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-4">
@@ -493,7 +493,7 @@ export default function Produtos() {
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
                       <TableCell colSpan={8} className="p-3">
-                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">

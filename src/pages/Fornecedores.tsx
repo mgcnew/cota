@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown, Clock, MessageCircle } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
@@ -219,7 +219,7 @@ export default function Fornecedores() {
       <PageWrapper>
         <div className="page-container">
       {/* Header Fornecedores com Tema Índigo */}
-      <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl p-6 border border-indigo-100 shadow-sm">
+      <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl p-4 border border-indigo-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-4">
@@ -246,59 +246,10 @@ export default function Fornecedores() {
                 <TrendingUp className="h-4 w-4 text-indigo-600" />
                 <span className="font-medium">Gerencie fornecedores e acompanhe performance</span>
               </div>
-              
-              
             </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-3">
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0">
-                  Ações
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => addSupplierRef.current?.click()}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Fornecedor
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => importSuppliersRef.current?.click()}>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Importar Fornecedores
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input placeholder="Buscar fornecedores..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
-            </div>
-            
-            <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="active">Ativos</SelectItem>
-                <SelectItem value="inactive">Inativos</SelectItem>
-                <SelectItem value="pending">Pendentes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Stats Cards Melhorados */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -399,6 +350,55 @@ export default function Fornecedores() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                <Input placeholder="Buscar fornecedores..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-indigo-300/70 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300" />
+              </div>
+
+              <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
+                <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-indigo-300/70 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="active">Ativos</SelectItem>
+                  <SelectItem value="inactive">Inativos</SelectItem>
+                  <SelectItem value="pending">Pendentes</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Ações
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                  <DropdownMenuLabel className="text-gray-600 font-medium">Gerenciar Fornecedores</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => addSupplierRef.current?.click()}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Fornecedor
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => importSuppliersRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Importar Fornecedores
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Suppliers View */}
       {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -529,7 +529,7 @@ export default function Fornecedores() {
                 <TableBody>
                   {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
                           {/* Fornecedor - Largura fixa */}
                           <div className="w-[30%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">

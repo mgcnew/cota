@@ -223,7 +223,7 @@ export default function Pedidos() {
   return <PageWrapper>
       <div className="page-container">
       {/* Header Pedidos com Tema Rosa */}
-      <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-100 shadow-sm">
+      <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-4 border border-pink-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-4">
@@ -244,92 +244,203 @@ export default function Pedidos() {
                 </div>
               </div>
             </div>
-            
-            
-          </div>
-          
-          <div className="flex flex-wrap gap-3">
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            
-            <Button className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0" onClick={() => setAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Pedido
-            </Button>
           </div>
         </div>
       </div>
 
+      {/* Statistics Cards Melhorados */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-yellow-50/30">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 relative">
+                    <Clock className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">Pedidos Ativos</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
+                <Clock className="h-3 w-3" />
+                <span className="text-xs font-medium">Em andamento</span>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-amber-600 h-2 rounded-full transition-all duration-500" style={{
+                width: '65%'
+              }}></div>
+              </div>
+              <span className="text-xs text-gray-500">65%</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
+                    <Truck className="h-5 w-5 text-green-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">Pedidos Entregues</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {pedidos.filter(p => p.status === "entregue").length}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                <CheckCircle className="h-3 w-3" />
+                <span className="text-xs font-medium">Concluídos</span>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              {Math.floor(pedidos.filter(p => p.status === "entregue").length / pedidos.length * 100)}% de taxa de entrega
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
+                    <DollarSign className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">Valor Total</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">
+                  R$ {totalValue.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2
+                })}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                <DollarSign className="h-3 w-3" />
+                <span className="text-xs font-medium">+15%</span>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              Valor médio: R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', {
+              minimumFractionDigits: 2
+            }) : '0,00'}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
+                    <Package className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">Itens por Pedido</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {pedidos.length > 0 ? Math.round(pedidos.reduce((acc, p) => acc + p.itens, 0) / pedidos.length) : 0}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                <Package className="h-3 w-3" />
+                <span className="text-xs font-medium">Média</span>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              Total de {pedidos.reduce((acc, p) => acc + p.itens, 0)} itens em {pedidos.length} pedidos
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Filters */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex gap-4 flex-wrap">
-            <div className="relative flex-1 min-w-64">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Buscar por fornecedor, produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                <Input placeholder="Buscar por fornecedor, produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-pink-300/70 focus:border-pink-400 focus:ring-2 focus:ring-pink-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300" />
+              </div>
+
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="w-full sm:w-[180px] h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-pink-300/70 focus:border-pink-400 focus:ring-2 focus:ring-pink-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 px-3">
+                <option value="all">Todos os Status</option>
+                <option value="pendente">Pendentes</option>
+                <option value="processando">Processando</option>
+                <option value="confirmado">Confirmados</option>
+                <option value="entregue">Entregues</option>
+                <option value="cancelado">Cancelados</option>
+              </select>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-pink-300/70 focus:border-pink-400 focus:ring-2 focus:ring-pink-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filtros Avançados
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-96" align="end">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Filtros Avançados</h4>
+                      <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+                        <X className="h-4 w-4 mr-1" />
+                        Limpar
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Fornecedor</Label>
+                      <select value={fornecedorFilter} onChange={e => setFornecedorFilter(e.target.value)} className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground">
+                        <option value="all">Todos os Fornecedores</option>
+                        {fornecedores.map(f => <option key={f} value={f}>{f}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label>Data Início</Label>
+                        <Input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Data Fim</Label>
+                        <Input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label>Valor Mínimo</Label>
+                        <Input type="number" placeholder="R$ 0,00" value={valorMin} onChange={e => setValorMin(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Valor Máximo</Label>
+                        <Input type="number" placeholder="R$ 0,00" value={valorMax} onChange={e => setValorMax(e.target.value)} />
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <Button variant="outline" onClick={exportToCSV} className="h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-pink-300/70 focus:border-pink-400 focus:ring-2 focus:ring-pink-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                <Download className="h-4 w-4 mr-2" />
+                Exportar CSV
+              </Button>
+
+              <Button className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl" onClick={() => setAddDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Pedido
+              </Button>
             </div>
-            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2 border border-border rounded-md bg-background text-foreground">
-              <option value="all">Todos os Status</option>
-              <option value="pendente">Pendentes</option>
-              <option value="processando">Processando</option>
-              <option value="confirmado">Confirmados</option>
-              <option value="entregue">Entregues</option>
-              <option value="cancelado">Cancelados</option>
-            </select>
-            
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filtros Avançados
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-96" align="end">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold">Filtros Avançados</h4>
-                    <Button variant="ghost" size="sm" onClick={handleClearFilters}>
-                      <X className="h-4 w-4 mr-1" />
-                      Limpar
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Fornecedor</Label>
-                    <select value={fornecedorFilter} onChange={e => setFornecedorFilter(e.target.value)} className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground">
-                      <option value="all">Todos os Fornecedores</option>
-                      {fornecedores.map(f => <option key={f} value={f}>{f}</option>)}
-                    </select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label>Data Início</Label>
-                      <Input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Data Fim</Label>
-                      <Input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)} />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label>Valor Mínimo</Label>
-                      <Input type="number" placeholder="R$ 0,00" value={valorMin} onChange={e => setValorMin(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Valor Máximo</Label>
-                      <Input type="number" placeholder="R$ 0,00" value={valorMax} onChange={e => setValorMax(e.target.value)} />
-                    </div>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Button variant="outline" onClick={exportToCSV}>
-              <Download className="h-4 w-4 mr-2" />
-              Exportar CSV
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -337,118 +448,6 @@ export default function Pedidos() {
       {loading ? <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div> : <>
-          {/* Statistics Cards Melhorados */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-yellow-50/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 relative">
-                        <Clock className="h-5 w-5 text-amber-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-600">Pedidos Ativos</span>
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                    <Clock className="h-3 w-3" />
-                    <span className="text-xs font-medium">Em andamento</span>
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-amber-600 h-2 rounded-full transition-all duration-500" style={{
-                    width: '65%'
-                  }}></div>
-                  </div>
-                  <span className="text-xs text-gray-500">65%</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
-                        <Truck className="h-5 w-5 text-green-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-600">Pedidos Entregues</span>
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {pedidos.filter(p => p.status === "entregue").length}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                    <CheckCircle className="h-3 w-3" />
-                    <span className="text-xs font-medium">Concluídos</span>
-                  </div>
-                </div>
-                <div className="mt-4 text-xs text-gray-500">
-                  {Math.floor(pedidos.filter(p => p.status === "entregue").length / pedidos.length * 100)}% de taxa de entrega
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
-                        <DollarSign className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-600">Valor Total</span>
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      R$ {totalValue.toLocaleString('pt-BR', {
-                      minimumFractionDigits: 2
-                    })}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                    <DollarSign className="h-3 w-3" />
-                    <span className="text-xs font-medium">+15%</span>
-                  </div>
-                </div>
-                <div className="mt-4 text-xs text-gray-500">
-                  Valor médio: R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', {
-                  minimumFractionDigits: 2
-                }) : '0,00'}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
-                        <Package className="h-5 w-5 text-purple-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-600">Itens por Pedido</span>
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {pedidos.length > 0 ? Math.round(pedidos.reduce((acc, p) => acc + p.itens, 0) / pedidos.length) : 0}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                    <Package className="h-3 w-3" />
-                    <span className="text-xs font-medium">Média</span>
-                  </div>
-                </div>
-                <div className="mt-4 text-xs text-gray-500">
-                  Total de {pedidos.reduce((acc, p) => acc + p.itens, 0)} itens em {pedidos.length} pedidos
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Pedidos View */}
           {viewMode === "table" ? <Card className="border-0 bg-transparent">
               <CardContent className="p-0">
@@ -493,7 +492,7 @@ export default function Pedidos() {
                     <TableBody>
                       {paginatedData.items.map((pedido, index) => <TableRow key={pedido.id} className="group border-none">
                           <TableCell colSpan={7} className="p-3">
-                            <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300">
+                            <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
                               {/* Pedido - Largura fixa */}
                               <div className="w-[15%] flex items-center gap-3 pr-4">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 flex items-center justify-center flex-shrink-0 border border-pink-200/50">

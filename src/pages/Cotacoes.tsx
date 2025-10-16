@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
 import EditQuoteDialog from "@/components/forms/EditQuoteDialog";
@@ -102,7 +102,7 @@ export default function Cotacoes() {
   const paginatedData = paginate(filteredCotacoes);
   return <div className="page-container">
       {/* Header Cotações com Tema Teal */}
-      <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-6 border border-teal-100 shadow-sm">
+      <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-4 border border-teal-100 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-4">
@@ -123,92 +123,9 @@ export default function Cotacoes() {
                 </div>
               </div>
             </div>
-            
-            
-          </div>
-          
-          <div className="flex flex-wrap gap-3">
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0">
-                  Ações
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => addQuoteRef.current?.click()}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Cotação
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Download className="h-4 w-4 mr-2" />
-                  Exportar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1 min-w-64">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Buscar por produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
-            </div>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Status</SelectItem>
-                <SelectItem value="ativa">Ativas</SelectItem>
-                <SelectItem value="pendente">Pendentes</SelectItem>
-                <SelectItem value="concluida">Concluídas</SelectItem>
-                <SelectItem value="expirada">Expiradas</SelectItem>
-                <SelectItem value="finalizada">Finalizadas</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Filtro por Fornecedor */}
-            <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Fornecedor" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Fornecedores</SelectItem>
-                {/* Extrair fornecedores únicos das cotações */}
-                {Array.from(new Set(cotacoes.flatMap(cotacao => cotacao.fornecedoresParticipantes?.map(f => f.nome) || []))).sort().map(fornecedor => <SelectItem key={fornecedor} value={fornecedor}>
-                    {fornecedor}
-                  </SelectItem>)}
-              </SelectContent>
-            </Select>
-
-            {/* Botão para limpar filtros se houver filtro ativo */}
-            {(supplierFilter !== "all" || statusFilter !== "all" || searchTerm) && <Button variant="outline" onClick={() => {
-            setSupplierFilter("all");
-            setStatusFilter("all");
-            setSearchTerm("");
-            setSearchParams({});
-          }} className="whitespace-nowrap">
-                Limpar Filtros
-              </Button>}
-          </div>
-
-          {/* Indicador de filtro ativo por fornecedor */}
-          {supplierFilter !== "all" && <div className="mt-3 flex items-center gap-2">
-              <Badge variant="secondary" className="bg-teal-100 text-teal-700 border-teal-300">
-                <Building2 className="h-3 w-3 mr-1" />
-                Fornecedor: {supplierFilter}
-              </Badge>
-            </div>}
-        </CardContent>
-      </Card>
 
       {/* Statistics Cards Melhorados */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -309,6 +226,77 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                <Input placeholder="Buscar por produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-teal-300/70 focus:border-teal-400 focus:ring-2 focus:ring-teal-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300" />
+              </div>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-teal-300/70 focus:border-teal-400 focus:ring-2 focus:ring-teal-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <SelectItem value="ativa">Ativas</SelectItem>
+                  <SelectItem value="pendente">Pendentes</SelectItem>
+                  <SelectItem value="concluida">Concluídas</SelectItem>
+                  <SelectItem value="expirada">Expiradas</SelectItem>
+                  <SelectItem value="finalizada">Finalizadas</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={supplierFilter} onValueChange={setSupplierFilter}>
+                <SelectTrigger className="w-full sm:w-[200px] h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-teal-300/70 focus:border-teal-400 focus:ring-2 focus:ring-teal-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                  <SelectValue placeholder="Fornecedor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Fornecedores</SelectItem>
+                  {Array.from(new Set(cotacoes.flatMap(cotacao => cotacao.fornecedoresParticipantes?.map(f => f.nome) || []))).sort().map(fornecedor => <SelectItem key={fornecedor} value={fornecedor}>
+                      {fornecedor}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Ações
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                  <DropdownMenuLabel className="text-gray-600 font-medium">Gerenciar Cotações</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => addQuoteRef.current?.click()}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nova Cotação
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Download className="h-4 w-4 mr-2" />
+                    Exportar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          {/* Indicador de filtro ativo por fornecedor */}
+          {supplierFilter !== "all" && <div className="mt-3 flex items-center gap-2">
+              <Badge variant="secondary" className="bg-teal-100 text-teal-700 border-teal-300">
+                <Building2 className="h-3 w-3 mr-1" />
+                Fornecedor: {supplierFilter}
+              </Badge>
+            </div>}
+        </CardContent>
+      </Card>
 
       {/* Cotações View */}
       {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -577,7 +565,7 @@ export default function Cotacoes() {
                 <TableBody>
                   {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
                           {/* Cotação - Largura fixa */}
                           <div className="w-[18%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50">
