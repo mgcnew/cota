@@ -446,42 +446,38 @@ export default function AddPedidoDialog({
                       }} placeholder="Digite para buscar produtos..." searchPlaceholder={`Buscar entre ${products.length} produtos...`} emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."} className="w-full border-pink-200 hover:border-pink-300" onSearchChange={setProductSearch} />
                         </div>
 
-                        {selectedProduct && (
-                          <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium text-gray-700">Quantidade</Label>
-                                <Input type="number" value={newProductQuantity} onChange={e => setNewProductQuantity(e.target.value)} placeholder="0" min="0" step="0.01" className="text-sm" />
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium text-gray-700">Unidade</Label>
-                                <Select value={newProductUnit} onValueChange={setNewProductUnit}>
-                                  <SelectTrigger className="text-sm">
-                                    <SelectValue placeholder="Unidade" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="un">Unidade (un)</SelectItem>
-                                    <SelectItem value="kg">Quilograma (kg)</SelectItem>
-                                    <SelectItem value="pc">Peça (pc)</SelectItem>
-                                    <SelectItem value="caixa">Caixa</SelectItem>
-                                    <SelectItem value="litro">Litro (L)</SelectItem>
-                                    <SelectItem value="metro">Metro (m)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">Quantidade</Label>
+                            <Input type="number" value={newProductQuantity} onChange={e => setNewProductQuantity(e.target.value)} placeholder="0" min="0" step="0.01" className="text-sm" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">Unidade</Label>
+                            <Select value={newProductUnit} onValueChange={setNewProductUnit}>
+                              <SelectTrigger className="text-sm">
+                                <SelectValue placeholder="Unidade" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="un">Unidade (un)</SelectItem>
+                                <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                                <SelectItem value="pc">Peça (pc)</SelectItem>
+                                <SelectItem value="caixa">Caixa</SelectItem>
+                                <SelectItem value="litro">Litro (L)</SelectItem>
+                                <SelectItem value="metro">Metro (m)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
 
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium text-gray-700">Valor Unitário</Label>
-                              <Input type="number" value={newProductPrice} onChange={e => setNewProductPrice(e.target.value)} placeholder="0,00" min="0" step="0.01" className="text-sm" />
-                            </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">Valor Unitário</Label>
+                          <Input type="number" value={newProductPrice} onChange={e => setNewProductPrice(e.target.value)} placeholder="0,00" min="0" step="0.01" className="text-sm" />
+                        </div>
 
-                            <Button type="button" onClick={handleAddNewProduct} className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-sm sm:text-base py-2 sm:py-2.5">
-                              <Plus className="h-4 w-4 mr-2" />
-                              Adicionar à Lista
-                            </Button>
-                          </>
-                        )}
+                        <Button type="button" onClick={handleAddNewProduct} className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-sm sm:text-base py-2 sm:py-2.5">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Adicionar à Lista
+                        </Button>
                       </div>
                     </Card>
 
