@@ -5,14 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loader2, Target, Award, Clock, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
 
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6m');
-  const [evolutionPeriod, setEvolutionPeriod] = useState('6m');
-  const [economyPeriod, setEconomyPeriod] = useState('6m');
+  const [evolutionPeriod, setEvolutionPeriod] = useState('7d');
+  const [economyPeriod, setEconomyPeriod] = useState('7d');
   const [showReportModal, setShowReportModal] = useState(false);
   const {
     metrics = { cotacoesAtivas: 0, fornecedores: 0, economiaGerada: 0, produtosCotados: 0 },
@@ -49,7 +49,10 @@ export default function Dashboard() {
 
   // Dados filtrados por período
   const evolutionData = filterDataByPeriod(evolutionPeriod);
-  const economyData = filterDataByPeriod(economyPeriod);
+  const economyData = filterDataByPeriod(economyPeriod).map((item, index) => ({
+    ...item,
+    fill: ['#10b981', '#34d399', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'][index % 6]
+  }));
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
@@ -87,7 +90,7 @@ export default function Dashboard() {
 
         {/* Métricas Principais */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 px-4">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 hover:border hover:border-gray-300/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -111,7 +114,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 hover:border hover:border-gray-300/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -135,7 +138,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 hover:border hover:border-gray-300/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -159,7 +162,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 hover:border hover:border-gray-300/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-[1px]">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -281,7 +284,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Top Fornecedores - 1 coluna */}
-          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 hover:border shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 hover:border shadow-lg hover:shadow-md rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-3 text-lg">
                 <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg">
@@ -356,12 +359,6 @@ export default function Dashboard() {
                 left: 0,
                 bottom: 5
               }}>
-                    <defs>
-                      <linearGradient id="colorEconomia" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.9} />
-                        <stop offset="95%" stopColor="#34d399" stopOpacity={0.6} />
-                      </linearGradient>
-                    </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                     <XAxis dataKey={economyPeriod === '7d' ? 'day' : 'month'} stroke="#6b7280" style={{
                   fontSize: '12px',
@@ -381,7 +378,11 @@ export default function Dashboard() {
                   fontWeight: 600,
                   color: '#374151'
                 }} />
-                    <Bar dataKey="economia" fill="url(#colorEconomia)" radius={[8, 8, 0, 0]} maxBarSize={60} />
+                    <Bar dataKey="economia" radius={[8, 8, 0, 0]} maxBarSize={60}>
+                      {economyData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer> : <div className="flex items-center justify-center h-[280px] text-slate-500">
                   <div className="text-center">
@@ -393,7 +394,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Cotações Recentes - 1 coluna */}
-          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 hover:border shadow-sm hover:shadow-md rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 hover:border shadow-lg hover:shadow-md rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-3 text-lg">
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">
