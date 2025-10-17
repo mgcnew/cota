@@ -41,12 +41,12 @@ export function SmoothPageTransition({ children }: SmoothPageTransitionProps) {
 
   return (
     <div
-      className={`w-full h-full transition-all ${
+      className={`w-full overflow-hidden transition-all ${
         isTransitioning 
-          ? "opacity-0 translate-y-2 scale-[0.98]" 
+          ? "opacity-0 translate-y-1" 
           : isEntering
-          ? "opacity-100 translate-y-0 scale-100"
-          : "opacity-0 translate-y-1 scale-[0.99]"
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-1"
       }`}
       style={{ 
         transitionDuration: `${TRANSITION_DURATION}ms`,
@@ -54,9 +54,7 @@ export function SmoothPageTransition({ children }: SmoothPageTransitionProps) {
         willChange: isTransitioning || !isEntering ? 'transform, opacity' : 'auto',
         backfaceVisibility: 'hidden',
         transformOrigin: 'center top',
-        // Adiciona um filtro sutil para suavizar a transição
-        filter: isTransitioning ? 'blur(0.5px)' : 'blur(0px)',
-        transitionProperty: 'opacity, transform, filter'
+        transitionProperty: 'opacity, transform'
       }}
     >
       {children}
