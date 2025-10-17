@@ -50,7 +50,7 @@ export function AppLayout() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative pt-16 pl-0 md:pl-24">
+        <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative pt-16 pl-0 md:pl-24 pr-2">
           <div className="min-h-full bg-white/40 backdrop-blur-sm w-full max-w-full">
             <div className="w-full max-w-full overflow-x-hidden">
               <SmoothPageTransition>

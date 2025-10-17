@@ -361,24 +361,24 @@
     @apply max-w-7xl mx-auto;
   }
   
-  /* Desktop: padding otimizado - esquerda ultra mínimo, direita generoso */
+  /* Desktop: padding equilibrado em ambos os lados */
   @media (min-width: 768px) {
     .page-container {
-      @apply mx-0 max-w-none pl-3 pr-12 py-8;
+      @apply mx-0 max-w-none pl-4 pr-4 py-8;
     }
   }
   
   /* Large screens: padding proporcional para telas grandes */
   @media (min-width: 1024px) {
     .page-container {
-      @apply pl-4 pr-16 py-10;
+      @apply pl-6 pr-6 py-10;
     }
   }
   
   /* Extra large screens: padding balanceado para telas muito grandes */
   @media (min-width: 1280px) {
     .page-container {
-      @apply pl-6 pr-20 py-12;
+      @apply pl-8 pr-8 py-12;
     }
   }
   
