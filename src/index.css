@@ -145,11 +145,13 @@
     font-feature-settings: 'cv11', 'ss01';
     font-variation-settings: 'opsz' 32;
     overflow-x: hidden;
+    scrollbar-gutter: stable both-edges;
   }
   
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
+    scrollbar-gutter: stable both-edges;
   }
   
   /* Prevent horizontal overflow globally */

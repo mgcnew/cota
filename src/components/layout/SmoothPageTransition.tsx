@@ -41,20 +41,20 @@ export function SmoothPageTransition({ children }: SmoothPageTransitionProps) {
 
   return (
     <div
-      className={`w-full overflow-hidden transition-all ${
+      className={`w-full transition-opacity ${
         isTransitioning 
-          ? "opacity-0 translate-y-1" 
+          ? "opacity-0" 
           : isEntering
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 translate-y-1"
+          ? "opacity-100"
+          : "opacity-0"
       }`}
       style={{ 
         transitionDuration: `${TRANSITION_DURATION}ms`,
         transitionTimingFunction: TRANSITION_EASING,
-        willChange: isTransitioning || !isEntering ? 'transform, opacity' : 'auto',
+        willChange: isTransitioning || !isEntering ? 'opacity' : 'auto',
         backfaceVisibility: 'hidden',
         transformOrigin: 'center top',
-        transitionProperty: 'opacity, transform'
+        transitionProperty: 'opacity'
       }}
     >
       {children}
