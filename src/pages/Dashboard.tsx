@@ -8,14 +8,18 @@ import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loade
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
-
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6m');
   const [evolutionPeriod, setEvolutionPeriod] = useState('7d');
   const [economyPeriod, setEconomyPeriod] = useState('7d');
   const [showReportModal, setShowReportModal] = useState(false);
   const {
-    metrics = { cotacoesAtivas: 0, fornecedores: 0, economiaGerada: 0, produtosCotados: 0 },
+    metrics = {
+      cotacoesAtivas: 0,
+      fornecedores: 0,
+      economiaGerada: 0,
+      produtosCotados: 0
+    },
     recentQuotes = [],
     topSuppliers = [],
     monthlyData = [],
@@ -78,9 +82,9 @@ export default function Dashboard() {
     }
   };
   return <PageWrapper>
-      <div className="page-container">
+      <div className="page-container px-0">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-2 mb-4 p-4 border border-gray-200/60 rounded-lg backdrop-blur-sm hover:border hover:border-gray-300/20 shadow-sm transition-all duration-300">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-2 mb-4 p-4 border border-gray-200/60 rounded-lg backdrop-blur-sm hover:border hover:border-gray-300/20 shadow-sm transition-all duration-300 mx-0">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">Visão geral do sistema de cotações</p>
@@ -379,9 +383,7 @@ export default function Dashboard() {
                   color: '#374151'
                 }} />
                     <Bar dataKey="economia" radius={[8, 8, 0, 0]} maxBarSize={60}>
-                      {economyData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
+                      {economyData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer> : <div className="flex items-center justify-center h-[280px] text-slate-500">
