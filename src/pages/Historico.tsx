@@ -413,50 +413,107 @@ export default function Historico() {
         </CardContent>
       </Card>
 
-      {/* Statistics Cards */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card className="card-gradient-primary">
-          <CardContent className="pt-4 sm:pt-6">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
-                <History className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+      {/* Statistics Cards - Estilo Apple */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-slate-500/10 flex items-center justify-center">
+                  <History className="h-3.5 w-3.5 text-slate-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</span>
               </div>
             </div>
-            <div className="text-lg sm:text-2xl font-bold text-foreground">{stats.totalAcoes}</div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Total de Ações</p>
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalAcoes}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">registradas</p>
+            </div>
+            <div className="flex items-end gap-0.5 h-8">
+              {[45, 60, 50, 75, 55, 80, 65].map((height, i) => (
+                <div key={i} className="flex-1 bg-gradient-to-t from-slate-500 to-gray-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
+              ))}
+            </div>
           </CardContent>
         </Card>
-        <Card className="card-gradient-info">
-          <CardContent className="pt-4 sm:pt-6">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-info/10">
-                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-info" />
+
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <FileText className="h-3.5 w-3.5 text-blue-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
               </div>
             </div>
-            <div className="text-lg sm:text-2xl font-bold text-foreground">{stats.cotacoesFinalizadas}</div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Cotações Finalizadas</p>
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.cotacoesFinalizadas}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">finalizadas</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style={{ width: '75%' }}></div>
+              </div>
+              <span className="text-xs font-semibold text-blue-600">75%</span>
+            </div>
           </CardContent>
         </Card>
-        <Card className="card-gradient-warning">
-          <CardContent className="pt-4 sm:pt-6">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-warning/10">
-                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
+
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <ShoppingCart className="h-3.5 w-3.5 text-amber-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pedidos</span>
               </div>
             </div>
-            <div className="text-lg sm:text-2xl font-bold text-foreground">{stats.pedidosCriados}</div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Pedidos Criados</p>
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.pedidosCriados}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">criados</p>
+            </div>
+            <div className="relative h-8">
+              <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="amberGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="rgb(245, 158, 11)" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="rgb(245, 158, 11)" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path d="M 0,28 L 15,24 L 30,26 L 45,20 L 60,22 L 75,15 L 90,18 L 100,12" fill="none" stroke="rgb(245, 158, 11)" strokeWidth="2" />
+                <path d="M 0,28 L 15,24 L 30,26 L 45,20 L 60,22 L 75,15 L 90,18 L 100,12 L 100,40 L 0,40 Z" fill="url(#amberGradient)" />
+              </svg>
+            </div>
           </CardContent>
         </Card>
-        <Card className="card-gradient-success">
-          <CardContent className="pt-4 sm:pt-6">
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-success/10">
-                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
+
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
               </div>
             </div>
-            <div className="text-lg sm:text-2xl font-bold text-success">{stats.economiaTotal}%</div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Economia Acumulada</p>
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">{stats.economiaTotal}%</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">acumulada</p>
+            </div>
+            <div className="flex items-center justify-center">
+              <div className="relative w-12 h-12">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(243, 244, 246)" strokeWidth="3" />
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(16, 185, 129)" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 20 * (stats.economiaTotal / 100)} ${2 * Math.PI * 20}`} strokeLinecap="round" className="transition-all duration-1000" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-emerald-600">{stats.economiaTotal}%</span>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -101,102 +101,92 @@ export default function Cotacoes() {
   }
   const paginatedData = paginate(filteredCotacoes);
   return <div className="page-container">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/50 to-cyan-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 relative">
-                    <FileText className="h-5 w-5 text-teal-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Cotações Ativas</span>
+      {/* Statistics Cards - Estilo Apple */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-teal-500/10 flex items-center justify-center">
+                  <FileText className="h-3.5 w-3.5 text-teal-600" />
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{cotacoes.filter(c => c.status === "ativa").length}</div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ativas</span>
               </div>
-              <div className="flex items-center gap-1 text-teal-600 bg-teal-100 px-2 py-1 rounded-full">
-                <FileText className="h-3 w-3" />
-                <span className="text-xs font-medium">Ativas</span>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-teal-50 dark:bg-teal-900/20 rounded-full">
+                <span className="text-xs font-semibold text-teal-600">75%</span>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-2">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-teal-600 h-2 rounded-full transition-all duration-500" style={{
-                width: '75%'
-              }}></div>
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{cotacoes.filter(c => c.status === "ativa").length}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotações</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full" style={{ width: '75%' }}></div>
               </div>
-              <span className="text-xs text-gray-500">75%</span>
+              <span className="text-xs font-semibold text-teal-600">75%</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-yellow-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 relative">
-                    <Calendar className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Aguardando Respostas</span>
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <Calendar className="h-3.5 w-3.5 text-amber-600" />
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{cotacoes.filter(c => c.status === "pendente").length}</div>
-              </div>
-              <div className="flex items-center gap-1 text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                <Calendar className="h-3 w-3" />
-                <span className="text-xs font-medium">Pendente</span>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pendentes</span>
               </div>
             </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(cotacoes.filter(c => c.status === "pendente").length * 0.6)} há mais de 24h
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{cotacoes.filter(c => c.status === "pendente").length}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">aguardando</p>
+            </div>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">{Math.floor(cotacoes.filter(c => c.status === "pendente").length * 0.6)} há mais de 24h</p>
+          </CardContent>
+        </Card>
+
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
+              </div>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                <span className="text-xs font-semibold text-green-600">+18%</span>
+              </div>
+            </div>
+            <div className="mb-3">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">R$ 47.231</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">economizados</p>
+            </div>
+            <div className="flex items-end gap-0.5 h-8">
+              {[50, 65, 55, 75, 60, 85, 70].map((height, i) => (
+                <div key={i} className="flex-1 bg-gradient-to-t from-emerald-500 to-green-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
-                    <DollarSign className="h-5 w-5 text-green-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Economia Total</span>
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <Building2 className="h-3.5 w-3.5 text-blue-600" />
                 </div>
-                <div className="text-2xl font-bold text-gray-900">R$ 47.231</div>
-              </div>
-              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                <DollarSign className="h-3 w-3" />
-                <span className="text-xs font-medium">+18%</span>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
               </div>
             </div>
-            <div className="mt-4 text-xs text-gray-500">
-              Meta mensal: R$ 50.000 • Restam R$ 2.769
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{cotacoes.length > 0 ? Math.round(cotacoes.reduce((acc, c) => acc + c.fornecedores, 0) / cotacoes.length) : 0}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">média</p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
-                    <Building2 className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Fornecedores Médio</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{cotacoes.length > 0 ? Math.round(cotacoes.reduce((acc, c) => acc + c.fornecedores, 0) / cotacoes.length) : 0}</div>
-              </div>
-              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                <Building2 className="h-3 w-3" />
-                <span className="text-xs font-medium">Por cotação</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              Média de participantes por cotação
-            </div>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">Participantes por cotação</p>
           </CardContent>
         </Card>
       </div>
