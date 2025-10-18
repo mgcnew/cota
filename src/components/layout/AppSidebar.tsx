@@ -257,8 +257,8 @@ export function AppSidebar() {
           {/* ConteÃºdo principal */}
           <div className="relative z-10 flex flex-col h-full">
             {/* Logo sempre flutuante */}
-            <div className="flex items-center justify-center h-16 px-2 border-b border-gray-200/40 bg-gradient-to-b from-white/60 to-white/30 backdrop-blur-sm flex-shrink-0 transition-all duration-500">
-              <NavLink to="/" className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/95 to-white/80 backdrop-blur-md flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.1)] border border-gray-200/50 overflow-hidden hover:scale-105 hover:shadow-[0_6px_24px_rgba(0,0,0,0.15)] hover:border-gray-300/60 transition-all duration-300">
+            <div className="flex items-center justify-center h-16 px-2 border-b border-gray-200/40 dark:border-gray-700/40 bg-gradient-to-b from-white/60 to-white/30 dark:from-gray-800/60 dark:to-gray-800/30 backdrop-blur-sm flex-shrink-0 transition-all duration-500">
+              <NavLink to="/" className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80 backdrop-blur-md flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] border border-gray-200/50 dark:border-gray-700/50 overflow-hidden hover:scale-105 hover:shadow-[0_6px_24px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_6px_24px_rgba(0,0,0,0.4)] hover:border-gray-300/60 dark:hover:border-gray-600/60 transition-all duration-300">
                 <LogoComponent />
               </NavLink>
             </div>
