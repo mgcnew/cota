@@ -584,97 +584,99 @@ export default function Relatorios() {
           </CardContent>
         </Card>}
 
-      {/* Resumo Executivo Melhorado */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
-                    <DollarSign className="h-5 w-5 text-green-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Economia Total</span>
+      {/* Resumo Executivo - Estilo Apple */}
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{estatisticasGerais.economiaTotal}</div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
               </div>
-              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+{estatisticasGerais.economiaPercentual}</span>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                <TrendingUp className="h-2.5 w-2.5 text-green-600" />
+                <span className="text-xs font-semibold text-green-600">+{estatisticasGerais.economiaPercentual}</span>
               </div>
             </div>
-            <div className="mt-4 text-xs text-gray-500">
-              vs mês anterior • Meta: R$ 50.000
+            <div className="mb-3">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{estatisticasGerais.economiaTotal}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">total gerada</p>
+            </div>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">Meta: R$ 50.000</p>
+          </CardContent>
+        </Card>
+
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <FileText className="h-3.5 w-3.5 text-purple-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
+              </div>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 rounded-full">
+                <span className="text-xs font-semibold text-purple-600">+12%</span>
+              </div>
+            </div>
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{estatisticasGerais.cotacoesRealizadas}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">realizadas</p>
+            </div>
+            <div className="flex items-end gap-0.5 h-8">
+              {[55, 70, 60, 85, 70, 90, 75].map((height, i) => (
+                <div key={i} className="flex-1 bg-gradient-to-t from-purple-500 to-violet-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-violet-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-violet-500/10 relative">
-                    <FileText className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Cotações Realizadas</span>
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <Building2 className="h-3.5 w-3.5 text-blue-600" />
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{estatisticasGerais.cotacoesRealizadas}</div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
               </div>
-              <div className="flex items-center gap-1 text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                <FileText className="h-3 w-3" />
-                <span className="text-xs font-medium">+12%</span>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
+                <span className="text-xs font-semibold text-blue-600">+5</span>
               </div>
             </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(estatisticasGerais.cotacoesRealizadas * 0.8)} concluídas • {Math.floor(estatisticasGerais.cotacoesRealizadas * 0.2)} ativas
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{estatisticasGerais.fornecedoresAtivos}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ativos</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" style={{ width: '90%' }}></div>
+              </div>
+              <span className="text-xs font-semibold text-blue-600">90%</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
-                    <Building2 className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Fornecedores Ativos</span>
+        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                  <Package className="h-3.5 w-3.5 text-orange-600" />
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{estatisticasGerais.fornecedoresAtivos}</div>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Produtos</span>
               </div>
-              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                <Building2 className="h-3 w-3" />
-                <span className="text-xs font-medium">+5</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(estatisticasGerais.fornecedoresAtivos * 0.9)} com cotações ativas
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50/50 to-amber-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 relative">
-                    <Package className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">Produtos Cotados</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{estatisticasGerais.produtosCotados}</div>
-              </div>
-              <div className="flex items-center gap-1 text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
-                <Package className="h-3 w-3" />
-                <span className="text-xs font-medium">+8%</span>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-full">
+                <span className="text-xs font-semibold text-orange-600">+8%</span>
               </div>
             </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(estatisticasGerais.produtosCotados * 0.6)} com economia gerada
+            <div className="mb-3">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{estatisticasGerais.produtosCotados}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotados</p>
             </div>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">{Math.floor(estatisticasGerais.produtosCotados * 0.6)} com economia gerada</p>
           </CardContent>
         </Card>
       </div>
