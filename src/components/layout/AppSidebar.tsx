@@ -1,4 +1,4 @@
-import { BarChart3, Package, Building2, FileText, ShoppingCart, History, TrendingUp, Settings, Home, MoreHorizontal } from "lucide-react";
+import { Icon } from '@iconify/react';
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -15,39 +15,39 @@ function LogoComponent() {
     </div>;
 }
 
-// Menu items
+// Menu items com ícones coloridos do Iconify
 const menuItems = [{
   title: "Dashboard",
   url: "/",
-  icon: Home
+  icon: "fluent:home-32-filled"
 }, {
   title: "Produtos",
   url: "/produtos",
-  icon: Package
+  icon: "fluent:box-32-filled"
 }, {
   title: "Fornecedores",
   url: "/fornecedores",
-  icon: Building2
+  icon: "fluent:building-32-filled"
 }, {
-  title: "CotaÃ§Ãµes",
+  title: "Cotações",
   url: "/cotacoes",
-  icon: FileText
+  icon: "fluent:document-text-32-filled"
 }, {
   title: "Pedidos",
   url: "/pedidos",
-  icon: ShoppingCart
+  icon: "fluent:shopping-bag-32-filled"
 }, {
-  title: "HistÃ³rico",
+  title: "Histórico",
   url: "/historico",
-  icon: History
+  icon: "fluent:history-32-filled"
 }, {
-  title: "RelatÃ³rios",
+  title: "Relatórios",
   url: "/relatorios",
-  icon: BarChart3
+  icon: "fluent:data-bar-vertical-32-filled"
 }, {
   title: "Analytics",
   url: "/analytics",
-  icon: TrendingUp
+  icon: "fluent:data-trending-32-filled"
 }];
 
 // Cores para os itens com efeitos aprimorados
@@ -123,7 +123,7 @@ function MobileMoreButton({
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full opacity-0 group-hover:opacity-100"></div>
 
           <div className="flex items-center justify-center mb-1 relative z-10 transition-all duration-300 w-7 h-7 rounded-xl group-hover:bg-white/60 group-hover:shadow-md">
-            <MoreHorizontal className="h-4 w-4 transition-all duration-200 flex-shrink-0 text-gray-500 group-hover:text-gray-700" />
+            <Icon icon="fluent:more-horizontal-32-filled" width="16" height="16" className="transition-all duration-200 flex-shrink-0 text-gray-500 group-hover:text-gray-700" />
           </div>
 
           <span className="text-[9px] font-bold text-center leading-tight transition-all duration-300 truncate max-w-[65px] relative z-10 tracking-wide text-gray-600 group-hover:text-gray-800 group-hover:font-extrabold">
@@ -136,7 +136,7 @@ function MobileMoreButton({
         <DialogHeader className="px-4 py-3 border-b border-gray-100/60 bg-gradient-to-r from-blue-50/80 to-purple-50/80">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg">
-              <MoreHorizontal className="h-4 w-4 text-white" />
+              <Icon icon="fluent:more-horizontal-32-filled" width="16" height="16" className="text-white" />
             </div>
             <DialogTitle className="text-lg font-bold bg-gradient-to-r from-blue-900 to-purple-800 bg-clip-text text-transparent">
               Mais OpÃ§Ãµes
@@ -156,7 +156,7 @@ function MobileMoreButton({
               const itemColor = colors[(index + 4) % colors.length];
               return <NavLink key={item.title} to={item.url} end={item.url === "/"} onClick={() => setOpen(false)} className={cn("flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-[1.02] active:scale-95", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-lg text-white ring-2 ring-white/20` : "bg-white/80 hover:bg-white hover:shadow-md text-gray-700 hover:text-gray-900 border border-gray-200/60 hover:border-blue-300")}>
                     <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm", isItemActive ? "bg-white/20 backdrop-blur-sm" : `bg-gradient-to-br ${itemColor.bg} group-hover:scale-110`)}>
-                      <item.icon className="h-4 w-4 transition-all duration-200 text-white" />
+                      <Icon icon={item.icon} width="16" height="16" className="transition-all duration-200 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className={cn("font-medium text-sm transition-all duration-200 truncate", isItemActive ? "text-white" : "text-gray-900 group-hover:text-blue-900")}>
@@ -178,16 +178,16 @@ function MobileMoreButton({
               setOpen(false);
               window.location.href = '/cotacoes';
             }} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95">
-                <FileText className="h-5 w-5" />
-                <span className="text-xs font-medium">Nova CotaÃ§Ã£o</span>
+                <Icon icon="fluent:document-text-32-filled" width="20" height="20" />
+                <span className="text-xs font-medium">Nova Cotação</span>
               </button>
 
               <button onClick={() => {
               setOpen(false);
               window.location.href = '/relatorios';
             }} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95">
-                <BarChart3 className="h-5 w-5" />
-                <span className="text-xs font-medium">RelatÃ³rio</span>
+                <Icon icon="fluent:data-bar-vertical-32-filled" width="20" height="20" />
+                <span className="text-xs font-medium">Relatório</span>
               </button>
             </div>
           </div>
@@ -203,10 +203,10 @@ function MobileMoreButton({
               window.location.href = '/configuracoes';
             }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/80 hover:bg-white hover:shadow-md text-gray-700 hover:text-gray-900 border border-gray-200/60 hover:border-gray-300 transition-all duration-200 hover:scale-[1.02] active:scale-95">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
-                  <Settings className="h-4 w-4 text-white" />
+                  <Icon icon="fluent:settings-32-filled" width="16" height="16" className="text-white" />
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="font-medium text-sm text-gray-900">ConfiguraÃ§Ãµes</div>
+                  <div className="font-medium text-sm text-gray-900">Configurações</div>
                   <div className="text-xs text-gray-500">Ajustes do sistema</div>
                 </div>
               </button>
@@ -278,8 +278,8 @@ export function AppSidebar() {
 
 
 
-                            {/* Ícone - Estilo Minimalista */}
-                            <item.icon className={cn("transition-all duration-500 flex-shrink-0 h-5 w-5", isItemActive ? "text-white drop-shadow-lg" : "text-gray-600 group-hover:text-gray-800")} />
+                            {/* Ícone - Estilo Colorido */}
+                            <Icon icon={item.icon} className={cn("transition-all duration-500 flex-shrink-0", isItemActive ? "text-white drop-shadow-lg" : "text-gray-600 group-hover:text-gray-800")} width="20" height="20" />
                           </NavLink>
                         </TooltipTrigger>
                         <TooltipContent side="right" sideOffset={15} className="font-medium bg-white text-gray-900 border-gray-200 shadow-xl z-[99999]">
@@ -311,7 +311,7 @@ export function AppSidebar() {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full opacity-0 group-hover:opacity-100"></div>
 
                 <div className={cn("flex items-center justify-center mb-1 relative z-10 transition-all duration-300 w-7 h-7 rounded-xl", isItemActive ? "bg-white/20 backdrop-blur-sm shadow-inner" : "group-hover:bg-white/60 group-hover:shadow-md")}>
-                  <item.icon className={cn("h-4 w-4 transition-all duration-200 flex-shrink-0", isItemActive ? "text-white drop-shadow-md" : "text-gray-500 group-hover:text-gray-700")} />
+                  <Icon icon={item.icon} width="16" height="16" className={cn("transition-all duration-200 flex-shrink-0", isItemActive ? "text-white drop-shadow-md" : "text-gray-500 group-hover:text-gray-700")} />
                 </div>
 
                 <span className={cn("text-[9px] font-bold text-center leading-tight transition-all duration-300 truncate max-w-[65px] relative z-10 tracking-wide", isItemActive ? "text-white drop-shadow-md" : "text-gray-600 group-hover:text-gray-800 group-hover:font-extrabold")}>
