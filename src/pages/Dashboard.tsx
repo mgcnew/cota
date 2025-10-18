@@ -82,114 +82,111 @@ export default function Dashboard() {
     }
   };
   return <PageWrapper>
-      {/* Header - Mesma largura do topbar */}
-      <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-gray-200/60 rounded-lg backdrop-blur-sm hover:border hover:border-gray-300/20 shadow-sm transition-all duration-300">
+      <div className="page-container">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-gray-200/60 rounded-lg backdrop-blur-sm hover:border-gray-300/20 shadow-sm transition-all duration-300 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">Visão geral do sistema de cotações</p>
           </div>
         </div>
-      </div>
-
-      <div className="page-container px-0">
 
         {/* Métricas Principais */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <p className="text-blue-700 text-sm font-semibold tracking-wide uppercase">Cotações Ativas</p>
-                  <p className="text-3xl font-bold text-blue-900">
-                    {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : metrics.cotacoesAtivas}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
-                      <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                      <span className="text-xs font-medium text-green-700">+12%</span>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <p className="text-blue-700 text-sm font-semibold tracking-wide uppercase">Cotações Ativas</p>
+                    <p className="text-3xl font-bold text-blue-900">
+                      {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : metrics.cotacoesAtivas}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
+                        <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+                        <span className="text-xs font-medium text-green-700">+12%</span>
+                      </div>
+                      <span className="text-xs text-blue-600">vs mês anterior</span>
                     </div>
-                    <span className="text-xs text-blue-600">vs mês anterior</span>
+                  </div>
+                  <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
+                    <ShoppingCart className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
-                  <ShoppingCart className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-blue-300 rounded-full opacity-20"></div>
-            </CardContent>
+                <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-blue-300 rounded-full opacity-20"></div>
+              </CardContent>
           </Card>
 
           <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <p className="text-emerald-700 text-sm font-semibold tracking-wide uppercase">Economia Gerada</p>
-                  <p className="text-3xl font-bold text-emerald-900">
-                    {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : `R$ ${metrics.economiaGerada?.toLocaleString('pt-BR') || '0'}`}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
-                      <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                      <span className="text-xs font-medium text-green-700">+18%</span>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <p className="text-emerald-700 text-sm font-semibold tracking-wide uppercase">Economia Gerada</p>
+                    <p className="text-3xl font-bold text-emerald-900">
+                      {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : `R$ ${metrics.economiaGerada?.toLocaleString('pt-BR') || '0'}`}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
+                        <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+                        <span className="text-xs font-medium text-green-700">+18%</span>
+                      </div>
+                      <span className="text-xs text-emerald-600">vs mês anterior</span>
                     </div>
-                    <span className="text-xs text-emerald-600">vs mês anterior</span>
+                  </div>
+                  <div className="p-3 bg-emerald-600 rounded-xl shadow-lg">
+                    <DollarSign className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <div className="p-3 bg-emerald-600 rounded-xl shadow-lg">
-                  <DollarSign className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-emerald-300 rounded-full opacity-20"></div>
-            </CardContent>
+                <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-emerald-300 rounded-full opacity-20"></div>
+              </CardContent>
           </Card>
 
           <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <p className="text-violet-700 text-sm font-semibold tracking-wide uppercase">Fornecedores</p>
-                  <p className="text-3xl font-bold text-violet-900">
-                    {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : metrics.fornecedores}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
-                      <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                      <span className="text-xs font-medium text-green-700">+3</span>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <p className="text-violet-700 text-sm font-semibold tracking-wide uppercase">Fornecedores</p>
+                    <p className="text-3xl font-bold text-violet-900">
+                      {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : metrics.fornecedores}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
+                        <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+                        <span className="text-xs font-medium text-green-700">+3</span>
+                      </div>
+                      <span className="text-xs text-violet-600">novos este mês</span>
                     </div>
-                    <span className="text-xs text-violet-600">novos este mês</span>
+                  </div>
+                  <div className="p-3 bg-violet-600 rounded-xl shadow-lg">
+                    <Users className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <div className="p-3 bg-violet-600 rounded-xl shadow-lg">
-                  <Users className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-violet-300 rounded-full opacity-20"></div>
-            </CardContent>
+                <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-violet-300 rounded-full opacity-20"></div>
+              </CardContent>
           </Card>
 
           <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <p className="text-amber-700 text-sm font-semibold tracking-wide uppercase">Taxa Aprovação</p>
-                  <p className="text-3xl font-bold text-amber-900">
-                    {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : `${taxaAprovacao}%`}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
-                      <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                      <span className="text-xs font-medium text-green-700">+5%</span>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <p className="text-amber-700 text-sm font-semibold tracking-wide uppercase">Taxa Aprovação</p>
+                    <p className="text-3xl font-bold text-amber-900">
+                      {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : `${taxaAprovacao}%`}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
+                        <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+                        <span className="text-xs font-medium text-green-700">+5%</span>
+                      </div>
+                      <span className="text-xs text-amber-600">vs mês anterior</span>
                     </div>
-                    <span className="text-xs text-amber-600">vs mês anterior</span>
+                  </div>
+                  <div className="p-3 bg-amber-600 rounded-xl shadow-lg">
+                    <Target className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <div className="p-3 bg-amber-600 rounded-xl shadow-lg">
-                  <Target className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-amber-300 rounded-full opacity-20"></div>
-            </CardContent>
+                <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-amber-300 rounded-full opacity-20"></div>
+              </CardContent>
           </Card>
         </div>
 

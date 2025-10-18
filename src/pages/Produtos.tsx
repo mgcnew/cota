@@ -165,9 +165,9 @@ export default function Produtos() {
   return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        {/* Header - Mesma largura do topbar */}
-        <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-orange-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-orange-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-orange-50 to-amber-50">
+        <div className="page-container">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-orange-100/60 rounded-lg backdrop-blur-sm hover:border-orange-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-orange-50 to-amber-50 mb-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Package className="h-6 w-6 text-white" />
@@ -185,116 +185,113 @@ export default function Produtos() {
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="page-container px-0">
-
-      {/* Stats Cards Melhorados */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 relative">
-                    <Package className="h-5 w-5 text-orange-600" />
+          {/* Stats Cards Melhorados */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="pt-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 relative">
+                        <Package className="h-5 w-5 text-orange-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Total de Produtos</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.totalProducts}</div>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Total de Produtos</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.totalProducts}</div>
-              </div>
-              <div className="flex items-center gap-1 text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+{Math.floor(stats.totalProducts * 0.1)}</span>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center gap-2">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-orange-600 h-2 rounded-full transition-all duration-500" style={{
-                    width: '85%'
-                  }}></div>
-              </div>
-              <span className="text-xs text-gray-500">85%</span>
-            </div>
-          </CardContent>
-          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-300 rounded-full opacity-20"></div>
-        </Card>
-
-        <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
-                    <Filter className="h-5 w-5 text-blue-600" />
+                  <div className="flex items-center gap-1 text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                    <TrendingUp className="h-3 w-3" />
+                    <span className="text-xs font-medium">+{Math.floor(stats.totalProducts * 0.1)}</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Categorias</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.totalCategories}</div>
-              </div>
-              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+2</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(stats.totalCategories * 0.7)} ativas • {Math.floor(stats.totalCategories * 0.3)} com poucos produtos
-            </div>
-          </CardContent>
-          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-blue-300 rounded-full opacity-20"></div>
-        </Card>
-
-        <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 via-green-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
-                    <Quote className="h-5 w-5 text-green-600" />
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-orange-600 h-2 rounded-full transition-all duration-500" style={{
+                      width: '85%'
+                    }}></div>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Cotações Ativas</span>
+                  <span className="text-xs text-gray-500">85%</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.activeQuotes}</div>
-              </div>
-              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+15%</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(stats.activeQuotes * 0.6)} aguardando • {Math.floor(stats.activeQuotes * 0.4)} em análise
-            </div>
-          </CardContent>
-          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-green-300 rounded-full opacity-20"></div>
-        </Card>
+              </CardContent>
+              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-300 rounded-full opacity-20"></div>
+            </Card>
 
-        <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-purple-100 to-pink-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
-                    <Scale className="h-5 w-5 text-purple-600" />
+            <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="pt-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
+                        <Filter className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Categorias</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.totalCategories}</div>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Valor Médio</span>
+                  <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    <TrendingUp className="h-3 w-3" />
+                    <span className="text-xs font-medium">+2</span>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.averageValue}</div>
-              </div>
-              <div className="flex items-center gap-1 text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+8%</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              Baseado em {products.filter(p => p.lastQuotePrice !== "R$ 0,00").length} produtos com preços
-            </div>
-          </CardContent>
-          <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-purple-300 rounded-full opacity-20"></div>
-        </Card>
-      </div>
+                <div className="mt-4 text-xs text-gray-500">
+                  {Math.floor(stats.totalCategories * 0.7)} ativas • {Math.floor(stats.totalCategories * 0.3)} com poucos produtos
+                </div>
+              </CardContent>
+              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-blue-300 rounded-full opacity-20"></div>
+            </Card>
 
-      {/* Filters - Between stats cards and products table */}
-      <Card>
+            <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 via-green-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="pt-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
+                        <Quote className="h-5 w-5 text-green-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Cotações Ativas</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.activeQuotes}</div>
+                  </div>
+                  <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                    <TrendingUp className="h-3 w-3" />
+                    <span className="text-xs font-medium">+15%</span>
+                  </div>
+                </div>
+                <div className="mt-4 text-xs text-gray-500">
+                  {Math.floor(stats.activeQuotes * 0.6)} aguardando • {Math.floor(stats.activeQuotes * 0.4)} em análise
+                </div>
+              </CardContent>
+              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-green-300 rounded-full opacity-20"></div>
+            </Card>
+
+            <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-purple-100 to-pink-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="pt-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
+                        <Scale className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Valor Médio</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.averageValue}</div>
+                  </div>
+                  <div className="flex items-center gap-1 text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                    <TrendingUp className="h-3 w-3" />
+                    <span className="text-xs font-medium">+8%</span>
+                  </div>
+                </div>
+                <div className="mt-4 text-xs text-gray-500">
+                  Baseado em {products.filter(p => p.lastQuotePrice !== "R$ 0,00").length} produtos com preços
+                </div>
+              </CardContent>
+              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-purple-300 rounded-full opacity-20"></div>
+            </Card>
+          </div>
+
+          {/* Filters - Between stats cards and products table */}
+          <Card>
         <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
             <ViewToggle view={viewMode} onViewChange={setViewMode} />

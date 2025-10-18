@@ -358,7 +358,7 @@
   
   /* Page container utility for consistent responsive layout */
   .page-container {
-    @apply p-4 sm:p-6 space-y-4 sm:space-y-6 md:space-y-8 w-full overflow-x-hidden;
+    @apply p-3 sm:p-4 space-y-4 sm:space-y-6 md:space-y-8 w-full overflow-x-hidden;
     /* Mobile: padding generoso com mx-auto para centralizar */
     @apply max-w-7xl mx-auto;
   }
@@ -366,21 +366,21 @@
   /* Desktop: padding equilibrado em ambos os lados */
   @media (min-width: 768px) {
     .page-container {
-      @apply mx-0 max-w-none pl-4 pr-4 py-8;
+      @apply mx-0 max-w-none px-1 pt-3 pb-6;
     }
   }
   
   /* Large screens: padding proporcional para telas grandes */
   @media (min-width: 1024px) {
     .page-container {
-      @apply pl-6 pr-6 py-10;
+      @apply px-1 pt-4 pb-8;
     }
   }
   
   /* Extra large screens: padding balanceado para telas muito grandes */
   @media (min-width: 1280px) {
     .page-container {
-      @apply pl-8 pr-8 py-12;
+      @apply px-1 pt-4 pb-10;
     }
   }
   
