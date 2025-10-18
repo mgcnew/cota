@@ -144,49 +144,7 @@ export default function Analytics() {
 
   return (
     <div className="page-container">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-green-100/60 rounded-lg backdrop-blur-sm hover:border-green-200/20 md:shadow-[0_2px_8px_rgba(0,0,0,0.08)] md:hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all duration-300 bg-gradient-to-r from-green-50 to-emerald-50 mb-6">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-            <TrendingUp className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-900 to-emerald-700 bg-clip-text text-transparent">
-              Analytics
-            </h1>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200 shadow-sm">
-                <BarChart3 className="h-3 w-3" />
-                Dados Analíticos
-              </div>
-
-                {startDate && endDate && (
-                  <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
-                    <Calendar className="h-3 w-3" />
-                    <span className="hidden sm:inline">
-                      Período: {startDate.toLocaleDateString('pt-BR')} - {endDate.toLocaleDateString('pt-BR')}
-                    </span>
-                    <span className="sm:hidden">
-                      {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))}d
-                    </span>
-                  </div>
-                )}
-
-                {hasFilters && (
-                  <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200 shadow-sm">
-                    <Filter className="h-3 w-3" />
-                    <span className="hidden sm:inline">
-                      {selectedFornecedores.length + selectedProdutos.length} filtro{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''} ativo{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''}
-                    </span>
-                    <span className="sm:hidden">{selectedFornecedores.length + selectedProdutos.length}F</span>
-                  </div>
-                )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Progress Bar */}
+      {/* Filters */}
       {isGenerating && (
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-4">

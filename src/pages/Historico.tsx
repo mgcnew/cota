@@ -177,41 +177,6 @@ export default function Historico() {
   }
 
   return <div className="page-container">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-slate-100/60 rounded-lg backdrop-blur-sm hover:border-gray-200/20 md:shadow-[0_2px_8px_rgba(0,0,0,0.08)] md:hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all duration-300 bg-gradient-to-r from-slate-50 to-gray-50 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-slate-600 to-gray-600 rounded-xl flex items-center justify-center shadow-lg">
-              <History className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 to-gray-700 bg-clip-text text-transparent">
-                Histórico
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-sm">
-                  <Clock className="h-3 w-3" />
-                  Registro de Atividades
-                </div>
-                {(dataInicio || dataFim) && <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
-                    <Calendar className="h-3 w-3" />
-                    <span className="hidden sm:inline">
-                      {dataInicio && dataFim ? `${format(dataInicio, "dd/MM", {
-                    locale: ptBR
-                  })} - ${format(dataFim, "dd/MM", {
-                    locale: ptBR
-                  })}` : dataInicio ? `A partir de ${format(dataInicio, "dd/MM", {
-                    locale: ptBR
-                  })}` : `Até ${format(dataFim!, "dd/MM", {
-                    locale: ptBR
-                  })}`}
-                    </span>
-                    <span className="sm:hidden">Filtrado</span>
-                  </div>}
-              </div>
-            </div>
-          </div>
-        </div>
-
       <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 mb-6">
             <Popover>
               <PopoverTrigger asChild>

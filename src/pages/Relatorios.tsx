@@ -381,27 +381,6 @@ export default function Relatorios() {
     return <LoadingSkeleton />;
   }
   return <div className="page-container">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-purple-100/60 rounded-lg backdrop-blur-sm hover:border-purple-200/20 md:shadow-[0_2px_8px_rgba(0,0,0,0.08)] md:hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all duration-300 bg-gradient-to-r from-purple-50 to-violet-50 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
-              <FileText className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-900 to-violet-700 bg-clip-text text-transparent">
-                Relatórios
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                {refreshing && <Loader2 className="h-4 w-4 animate-spin text-purple-600" />}
-                <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200 shadow-sm">
-                  <FileBarChart className="h-3 w-3" />
-                  Sistema de Relatórios
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
       <div className="flex flex-wrap gap-3 mb-6">
             <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="bg-white/70 backdrop-blur-sm border-purple-200 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 flex items-center gap-2">
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
