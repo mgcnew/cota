@@ -264,7 +264,7 @@ export function AppSidebar() {
             </div>
 
             {/* Menu Items sempre flutuantes - Estilo Canva */}
-            <div className="flex-1 flex flex-col justify-start py-2 transition-all duration-500 overflow-visible px-0">
+            <div className="flex-1 flex flex-col justify-start py-2 transition-all duration-500 overflow-visible px-[3px]">
               <TooltipProvider delayDuration={200}>
                 <div className="space-y-1 px-[12px]">
                   {menuItems.map((item, index) => {
