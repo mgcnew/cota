@@ -245,14 +245,14 @@ export function AppSidebar() {
   }, [location.pathname]);
   return <>
       {/* Desktop Sidebar Sempre Flutuante - Estilo Canva */}
-      <div className="hidden md:flex fixed z-50 w-20 left-2 top-2 bottom-4 transition-all duration-500 ease-out bg-white shadow-lg">
+      <div className="hidden md:flex fixed z-50 w-20 left-2 top-1 bottom-1 transition-all duration-500 ease-out bg-white dark:bg-gray-900 shadow-lg rounded-xl overflow-hidden">
         {/* Container sempre flutuante */}
-        <div className="w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-xl border border-gray-200/60 hover:border-gray-300/70 transition-all duration-500 overflow-visible">
+        <div className="w-full flex flex-col bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/70 dark:hover:border-gray-600/70 transition-all duration-500 overflow-visible">
           {/* Efeitos de vidro sempre aplicados */}
           <>
             {/* Efeito de vidro gloss */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 rounded-xl pointer-events-none"></div>
-            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 dark:from-gray-800/40 dark:via-gray-900/10 dark:to-gray-800/30 rounded-xl pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 dark:ring-gray-700/50 pointer-events-none"></div>
           </>
           {/* ConteÃºdo principal */}
           <div className="relative z-10 flex flex-col h-full">
