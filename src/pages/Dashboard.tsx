@@ -82,15 +82,17 @@ export default function Dashboard() {
     }
   };
   return <PageWrapper>
-      <div className="page-container px-0">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-2 mb-4 px-4 py-4 md:px-6 border border-gray-200/60 rounded-lg backdrop-blur-sm hover:border hover:border-gray-300/20 shadow-sm transition-all duration-300 mx-2 md:mx-4">
+      {/* Header - Mesma largura do topbar */}
+      <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 py-4 border border-gray-200/60 rounded-lg backdrop-blur-sm hover:border hover:border-gray-300/20 shadow-sm transition-all duration-300">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">Visão geral do sistema de cotações</p>
           </div>
-          
         </div>
+      </div>
+
+      <div className="page-container px-0">
 
         {/* Métricas Principais */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
