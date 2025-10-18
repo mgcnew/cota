@@ -44,7 +44,7 @@ export function AppLayout() {
           <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-4 w-full max-w-full gap-4 transition-opacity duration-200 md:transition-all md:duration-300">
             {/* Título da Página - Lado Esquerdo */}
             {pageTitle && (
-              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent hidden md:block">
+              <h1 className="text-xl md:text-2xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent hidden md:block tracking-tight leading-tight">
                 {pageTitle}
               </h1>
             )}
