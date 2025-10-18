@@ -11,7 +11,7 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
-import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar } from "lucide-react";
+import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp } from "lucide-react";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import EditPedidoDialog from "@/components/forms/EditPedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
@@ -222,114 +222,110 @@ export default function Pedidos() {
   const totalValue = pedidos.filter(p => p.status !== "cancelado").reduce((acc, p) => acc + parseFloat(p.total.replace("R$ ", "").replace(".", "").replace(",", ".")), 0);
   return <PageWrapper>
       <div className="page-container">
-        {/* Statistics Cards Melhorados */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-yellow-50/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 relative">
-                      <Clock className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-600">Pedidos Ativos</span>
+        {/* Statistics Cards - Estilo Apple */}
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
+          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <Clock className="h-3.5 w-3.5 text-amber-600" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
-                  </div>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ativos</span>
                 </div>
-                <div className="flex items-center gap-1 text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                  <Clock className="h-3 w-3" />
-                  <span className="text-xs font-medium">Em andamento</span>
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 rounded-full">
+                  <Clock className="h-2.5 w-2.5 text-amber-600" />
+                  <span className="text-xs font-semibold text-amber-600">65%</span>
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-amber-600 h-2 rounded-full transition-all duration-500" style={{
-                    width: '65%'
-                  }}></div>
+              <div className="mb-3">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                  {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">em andamento</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full" style={{ width: '65%' }}></div>
                 </div>
-                <span className="text-xs text-gray-500">65%</span>
+                <span className="text-xs font-semibold text-amber-600">65%</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-              <div className="space-y-2">
+          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
-                    <Truck className="h-5 w-5 text-green-600" />
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <Truck className="h-3.5 w-3.5 text-emerald-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Pedidos Entregues</span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Entregues</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                  <CheckCircle className="h-2.5 w-2.5 text-green-600" />
+                  <span className="text-xs font-semibold text-green-600">{Math.floor(pedidos.filter(p => p.status === "entregue").length / pedidos.length * 100)}%</span>
+                </div>
+              </div>
+              <div className="mb-3">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                   {pedidos.filter(p => p.status === "entregue").length}
-                </div>
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">concluídos</p>
               </div>
-              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                <CheckCircle className="h-3 w-3" />
-                <span className="text-xs font-medium">Concluídos</span>
-              </div>
-              </div>
-              <div className="mt-4 text-xs text-gray-500">
-                {Math.floor(pedidos.filter(p => p.status === "entregue").length / pedidos.length * 100)}% de taxa de entrega
+              <div className="flex items-end gap-0.5 h-8">
+                {[55, 70, 60, 85, 75, 90, 80].map((height, i) => (
+                  <div key={i} className="flex-1 bg-gradient-to-t from-emerald-500 to-green-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
+                ))}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-              <div className="space-y-2">
+          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
+                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <DollarSign className="h-3.5 w-3.5 text-blue-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Valor Total</span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Valor Total</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">
-                  R$ {totalValue.toLocaleString('pt-BR', {
-                  minimumFractionDigits: 2
-                })}
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
+                  <TrendingUp className="h-2.5 w-2.5 text-blue-600" />
+                  <span className="text-xs font-semibold text-blue-600">15%</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                <DollarSign className="h-3 w-3" />
-                <span className="text-xs font-medium">+15%</span>
+              <div className="mb-3">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                  R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">em pedidos</p>
               </div>
-              </div>
-              <div className="mt-4 text-xs text-gray-500">
-                Valor médio: R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', {
-                minimumFractionDigits: 2
-              }) : '0,00'}
-              </div>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400">Média: R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</p>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-              <div className="space-y-2">
+          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
-                    <Package className="h-5 w-5 text-purple-600" />
+                  <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <Package className="h-3.5 w-3.5 text-purple-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Itens por Pedido</span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Itens</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 rounded-full">
+                  <Package className="h-2.5 w-2.5 text-purple-600" />
+                  <span className="text-xs font-semibold text-purple-600">Média</span>
+                </div>
+              </div>
+              <div className="mb-3">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                   {pedidos.length > 0 ? Math.round(pedidos.reduce((acc, p) => acc + p.itens, 0) / pedidos.length) : 0}
-                </div>
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">por pedido</p>
               </div>
-              <div className="flex items-center gap-1 text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                <Package className="h-3 w-3" />
-                <span className="text-xs font-medium">Média</span>
-              </div>
-              </div>
-              <div className="mt-4 text-xs text-gray-500">
-                Total de {pedidos.reduce((acc, p) => acc + p.itens, 0)} itens em {pedidos.length} pedidos
-              </div>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400">Total: {pedidos.reduce((acc, p) => acc + p.itens, 0)} itens em {pedidos.length} pedidos</p>
             </CardContent>
           </Card>
         </div>

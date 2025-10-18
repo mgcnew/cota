@@ -218,101 +218,112 @@ export default function Fornecedores() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Stats Cards Melhorados */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-indigo-500 bg-gradient-to-br from-indigo-50/50 to-blue-50/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 relative">
-                        <Building2 className="h-5 w-5 text-indigo-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-600">Total de Fornecedores</span>
+          {/* Stats Cards - Estilo Apple */}
+          <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
+            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                      <Building2 className="h-3.5 w-3.5 text-indigo-600" />
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
                   </div>
-                  <div className="flex items-center gap-1 text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">
-                    <TrendingUp className="h-3 w-3" />
-                    <span className="text-xs font-medium">+{Math.floor(stats.total * 0.15)}</span>
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-full">
+                    <TrendingUp className="h-2.5 w-2.5 text-indigo-600" />
+                    <span className="text-xs font-semibold text-indigo-600">+{Math.floor(stats.total * 0.15)}</span>
                   </div>
                 </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-indigo-600 h-2 rounded-full transition-all duration-500" style={{
-                      width: '90%'
-                    }}></div>
+                <div className="mb-3">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.total}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cadastrados</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full" style={{ width: '90%' }}></div>
                   </div>
-                  <span className="text-xs text-gray-500">90%</span>
+                  <span className="text-xs font-semibold text-indigo-600">90%</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
-                        <TrendingUp className="h-5 w-5 text-green-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-600">Fornecedores Ativos</span>
+            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                      <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{stats.active}</div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ativos</span>
                   </div>
-                  <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                    <TrendingUp className="h-3 w-3" />
-                    <span className="text-xs font-medium">+{Math.floor(stats.active * 0.1)}</span>
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                    <TrendingUp className="h-2.5 w-2.5 text-green-600" />
+                    <span className="text-xs font-semibold text-green-600">+{Math.floor(stats.active * 0.1)}</span>
                   </div>
                 </div>
-                <div className="mt-4 text-xs text-gray-500">
-                  {Math.floor(stats.active / stats.total * 100)}% da base ativa • {stats.total - stats.active} inativos
+                <div className="mb-3">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.active}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">fornecedores</p>
+                </div>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">{Math.floor(stats.active / stats.total * 100)}% da base • {stats.total - stats.active} inativos</p>
+              </CardContent>
+            </Card>
+
+            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                      <DollarSign className="h-3.5 w-3.5 text-blue-600" />
+                    </div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Limite</span>
+                  </div>
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
+                    <TrendingUp className="h-2.5 w-2.5 text-blue-600" />
+                    <span className="text-xs font-semibold text-blue-600">12%</span>
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalLimit}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">de crédito</p>
+                </div>
+                <div className="relative h-8">
+                  <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.3" />
+                        <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M 0,25 L 15,20 L 30,22 L 45,18 L 60,15 L 75,12 L 90,10 L 100,8" fill="none" stroke="rgb(59, 130, 246)" strokeWidth="2" />
+                    <path d="M 0,25 L 15,20 L 30,22 L 45,18 L 60,15 L 75,12 L 90,10 L 100,8 L 100,40 L 0,40 Z" fill="url(#blueGradient)" />
+                  </svg>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-cyan-50/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 relative">
-                        <DollarSign className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-600">Limite Total</span>
+            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                      <FileText className="h-3.5 w-3.5 text-orange-600" />
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">{stats.totalLimit}</div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
                   </div>
-                  <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                    <TrendingUp className="h-3 w-3" />
-                    <span className="text-xs font-medium">+12%</span>
-                  </div>
-                </div>
-                <div className="mt-4 text-xs text-gray-500">
-                  Capacidade total de crédito disponível
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50/50 to-amber-50/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 relative">
-                        <FileText className="h-5 w-5 text-orange-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-600">Cotações Ativas</span>
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900">{stats.activeQuotes}</div>
-                  </div>
-                  <div className="flex items-center gap-1 text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
-                    <TrendingUp className="h-3 w-3" />
-                    <span className="text-xs font-medium">+25%</span>
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-full">
+                    <TrendingUp className="h-2.5 w-2.5 text-orange-600" />
+                    <span className="text-xs font-semibold text-orange-600">25%</span>
                   </div>
                 </div>
-                <div className="mt-4 text-xs text-gray-500">
-                  {Math.floor(stats.activeQuotes * 0.7)} aguardando • {Math.floor(stats.activeQuotes * 0.3)} em análise
+                <div className="mb-3">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.activeQuotes}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ativas</p>
+                </div>
+                <div className="flex items-end gap-0.5 h-8">
+                  {[50, 70, 60, 85, 65, 90, 75].map((height, i) => (
+                    <div key={i} className="flex-1 bg-gradient-to-t from-orange-500 to-amber-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
