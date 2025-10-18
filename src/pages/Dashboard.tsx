@@ -326,38 +326,37 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Top Fornecedores - 1 coluna */}
-          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 hover:border shadow-lg hover:shadow-md rounded-xl transition-all duration-300">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3 text-lg">
-                <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg">
+          {/* Top Fornecedores - 1 coluna - Estilo Apple */}
+          <Card className="lg:col-span-1 bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-xl transition-all duration-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center shadow-sm">
                   <Award className="h-4 w-4 text-white" />
                 </div>
-                <span className="bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent font-bold">
-                  Top Fornecedores
-                </span>
+                <span className="font-bold text-gray-900 dark:text-white">Top Fornecedores</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {isLoading ? <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-yellow-500" />
-                </div> : topSuppliers.length > 0 ? topSuppliers.slice(0, 5).map((supplier, index) => <div key={index} className="group">
-                    <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-slate-200/60 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:border-slate-300/70 transition-all duration-300">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md ${index === 0 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' : index === 1 ? 'bg-gradient-to-r from-gray-400 to-gray-500' : index === 2 ? 'bg-gradient-to-r from-orange-500 to-orange-600' : 'bg-gradient-to-r from-slate-500 to-slate-600'}`}>
+            <CardContent className="space-y-2">
+              {isLoading ? <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+                </div> : topSuppliers.length > 0 ? topSuppliers.slice(0, 5).map((supplier, index) => <div key={index} className="group relative">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm flex-shrink-0 ${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-500' : index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400' : index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-500' : 'bg-gradient-to-br from-slate-400 to-slate-500'}`}>
                           {index + 1}
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-700 transition-colors">{supplier.name}</p>
-                          <p className="text-xs text-slate-600">{supplier.quotes} cotações</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{supplier.name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{supplier.quotes} cotações</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-emerald-600 text-sm">R$ {supplier.savings ? String(supplier.savings) : '0'}</p>
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <p className="font-bold text-emerald-600 dark:text-emerald-400 text-sm whitespace-nowrap">R$ {supplier.savings ? String(supplier.savings) : '0'}</p>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400">economia</p>
                       </div>
                     </div>
-                  </div>) : <div className="text-center py-8 text-slate-500">
-                  <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  </div>) : <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <Users className="h-10 w-10 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">Nenhum fornecedor encontrado</p>
                 </div>}
             </CardContent>
@@ -434,43 +433,41 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Cotações Recentes - 1 coluna */}
-          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.12)] rounded-xl transition-all duration-300">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3 text-lg">
-                <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">
+          {/* Cotações Recentes - 1 coluna - Estilo Apple */}
+          <Card className="lg:col-span-1 bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-xl transition-all duration-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-sm">
                   <Clock className="h-4 w-4 text-white" />
                 </div>
-                <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent font-bold">
-                  Cotações Recentes
-                </span>
+                <span className="font-bold text-gray-900 dark:text-white">Cotações Recentes</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {isLoading ? <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                </div> : recentQuotes.length > 0 ? recentQuotes.slice(0, 5).map((quote, index) => <div key={quote.id || index} className="group">
-                    <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-slate-200/60 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:border-slate-300/70 transition-all duration-300">
+            <CardContent className="space-y-2">
+              {isLoading ? <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                </div> : recentQuotes.length > 0 ? recentQuotes.slice(0, 5).map((quote, index) => <div key={quote.id || index} className="group relative">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`p-1.5 rounded-lg ${quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-green-100' : quote.status === 'pendente' || quote.status === 'pending' ? 'bg-yellow-100' : 'bg-red-100'}`}>
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-emerald-100 dark:bg-emerald-900/30' : quote.status === 'pendente' || quote.status === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
                           {getStatusIcon(quote.status)}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-slate-900 text-sm truncate group-hover:text-slate-700 transition-colors">
+                          <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">
                             {quote.product}
                           </p>
-                          <p className="text-xs text-slate-600 truncate">{quote.supplier}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{quote.supplier}</p>
                         </div>
                       </div>
-                      <div className="text-right ml-2">
-                        <p className="font-bold text-slate-900 text-sm">R$ {quote.bestPrice || '0'}</p>
-                        <Badge className={`text-xs font-medium mt-1 ${quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-green-100 text-green-800' : quote.status === 'pendente' || quote.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <p className="font-bold text-gray-900 dark:text-white text-sm whitespace-nowrap">R$ {quote.bestPrice || '0'}</p>
+                        <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1 ${quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : quote.status === 'pendente' || quote.status === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
                           {getStatusText(quote.status)}
-                        </Badge>
+                        </span>
                       </div>
                     </div>
-                  </div>) : <div className="text-center py-8 text-slate-500">
-                  <ShoppingCart className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  </div>) : <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <ShoppingCart className="h-10 w-10 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">Nenhuma cotação encontrada</p>
                 </div>}
             </CardContent>
