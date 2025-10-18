@@ -381,34 +381,30 @@ export default function Relatorios() {
     return <LoadingSkeleton />;
   }
   return <div className="page-container">
-      {/* Header Relatórios com Tema Roxo */}
-      <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-2xl p-6 border border-purple-100 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <FileText className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-bold text-3xl bg-gradient-to-r from-purple-900 to-violet-700 bg-clip-text text-transparent">
-                    Relatórios
-                  </h1>
-                  <div className="flex items-center gap-2 mt-1">
-                    {refreshing && <Loader2 className="h-4 w-4 animate-spin text-purple-600" />}
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200 shadow-sm">
-                      <FileBarChart className="h-3 w-3" />
-                      Sistema de Relatórios
-                    </div>
-                  </div>
+      {/* Header - Mesma largura do topbar */}
+      <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-purple-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-purple-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-purple-50 to-violet-50">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
+              <FileText className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-900 to-violet-700 bg-clip-text text-transparent">
+                Relatórios
+              </h1>
+              <div className="flex items-center gap-2 mt-1">
+                {refreshing && <Loader2 className="h-4 w-4 animate-spin text-purple-600" />}
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200 shadow-sm">
+                  <FileBarChart className="h-3 w-3" />
+                  Sistema de Relatórios
                 </div>
               </div>
             </div>
-            
-            
           </div>
-          
-          <div className="flex flex-wrap gap-3">
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-3 px-2 md:px-4 mb-6">
             <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="bg-white/70 backdrop-blur-sm border-purple-200 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 flex items-center gap-2">
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               Atualizar
@@ -594,8 +590,6 @@ export default function Relatorios() {
               {isGenerating ? 'Gerando...' : 'Exportar Todos'}
             </Button>
           </div>
-        </div>
-      </div>
 
       {/* Progress Bar Melhorado */}
       {isGenerating && <Card className="border-blue-200 bg-blue-50">

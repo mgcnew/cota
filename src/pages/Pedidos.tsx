@@ -221,32 +221,29 @@ export default function Pedidos() {
   const paginatedData = paginate(filteredPedidos);
   const totalValue = pedidos.filter(p => p.status !== "cancelado").reduce((acc, p) => acc + parseFloat(p.total.replace("R$ ", "").replace(".", "").replace(",", ".")), 0);
   return <PageWrapper>
-      <div className="page-container">
-      {/* Header Pedidos com Tema Rosa */}
-      <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-4 border border-pink-100 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <ShoppingCart className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-bold text-3xl bg-gradient-to-r from-pink-900 to-rose-700 bg-clip-text text-transparent">
-                    Pedidos
-                  </h1>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-700 border border-pink-200 shadow-sm">
-                      <Truck className="h-3 w-3" />
-                      Gestão de Pedidos
-                    </div>
-                  </div>
+      {/* Header - Mesma largura do topbar */}
+      <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-pink-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-pink-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-pink-50 to-rose-50">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
+              <ShoppingCart className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-900 to-rose-700 bg-clip-text text-transparent">
+                Pedidos
+              </h1>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-700 border border-pink-200 shadow-sm">
+                  <Truck className="h-3 w-3" />
+                  Gestão de Pedidos
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <div className="page-container px-0">
 
       {/* Statistics Cards Melhorados */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

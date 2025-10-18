@@ -175,54 +175,44 @@ export default function Historico() {
       </div>;
   }
   return <div className="page-container">
-      {/* Header Histórico com Tema Slate */}
-      <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-100 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
-          <div className="space-y-2 sm:space-y-3">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-slate-600 to-gray-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
-                  <History className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+      {/* Header - Mesma largura do topbar */}
+      <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-slate-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-gray-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-slate-50 to-gray-50">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-slate-600 to-gray-600 rounded-xl flex items-center justify-center shadow-lg">
+              <History className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 to-gray-700 bg-clip-text text-transparent">
+                Histórico
+              </h1>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-sm">
+                  <Clock className="h-3 w-3" />
+                  Registro de Atividades
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h1 className="font-bold text-xl sm:text-2xl lg:text-3xl bg-gradient-to-r from-slate-900 to-gray-700 bg-clip-text text-transparent">
-                    Histórico
-                  </h1>
-                  <div className="flex items-center gap-1 sm:gap-2 mt-1">
-                    <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 shadow-sm">
-                      <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                      <span className="hidden sm:inline">Registro de Atividades</span>
-                      <span className="sm:hidden">Atividades</span>
-                    </div>
-
-                    {(dataInicio || dataFim) && <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
-                        <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                        <span className="hidden sm:inline">
-                          {dataInicio && dataFim ? `${format(dataInicio, "dd/MM", {
-                        locale: ptBR
-                      })} - ${format(dataFim, "dd/MM", {
-                        locale: ptBR
-                      })}` : dataInicio ? `A partir de ${format(dataInicio, "dd/MM", {
-                        locale: ptBR
-                      })}` : `Até ${format(dataFim!, "dd/MM", {
-                        locale: ptBR
-                      })}`}
-                        </span>
-                        <span className="sm:hidden">Filtrado</span>
-                      </div>}
-                  </div>
-                </div>
+                {(dataInicio || dataFim) && <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
+                    <Calendar className="h-3 w-3" />
+                    <span className="hidden sm:inline">
+                      {dataInicio && dataFim ? `${format(dataInicio, "dd/MM", {
+                    locale: ptBR
+                  })} - ${format(dataFim, "dd/MM", {
+                    locale: ptBR
+                  })}` : dataInicio ? `A partir de ${format(dataInicio, "dd/MM", {
+                    locale: ptBR
+                  })}` : `Até ${format(dataFim!, "dd/MM", {
+                    locale: ptBR
+                  })}`}
+                    </span>
+                    <span className="sm:hidden">Filtrado</span>
+                  </div>}
               </div>
             </div>
-            
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-              
-              
-              
-            </div>
           </div>
+        </div>
+      </div>
           
-          <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 px-2 md:px-4 mb-6">
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className={`bg-white/70 backdrop-blur-sm border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 text-xs sm:text-sm ${dataInicio || dataFim ? 'ring-2 ring-slate-500 bg-slate-50 border-slate-300' : ''}`}>
@@ -379,8 +369,6 @@ export default function Historico() {
               <span className="sm:hidden">CSV</span>
             </Button>
           </div>
-        </div>
-      </div>
 
       {/* Filters */}
       <Card>

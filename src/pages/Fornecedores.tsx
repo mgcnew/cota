@@ -217,39 +217,29 @@ export default function Fornecedores() {
   return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        <div className="page-container">
-      {/* Header Fornecedores com Tema Índigo */}
-      <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl p-4 border border-indigo-100 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="space-y-3">
+        {/* Header - Mesma largura do topbar */}
+        <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-indigo-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-indigo-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-indigo-50 to-blue-50">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Building2 className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-bold text-3xl bg-gradient-to-r from-indigo-900 to-blue-700 bg-clip-text text-transparent">
-                    Fornecedores
-                  </h1>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm">
-                      <Star className="h-3 w-3" />
-                      Rede de Fornecedores
-                    </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-900 to-blue-700 bg-clip-text text-transparent">
+                  Fornecedores
+                </h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm">
+                    <Star className="h-3 w-3" />
+                    Rede de Fornecedores
                   </div>
                 </div>
               </div>
             </div>
-            
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
-              <div className="flex items-center gap-2 text-gray-700 bg-white/60 px-3 py-2 rounded-lg backdrop-blur-sm">
-                <TrendingUp className="h-4 w-4 text-indigo-600" />
-                <span className="font-medium">Gerencie fornecedores e acompanhe performance</span>
-              </div>
-            </div>
           </div>
         </div>
-      </div>
+
+        <div className="page-container px-0">
 
       {/* Stats Cards Melhorados */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

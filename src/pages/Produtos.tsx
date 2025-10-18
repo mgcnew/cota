@@ -165,41 +165,29 @@ export default function Produtos() {
   return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        <div className="page-container">
-      {/* Header Produtos com Tema Laranja */}
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-4 border border-orange-100 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="space-y-3">
+        {/* Header - Mesma largura do topbar */}
+        <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-orange-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-orange-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-orange-50 to-amber-50">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Package className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-bold text-3xl bg-gradient-to-r from-orange-900 to-amber-700 bg-clip-text text-transparent">
-                    Produtos
-                  </h1>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 border border-orange-200 shadow-sm">
-                      <Scale className="h-3 w-3" />
-                      Catálogo de Produtos
-                    </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Package className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-900 to-amber-700 bg-clip-text text-transparent">
+                  Produtos
+                </h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 border border-orange-200 shadow-sm">
+                    <Scale className="h-3 w-3" />
+                    Catálogo de Produtos
                   </div>
                 </div>
               </div>
             </div>
-            
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
-              
-              
-              
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-3">
           </div>
         </div>
-      </div>
+
+        <div className="page-container px-0">
 
       {/* Stats Cards Melhorados */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
