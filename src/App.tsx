@@ -23,7 +23,7 @@ const App = () => <QueryClientProvider client={queryClient}>
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<AppLayout />} className="bg-transparent">
+            <Route path="/" element={<AppLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="produtos" element={<Produtos />} />
               <Route path="fornecedores" element={<Fornecedores />} />
