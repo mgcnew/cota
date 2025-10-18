@@ -414,24 +414,24 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] sm:w-[90vw] max-w-[1000px] h-[90vh] sm:h-[85vh] max-h-[900px] p-0 gap-0 overflow-hidden border-teal-200/40 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-300">
-        <DialogHeader className="relative px-4 sm:px-6 py-3 bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 border-b border-teal-100/60 overflow-hidden">
-          <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 rounded-full -translate-y-12 -translate-x-12"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 rounded-full -translate-y-16 translate-x-16"></div>
+      <DialogContent className="w-[95vw] sm:w-[90vw] max-w-[1000px] h-[90vh] sm:h-[85vh] max-h-[900px] p-0 gap-0 overflow-hidden border-teal-200/40 dark:border-gray-700 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-300 bg-white dark:bg-gray-900">
+        <DialogHeader className="relative px-4 sm:px-6 py-3 bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 border-b border-teal-100/60 dark:border-gray-700 overflow-hidden">
+          <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 dark:from-teal-400/20 dark:to-cyan-400/20 rounded-full -translate-y-12 -translate-x-12"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 dark:from-teal-400/20 dark:to-cyan-400/20 rounded-full -translate-y-16 translate-x-16"></div>
           
           <div className="relative z-10">
             {/* Compact Header */}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 text-white shadow-lg shadow-teal-500/25 ring-2 ring-white/20 flex-shrink-0">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 text-white shadow-lg shadow-teal-500/25 ring-2 ring-white/20 dark:ring-teal-900/50 flex-shrink-0">
                   <FileText className="h-5 w-5" />
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <DialogTitle className="text-lg font-bold bg-gradient-to-r from-teal-900 via-cyan-800 to-blue-800 bg-clip-text text-transparent">
+                  <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
                     Nova Cotação
                   </DialogTitle>
-                  <DialogDescription className="text-gray-600/80 text-xs">
+                  <DialogDescription className="text-gray-600 dark:text-gray-400 text-xs">
                     {Math.round(progress)}% concluído
                   </DialogDescription>
                 </div>
@@ -520,8 +520,8 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
             <Form {...form}>
               <form id="quote-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
                 {/* Compact Tab Navigation */}
-                <div className="flex-shrink-0 px-3 sm:px-6 py-2 border-b border-teal-100/60 bg-gradient-to-r from-teal-50/40 to-cyan-50/30 backdrop-blur-sm">
-                  <div className="flex space-x-1 bg-white/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-teal-200/40">
+                <div className="flex-shrink-0 px-3 sm:px-6 py-2 border-b border-teal-100/60 dark:border-gray-700 bg-gradient-to-r from-teal-50/40 to-cyan-50/30 dark:from-gray-800 dark:to-gray-800 backdrop-blur-sm">
+                  <div className="flex space-x-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-teal-200/40 dark:border-gray-700">
                     {tabs.map((tab) => {
                       const Icon = tab.icon;
                       const status = getTabStatus(tab.id);
@@ -534,7 +534,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                             "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 relative overflow-hidden group",
                             status === "current" && "bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-xl shadow-teal-500/25 scale-105",
                             status === "completed" && "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg",
-                            status === "pending" && "bg-gray-100 text-gray-500 hover:bg-teal-50 hover:text-teal-700"
+                            status === "pending" && "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 hover:text-teal-700 dark:hover:text-teal-400"
                           )}
                         >
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
@@ -575,9 +575,9 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                           <div className="h-full p-4 sm:p-6">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
                               {/* Formulário de Adição - Lado Esquerdo */}
-                              <Card className="border-teal-100 bg-gradient-to-br from-white to-teal-50/20 shadow-sm h-fit">
-                                <CardHeader className="pb-3 border-b border-teal-100/60">
-                                  <CardTitle className="flex items-center gap-2 text-teal-900">
+                              <Card className="border-teal-100 dark:border-gray-700 bg-gradient-to-br from-white to-teal-50/20 dark:from-gray-800 dark:to-gray-800 shadow-sm h-fit">
+                                <CardHeader className="pb-3 border-b border-teal-100/60 dark:border-gray-700">
+                                  <CardTitle className="flex items-center gap-2 text-teal-900 dark:text-white">
                                     <Plus className="h-5 w-5 text-teal-600" />
                                     Adicionar Produto
                                   </CardTitle>
@@ -585,13 +585,13 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                  <CardContent className="pt-4 space-y-4">
                                   {/* Seletor de Produto */}
                                   <div>
-                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Produto *</label>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Produto *</label>
                                     <Popover>
                                       <PopoverTrigger asChild>
                                         <Button
                                           variant="outline"
                                           role="combobox"
-                                          className="w-full justify-between border-teal-200 focus:ring-teal-500/20"
+                                          className="w-full justify-between border-teal-200 dark:border-gray-700 focus:ring-teal-500/20 dark:bg-gray-800 dark:text-white"
                                         >
                                           {selectedProduct ? selectedProduct.name : "Selecionar produto..."}
                                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -683,15 +683,15 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
 
                               {/* Lista de Produtos - Lado Direito */}
                               <Card className="border-teal-100 bg-gradient-to-br from-white to-teal-50/20 shadow-sm">
-                                <CardHeader className="pb-3 border-b border-teal-100/60">
-                                  <CardTitle className="flex items-center gap-2 text-teal-900">
-                                    <Package className="h-5 w-5 text-teal-600" />
+                                <CardHeader className="pb-3 border-b border-teal-100/60 dark:border-gray-700">
+                                  <CardTitle className="flex items-center gap-2 text-teal-900 dark:text-white">
+                                    <Package className="h-5 w-5 text-teal-600 dark:text-teal-400" />
                                     Produtos Adicionados ({fields.length})
                                   </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-4">
                                   {fields.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500">
+                                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                                       <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
                                       <p>Nenhum produto adicionado ainda</p>
                                       <p className="text-sm">Use o formulário ao lado para adicionar produtos</p>
@@ -700,15 +700,15 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                     <ScrollArea className="h-[400px]">
                                       <div className="space-y-3">
                                         {fields.map((field, index) => (
-                                          <Card key={field.id} className="border-teal-200 hover:border-teal-400 transition-all">
+                                          <Card key={field.id} className="border-teal-200 dark:border-gray-700 hover:border-teal-400 dark:hover:border-teal-600 transition-all bg-white dark:bg-gray-800">
                                             <div className="h-1 bg-gradient-to-r from-teal-500 to-cyan-500"></div>
                                             <CardContent className="p-3">
                                               <div className="flex items-start justify-between">
                                                 <div className="flex-1">
-                                                  <h4 className="font-semibold text-gray-900 text-sm">
+                                                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
                                                     {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
                                                   </h4>
-                                                  <div className="text-sm text-gray-600 mt-1">
+                                                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                                     <span className="font-medium">{form.watch(`produtos.${index}.quantidade`)}</span>
                                                     <span className="mx-1">×</span>
                                                     <span>{form.watch(`produtos.${index}.unidade`)}</span>
@@ -738,8 +738,8 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
 
                         {/* Período Tab */}
                         <TabsContent value="periodo" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 m-0">
-                          <Card className="border-0 shadow-lg bg-gradient-to-br from-white via-gray-50/30 to-indigo-50/20 backdrop-blur-sm">
-                            <CardHeader className="pb-3 bg-gradient-to-r from-indigo-50/60 to-purple-50/40 rounded-t-xl border-b border-gray-100/60">
+                          <Card className="border-0 shadow-lg bg-gradient-to-br from-white via-gray-50/30 to-indigo-50/20 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 backdrop-blur-sm">
+                            <CardHeader className="pb-3 bg-gradient-to-r from-indigo-50/60 to-purple-50/40 dark:from-gray-800 dark:to-gray-800 rounded-t-xl border-b border-gray-100/60 dark:border-gray-700">
                               <CardTitle className="flex items-center gap-3 text-base font-bold">
                                 <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
                                   <Clock className="h-4 w-4 drop-shadow-sm" />

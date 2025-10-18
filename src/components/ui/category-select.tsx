@@ -95,26 +95,26 @@ export function CategorySelect({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full sm:w-[280px] justify-between bg-gradient-to-r from-white via-orange-50/30 to-amber-50/30 hover:from-orange-100/50 hover:to-amber-100/50 border-orange-200/60 hover:border-orange-300/70 transition-all duration-200 shadow-sm hover:shadow-md"
+            className="w-full sm:w-[280px] justify-between bg-gradient-to-r from-white via-orange-50/30 to-amber-50/30 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 hover:from-orange-100/50 hover:to-amber-100/50 dark:hover:from-gray-700 dark:hover:to-gray-700 border-orange-200/60 dark:border-gray-700 hover:border-orange-300/70 dark:hover:border-orange-600 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Filter className="h-4 w-4 text-orange-600 flex-shrink-0" />
-              <span className="truncate text-sm font-medium text-gray-700">
+              <Filter className="h-4 w-4 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+              <span className="truncate text-sm font-medium text-gray-700 dark:text-gray-200">
                 {getCategoryLabel(selectedCategory)}
               </span>
               {selectedCategory !== "all" && (
-                <Badge variant="secondary" className="ml-auto flex-shrink-0 text-xs bg-orange-100 text-orange-700 border-orange-200">
+                <Badge variant="secondary" className="ml-auto flex-shrink-0 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-700">
                   {getCategoryCount(selectedCategory)}
                 </Badge>
               )}
             </div>
-            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-orange-600" />
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-orange-600 dark:text-orange-400" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[320px] p-0" align="start">
-          <Command className="bg-gradient-to-br from-white via-orange-50/20 to-amber-50/30">
-            <div className="flex items-center border-b border-orange-200/40 px-3 bg-gradient-to-r from-orange-50/30 to-amber-50/30">
-              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50 text-orange-600" />
+          <Command className="bg-gradient-to-br from-white via-orange-50/20 to-amber-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+            <div className="flex items-center border-b border-orange-200/40 dark:border-gray-700 px-3 bg-gradient-to-r from-orange-50/30 to-amber-50/30 dark:from-gray-800 dark:to-gray-800">
+              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50 text-orange-600 dark:text-orange-400" />
               <CommandInput
                 placeholder="Buscar categoria..."
                 value={searchValue}

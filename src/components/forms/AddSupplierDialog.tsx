@@ -125,22 +125,22 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-[600px] h-[85vh] max-h-[800px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-green-50/80 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm relative overflow-hidden">
+      <DialogContent className="w-[90vw] max-w-[600px] h-[85vh] max-h-[800px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 dark:border-gray-800 bg-gradient-to-br from-green-50/80 via-emerald-50/60 to-teal-50/40 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 backdrop-blur-sm relative overflow-hidden">
           {/* Efeitos decorativos de fundo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 via-emerald-500/5 to-teal-500/5"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-400/10 to-emerald-400/10 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-teal-400/10 to-cyan-400/10 rounded-full translate-y-12 -translate-x-12"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 via-emerald-500/5 to-teal-500/5 dark:from-green-400/10 dark:via-emerald-400/10 dark:to-teal-400/10"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-400/10 to-emerald-400/10 dark:from-green-400/20 dark:to-emerald-400/20 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-teal-400/10 to-cyan-400/10 dark:from-teal-400/20 dark:to-cyan-400/20 rounded-full translate-y-12 -translate-x-12"></div>
           
           <div className="relative z-10 flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 text-white shadow-lg shadow-green-500/25 ring-2 ring-white/20 backdrop-blur-sm flex-shrink-0">
+            <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 text-white shadow-lg shadow-green-500/25 ring-2 ring-white/20 dark:ring-green-900/50 backdrop-blur-sm flex-shrink-0">
               <Plus className="h-5 w-5 sm:h-6 sm:w-6 drop-shadow-sm" />
             </div>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-900 via-emerald-800 to-teal-800 bg-clip-text text-transparent">
+              <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 Novo Fornecedor
               </DialogTitle>
-              <DialogDescription className="text-gray-600/80 text-sm font-medium mt-1">
+              <DialogDescription className="text-gray-600 dark:text-gray-400 text-sm font-medium mt-1">
                 Cadastre um novo fornecedor no sistema
               </DialogDescription>
             </div>
@@ -152,11 +152,11 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
               <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                 {/* Seção: Informações da Empresa */}
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center gap-3 pb-2 sm:pb-3 border-b border-gray-200/60">
+                  <div className="flex items-center gap-3 pb-2 sm:pb-3 border-b border-gray-200/60 dark:border-gray-700">
                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white shadow-md text-sm">
                       🏢
                     </div>
-                    <h3 className="font-bold text-gray-900 text-base sm:text-lg">Informações da Empresa</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg">Informações da Empresa</h3>
                   </div>
                   
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
@@ -165,11 +165,11 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-gray-700">Nome do Fornecedor *</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome do Fornecedor *</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="Ex: Holambra Distribuidora" 
-                              className="rounded-xl border-gray-200 focus:border-green-400 focus:ring-green-400/20"
+                              className="rounded-xl border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white"
                               {...field} 
                             />
                           </FormControl>
@@ -183,11 +183,11 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                       name="cnpj"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-gray-700">CNPJ</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">CNPJ</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="00.000.000/0000-00" 
-                              className="rounded-xl border-gray-200 focus:border-green-400 focus:ring-green-400/20"
+                              className="rounded-xl border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white"
                               {...field} 
                             />
                           </FormControl>
@@ -202,11 +202,11 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-semibold text-gray-700">Endereço Completo</FormLabel>
+                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Endereço Completo</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Rua das Flores, 123, Centro, São Paulo - SP" 
-                            className="rounded-xl border-gray-200 focus:border-green-400 focus:ring-green-400/20"
+                            className="rounded-xl border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white"
                             {...field} 
                           />
                         </FormControl>
@@ -218,11 +218,11 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
 
                 {/* Seção: Informações de Contato */}
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center gap-3 pb-2 sm:pb-3 border-b border-gray-200/60">
+                  <div className="flex items-center gap-3 pb-2 sm:pb-3 border-b border-gray-200/60 dark:border-gray-700">
                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-md text-sm">
                       👤
                     </div>
-                    <h3 className="font-bold text-gray-900 text-base sm:text-lg">Informações de Contato</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg">Informações de Contato</h3>
                   </div>
 
                   <FormField

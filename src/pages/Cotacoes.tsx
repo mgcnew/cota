@@ -199,12 +199,12 @@ export default function Cotacoes() {
 
             <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
-                <Input placeholder="Buscar por produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-teal-300/70 focus:border-teal-400 focus:ring-2 focus:ring-teal-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                <Input placeholder="Buscar por produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
               </div>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-teal-300/70 focus:border-teal-400 focus:ring-2 focus:ring-teal-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -218,7 +218,7 @@ export default function Cotacoes() {
               </Select>
 
               <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-                <SelectTrigger className="w-full sm:w-[200px] h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-teal-300/70 focus:border-teal-400 focus:ring-2 focus:ring-teal-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                <SelectTrigger className="w-full sm:w-[200px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
                   <SelectValue placeholder="Fornecedor" />
                 </SelectTrigger>
                 <SelectContent>
@@ -490,63 +490,63 @@ export default function Cotacoes() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 border-b border-teal-200">
-                  <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-teal-900 py-4 px-4 text-xs">
+                <TableHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-gray-800 dark:to-gray-800 border-b border-teal-200 dark:border-gray-700">
+                  <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
+                    <TableHead className="font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
                         Cotação
                       </div>
                     </TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-teal-900 py-4 px-4 text-xs">
+                    <TableHead className="hidden md:table-cell font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4" />
                         Produto
                       </div>
                     </TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-teal-900 py-4 px-4 text-xs">
+                    <TableHead className="hidden lg:table-cell font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         Período
                       </div>
                     </TableHead>
-                    <TableHead className="font-semibold text-teal-900 py-4 px-4 text-xs">Status</TableHead>
-                    <TableHead className="font-semibold text-teal-900 py-4 px-4 text-xs">
+                    <TableHead className="font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">Status</TableHead>
+                    <TableHead className="font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4" />
                         Melhor Preço
                       </div>
                     </TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-teal-900 py-4 px-4 text-xs">
+                    <TableHead className="hidden sm:table-cell font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4" />
                         Fornecedores
                       </div>
                     </TableHead>
-                    <TableHead className="text-right font-semibold text-teal-900 py-4 px-4 w-32 text-xs">Ações</TableHead>
+                    <TableHead className="text-right font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 w-32 text-xs">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
                           {/* Cotação - Largura fixa */}
                           <div className="w-[18%] flex items-center gap-3 pr-4">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50">
-                              <FileText className="h-4 w-4 text-teal-600" />
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 dark:from-teal-400/20 dark:to-cyan-400/20 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50 dark:border-teal-700/50">
+                              <FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold font-mono text-sm text-gray-900 truncate">
+                              <div className="font-semibold font-mono text-sm text-gray-900 dark:text-white truncate">
                                 #{cotacao.id.substring(0, 8)}
                               </div>
-                              <div className="text-xs text-gray-500 md:hidden mt-1 truncate">{cotacao.produto}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 md:hidden mt-1 truncate">{cotacao.produto}</div>
                             </div>
                           </div>
 
                           {/* Produto - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[20%] px-2">
                             <div className="min-w-0 max-w-[150px]">
-                              <div className="font-medium text-sm text-gray-900 truncate">{cotacao.produto}</div>
+                              <div className="font-medium text-sm text-gray-900 dark:text-white truncate">{cotacao.produto}</div>
                               <div className="text-xs text-gray-500 mt-1">
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md">
                                   <Package className="h-3 w-3" />

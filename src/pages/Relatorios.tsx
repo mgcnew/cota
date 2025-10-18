@@ -382,14 +382,14 @@ export default function Relatorios() {
   }
   return <div className="page-container">
       <div className="flex flex-wrap gap-3 mb-6">
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="bg-white/70 backdrop-blur-sm border-purple-200 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 flex items-center gap-2 text-gray-900 dark:text-white">
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>
             
             <Dialog open={isPeriodDialogOpen} onOpenChange={setIsPeriodDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className={`bg-white/70 backdrop-blur-sm border-purple-200 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 flex items-center gap-2 ${startDate && endDate ? 'ring-2 ring-purple-500 bg-purple-50 border-purple-300' : ''}`}>
+                <Button variant="outline" size="sm" className={`bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 flex items-center gap-2 text-gray-900 dark:text-white ${startDate && endDate ? 'ring-2 ring-purple-500 dark:ring-purple-400 bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-600' : ''}`}>
                   <Calendar className="h-4 w-4" />
                   {dateRangeText}
                 </Button>
@@ -691,29 +691,29 @@ export default function Relatorios() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {relatoriosDisponiveis.map((relatorio, index) => <Card key={relatorio.tipo} className="hover:shadow-lg transition-all duration-200 border border-gray-200/60 hover:border-purple-300/60">
+            {relatoriosDisponiveis.map((relatorio, index) => <Card key={relatorio.tipo} className="bg-white dark:bg-gray-900 border border-gray-200/60 dark:border-gray-700/60 hover:border-purple-300/60 dark:hover:border-purple-600/60 hover:shadow-lg transition-all duration-200">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-violet-500/10">
-                      <relatorio.icone className="h-5 w-5 text-purple-600" />
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-violet-500/10 dark:from-purple-400/20 dark:to-violet-400/20">
+                      <relatorio.icone className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-base font-semibold text-gray-900">{relatorio.titulo}</CardTitle>
-                      <p className="text-sm text-gray-600 mt-1">{relatorio.descricao}</p>
+                      <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">{relatorio.titulo}</CardTitle>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{relatorio.descricao}</p>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Período:</span>
-                    <span className="font-medium text-gray-900">{relatorio.periodo}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Período:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{relatorio.periodo}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Tempo estimado:</span>
-                    <span className="font-medium text-gray-900">{relatorio.tempoEstimado}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Tempo estimado:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{relatorio.tempoEstimado}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={`text-xs ${relatorio.prioridade === 'alta' ? 'bg-red-50 text-red-700 border-red-200' : relatorio.prioridade === 'media' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+                    <Badge variant="outline" className={`text-xs ${relatorio.prioridade === 'alta' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-700' : relatorio.prioridade === 'media' ? 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-700' : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-700'}`}>
                       {relatorio.prioridade === 'alta' ? 'Alta Prioridade' : relatorio.prioridade === 'media' ? 'Média Prioridade' : 'Baixa Prioridade'}
                     </Badge>
                   </div>

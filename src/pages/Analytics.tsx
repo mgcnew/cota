@@ -164,16 +164,16 @@ export default function Analytics() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800">
+          <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white text-gray-600 dark:text-gray-400">
             <BarChart3 className="h-4 w-4" />
             Visão Geral
           </TabsTrigger>
-          <TabsTrigger value="performance" className="flex items-center gap-2">
+          <TabsTrigger value="performance" className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white text-gray-600 dark:text-gray-400">
             <TrendingUp className="h-4 w-4" />
             Performance
           </TabsTrigger>
-          <TabsTrigger value="insights" className="flex items-center gap-2">
+          <TabsTrigger value="insights" className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white text-gray-600 dark:text-gray-400">
             <Target className="h-4 w-4" />
             Insights
           </TabsTrigger>
@@ -266,31 +266,31 @@ export default function Analytics() {
           {/* Charts Row */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Tendência de Economia */}
-            <Card className="hover:shadow-md transition-shadow duration-200">
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-shadow duration-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                  <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   Tendência de Economia
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {tendenciasMensais.map(item => (
-                    <div key={item.mes} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div key={item.mes} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-600">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-sm font-medium text-blue-600 dark:text-blue-400">
                           {item.mes}
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">{item.cotacoes} cotações</div>
-                          <div className="text-sm text-gray-600">
+                          <div className="font-medium text-gray-900 dark:text-white">{item.cotacoes} cotações</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
                             R$ {item.valor.toLocaleString('pt-BR')}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold text-green-600">{item.economia}%</div>
-                        <div className="text-xs text-gray-500">economia</div>
+                        <div className="font-semibold text-green-600 dark:text-green-400">{item.economia}%</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">economia</div>
                       </div>
                     </div>
                   ))}
@@ -299,17 +299,17 @@ export default function Analytics() {
             </Card>
 
             {/* Performance de Fornecedores */}
-            <Card className="hover:shadow-md transition-shadow duration-200">
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-shadow duration-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-blue-600" />
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   Top Fornecedores
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {performanceFornecedores.slice(0, 4).map(fornecedor => (
-                    <div key={fornecedor.fornecedor} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div key={fornecedor.fornecedor} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white ${
                           fornecedor.score >= 90 ? 'bg-green-500' : 
@@ -318,15 +318,15 @@ export default function Analytics() {
                           {fornecedor.score}
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">{fornecedor.fornecedor}</div>
-                          <div className="text-sm text-gray-600">
+                          <div className="font-medium text-gray-900 dark:text-white">{fornecedor.fornecedor}</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
                             {fornecedor.cotacoes} cotações • {fornecedor.tempo}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold text-green-600">-{fornecedor.economia}</div>
-                        <div className="text-xs text-gray-500">economia</div>
+                        <div className="font-semibold text-green-600 dark:text-green-400">-{fornecedor.economia}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">economia</div>
                       </div>
                     </div>
                   ))}
@@ -336,34 +336,34 @@ export default function Analytics() {
           </div>
 
           {/* Top Produtos */}
-          <Card className="hover:shadow-md transition-shadow duration-200">
+          <Card className="bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-shadow duration-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-blue-600" />
+              <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 Top Produtos por Economia
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {topProdutos.map((produto, index) => (
-                  <div key={produto.produto} className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                  <div key={produto.produto} className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-600">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-sm font-medium text-blue-600 dark:text-blue-400">
                         {index + 1}
                       </div>
                       <div>
-                        <div className="font-medium text-gray-900">{produto.produto}</div>
-                        <div className="text-sm text-gray-600">{produto.cotacoes} cotações realizadas</div>
+                        <div className="font-medium text-gray-900 dark:text-white">{produto.produto}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{produto.cotacoes} cotações realizadas</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <div className="font-semibold text-gray-900">{produto.valor}</div>
-                        <div className="text-xs text-gray-500">valor total</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{produto.valor}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">valor total</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold text-green-600">-{produto.economia}</div>
-                        <div className="text-xs text-gray-500">economia</div>
+                        <div className="font-semibold text-green-600 dark:text-green-400">-{produto.economia}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">economia</div>
                       </div>
                     </div>
                   </div>
@@ -375,17 +375,17 @@ export default function Analytics() {
 
         <TabsContent value="performance" className="space-y-6 mt-6">
           <div className="text-center py-12">
-            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Performance Detalhada</h3>
-            <p className="text-gray-600">Análises detalhadas de performance em desenvolvimento</p>
+            <Package className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Performance Detalhada</h3>
+            <p className="text-gray-600 dark:text-gray-400">Análises detalhadas de performance em desenvolvimento</p>
           </div>
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-6 mt-6">
           <div className="text-center py-12">
-            <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Insights Avançados</h3>
-            <p className="text-gray-600">Insights e recomendações inteligentes em desenvolvimento</p>
+            <Target className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Insights Avançados</h3>
+            <p className="text-gray-600 dark:text-gray-400">Insights e recomendações inteligentes em desenvolvimento</p>
           </div>
         </TabsContent>
       </Tabs>

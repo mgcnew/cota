@@ -188,22 +188,22 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
           Novo Produto
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-[600px] h-[85vh] max-h-[800px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-orange-50/80 via-amber-50/60 to-yellow-50/40 backdrop-blur-sm relative overflow-hidden">
+      <DialogContent className="w-[90vw] max-w-[600px] h-[85vh] max-h-[800px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 dark:border-gray-800 bg-gradient-to-br from-orange-50/80 via-amber-50/60 to-yellow-50/40 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 backdrop-blur-sm relative overflow-hidden">
           {/* Efeitos decorativos de fundo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-amber-500/5 to-yellow-500/5"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-400/10 to-amber-400/10 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-yellow-400/10 to-orange-400/10 rounded-full translate-y-12 -translate-x-12"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-amber-500/5 to-yellow-500/5 dark:from-orange-400/10 dark:via-amber-400/10 dark:to-yellow-400/10"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-400/10 to-amber-400/10 dark:from-orange-400/20 dark:to-amber-400/20 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tl from-yellow-400/10 to-orange-400/10 dark:from-yellow-400/20 dark:to-orange-400/20 rounded-full translate-y-12 -translate-x-12"></div>
           
           <div className="relative z-10 flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-orange-600 via-amber-600 to-yellow-600 text-white shadow-lg shadow-orange-500/25 ring-2 ring-white/20 backdrop-blur-sm flex-shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-600 flex items-center justify-center text-white shadow-lg ring-2 ring-orange-100/50 dark:ring-orange-900/50 flex-shrink-0">
               <Plus className="h-5 w-5 sm:h-6 sm:w-6 drop-shadow-sm" />
             </div>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-900 via-amber-800 to-yellow-800 bg-clip-text text-transparent">
+              <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 Novo Produto
               </DialogTitle>
-              <p className="text-gray-600/80 text-sm font-medium mt-1">
+              <p className="text-gray-600 dark:text-gray-400 text-sm font-medium mt-1">
                 Cadastre um novo produto no sistema
               </p>
             </div>
@@ -215,11 +215,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
               <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                 {/* Seção: Informações Básicas */}
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center gap-3 pb-2 sm:pb-3 border-b border-gray-200/60">
+                  <div className="flex items-center gap-3 pb-2 sm:pb-3 border-b border-gray-200/60 dark:border-gray-700">
                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white shadow-md text-sm">
                       📦
                     </div>
-                    <h3 className="font-bold text-gray-900 text-base sm:text-lg">Informações do Produto</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg">Informações do Produto</h3>
                   </div>
                   
                   <FormField
@@ -227,11 +227,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-semibold text-gray-700">Nome do Produto *</FormLabel>
+                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome do Produto *</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Ex: Coxa com Sobrecoxa Congelada"
-                            className="rounded-xl border-gray-200 focus:border-orange-400 focus:ring-orange-400/20"
+                            className="rounded-xl border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-orange-400/20 dark:bg-gray-800 dark:text-white"
                             {...field}
                           />
                         </FormControl>
@@ -245,11 +245,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                     name="weight"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-semibold text-gray-700">Peso/Quantidade Padrão</FormLabel>
+                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Peso/Quantidade Padrão</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Ex: 500kg, 15 metades, 1 caixa com 20kg"
-                            className="rounded-xl border-gray-200 focus:border-orange-400 focus:ring-orange-400/20"
+                            className="rounded-xl border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-orange-400/20 dark:bg-gray-800 dark:text-white"
                             {...field}
                           />
                         </FormControl>
@@ -261,11 +261,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
 
                 {/* Seção: Categorização */}
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center gap-3 pb-2 sm:pb-3 border-b border-gray-200/60">
+                  <div className="flex items-center gap-3 pb-2 sm:pb-3 border-b border-gray-200/60 dark:border-gray-700">
                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-md text-sm">
                       🏷️
                     </div>
-                    <h3 className="font-bold text-gray-900 text-base sm:text-lg">Categorização</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg">Categorização</h3>
                   </div>
 
                   <FormField
@@ -273,7 +273,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                     name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-semibold text-gray-700">Categoria do Produto *</FormLabel>
+                        <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Categoria do Produto *</FormLabel>
                         <Select 
                           onValueChange={(value) => {
                             field.onChange(value);
@@ -286,7 +286,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                           disabled={loadingCategories}
                         >
                           <FormControl>
-                            <SelectTrigger className="bg-background rounded-xl border-gray-200 focus:border-orange-400">
+                            <SelectTrigger className="bg-background dark:bg-gray-800 rounded-xl border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
                               <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Selecione uma categoria existente"} />
                             </SelectTrigger>
                           </FormControl>
@@ -329,11 +329,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                       name="newCategory"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-gray-700">Nome da Nova Categoria *</FormLabel>
+                          <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome da Nova Categoria *</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="Ex: Peixes, Laticínios, Temperos"
-                              className="rounded-xl border-orange-200 focus:border-orange-400 focus:ring-orange-400/20 bg-orange-50/30"
+                              className="rounded-xl border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-orange-400/20 bg-orange-50/30 dark:bg-orange-900/20 dark:text-white"
                               {...field}
                             />
                           </FormControl>
@@ -345,14 +345,14 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                 </div>
 
                 {/* Dica de preenchimento */}
-                <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/60 rounded-xl p-3 sm:p-4">
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200/60 dark:border-orange-800 rounded-xl p-3 sm:p-4">
                   <div className="flex items-start gap-2 sm:gap-3">
                     <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs sm:text-sm font-bold flex-shrink-0 mt-0.5">
                       💡
                     </div>
                     <div>
-                      <h4 className="font-semibold text-orange-900 mb-1 text-sm sm:text-base">Dicas de Cadastro</h4>
-                      <ul className="text-xs sm:text-sm text-orange-800 space-y-0.5 sm:space-y-1">
+                      <h4 className="font-semibold text-orange-900 dark:text-orange-300 mb-1 text-sm sm:text-base">Dicas de Cadastro</h4>
+                      <ul className="text-xs sm:text-sm text-orange-800 dark:text-orange-400 space-y-0.5 sm:space-y-1">
                         <li>• Use nomes descritivos para facilitar a busca</li>
                         <li>• Especifique peso/quantidade quando relevante</li>
                         <li>• Categorias ajudam na organização das cotações</li>
@@ -363,13 +363,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
               </div>
 
               {/* Footer com botões */}
-              <div className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-100/60 bg-gray-50/50">
+              <div className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-100/60 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setOpen(false)}
-                    className="rounded-xl border-gray-200 hover:bg-gray-50 text-sm"
+                    className="rounded-xl border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-white"
                   >
                     Cancelar
                   </Button>
