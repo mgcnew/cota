@@ -84,7 +84,7 @@ export default function Dashboard() {
   return <PageWrapper>
       <div className="page-container">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-gray-200/60 rounded-lg backdrop-blur-sm hover:border-gray-300/20 shadow-sm transition-all duration-300 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-gray-200/60 rounded-lg backdrop-blur-sm hover:border-gray-300/20 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all duration-300 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">Visão geral do sistema de cotações</p>
@@ -93,7 +93,7 @@ export default function Dashboard() {
 
         {/* Métricas Principais */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-[0_4px_12px_rgba(59,130,246,0.15)] hover:shadow-[0_6px_16px_rgba(59,130,246,0.2)] hover:brightness-95 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -117,7 +117,7 @@ export default function Dashboard() {
               </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:shadow-[0_6px_16px_rgba(16,185,129,0.2)] hover:brightness-95 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -141,7 +141,7 @@ export default function Dashboard() {
               </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-[0_4px_12px_rgba(139,92,246,0.15)] hover:shadow-[0_6px_16px_rgba(139,92,246,0.2)] hover:brightness-95 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -165,7 +165,7 @@ export default function Dashboard() {
               </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 shadow-xl hover:shadow-md hover:brightness-95 transition-all duration-300">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 shadow-[0_4px_12px_rgba(245,158,11,0.15)] hover:shadow-[0_6px_16px_rgba(245,158,11,0.2)] hover:brightness-95 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -193,7 +193,7 @@ export default function Dashboard() {
         {/* Gráficos lado a lado - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Gráfico de Evolução - 2 colunas */}
-          <Card className="lg:col-span-2 bg-gradient-to-br from-purple-50/50 via-white to-blue-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-purple-300/70 hover:border shadow-lg hover:shadow-md rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-2 bg-gradient-to-br from-purple-50/50 via-white to-blue-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-purple-300/70 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_16px_rgba(139,92,246,0.12)] rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -302,7 +302,7 @@ export default function Dashboard() {
               {isLoading ? <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-yellow-500" />
                 </div> : topSuppliers.length > 0 ? topSuppliers.slice(0, 5).map((supplier, index) => <div key={index} className="group">
-                    <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-slate-200/60 hover:shadow-md hover:border-slate-300/70 transition-all duration-300">
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-slate-200/60 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:border-slate-300/70 transition-all duration-300">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md ${index === 0 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' : index === 1 ? 'bg-gradient-to-r from-gray-400 to-gray-500' : index === 2 ? 'bg-gradient-to-r from-orange-500 to-orange-600' : 'bg-gradient-to-r from-slate-500 to-slate-600'}`}>
                           {index + 1}
@@ -327,7 +327,7 @@ export default function Dashboard() {
         {/* Economia Mensal e Cotações Recentes - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Gráfico de Economia - 2 colunas */}
-          <Card className="lg:col-span-2 bg-gradient-to-br from-emerald-50/50 via-white to-green-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-emerald-300/70 hover:border shadow-lg hover:shadow-md rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-2 bg-gradient-to-br from-emerald-50/50 via-white to-green-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-emerald-300/70 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_16px_rgba(16,185,129,0.12)] rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -395,7 +395,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Cotações Recentes - 1 coluna */}
-          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 hover:border shadow-lg hover:shadow-md rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-1 bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.12)] rounded-xl transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-3 text-lg">
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">
@@ -410,7 +410,7 @@ export default function Dashboard() {
               {isLoading ? <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                 </div> : recentQuotes.length > 0 ? recentQuotes.slice(0, 5).map((quote, index) => <div key={quote.id || index} className="group">
-                    <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-slate-200/60 hover:shadow-md hover:border-slate-300/70 transition-all duration-300">
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-slate-200/60 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:border-slate-300/70 transition-all duration-300">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className={`p-1.5 rounded-lg ${quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-green-100' : quote.status === 'pendente' || quote.status === 'pending' ? 'bg-yellow-100' : 'bg-red-100'}`}>
                           {getStatusIcon(quote.status)}
