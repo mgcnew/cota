@@ -16,7 +16,7 @@ export function PageWrapper({ children, className = "" }: PageWrapperProps) {
         ease: [0.25, 0.46, 0.45, 0.94],
         type: "tween"
       }}
-      className={`w-full overflow-hidden ${className}`}
+      className={`w-full overflow-hidden pt-6 ${className}`}
     >
       {children}
     </motion.div>
