@@ -167,7 +167,7 @@ export default function Produtos() {
       <PageWrapper>
         <div className="page-container">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-orange-100/60 rounded-lg backdrop-blur-sm hover:border-orange-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-orange-50 to-amber-50 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-orange-100/60 rounded-lg backdrop-blur-sm hover:border-orange-200/20 md:shadow-[0_2px_8px_rgba(0,0,0,0.08)] md:hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all duration-300 bg-gradient-to-r from-orange-50 to-amber-50 mb-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Package className="h-6 w-6 text-white" />
@@ -188,7 +188,7 @@ export default function Produtos() {
 
           {/* Stats Cards Melhorados */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-            <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-0 md:shadow-[0_4px_12px_rgba(249,115,22,0.15)] md:hover:shadow-[0_6px_16px_rgba(249,115,22,0.2)] transition-all duration-300">
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -217,7 +217,7 @@ export default function Produtos() {
               <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-300 rounded-full opacity-20"></div>
             </Card>
 
-            <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-200 border-0 md:shadow-[0_4px_12px_rgba(59,130,246,0.15)] md:hover:shadow-[0_6px_16px_rgba(59,130,246,0.2)] transition-all duration-300">
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -241,7 +241,7 @@ export default function Produtos() {
               <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-blue-300 rounded-full opacity-20"></div>
             </Card>
 
-            <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 via-green-100 to-emerald-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 via-green-100 to-emerald-200 border-0 md:shadow-[0_4px_12px_rgba(16,185,129,0.15)] md:hover:shadow-[0_6px_16px_rgba(16,185,129,0.2)] transition-all duration-300">
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -265,7 +265,7 @@ export default function Produtos() {
               <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-green-300 rounded-full opacity-20"></div>
             </Card>
 
-            <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-purple-100 to-pink-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-purple-100 to-pink-200 border-0 md:shadow-[0_4px_12px_rgba(139,92,246,0.15)] md:hover:shadow-[0_6px_16px_rgba(139,92,246,0.2)] transition-all duration-300">
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -351,7 +351,7 @@ export default function Produtos() {
 
       {/* Products View */}
       {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map(product => <Card key={product.id} className="group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          {paginatedData.items.map(product => <Card key={product.id} className="group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 border-0 md:shadow-[0_4px_12px_rgba(0,0,0,0.08)] md:hover:shadow-[0_6px_16px_rgba(0,0,0,0.12)] transition-all duration-300">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-3 flex-1">
