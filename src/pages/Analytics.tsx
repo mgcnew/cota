@@ -180,8 +180,8 @@ export default function Analytics() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
-          {/* Métricas Principais Melhoradas */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* Métricas Principais - Estilo Apple */}
+          <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
             {metricas.map((metrica, index) => {
               const iconConfigs = [
                 { 
@@ -225,39 +225,37 @@ export default function Analytics() {
               const Icon = config.icon;
               
               return (
-                <Card key={metrica.titulo} className={`hover:shadow-xl transition-all duration-300 border-l-4 ${config.borderColor} bg-gradient-to-br ${config.cardBg} backdrop-blur-sm`}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className={`p-2.5 rounded-xl bg-gradient-to-br ${config.bgGradient} transition-all duration-300 hover:scale-110`}>
-                            <Icon className={`h-5 w-5 ${config.iconColor}`} />
-                          </div>
-                          <span className="text-sm font-medium text-gray-600">{metrica.titulo}</span>
+                <Card key={metrica.titulo} className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${config.bgGradient} flex items-center justify-center`}>
+                          <Icon className={`h-3.5 w-3.5 ${config.iconColor}`} />
                         </div>
-                        <div className="text-2xl font-bold text-gray-900">{metrica.valor}</div>
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{metrica.titulo}</span>
                       </div>
-                      <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
-                        metrica.tipo === 'positivo' ? config.trendColor.positive : config.trendColor.negative
+                      <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${
+                        metrica.tipo === 'positivo' ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
                       }`}>
                         {metrica.tipo === 'positivo' ? (
-                          <TrendingUp className="h-3 w-3" />
+                          <TrendingUp className={`h-2.5 w-2.5 ${metrica.tipo === 'positivo' ? 'text-green-600' : 'text-red-600'}`} />
                         ) : (
-                          <TrendingDown className="h-3 w-3" />
+                          <TrendingDown className={`h-2.5 w-2.5 ${metrica.tipo === 'positivo' ? 'text-green-600' : 'text-red-600'}`} />
                         )}
-                        <span>{metrica.variacao}</span>
+                        <span className={`text-xs font-semibold ${metrica.tipo === 'positivo' ? 'text-green-600' : 'text-red-600'}`}>{metrica.variacao}</span>
                       </div>
                     </div>
-                    <div className="mt-4 flex items-center gap-2">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className={`h-2 rounded-full transition-all duration-500 ${
+                    <div className="mb-3">
+                      <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{metrica.valor}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{metrica.descricao}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-500 ${
                           metrica.tipo === 'positivo' ? config.progressColor.positive : config.progressColor.negative
                         }`} style={{ width: '75%' }}></div>
                       </div>
-                      <span className="text-xs text-gray-500">75%</span>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-2">
-                      {metrica.descricao}
+                      <span className="text-xs font-semibold text-gray-600">75%</span>
                     </div>
                   </CardContent>
                 </Card>
