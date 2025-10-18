@@ -493,29 +493,29 @@ export default function Fornecedores() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-200">
-                  <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[30%]">Fornecedor</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[12%]">Status</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">Limite</TableHead>
-                    <TableHead className="font-semibold text-indigo-900 py-4 px-4 text-xs w-[15%]">Preço Médio</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[10%]">Cotações</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 py-4 px-4 text-xs w-[8%]">Avaliação</TableHead>
-                    <TableHead className="text-right font-semibold text-indigo-900 py-4 px-4 text-xs w-[10%]">Ações</TableHead>
+                <TableHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 border-b border-indigo-200 dark:border-gray-700">
+                  <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
+                    <TableHead className="font-semibold text-indigo-900 dark:text-gray-200 py-4 px-4 text-xs w-[30%]">Fornecedor</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[12%]">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[15%]">Limite</TableHead>
+                    <TableHead className="font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[15%]">Preço Médio</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[10%]">Cotações</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[8%]">Avaliação</TableHead>
+                    <TableHead className="text-right font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[10%]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
                           {/* Fornecedor - Largura fixa */}
                           <div className="w-[30%] flex items-center gap-3 pr-4">
-                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
-                              <Building2 className="h-4 w-4 text-indigo-600" />
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 dark:from-indigo-400/20 dark:to-blue-400/20 flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <Building2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-gray-900 text-sm truncate">{supplier.name}</div>
-                              <div className="text-xs text-gray-500 mt-1">{supplier.contact}</div>
+                              <div className="font-semibold text-gray-900 dark:text-white text-sm truncate">{supplier.name}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{supplier.contact}</div>
                             </div>
                           </div>
 
@@ -529,14 +529,14 @@ export default function Fornecedores() {
                           {/* Limite - Largura fixa, hidden on large screens */}
                           <div className="hidden lg:block w-[15%] px-2">
                             <div className="flex justify-center">
-                              <Badge variant="outline" className="bg-blue-50/80 border-blue-200/60 text-blue-700 font-medium text-xs">{supplier.limit}</Badge>
+                              <Badge variant="outline" className="bg-blue-50/80 dark:bg-blue-900/30 border-blue-200/60 dark:border-blue-700/60 text-blue-700 dark:text-blue-400 font-medium text-xs">{supplier.limit}</Badge>
                             </div>
                           </div>
 
                           {/* Preço Médio - Largura fixa */}
                           <div className="w-[15%] px-2">
                             <div className="flex justify-center">
-                              <span className="font-bold text-green-700 text-sm">{supplier.avgPrice}</span>
+                              <span className="font-bold text-green-700 dark:text-green-400 text-sm">{supplier.avgPrice}</span>
                             </div>
                           </div>
 
@@ -544,10 +544,10 @@ export default function Fornecedores() {
                           <div className="hidden sm:block w-[10%] px-2">
                             <div className="text-center">
                               <div className="flex items-center justify-center gap-1 mb-1">
-                                <FileText className="h-3 w-3 text-indigo-600" />
-                                <span className="font-semibold text-indigo-700 text-xs">{supplier.activeQuotes}</span>
+                                <FileText className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                                <span className="font-semibold text-indigo-700 dark:text-indigo-400 text-xs">{supplier.activeQuotes}</span>
                               </div>
-                              <div className="text-xs text-gray-500">{supplier.totalQuotes}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">{supplier.totalQuotes}</div>
                             </div>
                           </div>
 

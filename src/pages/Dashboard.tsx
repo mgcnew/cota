@@ -233,14 +233,14 @@ export default function Dashboard() {
         {/* Gráficos lado a lado - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Gráfico de Evolução - 2 colunas */}
-          <Card className="lg:col-span-2 bg-gradient-to-br from-purple-50/50 via-white to-blue-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-purple-300/70 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_16px_rgba(139,92,246,0.12)] rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-xl transition-all duration-500">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg shadow-md">
                     <BarChart3 className="h-4 w-4 text-white" />
                   </div>
-                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-bold">
+                  <span className="font-bold text-gray-900 dark:text-white">
                     Evolução das Cotações
                   </span>
                 </CardTitle>
@@ -366,14 +366,14 @@ export default function Dashboard() {
         {/* Economia Mensal e Cotações Recentes - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Gráfico de Economia - 2 colunas */}
-          <Card className="lg:col-span-2 bg-gradient-to-br from-emerald-50/50 via-white to-green-50/50 backdrop-blur-xl border border-gray-200/60 hover:border-emerald-300/70 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_16px_rgba(16,185,129,0.12)] rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-xl transition-all duration-500">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg shadow-md">
                     <DollarSign className="h-4 w-4 text-white" />
                   </div>
-                  <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent font-bold">
+                  <span className="font-bold text-gray-900 dark:text-white">
                     Economia Mensal
                   </span>
                 </CardTitle>

@@ -439,43 +439,43 @@ export default function Produtos() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
-                  <TableRow className="border-b-2 border-gray-100">
-                    <TableHead className="font-semibold text-gray-800 py-4 px-4 text-xs min-w-0">Produto</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Status</TableHead>
-                    <TableHead className="font-semibold text-gray-700 py-4 px-4 text-xs">Melhor Preço</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Fornecedor</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 py-4 px-4 text-xs">Cotações</TableHead>
-                    <TableHead className="text-right font-semibold text-gray-700 py-4 px-4 text-xs">Ações</TableHead>
+                <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 border-b border-orange-200 dark:border-gray-700">
+                  <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
+                    <TableHead className="font-semibold text-gray-800 dark:text-gray-200 py-4 px-4 text-xs min-w-0">Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Melhor Preço</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Fornecedor</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Cotações</TableHead>
+                    <TableHead className="text-right font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
                       <TableCell colSpan={8} className="p-3">
-                        <div className="flex items-center p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-300/70 transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-0.5">
+                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/70 transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-0.5">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 shadow-sm">
-                              <Package className="h-4 w-4 text-orange-600" />
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-gray-900 text-sm truncate">{product.name}</div>
-                              <div className="text-xs text-gray-500 md:hidden mt-1">{product.category}</div>
+                              <div className="font-semibold text-gray-900 dark:text-white text-sm truncate">{product.name}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 md:hidden mt-1">{product.category}</div>
                             </div>
                           </div>
 
                           {/* Categoria - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[15%] px-2">
-                            <Badge variant="outline" className="bg-orange-50/80 border-orange-200/60 text-orange-700 font-medium text-xs w-full justify-center">
+                            <Badge variant="outline" className="bg-orange-50/80 dark:bg-orange-900/30 border-orange-200/60 dark:border-orange-700/60 text-orange-700 dark:text-orange-400 font-medium text-xs w-full justify-center">
                               {product.category}
                             </Badge>
                           </div>
 
                           {/* Peso - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[12%] px-2">
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 font-medium text-xs w-full justify-center">
+                            <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-xs w-full justify-center">
                               {product.weight}
                             </Badge>
                           </div>
@@ -490,7 +490,7 @@ export default function Produtos() {
                           {/* Melhor Preço - Largura fixa */}
                           <div className="w-[12%] px-2">
                             <div className="flex items-center justify-center gap-2">
-                              <span className="font-bold text-green-700 text-sm">{product.lastQuotePrice}</span>
+                              <span className="font-bold text-green-700 dark:text-green-400 text-sm">{product.lastQuotePrice}</span>
                               {getTrendIcon(product.trend)}
                             </div>
                           </div>
@@ -498,28 +498,28 @@ export default function Produtos() {
                           {/* Fornecedor - Largura fixa, hidden on mobile */}
                           <div className="hidden lg:block w-[15%] px-2">
                             <div className="text-center">
-                              <span className="text-gray-700 font-medium text-sm truncate block">{product.bestSupplier}</span>
+                              <span className="text-gray-700 dark:text-gray-300 font-medium text-sm truncate block">{product.bestSupplier}</span>
                             </div>
                           </div>
 
                           {/* Cotações - Largura fixa, hidden on small screens */}
                           <div className="hidden sm:block w-[8%] px-2">
                             <div className="flex items-center justify-center gap-1">
-                              <Quote className="h-4 w-4 text-blue-600" />
-                              <span className="font-semibold text-blue-700 text-sm">{product.quotesCount}</span>
+                              <Quote className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount}</span>
                             </div>
                           </div>
 
                           {/* Ações - Largura fixa */}
                           <div className="w-[10%] pl-4">
                             <div className="flex items-center justify-end gap-2">
-                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 flex items-center justify-center">
+                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 flex items-center justify-center">
                                     <Clock className="h-4 w-4" />
                                   </Button>} />
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full">
+                                  <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>

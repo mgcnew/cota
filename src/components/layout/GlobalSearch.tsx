@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Package, Building2, FileText, ShoppingCart } from "lucide-react";
 import {
@@ -330,33 +330,33 @@ export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
       <Button
         variant="ghost"
         onClick={onClick}
-        className="relative w-full justify-start text-sm bg-white/80 backdrop-blur-xl border border-gray-200/60 hover:border-gray-300/70 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl h-10 px-4 overflow-hidden group-hover:bg-white/90"
+        className="relative w-full justify-start text-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/70 dark:hover:border-gray-600/70 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl h-10 px-4 overflow-hidden group-hover:bg-white/90 dark:group-hover:bg-gray-800/90"
       >
         {/* Efeito de vidro gloss */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 rounded-xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 dark:from-gray-700/40 dark:via-gray-800/10 dark:to-gray-700/30 rounded-xl pointer-events-none" />
         
         {/* Borda interna sutil */}
-        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 pointer-events-none" />
+        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 dark:ring-gray-600/50 pointer-events-none" />
         
         {/* Hover gradient effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 dark:from-blue-400/10 dark:to-purple-400/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
         <div className="relative flex items-center w-full z-10">
-          <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 mr-2.5 group-hover:from-blue-500/15 group-hover:to-purple-500/15 transition-all duration-300 shadow-sm">
-            <Search className="h-4 w-4 text-blue-600 group-hover:scale-105 transition-transform duration-300" />
+          <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 mr-2.5 group-hover:from-blue-500/15 group-hover:to-purple-500/15 dark:group-hover:from-blue-400/25 dark:group-hover:to-purple-400/25 transition-all duration-300 shadow-sm">
+            <Search className="h-4 w-4 text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform duration-300" />
           </div>
           
           <div className="flex-1 text-left">
-            <span className="hidden md:inline-flex text-gray-600 group-hover:text-gray-800 font-medium text-sm transition-colors duration-300">
+            <span className="hidden md:inline-flex text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 font-medium text-sm transition-colors duration-300">
               Buscar cotações, produtos, fornecedores...
             </span>
-            <span className="md:hidden text-gray-600 group-hover:text-gray-800 font-medium text-sm transition-colors duration-300">
+            <span className="md:hidden text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 font-medium text-sm transition-colors duration-300">
               Buscar...
             </span>
           </div>
           
           <div className="flex items-center gap-1 ml-2">
-            <kbd className="hidden sm:inline-flex h-6 min-w-[24px] select-none items-center justify-center rounded-md border border-gray-200/60 bg-gradient-to-b from-white to-gray-50/80 px-1.5 font-mono text-[10px] font-medium text-gray-500 shadow-sm backdrop-blur-sm">
+            <kbd className="hidden sm:inline-flex h-6 min-w-[24px] select-none items-center justify-center rounded-md border border-gray-200/60 dark:border-gray-600/60 bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-700 dark:to-gray-800/80 px-1.5 font-mono text-[10px] font-medium text-gray-500 dark:text-gray-400 shadow-sm backdrop-blur-sm">
               K
             </kbd>
           </div>

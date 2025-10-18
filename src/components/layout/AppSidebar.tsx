@@ -145,21 +145,21 @@ function MobileMoreButton({
         </DialogHeader>
 
         <div className="p-4 max-h-[70vh] overflow-y-auto">
-          {/* SeÃ§Ã£o Principal - NavegaÃ§Ã£o */}
+          {/* Seção Principal - Navegação */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
-              NavegaÃ§Ã£o
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-1">
+              Navegação
             </h3>
             <div className="grid grid-cols-1 gap-2">
               {remainingItems.map((item, index) => {
               const isItemActive = location.pathname === item.url || item.url === "/" && location.pathname === "/";
               const itemColor = colors[(index + 4) % colors.length];
-              return <NavLink key={item.title} to={item.url} end={item.url === "/"} onClick={() => setOpen(false)} className={cn("flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-[1.02] active:scale-95", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-lg text-white ring-2 ring-white/20` : "bg-white/80 hover:bg-white hover:shadow-md text-gray-700 hover:text-gray-900 border border-gray-200/60 hover:border-blue-300")}>
+              return <NavLink key={item.title} to={item.url} end={item.url === "/"} onClick={() => setOpen(false)} className={cn("flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-[1.02] active:scale-95", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-lg text-white ring-2 ring-white/20 dark:ring-white/10` : "bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700/80 hover:shadow-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-blue-300 dark:hover:border-blue-500")}>
                     <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm", isItemActive ? "bg-white/20 backdrop-blur-sm" : `bg-gradient-to-br ${itemColor.bg} group-hover:scale-110`)}>
                       <Icon icon={item.icon} width="16" height="16" className="transition-all duration-200 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className={cn("font-medium text-sm transition-all duration-200 truncate", isItemActive ? "text-white" : "text-gray-900 group-hover:text-blue-900")}>
+                      <div className={cn("font-medium text-sm transition-all duration-200 truncate", isItemActive ? "text-white" : "text-gray-900 dark:text-gray-200 group-hover:text-blue-900 dark:group-hover:text-blue-300")}>
                         {item.title}
                       </div>
                     </div>
@@ -168,10 +168,10 @@ function MobileMoreButton({
             </div>
           </div>
 
-          {/* SeÃ§Ã£o AÃ§Ãµes RÃ¡pidas */}
+          {/* Seção Ações Rápidas */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
-              AÃ§Ãµes RÃ¡pidas
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-1">
+              Ações Rápidas
             </h3>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => {
@@ -192,22 +192,22 @@ function MobileMoreButton({
             </div>
           </div>
 
-          {/* SeÃ§Ã£o ConfiguraÃ§Ãµes */}
+          {/* Seção Configurações */}
           <div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-1">
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-1">
               Sistema
             </h3>
             <div className="space-y-2">
               <button onClick={() => {
               setOpen(false);
               window.location.href = '/configuracoes';
-            }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/80 hover:bg-white hover:shadow-md text-gray-700 hover:text-gray-900 border border-gray-200/60 hover:border-gray-300 transition-all duration-200 hover:scale-[1.02] active:scale-95">
+            }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 hover:scale-[1.02] active:scale-95">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
                   <Icon icon="fluent:settings-32-filled" width="16" height="16" className="text-white" />
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="font-medium text-sm text-gray-900">Configurações</div>
-                  <div className="text-xs text-gray-500">Ajustes do sistema</div>
+                  <div className="font-medium text-sm text-gray-900 dark:text-white">Configurações</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Ajustes do sistema</div>
                 </div>
               </button>
             </div>
