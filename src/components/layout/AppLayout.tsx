@@ -18,14 +18,14 @@ export function AppLayout() {
       {/* Main Content Area */}
       <div className="flex flex-col w-full min-h-screen relative">
         {/* Header Fixo Minimalista */}
-        <header className="fixed top-1 right-1 left-1 md:left-[5.5rem] z-40 h-12 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/70 dark:hover:border-gray-600/70 rounded-xl transition-all duration-500 ease-out">
+        <header className="fixed top-1 right-1 left-1 md:right-1 md:left-[5.5rem] z-40 h-12 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/70 dark:hover:border-gray-600/70 rounded-xl transition-all duration-500 ease-out">
           {/* Efeito de vidro gloss - Idêntico à sidebar */}
           <>
             <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 dark:from-gray-800/40 dark:via-gray-900/10 dark:to-gray-800/30 rounded-xl pointer-events-none"></div>
             <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 dark:ring-gray-700/50 pointer-events-none"></div>
           </>
 
-          <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-6 w-full max-w-full gap-4 transition-all duration-500">
+          <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-4 w-full max-w-full gap-4 transition-all duration-500">
             {/* Global Search - Centralizada com bom espaçamento */}
             <div className="flex-1 flex items-center justify-center max-w-2xl mx-auto">
               <div className="w-full max-w-xl">
@@ -52,7 +52,7 @@ export function AppLayout() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative pt-16 pl-0 md:pl-[5rem] pr-1">
+        <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative pt-[3.75rem] pl-0 md:pl-[5rem] pr-0">
           <div className="min-h-full bg-white/40 dark:bg-gray-900/40 backdrop-blur-sm w-full max-w-full">
             <div className="w-full max-w-full">
               <SmoothPageTransition>
