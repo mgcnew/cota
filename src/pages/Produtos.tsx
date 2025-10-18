@@ -166,26 +166,6 @@ export default function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-orange-100/60 rounded-lg backdrop-blur-sm hover:border-orange-200/20 md:shadow-[0_2px_8px_rgba(0,0,0,0.08)] md:hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all duration-300 bg-gradient-to-r from-orange-50 to-amber-50 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Package className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-900 to-amber-700 bg-clip-text text-transparent">
-                  Produtos
-                </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 border border-orange-200 shadow-sm">
-                    <Scale className="h-3 w-3" />
-                    Catálogo de Produtos
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Stats Cards Melhorados */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
             <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 border-0 md:shadow-[0_4px_12px_rgba(249,115,22,0.15)] md:hover:shadow-[0_6px_16px_rgba(249,115,22,0.2)] transition-all duration-300">

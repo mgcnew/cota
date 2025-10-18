@@ -1,14 +1,30 @@
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
 import { Bell, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
+
+// Mapeamento de títulos por rota
+const pageTitles: Record<string, string> = {
+  "/": "Dashboard",
+  "/produtos": "Produtos",
+  "/fornecedores": "Fornecedores",
+  "/cotacoes": "Cotações",
+  "/pedidos": "Pedidos",
+  "/historico": "Histórico",
+  "/analytics": "Analytics",
+  "/relatorios": "Relatórios",
+  "/configuracoes": "Configurações"
+};
+
 export function AppLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
+  const pageTitle = pageTitles[location.pathname] || "";
 
   return (
     <div className="min-h-screen w-full bg-gray-50 md:bg-gradient-to-br md:from-gray-50 md:via-slate-50 md:to-stone-50 dark:bg-gray-900 dark:md:from-gray-900 dark:md:via-gray-950 dark:md:to-slate-950 overflow-x-hidden">
@@ -26,8 +42,15 @@ export function AppLayout() {
           </>
 
           <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-4 w-full max-w-full gap-4 transition-opacity duration-200 md:transition-all md:duration-300">
+            {/* Título da Página - Lado Esquerdo */}
+            {pageTitle && (
+              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent hidden md:block">
+                {pageTitle}
+              </h1>
+            )}
+            
             {/* Global Search - Centralizada com bom espaçamento */}
-            <div className="flex-1 flex items-center justify-center max-w-2xl mx-auto">
+            <div className={`flex-1 flex items-center ${pageTitle ? 'justify-end md:justify-center' : 'justify-center'} max-w-2xl ${pageTitle ? 'md:mx-0' : 'mx-auto'}`}>
               <div className="w-full max-w-xl">
                 <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
               </div>
