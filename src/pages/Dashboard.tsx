@@ -83,101 +83,149 @@ export default function Dashboard() {
   };
   return <PageWrapper>
       <div className="page-container">
-        {/* Métricas Principais */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 border-0 shadow-[0_4px_12px_rgba(59,130,246,0.15)] hover:shadow-[0_6px_16px_rgba(59,130,246,0.2)] hover:brightness-95 transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <p className="text-blue-700 text-sm font-semibold tracking-wide uppercase">Cotações Ativas</p>
-                    <p className="text-3xl font-bold text-blue-900">
-                      {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : metrics.cotacoesAtivas}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
-                        <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                        <span className="text-xs font-medium text-green-700">+12%</span>
-                      </div>
-                      <span className="text-xs text-blue-600">vs mês anterior</span>
+        {/* Métricas Principais - Estilo Apple */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 overflow-visible">
+          {/* Card 1: Cotações Ativas */}
+          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+              <CardContent className="p-4">
+                {/* Header com ícone minimalista */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                      <ShoppingCart className="h-3.5 w-3.5 text-blue-600" />
                     </div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
                   </div>
-                  <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
-                    <ShoppingCart className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                    <TrendingUp className="h-2.5 w-2.5 text-green-600" />
+                    <span className="text-xs font-semibold text-green-600">12%</span>
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-blue-300 rounded-full opacity-20"></div>
+
+                {/* Valor principal */}
+                <div className="mb-3">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.cotacoesAtivas}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ativas no momento</p>
+                </div>
+
+                {/* Mini gráfico de barras */}
+                <div className="flex items-end gap-0.5 h-8">
+                  {[40, 65, 45, 80, 55, 90, 70].map((height, i) => (
+                    <div key={i} className="flex-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
+                  ))}
+                </div>
               </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-200 border-0 shadow-[0_4px_12px_rgba(16,185,129,0.15)] hover:shadow-[0_6px_16px_rgba(16,185,129,0.2)] hover:brightness-95 transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <p className="text-emerald-700 text-sm font-semibold tracking-wide uppercase">Economia Gerada</p>
-                    <p className="text-3xl font-bold text-emerald-900">
-                      {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : `R$ ${metrics.economiaGerada?.toLocaleString('pt-BR') || '0'}`}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
-                        <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                        <span className="text-xs font-medium text-green-700">+18%</span>
-                      </div>
-                      <span className="text-xs text-emerald-600">vs mês anterior</span>
+          {/* Card 2: Economia Gerada */}
+          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                      <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
                     </div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
                   </div>
-                  <div className="p-3 bg-emerald-600 rounded-xl shadow-lg">
-                    <DollarSign className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                    <TrendingUp className="h-2.5 w-2.5 text-green-600" />
+                    <span className="text-xs font-semibold text-green-600">18%</span>
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-emerald-300 rounded-full opacity-20"></div>
+
+                <div className="mb-3">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `R$ ${metrics.economiaGerada?.toLocaleString('pt-BR') || '0'}`}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">economizados</p>
+                </div>
+
+                {/* Mini gráfico de linha */}
+                <div className="relative h-8">
+                  <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.3" />
+                        <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M 0,30 L 15,25 L 30,28 L 45,15 L 60,20 L 75,10 L 90,12 L 100,8" fill="none" stroke="rgb(16, 185, 129)" strokeWidth="2" />
+                    <path d="M 0,30 L 15,25 L 30,28 L 45,15 L 60,20 L 75,10 L 90,12 L 100,8 L 100,40 L 0,40 Z" fill="url(#emeraldGradient)" />
+                  </svg>
+                </div>
               </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-violet-100 to-violet-200 border-0 shadow-[0_4px_12px_rgba(139,92,246,0.15)] hover:shadow-[0_6px_16px_rgba(139,92,246,0.2)] hover:brightness-95 transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <p className="text-violet-700 text-sm font-semibold tracking-wide uppercase">Fornecedores</p>
-                    <p className="text-3xl font-bold text-violet-900">
-                      {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : metrics.fornecedores}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
-                        <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                        <span className="text-xs font-medium text-green-700">+3</span>
-                      </div>
-                      <span className="text-xs text-violet-600">novos este mês</span>
+          {/* Card 3: Fornecedores */}
+          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                      <Users className="h-3.5 w-3.5 text-violet-600" />
                     </div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
                   </div>
-                  <div className="p-3 bg-violet-600 rounded-xl shadow-lg">
-                    <Users className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-violet-50 dark:bg-violet-900/20 rounded-full">
+                    <span className="text-xs font-semibold text-violet-600">+3</span>
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-violet-300 rounded-full opacity-20"></div>
+
+                <div className="mb-3">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.fornecedores}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">parceiros</p>
+                </div>
+
+                {/* Mini indicador circular */}
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full" style={{ width: '85%' }}></div>
+                  </div>
+                  <span className="text-xs font-semibold text-violet-600">85%</span>
+                </div>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">taxa de atividade</p>
               </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-amber-100 to-amber-200 border-0 shadow-[0_4px_12px_rgba(245,158,11,0.15)] hover:shadow-[0_6px_16px_rgba(245,158,11,0.2)] hover:brightness-95 transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <p className="text-amber-700 text-sm font-semibold tracking-wide uppercase">Taxa Aprovação</p>
-                    <p className="text-3xl font-bold text-amber-900">
-                      {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : `${taxaAprovacao}%`}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center px-2 py-1 bg-green-100 rounded-full">
-                        <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                        <span className="text-xs font-medium text-green-700">+5%</span>
-                      </div>
-                      <span className="text-xs text-amber-600">vs mês anterior</span>
+          {/* Card 4: Taxa de Aprovação */}
+          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                      <Target className="h-3.5 w-3.5 text-amber-600" />
                     </div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aprovação</span>
                   </div>
-                  <div className="p-3 bg-amber-600 rounded-xl shadow-lg">
-                    <Target className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                    <TrendingUp className="h-2.5 w-2.5 text-green-600" />
+                    <span className="text-xs font-semibold text-green-600">5%</span>
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-amber-300 rounded-full opacity-20"></div>
+
+                <div className="mb-3">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${taxaAprovacao}%`}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">de aprovação</p>
+                </div>
+
+                {/* Mini gráfico circular */}
+                <div className="flex items-center justify-center">
+                  <div className="relative w-12 h-12">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(243, 244, 246)" strokeWidth="3" />
+                      <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(245, 158, 11)" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 20 * (taxaAprovacao / 100)} ${2 * Math.PI * 20}`} strokeLinecap="round" className="transition-all duration-1000" />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-amber-600">{taxaAprovacao}%</span>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
           </Card>
         </div>
