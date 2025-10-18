@@ -217,9 +217,9 @@ export default function Fornecedores() {
   return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        {/* Header - Mesma largura do topbar */}
-        <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-indigo-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-indigo-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-indigo-50 to-blue-50">
+        <div className="page-container">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-indigo-100/60 rounded-lg backdrop-blur-sm hover:border-indigo-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-indigo-50 to-blue-50 mb-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Building2 className="h-6 w-6 text-white" />
@@ -237,113 +237,110 @@ export default function Fornecedores() {
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="page-container px-0">
-
-      {/* Stats Cards Melhorados */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-indigo-500 bg-gradient-to-br from-indigo-50/50 to-blue-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 relative">
-                    <Building2 className="h-5 w-5 text-indigo-600" />
+          {/* Stats Cards Melhorados */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-indigo-500 bg-gradient-to-br from-indigo-50/50 to-blue-50/30">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 relative">
+                        <Building2 className="h-5 w-5 text-indigo-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Total de Fornecedores</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Total de Fornecedores</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-              </div>
-              <div className="flex items-center gap-1 text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+{Math.floor(stats.total * 0.15)}</span>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center gap-2">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-indigo-600 h-2 rounded-full transition-all duration-500" style={{
-                    width: '90%'
-                  }}></div>
-              </div>
-              <span className="text-xs text-gray-500">90%</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
+                  <div className="flex items-center gap-1 text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">
+                    <TrendingUp className="h-3 w-3" />
+                    <span className="text-xs font-medium">+{Math.floor(stats.total * 0.15)}</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Fornecedores Ativos</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.active}</div>
-              </div>
-              <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+{Math.floor(stats.active * 0.1)}</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(stats.active / stats.total * 100)}% da base ativa • {stats.total - stats.active} inativos
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-cyan-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 relative">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-indigo-600 h-2 rounded-full transition-all duration-500" style={{
+                      width: '90%'
+                    }}></div>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Limite Total</span>
+                  <span className="text-xs text-gray-500">90%</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.totalLimit}</div>
-              </div>
-              <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+12%</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              Capacidade total de crédito disponível
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50/50 to-amber-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 relative">
-                    <FileText className="h-5 w-5 text-orange-600" />
+            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
+                        <TrendingUp className="h-5 w-5 text-green-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Fornecedores Ativos</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.active}</div>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Cotações Ativas</span>
+                  <div className="flex items-center gap-1 text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                    <TrendingUp className="h-3 w-3" />
+                    <span className="text-xs font-medium">+{Math.floor(stats.active * 0.1)}</span>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{stats.activeQuotes}</div>
-              </div>
-              <div className="flex items-center gap-1 text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3" />
-                <span className="text-xs font-medium">+25%</span>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(stats.activeQuotes * 0.7)} aguardando • {Math.floor(stats.activeQuotes * 0.3)} em análise
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <div className="mt-4 text-xs text-gray-500">
+                  {Math.floor(stats.active / stats.total * 100)}% da base ativa • {stats.total - stats.active} inativos
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-3 md:p-4">
+            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-cyan-50/30">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 relative">
+                        <DollarSign className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Limite Total</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.totalLimit}</div>
+                  </div>
+                  <div className="flex items-center gap-1 text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    <TrendingUp className="h-3 w-3" />
+                    <span className="text-xs font-medium">+12%</span>
+                  </div>
+                </div>
+                <div className="mt-4 text-xs text-gray-500">
+                  Capacidade total de crédito disponível
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50/50 to-amber-50/30">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 relative">
+                        <FileText className="h-5 w-5 text-orange-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">Cotações Ativas</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{stats.activeQuotes}</div>
+                  </div>
+                  <div className="flex items-center gap-1 text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                    <TrendingUp className="h-3 w-3" />
+                    <span className="text-xs font-medium">+25%</span>
+                  </div>
+                </div>
+                <div className="mt-4 text-xs text-gray-500">
+                  {Math.floor(stats.activeQuotes * 0.7)} aguardando • {Math.floor(stats.activeQuotes * 0.3)} em análise
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filters */}
+          <Card>
+            <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
 

@@ -169,15 +169,16 @@ export default function Historico() {
     pedidosCriados: historico.filter(h => h.tipo === "pedido" && h.acao.includes("criado")).length,
     economiaTotal: historico.filter(h => h.economia).reduce((acc, h) => acc + parseFloat(h.economia.replace("%", "")), 0)
   };
+
   if (loading) {
     return <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>;
   }
+
   return <div className="page-container">
-      {/* Header - Mesma largura do topbar */}
-      <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-slate-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-gray-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-slate-50 to-gray-50">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-slate-100/60 rounded-lg backdrop-blur-sm hover:border-gray-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-slate-50 to-gray-50 mb-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-r from-slate-600 to-gray-600 rounded-xl flex items-center justify-center shadow-lg">
               <History className="h-6 w-6 text-white" />
@@ -210,9 +211,8 @@ export default function Historico() {
             </div>
           </div>
         </div>
-      </div>
-          
-      <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 px-2 md:px-4 mb-6">
+
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 mb-6">
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className={`bg-white/70 backdrop-blur-sm border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 text-xs sm:text-sm ${dataInicio || dataFim ? 'ring-2 ring-slate-500 bg-slate-50 border-slate-300' : ''}`}>

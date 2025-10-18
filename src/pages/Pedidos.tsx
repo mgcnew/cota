@@ -221,9 +221,9 @@ export default function Pedidos() {
   const paginatedData = paginate(filteredPedidos);
   const totalValue = pedidos.filter(p => p.status !== "cancelado").reduce((acc, p) => acc + parseFloat(p.total.replace("R$ ", "").replace(".", "").replace(",", ".")), 0);
   return <PageWrapper>
-      {/* Header - Mesma largura do topbar */}
-      <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-pink-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-pink-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-pink-50 to-rose-50">
+      <div className="page-container">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-pink-100/60 rounded-lg backdrop-blur-sm hover:border-pink-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-pink-50 to-rose-50 mb-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
               <ShoppingCart className="h-6 w-6 text-white" />
@@ -241,45 +241,42 @@ export default function Pedidos() {
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="page-container px-0">
-
-      {/* Statistics Cards Melhorados */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-yellow-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 relative">
-                    <Clock className="h-5 w-5 text-amber-600" />
+        {/* Statistics Cards Melhorados */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-yellow-50/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 relative">
+                      <Clock className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-600">Pedidos Ativos</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Pedidos Ativos</span>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
+                <div className="flex items-center gap-1 text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
+                  <Clock className="h-3 w-3" />
+                  <span className="text-xs font-medium">Em andamento</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                <Clock className="h-3 w-3" />
-                <span className="text-xs font-medium">Em andamento</span>
+              <div className="mt-4 flex items-center gap-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-amber-600 h-2 rounded-full transition-all duration-500" style={{
+                    width: '65%'
+                  }}></div>
+                </div>
+                <span className="text-xs text-gray-500">65%</span>
               </div>
-            </div>
-            <div className="mt-4 flex items-center gap-2">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-amber-600 h-2 rounded-full transition-all duration-500" style={{
-                width: '65%'
-              }}></div>
-              </div>
-              <span className="text-xs text-gray-500">65%</span>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 relative">
@@ -295,16 +292,16 @@ export default function Pedidos() {
                 <CheckCircle className="h-3 w-3" />
                 <span className="text-xs font-medium">Concluídos</span>
               </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              {Math.floor(pedidos.filter(p => p.status === "entregue").length / pedidos.length * 100)}% de taxa de entrega
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+              <div className="mt-4 text-xs text-gray-500">
+                {Math.floor(pedidos.filter(p => p.status === "entregue").length / pedidos.length * 100)}% de taxa de entrega
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 relative">
@@ -322,18 +319,18 @@ export default function Pedidos() {
                 <DollarSign className="h-3 w-3" />
                 <span className="text-xs font-medium">+15%</span>
               </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              Valor médio: R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', {
-              minimumFractionDigits: 2
-            }) : '0,00'}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+              <div className="mt-4 text-xs text-gray-500">
+                Valor médio: R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2
+              }) : '0,00'}
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 relative">
@@ -349,17 +346,17 @@ export default function Pedidos() {
                 <Package className="h-3 w-3" />
                 <span className="text-xs font-medium">Média</span>
               </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              Total de {pedidos.reduce((acc, p) => acc + p.itens, 0)} itens em {pedidos.length} pedidos
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </div>
+              <div className="mt-4 text-xs text-gray-500">
+                Total de {pedidos.reduce((acc, p) => acc + p.itens, 0)} itens em {pedidos.length} pedidos
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-3 md:p-4">
+        {/* Filters */}
+        <Card>
+          <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
 

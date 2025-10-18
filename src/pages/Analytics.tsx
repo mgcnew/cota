@@ -144,22 +144,21 @@ export default function Analytics() {
 
   return (
     <div className="page-container">
-      {/* Header - Mesma largura do topbar */}
-      <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-green-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-green-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-green-50 to-emerald-50">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-              <TrendingUp className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-900 to-emerald-700 bg-clip-text text-transparent">
-                Analytics
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200 shadow-sm">
-                  <BarChart3 className="h-3 w-3" />
-                  Dados Analíticos
-                </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-green-100/60 rounded-lg backdrop-blur-sm hover:border-green-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-green-50 to-emerald-50 mb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+            <TrendingUp className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-900 to-emerald-700 bg-clip-text text-transparent">
+              Analytics
+            </h1>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200 shadow-sm">
+                <BarChart3 className="h-3 w-3" />
+                Dados Analíticos
+              </div>
 
                 {startDate && endDate && (
                   <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
@@ -182,19 +181,10 @@ export default function Analytics() {
                     <span className="sm:hidden">{selectedFornecedores.length + selectedProdutos.length}F</span>
                   </div>
                 )}
-              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 px-2 md:px-4">
-        {/* Cards content will be here */}
-      </div>
-
-      {/* Rest of content */}
-      <div className="px-2 md:px-4">
 
       {/* Progress Bar */}
       {isGenerating && (
@@ -443,7 +433,6 @@ export default function Analytics() {
           </div>
         </TabsContent>
       </Tabs>
-      </div>
     </div>
   );
 }

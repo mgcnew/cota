@@ -381,9 +381,8 @@ export default function Relatorios() {
     return <LoadingSkeleton />;
   }
   return <div className="page-container">
-      {/* Header - Mesma largura do topbar */}
-      <div className="mx-2 md:mx-0 md:ml-2 md:mr-2 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 md:px-6 pt-6 pb-4 border border-purple-100/60 rounded-lg backdrop-blur-sm hover:border hover:border-purple-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-purple-50 to-violet-50">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 md:p-3 border border-purple-100/60 rounded-lg backdrop-blur-sm hover:border-purple-200/20 shadow-sm transition-all duration-300 bg-gradient-to-r from-purple-50 to-violet-50 mb-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
               <FileText className="h-6 w-6 text-white" />
@@ -402,9 +401,8 @@ export default function Relatorios() {
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex flex-wrap gap-3 px-2 md:px-4 mb-6">
+      <div className="flex flex-wrap gap-3 mb-6">
             <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="bg-white/70 backdrop-blur-sm border-purple-200 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 flex items-center gap-2">
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               Atualizar
