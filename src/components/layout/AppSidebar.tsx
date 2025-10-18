@@ -272,14 +272,14 @@ export function AppSidebar() {
                   const itemColor = colors[index] || colors[0];
                   return <Tooltip key={item.title}>
                         <TooltipTrigger asChild>
-                          <NavLink to={item.url} end={item.url === "/"} className={cn("flex items-center justify-center transition-all duration-500 group relative rounded-lg h-12 w-12 p-2", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-[0_4px_16px_${itemColor.shadowColor}] border border-white/40` : "text-gray-600 hover:text-gray-800 hover:bg-white/80 hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:border-gray-200/60 bg-white/40 border border-transparent hover:border-gray-200/50")}>
+                          <NavLink to={item.url} end={item.url === "/"} className={cn("flex items-center justify-center transition-all duration-500 group relative rounded-lg h-12 w-12 p-2", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-[0_4px_16px_${itemColor.shadowColor}] border border-white/40 dark:border-white/20` : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:border-gray-200/60 dark:hover:border-gray-600 bg-white/40 dark:bg-gray-800/40 border border-transparent hover:border-gray-200/50 dark:hover:border-gray-600/50")}>
                             {/* Indicador de ativo */}
                             {isItemActive && <div className="absolute -left-0.5 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-white rounded-r-full shadow-[0_2px_8px_rgba(255,255,255,0.6)] transition-all duration-500"></div>}
 
 
 
                             {/* Ícone - Estilo Colorido */}
-                            <Icon icon={item.icon} className={cn("transition-all duration-500 flex-shrink-0", isItemActive ? "text-white drop-shadow-lg" : "text-gray-600 group-hover:text-gray-800")} width="20" height="20" />
+                            <Icon icon={item.icon} className={cn("transition-all duration-500 flex-shrink-0", isItemActive ? "text-white drop-shadow-lg" : "text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200")} width="20" height="20" />
                           </NavLink>
                         </TooltipTrigger>
                         <TooltipContent side="right" sideOffset={15} className="font-medium bg-white text-gray-900 border-gray-200 shadow-xl z-[99999]">
