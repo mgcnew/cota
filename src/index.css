@@ -373,14 +373,14 @@
   /* Large screens: padding proporcional para telas grandes */
   @media (min-width: 1024px) {
     .page-container {
-      @apply px-1 pt-4 pb-8;
+      @apply pl-1 pr-0 pt-4 pb-8;
     }
   }
   
   /* Extra large screens: padding balanceado para telas muito grandes */
   @media (min-width: 1280px) {
     .page-container {
-      @apply px-1 pt-4 pb-10;
+      @apply pl-1 pr-0 pt-4 pb-10;
     }
   }
   
