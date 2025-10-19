@@ -238,9 +238,9 @@ export default function Analytics() {
                         metrica.tipo === 'positivo' ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
                       }`}>
                         {metrica.tipo === 'positivo' ? (
-                          <TrendingUp className={`h-2.5 w-2.5 ${metrica.tipo === 'positivo' ? 'text-green-600' : 'text-red-600'}`} />
+                          <TrendingUp className={`h-2.5 w-2.5 text-green-600`} />
                         ) : (
-                          <TrendingDown className={`h-2.5 w-2.5 ${metrica.tipo === 'positivo' ? 'text-green-600' : 'text-red-600'}`} />
+                          <TrendingDown className={`h-2.5 w-2.5 text-red-600`} />
                         )}
                         <span className={`text-xs font-semibold ${metrica.tipo === 'positivo' ? 'text-green-600' : 'text-red-600'}`}>{metrica.variacao}</span>
                       </div>
