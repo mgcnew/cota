@@ -91,7 +91,7 @@ export default function Cotacoes() {
     
     const valores = cotacao.fornecedoresParticipantes
       .map(f => {
-        const valor = f.valor_total || f.valor || 0;
+        const valor = f.valorOferecido || 0;
         return typeof valor === 'number' ? valor : parseFloat(String(valor).replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
       })
       .filter(v => v > 0);
@@ -136,7 +136,7 @@ export default function Cotacoes() {
     const pendentesMais24h = cotacoes.filter(c => {
       if (c.status !== "pendente") return false;
       try {
-        const dataInicio = new Date(c.data_inicio);
+        const dataInicio = new Date(c.dataInicio);
         return dataInicio < umDiaAtras;
       } catch {
         return false;
@@ -150,7 +150,7 @@ export default function Cotacoes() {
       if (cotacao.fornecedoresParticipantes && cotacao.fornecedoresParticipantes.length >= 2) {
         const valores = cotacao.fornecedoresParticipantes
           .map(f => {
-            const valor = f.valor_total || f.valor || 0;
+            const valor = f.valorOferecido || 0;
             return typeof valor === 'number' ? valor : parseFloat(String(valor).replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
           })
           .filter(v => v > 0);
