@@ -174,14 +174,32 @@ export default function Relatorios() {
       const suppliers = suppliersResult.data || [];
       const products = productsResult.data || [];
 
-      // Calcular métricas de forma otimizada
-      const metricsData = quotes.reduce((acc, quote: any) => {
-        if (quote.quote_suppliers && quote.quote_suppliers.length > 0) {
-          const valores = quote.quote_suppliers.filter((qs: any) => qs.valor_oferecido > 0).map((qs: any) => qs.valor_oferecido);
-          if (valores.length >= 2) {
-            const melhorPreco = Math.min(...valores);
-            const piorPreco = Math.max(...valores);
-            acc.economiaTotal += piorPreco - melhorPreco;
+      // Calcular métricas de forma otimizada - APENAS cotações finalizadas
+      const quotesFinalizadas = quotes.filter((q: any) => 
+        q.status === 'finalizada' || q.status === 'concluida'
+      );
+      
+      const metricsData = quotesFinalizadas.reduce((acc, quote: any) => {
+        if (quote.quote_suppliers && quote.quote_suppliers.length >= 2) {
+          // Agrupar por fornecedor e calcular valor total de cada um
+          const fornecedoresMap = new Map();
+          
+          quote.quote_suppliers.forEach((supplier: any) => {
+            const supplierId = supplier.supplier_id;
+            const valorTotal = supplier.valor_oferecido || 0;
+            
+            if (!fornecedoresMap.has(supplierId)) {
+              fornecedoresMap.set(supplierId, 0);
+            }
+            fornecedoresMap.set(supplierId, fornecedoresMap.get(supplierId) + valorTotal);
+          });
+          
+          // Calcular economia: diferença entre maior e menor valor total
+          const valoresFornecedores = Array.from(fornecedoresMap.values()).filter(v => v > 0);
+          if (valoresFornecedores.length >= 2) {
+            const menorValorTotal = Math.min(...valoresFornecedores);
+            const maiorValorTotal = Math.max(...valoresFornecedores);
+            acc.economiaTotal += maiorValorTotal - menorValorTotal;
             acc.cotacoesComEconomia++;
           }
         }

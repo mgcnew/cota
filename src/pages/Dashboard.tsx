@@ -8,6 +8,7 @@ import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loade
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
+
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6m');
   const [evolutionPeriod, setEvolutionPeriod] = useState('7d');
@@ -18,7 +19,12 @@ export default function Dashboard() {
       cotacoesAtivas: 0,
       fornecedores: 0,
       economiaGerada: 0,
-      produtosCotados: 0
+      produtosCotados: 0,
+      taxaAtividade: 0,
+      taxaAprovacao: 0,
+      crescimentoCotacoes: 0,
+      crescimentoEconomia: 0,
+      ultimos7DiasCotacoes: [0, 0, 0, 0, 0, 0, 0]
     },
     recentQuotes = [],
     topSuppliers = [],
@@ -26,7 +32,6 @@ export default function Dashboard() {
     dailyData = [],
     isLoading = false
   } = useDashboard() || {};
-  const taxaAprovacao = recentQuotes.length > 0 ? Math.round(recentQuotes.filter(q => q.status === 'aprovada' || q.status === 'approved').length / recentQuotes.length * 100) : 0;
 
   // Função para filtrar dados por período
   const filterDataByPeriod = (period: string) => {
@@ -96,10 +101,12 @@ export default function Dashboard() {
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-green-600" />
-                    <span className="text-xs font-semibold text-green-600">12%</span>
-                  </div>
+                  {metrics.crescimentoCotacoes !== 0 && (
+                    <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${metrics.crescimentoCotacoes > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                      <TrendingUp className={`h-2.5 w-2.5 ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
+                      <span className={`text-xs font-semibold ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoCotacoes)}%</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Valor principal */}
@@ -110,11 +117,41 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ativas no momento</p>
                 </div>
 
-                {/* Mini gráfico de barras */}
+                {/* Mini gráfico de barras - Últimos 7 dias */}
                 <div className="flex items-end gap-0.5 h-8">
-                  {[40, 65, 45, 80, 55, 90, 70].map((height, i) => (
-                    <div key={i} className="flex-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
-                  ))}
+                  {metrics.ultimos7DiasCotacoes.map((cotacoes, i) => {
+                    const maxValue = Math.max(...metrics.ultimos7DiasCotacoes, 1);
+                    const heightPercent = maxValue > 0 ? (cotacoes / maxValue) * 100 : 20;
+                    const cores = [
+                      'from-blue-500 to-blue-400',
+                      'from-violet-500 to-violet-400',
+                      'from-purple-500 to-purple-400',
+                      'from-indigo-500 to-indigo-400',
+                      'from-cyan-500 to-cyan-400',
+                      'from-sky-500 to-sky-400',
+                      'from-blue-600 to-blue-500'
+                    ];
+                    // Calcular o dia correspondente
+                    const hoje = new Date();
+                    const dia = new Date(hoje.getTime() - (6 - i) * 24 * 60 * 60 * 1000);
+                    const diaNome = dia.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+                    
+                    return (
+                      <div 
+                        key={i} 
+                        className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t opacity-60 hover:opacity-100 transition-all duration-300 relative group`} 
+                        style={{ height: `${heightPercent}%`, minHeight: '8px' }}
+                        title={`${diaNome} - ${cotacoes} cotações`}
+                      >
+                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-lg border border-gray-200 dark:border-gray-700">
+                          <div className="text-center">
+                            <div className="text-gray-500 dark:text-gray-400">{diaNome}</div>
+                            <div className="font-bold">{cotacoes} {cotacoes === 1 ? 'cotação' : 'cotações'}</div>
+                          </div>
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
           </Card>
@@ -129,10 +166,12 @@ export default function Dashboard() {
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-green-600" />
-                    <span className="text-xs font-semibold text-green-600">18%</span>
-                  </div>
+                  {metrics.crescimentoEconomia !== 0 && (
+                    <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${metrics.crescimentoEconomia > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                      <TrendingUp className={`h-2.5 w-2.5 ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
+                      <span className={`text-xs font-semibold ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoEconomia)}%</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mb-3">
@@ -183,9 +222,9 @@ export default function Dashboard() {
                 {/* Mini indicador circular */}
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full" style={{ width: '85%' }}></div>
+                    <div className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAtividade}%` }}></div>
                   </div>
-                  <span className="text-xs font-semibold text-violet-600">85%</span>
+                  <span className="text-xs font-semibold text-violet-600">{isLoading ? '-' : `${metrics.taxaAtividade}%`}</span>
                 </div>
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">taxa de atividade</p>
               </CardContent>
@@ -209,7 +248,7 @@ export default function Dashboard() {
 
                 <div className="mb-3">
                   <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${taxaAprovacao}%`}
+                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${metrics.taxaAprovacao}%`}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">de aprovação</p>
                 </div>
@@ -219,10 +258,10 @@ export default function Dashboard() {
                   <div className="relative w-12 h-12">
                     <svg className="w-full h-full transform -rotate-90">
                       <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(243, 244, 246)" strokeWidth="3" />
-                      <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(245, 158, 11)" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 20 * (taxaAprovacao / 100)} ${2 * Math.PI * 20}`} strokeLinecap="round" className="transition-all duration-1000" />
+                      <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(245, 158, 11)" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 20 * (metrics.taxaAprovacao / 100)} ${2 * Math.PI * 20}`} strokeLinecap="round" className="transition-all duration-1000" />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[10px] font-bold text-amber-600">{taxaAprovacao}%</span>
+                      <span className="text-[10px] font-bold text-amber-600">{metrics.taxaAprovacao}%</span>
                     </div>
                   </div>
                 </div>
@@ -347,11 +386,11 @@ export default function Dashboard() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{supplier.name}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{supplier.quotes} cotações</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{supplier.quotes} {supplier.quotes === 1 ? 'vitória' : 'vitórias'}</p>
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0 ml-2">
-                        <p className="font-bold text-emerald-600 dark:text-emerald-400 text-sm whitespace-nowrap">R$ {supplier.savings ? String(supplier.savings) : '0'}</p>
+                        <p className="font-bold text-emerald-600 dark:text-emerald-400 text-sm whitespace-nowrap">{supplier.savings ? String(supplier.savings) : '0%'}</p>
                         <p className="text-[10px] text-gray-500 dark:text-gray-400">economia</p>
                       </div>
                     </div>
