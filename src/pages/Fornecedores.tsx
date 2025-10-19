@@ -202,11 +202,56 @@ export default function Fornecedores() {
       return sum + (isNaN(limitValue) ? 0 : limitValue);
     }, 0);
     const activeQuotesTotal = suppliers.reduce((sum, s) => sum + s.activeQuotes, 0);
+    
+    // Distribuição por status
+    const porStatus = {
+      active: suppliers.filter(s => s.status === "active").length,
+      inactive: suppliers.filter(s => s.status === "inactive").length,
+      pending: suppliers.filter(s => s.status === "pending").length
+    };
+    
+    // Percentual de fornecedores ativos
+    const percentualAtivos = suppliers.length > 0 
+      ? Math.round((porStatus.active / suppliers.length) * 100)
+      : 0;
+    
+    // Limite médio por fornecedor ativo
+    const limiteMedioPorAtivo = porStatus.active > 0
+      ? (totalLimit / porStatus.active).toFixed(1)
+      : "0.0";
+    
+    // Média de cotações por fornecedor
+    const fornecedoresComCotacoes = suppliers.filter(s => s.activeQuotes > 0 || s.totalQuotes > 0);
+    const totalQuotes = suppliers.reduce((sum, s) => sum + s.totalQuotes, 0);
+    const mediaCotacoesPorFornecedor = fornecedoresComCotacoes.length > 0
+      ? (totalQuotes / fornecedoresComCotacoes.length).toFixed(1)
+      : "0.0";
+    
+    // Distribuição de cotações por fornecedor (para o mini gráfico)
+    // Agrupa fornecedores por faixas de cotações ativas
+    const distribuicaoCotacoes = [0, 0, 0, 0, 0, 0, 0]; // 7 barras
+    suppliers.forEach(s => {
+      const quotes = s.activeQuotes;
+      if (quotes === 0) distribuicaoCotacoes[0]++;
+      else if (quotes <= 2) distribuicaoCotacoes[1]++;
+      else if (quotes <= 5) distribuicaoCotacoes[2]++;
+      else if (quotes <= 8) distribuicaoCotacoes[3]++;
+      else if (quotes <= 12) distribuicaoCotacoes[4]++;
+      else if (quotes <= 20) distribuicaoCotacoes[5]++;
+      else distribuicaoCotacoes[6]++;
+    });
+    
     return {
       total: suppliers.length,
-      active: suppliers.filter(s => s.status === "active").length,
+      active: porStatus.active,
+      inactive: porStatus.inactive,
+      pending: porStatus.pending,
+      percentualAtivos,
       totalLimit: totalLimit > 0 ? `R$ ${totalLimit.toFixed(0)}k` : "R$ 0",
-      activeQuotes: activeQuotesTotal
+      limiteMedioPorAtivo,
+      activeQuotes: activeQuotesTotal,
+      mediaCotacoesPorFornecedor,
+      distribuicaoCotacoes
     };
   }, [suppliers]);
   if (loading || suppliersLoading) {
@@ -240,10 +285,11 @@ export default function Fornecedores() {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full" style={{ width: '90%' }}></div>
+                    <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualAtivos}%` }}></div>
                   </div>
-                  <span className="text-xs font-semibold text-indigo-600">90%</span>
+                  <span className="text-xs font-semibold text-indigo-600">{stats.percentualAtivos}%</span>
                 </div>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{stats.active} ativos • {stats.inactive} inativos • {stats.pending} pendentes</p>
               </CardContent>
             </Card>
 
@@ -256,16 +302,20 @@ export default function Fornecedores() {
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ativos</span>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-green-600" />
-                    <span className="text-xs font-semibold text-green-600">+{Math.floor(stats.active * 0.1)}</span>
-                  </div>
+                  {stats.percentualAtivos > 0 && (
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                      <TrendingUp className="h-2.5 w-2.5 text-green-600" />
+                      <span className="text-xs font-semibold text-green-600">{stats.percentualAtivos}%</span>
+                    </div>
+                  )}
                 </div>
                 <div className="mb-3">
                   <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.active}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">fornecedores</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">fornecedores ativos</p>
                 </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">{Math.floor(stats.active / stats.total * 100)}% da base • {stats.total - stats.active} inativos</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                  {stats.percentualAtivos}% da base • {stats.inactive} inativos • {stats.pending} pendentes
+                </p>
               </CardContent>
             </Card>
 
@@ -278,15 +328,19 @@ export default function Fornecedores() {
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Limite</span>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-blue-600" />
-                    <span className="text-xs font-semibold text-blue-600">12%</span>
-                  </div>
+                  {stats.active > 0 && (
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
+                      <span className="text-xs font-semibold text-blue-600">{stats.active} ativos</span>
+                    </div>
+                  )}
                 </div>
                 <div className="mb-3">
                   <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalLimit}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">de crédito</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">limite total</p>
                 </div>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-2">
+                  Média de <span className="font-semibold text-blue-600 dark:text-blue-400">R$ {stats.limiteMedioPorAtivo}k</span> por fornecedor ativo
+                </p>
                 <div className="relative h-8">
                   <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
                     <defs>
@@ -311,19 +365,50 @@ export default function Fornecedores() {
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-orange-600" />
-                    <span className="text-xs font-semibold text-orange-600">25%</span>
-                  </div>
+                  {stats.mediaCotacoesPorFornecedor !== "0.0" && (
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-full">
+                      <span className="text-xs font-semibold text-orange-600">{stats.mediaCotacoesPorFornecedor} média</span>
+                    </div>
+                  )}
                 </div>
                 <div className="mb-3">
                   <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.activeQuotes}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ativas</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotações ativas</p>
                 </div>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-2">
+                  Média de <span className="font-semibold text-orange-600 dark:text-orange-400">{stats.mediaCotacoesPorFornecedor}</span> cotações por fornecedor
+                </p>
+                {/* Mini gráfico de distribuição de cotações */}
                 <div className="flex items-end gap-0.5 h-8">
-                  {[50, 70, 60, 85, 65, 90, 75].map((height, i) => (
-                    <div key={i} className="flex-1 bg-gradient-to-t from-orange-500 to-amber-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
-                  ))}
+                  {stats.distribuicaoCotacoes.map((count, i) => {
+                    const maxCount = Math.max(...stats.distribuicaoCotacoes, 1);
+                    const heightPercent = (count / maxCount) * 100;
+                    const cores = [
+                      'from-gray-400 to-gray-300',
+                      'from-orange-400 to-orange-300',
+                      'from-orange-500 to-orange-400',
+                      'from-amber-500 to-amber-400',
+                      'from-yellow-500 to-yellow-400',
+                      'from-green-500 to-green-400',
+                      'from-emerald-500 to-emerald-400'
+                    ];
+                    const labels = ['0', '1-2', '3-5', '6-8', '9-12', '13-20', '20+'];
+                    return (
+                      <div 
+                        key={i} 
+                        className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t opacity-60 hover:opacity-100 transition-all duration-300 relative group`}
+                        style={{ height: `${Math.max(heightPercent, 10)}%`, minHeight: '8px' }}
+                        title={`${count} fornecedores com ${labels[i]} cotações`}
+                      >
+                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-orange-600 dark:text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-lg border border-gray-200 dark:border-gray-700">
+                          <div className="text-center">
+                            <div className="text-gray-500 dark:text-gray-400">{labels[i]} cotações</div>
+                            <div className="font-bold">{count} fornecedores</div>
+                          </div>
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
