@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loader2, Target, Award, Clock, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell, ComposedChart, Area, ReferenceLine } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
 
@@ -65,10 +65,17 @@ export default function Dashboard() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
+      case 'aprovada':
+      case 'finalizada':
+      case 'concluida':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'pending':
+      case 'pendente':
+      case 'ativa':
         return <Clock className="h-4 w-4 text-yellow-500" />;
       case 'rejected':
+      case 'cancelada':
+      case 'expirada':
         return <XCircle className="h-4 w-4 text-red-500" />;
       default:
         return <AlertCircle className="h-4 w-4 text-gray-500" />;
@@ -77,13 +84,24 @@ export default function Dashboard() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'approved':
+      case 'aprovada':
         return 'Aprovada';
       case 'pending':
+      case 'pendente':
         return 'Pendente';
+      case 'ativa':
+        return 'Ativa';
       case 'rejected':
         return 'Rejeitada';
+      case 'cancelada':
+        return 'Cancelada';
+      case 'finalizada':
+      case 'concluida':
+        return 'Finalizada';
+      case 'expirada':
+        return 'Expirada';
       default:
-        return 'Desconhecido';
+        return status || 'Pendente';
     }
   };
   return <PageWrapper>
@@ -434,35 +452,154 @@ export default function Dashboard() {
               {isLoading ? <div className="flex items-center justify-center h-[280px]">
                   <Loader2 className="h-8 w-8 animate-spin text-green-500" />
                 </div> : economyData && economyData.length > 0 ? <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={economyData} margin={{
+                  <ComposedChart data={economyData} margin={{
                 top: 5,
                 right: 20,
-                left: 0,
+                left: 10,
                 bottom: 5
               }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                    <XAxis dataKey={economyPeriod === '7d' ? 'day' : 'month'} stroke="#6b7280" style={{
-                  fontSize: '12px',
-                  fontWeight: 500
-                }} tickLine={false} />
-                    <YAxis stroke="#6b7280" style={{
-                  fontSize: '12px',
-                  fontWeight: 500
-                }} tickLine={false} axisLine={false} />
-                    <Tooltip formatter={value => [`R$ ${value?.toLocaleString('pt-BR') || '0'}`, 'Economia']} contentStyle={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                  padding: '8px 12px'
-                }} labelStyle={{
-                  fontWeight: 600,
-                  color: '#374151'
-                }} />
-                    <Bar dataKey="economia" radius={[8, 8, 0, 0]} maxBarSize={60}>
-                      {economyData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
-                    </Bar>
-                  </BarChart>
+                    <defs>
+                      <linearGradient id="economyGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} vertical={false} />
+                    <XAxis 
+                      dataKey={economyPeriod === '7d' ? 'day' : 'month'} 
+                      stroke="#6b7280" 
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 500
+                      }} 
+                      tickLine={false}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                    />
+                    <YAxis 
+                      stroke="#6b7280" 
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 500
+                      }} 
+                      tickLine={false} 
+                      axisLine={false}
+                      tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip 
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          // Encontrar os valores corretos de economia e cotações
+                          const economiaItem = payload.find(p => p.dataKey === 'economia');
+                          const cotacoesItem = payload.find(p => p.dataKey === 'cotacoes');
+                          
+                          return (
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                              <p className="font-semibold text-gray-900 dark:text-white mb-2">{label}</p>
+                              <div className="space-y-1">
+                                {economiaItem && (
+                                  <div className="flex items-center justify-between gap-4">
+                                    <span className="text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                      Economia
+                                    </span>
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                      R$ {economiaItem.value?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0,00'}
+                                    </span>
+                                  </div>
+                                )}
+                                {cotacoesItem && (
+                                  <div className="flex items-center justify-between gap-4">
+                                    <span className="text-sm text-cyan-600 dark:text-cyan-400 flex items-center gap-1">
+                                      <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
+                                      Cotações finalizadas
+                                    </span>
+                                    <span className="font-semibold text-cyan-600 dark:text-cyan-400">
+                                      {cotacoesItem.value || 0}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Legend 
+                      wrapperStyle={{
+                        paddingTop: '15px'
+                      }}
+                      iconType="circle"
+                    />
+                    {/* Linha de meta (opcional) */}
+                    <ReferenceLine 
+                      y={5000} 
+                      stroke="#f59e0b" 
+                      strokeDasharray="5 5" 
+                      strokeWidth={2}
+                      label={{ 
+                        value: 'Meta: R$ 5k', 
+                        position: 'right',
+                        fill: '#f59e0b',
+                        fontSize: 11,
+                        fontWeight: 600
+                      }}
+                    />
+                    {/* Área com gradiente */}
+                    <Area 
+                      type="monotone" 
+                      dataKey="economia" 
+                      fill="url(#economyGradient)" 
+                      stroke="none"
+                      name="Economia"
+                    />
+                    {/* Linha de economia */}
+                    <Line 
+                      type="monotone" 
+                      dataKey="economia" 
+                      stroke="#10b981" 
+                      strokeWidth={3} 
+                      name="Economia"
+                      dot={{ 
+                        fill: '#10b981', 
+                        strokeWidth: 2, 
+                        r: 4,
+                        stroke: '#fff'
+                      }} 
+                      activeDot={{ 
+                        r: 6, 
+                        strokeWidth: 2,
+                        stroke: '#fff'
+                      }}
+                    />
+                    {/* Linha de cotações (contexto) */}
+                    <Line 
+                      type="monotone" 
+                      dataKey="cotacoes" 
+                      stroke="#06b6d4" 
+                      strokeWidth={2} 
+                      name="Cotações"
+                      dot={{ 
+                        fill: '#06b6d4', 
+                        strokeWidth: 2, 
+                        r: 3,
+                        stroke: '#fff'
+                      }}
+                      yAxisId="right"
+                      strokeDasharray="5 5"
+                    />
+                    <YAxis 
+                      yAxisId="right" 
+                      orientation="right"
+                      stroke="#06b6d4"
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 500
+                      }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                  </ComposedChart>
                 </ResponsiveContainer> : <div className="flex items-center justify-center h-[280px] text-slate-500">
                   <div className="text-center">
                     <DollarSign className="h-12 w-12 mx-auto mb-2 opacity-50" />
