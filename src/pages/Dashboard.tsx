@@ -119,8 +119,8 @@ export default function Dashboard() {
 
                 {/* Mini gráfico de barras - Últimos 7 dias */}
                 <div className="flex items-end gap-0.5 h-8">
-                  {metrics.ultimos7DiasCotacoes.map((cotacoes, i) => {
-                    const maxValue = Math.max(...metrics.ultimos7DiasCotacoes, 1);
+                  {(metrics.ultimos7DiasCotacoes || []).map((cotacoes, i) => {
+                    const maxValue = Math.max(...(metrics.ultimos7DiasCotacoes || [0]), 1);
                     const heightPercent = maxValue > 0 ? (cotacoes / maxValue) * 100 : 20;
                     const cores = [
                       'from-blue-500 to-blue-400',

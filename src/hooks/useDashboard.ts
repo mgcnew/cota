@@ -337,25 +337,27 @@ export function useDashboard() {
     });
 
     // 2. Contar pedidos diretos (pedidos que não vieram de cotações)
-    data.orders?.forEach((order: any) => {
-      if (order.supplier_id) {
-        // Buscar nome do fornecedor
-        const supplier = data.suppliers.find((s: any) => s.id === order.supplier_id);
-        
-        if (!supplierStats.has(order.supplier_id)) {
-          supplierStats.set(order.supplier_id, {
-            name: supplier?.name || "Fornecedor",
-            vitoriasEmCotacoes: 0,
-            pedidosDiretos: 0,
-            economiaTotal: 0,
-            valorTotalCotacoes: 0
-          });
+    if (data.orders && Array.isArray(data.orders)) {
+      data.orders.forEach((order: any) => {
+        if (order.supplier_id) {
+          // Buscar nome do fornecedor
+          const supplier = data.suppliers?.find((s: any) => s.id === order.supplier_id);
+          
+          if (!supplierStats.has(order.supplier_id)) {
+            supplierStats.set(order.supplier_id, {
+              name: supplier?.name || "Fornecedor",
+              vitoriasEmCotacoes: 0,
+              pedidosDiretos: 0,
+              economiaTotal: 0,
+              valorTotalCotacoes: 0
+            });
+          }
+          
+          const stats = supplierStats.get(order.supplier_id);
+          stats.pedidosDiretos += 1;
         }
-        
-        const stats = supplierStats.get(order.supplier_id);
-        stats.pedidosDiretos += 1;
-      }
-    });
+      });
+    }
 
     // Ordenar por: total de vitórias + pedidos diretos, depois por percentual de economia
     return Array.from(supplierStats.values())
