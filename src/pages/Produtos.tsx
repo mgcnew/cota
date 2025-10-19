@@ -98,10 +98,38 @@ export default function Produtos() {
   }, [products, debouncedSearchQuery, selectedCategory]);
   const paginatedData = paginate(filteredProducts);
 
-  // Cálculos de métricas reais
+  // Cálculos de métricas reais e dinâmicas
   const stats = useMemo(() => {
     const totalCategories = categories.length - 1; // -1 para remover "all"
     const activeQuotes = products.reduce((sum, p) => sum + p.quotesCount, 0);
+    
+    // Calcular produtos por status
+    const produtosPorStatus = {
+      ativos: products.filter(p => p.quotesCount >= 3).length,
+      cotados: products.filter(p => p.quotesCount > 0 && p.quotesCount < 3).length,
+      pendentes: products.filter(p => p.quotesCount === 0 && p.lastQuotePrice !== "R$ 0,00").length,
+      semCotacao: products.filter(p => p.quotesCount === 0 && p.lastQuotePrice === "R$ 0,00").length
+    };
+    
+    const percentualAtivos = products.length > 0 
+      ? Math.round((produtosPorStatus.ativos / products.length) * 100) 
+      : 0;
+    
+    // Top categorias por número de produtos
+    const categoriaCount = new Map();
+    products.forEach(p => {
+      const cat = p.category || 'Sem Categoria';
+      categoriaCount.set(cat, (categoriaCount.get(cat) || 0) + 1);
+    });
+    const topCategoria = Array.from(categoriaCount.entries())
+      .sort((a, b) => b[1] - a[1])[0];
+    
+    // Média de cotações por produto
+    const mediaCotacoesPorProduto = products.length > 0
+      ? (activeQuotes / products.length).toFixed(1)
+      : "0.0";
+    
+    // Valor médio e tendência
     const productsWithPrices = products.filter(p => p.lastQuotePrice !== "R$ 0,00");
     let averageValue = "R$ 0,00";
     if (productsWithPrices.length > 0) {
@@ -111,11 +139,17 @@ export default function Produtos() {
       }, 0);
       averageValue = `R$ ${(total / productsWithPrices.length).toFixed(2)}`;
     }
+    
     return {
       totalProducts: products.length,
       totalCategories,
       activeQuotes,
-      averageValue
+      averageValue,
+      produtosPorStatus,
+      percentualAtivos,
+      topCategoria: topCategoria ? { nome: topCategoria[0], count: topCategoria[1] } : null,
+      mediaCotacoesPorProduto,
+      productsWithPrices: productsWithPrices.length
     };
   }, [products, categories]);
   const getTrendIcon = (trend: "up" | "down" | "stable") => {
@@ -188,10 +222,11 @@ export default function Produtos() {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full" style={{ width: '85%' }}></div>
+                    <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualAtivos}%` }}></div>
                   </div>
-                  <span className="text-xs font-semibold text-orange-600">85%</span>
+                  <span className="text-xs font-semibold text-orange-600">{stats.percentualAtivos}%</span>
                 </div>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{stats.produtosPorStatus.ativos} ativos • {stats.produtosPorStatus.cotados} cotados</p>
               </CardContent>
             </Card>
 
@@ -213,7 +248,11 @@ export default function Produtos() {
                   <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalCategories}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">disponíveis</p>
                 </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">{Math.floor(stats.totalCategories * 0.7)} ativas • {Math.floor(stats.totalCategories * 0.3)} com poucos</p>
+                {stats.topCategoria && (
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.topCategoria.nome}</span> • {stats.topCategoria.count} produtos
+                  </p>
+                )}
               </CardContent>
             </Card>
 
@@ -233,13 +272,11 @@ export default function Produtos() {
                 </div>
                 <div className="mb-3">
                   <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.activeQuotes}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ativas</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">total de cotações</p>
                 </div>
-                <div className="flex items-end gap-0.5 h-8">
-                  {[60, 45, 70, 55, 80, 65, 75].map((height, i) => (
-                    <div key={i} className="flex-1 bg-gradient-to-t from-emerald-500 to-green-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
-                  ))}
-                </div>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                  Média de <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stats.mediaCotacoesPorProduto}</span> cotações/produto
+                </p>
               </CardContent>
             </Card>
 
@@ -259,9 +296,11 @@ export default function Produtos() {
                 </div>
                 <div className="mb-3">
                   <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.averageValue}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">por produto</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">valor médio</p>
                 </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">Baseado em {products.filter(p => p.lastQuotePrice !== "R$ 0,00").length} produtos</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                  <span className="font-semibold">{stats.productsWithPrices}</span> produtos com preço
+                </p>
               </CardContent>
             </Card>
           </div>
