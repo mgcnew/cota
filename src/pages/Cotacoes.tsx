@@ -83,6 +83,31 @@ export default function Cotacoes() {
       </Badge>;
   };
 
+  // Calcular economia de uma cotação específica
+  const calcularEconomiaCotacao = (cotacao: Quote): { economia: number; percentual: number } => {
+    if (!cotacao.fornecedoresParticipantes || cotacao.fornecedoresParticipantes.length < 2) {
+      return { economia: 0, percentual: 0 };
+    }
+    
+    const valores = cotacao.fornecedoresParticipantes
+      .map(f => {
+        const valor = f.valor_total || f.valor || 0;
+        return typeof valor === 'number' ? valor : parseFloat(String(valor).replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+      })
+      .filter(v => v > 0);
+    
+    if (valores.length < 2) {
+      return { economia: 0, percentual: 0 };
+    }
+    
+    const maiorValor = Math.max(...valores);
+    const menorValor = Math.min(...valores);
+    const economia = maiorValor - menorValor;
+    const percentual = maiorValor > 0 ? ((economia / maiorValor) * 100) : 0;
+    
+    return { economia, percentual };
+  };
+
   // OPTIMIZED: Memoize filtered results
   const filteredCotacoes = useMemo(() => {
     return cotacoes.filter(cotacao => {
@@ -94,6 +119,88 @@ export default function Cotacoes() {
       return matchesSearch && matchesStatus && matchesSupplier;
     });
   }, [cotacoes, debouncedSearchTerm, statusFilter, supplierFilter]);
+
+  // Calcular estatísticas dinâmicas
+  const stats = useMemo(() => {
+    const porStatus = {
+      ativas: cotacoes.filter(c => c.status === "ativa").length,
+      pendentes: cotacoes.filter(c => c.status === "pendente").length,
+      concluidas: cotacoes.filter(c => c.status === "concluida" || c.status === "finalizada").length,
+      expiradas: cotacoes.filter(c => c.status === "expirada").length
+    };
+    
+    const percentualAtivas = cotacoes.length > 0 ? Math.round((porStatus.ativas / cotacoes.length) * 100) : 0;
+    
+    const agora = new Date();
+    const umDiaAtras = new Date(agora.getTime() - 24 * 60 * 60 * 1000);
+    const pendentesMais24h = cotacoes.filter(c => {
+      if (c.status !== "pendente") return false;
+      try {
+        const dataInicio = new Date(c.data_inicio);
+        return dataInicio < umDiaAtras;
+      } catch {
+        return false;
+      }
+    }).length;
+    
+    let economiaTotal = 0;
+    const economiasPorCotacao: number[] = [];
+    
+    cotacoes.forEach(cotacao => {
+      if (cotacao.fornecedoresParticipantes && cotacao.fornecedoresParticipantes.length >= 2) {
+        const valores = cotacao.fornecedoresParticipantes
+          .map(f => {
+            const valor = f.valor_total || f.valor || 0;
+            return typeof valor === 'number' ? valor : parseFloat(String(valor).replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+          })
+          .filter(v => v > 0);
+        
+        if (valores.length >= 2) {
+          const maiorValor = Math.max(...valores);
+          const menorValor = Math.min(...valores);
+          const economia = maiorValor - menorValor;
+          
+          if (economia > 0) {
+            economiaTotal += economia;
+            economiasPorCotacao.push(economia);
+          }
+        }
+      }
+    });
+    
+    const economiaFormatada = economiaTotal > 0 
+      ? `R$ ${economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+      : "R$ 0";
+    
+    const ultimas7Economias = economiasPorCotacao.slice(-7);
+    while (ultimas7Economias.length < 7) {
+      ultimas7Economias.unshift(0);
+    }
+    
+    const fornecedoresUnicos = new Set<string>();
+    cotacoes.forEach(cotacao => {
+      cotacao.fornecedoresParticipantes?.forEach(f => {
+        if (f.nome) fornecedoresUnicos.add(f.nome);
+      });
+    });
+    
+    const mediaFornecedores = cotacoes.length > 0 
+      ? Math.round(cotacoes.reduce((acc, c) => acc + c.fornecedores, 0) / cotacoes.length)
+      : 0;
+    
+    return {
+      porStatus,
+      percentualAtivas,
+      pendentesMais24h,
+      economiaTotal,
+      economiaFormatada,
+      ultimas7Economias,
+      totalFornecedoresUnicos: fornecedoresUnicos.size,
+      mediaFornecedores,
+      total: cotacoes.length
+    };
+  }, [cotacoes]);
+
   if (isLoading) {
     return <div className="p-6 flex items-center justify-center min-h-screen">
         <p className="text-muted-foreground">Carregando cotações...</p>
@@ -112,20 +219,25 @@ export default function Cotacoes() {
                 </div>
                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ativas</span>
               </div>
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-teal-50 dark:bg-teal-900/20 rounded-full">
-                <span className="text-xs font-semibold text-teal-600">75%</span>
-              </div>
+              {stats.percentualAtivas > 0 && (
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-teal-50 dark:bg-teal-900/20 rounded-full">
+                  <span className="text-xs font-semibold text-teal-600">{stats.percentualAtivas}%</span>
+                </div>
+              )}
             </div>
             <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{cotacoes.filter(c => c.status === "ativa").length}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotações</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.porStatus.ativas}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotações ativas</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full" style={{ width: '75%' }}></div>
+                <div className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualAtivas}%` }}></div>
               </div>
-              <span className="text-xs font-semibold text-teal-600">75%</span>
+              <span className="text-xs font-semibold text-teal-600">{stats.percentualAtivas}%</span>
             </div>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+              {stats.porStatus.pendentes} pendentes • {stats.porStatus.concluidas} finalizadas
+            </p>
           </CardContent>
         </Card>
 
@@ -138,12 +250,23 @@ export default function Cotacoes() {
                 </div>
                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pendentes</span>
               </div>
+              {stats.pendentesMais24h > 0 && (
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-50 dark:bg-red-900/20 rounded-full">
+                  <span className="text-xs font-semibold text-red-600">⚠ {stats.pendentesMais24h}</span>
+                </div>
+              )}
             </div>
             <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{cotacoes.filter(c => c.status === "pendente").length}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">aguardando</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.porStatus.pendentes}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">aguardando resposta</p>
             </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">{Math.floor(cotacoes.filter(c => c.status === "pendente").length * 0.6)} há mais de 24h</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">
+              {stats.pendentesMais24h > 0 ? (
+                <span className="text-red-600 dark:text-red-400 font-semibold">{stats.pendentesMais24h} há mais de 24h</span>
+              ) : (
+                <span className="text-green-600 dark:text-green-400">Todas dentro do prazo</span>
+              )}
+            </p>
           </CardContent>
         </Card>
 
@@ -156,18 +279,35 @@ export default function Cotacoes() {
                 </div>
                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
               </div>
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                <span className="text-xs font-semibold text-green-600">+18%</span>
-              </div>
+              {stats.economiaTotal > 0 && (
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                  <span className="text-xs font-semibold text-green-600">Total</span>
+                </div>
+              )}
             </div>
             <div className="mb-3">
-              <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">R$ 47.231</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.economiaFormatada}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">economizados</p>
             </div>
             <div className="flex items-end gap-0.5 h-8">
-              {[50, 65, 55, 75, 60, 85, 70].map((height, i) => (
-                <div key={i} className="flex-1 bg-gradient-to-t from-emerald-500 to-green-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
-              ))}
+              {stats.ultimas7Economias.map((economia, i) => {
+                const maxEconomia = Math.max(...stats.ultimas7Economias, 1);
+                const heightPercent = (economia / maxEconomia) * 100;
+                return (
+                  <div 
+                    key={i} 
+                    className="flex-1 bg-gradient-to-t from-emerald-500 to-green-400 rounded-t opacity-60 hover:opacity-100 transition-all duration-300 relative group" 
+                    style={{ height: `${Math.max(heightPercent, 8)}%`, minHeight: '8px' }}
+                    title={economia > 0 ? `Economia: R$ ${economia.toLocaleString('pt-BR')}` : 'Sem economia'}
+                  >
+                    {economia > 0 && (
+                      <span className="absolute -top-10 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-lg border border-gray-200 dark:border-gray-700">
+                        R$ {economia.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -181,12 +321,19 @@ export default function Cotacoes() {
                 </div>
                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
               </div>
+              {stats.totalFornecedoresUnicos > 0 && (
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
+                  <span className="text-xs font-semibold text-blue-600">{stats.totalFornecedoresUnicos} únicos</span>
+                </div>
+              )}
             </div>
             <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{cotacoes.length > 0 ? Math.round(cotacoes.reduce((acc, c) => acc + c.fornecedores, 0) / cotacoes.length) : 0}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">média</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.mediaFornecedores}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">média por cotação</p>
             </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">Participantes por cotação</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">
+              {stats.totalFornecedoresUnicos} fornecedores únicos participantes
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -396,9 +543,18 @@ export default function Cotacoes() {
                       <p className="text-xs text-muted-foreground">{cotacao.melhorFornecedor}</p>
                     </div>
                     <div className="text-right">
-                      <Badge variant="secondary" className="text-success">
-                        -{cotacao.economia}
-                      </Badge>
+                      {(() => {
+                        const { economia, percentual } = calcularEconomiaCotacao(cotacao);
+                        return economia > 0 ? (
+                          <Badge variant="secondary" className="text-success" title={`Economia: R$ ${economia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}>
+                            -{percentual.toFixed(1)}%
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-gray-600">
+                            0%
+                          </Badge>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -582,10 +738,20 @@ export default function Cotacoes() {
                             <div className="space-y-1">
                               <div className="font-bold text-green-600 text-sm">{cotacao.melhorPreco}</div>
                               <div className="text-xs text-gray-600 truncate max-w-[100px]">{cotacao.melhorFornecedor}</div>
-                              <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium justify-center">
-                                <DollarSign className="h-3 w-3" />
-                                -{cotacao.economia}
-                              </div>
+                              {(() => {
+                                const { economia, percentual } = calcularEconomiaCotacao(cotacao);
+                                return economia > 0 ? (
+                                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium justify-center" title={`Economia: R$ ${economia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}>
+                                    <DollarSign className="h-3 w-3" />
+                                    -{percentual.toFixed(1)}%
+                                  </div>
+                                ) : (
+                                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md text-xs font-medium justify-center">
+                                    <DollarSign className="h-3 w-3" />
+                                    0%
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </div>
 
