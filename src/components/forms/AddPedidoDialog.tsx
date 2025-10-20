@@ -327,30 +327,30 @@ export default function AddPedidoDialog({
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-[900px] max-h-[95vh] sm:max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-lg sm:rounded-xl p-0 flex flex-col">
-        <DialogHeader className="relative px-4 sm:px-6 py-3 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-50 border-b border-pink-100/60 overflow-hidden">
-          <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-pink-400/10 to-rose-400/10 rounded-full -translate-y-12 -translate-x-12"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400/10 to-rose-400/10 rounded-full -translate-y-16 translate-x-16"></div>
+        <DialogHeader className="relative px-4 sm:px-6 py-3 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-50 dark:from-pink-950/30 dark:via-rose-950/30 dark:to-pink-950/30 border-b border-pink-100/60 dark:border-pink-800/30 overflow-hidden">
+          <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-pink-400/10 to-rose-400/10 dark:from-pink-400/20 dark:to-rose-400/20 rounded-full -translate-y-12 -translate-x-12"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400/10 to-rose-400/10 dark:from-pink-400/20 dark:to-rose-400/20 rounded-full -translate-y-16 translate-x-16"></div>
           
           <div className="relative z-10">
             {/* Compact Header */}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-pink-600 via-rose-600 to-pink-600 text-white shadow-lg shadow-pink-500/25 ring-2 ring-white/20 flex-shrink-0">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-pink-600 via-rose-600 to-pink-600 text-white shadow-lg shadow-pink-500/25 ring-2 ring-white/20 dark:ring-pink-400/20 flex-shrink-0">
                   <ShoppingCart className="h-5 w-5" />
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <DialogTitle className="text-lg font-bold bg-gradient-to-r from-pink-900 via-rose-800 to-pink-800 bg-clip-text text-transparent">
+                  <DialogTitle className="text-lg font-bold bg-gradient-to-r from-pink-900 via-rose-800 to-pink-800 dark:from-pink-400 dark:via-rose-300 dark:to-pink-300 bg-clip-text text-transparent">
                     Novo Pedido
                   </DialogTitle>
-                  <p className="text-gray-600/80 text-xs">
+                  <p className="text-muted-foreground text-xs">
                     {Math.round(progress)}% concluído
                   </p>
                 </div>
 
                 {/* Navigation Controls - Moved to left side */}
                 <div className="flex items-center gap-2 sm:gap-3">
-                  {currentTabIndex > 0 && <Button type="button" variant="outline" size="sm" onClick={handlePrevious} disabled={loading} className="border-gray-300 hover:bg-gray-100 h-8 px-3">
+                  {currentTabIndex > 0 && <Button type="button" variant="outline" size="sm" onClick={handlePrevious} disabled={loading} className="h-8 px-3">
                       <ChevronLeft className="h-3 w-3 mr-1" />
                       <span className="hidden sm:inline">Voltar</span>
                     </Button>}
@@ -371,26 +371,26 @@ export default function AddPedidoDialog({
               </div>
 
               {/* Close Button - Isolated on the right */}
-              <Button type="button" variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="text-gray-600 hover:bg-gray-100 h-8 w-8 p-0 flex-shrink-0">
+              <Button type="button" variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="h-8 w-8 p-0 flex-shrink-0">
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </div>
             
             {/* Compact Progress Bar */}
             <div className="mt-2">
-              <Progress value={progress} className="h-2 bg-pink-100/60 [&>div]:bg-gradient-to-r [&>div]:from-pink-500 [&>div]:to-rose-500" />
+              <Progress value={progress} className="h-2 bg-pink-100/60 dark:bg-pink-900/30 [&>div]:bg-gradient-to-r [&>div]:from-pink-500 [&>div]:to-rose-500" />
             </div>
           </div>
         </DialogHeader>
 
         {/* Compact Tab Navigation */}
-        <div className="flex-shrink-0 px-3 sm:px-6 py-2 border-b border-pink-100/60 bg-gradient-to-r from-pink-50/40 to-rose-50/30 backdrop-blur-sm">
-          <div className="flex space-x-1 bg-white/80 backdrop-blur-sm rounded-xl p-1 shadow-lg border border-pink-200/40">
+        <div className="flex-shrink-0 px-3 sm:px-6 py-2 border-b border-pink-100/60 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/40 to-rose-50/30 dark:from-pink-950/20 dark:to-rose-950/20 backdrop-blur-sm">
+          <div className="flex space-x-1 bg-card backdrop-blur-sm rounded-xl p-1 shadow-lg border border-pink-200/40 dark:border-pink-800/40">
             {tabs.map(tab => {
             const status = getTabStatus(tab.id);
             return <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={`
                     flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 relative overflow-hidden group
-                    ${status === 'current' ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-xl shadow-pink-500/25 scale-105' : status === 'completed' ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'bg-gray-100 text-gray-500 hover:bg-pink-50 hover:text-pink-700'}
+                    ${status === 'current' ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-xl shadow-pink-500/25 scale-105' : status === 'completed' ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'bg-muted text-muted-foreground hover:bg-pink-50 dark:hover:bg-pink-950/50 hover:text-pink-700 dark:hover:text-pink-300'}
                   `}>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                   
@@ -634,14 +634,14 @@ export default function AddPedidoDialog({
           </AnimatePresence>
         </div>
 
-        <DialogFooter className="flex-shrink-0 px-3 sm:px-6 py-3 sm:py-4 border-t border-pink-100/60 bg-gradient-to-r from-pink-50/30 to-rose-50/30 backdrop-blur-sm">
+        <DialogFooter className="flex-shrink-0 px-3 sm:px-6 py-3 sm:py-4 border-t border-pink-100/60 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/30 to-rose-50/30 dark:from-pink-950/20 dark:to-rose-950/20 backdrop-blur-sm">
           <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3 sm:gap-0">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 order-2 sm:order-1">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
               {loading ? <>
                   <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
                   <span>Criando pedido...</span>
                 </> : <>
-                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 dark:text-green-400" />
                   <span>Etapa {currentTabIndex + 1} de {tabs.length}</span>
                 </>}
             </div>
