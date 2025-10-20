@@ -685,26 +685,26 @@ export default function Cotacoes() {
                 <TableBody>
                   {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-card backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 hover:bg-accent/5">
                           {/* Cotação - Largura fixa */}
                           <div className="w-[18%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 dark:from-teal-400/20 dark:to-cyan-400/20 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50 dark:border-teal-700/50">
                               <FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold font-mono text-sm text-gray-900 dark:text-white truncate">
+                              <div className="font-semibold font-mono text-sm text-foreground truncate">
                                 #{cotacao.id.substring(0, 8)}
                               </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 md:hidden mt-1 truncate">{cotacao.produto}</div>
+                              <div className="text-xs text-muted-foreground md:hidden mt-1 truncate">{cotacao.produto}</div>
                             </div>
                           </div>
 
                           {/* Produto - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[20%] px-2">
                             <div className="min-w-0 max-w-[150px]">
-                              <div className="font-medium text-sm text-gray-900 dark:text-white truncate">{cotacao.produto}</div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md">
+                              <div className="font-medium text-sm text-foreground truncate">{cotacao.produto}</div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded-md">
                                   <Package className="h-3 w-3" />
                                   {cotacao.quantidade}
                                 </span>
@@ -715,11 +715,11 @@ export default function Cotacoes() {
                           {/* Período - Largura fixa, hidden on large screens */}
                           <div className="hidden lg:block w-[15%] px-2">
                             <div className="text-xs space-y-1">
-                              <div className="flex items-center gap-1 text-gray-900">
-                                <Calendar className="h-3 w-3 text-teal-600" />
+                              <div className="flex items-center gap-1 text-foreground">
+                                <Calendar className="h-3 w-3 text-primary" />
                                 {cotacao.dataInicio}
                               </div>
-                              <div className="flex items-center gap-1 text-gray-500">
+                              <div className="flex items-center gap-1 text-muted-foreground">
                                 <Calendar className="h-3 w-3" />
                                 {cotacao.dataFim}
                               </div>
@@ -736,17 +736,17 @@ export default function Cotacoes() {
                           {/* Melhor Preço - Largura fixa */}
                           <div className="w-[15%] px-2">
                             <div className="space-y-1">
-                              <div className="font-bold text-green-600 text-sm">{cotacao.melhorPreco}</div>
-                              <div className="text-xs text-gray-600 truncate max-w-[100px]">{cotacao.melhorFornecedor}</div>
+                              <div className="font-bold text-green-600 dark:text-green-400 text-sm">{cotacao.melhorPreco}</div>
+                              <div className="text-xs text-muted-foreground truncate max-w-[100px]">{cotacao.melhorFornecedor}</div>
                               {(() => {
                                 const { economia, percentual } = calcularEconomiaCotacao(cotacao);
                                 return economia > 0 ? (
-                                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium justify-center" title={`Economia: R$ ${economia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}>
+                                   <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-xs font-medium justify-center" title={`Economia: R$ ${economia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}>
                                     <DollarSign className="h-3 w-3" />
                                     -{percentual.toFixed(1)}%
                                   </div>
                                 ) : (
-                                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md text-xs font-medium justify-center">
+                                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted text-muted-foreground rounded-md text-xs font-medium justify-center">
                                     <DollarSign className="h-3 w-3" />
                                     0%
                                   </div>
@@ -758,7 +758,7 @@ export default function Cotacoes() {
                           {/* Fornecedores - Largura fixa, hidden on small screens */}
                           <div className="hidden sm:block w-[10%] px-2">
                             <div className="flex justify-center">
-                              <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 font-medium">
+                              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 font-medium">
                                 <Building2 className="h-3 w-3 mr-1" />
                                 {cotacao.fornecedores}
                               </Badge>
