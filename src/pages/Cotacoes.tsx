@@ -685,7 +685,7 @@ export default function Cotacoes() {
                 <TableBody>
                   {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center p-3 bg-card backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 hover:bg-accent/5">
+                        <div className="flex items-center p-2 bg-card backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 hover:bg-accent/5">
                           {/* Cotação - Largura fixa */}
                           <div className="w-[18%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 dark:from-teal-400/20 dark:to-cyan-400/20 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50 dark:border-teal-700/50">
