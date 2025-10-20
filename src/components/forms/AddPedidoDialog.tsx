@@ -427,10 +427,10 @@ export default function AddPedidoDialog({
               <div className="h-full p-4 sm:p-6 py-0">
                 {activeTab === 'produtos' && <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4 h-full">
                   {/* Left Column - Add Product Form */}
-                    <Card className="border-pink-100 shadow-sm order-1 lg:order-1 h-fit">
-                      <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50">
-                        <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
-                          <Package className="h-4 w-4 text-pink-500" />
+                    <Card className="border-pink-100 dark:border-pink-800/30 shadow-sm order-1 lg:order-1 h-fit">
+                      <div className="p-2 sm:p-3 border-b border-pink-100 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-pink-950/30 dark:to-rose-950/30">
+                        <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
+                          <Package className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                           Adicionar Produto
                         </h3>
                       </div>
@@ -443,16 +443,16 @@ export default function AddPedidoDialog({
                       }))} value={selectedProduct ? selectedProduct.name : ""} onValueChange={value => {
                         const product = products.find(p => p.name === value);
                         setSelectedProduct(product || null);
-                      }} placeholder="Digite para buscar produtos..." searchPlaceholder={`Buscar entre ${products.length} produtos...`} emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."} className="w-full border-pink-200 hover:border-pink-300" onSearchChange={setProductSearch} />
+                      }} placeholder="Digite para buscar produtos..." searchPlaceholder={`Buscar entre ${products.length} produtos...`} emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."} className="w-full" onSearchChange={setProductSearch} />
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="space-y-2">
-                            <Label className="text-sm font-medium text-gray-700">Quantidade</Label>
+                            <Label className="text-sm font-medium text-foreground">Quantidade</Label>
                             <Input type="number" value={newProductQuantity} onChange={e => setNewProductQuantity(e.target.value)} placeholder="0" min="0" step="0.01" className="text-sm" />
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-sm font-medium text-gray-700">Unidade</Label>
+                            <Label className="text-sm font-medium text-foreground">Unidade</Label>
                             <Select value={newProductUnit} onValueChange={setNewProductUnit}>
                               <SelectTrigger className="text-sm">
                                 <SelectValue placeholder="Unidade" />
@@ -470,7 +470,7 @@ export default function AddPedidoDialog({
                         </div>
 
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium text-gray-700">Valor Unitário</Label>
+                          <Label className="text-sm font-medium text-foreground">Valor Unitário</Label>
                           <Input type="number" value={newProductPrice} onChange={e => setNewProductPrice(e.target.value)} placeholder="0,00" min="0" step="0.01" className="text-sm" />
                         </div>
 
@@ -482,29 +482,29 @@ export default function AddPedidoDialog({
                     </Card>
 
                     {/* Right Column - Products List */}
-                    <Card className="border-pink-100 shadow-sm order-2 lg:order-2 flex flex-col">
-                      <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50 flex-shrink-0">
-                        <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
-                          <Package className="h-4 w-4 text-pink-500" />
+                    <Card className="border-pink-100 dark:border-pink-800/30 shadow-sm order-2 lg:order-2 flex flex-col">
+                      <div className="p-2 sm:p-3 border-b border-pink-100 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-pink-950/30 dark:to-rose-950/30 flex-shrink-0">
+                        <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
+                          <Package className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                           Produtos Adicionados ({itens.length})
                         </h3>
                       </div>
                       <div className="flex-1 min-h-0 overflow-y-auto">
                         <div className="p-2 sm:p-3 space-y-2">
-                          {itens.length === 0 ? <div className="text-center py-6 text-gray-500">
+                          {itens.length === 0 ? <div className="text-center py-6 text-muted-foreground">
                               <Package className="h-8 w-8 mx-auto mb-2 opacity-30" />
                               <p className="text-sm">Nenhum produto adicionado</p>
                               <p className="text-xs">Use o formulário ao lado para adicionar produtos</p>
-                            </div> : itens.map((item, index) => <div key={index} className="border border-gray-200 rounded-lg p-2 bg-gray-50/50">
+                            </div> : itens.map((item, index) => <div key={index} className="border border-border rounded-lg p-2 bg-muted/50">
                                 <div className="flex items-start justify-between mb-1">
-                                  <h4 className="font-medium text-gray-900 text-xs pr-2 flex-1">
+                                  <h4 className="font-medium text-foreground text-xs pr-2 flex-1">
                                     {item.produto || 'Produto não encontrado'}
                                   </h4>
-                                  <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveItem(index)} className="h-5 w-5 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0">
+                                  <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveItem(index)} className="h-5 w-5 p-0 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/50 flex-shrink-0">
                                     <Trash2 className="h-3 w-3" />
                                   </Button>
                                 </div>
-                                <div className="grid grid-cols-3 gap-1 text-xs text-gray-600">
+                                <div className="grid grid-cols-3 gap-1 text-xs text-muted-foreground">
                                   <div>
                                     <span className="font-medium">Qtd:</span> 
                                     <span>{item.quantidade} {item.unidade}</span>
@@ -514,7 +514,7 @@ export default function AddPedidoDialog({
                                     <span>R$ {item.valorUnitario.toFixed(2)}</span>
                                   </div>
                                   <div className="text-right">
-                                    <span className="font-medium text-pink-600">
+                                    <span className="font-medium text-pink-600 dark:text-pink-400">
                                       R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
                                     </span>
                                   </div>
@@ -522,10 +522,10 @@ export default function AddPedidoDialog({
                               </div>)}
                         </div>
                       </div>
-                      {itens.length > 0 && <div className="p-2 sm:p-3 border-t border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50 flex-shrink-0">
+                      {itens.length > 0 && <div className="p-2 sm:p-3 border-t border-pink-100 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-pink-950/30 dark:to-rose-950/30 flex-shrink-0">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium text-gray-700 text-sm">Total:</span>
-                            <span className="text-base font-bold text-pink-600">
+                            <span className="font-medium text-foreground text-sm">Total:</span>
+                            <span className="text-base font-bold text-pink-600 dark:text-pink-400">
                               R$ {calculateTotal().toFixed(2)}
                             </span>
                           </div>
