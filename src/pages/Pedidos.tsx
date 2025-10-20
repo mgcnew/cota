@@ -462,17 +462,17 @@ export default function Pedidos() {
                     <TableBody>
                       {paginatedData.items.map((pedido, index) => <TableRow key={pedido.id} className="group border-none">
                           <TableCell colSpan={7} className="p-3">
-                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+                            <div className="flex items-center p-3 bg-card backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 hover:bg-accent/5">
                               {/* Pedido - Largura fixa */}
                               <div className="w-[15%] flex items-center gap-3 pr-4">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 dark:from-pink-400/20 dark:to-rose-400/20 flex items-center justify-center flex-shrink-0 border border-pink-200/50 dark:border-pink-700/50">
                                   <ShoppingCart className="h-4 w-4 text-pink-600 dark:text-pink-400" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="font-semibold font-mono text-sm text-gray-900 dark:text-white truncate">
+                                  <div className="font-semibold font-mono text-sm text-foreground truncate">
                                     #{pedido.id.substring(0, 8)}
                                   </div>
-                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                                  <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                                     <Calendar className="h-3 w-3" />
                                     {pedido.dataPedido}
                                   </div>
@@ -482,11 +482,11 @@ export default function Pedidos() {
                               {/* Fornecedor - Largura fixa */}
                               <div className="w-[18%] px-2">
                                 <div className="min-w-0">
-                                  <div className="font-medium text-gray-900 dark:text-white truncate" title={pedido.fornecedor}>
+                                  <div className="font-medium text-foreground truncate" title={pedido.fornecedor}>
                                     {abbreviateSupplierName(pedido.fornecedor)}
                                   </div>
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md">
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
                                       <Package className="h-3 w-3" />
                                       {pedido.itens} itens
                                     </span>
@@ -497,11 +497,11 @@ export default function Pedidos() {
                               {/* Produtos - Largura fixa, hidden on mobile */}
                               <div className="hidden md:block w-[18%] px-2">
                                 <div className="min-w-0">
-                                  <div className="text-sm text-gray-900 dark:text-white truncate max-w-[150px]">
+                                  <div className="text-sm text-foreground truncate max-w-[150px]">
                                     {pedido.produtos[0]}
-                                    {pedido.produtos.length > 1 && <span className="text-gray-500"> +{pedido.produtos.length - 1}</span>}
+                                    {pedido.produtos.length > 1 && <span className="text-muted-foreground"> +{pedido.produtos.length - 1}</span>}
                                   </div>
-                                  <div className="text-xs text-gray-500 mt-1">
+                                  <div className="text-xs text-muted-foreground mt-1">
                                     {pedido.produtos.length} produto{pedido.produtos.length !== 1 ? 's' : ''}
                                   </div>
                                 </div>
@@ -510,11 +510,11 @@ export default function Pedidos() {
                               {/* Entrega - Largura fixa, hidden on large screens */}
                               <div className="hidden lg:block w-[15%] px-2">
                                 <div className="text-sm space-y-1">
-                                  <div className="flex items-center gap-1 text-gray-900">
-                                    <Truck className="h-3 w-3 text-pink-600" />
+                                  <div className="flex items-center gap-1 text-foreground">
+                                    <Truck className="h-3 w-3 text-pink-600 dark:text-pink-400" />
                                     {pedido.dataEntrega}
                                   </div>
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-muted-foreground">
                                     Entrega prevista
                                   </div>
                                 </div>
@@ -530,7 +530,7 @@ export default function Pedidos() {
                               {/* Valor - Largura fixa */}
                               <div className="w-[12%] px-2">
                                 <div className="text-center">
-                                  <div className="font-bold text-emerald-600 text-base">{pedido.total}</div>
+                                  <div className="font-bold text-emerald-600 dark:text-emerald-400 text-base">{pedido.total}</div>
                                 </div>
                               </div>
 
