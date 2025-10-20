@@ -533,7 +533,7 @@ export default function Historico() {
             {paginatedData.items.map(item => {
             const iconColorClass = item.tipo === "cotacao" ? "text-info" : item.tipo === "pedido" ? "text-warning" : item.tipo === "fornecedor" ? "text-primary" : "text-success";
             const bgColorClass = item.tipo === "cotacao" ? "bg-info/10" : item.tipo === "pedido" ? "bg-warning/10" : item.tipo === "fornecedor" ? "bg-primary/10" : "bg-success/10";
-            return <div key={item.id} className="group flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 border-border hover:border-primary/40 bg-card hover:shadow-lg dark:hover:shadow-primary/20 transition-all duration-300">
+            return <div key={item.id} className="group flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-border hover:border-primary/50 bg-card backdrop-blur-sm hover:shadow-md hover:bg-accent/5 transition-all duration-300">
                 <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center mt-0.5 transition-transform duration-300 group-hover:scale-110 flex-shrink-0", bgColorClass)}>
                   <div className={iconColorClass}>
                     {getTipoIcon(item.tipo)}
@@ -545,7 +545,7 @@ export default function Historico() {
                     <span className="font-medium text-foreground text-sm sm:text-base truncate">{item.acao}</span>
                     <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                       {getTipoBadge(item.tipo)}
-                      {item.economia && <Badge variant="outline" className="text-success border-success text-xs">
+                      {item.economia && <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-600 dark:border-green-500 text-xs">
                           -{item.economia}
                         </Badge>}
                     </div>
@@ -560,7 +560,7 @@ export default function Historico() {
                   </div>
                 </div>
                 
-                <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary transition-colors h-8 w-8 sm:h-9 sm:w-9 p-0 flex-shrink-0" onClick={() => {
+                <Button variant="ghost" size="sm" className="hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary transition-colors h-8 w-8 sm:h-9 sm:w-9 p-0 flex-shrink-0" onClick={() => {
                 setSelectedItem(item);
                 setViewDialogOpen(true);
               }}>
