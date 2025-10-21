@@ -12,6 +12,9 @@ import { useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useInsights } from "@/hooks/useInsights";
+import { InsightsPanel } from "@/components/analytics/InsightsPanel";
+import { PerformanceCharts } from "@/components/analytics/PerformanceCharts";
 import { 
   BarChart3, TrendingUp, TrendingDown, Calendar, Filter, Download, 
   DollarSign, Package, Building2, Target, Loader2, RefreshCw, 
@@ -64,6 +67,39 @@ export default function Analytics() {
     selectedFornecedores,
     selectedProdutos
   });
+
+  // Use insights hook
+  const { insights, isGenerating: isGeneratingInsights, lastGenerated, generateInsights } = useInsights();
+
+  // Handler para gerar insights
+  const handleGenerateInsights = useCallback(() => {
+    const analyticsData = {
+      metricas: {
+        taxaEconomia: parseFloat(metricas[0]?.valor.replace('%', '') || '0'),
+        tempoMedioCotacao: parseFloat(metricas[1]?.valor.replace(' dias', '') || '0'),
+        taxaResposta: parseFloat(metricas[2]?.valor.replace('%', '') || '0'),
+        valorMedioPedido: parseFloat(metricas[3]?.valor.replace(/[^\d,]/g, '').replace(',', '.') || '0'),
+      },
+      topProdutos: topProdutos.map(p => ({
+        nome: p.produto,
+        economia: parseFloat(p.economia.replace('%', '') || '0'),
+        cotacoes: parseInt(p.cotacoes.toString()),
+      })),
+      performanceFornecedores: performanceFornecedores.map(f => ({
+        nome: f.fornecedor,
+        score: f.score,
+        cotacoes: f.cotacoes,
+        taxaResposta: parseFloat(f.tempo.replace(/[^\d,]/g, '').replace(',', '.') || '0'),
+      })),
+      tendenciasMensais: tendenciasMensais.map(t => ({
+        mes: t.mes,
+        cotacoes: t.cotacoes,
+        economia: parseFloat(t.economia.toString()),
+      })),
+    };
+    
+    generateInsights(analyticsData);
+  }, [metricas, topProdutos, performanceFornecedores, tendenciasMensais, generateInsights]);
 
   const handleExportAnalytics = useCallback(async () => {
     try {
@@ -374,19 +410,19 @@ export default function Analytics() {
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6 mt-6">
-          <div className="text-center py-12">
-            <Package className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Performance Detalhada</h3>
-            <p className="text-gray-600 dark:text-gray-400">Análises detalhadas de performance em desenvolvimento</p>
-          </div>
+          <PerformanceCharts 
+            performanceFornecedores={performanceFornecedores}
+            tendenciasMensais={tendenciasMensais}
+          />
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-6 mt-6">
-          <div className="text-center py-12">
-            <Target className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Insights Avançados</h3>
-            <p className="text-gray-600 dark:text-gray-400">Insights e recomendações inteligentes em desenvolvimento</p>
-          </div>
+          <InsightsPanel
+            insights={insights}
+            isGenerating={isGeneratingInsights}
+            lastGenerated={lastGenerated}
+            onGenerate={handleGenerateInsights}
+          />
         </TabsContent>
       </Tabs>
     </div>
