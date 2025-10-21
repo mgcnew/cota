@@ -504,16 +504,16 @@ export default function Produtos() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 border-b border-orange-200 dark:border-gray-700">
-                  <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
-                    <TableHead className="font-semibold text-gray-800 dark:text-gray-200 py-4 px-4 text-xs min-w-0">Produto</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Status</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Melhor Preço</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Fornecedor</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Cotações</TableHead>
-                    <TableHead className="text-right font-semibold text-gray-700 dark:text-gray-300 py-4 px-4 text-xs">Ações</TableHead>
+                <TableHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-primary/20 dark:to-primary-dark/20 border-b border-orange-200 dark:border-primary/40">
+                  <TableRow className="border-b-2 border-border dark:border-primary/30">
+                    <TableHead className="font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs min-w-0">Produto</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Categoria</TableHead>
+                    <TableHead className="hidden md:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Melhor Preço</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Fornecedor</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Cotações</TableHead>
+                    <TableHead className="text-right font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
