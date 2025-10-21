@@ -19,15 +19,12 @@ const pageTitles: Record<string, string> = {
   "/relatorios": "Relatórios",
   "/configuracoes": "Configurações"
 };
-
 export function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const pageTitle = pageTitles[location.pathname] || "";
-
-  return (
-    <div className="min-h-screen w-full bg-gray-50 md:bg-gradient-to-br md:from-gray-50 md:via-slate-50 md:to-stone-50 dark:bg-gray-900 dark:md:from-gray-900 dark:md:via-gray-950 dark:md:to-slate-950 overflow-x-hidden">
+  return <div className="min-h-screen w-full bg-gray-50 md:bg-gradient-to-br md:from-gray-50 md:via-slate-50 md:to-stone-50 dark:bg-gray-900 dark:md:from-gray-900 dark:md:via-gray-950 dark:md:to-slate-950 overflow-x-hidden">
       {/* Desktop Sidebar Flutuante */}
       <AppSidebar />
 
@@ -43,11 +40,9 @@ export function AppLayout() {
 
           <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-6 w-full max-w-full gap-4 transition-opacity duration-200 md:transition-all md:duration-300">
             {/* Título da Página - Lado Esquerdo */}
-            {pageTitle && (
-              <h1 className="text-xl md:text-2xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent hidden md:block tracking-tight leading-tight">
+            {pageTitle && <h1 className="text-xl md:text-2xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent hidden md:block tracking-tight leading-tight">
                 {pageTitle}
-              </h1>
-            )}
+              </h1>}
             
             {/* Global Search - Centralizada com bom espaçamento */}
             <div className={`flex-1 flex items-center ${pageTitle ? 'justify-end md:justify-center' : 'justify-center'} max-w-2xl ${pageTitle ? 'md:mx-0' : 'mx-auto'}`}>
@@ -75,7 +70,7 @@ export function AppLayout() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative pt-[4.5rem] pl-0 md:pl-20 pr-0 md:pr-[1px] transition-none">
+        <main className="flex-1 w-full overflow-x-hidden pb-20 md:pb-0 relative pt-[4.5rem] pl-0 md:pl-20 pr-0 md:pr-[1px] transition-none bg-slate-100">
           <div className="min-h-full bg-transparent md:bg-white/40 md:dark:bg-gray-900/40 md:backdrop-blur-sm w-full max-w-full">
             <div className="w-full max-w-full">
               <SmoothPageTransition>
@@ -88,6 +83,5 @@ export function AppLayout() {
 
       {/* Global Search Dialog */}
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
-    </div>
-  );
+    </div>;
 }
