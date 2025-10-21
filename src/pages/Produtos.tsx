@@ -102,7 +102,7 @@ export default function Produtos() {
   const stats = useMemo(() => {
     const totalCategories = categories.length - 1; // -1 para remover "all"
     const activeQuotes = products.reduce((sum, p) => sum + p.quotesCount, 0);
-
+    
     // Calcular produtos por status
     const produtosPorStatus = {
       ativos: products.filter(p => p.quotesCount >= 3).length,
@@ -110,45 +110,52 @@ export default function Produtos() {
       pendentes: products.filter(p => p.quotesCount === 0 && p.lastQuotePrice !== "R$ 0,00").length,
       semCotacao: products.filter(p => p.quotesCount === 0 && p.lastQuotePrice === "R$ 0,00").length
     };
-
+    
     // Percentual de produtos com pelo menos 1 cotação (engajamento geral)
     const produtosComCotacao = produtosPorStatus.ativos + produtosPorStatus.cotados;
-    const percentualComCotacao = products.length > 0 ? Math.round(produtosComCotacao / products.length * 100) : 0;
-
+    const percentualComCotacao = products.length > 0 
+      ? Math.round((produtosComCotacao / products.length) * 100) 
+      : 0;
+    
     // Top categorias por número de produtos
     const categoriaCount = new Map();
     products.forEach(p => {
       const cat = p.category || 'Sem Categoria';
       categoriaCount.set(cat, (categoriaCount.get(cat) || 0) + 1);
     });
-    const topCategoria = Array.from(categoriaCount.entries()).sort((a, b) => b[1] - a[1])[0];
-
+    const topCategoria = Array.from(categoriaCount.entries())
+      .sort((a, b) => b[1] - a[1])[0];
+    
     // Média de cotações por produto (apenas produtos com cotação)
     const produtosComCotacaoParaMedia = products.filter(p => p.quotesCount > 0);
-    const mediaCotacoesPorProduto = produtosComCotacaoParaMedia.length > 0 ? (activeQuotes / produtosComCotacaoParaMedia.length).toFixed(1) : "0.0";
-
+    const mediaCotacoesPorProduto = produtosComCotacaoParaMedia.length > 0
+      ? (activeQuotes / produtosComCotacaoParaMedia.length).toFixed(1)
+      : "0.0";
+    
     // Valor médio e economia potencial
     const productsWithPrices = products.filter(p => p.lastQuotePrice !== "R$ 0,00");
     let averageValue = "R$ 0,00";
     let economiaMediaPorProduto = "0";
     let percentualEconomiaMedia = 0;
+    
     if (productsWithPrices.length > 0) {
       const total = productsWithPrices.reduce((sum, p) => {
         const price = parseFloat(p.lastQuotePrice.replace(/[^\d,]/g, '').replace(',', '.'));
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
       averageValue = `R$ ${(total / productsWithPrices.length).toFixed(2)}`;
-
+      
       // Calcular economia média (assumindo economia de 10-15% em cotações bem feitas)
       // Baseado nos produtos que têm cotação
       const produtosComMultiplasCotacoes = products.filter(p => p.quotesCount >= 2);
       if (produtosComMultiplasCotacoes.length > 0) {
         // Estimativa conservadora: produtos com múltiplas cotações geram economia média
-        percentualEconomiaMedia = Math.round(produtosComMultiplasCotacoes.length / productsWithPrices.length * 12);
+        percentualEconomiaMedia = Math.round((produtosComMultiplasCotacoes.length / productsWithPrices.length) * 12);
         const valorMedio = total / productsWithPrices.length;
         economiaMediaPorProduto = (valorMedio * (percentualEconomiaMedia / 100)).toFixed(2);
       }
     }
+    
     return {
       totalProducts: products.length,
       totalCategories,
@@ -156,10 +163,7 @@ export default function Produtos() {
       averageValue,
       produtosPorStatus,
       percentualComCotacao,
-      topCategoria: topCategoria ? {
-        nome: topCategoria[0],
-        count: topCategoria[1]
-      } : null,
+      topCategoria: topCategoria ? { nome: topCategoria[0], count: topCategoria[1] } : null,
       mediaCotacoesPorProduto,
       productsWithPrices: productsWithPrices.length,
       economiaMediaPorProduto,
@@ -213,7 +217,7 @@ export default function Produtos() {
   return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        <div className="page-container bg-slate-100">
+        <div className="page-container">
           {/* Stats Cards - Estilo Apple */}
           <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
             <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
@@ -236,9 +240,7 @@ export default function Produtos() {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500" style={{
-                    width: `${stats.percentualComCotacao}%`
-                  }}></div>
+                    <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualComCotacao}%` }}></div>
                   </div>
                   <span className="text-xs font-semibold text-orange-600">{stats.percentualComCotacao}%</span>
                 </div>
@@ -264,9 +266,11 @@ export default function Produtos() {
                   <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalCategories}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">disponíveis</p>
                 </div>
-                {stats.topCategoria && <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                {stats.topCategoria && (
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">
                     <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.topCategoria.nome}</span> • {stats.topCategoria.count} produtos
-                  </p>}
+                  </p>
+                )}
               </CardContent>
             </Card>
 
@@ -303,20 +307,26 @@ export default function Produtos() {
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Valor Médio</span>
                   </div>
-                  {stats.percentualEconomiaMedia > 0 && <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
+                  {stats.percentualEconomiaMedia > 0 && (
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
                       <TrendingUp className="h-2.5 w-2.5 text-green-600" />
                       <span className="text-xs font-semibold text-green-600">{stats.percentualEconomiaMedia}%</span>
-                    </div>}
+                    </div>
+                  )}
                 </div>
                 <div className="mb-3">
                   <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.averageValue}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">valor médio por produto</p>
                 </div>
-                {stats.percentualEconomiaMedia > 0 ? <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                {stats.percentualEconomiaMedia > 0 ? (
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">
                     Economia média de <span className="font-semibold text-green-600 dark:text-green-400">R$ {stats.economiaMediaPorProduto}</span> por produto
-                  </p> : <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">
                     <span className="font-semibold">{stats.productsWithPrices}</span> produtos com preço
-                  </p>}
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
