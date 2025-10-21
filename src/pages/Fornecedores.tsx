@@ -578,7 +578,7 @@ export default function Fornecedores() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 border-b border-indigo-200 dark:border-gray-700">
+                <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
                   <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
                     <TableHead className="font-semibold text-indigo-900 dark:text-gray-200 py-4 px-4 text-xs w-[30%]">Fornecedor</TableHead>
                     <TableHead className="hidden md:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[12%]">Status</TableHead>

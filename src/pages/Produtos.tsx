@@ -504,7 +504,7 @@ export default function Produtos() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gradient-to-r from-primary/15 to-primary-dark/15 dark:from-primary/30 dark:to-primary-dark/30 border-b border-primary/30 dark:border-primary/50">
+                <TableHeader className="bg-muted dark:bg-accent/20 border-b border-primary/30 dark:border-primary/50">
                   <TableRow className="border-b-2 border-border dark:border-primary/30">
                     <TableHead className="font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs min-w-0">Produto</TableHead>
                     <TableHead className="hidden md:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Categoria</TableHead>

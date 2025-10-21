@@ -423,7 +423,7 @@ export default function Pedidos() {
               <CardContent className="p-0">
                 <div className="overflow-hidden">
                   <Table>
-                    <TableHeader className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-gray-800 dark:to-gray-800 border-b border-pink-200 dark:border-gray-700">
+                    <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
                       <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
                         <TableHead className="font-semibold text-pink-900 dark:text-gray-200 py-4 px-4 text-xs">
                           <div className="flex items-center gap-2">

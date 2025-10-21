@@ -27,7 +27,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
   return (
     <div className="overflow-x-auto">
       <Table>
-        <TableHeader className="bg-gradient-to-r from-purple-50/80 to-pink-50/80 border-b border-purple-100">
+        <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
           <TableRow className="hover:bg-transparent">
             <TableHead className="font-semibold text-purple-900 py-4 px-6">
               <div className="flex items-center gap-2">

@@ -646,7 +646,7 @@ export default function Cotacoes() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-gray-800 dark:to-gray-800 border-b border-teal-200 dark:border-gray-700">
+                <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
                   <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
                     <TableHead className="font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
