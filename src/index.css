@@ -474,4 +474,14 @@
   .scrollbar-thin:hover {
     scrollbar-color: hsl(var(--border)) transparent;
   }
+
+  /* Hide scrollbar completely */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
