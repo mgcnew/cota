@@ -124,17 +124,20 @@ export default function AddPedidoDialog({
   };
   const loadFrequentProducts = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('order_items')
         .select('product_id, product_name')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
         .limit(10);
+      
+      if (error) {
+        console.error('Error loading frequent products:', error);
+        return;
+      }
       
       if (data) {
         // Remover duplicatas
-        const unique = data.filter((item, index, self) => 
-          index === self.findIndex(t => t.product_id === item.product_id)
+        const unique = data.filter((item: any, index: number, self: any[]) => 
+          index === self.findIndex((t: any) => t.product_id === item.product_id)
         ).slice(0, 5);
         setFrequentProducts(unique);
       }
@@ -145,15 +148,19 @@ export default function AddPedidoDialog({
 
   const loadLastPrices = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('order_items')
         .select('product_id, unit_price')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+        .limit(100);
+      
+      if (error) {
+        console.error('Error loading last prices:', error);
+        return;
+      }
       
       if (data) {
         const pricesMap: Record<string, number> = {};
-        data.forEach(item => {
+        data.forEach((item: any) => {
           if (!pricesMap[item.product_id]) {
             pricesMap[item.product_id] = item.unit_price;
           }

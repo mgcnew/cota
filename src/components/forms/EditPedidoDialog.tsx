@@ -45,16 +45,36 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
 
   const statusOptions = ["pendente", "processando", "confirmado", "entregue", "cancelado"];
 
-  // Filtrar produtos baseado na busca
+  // Filtrar produtos baseado na busca - sempre incluir produtos selecionados
   const filteredProducts = useMemo(() => {
+    // Obter produtos já selecionados nos itens
+    const selectedProductNames = itens.map(item => item.produto).filter(Boolean);
+    const selectedProducts = products.filter(p => selectedProductNames.includes(p.name));
+    
     if (!debouncedProductSearch) {
-      return products.slice(0, 50); // Mostrar apenas 50 inicialmente
+      // Sem busca: mostrar produtos selecionados + primeiros 50
+      const initialProducts = products.slice(0, 50);
+      const merged = [...selectedProducts, ...initialProducts];
+      // Remover duplicatas
+      const unique = merged.filter((p, idx, arr) => 
+        arr.findIndex(t => t.name === p.name) === idx
+      );
+      return unique;
     }
+    
+    // Com busca: filtrar + sempre incluir selecionados
     const search = debouncedProductSearch.toLowerCase();
-    return products.filter(p => 
+    const filtered = products.filter(p => 
       p.name?.toLowerCase().includes(search)
-    ).slice(0, 100);
-  }, [products, debouncedProductSearch]);
+    );
+    
+    // Adicionar produtos selecionados mesmo que não correspondam à busca
+    const merged = [...selectedProducts, ...filtered].slice(0, 100);
+    const unique = merged.filter((p, idx, arr) => 
+      arr.findIndex(t => t.name === p.name) === idx
+    );
+    return unique;
+  }, [products, debouncedProductSearch, itens]);
 
   useEffect(() => {
     if (open) {
