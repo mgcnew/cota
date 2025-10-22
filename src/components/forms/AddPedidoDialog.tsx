@@ -326,90 +326,45 @@ export default function AddPedidoDialog({
     }
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-[900px] max-h-[95vh] sm:max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-lg sm:rounded-xl p-0 flex flex-col">
-        <DialogHeader className="relative px-4 sm:px-6 py-3 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-50 dark:from-pink-950/30 dark:via-rose-950/30 dark:to-pink-950/30 border-b border-pink-100/60 dark:border-pink-800/30 overflow-hidden">
-          <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-pink-400/10 to-rose-400/10 dark:from-pink-400/20 dark:to-rose-400/20 rounded-full -translate-y-12 -translate-x-12"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-400/10 to-rose-400/10 dark:from-pink-400/20 dark:to-rose-400/20 rounded-full -translate-y-16 translate-x-16"></div>
-          
-          <div className="relative z-10">
-            {/* Compact Header */}
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-pink-600 via-rose-600 to-pink-600 text-white shadow-lg shadow-pink-500/25 ring-2 ring-white/20 dark:ring-pink-400/20 flex-shrink-0">
-                  <ShoppingCart className="h-5 w-5" />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <DialogTitle className="text-lg font-bold bg-gradient-to-r from-pink-900 via-rose-800 to-pink-800 dark:from-pink-400 dark:via-rose-300 dark:to-pink-300 bg-clip-text text-transparent">
-                    Novo Pedido
-                  </DialogTitle>
-                  <p className="text-muted-foreground text-xs">
-                    {Math.round(progress)}% concluído
-                  </p>
-                </div>
-
-                {/* Navigation Controls - Moved to left side */}
-                <div className="flex items-center gap-2 sm:gap-3">
-                  {currentTabIndex > 0 && <Button type="button" variant="outline" size="sm" onClick={handlePrevious} disabled={loading} className="h-8 px-3">
-                      <ChevronLeft className="h-3 w-3 mr-1" />
-                      <span className="hidden sm:inline">Voltar</span>
-                    </Button>}
-                  
-                  {currentTabIndex < tabs.length - 1 ? <Button type="button" size="sm" onClick={handleNext} disabled={!canProceedToNext() || loading} className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg h-8 px-3">
-                      <span className="hidden sm:inline">Próximo</span>
-                      <ChevronRight className="h-3 w-3 ml-1" />
-                    </Button> : <Button type="submit" size="sm" disabled={loading} onClick={handleSubmit} className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg h-8 px-3">
-                      {loading ? <>
-                          <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
-                          <span className="hidden sm:inline">Criando...</span>
-                        </> : <>
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          <span className="hidden sm:inline">Criar</span>
-                        </>}
-                    </Button>}
-                </div>
-              </div>
-
-              {/* Close Button - Isolated on the right */}
-              <Button type="button" variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="h-8 w-8 p-0 flex-shrink-0">
-                <ChevronDown className="h-4 w-4" />
-              </Button>
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-4xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden border-0 dark:border dark:border-gray-700 shadow-2xl rounded-lg sm:rounded-xl p-0 flex flex-col bg-white dark:bg-gray-900">
+        <DialogHeader className="flex-shrink-0 px-3 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+          <div className="flex items-center gap-2">
+            <div className="p-1 rounded bg-pink-600 dark:bg-pink-500 flex-shrink-0">
+              <ShoppingCart className="h-3.5 w-3.5 text-white" />
             </div>
-            
-            {/* Compact Progress Bar */}
-            <div className="mt-2">
-              <Progress value={progress} className="h-2 bg-pink-100/60 dark:bg-pink-900/30 [&>div]:bg-gradient-to-r [&>div]:from-pink-500 [&>div]:to-rose-500" />
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                Novo Pedido
+              </DialogTitle>
+            </div>
+            <div className="text-xs text-slate-600 dark:text-gray-400">
+              {currentTabIndex + 1}/{tabs.length}
             </div>
           </div>
         </DialogHeader>
 
-        {/* Compact Tab Navigation */}
-        <div className="flex-shrink-0 px-3 sm:px-6 py-2 border-b border-pink-100/60 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/40 to-rose-50/30 dark:from-pink-950/20 dark:to-rose-950/20 backdrop-blur-sm">
-          <div className="flex space-x-1 bg-card backdrop-blur-sm rounded-xl p-1 shadow-lg border border-pink-200/40 dark:border-pink-800/40">
+        {/* Tab Navigation */}
+        <div className="flex-shrink-0 px-3 sm:px-4 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+          <div className="flex space-x-1 bg-white dark:bg-gray-900 rounded-md p-0.5 border border-gray-200 dark:border-gray-700">
             {tabs.map(tab => {
             const status = getTabStatus(tab.id);
             return <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={`
-                    flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 relative overflow-hidden group
-                    ${status === 'current' ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-xl shadow-pink-500/25 scale-105' : status === 'completed' ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'bg-muted text-muted-foreground hover:bg-pink-50 dark:hover:bg-pink-950/50 hover:text-pink-700 dark:hover:text-pink-300'}
+                    flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-xs font-medium transition-all
+                    ${status === 'current' 
+                      ? 'bg-pink-600 dark:bg-pink-500 text-white' 
+                      : status === 'completed' 
+                      ? 'bg-green-500 dark:bg-green-600 text-white' 
+                      : 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}
                   `}>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                  
-                  <div className={`
-                    flex items-center justify-center w-4 h-4 rounded transition-all
-                    ${status === 'current' ? 'bg-white/20' : ''}
-                    ${status === 'completed' ? 'bg-white/20' : ''}
-                  `}>
-                    {status === 'completed' ? <CheckCircle className="h-3 w-3 text-white" /> : <tab.icon className="h-3 w-3" />}
-                  </div>
-                  
-                  <span className="relative z-10 hidden sm:inline">{tab.label}</span>
+                    {status === 'completed' ? <CheckCircle className="h-3 w-3" /> : <tab.icon className="h-3 w-3" />}
+                  <span className="hidden sm:inline text-xs">{tab.label}</span>
                 </button>;
           })}
           </div>
         </div>
 
-        {/* Content Area - Now with more space */}
-        <div className="flex-1 overflow-hidden">
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto min-h-0">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{
             opacity: 0,
@@ -424,11 +379,11 @@ export default function AddPedidoDialog({
             duration: 0.25,
             ease: "easeOut"
           }} className="h-full">
-              <div className="h-full p-4 sm:p-6 py-0">
+              <div className="p-3 sm:p-4">
                 {activeTab === 'produtos' && <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4 h-full">
                   {/* Left Column - Add Product Form */}
-                    <Card className="border-pink-100 dark:border-pink-800/30 shadow-sm order-1 lg:order-1 h-fit">
-                      <div className="p-2 sm:p-3 border-b border-pink-100 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-pink-950/30 dark:to-rose-950/30">
+                    <Card className="border-gray-200 dark:border-gray-700 shadow-sm order-1 lg:order-1 h-fit dark:bg-gray-800">
+                      <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
                         <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
                           <Package className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                           Adicionar Produto
@@ -482,8 +437,8 @@ export default function AddPedidoDialog({
                     </Card>
 
                     {/* Right Column - Products List */}
-                    <Card className="border-pink-100 dark:border-pink-800/30 shadow-sm order-2 lg:order-2 flex flex-col">
-                      <div className="p-2 sm:p-3 border-b border-pink-100 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-pink-950/30 dark:to-rose-950/30 flex-shrink-0">
+                    <Card className="border-gray-200 dark:border-gray-700 shadow-sm order-2 lg:order-2 flex flex-col dark:bg-gray-800">
+                      <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 flex-shrink-0">
                         <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
                           <Package className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                           Produtos Adicionados ({itens.length})
@@ -522,7 +477,7 @@ export default function AddPedidoDialog({
                               </div>)}
                         </div>
                       </div>
-                      {itens.length > 0 && <div className="p-2 sm:p-3 border-t border-pink-100 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-pink-950/30 dark:to-rose-950/30 flex-shrink-0">
+                      {itens.length > 0 && <div className="p-2 sm:p-3 border-t border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 flex-shrink-0">
                           <div className="flex justify-between items-center">
                             <span className="font-medium text-foreground text-sm">Total:</span>
                             <span className="text-base font-bold text-pink-600 dark:text-pink-400">
@@ -534,19 +489,19 @@ export default function AddPedidoDialog({
                   </div>}
 
                 {activeTab === 'fornecedor' && <div className="max-w-2xl mx-auto space-y-3 sm:space-y-4 h-full">
-                    <Card className="border-pink-100 shadow-sm">
-                      <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50">
-                        <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
+                    <Card className="border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800">
+                      <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+                        <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
                           <Building2 className="h-4 w-4 text-pink-500" />
                           Informações do Fornecedor
                         </h3>
-                        <p className="text-xs text-gray-600 mt-1">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                           Selecione o fornecedor e defina a data de entrega
                         </p>
                       </div>
                       <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="fornecedor" className="text-xs font-medium text-gray-700">
+                          <Label htmlFor="fornecedor" className="text-xs font-medium text-gray-700 dark:text-gray-300">
                             Fornecedor *
                           </Label>
                           <Combobox options={suppliers.map(s => ({
@@ -556,7 +511,7 @@ export default function AddPedidoDialog({
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor="dataEntrega" className="text-xs font-medium text-gray-700">
+                          <Label htmlFor="dataEntrega" className="text-xs font-medium text-gray-700 dark:text-gray-300">
                             Data de Entrega *
                           </Label>
                           <Input id="dataEntrega" type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className="w-full text-sm" />
@@ -568,57 +523,57 @@ export default function AddPedidoDialog({
                 {activeTab === 'detalhes' && <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 h-full">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                       {/* Observações */}
-                      <Card className="border-pink-100 shadow-sm">
-                        <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50">
-                          <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
-                            <FileText className="h-4 w-4 text-pink-500" />
+                      <Card className="border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800">
+                        <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+                          <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                            <FileText className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                             Observações
                           </h3>
                         </div>
                         <div className="p-2 sm:p-3">
-                          <Textarea value={observacoes} onChange={e => setObservacoes(e.target.value)} placeholder="Observações adicionais sobre o pedido..." className="min-h-[80px] sm:min-h-[100px] resize-none border-pink-200 focus:border-pink-300 text-sm" />
+                          <Textarea value={observacoes} onChange={e => setObservacoes(e.target.value)} placeholder="Observações adicionais sobre o pedido..." className="min-h-[80px] sm:min-h-[100px] resize-none text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-white" />
                         </div>
                       </Card>
 
                       {/* Resumo do Pedido */}
-                      <Card className="border-pink-100 shadow-sm">
-                        <div className="p-2 sm:p-3 border-b border-pink-100 bg-gradient-to-r from-pink-50/50 to-rose-50/50">
-                          <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
-                            <Clock className="h-4 w-4 text-pink-500" />
+                      <Card className="border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800">
+                        <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+                          <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                            <Clock className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                             Resumo do Pedido
                           </h3>
                         </div>
                         <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs">
                             <div>
-                              <span className="text-gray-600">Produtos:</span>
-                              <div className="font-medium">{itens.length} itens</div>
+                              <span className="text-gray-600 dark:text-gray-400">Produtos:</span>
+                              <div className="font-medium dark:text-gray-200">{itens.length} itens</div>
                             </div>
                             <div>
-                              <span className="text-gray-600">Fornecedor:</span>
-                              <div className="font-medium text-xs truncate">
+                              <span className="text-gray-600 dark:text-gray-400">Fornecedor:</span>
+                              <div className="font-medium text-xs truncate dark:text-gray-200">
                                 {fornecedor ? suppliers.find(s => s.id === fornecedor)?.name : 'Não selecionado'}
                               </div>
                             </div>
                             <div>
-                              <span className="text-gray-600">Data de Entrega:</span>
-                              <div className="font-medium">
+                              <span className="text-gray-600 dark:text-gray-400">Data de Entrega:</span>
+                              <div className="font-medium dark:text-gray-200">
                                 {dataEntrega ? new Date(dataEntrega).toLocaleDateString('pt-BR') : 'Não definida'}
                               </div>
                             </div>
                             <div>
-                              <span className="text-gray-600">Valor Total:</span>
+                              <span className="text-gray-600 dark:text-gray-400">Valor Total:</span>
                               <div className="font-bold text-pink-600 text-sm sm:text-base">
                                 R$ {calculateTotal().toFixed(2)}
                               </div>
                             </div>
                           </div>
                           
-                          {itens.length > 0 && <div className="border-t border-gray-200 pt-2 sm:pt-3">
-                              <h4 className="font-medium text-gray-900 mb-1 text-xs">Produtos Selecionados:</h4>
+                          {itens.length > 0 && <div className="border-t border-gray-200 dark:border-gray-700 pt-2 sm:pt-3">
+                              <h4 className="font-medium text-gray-900 dark:text-white mb-1 text-xs">Produtos Selecionados:</h4>
                               <div className="h-20 sm:h-24 overflow-y-auto">
                                 <div className="space-y-1">
-                                  {itens.map((item, index) => <div key={index} className="text-xs text-gray-600 flex justify-between gap-2">
+                                  {itens.map((item, index) => <div key={index} className="text-xs text-gray-600 dark:text-gray-400 flex justify-between gap-2">
                                       <span className="truncate flex-1">{item.produto}</span>
                                       <span className="flex-shrink-0">{item.quantidade} {item.unidade}</span>
                                     </div>)}
@@ -634,45 +589,63 @@ export default function AddPedidoDialog({
           </AnimatePresence>
         </div>
 
-        <DialogFooter className="flex-shrink-0 px-3 sm:px-6 py-3 sm:py-4 border-t border-pink-100/60 dark:border-pink-800/30 bg-gradient-to-r from-pink-50/30 to-rose-50/30 dark:from-pink-950/20 dark:to-rose-950/20 backdrop-blur-sm">
-          <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3 sm:gap-0">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-              {loading ? <>
-                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
-                  <span>Criando pedido...</span>
-                </> : <>
-                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 dark:text-green-400" />
-                  <span>Etapa {currentTabIndex + 1} de {tabs.length}</span>
-                </>}
+        <DialogFooter className="flex-shrink-0 px-3 sm:px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+          <div className="flex items-center justify-between w-full gap-2">
+            <div className="flex gap-2">
+              {currentTabIndex > 0 && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handlePrevious} 
+                  disabled={loading}
+                  className="dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Voltar
+                </Button>
+              )}
             </div>
             
-            <div className="flex gap-2 order-1 sm:order-2 w-full sm:w-auto justify-center sm:justify-end">
-              {currentTabIndex > 0 && <Button type="button" variant="outline" onClick={handlePrevious} disabled={loading} className="border-pink-200 hover:bg-pink-50 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 flex-1 sm:flex-none">
-                  <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                  <span className="hidden xs:inline">Anterior</span>
-                  <span className="xs:hidden">Ant.</span>
-                </Button>}
-              
-              {currentTabIndex < tabs.length - 1 ? <Button type="button" onClick={handleNext} disabled={!canProceedToNext() || loading} className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 flex-1 sm:flex-none">
-                  <span className="hidden xs:inline">Próximo</span>
-                  <span className="xs:hidden">Prox.</span>
-                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
-                </Button> : <Button onClick={handleSubmit} disabled={loading || !fornecedor || !dataEntrega || itens.some(item => !item.produto || item.quantidade <= 0)} className="bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:via-rose-600 hover:to-pink-700 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 flex-1 sm:flex-none">
-                  {loading ? <>
-                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      <span className="hidden xs:inline">Criando...</span>
-                      <span className="xs:hidden">...</span>
-                    </> : <>
-                      <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                      <span className="hidden xs:inline">Criar Pedido</span>
-                      <span className="xs:hidden">Criar</span>
-                    </>}
-                </Button>}
-              
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading} className="border-gray-300 hover:bg-gray-50 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 flex-1 sm:flex-none">
-                <span className="hidden xs:inline">Cancelar</span>
-                <span className="xs:hidden">Cancel.</span>
+            <div className="flex gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => onOpenChange(false)} 
+                disabled={loading}
+                className="dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+              >
+                Cancelar
               </Button>
+              
+              {currentTabIndex < tabs.length - 1 ? (
+                <Button 
+                  type="button" 
+                  onClick={handleNext} 
+                  disabled={!canProceedToNext() || loading}
+                  className="bg-pink-600 dark:bg-pink-500 hover:bg-pink-700 dark:hover:bg-pink-600 text-white"
+                >
+                  Próximo
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleSubmit} 
+                  disabled={loading || !fornecedor || !dataEntrega || itens.some(item => !item.produto || item.quantidade <= 0)}
+                  className="bg-gradient-to-r from-pink-600 to-rose-600 dark:from-pink-500 dark:to-rose-500 hover:from-pink-700 hover:to-rose-700 dark:hover:from-pink-600 dark:hover:to-rose-600 text-white"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Criando...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Criar Pedido
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </DialogFooter>
