@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import ConvertToOrderDialog from "./ConvertToOrderDialog";
@@ -53,11 +53,20 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   const [selectedSupplierForConversion, setSelectedSupplierForConversion] = useState<{ id: string; name: string } | null>(null);
   const [showSelectSupplierDialog, setShowSelectSupplierDialog] = useState(false);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Map<string, { supplierId: string; supplierName: string }>>(new Map());
+  const editInputRef = useRef<HTMLInputElement>(null);
 
   const handleStartEdit = (productId: string, currentValue: number) => {
     setEditingProductId(productId);
     setEditedValues(prev => ({ ...prev, [productId]: currentValue }));
   };
+  
+  // Auto-foco e seleção quando entra em modo de edição
+  useEffect(() => {
+    if (editingProductId && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editingProductId]);
 
   const handleSaveEdit = (productId: string) => {
     if (selectedSupplier && onUpdateSupplierProductValue && editedValues[productId] !== undefined) {
@@ -506,212 +515,275 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </div>
             </TabsContent>
 
-            <TabsContent value="atualizacao" className="flex-1 overflow-y-auto p-3 space-y-3 animate-in fade-in-0 duration-500 min-h-0">
-              <Card className="p-3 border-0 shadow-md bg-gradient-to-br from-white via-gray-50/30 to-green-50/20 backdrop-blur-sm rounded-lg">
-                <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gradient-to-r from-green-50/60 to-emerald-50/40 rounded-lg border border-green-100/60">
-                    <div className="p-1.5 rounded-md bg-blue-50 text-blue-600/80 shadow-sm flex-shrink-0">
-                      <Users className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <label className="text-sm font-bold text-slate-800 block mb-2">Selecione o Fornecedor</label>
+            <TabsContent value="atualizacao" className="flex-1 overflow-hidden p-3 sm:p-4 animate-in fade-in-0 duration-300">
+              <div className="h-full flex flex-col lg:flex-row gap-4">
+                {/* Painel Esquerdo - Seleção de Fornecedor */}
+                <div className="lg:w-80 flex-shrink-0 space-y-4">
+                  {/* Card de Seleção */}
+                  <Card className="border border-blue-200 dark:border-blue-800/40 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                    <div className="p-4 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-blue-600 dark:bg-blue-500 text-white">
+                          <Users className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100">Selecionar Fornecedor</h3>
+                          <p className="text-xs text-blue-700 dark:text-blue-300">Escolha para editar valores</p>
+                        </div>
+                      </div>
+                      
                       <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
-                        <SelectTrigger className="bg-white/80 backdrop-blur-sm border-green-200 focus:border-green-400 rounded-xl">
-                          <SelectValue placeholder="Escolha um fornecedor para editar valores" />
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-blue-200 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-500 dark:text-white">
+                          <SelectValue placeholder="Selecione um fornecedor" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
                           {quote.fornecedoresParticipantes.map(fornecedor => (
                             <SelectItem 
                               key={fornecedor.id} 
                               value={fornecedor.id}
-                              className="focus:bg-emerald-50 focus:text-emerald-800 data-[highlighted]:bg-emerald-50 data-[highlighted]:text-emerald-800"
+                              className="focus:bg-blue-50 dark:focus:bg-blue-900/30"
                             >
                               <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                                {fornecedor.nome}
+                                <div className={cn(
+                                  "w-2 h-2 rounded-full",
+                                  fornecedor.status === 'respondido' ? "bg-emerald-500" : "bg-amber-500"
+                                )}></div>
+                                <span>{fornecedor.nome}</span>
                               </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
+                  </Card>
 
-                  {selectedSupplier && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold flex items-center gap-2 text-lg border-b border-slate-200 pb-2 mb-3">
-                          <DollarSign className="h-5 w-5 text-slate-600" />
-                          Lista de Produtos
-                        </h4>
-                        {quote.status === "concluida" && (
-                          <Badge variant="secondary" className="bg-gray-100 text-gray-600 border border-gray-300">
-                            <FileText className="h-3 w-3 mr-1" />
-                            Cotação Finalizada
-                          </Badge>
-                        )}
-                      </div>
-
-                      {quote.status === "concluida" && (
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                          <div className="flex items-center gap-2 text-amber-800">
-                            <ShoppingCart className="h-4 w-4" />
-                            <span className="text-sm font-medium">
-                              Esta cotação foi finalizada e convertida em pedido. Os valores não podem mais ser editados.
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                      <div className="rounded-xl border border-slate-200/40 shadow-lg overflow-hidden bg-white/60 backdrop-blur-sm overflow-x-auto">
-                        <table className="w-full min-w-[600px]">
-                          <thead>
-                            <tr className="bg-gradient-to-r from-slate-100/80 to-blue-50/60 border-b border-slate-300/50">
-                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm text-slate-800">
-                                <span className="hidden sm:inline flex items-center gap-2">
-                                  <Package className="h-4 w-4 text-blue-500" />
-                                  Produto
-                                </span>
-                                <span className="sm:hidden">
-                                  <Package className="h-4 w-4 text-blue-500" />
-                                </span>
-                              </th>
-                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm text-slate-800">
-                                <span className="hidden sm:inline flex items-center gap-2">
-                                  <TrendingDown className="h-4 w-4 text-blue-500" />
-                                  Quantidade
-                                </span>
-                                <span className="sm:hidden">
-                                  <TrendingDown className="h-4 w-4 text-blue-500" />
-                                </span>
-                              </th>
-                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm text-slate-800">
-                                <span className="hidden sm:inline flex items-center gap-2">
-                                  <DollarSign className="h-4 w-4 text-blue-500" />
-                                  Valor Oferecido
-                                </span>
-                                <span className="sm:hidden">
-                                  <DollarSign className="h-4 w-4 text-blue-500" />
-                                </span>
-                              </th>
-                              <th className="p-2 sm:p-3 text-left font-bold text-xs sm:text-sm text-slate-800">
-                                <span className="hidden sm:inline flex items-center gap-2">
-                                  <Edit2 className="h-4 w-4 text-blue-500" />
-                                  Ações
-                                </span>
-                                <span className="sm:hidden">
-                                  <Edit2 className="h-4 w-4 text-blue-500" />
-                                </span>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {products.map((product: any, index: number) => {
-                              const currentValue = getSupplierProductValue(selectedSupplier, product.product_id);
-                              const isEditing = editingProductId === product.product_id;
-                              const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
-                              const isBestPrice = currentValue > 0 && selectedSupplier === bestSupplierId;
-
-                              return (
-                                <tr key={product.product_id} className={cn(
-                                  "border-b border-slate-200/60 last:border-0 hover:bg-blue-50/40 transition-colors",
-                                  index % 2 === 0 ? "bg-white/80" : "bg-slate-50/30"
+                  {/* Lista de Fornecedores */}
+                  <Card className="border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                    <div className="p-3 border-b border-slate-200 dark:border-gray-700">
+                      <h4 className="text-xs font-semibold text-slate-700 dark:text-gray-300 flex items-center gap-2">
+                        <Building2 className="h-3 w-3" />
+                        Todos os Fornecedores
+                      </h4>
+                    </div>
+                    <div className="p-2 space-y-1 max-h-[400px] overflow-y-auto">
+                      {quote.fornecedoresParticipantes.map(fornecedor => {
+                        const isSelected = selectedSupplier === fornecedor.id;
+                        const totalValue = products.reduce((sum: number, product: any) => {
+                          const value = getSupplierProductValue(fornecedor.id, product.product_id);
+                          return sum + (value || 0);
+                        }, 0);
+                        
+                        return (
+                          <button
+                            key={fornecedor.id}
+                            onClick={() => setSelectedSupplier(fornecedor.id)}
+                            className={cn(
+                              "w-full text-left p-2 rounded-lg transition-all",
+                              isSelected 
+                                ? "bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700" 
+                                : "hover:bg-slate-50 dark:hover:bg-gray-700/50 border border-transparent"
+                            )}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <div className={cn(
+                                  "w-2 h-2 rounded-full flex-shrink-0",
+                                  fornecedor.status === 'respondido' ? "bg-emerald-500" : "bg-amber-500"
+                                )}></div>
+                                <span className={cn(
+                                  "text-xs font-medium truncate",
+                                  isSelected ? "text-blue-900 dark:text-blue-100" : "text-slate-700 dark:text-gray-300"
                                 )}>
-                                  <td className="p-2 sm:p-3">
-                                    <div className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[150px] sm:max-w-none" title={product.product_name}>
-                                      {product.product_name}
-                                    </div>
-                                  </td>
-                                  <td className="p-2 sm:p-3">
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                      <span className="font-semibold text-slate-700 text-xs sm:text-sm">{product.quantidade}</span>
-                                      <Badge variant="outline" className="text-xs w-fit text-slate-500 border-slate-300">{product.unidade}</Badge>
-                                    </div>
-                                  </td>
-                                  <td className="p-2 sm:p-3">
-                                    {isEditing ? (
-                                      <div className="flex items-center gap-2">
-                                        <Input
-                                          type="number"
-                                          value={editedValues[product.product_id] || 0}
-                                          onChange={(e) => setEditedValues(prev => ({
-                                            ...prev,
-                                            [product.product_id]: Number(e.target.value)
-                                          }))}
-                                          className="w-28 sm:w-36 rounded-lg sm:rounded-xl border-green-200 focus:border-green-400 text-xs sm:text-sm"
-                                          step="0.01"
-                                          min="0"
-                                          placeholder="0.00"
-                                        />
-                                      </div>
-                                    ) : (
-                                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                                        <span className={cn(
-                                          "font-bold text-sm sm:text-base",
-                                          isBestPrice ? "text-emerald-600" : "text-slate-800"
-                                        )}>
-                                          R$ {currentValue.toFixed(2)}
-                                        </span>
-                                        {isBestPrice && (
-                                          <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm text-xs w-fit">
-                                            <span className="hidden sm:inline flex items-center gap-1">
-                                              <TrendingDown className="h-3 w-3" />
-                                              Melhor Preço
-                                            </span>
-                                            <span className="sm:hidden">
-                                              <TrendingDown className="h-3 w-3" />
-                                            </span>
-                                          </Badge>
-                                        )}
-                                      </div>
-                                    )}
-                                  </td>
-                                  <td className="p-2 sm:p-3">
-                                    {isEditing ? (
-                                      <div className="flex gap-1 sm:gap-2">
-                                        <Button
-                                          size="sm"
-                                          onClick={() => handleSaveEdit(product.product_id)}
-                                          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg sm:rounded-xl shadow-lg h-8 w-8 sm:h-9 sm:w-9 p-0"
-                                        >
-                                          <Save className="h-3 w-3 sm:h-4 sm:w-4" />
-                                        </Button>
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={handleCancelEdit}
-                                          className="rounded-lg sm:rounded-xl border-red-200 text-red-600 hover:bg-red-50 h-8 w-8 sm:h-9 sm:w-9 p-0"
-                                        >
-                                          <X className="h-3 w-3 sm:h-4 sm:w-4" />
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleStartEdit(product.product_id, currentValue)}
-                                        disabled={quote.status === "concluida"}
-                                        className={cn(
-                                          "rounded-lg sm:rounded-xl h-8 w-8 sm:h-9 sm:w-9 p-0",
-                                          quote.status === "concluida"
-                                            ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                                            : "border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
-                                        )}
-                                        title={quote.status === "concluida" ? "Cotação finalizada - Edição não permitida" : "Editar valor"}
-                                      >
-                                        <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                                      </Button>
-                                    )}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                                  {fornecedor.nome}
+                                </span>
+                              </div>
+                              {totalValue > 0 && (
+                                <span className="text-xs font-semibold text-slate-600 dark:text-gray-400 flex-shrink-0">
+                                  R$ {totalValue.toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </Card>
+
+                  {/* Alerta de Cotação Finalizada */}
+                  {quote.status === "concluida" && (
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
+                        <ShoppingCart className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-xs font-medium">
+                          Cotação finalizada
+                        </span>
                       </div>
                     </div>
                   )}
                 </div>
-              </Card>
+
+                {/* Painel Direito - Tabela de Produtos */}
+                <div className="flex-1 min-w-0">
+                  {!selectedSupplier ? (
+                    <Card className="h-full border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                      <div className="h-full flex items-center justify-center p-8">
+                        <div className="text-center">
+                          <div className="p-4 rounded-full bg-blue-50 dark:bg-blue-900/20 w-fit mx-auto mb-4">
+                            <DollarSign className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Selecione um Fornecedor</h3>
+                          <p className="text-sm text-slate-600 dark:text-gray-400">
+                            Escolha um fornecedor à esquerda para visualizar e editar os valores dos produtos
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  ) : (
+                    <Card className="h-full border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg overflow-hidden flex flex-col">
+                      <div className="p-3 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Produtos - {quote.fornecedoresParticipantes.find(f => f.id === selectedSupplier)?.nome}
+                        </h3>
+                        <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                          {products.length} produtos
+                        </Badge>
+                      </div>
+                      <div className="flex-1 overflow-auto">
+                        <table className="w-full">
+                          <thead className="bg-slate-50 dark:bg-gray-800/50 border-b border-slate-200 dark:border-gray-700">
+                            <tr>
+                              <th className="px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-gray-300">
+                                <div className="flex items-center gap-1">
+                                  <Package className="h-3 w-3" />
+                                  <span className="hidden sm:inline">Produto</span>
+                                </div>
+                              </th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-gray-300">
+                              <div className="flex items-center gap-1">
+                                <Package className="h-3 w-3" />
+                                <span className="hidden sm:inline">Qtd</span>
+                              </div>
+                            </th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-gray-300">
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="h-3 w-3" />
+                                <span className="hidden sm:inline">Valor</span>
+                              </div>
+                            </th>
+                            <th className="px-3 py-2 text-center text-xs font-semibold text-slate-700 dark:text-gray-300">
+                              <Edit2 className="h-3 w-3 mx-auto" />
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
+                          {products.map((product: any) => {
+                            const currentValue = getSupplierProductValue(selectedSupplier, product.product_id);
+                            const isEditing = editingProductId === product.product_id;
+                            const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
+                            const isBestPrice = currentValue > 0 && selectedSupplier === bestSupplierId;
+
+                            return (
+                              <tr key={product.product_id} className={cn(
+                                "hover:bg-slate-50 dark:hover:bg-gray-700/50 transition-colors",
+                                isBestPrice && "bg-emerald-50 dark:bg-emerald-900/20"
+                              )}>
+                                <td className="px-3 py-2.5">
+                                  <p className="font-semibold text-sm text-slate-900 dark:text-white truncate" title={product.product_name}>
+                                    {product.product_name}
+                                  </p>
+                                </td>
+                                <td className="px-3 py-2.5">
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-medium text-sm text-slate-700 dark:text-gray-300">{product.quantidade}</span>
+                                    <span className="text-xs text-slate-500 dark:text-gray-400">{product.unidade}</span>
+                                  </div>
+                                </td>
+                                <td className="px-3 py-2.5">
+                                  {isEditing ? (
+                                    <Input
+                                      ref={editInputRef}
+                                      type="number"
+                                      value={editedValues[product.product_id] || 0}
+                                      onChange={(e) => setEditedValues(prev => ({
+                                        ...prev,
+                                        [product.product_id]: Number(e.target.value)
+                                      }))}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          handleSaveEdit(product.product_id);
+                                        } else if (e.key === 'Escape') {
+                                          handleCancelEdit();
+                                        }
+                                      }}
+                                      className="w-32 h-8 rounded-lg border-blue-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-blue-400 dark:focus:border-blue-500 text-sm"
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="0.00"
+                                    />
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <span className={cn(
+                                        "font-bold text-sm",
+                                        isBestPrice ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white"
+                                      )}>
+                                        R$ {currentValue.toFixed(2)}
+                                      </span>
+                                      {isBestPrice && (
+                                        <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-xs">
+                                          <TrendingDown className="h-3 w-3" />
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="px-3 py-2.5 text-center">
+                                  {isEditing ? (
+                                    <div className="flex gap-1 justify-center">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => handleSaveEdit(product.product_id)}
+                                        className="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white h-8 w-8 p-0"
+                                      >
+                                        <Save className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={handleCancelEdit}
+                                        className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 h-8 w-8 p-0"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleStartEdit(product.product_id, currentValue)}
+                                      disabled={quote.status === "concluida"}
+                                      className={cn(
+                                        "h-8 w-8 p-0",
+                                        quote.status === "concluida"
+                                          ? "text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                                          : "text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                                      )}
+                                      title={quote.status === "concluida" ? "Cotação finalizada" : "Editar valor"}
+                                    >
+                                      <Edit2 className="h-3 w-3" />
+                                    </Button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+                  )}
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="comparativo" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500 min-h-0">
