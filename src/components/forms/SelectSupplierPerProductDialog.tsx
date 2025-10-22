@@ -95,118 +95,133 @@ export function SelectSupplierPerProductDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
-            Selecionar Fornecedor por Produto
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-5xl h-[90vh] sm:h-[85vh] p-0 flex flex-col bg-white dark:bg-gray-900 border-0 dark:border dark:border-gray-700 rounded-lg sm:rounded-xl">
+        <DialogHeader className="px-3 sm:px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
+            <div className="p-1.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white flex-shrink-0">
+              <Package className="h-4 w-4" />
+            </div>
+            <span className="text-sm sm:text-base font-bold truncate">Selecionar Fornecedor por Produto</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="flex-1 overflow-auto p-3 sm:p-4 space-y-3">
           {hasNonOptimalSelection() && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Você selecionou fornecedores que não oferecem o melhor preço para alguns produtos.
-                Economia potencial perdida: R$ {(total - bestTotal).toFixed(2)}
+            <Alert className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <AlertDescription className="text-amber-800 dark:text-amber-200 text-xs">
+                <strong>Atenção:</strong> Economia perdida: <span className="font-bold">R$ {(total - bestTotal).toFixed(2)}</span>
               </AlertDescription>
             </Alert>
           )}
 
-          <div className="border rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Produto</TableHead>
-                  <TableHead>Quantidade</TableHead>
-                  <TableHead>Fornecedor Selecionado</TableHead>
-                  <TableHead className="text-right">Preço</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products.map((product) => {
-                  const selection = selections.get(product.productId);
-                  const selectedSupplier = product.supplierOptions.find(s => s.supplierId === selection?.supplierId);
-                  
-                  return (
-                    <TableRow key={product.productId}>
-                      <TableCell>
-                        <div className="font-medium">{product.productName}</div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">
-                          {product.quantity} {product.unit}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Combobox
-                            options={product.supplierOptions.map(s => ({
-                              value: s.supplierId,
-                              label: `${s.supplierName} - R$ ${s.price.toFixed(2)}${s.isBest ? ' ⭐' : ''}`
-                            }))}
-                            value={selection?.supplierId || ''}
-                            onValueChange={(value) => handleSelectionChange(product.productId, value)}
-                            placeholder="Selecione o fornecedor"
-                            className="w-[300px]"
-                          />
-                          {selectedSupplier?.isBest && (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                              <Award className="h-3 w-3 mr-1" />
-                              Melhor Preço
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className={`font-bold ${selectedSupplier?.isBest ? 'text-green-600' : 'text-gray-900'}`}>
-                          R$ {selectedSupplier?.price.toFixed(2) || '0.00'}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold">Total do Pedido:</span>
-              <span className="text-2xl font-bold text-green-600">R$ {total.toFixed(2)}</span>
-            </div>
-            
-            {supplierGroups.size > 1 && (
-              <Alert className="bg-blue-50 border-blue-200">
-                <AlertCircle className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-900">
-                  <strong>Atenção:</strong> Você selecionou produtos de {supplierGroups.size} fornecedores diferentes.
-                  {Array.from(supplierGroups.entries()).map(([supplierId, productNames]) => {
-                    const supplier = products.find(p => 
-                      p.supplierOptions.some(s => s.supplierId === supplierId)
-                    )?.supplierOptions.find(s => s.supplierId === supplierId);
+          <div className="border border-slate-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-slate-50 dark:bg-gray-800/50 border-b border-slate-200 dark:border-gray-700">
+                    <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[140px]">Produto</TableHead>
+                    <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[70px]">Qtd</TableHead>
+                    <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[260px]">Fornecedor</TableHead>
+                    <TableHead className="px-2 py-1.5 text-right text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[100px]">Preço</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-slate-100 dark:divide-gray-700">
+                  {products.map((product) => {
+                    const selection = selections.get(product.productId);
+                    const selectedSupplier = product.supplierOptions.find(s => s.supplierId === selection?.supplierId);
                     
                     return (
-                      <div key={supplierId} className="mt-2">
-                        • <strong>{supplier?.supplierName}:</strong> {productNames.join(', ')}
-                      </div>
+                      <TableRow key={product.productId} className="hover:bg-slate-50 dark:hover:bg-gray-700/50">
+                        <TableCell className="px-2 py-2">
+                          <p className="font-semibold text-xs text-slate-900 dark:text-white truncate" title={product.productName}>
+                            {product.productName}
+                          </p>
+                        </TableCell>
+                        <TableCell className="px-2 py-2">
+                          <span className="text-[10px] text-slate-600 dark:text-gray-400 whitespace-nowrap">
+                            {product.quantity} {product.unit}
+                          </span>
+                        </TableCell>
+                        <TableCell className="px-2 py-2">
+                          <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+                            <Combobox
+                              options={product.supplierOptions.map(s => ({
+                                value: s.supplierId,
+                                label: `${s.supplierName} - R$ ${s.price.toFixed(2)}${s.isBest ? ' ⭐' : ''}`
+                              }))}
+                              value={selection?.supplierId || ''}
+                              onValueChange={(value) => handleSelectionChange(product.productId, value)}
+                              placeholder="Selecione"
+                              className="w-full min-w-[180px] text-xs"
+                            />
+                            {selectedSupplier?.isBest && (
+                              <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px] whitespace-nowrap flex-shrink-0 px-1.5 py-0.5">
+                                <Award className="h-2.5 w-2.5 mr-0.5" />
+                                Melhor
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2 py-2 text-right">
+                          <span className={`font-bold text-xs whitespace-nowrap ${
+                            selectedSupplier?.isBest 
+                              ? 'text-emerald-600 dark:text-emerald-400' 
+                              : 'text-slate-900 dark:text-white'
+                          }`}>
+                            R$ {selectedSupplier?.price.toFixed(2) || '0.00'}
+                          </span>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </AlertDescription>
-              </Alert>
-            )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
+
+          {supplierGroups.size > 1 && (
+            <Alert className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+              <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <AlertDescription className="text-blue-900 dark:text-blue-200 text-xs">
+                <strong>Múltiplos fornecedores:</strong> {supplierGroups.size} selecionados
+                {Array.from(supplierGroups.entries()).map(([supplierId, productNames]) => {
+                  const supplier = products.find(p => 
+                    p.supplierOptions.some(s => s.supplierId === supplierId)
+                  )?.supplierOptions.find(s => s.supplierId === supplierId);
+                  
+                  return (
+                    <div key={supplierId} className="mt-0.5 text-[10px]">
+                      • <strong>{supplier?.supplierName}:</strong> {productNames.length} produto(s)
+                    </div>
+                  );
+                })}
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
-          </Button>
-          <Button onClick={() => onConfirm(selections)}>
-            Confirmar e Continuar
-          </Button>
-        </DialogFooter>
+        <div className="flex-shrink-0 p-3 border-t border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+          <div className="flex items-center justify-between mb-2 gap-3">
+            <span className="text-xs font-semibold text-slate-700 dark:text-gray-300 whitespace-nowrap">Total do Pedido:</span>
+            <span className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">R$ {total.toFixed(2)}</span>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              className="flex-1 border-slate-300 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={() => onConfirm(selections)}
+              className="flex-1 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white"
+            >
+              Confirmar e Continuar
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

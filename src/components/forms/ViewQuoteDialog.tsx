@@ -783,10 +783,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                 {/* Tabela Comparativa - Foco Total */}
                 <div className="flex-1 overflow-auto border border-slate-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                  <table className="w-full border-collapse">
+                  <table className="w-full border-collapse min-w-max">
                     <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-gray-900">
                       <tr className="border-b-2 border-slate-300 dark:border-gray-600">
-                        <th className="px-3 py-2 text-left bg-slate-100 dark:bg-gray-800">
+                        <th className="px-3 py-2 text-left bg-slate-100 dark:bg-gray-800 sticky left-0 z-20">
                           <div className="flex items-center gap-1.5">
                             <Package className="h-3.5 w-3.5 text-slate-600 dark:text-gray-400" />
                             <span className="font-semibold text-xs text-slate-800 dark:text-gray-200">Produto</span>
@@ -803,24 +803,26 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                             <th 
                               key={fornecedor.id} 
                               className={cn(
-                                "px-3 py-2 text-center min-w-[120px] group relative",
+                                "px-2 py-2 text-center group relative",
+                                quote.fornecedoresParticipantes.length > 5 ? "min-w-[100px] max-w-[120px]" : "min-w-[120px]",
                                 isWinning 
                                   ? "bg-emerald-100 dark:bg-emerald-900/30" 
                                   : "bg-slate-50 dark:bg-gray-900"
                               )}
                               title={`Total: R$ ${totalValue.toFixed(2)}`}
                             >
-                              <div className="flex items-center justify-center gap-1">
+                              <div className="flex items-center justify-center gap-0.5">
                                 <Building2 className={cn(
-                                  "h-3.5 w-3.5",
+                                  "h-3 w-3 flex-shrink-0",
                                   isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-gray-400"
                                 )} />
-                                {isWinning && <Star className="h-3 w-3 text-emerald-600 dark:text-emerald-400 fill-current" />}
+                                {isWinning && <Star className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400 fill-current flex-shrink-0" />}
                               </div>
                               <p className={cn(
-                                "font-semibold text-xs truncate mt-1",
+                                "font-semibold truncate mt-0.5",
+                                quote.fornecedoresParticipantes.length > 5 ? "text-[10px]" : "text-xs",
                                 isWinning ? "text-emerald-700 dark:text-emerald-300" : "text-slate-800 dark:text-gray-200"
-                              )}>
+                              )} title={fornecedor.nome}>
                                 {fornecedor.nome}
                               </p>
                               {/* Tooltip com total */}
@@ -841,8 +843,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                             "border-b border-slate-200 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors",
                             index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-slate-50/50 dark:bg-gray-800/30"
                           )}>
-                            <td className="px-3 py-2 bg-slate-50/50 dark:bg-gray-800/50">
-                              <p className="font-semibold text-xs text-slate-900 dark:text-white truncate" title={product.product_name}>
+                            <td className="px-3 py-2 bg-slate-50/50 dark:bg-gray-800/50 sticky left-0 z-10">
+                              <p className="font-semibold text-xs text-slate-900 dark:text-white truncate max-w-[200px]" title={product.product_name}>
                                 {product.product_name}
                               </p>
                               <p className="text-[10px] text-slate-500 dark:text-gray-500 mt-0.5">
@@ -855,22 +857,26 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                               return (
                                 <td key={fornecedor.id} className={cn(
-                                  "px-3 py-2 text-center",
+                                  "py-2 text-center",
+                                  quote.fornecedoresParticipantes.length > 5 ? "px-2" : "px-3",
                                   isBestPrice && "bg-emerald-50 dark:bg-emerald-900/20"
                                 )}>
                                   {value > 0 ? (
                                     <div className={cn(
-                                      "px-2 py-1 rounded font-bold text-sm inline-flex items-center gap-1",
+                                      "rounded font-bold inline-flex items-center justify-center gap-0.5",
+                                      quote.fornecedoresParticipantes.length > 5 
+                                        ? "px-1.5 py-0.5 text-xs min-w-[75px]" 
+                                        : "px-2 py-1 text-sm min-w-[85px]",
                                       isBestPrice
                                         ? "bg-emerald-600 dark:bg-emerald-500 text-white"
                                         : "bg-slate-200 dark:bg-gray-700 text-slate-800 dark:text-gray-200"
                                     )}>
-                                      {isBestPrice && <TrendingDown className="h-3 w-3" />}
-                                      R$ {value.toFixed(2)}
+                                      {isBestPrice && <TrendingDown className="h-2.5 w-2.5 flex-shrink-0" />}
+                                      <span className="whitespace-nowrap">R$ {value.toFixed(2)}</span>
                                     </div>
                                   ) : (
                                     <div className="text-slate-400 dark:text-gray-600">
-                                      <Minus className="h-4 w-4 mx-auto" />
+                                      <Minus className="h-3.5 w-3.5 mx-auto" />
                                     </div>
                                   )}
                                 </td>
