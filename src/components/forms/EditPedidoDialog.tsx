@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, Loader2, Edit3, Building2, Calendar, Package, FileText, DollarSign, Save } from "lucide-react";
+import { Combobox } from "@/components/ui/combobox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -17,6 +19,7 @@ interface PedidoItem {
   produto: string;
   quantidade: number;
   valorUnitario: number;
+  unidade: string;
 }
 
 interface EditPedidoDialogProps {
@@ -37,8 +40,21 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [productSearch, setProductSearch] = useState("");
+  const debouncedProductSearch = useDebounce(productSearch, 300);
 
   const statusOptions = ["pendente", "processando", "confirmado", "entregue", "cancelado"];
+
+  // Filtrar produtos baseado na busca
+  const filteredProducts = useMemo(() => {
+    if (!debouncedProductSearch) {
+      return products.slice(0, 50); // Mostrar apenas 50 inicialmente
+    }
+    const search = debouncedProductSearch.toLowerCase();
+    return products.filter(p => 
+      p.name?.toLowerCase().includes(search)
+    ).slice(0, 100);
+  }, [products, debouncedProductSearch]);
 
   useEffect(() => {
     if (open) {
@@ -50,7 +66,24 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
       setDataEntrega(pedido.delivery_date || "");
       setStatus(pedido.status);
       setObservacoes(pedido.observacoes || "");
-      setItens(pedido.detalhesItens || [{ produto: "", quantidade: 1, valorUnitario: 0 }]);
+      
+      // Carregar itens do pedido
+      if (pedido.detalhesItens && pedido.detalhesItens.length > 0) {
+        console.log('[EDIT PEDIDO] Itens recebidos:', pedido.detalhesItens);
+        const formattedItens = pedido.detalhesItens.map((item: any) => {
+          const formattedItem = {
+            produto: item.product_name || item.produto || item.productName || "",
+            quantidade: parseFloat(item.quantity || item.quantidade || 1),
+            valorUnitario: parseFloat(item.unit_price || item.valorUnitario || item.unitPrice || 0),
+            unidade: item.unit || item.unidade || "un"
+          };
+          console.log('[EDIT PEDIDO] Item formatado:', formattedItem);
+          return formattedItem;
+        });
+        setItens(formattedItens);
+      } else {
+        setItens([{ produto: "", quantidade: 1, valorUnitario: 0, unidade: "un" }]);
+      }
     }
   }, [pedido, open]);
 
@@ -68,20 +101,63 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
   };
 
   const loadProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('name');
-    
-    if (error) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      // Get total count
+      const { count: totalCount, error: countError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      
+      if (countError) throw countError;
+      if (!totalCount || totalCount === 0) {
+        setProducts([]);
+        return;
+      }
+
+      // Load in batches of 1000
+      const pageSize = 1000;
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const allProducts = [];
+      
+      console.log(`[EDIT PEDIDO] Loading ${totalCount} products in ${totalPages} pages`);
+      
+      for (let page = 0; page < totalPages; page++) {
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+        
+        const { data: pageData, error: pageError } = await supabase
+          .from('products')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('name')
+          .range(from, to);
+        
+        if (pageError) throw pageError;
+        if (pageData && pageData.length > 0) {
+          allProducts.push(...pageData);
+        }
+      }
+      
+      console.log(`[EDIT PEDIDO] Loaded ${allProducts.length} products total`);
+      setProducts(allProducts);
+    } catch (error) {
       console.error('Error loading products:', error);
-      return;
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar produtos",
+        variant: "destructive"
+      });
     }
-    setProducts(data || []);
   };
 
   const handleAddItem = () => {
-    setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0 }]);
+    setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0, unidade: "un" }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -153,6 +229,7 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
           product_id: product?.id || null,
           product_name: item.produto,
           quantity: item.quantidade,
+          unit: item.unidade,
           unit_price: item.valorUnitario,
           total_price: item.quantidade * item.valorUnitario,
         };
@@ -185,314 +262,265 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] max-w-5xl h-[85vh] max-h-[900px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 animate-in fade-in-0 zoom-in-95 duration-300">
-        <DialogHeader className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
-          {/* Efeitos decorativos de fundo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-blue-400/10 rounded-full translate-y-12 -translate-x-12"></div>
-          
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-white/20 backdrop-blur-sm flex-shrink-0">
-                <Edit3 className="h-5 w-5 sm:h-6 sm:w-6 drop-shadow-sm" />
-              </div>
-              <div className="flex flex-col flex-1 min-w-0">
-                <DialogTitle className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-800 bg-clip-text text-transparent truncate">
-                  Editar Pedido #{pedido?.id}
-                </DialogTitle>
-                <p className="text-gray-600/80 text-xs sm:text-sm font-medium mt-0.5 truncate">
-                  Modifique as informações do pedido
-                </p>
-              </div>
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-4xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden border-0 dark:border dark:border-gray-700 shadow-2xl rounded-lg sm:rounded-xl p-0 flex flex-col bg-white dark:bg-gray-900">
+        <DialogHeader className="flex-shrink-0 px-3 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+          <div className="flex items-center gap-2">
+            <div className="p-1 rounded bg-blue-600 dark:bg-blue-500 flex-shrink-0">
+              <Edit3 className="h-3.5 w-3.5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                Editar Pedido #{pedido?.id}
+              </DialogTitle>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="flex flex-col h-full overflow-hidden">
-          <Tabs defaultValue="dados" className="w-full flex flex-col h-full">
-            <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm flex-shrink-0">
-              <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-1 sm:p-1.5 shadow-lg border border-gray-200/40">
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <Tabs defaultValue="dados" className="w-full flex flex-col flex-1 overflow-hidden">
+            <div className="flex-shrink-0 px-3 sm:px-4 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+              <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-gray-900 rounded-md p-0.5 border border-gray-200 dark:border-gray-700">
                 <TabsTrigger 
                   value="dados" 
-                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-blue-500/25 px-2 sm:px-3 py-2 sm:py-2.5"
+                  className="rounded text-xs font-medium px-2 py-1.5 data-[state=active]:bg-blue-600 data-[state=active]:dark:bg-blue-500 data-[state=active]:text-white"
                 >
-                  <span className="hidden sm:inline">📋 Dados</span>
-                  <span className="sm:hidden">📋</span>
+                  Dados
                 </TabsTrigger>
                 <TabsTrigger 
                   value="itens" 
-                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-green-500/25 px-2 sm:px-3 py-2 sm:py-2.5"
+                  className="rounded text-xs font-medium px-2 py-1.5 data-[state=active]:bg-green-600 data-[state=active]:dark:bg-green-500 data-[state=active]:text-white"
                 >
-                  <span className="hidden sm:inline">📦 Itens</span>
-                  <span className="sm:hidden">📦</span>
+                  Itens
                 </TabsTrigger>
                 <TabsTrigger 
                   value="observacoes" 
-                  className="rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-purple-500/25 px-2 sm:px-3 py-2 sm:py-2.5"
+                  className="rounded text-xs font-medium px-2 py-1.5 data-[state=active]:bg-purple-600 data-[state=active]:dark:bg-purple-500 data-[state=active]:text-white"
                 >
-                  <span className="hidden sm:inline">📝 Obs</span>
-                  <span className="sm:hidden">📝</span>
+                  Obs
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="dados" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <Card className="p-4 sm:p-5 border-0 shadow-lg bg-gradient-to-br from-blue-50/60 to-indigo-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg flex-shrink-0">
-                        <Building2 className="h-4 w-4" />
-                      </div>
-                      <Label htmlFor="fornecedor" className="text-sm font-semibold text-gray-700">Fornecedor *</Label>
-                    </div>
-                    <Select value={fornecedor} onValueChange={setFornecedor}>
-                      <SelectTrigger className="bg-white/60 backdrop-blur-sm border-blue-200 focus:border-blue-400 transition-colors">
-                        <SelectValue placeholder="Selecione o fornecedor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {suppliers.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </Card>
+            <TabsContent value="dados" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="fornecedor" className="text-sm font-medium text-gray-700 dark:text-gray-300">Fornecedor *</Label>
+                  <Select value={fornecedor} onValueChange={setFornecedor}>
+                    <SelectTrigger className="dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                      <SelectValue placeholder="Selecione o fornecedor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                <Card className="p-4 sm:p-5 border-0 shadow-lg bg-gradient-to-br from-green-50/60 to-emerald-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
-                        <Calendar className="h-4 w-4" />
-                      </div>
-                      <Label htmlFor="dataEntrega" className="text-sm font-semibold text-gray-700">Data de Entrega *</Label>
-                    </div>
-                    <Input
-                      id="dataEntrega"
-                      type="date"
-                      value={dataEntrega}
-                      onChange={(e) => setDataEntrega(e.target.value)}
-                      className="bg-white/60 backdrop-blur-sm border-green-200 focus:border-green-400 transition-colors"
-                    />
-                  </div>
-                </Card>
+                <div className="space-y-2">
+                  <Label htmlFor="dataEntrega" className="text-sm font-medium text-gray-700 dark:text-gray-300">Data de Entrega *</Label>
+                  <Input
+                    id="dataEntrega"
+                    type="date"
+                    value={dataEntrega}
+                    onChange={(e) => setDataEntrega(e.target.value)}
+                    className="dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  />
+                </div>
 
-                <Card className="p-4 sm:p-5 border-0 shadow-lg bg-gradient-to-br from-purple-50/60 to-violet-50/40 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:col-span-2">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-violet-600 text-white shadow-lg flex-shrink-0">
-                        <Package className="h-4 w-4" />
-                      </div>
-                      <Label htmlFor="status" className="text-sm font-semibold text-gray-700">Status do Pedido</Label>
-                    </div>
-                    <Select value={status} onValueChange={setStatus}>
-                      <SelectTrigger className="bg-white/60 backdrop-blur-sm border-purple-200 focus:border-purple-400 transition-colors">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.map((s) => (
-                          <SelectItem key={s} value={s}>
-                            {s.charAt(0).toUpperCase() + s.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </Card>
+                <div className="space-y-2 lg:col-span-2">
+                  <Label htmlFor="status" className="text-sm font-medium text-gray-700 dark:text-gray-300">Status do Pedido</Label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger className="dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statusOptions.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s.charAt(0).toUpperCase() + s.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="itens" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-              <Card className="p-4 sm:p-6 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-green-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gradient-to-r from-green-50/60 to-emerald-50/40 rounded-xl sm:rounded-2xl border border-green-100/60">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-lg flex-shrink-0">
-                        <Package className="h-4 w-4 sm:h-5 sm:w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-gray-900 text-sm sm:text-base">Itens do Pedido *</h4>
-                        <p className="text-xs sm:text-sm text-gray-600">
-                          {itens.length} item(s) no pedido
-                        </p>
-                      </div>
-                    </div>
-                    <Button 
-                      type="button" 
-                      onClick={handleAddItem}
-                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                      size="sm"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Adicionar Item</span>
-                      <span className="sm:hidden">Adicionar</span>
-                    </Button>
-                  </div>
-
-                  <div className="space-y-3 sm:space-y-4">
-                    {itens.map((item, index) => (
-                      <Card key={index} className="p-3 sm:p-4 border-0 shadow-lg bg-gradient-to-br from-white/80 to-gray-50/40 backdrop-blur-sm rounded-xl">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-                          <div className="lg:col-span-2 space-y-2">
-                            <Label className="text-xs font-semibold text-gray-600">Produto</Label>
-                            <Select
-                              value={item.produto}
-                              onValueChange={(value) => handleItemChange(index, 'produto', value)}
-                            >
-                              <SelectTrigger className="bg-white/60 backdrop-blur-sm border-gray-200 focus:border-green-400 transition-colors">
-                                <SelectValue placeholder="Selecione o produto" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {products.map((p) => (
-                                  <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label className="text-xs font-semibold text-gray-600">Quantidade</Label>
-                            <Input
-                              type="number"
-                              min="1"
-                              value={item.quantidade}
-                              onChange={(e) => handleItemChange(index, 'quantidade', parseInt(e.target.value) || 0)}
-                              className="bg-white/60 backdrop-blur-sm border-gray-200 focus:border-green-400 transition-colors"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label className="text-xs font-semibold text-gray-600">Valor Unit.</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              placeholder="0.00"
-                              value={item.valorUnitario}
-                              onChange={(e) => handleItemChange(index, 'valorUnitario', parseFloat(e.target.value) || 0)}
-                              className="bg-white/60 backdrop-blur-sm border-gray-200 focus:border-green-400 transition-colors"
-                            />
-                          </div>
-                          
-                          <div className="flex items-end gap-2">
-                            <div className="flex-1 space-y-2">
-                              <Label className="text-xs font-semibold text-gray-600">Subtotal</Label>
-                              <div className="px-3 py-2 bg-green-50 border border-green-200 rounded-md text-sm font-bold text-green-700">
-                                R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
-                              </div>
-                            </div>
-                            {itens.length > 1 && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveItem(index)}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-
-                  <Card className="p-4 sm:p-5 border-0 shadow-xl bg-gradient-to-br from-green-50 via-emerald-50/60 to-teal-50/40 backdrop-blur-sm rounded-xl border-l-4 border-l-green-500">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white shadow-xl flex-shrink-0">
-                          <DollarSign className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-gray-900 text-sm">Total do Pedido</h4>
-                          <p className="text-xs text-gray-600">Valor total calculado</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl sm:text-3xl font-bold text-green-600">
-                          R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </div>
-                        <p className="text-xs text-gray-500">{itens.length} item(s)</p>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="observacoes" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-              <Card className="p-4 sm:p-6 border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/30 to-purple-50/20 backdrop-blur-sm rounded-xl sm:rounded-2xl">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-purple-50/60 to-violet-50/40 rounded-xl sm:rounded-2xl border border-purple-100/60">
-                    <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-600 to-violet-600 text-white shadow-lg flex-shrink-0">
-                      <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-gray-900 text-sm sm:text-base">Observações do Pedido</h4>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        Adicione informações extras sobre o pedido
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="observacoes" className="text-sm font-semibold text-gray-700">Observações Adicionais</Label>
-                    <Textarea
-                      id="observacoes"
-                      placeholder="Digite aqui observações importantes sobre o pedido, instruções especiais de entrega, condições de pagamento, etc..."
-                      value={observacoes}
-                      onChange={(e) => setObservacoes(e.target.value)}
-                      rows={8}
-                      className="bg-white/60 backdrop-blur-sm border-purple-200 focus:border-purple-400 transition-colors resize-none"
-                    />
-                    <p className="text-xs text-gray-500">
-                      {observacoes.length}/500 caracteres
+            <TabsContent value="itens" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-white">Itens do Pedido *</h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {itens.length} item(s)
                     </p>
                   </div>
+                  <Button 
+                    type="button" 
+                    onClick={handleAddItem}
+                    className="bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Adicionar
+                  </Button>
                 </div>
-              </Card>
+
+                <div className="space-y-2">
+                  {itens.map((item, index) => (
+                    <div key={index} className="p-2 sm:p-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2">
+                        <div className="lg:col-span-2 space-y-1">
+                          <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Produto *</Label>
+                          <Combobox
+                            options={filteredProducts.map(p => ({
+                              value: p.name,
+                              label: p.name
+                            }))}
+                            value={item.produto}
+                            onValueChange={(value) => handleItemChange(index, 'produto', value)}
+                            placeholder="Buscar produto..."
+                            searchPlaceholder={`Buscar entre ${products.length} produtos...`}
+                            emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."}
+                            className="text-sm"
+                            onSearchChange={setProductSearch}
+                          />
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Qtd *</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            value={item.quantidade}
+                            onChange={(e) => handleItemChange(index, 'quantidade', parseFloat(e.target.value) || 0)}
+                            onFocus={(e) => e.target.select()}
+                            className="text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Unidade *</Label>
+                          <Select
+                            value={item.unidade}
+                            onValueChange={(value) => handleItemChange(index, 'unidade', value)}
+                          >
+                            <SelectTrigger className="text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="un">un</SelectItem>
+                              <SelectItem value="kg">kg</SelectItem>
+                              <SelectItem value="pc">pc</SelectItem>
+                              <SelectItem value="caixa">caixa</SelectItem>
+                              <SelectItem value="litro">L</SelectItem>
+                              <SelectItem value="metro">m</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Valor Unit. *</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={item.valorUnitario}
+                            onChange={(e) => handleItemChange(index, 'valorUnitario', parseFloat(e.target.value) || 0)}
+                            onFocus={(e) => e.target.select()}
+                            className="text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        
+                        <div className="flex items-end gap-1">
+                          <div className="flex-1 space-y-1">
+                            <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Subtotal</Label>
+                            <div className="px-2 py-1.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-sm font-semibold text-green-700 dark:text-green-400">
+                              R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
+                            </div>
+                          </div>
+                          {itens.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveItem(index)}
+                              className="h-7 w-7 p-0 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/50"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-3 border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total do Pedido</span>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                        R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{itens.length} item(s)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="observacoes" className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="observacoes" className="text-sm font-medium text-gray-700 dark:text-gray-300">Observações Adicionais</Label>
+                <Textarea
+                  id="observacoes"
+                  placeholder="Digite observações sobre o pedido, instruções de entrega, etc..."
+                  value={observacoes}
+                  onChange={(e) => setObservacoes(e.target.value)}
+                  rows={6}
+                  className="resize-none dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {observacoes.length}/500 caracteres
+                </p>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
 
-        <DialogFooter className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-t border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-slate-50/60 backdrop-blur-sm flex-shrink-0">
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:justify-between sm:items-center">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>Editando pedido #{pedido?.id}</span>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <DialogFooter className="flex-shrink-0 px-3 sm:px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+          <div className="flex items-center justify-between w-full gap-2">
+            <div className="flex gap-2">
               <Button 
                 variant="outline" 
                 onClick={() => onOpenChange(false)} 
                 disabled={loading}
-                className="bg-white/60 backdrop-blur-sm border-gray-200 hover:bg-gray-50 transition-all duration-200"
+                className="dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
               >
                 Cancelar
               </Button>
-              <Button 
-                onClick={handleSubmit} 
-                disabled={loading}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    <span className="hidden sm:inline">Salvando...</span>
-                    <span className="sm:hidden">Salvando</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Salvar Alterações</span>
-                    <span className="sm:hidden">Salvar</span>
-                  </>
-                )}
-              </Button>
             </div>
+            
+            <Button 
+              onClick={handleSubmit} 
+              disabled={loading}
+              className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Salvar
+                </>
+              )}
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>
