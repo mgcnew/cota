@@ -290,35 +290,27 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         {trigger}
       </DialogTrigger>
       <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-6xl h-[92vh] sm:h-[88vh] md:h-[85vh] max-h-[950px] border-0 dark:border dark:border-gray-700 shadow-2xl rounded-lg sm:rounded-xl md:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900">
-        <DialogHeader className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 border-b border-gray-100/60 dark:border-gray-700 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
-          {/* Efeitos decorativos de fundo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5 dark:from-blue-500/10 dark:via-indigo-500/10 dark:to-purple-500/10"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 dark:from-blue-400/20 dark:to-indigo-400/20 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-pink-400/10 dark:from-purple-400/20 dark:to-pink-400/20 rounded-full translate-y-12 -translate-x-12"></div>
-
-          <div className="relative z-10 flex items-center justify-between gap-2 sm:gap-3">
-            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-white/20 dark:ring-blue-900/50 backdrop-blur-sm flex-shrink-0">
-                <Package className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-sm" />
+        <DialogHeader className="px-3 sm:px-4 md:px-6 py-2 border-b border-gray-100/60 dark:border-gray-700 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
+          <div className="relative z-10 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg flex-shrink-0">
+                <Package className="h-4 w-4" />
               </div>
-              <div className="flex flex-col flex-1 min-w-0">
-                <DialogTitle className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-800 dark:from-blue-300 dark:via-indigo-300 dark:to-purple-300 bg-clip-text text-transparent truncate">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <DialogTitle className="text-sm font-bold text-slate-900 dark:text-white truncate">
                   Detalhes da Cotação
                 </DialogTitle>
-                <p className="text-gray-600 dark:text-gray-400 text-xs font-medium mt-0.5 truncate">
-                  {quote.produto} • {getStatusBadge(quote.status)}
-                </p>
+                {getStatusBadge(quote.status)}
               </div>
             </div>
             
-            {/* Close Button - Isolated on the right */}
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 rounded-full border border-transparent hover:border-slate-300 dark:hover:border-gray-600 dark:text-gray-300 transition-colors flex-shrink-0"
+              className="h-7 w-7 p-0 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 dark:text-gray-300 transition-colors flex-shrink-0"
               onClick={() => setOpen(false)}
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </Button>
           </div>
         </DialogHeader>
@@ -786,122 +778,58 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </div>
             </TabsContent>
 
-            <TabsContent value="comparativo" className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-4 animate-in fade-in-0 duration-500 min-h-0">
-              {/* Resumo dos Fornecedores */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
-                {quote.fornecedoresParticipantes.map(fornecedor => {
-                  const totalValue = products.reduce((sum: number, product: any) => {
-                    const value = getSupplierProductValue(fornecedor.id, product.product_id);
-                    return sum + (value || 0);
-                  }, 0);
+            <TabsContent value="comparativo" className="flex-1 overflow-hidden animate-in fade-in-0 duration-300">
+              <div className="h-full flex flex-col">
 
-                  const respondedProducts = products.filter((product: any) =>
-                    getSupplierProductValue(fornecedor.id, product.product_id) > 0
-                  ).length;
-
-                  const isWinning = bestSupplier?.id === fornecedor.id;
-
-                  return (
-                    <Card key={fornecedor.id} className={cn(
-                      "p-4 sm:p-6 border transition-all duration-200 hover:shadow-md",
-                      isWinning
-                        ? "bg-white border-emerald-200 shadow-emerald-50 shadow-lg"
-                        : "bg-white border-slate-200 hover:border-slate-300"
-                    )}>
-                      <div className="flex items-start gap-4">
-                        <div className={cn(
-                          "p-3 rounded-lg flex-shrink-0 border",
-                          isWinning
-                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                            : "bg-slate-50 border-slate-200 text-slate-600"
-                        )}>
-                          <Building2 className="h-5 w-5" />
-                        </div>
-                        <div className="flex-1 min-w-0 space-y-4">
-                          {/* H1 - Título Principal: Nome do Fornecedor */}
-                          <div className="flex items-center justify-between">
-                            <h1 className="text-base font-bold text-slate-900 truncate" title={fornecedor.nome}>
-                              {fornecedor.nome}
-                            </h1>
-                            {isWinning && (
-                              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold text-xs">
-                                🏆 Melhor Oferta
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          {/* H3 - Destaques: Valores Principais */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Valor Total</span>
-                              <div className={cn(
-                                "text-lg font-bold leading-tight",
-                                isWinning ? "text-emerald-700" : "text-slate-900"
-                              )}>
-                                R$ {totalValue.toFixed(2)}
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Produtos</span>
-                              <div className="text-sm font-bold text-slate-800">
-                                {respondedProducts} <span className="text-xs font-medium text-slate-600">de {products.length}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Body - Conteúdo: Informações Complementares */}
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Taxa de Participação</span>
-                              <span className="text-xs font-bold text-slate-800">
-                                {Math.round((respondedProducts / products.length) * 100)}%
-                              </span>
-                            </div>
-                            <div className="w-full bg-slate-100 rounded-full h-2.5">
-                              <div
-                                className={cn(
-                                  "h-2.5 rounded-full transition-all duration-500",
-                                  isWinning ? "bg-emerald-500" : "bg-slate-400"
-                                )}
-                                style={{ width: `${(respondedProducts / products.length) * 100}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-
-              {/* Tabela Comparativa */}
-              <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[600px]">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200">
-                        {/* H2 - Subtítulo: Header da Tabela */}
-                        <th className="p-4 text-left min-w-[200px]">
-                          <div className="flex items-center gap-3">
-                            <div className="p-1.5 bg-slate-100 rounded-md">
-                              <Package className="h-4 w-4 text-slate-600" />
-                            </div>
-                            <span className="text-base font-bold text-slate-800">Produtos</span>
+                {/* Tabela Comparativa - Foco Total */}
+                <div className="flex-1 overflow-auto border border-slate-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                  <table className="w-full border-collapse">
+                    <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-gray-900">
+                      <tr className="border-b-2 border-slate-300 dark:border-gray-600">
+                        <th className="px-3 py-2 text-left bg-slate-100 dark:bg-gray-800">
+                          <div className="flex items-center gap-1.5">
+                            <Package className="h-3.5 w-3.5 text-slate-600 dark:text-gray-400" />
+                            <span className="font-semibold text-xs text-slate-800 dark:text-gray-200">Produto</span>
                           </div>
                         </th>
-                        {quote.fornecedoresParticipantes.map(fornecedor => (
-                          <th key={fornecedor.id} className="p-4 text-center min-w-[120px] max-w-[140px]">
-                            <div className="flex flex-col items-center gap-2">
-                              <div className="p-1.5 bg-slate-100 rounded-md">
-                                <Building2 className="h-4 w-4 text-slate-600" />
+                        {quote.fornecedoresParticipantes.map(fornecedor => {
+                          const totalValue = products.reduce((sum: number, product: any) => {
+                            const value = getSupplierProductValue(fornecedor.id, product.product_id);
+                            return sum + (value || 0);
+                          }, 0);
+                          const isWinning = bestSupplier?.id === fornecedor.id;
+                          
+                          return (
+                            <th 
+                              key={fornecedor.id} 
+                              className={cn(
+                                "px-3 py-2 text-center min-w-[120px] group relative",
+                                isWinning 
+                                  ? "bg-emerald-100 dark:bg-emerald-900/30" 
+                                  : "bg-slate-50 dark:bg-gray-900"
+                              )}
+                              title={`Total: R$ ${totalValue.toFixed(2)}`}
+                            >
+                              <div className="flex items-center justify-center gap-1">
+                                <Building2 className={cn(
+                                  "h-3.5 w-3.5",
+                                  isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-gray-400"
+                                )} />
+                                {isWinning && <Star className="h-3 w-3 text-emerald-600 dark:text-emerald-400 fill-current" />}
                               </div>
-                              {/* H2 - Subtítulo: Nome do Fornecedor no Header */}
-                              <span className="truncate text-xs font-bold text-slate-800 leading-tight" title={fornecedor.nome}>
-                                {fornecedor.nome.length > 14 ? `${fornecedor.nome.substring(0, 14)}...` : fornecedor.nome}
-                              </span>
-                            </div>
-                          </th>
-                        ))}
+                              <p className={cn(
+                                "font-semibold text-xs truncate mt-1",
+                                isWinning ? "text-emerald-700 dark:text-emerald-300" : "text-slate-800 dark:text-gray-200"
+                              )}>
+                                {fornecedor.nome}
+                              </p>
+                              {/* Tooltip com total */}
+                              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 px-2 py-1 bg-slate-900 dark:bg-gray-700 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
+                                Total: R$ {totalValue.toFixed(2)}
+                              </div>
+                            </th>
+                          );
+                        })}
                       </tr>
                     </thead>
                     <tbody>
@@ -910,59 +838,41 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                         return (
                           <tr key={product.product_id} className={cn(
-                            "border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors duration-150",
-                            index % 2 === 0 ? "bg-white" : "bg-slate-50/30"
+                            "border-b border-slate-200 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors",
+                            index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-slate-50/50 dark:bg-gray-800/30"
                           )}>
-                            <td className="p-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 border border-slate-200">
-                                  <Package className="h-4 w-4 text-slate-600" />
-                                </div>
-                                <div className="flex-1 min-w-0 space-y-2">
-                                  {/* H3 - Destaque: Nome do Produto */}
-                                  <p className="font-bold text-slate-900 text-sm truncate" title={product.product_name}>
-                                    {product.product_name}
-                                  </p>
-                                  <div className="flex items-center gap-2">
-                                    {/* Body - Conteúdo: Quantidade */}
-                                    <span className="text-xs text-slate-700 font-semibold">{product.quantidade}</span>
-                                    {/* Caption - Informação Secundária: Unidade */}
-                                    <Badge variant="outline" className="text-xs px-2 py-0.5 h-5 border-slate-300 text-slate-600 bg-white font-medium">
-                                      {product.unidade}
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </div>
+                            <td className="px-3 py-2 bg-slate-50/50 dark:bg-gray-800/50">
+                              <p className="font-semibold text-xs text-slate-900 dark:text-white truncate" title={product.product_name}>
+                                {product.product_name}
+                              </p>
+                              <p className="text-[10px] text-slate-500 dark:text-gray-500 mt-0.5">
+                                {product.quantidade} {product.unidade}
+                              </p>
                             </td>
                             {quote.fornecedoresParticipantes.map(fornecedor => {
                               const value = getSupplierProductValue(fornecedor.id, product.product_id);
                               const isBestPrice = fornecedor.id === bestSupplierId;
 
                               return (
-                                <td key={fornecedor.id} className="p-4 text-center">
+                                <td key={fornecedor.id} className={cn(
+                                  "px-3 py-2 text-center",
+                                  isBestPrice && "bg-emerald-50 dark:bg-emerald-900/20"
+                                )}>
                                   {value > 0 ? (
-                                    <div className="flex flex-col items-center gap-2">
-                                      {/* H3 - Destaque: Valor do Produto */}
-                                      <div className={cn(
-                                        "px-3 py-2 rounded-lg transition-all duration-200 min-w-[100px]",
-                                        isBestPrice
-                                          ? "bg-emerald-500 text-white shadow-sm font-bold text-sm"
-                                          : "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 font-semibold text-xs"
-                                      )}>
-                                        R$ {value.toFixed(2)}
-                                      </div>
-                                      {isBestPrice && (
-                                        <div className="flex items-center gap-1 text-emerald-600">
-                                          <Star className="h-3 w-3 fill-current" />
-                                          <span className="text-xs font-semibold">Melhor preço</span>
-                                        </div>
-                                      )}
+                                    <div className={cn(
+                                      "px-2 py-1 rounded font-bold text-sm inline-flex items-center gap-1",
+                                      isBestPrice
+                                        ? "bg-emerald-600 dark:bg-emerald-500 text-white"
+                                        : "bg-slate-200 dark:bg-gray-700 text-slate-800 dark:text-gray-200"
+                                    )}>
+                                      {isBestPrice && <TrendingDown className="h-3 w-3" />}
+                                      R$ {value.toFixed(2)}
                                     </div>
                                   ) : (
-                                      <div className="px-3 py-2 rounded-lg bg-slate-50 text-slate-400 font-medium text-xs border border-slate-200 min-w-[100px] flex items-center justify-center">
-                                        <Minus className="h-4 w-4" />
-                                      </div>
-                                    )}
+                                    <div className="text-slate-400 dark:text-gray-600">
+                                      <Minus className="h-4 w-4 mx-auto" />
+                                    </div>
+                                  )}
                                 </td>
                               );
                             })}
@@ -972,121 +882,35 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     </tbody>
                   </table>
                 </div>
-              </div>
 
-              {/* Ações da Cotação */}
-              <div className="space-y-4">
-                {/* Convert to Order Button */}
+                {/* Rodapé com Ação de Converter */}
                 {quote.status === 'ativa' && bestSupplier && (
-                  <Card className="p-4 sm:p-5 border border-blue-200/50 shadow-lg bg-gradient-to-br from-blue-50/80 via-sky-50/60 to-blue-100/40 backdrop-blur-sm rounded-xl border-l-4 border-l-blue-500">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+                  <div className="flex-shrink-0 p-4 border-t-2 border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                    <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
-                          <ShoppingCart className="h-5 w-5" />
+                        <div className="p-2.5 rounded-lg bg-emerald-600 dark:bg-emerald-500 text-white">
+                          <Star className="h-5 w-5 fill-current" />
                         </div>
                         <div>
-                          {/* H2 - Subtítulo: Título da Seção */}
-                          <h3 className="font-bold text-xl text-slate-900 mb-2">Pronto para Converter?</h3>
-                          <div className="space-y-1">
-                            {/* Body - Conteúdo: Informação do Fornecedor */}
-                            <p className="text-xs text-slate-700">
-                              Melhor fornecedor: <span className="font-bold text-blue-700">{bestSupplier.nome}</span>
-                            </p>
-                            {/* H3 - Destaque: Valor Total */}
-                            <p className="text-sm text-slate-700">
-                              Valor total: <span className="font-bold text-blue-700 text-base">R$ {bestSupplier.totalValue.toFixed(2)}</span>
-                            </p>
-                          </div>
+                          <p className="text-sm font-bold text-slate-900 dark:text-white">
+                            Melhor Opção: <span className="text-emerald-600 dark:text-emerald-400">{bestSupplier.nome}</span>
+                          </p>
+                          <p className="text-xs text-slate-600 dark:text-gray-400">
+                            Valor total: <span className="font-semibold text-emerald-600 dark:text-emerald-400">R$ {bestSupplier.totalValue.toFixed(2)}</span>
+                          </p>
                         </div>
                       </div>
                       <Button
                         onClick={handleConvertToOrder}
                         disabled={isUpdating}
-                        className="bg-blue-600 border border-blue-600 hover:bg-blue-700 hover:border-blue-700 text-white transition-colors duration-200 text-sm px-6 py-2.5 h-auto min-h-[44px] whitespace-nowrap"
+                        size="lg"
+                        className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-semibold"
                       >
-                        <ShoppingCart className="h-5 w-5 mr-2 flex-shrink-0" />
-                        <span className="font-medium">Converter para Pedido</span>
-                      </Button>
-                    </div>
-                  </Card>
-                )}
-
-                {/* Ações Adicionais */}
-                <Card className="p-4 border border-slate-200/50 shadow-md bg-gradient-to-br from-white via-slate-50/30 to-blue-50/20 backdrop-blur-sm rounded-xl">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-sm">
-                        <FileText className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-sm text-slate-900">Ações da Cotação</h4>
-                        <p className="text-xs text-slate-600">Exportar dados ou compartilhar informações</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-slate-300 text-slate-600 hover:border-slate-400 hover:bg-slate-50 transition-colors duration-200 rounded-lg"
-                        onClick={() => {
-                          // Função para exportar dados da cotação
-                          const data = {
-                            cotacao: quote,
-                            produtos: products,
-                            fornecedores: quote.fornecedoresParticipantes
-                          };
-                          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = `cotacao-${quote.id}.json`;
-                          a.click();
-                          URL.revokeObjectURL(url);
-                        }}
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">Exportar</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-slate-300 text-slate-600 hover:border-slate-400 hover:bg-slate-50 transition-colors duration-200 rounded-lg"
-                        onClick={() => {
-                          // Função para compartilhar cotação
-                          if (navigator.share) {
-                            navigator.share({
-                              title: `Cotação - ${quote.produto}`,
-                              text: `Cotação para ${quote.produto} com ${quote.fornecedores} fornecedores participantes`,
-                              url: window.location.href
-                            });
-                          } else {
-                            // Fallback para copiar link
-                            navigator.clipboard.writeText(window.location.href);
-                          }
-                        }}
-                      >
-                        <Share2 className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">Compartilhar</span>
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        Converter em Pedido
                       </Button>
                     </div>
                   </div>
-                </Card>
-
-                {/* Informações de Tempo */}
-                {quote.status === 'ativa' && (
-                  <Card className="p-3 border border-blue-200/50 shadow-md bg-gradient-to-br from-blue-50/60 to-sky-50/40 backdrop-blur-sm rounded-xl border-l-4 border-l-blue-400">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm">
-                        <Clock className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm text-blue-800">Cotação em Andamento</p>
-                        <p className="text-xs text-blue-700">
-                          Prazo final: {quote.dataFim} • Aguardando respostas dos fornecedores
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
                 )}
               </div>
             </TabsContent>
