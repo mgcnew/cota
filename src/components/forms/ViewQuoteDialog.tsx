@@ -890,7 +890,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                 </div>
 
                 {/* Rodapé com Ação de Converter */}
-                {quote.status === 'ativa' && bestSupplier && (
+                {bestSupplier && quote.status !== 'finalizada' && (
                   <div className="flex-shrink-0 p-4 border-t-2 border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">

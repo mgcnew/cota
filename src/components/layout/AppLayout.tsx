@@ -34,11 +34,21 @@ export function AppLayout() {
       {/* Main Content Area */}
       <div className="flex flex-col w-full min-h-screen relative">
         {/* Header Fixo Minimalista */}
-        <header className="fixed top-1 right-1 left-1 md:right-1 md:left-24 z-40 h-16 bg-white dark:bg-gray-900 md:bg-white/95 md:dark:bg-gray-900/80 md:backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/60 shadow-depth-1 hover:shadow-depth-2 rounded-xl transition-all duration-300 ease-out">
-          {/* Efeito de vidro gloss - Apenas desktop */}
+        <header className="fixed top-1 right-1 left-1 md:right-1 md:left-24 z-40 h-16 bg-white/70 dark:bg-gray-900/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/40 dark:border-gray-700/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_8px_40px_rgba(0,0,0,0.5)] rounded-xl transition-all duration-300 ease-out">
+          {/* Efeito de vidro gloss - Glassmorphism real */}
           <>
-            <div className="hidden md:block absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 dark:from-gray-800/40 dark:via-gray-900/10 dark:to-gray-800/30 rounded-xl pointer-events-none"></div>
-            <div className="hidden md:block absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 dark:ring-gray-700/50 pointer-events-none"></div>
+            {/* Gradiente principal do gloss - mais intenso */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-white/40 to-white/60 dark:from-white/[0.15] dark:via-white/[0.08] dark:to-white/[0.12] rounded-xl pointer-events-none"></div>
+            {/* Brilho superior - mais visível */}
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-white dark:via-white/40 to-transparent pointer-events-none"></div>
+            {/* Brilho inferior sutil */}
+            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-black/5 dark:via-white/5 to-transparent pointer-events-none"></div>
+            {/* Ring interno para profundidade - mais visível */}
+            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/80 dark:ring-white/20 pointer-events-none"></div>
+            {/* Reflexo no canto superior esquerdo - mais pronunciado */}
+            <div className="absolute -top-8 -left-8 w-48 h-48 bg-gradient-to-br from-white/60 dark:from-white/20 via-white/30 dark:via-white/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+            {/* Reflexo no canto superior direito */}
+            <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-bl from-white/40 dark:from-white/15 to-transparent rounded-full blur-2xl pointer-events-none"></div>
           </>
 
           <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-6 w-full max-w-full gap-4 transition-opacity duration-200 md:transition-all md:duration-300">

@@ -261,7 +261,7 @@ export default function Analytics() {
               const Icon = config.icon;
               
               return (
-                <Card key={metrica.titulo} className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+                <Card key={metrica.titulo} className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -302,7 +302,7 @@ export default function Analytics() {
           {/* Charts Row */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Tendência de Economia */}
-            <Card className="bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-shadow duration-200">
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-shadow duration-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                   <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -335,7 +335,7 @@ export default function Analytics() {
             </Card>
 
             {/* Performance de Fornecedores */}
-            <Card className="bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-shadow duration-200">
+            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-shadow duration-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                   <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
