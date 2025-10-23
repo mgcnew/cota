@@ -15,17 +15,17 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     active: {
       variant: "default" as const,
       label: "Ativo",
-      className: "bg-success text-white border-success shadow-sm"
+      className: "bg-[#22C55E] text-white border-[#22C55E] shadow-sm font-semibold"
     },
     inactive: {
       variant: "secondary" as const,
       label: "Inativo",
-      className: "bg-muted text-muted-foreground"
+      className: "bg-[#9CA3AF] text-white border-[#9CA3AF] shadow-sm font-semibold"
     },
     pending: {
       variant: "outline" as const,
       label: "Pendente",
-      className: "bg-warning text-white border-warning shadow-sm"
+      className: "bg-[#FACC15] text-gray-900 border-[#FACC15] shadow-sm font-semibold"
     },
     completed: {
       variant: "secondary" as const,

@@ -27,14 +27,14 @@ export function AppLayout() {
   const pageTitle = pageTitles[location.pathname] || "";
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 md:bg-gradient-to-br md:from-gray-50 md:via-slate-50 md:to-stone-50 dark:bg-gray-900 dark:md:from-gray-900 dark:md:via-gray-950 dark:md:to-slate-950 overflow-x-hidden">
+    <div className="min-h-screen w-full bg-[#F6F7F9] dark:bg-gray-900 overflow-x-hidden">
       {/* Desktop Sidebar Flutuante */}
       <AppSidebar />
 
       {/* Main Content Area */}
       <div className="flex flex-col w-full min-h-screen relative">
         {/* Header Fixo Minimalista */}
-        <header className="fixed top-1 right-1 left-1 md:right-1 md:left-24 z-40 h-16 bg-white dark:bg-gray-900 md:bg-white/80 md:dark:bg-gray-900/80 md:backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/70 dark:hover:border-gray-600/70 rounded-xl transition-opacity duration-200 md:transition-all md:duration-300 ease-out">
+        <header className="fixed top-1 right-1 left-1 md:right-1 md:left-24 z-40 h-16 bg-white dark:bg-gray-900 md:bg-white/95 md:dark:bg-gray-900/80 md:backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/60 shadow-depth-1 hover:shadow-depth-2 rounded-xl transition-all duration-300 ease-out">
           {/* Efeito de vidro gloss - Apenas desktop */}
           <>
             <div className="hidden md:block absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 dark:from-gray-800/40 dark:via-gray-900/10 dark:to-gray-800/30 rounded-xl pointer-events-none"></div>

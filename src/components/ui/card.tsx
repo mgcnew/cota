@@ -2,8 +2,19 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)} {...props} />
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { accent?: boolean }
+>(({ className, accent, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-2xl border bg-card text-card-foreground shadow-sm relative",
+      accent && "before:absolute before:top-0 before:left-0 before:right-0 before:h-0.5 before:bg-primary before:rounded-t-2xl",
+      className
+    )}
+    {...props}
+  />
 ));
 Card.displayName = "Card";
 
