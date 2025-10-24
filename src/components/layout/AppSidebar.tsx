@@ -244,15 +244,20 @@ export function AppSidebar() {
     });
   }, [location.pathname]);
   return <>
-      {/* Desktop Sidebar Sempre Flutuante - Estilo Canva */}
-      <div className="hidden md:flex fixed z-50 w-20 left-1 top-1 bottom-1 transition-all duration-500 ease-out bg-white dark:bg-gray-900 shadow-lg rounded-xl overflow-hidden">
-        {/* Container sempre flutuante */}
-        <div className="w-full flex flex-col bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/70 dark:hover:border-gray-600/70 transition-all duration-500 overflow-visible">
-          {/* Efeitos de vidro sempre aplicados */}
+      {/* Desktop Sidebar Sempre Flutuante - Estilo Canva com Efeito 3D */}
+      <div className="hidden md:flex fixed z-50 w-20 left-1 top-1 bottom-1 transition-all duration-500 ease-out" style={{ perspective: '1000px' }}>
+        {/* Container sempre flutuante com efeito 3D */}
+        <div className="w-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/70 dark:hover:border-gray-600/70 transition-all duration-500 overflow-visible shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3),0_8px_16px_-8px_rgba(0,0,0,0.2),inset_0_1px_0_0_rgba(255,255,255,0.8)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6),0_8px_16px_-8px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.1)] hover:shadow-[0_24px_70px_-15px_rgba(0,0,0,0.35),0_10px_20px_-8px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:hover:shadow-[0_24px_70px_-15px_rgba(0,0,0,0.7),0_10px_20px_-8px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)]" style={{ transform: 'translateZ(20px) rotateY(1deg)', transformStyle: 'preserve-3d' }}>
+          {/* Efeitos de vidro 3D sempre aplicados */}
           <>
-            {/* Efeito de vidro gloss */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 dark:from-gray-800/40 dark:via-gray-900/10 dark:to-gray-800/30 rounded-xl pointer-events-none"></div>
-            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 dark:ring-gray-700/50 pointer-events-none"></div>
+            {/* Efeito de vidro gloss com profundidade */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/20 to-white/40 dark:from-gray-800/60 dark:via-gray-900/20 dark:to-gray-800/40 rounded-xl pointer-events-none" style={{ transform: 'translateZ(5px)' }}></div>
+            {/* Highlight superior 3D */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white dark:via-white/30 to-transparent pointer-events-none"></div>
+            {/* Ring interno para profundidade */}
+            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/70 dark:ring-gray-700/70 pointer-events-none shadow-inner"></div>
+            {/* Reflexo lateral esquerdo para simular luz */}
+            <div className="absolute left-0 top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-white/60 dark:via-white/20 to-transparent pointer-events-none"></div>
           </>
           {/* ConteÃºdo principal */}
           <div className="relative z-10 flex flex-col h-full">
