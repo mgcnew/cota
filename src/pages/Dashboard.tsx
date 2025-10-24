@@ -105,7 +105,7 @@ export default function Dashboard() {
     }
   };
   return <PageWrapper>
-      <div className="page-container bg-transparent">
+      <div className="page-container">
         {/* Métricas Principais - Estilo Apple */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 overflow-visible">
           {/* Card 1: Cotações Ativas */}
