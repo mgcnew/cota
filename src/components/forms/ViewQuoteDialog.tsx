@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import ConvertToOrderDialog from "./ConvertToOrderDialog";
+import ConvertToMultipleOrdersDialog, { SupplierOrder } from "./ConvertToMultipleOrdersDialog";
 import { SelectSupplierPerProductDialog } from "./SelectSupplierPerProductDialog";
 
 interface FornecedorParticipante {
@@ -39,7 +40,12 @@ interface Quote {
 interface ViewQuoteDialogProps {
   quote: Quote;
   onUpdateSupplierProductValue?: (quoteId: string, supplierId: string, productId: string, newValue: number) => void;
-  onConvertToOrder?: (quoteId: string, supplierId: string, deliveryDate: string, observations?: string) => void;
+  onConvertToOrder?: (quoteId: string, orders: Array<{
+    supplierId: string;
+    productIds: string[];
+    deliveryDate: string;
+    observations?: string;
+  }>) => void;
   trigger?: React.ReactNode;
   isUpdating?: boolean;
 }
@@ -53,6 +59,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   const [selectedSupplierForConversion, setSelectedSupplierForConversion] = useState<{ id: string; name: string } | null>(null);
   const [showSelectSupplierDialog, setShowSelectSupplierDialog] = useState(false);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Map<string, { supplierId: string; supplierName: string }>>(new Map());
+  const [showMultipleOrdersDialog, setShowMultipleOrdersDialog] = useState(false);
+  const [supplierOrdersForConversion, setSupplierOrdersForConversion] = useState<SupplierOrder[]>([]);
   const editInputRef = useRef<HTMLInputElement>(null);
 
   const handleStartEdit = (productId: string, currentValue: number) => {
@@ -234,7 +242,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
     setSelectedSuppliers(selections);
     setShowSelectSupplierDialog(false);
 
-    // Agrupar por fornecedor para decidir o fluxo
+    // Agrupar por fornecedor
     const supplierGroups = new Map<string, string[]>();
     selections.forEach((selection, productId) => {
       if (!supplierGroups.has(selection.supplierId)) {
@@ -243,13 +251,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       supplierGroups.get(selection.supplierId)!.push(productId);
     });
 
-    // Por enquanto, usar apenas o primeiro fornecedor (mais produtos)
-    // Depois podemos implementar múltiplos pedidos
-    const mainSupplier = Array.from(supplierGroups.entries())
-      .sort((a, b) => b[1].length - a[1].length)[0];
-
-    if (mainSupplier) {
-      const selection = selections.get(mainSupplier[1][0]);
+    // Se apenas 1 fornecedor foi escolhido, usar fluxo simples
+    if (supplierGroups.size === 1) {
+      const [supplierId, productIds] = Array.from(supplierGroups.entries())[0];
+      const selection = selections.get(productIds[0]);
       if (selection) {
         setSelectedSupplierForConversion({
           id: selection.supplierId,
@@ -257,13 +262,68 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         });
         setConvertDialogOpen(true);
       }
+    } else {
+      // Múltiplos fornecedores - preparar dados para múltiplos pedidos
+      const supplierOrders: SupplierOrder[] = Array.from(supplierGroups.entries()).map(([supplierId, productIds]) => {
+        const selection = selections.get(productIds[0]);
+        const supplierName = selection!.supplierName;
+        
+        // Buscar produtos e valores
+        const productsData = productIds.map(productId => {
+          const product = quote._raw.quote_items.find((item: any) => item.product_id === productId);
+          const value = getSupplierProductValue(supplierId, productId);
+          
+          return {
+            productId,
+            productName: product.product_name,
+            quantity: product.quantidade,
+            value
+          };
+        });
+        
+        const totalValue = productsData.reduce((sum, p) => sum + p.value, 0);
+        
+        return {
+          supplierId,
+          supplierName,
+          products: productsData,
+          totalValue,
+          deliveryDate: '',
+          observations: ''
+        };
+      });
+
+      setSupplierOrdersForConversion(supplierOrders);
+      setShowMultipleOrdersDialog(true);
     }
   };
 
   const handleConfirmConversion = (deliveryDate: string, observations?: string) => {
     if (selectedSupplierForConversion && onConvertToOrder) {
-      onConvertToOrder(quote.id, selectedSupplierForConversion.id, deliveryDate, observations);
+      // Fluxo simples: 1 fornecedor com todos os produtos
+      const allProductIds = products.map((p: any) => p.product_id);
+      onConvertToOrder(quote.id, [{
+        supplierId: selectedSupplierForConversion.id,
+        productIds: allProductIds,
+        deliveryDate,
+        observations
+      }]);
       setConvertDialogOpen(false);
+      setOpen(false);
+    }
+  };
+
+  const handleConfirmMultipleOrders = (supplierOrders: SupplierOrder[]) => {
+    if (onConvertToOrder) {
+      const orders = supplierOrders.map(order => ({
+        supplierId: order.supplierId,
+        productIds: order.products.map(p => p.productId),
+        deliveryDate: order.deliveryDate,
+        observations: order.observations
+      }));
+      
+      onConvertToOrder(quote.id, orders);
+      setShowMultipleOrdersDialog(false);
       setOpen(false);
     }
   };
@@ -983,6 +1043,15 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
             isLoading={isUpdating}
           />
         )}
+
+        {/* Convert to Multiple Orders Dialog */}
+        <ConvertToMultipleOrdersDialog
+          open={showMultipleOrdersDialog}
+          onOpenChange={setShowMultipleOrdersDialog}
+          supplierOrders={supplierOrdersForConversion}
+          onConfirm={handleConfirmMultipleOrders}
+          isLoading={isUpdating}
+        />
       </DialogContent>
     </Dialog>
   );

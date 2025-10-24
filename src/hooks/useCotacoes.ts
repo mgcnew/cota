@@ -361,106 +361,111 @@ export function useCotacoes() {
     }
   });
 
-  // Convert quote to order mutation
+  // Convert quote to order(s) - supports multiple suppliers
   const convertToOrder = useMutation({
-    mutationFn: async ({ 
-      quoteId, 
-      supplierId, 
-      deliveryDate, 
-      observations 
-    }: { 
-      quoteId: string; 
-      supplierId: string; 
-      deliveryDate: string;
-      observations?: string;
+    mutationFn: async ({
+      quoteId,
+      orders
+    }: {
+      quoteId: string;
+      orders: Array<{
+        supplierId: string;
+        productIds: string[];
+        deliveryDate: string;
+        observations?: string;
+      }>;
     }) => {
+      // Get the authenticated user's ID
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // 1. Fetch quote data (without quote_supplier_items)
+      // Fetch quote details to get quote items
       const { data: quoteData, error: quoteError } = await supabase
         .from("quotes")
-        .select(`
-          *,
-          quote_items(*),
-          quote_suppliers(*)
-        `)
+        .select("*, quote_items (*)")
         .eq("id", quoteId)
         .single();
 
       if (quoteError) throw quoteError;
-      if (!quoteData) throw new Error("Cotação não encontrada");
 
-      // 2. Fetch quote_supplier_items separately
-      const { data: supplierItemsData, error: supplierItemsError } = await supabase
-        .from("quote_supplier_items")
-        .select("*")
-        .eq("quote_id", quoteId)
-        .eq("supplier_id", supplierId);
+      const createdOrderIds: string[] = [];
+      let totalValueAllOrders = 0;
 
-      if (supplierItemsError) throw supplierItemsError;
-      if (!supplierItemsData || supplierItemsData.length === 0) {
-        throw new Error("Nenhum item encontrado para este fornecedor");
+      // Loop through each supplier order
+      for (const order of orders) {
+        const { supplierId, productIds, deliveryDate, observations } = order;
+
+        // Fetch supplier details
+        const { data: supplierData, error: supplierError } = await supabase
+          .from("suppliers")
+          .select("*")
+          .eq("id", supplierId)
+          .single();
+
+        if (supplierError) throw supplierError;
+
+        // Fetch supplier items for this quote and supplier
+        const { data: supplierItems, error: supplierItemsError } = await supabase
+          .from("quote_supplier_items")
+          .select("*")
+          .eq("quote_id", quoteId)
+          .eq("supplier_id", supplierId)
+          .in("product_id", productIds);
+
+        if (supplierItemsError) throw supplierItemsError;
+
+        // Calculate total value based on supplier items for these specific products
+        const totalValue = supplierItems.reduce((sum, item) => {
+          return sum + (item.valor_oferecido || 0);
+        }, 0);
+
+        totalValueAllOrders += totalValue;
+
+        // Create the order
+        const { data: orderData, error: orderError } = await supabase
+          .from("orders")
+          .insert({
+            user_id: user.id,
+            supplier_id: supplierId,
+            supplier_name: supplierData.name,
+            total_value: totalValue,
+            order_date: new Date().toISOString().split('T')[0],
+            delivery_date: deliveryDate,
+            status: "pendente",
+            observations: observations || null
+          })
+          .select()
+          .single();
+
+        if (orderError) throw orderError;
+
+        createdOrderIds.push(orderData.id);
+
+        // Create order items only for the selected products
+        const orderItems = quoteData.quote_items
+          .filter((item: any) => productIds.includes(item.product_id))
+          .map((item: any) => {
+            const supplierItem = supplierItems.find((si: any) => si.product_id === item.product_id);
+            
+            return {
+              order_id: orderData.id,
+              product_id: item.product_id,
+              product_name: item.product_name,
+              quantity: parseInt(item.quantidade) || 1,
+              unit: item.unidade || 'un',
+              unit_price: supplierItem?.valor_oferecido || 0,
+              total_price: (supplierItem?.valor_oferecido || 0) * (parseInt(item.quantidade) || 1)
+            };
+          });
+
+        const { error: orderItemsError } = await supabase
+          .from("order_items")
+          .insert(orderItems);
+
+        if (orderItemsError) throw orderItemsError;
       }
 
-      // 3. Get supplier info
-      const { data: supplierData, error: supplierError } = await supabase
-        .from("suppliers")
-        .select("name")
-        .eq("id", supplierId)
-        .single();
-
-      if (supplierError) throw supplierError;
-
-      // 4. Calculate total value from supplier items
-      const totalValue = supplierItemsData.reduce(
-        (sum: number, item: any) => sum + (item.valor_oferecido || 0), 
-        0
-      );
-
-      // 5. Create order
-      const { data: orderData, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          user_id: user.id,
-          supplier_id: supplierId,
-          supplier_name: supplierData.name,
-          total_value: totalValue,
-          status: "pendente",
-          order_date: new Date().toISOString().split('T')[0],
-          delivery_date: deliveryDate,
-          observations: observations ? 
-            `Pedido gerado a partir da cotação ${quoteId}. ${observations}` : 
-            `Pedido gerado a partir da cotação ${quoteId}`
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // 6. Create order items
-      const orderItems = supplierItemsData.map((item: any) => {
-        const quoteItem = quoteData.quote_items.find((qi: any) => qi.product_id === item.product_id);
-        const quantityStr = quoteItem?.quantidade || "1";
-        const quantity = parseInt(quantityStr) || 1;
-        
-        return {
-          order_id: orderData.id,
-          product_id: item.product_id,
-          product_name: item.product_name,
-          quantity: quantity,
-          unit_price: item.valor_oferecido || 0,
-          total_price: item.valor_oferecido || 0
-        };
-      });
-
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      // 7. Update quote status to finalizada
+      // Update quote status to finalizada
       const { error: updateError } = await supabase
         .from("quotes")
         .update({ status: "finalizada" })
@@ -468,21 +473,25 @@ export function useCotacoes() {
 
       if (updateError) throw updateError;
 
-      return { orderId: orderData.id, totalValue };
+      return { orderIds: createdOrderIds, totalValue: totalValueAllOrders };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
-      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      queryClient.invalidateQueries({ queryKey: ["cotacoes"] });
+      queryClient.invalidateQueries({ queryKey: ["pedidos"] });
+      const count = data.orderIds.length;
       toast({
-        title: "✅ Pedido criado com sucesso!",
-        description: `A cotação foi finalizada e o pedido foi gerado no valor de R$ ${data.totalValue.toFixed(2)}`,
+        title: count > 1 ? "Pedidos criados!" : "Pedido criado!",
+        description: count > 1 
+          ? `${count} pedidos foram criados com sucesso no valor total de R$ ${data.totalValue.toFixed(2)}`
+          : `A cotação foi convertida em pedido com sucesso no valor de R$ ${data.totalValue.toFixed(2)}`
       });
     },
-    onError: (error: Error) => {
+    onError: (error) => {
+      console.error("Erro ao converter cotação:", error);
       toast({
-        title: "Erro ao converter cotação",
-        description: error.message,
-        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível converter a cotação em pedido.",
+        variant: "destructive"
       });
     }
   });

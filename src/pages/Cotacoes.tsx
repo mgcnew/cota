@@ -606,11 +606,9 @@ export default function Cotacoes() {
                     supplierId,
                     productId,
                     newValue
-                  })} onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
+                  })} onConvertToOrder={(quoteId, orders) => convertToOrder({
                     quoteId,
-                    supplierId,
-                    deliveryDate,
-                    observations
+                    orders
                   })} isUpdating={isUpdating} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                           <Eye className="h-4 w-4 mr-2" />
                           Visualizar
@@ -774,11 +772,9 @@ export default function Cotacoes() {
                             supplierId,
                             productId,
                             newValue
-                          })} onConvertToOrder={(quoteId, supplierId, deliveryDate, observations) => convertToOrder({
+                          })} onConvertToOrder={(quoteId, orders) => convertToOrder({
                             quoteId,
-                            supplierId,
-                            deliveryDate,
-                            observations
+                            orders
                           })} isUpdating={isUpdating} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 shadow-sm hover:shadow-md">
                                     <Eye className="h-3 w-3" />
                                     <span className="sr-only">Ver detalhes da cotação</span>
