@@ -336,7 +336,7 @@ export default function Historico() {
           </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
         <CardContent className="pt-4 sm:pt-6">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1 min-w-0">
@@ -415,7 +415,7 @@ export default function Historico() {
 
       {/* Statistics Cards - Estilo Apple */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -437,7 +437,7 @@ export default function Historico() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -460,7 +460,7 @@ export default function Historico() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -489,7 +489,7 @@ export default function Historico() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -519,7 +519,7 @@ export default function Historico() {
       </div>
 
       {/* Histórico List com Paginação */}
-      <Card>
+      <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Atividades Recentes</span>
@@ -533,7 +533,7 @@ export default function Historico() {
             {paginatedData.items.map(item => {
             const iconColorClass = item.tipo === "cotacao" ? "text-info" : item.tipo === "pedido" ? "text-warning" : item.tipo === "fornecedor" ? "text-primary" : "text-success";
             const bgColorClass = item.tipo === "cotacao" ? "bg-info/10" : item.tipo === "pedido" ? "bg-warning/10" : item.tipo === "fornecedor" ? "bg-primary/10" : "bg-success/10";
-            return <div key={item.id} className="group flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-border hover:border-primary/50 bg-card backdrop-blur-sm hover:shadow-md hover:bg-accent/5 transition-all duration-300">
+            return <div key={item.id} className="group flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700/30 hover:border-primary/50 dark:hover:border-primary/40 bg-white dark:bg-gray-800/30 backdrop-blur-sm hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
                 <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center mt-0.5 transition-transform duration-300 group-hover:scale-110 flex-shrink-0", bgColorClass)}>
                   <div className={iconColorClass}>
                     {getTipoIcon(item.tipo)}

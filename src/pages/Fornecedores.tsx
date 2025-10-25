@@ -265,7 +265,7 @@ export default function Fornecedores() {
         <div className="page-container">
           {/* Stats Cards - Estilo Apple */}
           <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -293,7 +293,7 @@ export default function Fornecedores() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -319,7 +319,7 @@ export default function Fornecedores() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -356,7 +356,7 @@ export default function Fornecedores() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -415,7 +415,7 @@ export default function Fornecedores() {
           </div>
 
           {/* Filters */}
-          <Card>
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
             <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
@@ -465,7 +465,7 @@ export default function Fornecedores() {
 
       {/* Suppliers View */}
       {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map(supplier => <Card key={supplier.id} className="group hover:shadow-xl transition-all duration-300 border border-gray-200/60 hover:border-indigo-300/60 bg-gradient-to-br from-white to-indigo-50/30 backdrop-blur-sm">
+          {paginatedData.items.map(supplier => <Card key={supplier.id} className="group hover:shadow-xl dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 border border-gray-200/60 dark:border-gray-700/30 hover:border-indigo-300/60 dark:hover:border-indigo-600/50 bg-gradient-to-br from-white to-indigo-50/30 dark:from-[#1C1F26] dark:to-[#1C1F26] backdrop-blur-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-3 flex-1">
@@ -474,10 +474,10 @@ export default function Fornecedores() {
                         <Building2 className="h-5 w-5 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors duration-300 truncate">
+                        <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate">
                           {supplier.name}
                         </CardTitle>
-                        <p className="text-sm text-gray-600 truncate mt-1">{supplier.contact}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">{supplier.contact}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -510,61 +510,61 @@ export default function Fornecedores() {
               </CardHeader>
 
               <CardContent className="space-y-4">
-                <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50/80 to-cyan-50/80 border border-blue-200/60">
+                <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50/80 to-cyan-50/80 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200/60 dark:border-blue-700/30">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <DollarSign className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-700">Limite</span>
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Limite</span>
                       </div>
-                      <p className="text-lg font-bold text-blue-800">{supplier.limit}</p>
+                      <p className="text-lg font-bold text-blue-800 dark:text-blue-300">{supplier.limit}</p>
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <TrendingUp className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium text-green-700">Preço Médio</span>
+                        <span className="text-sm font-medium text-green-700 dark:text-green-400">Preço Médio</span>
                       </div>
-                      <p className="text-lg font-bold text-green-800">{supplier.avgPrice}</p>
+                      <p className="text-lg font-bold text-green-800 dark:text-green-300">{supplier.avgPrice}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-lg bg-indigo-50/80 border border-indigo-200/60 text-center">
+                  <div className="p-3 rounded-lg bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-200/60 dark:border-indigo-700/30 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <FileText className="h-4 w-4 text-indigo-600" />
-                      <span className="text-xs font-medium text-indigo-600">Cotações Ativas</span>
+                      <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">Cotações Ativas</span>
                     </div>
-                    <span className="text-lg font-bold text-indigo-800">{supplier.activeQuotes}</span>
+                    <span className="text-lg font-bold text-indigo-800 dark:text-indigo-300">{supplier.activeQuotes}</span>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-purple-50/80 border border-purple-200/60 text-center">
+                  <div className="p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Star className="h-4 w-4 text-purple-600" />
-                      <span className="text-xs font-medium text-purple-600">Total</span>
+                      <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Total</span>
                     </div>
-                    <span className="text-lg font-bold text-purple-800">{supplier.totalQuotes}</span>
+                    <span className="text-lg font-bold text-purple-800 dark:text-purple-300">{supplier.totalQuotes}</span>
                   </div>
                 </div>
 
-                <div className="space-y-3 p-4 rounded-xl bg-gray-50/80 border border-gray-200/60">
+                <div className="space-y-3 p-4 rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
                   {supplier.phone && <div className="flex items-center gap-3">
                       <div className="p-1.5 rounded-lg bg-green-100">
                         <Phone className="h-3 w-3 text-green-600" />
                       </div>
-                      <span className="text-sm font-medium text-gray-700">{supplier.phone}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.phone}</span>
                     </div>}
                   {supplier.email && <div className="flex items-center gap-3">
                       <div className="p-1.5 rounded-lg bg-blue-100">
                         <Mail className="h-3 w-3 text-blue-600" />
                       </div>
-                      <span className="text-sm font-medium text-gray-700 truncate">{supplier.email}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{supplier.email}</span>
                     </div>}
                   <div className="flex items-center gap-3">
                     <div className="p-1.5 rounded-lg bg-orange-100">
                       <FileText className="h-3 w-3 text-orange-600" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700">Último: {supplier.lastOrder}</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Último: {supplier.lastOrder}</span>
                   </div>
                 </div>
 
@@ -578,8 +578,8 @@ export default function Fornecedores() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
-                  <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
+                <TableHeader className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700/30">
+                  <TableRow className="border-b-2 border-gray-200 dark:border-gray-700/30">
                     <TableHead className="font-semibold text-indigo-900 dark:text-gray-200 py-4 px-4 text-xs w-[30%]">Fornecedor</TableHead>
                     <TableHead className="hidden md:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[12%]">Status</TableHead>
                     <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[15%]">Limite</TableHead>
@@ -592,7 +592,7 @@ export default function Fornecedores() {
                 <TableBody>
                   {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/70 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-sm dark:hover:shadow-lg dark:hover:shadow-black/20 hover:-translate-y-0.5 transition-all duration-300">
                           {/* Fornecedor - Largura fixa */}
                           <div className="w-[30%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 dark:from-indigo-400/20 dark:to-blue-400/20 flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -646,17 +646,17 @@ export default function Fornecedores() {
                           {/* Ações - Largura fixa */}
                           <div className="w-[10%] pl-4">
                             <div className="flex items-center justify-end gap-2">
-                              <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-orange-300 flex items-center justify-center">
+                              <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 flex items-center justify-center">
                                     <Clock className="h-4 w-4" />
                                   </Button>} />
 
-                              <Button variant="ghost" size="sm" onClick={() => openWhatsApp(supplier)} className="text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 hover:border-green-300 flex items-center justify-center" title={`Conversar com ${supplier.contact} no WhatsApp`}>
+                              <Button variant="ghost" size="sm" onClick={() => openWhatsApp(supplier)} className="text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 flex items-center justify-center" title={`Conversar com ${supplier.contact} no WhatsApp`}>
                                 <MessageCircle className="h-4 w-4" />
                               </Button>
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 hover:bg-gray-50/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full">
+                                  <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -679,17 +679,17 @@ export default function Fornecedores() {
                 </TableBody>
               </Table>
             </div>
-            <div className="border-t border-indigo-100/80 bg-gradient-to-r from-indigo-50/30 to-blue-50/30 px-6 py-4">
+            <div className="border-t border-indigo-100/80 dark:border-gray-700/30 bg-gradient-to-r from-indigo-50/30 to-blue-50/30 dark:from-gray-800/30 dark:to-gray-800/20 px-6 py-4">
               <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>
         </Card>}
 
-      {filteredSuppliers.length === 0 && <Card>
+      {filteredSuppliers.length === 0 && <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
           <CardContent className="p-12 text-center">
             <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum fornecedor encontrado</h3>
-            <p className="text-muted-foreground mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhum fornecedor encontrado</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Tente ajustar os filtros ou adicione novos fornecedores
             </p>
             <AddSupplierDialog onAdd={handleAddSupplier} trigger={<Button>

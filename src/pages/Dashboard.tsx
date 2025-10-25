@@ -109,7 +109,7 @@ export default function Dashboard() {
         {/* Métricas Principais - Estilo Apple */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 overflow-visible">
           {/* Card 1: Cotações Ativas */}
-          <Card accent className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+          <Card accent className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-6">
                 {/* Header com ícone minimalista */}
                 <div className="flex items-center justify-between mb-3">
@@ -175,7 +175,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Card 2: Economia Gerada */}
-          <Card accent className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+          <Card accent className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -216,7 +216,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Card 3: Fornecedores */}
-          <Card accent className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+          <Card accent className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -249,7 +249,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Card 4: Taxa de Aprovação */}
-          <Card accent className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+          <Card accent className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -290,8 +290,8 @@ export default function Dashboard() {
         {/* Gráficos lado a lado - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Gráfico de Evolução - 2 colunas */}
-          <Card className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl rounded-xl transition-all duration-500">
-            <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
+          <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
+            <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700/30">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <div className="p-2 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg shadow-md">
@@ -335,12 +335,12 @@ export default function Dashboard() {
                         <stop offset="95%" stopColor="#22C55E" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                    <XAxis dataKey={evolutionPeriod === '7d' ? 'day' : 'month'} stroke="#6b7280" style={{
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.5} />
+                    <XAxis dataKey={evolutionPeriod === '7d' ? 'day' : 'month'} stroke="#6b7280" className="dark:stroke-gray-500" style={{
                   fontSize: '12px',
                   fontWeight: 500
                 }} tickLine={false} />
-                    <YAxis stroke="#6b7280" style={{
+                    <YAxis stroke="#6b7280" className="dark:stroke-gray-500" style={{
                   fontSize: '12px',
                   fontWeight: 500
                 }} tickLine={false} axisLine={false} />
@@ -384,8 +384,8 @@ export default function Dashboard() {
           </Card>
 
           {/* Top Fornecedores - 1 coluna - Estilo Apple */}
-          <Card className="lg:col-span-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl rounded-xl transition-all duration-500">
-            <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
+          <Card className="lg:col-span-1 bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
+            <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-700/30">
               <CardTitle className="flex items-center gap-2 text-base">
                 <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center shadow-sm">
                   <Award className="h-4 w-4 text-white" />
@@ -397,7 +397,7 @@ export default function Dashboard() {
               {isLoading ? <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
                 </div> : topSuppliers.length > 0 ? topSuppliers.slice(0, 5).map((supplier, index) => <div key={index} className="group relative">
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-800/30 rounded-lg hover:from-gray-100 hover:to-gray-200/50 dark:hover:from-gray-800/70 dark:hover:to-gray-800/50 transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md">
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/30 dark:to-gray-800/20 rounded-lg hover:from-gray-100 hover:to-gray-200/50 dark:hover:from-gray-800/50 dark:hover:to-gray-800/30 transition-all duration-300 border border-gray-200 dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600/50 hover:shadow-md">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm flex-shrink-0 ${index === 0 ? 'bg-gradient-to-br from-purple-500 to-purple-600' : index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400' : index === 2 ? 'bg-gradient-to-br from-purple-400 to-purple-500' : 'bg-gradient-to-br from-slate-400 to-slate-500'}`}>
                           {index + 1}
@@ -423,8 +423,8 @@ export default function Dashboard() {
         {/* Economia Mensal e Cotações Recentes - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Gráfico de Economia - 2 colunas */}
-          <Card className="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl rounded-xl transition-all duration-500">
-            <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
+          <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
+            <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700/30">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <div className="p-2 bg-gradient-to-br from-green-600 to-green-500 rounded-lg shadow-md">
@@ -464,10 +464,11 @@ export default function Dashboard() {
                         <stop offset="95%" stopColor="#22C55E" stopOpacity={0.05} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
                     <XAxis 
                       dataKey={economyPeriod === '7d' ? 'day' : 'month'} 
-                      stroke="#6b7280" 
+                      stroke="#6b7280"
+                      className="dark:stroke-gray-500"
                       style={{
                         fontSize: '12px',
                         fontWeight: 500
@@ -476,7 +477,8 @@ export default function Dashboard() {
                       axisLine={{ stroke: '#e5e7eb' }}
                     />
                     <YAxis 
-                      stroke="#6b7280" 
+                      stroke="#6b7280"
+                      className="dark:stroke-gray-500"
                       style={{
                         fontSize: '12px',
                         fontWeight: 500
@@ -610,8 +612,8 @@ export default function Dashboard() {
           </Card>
 
           {/* Cotações Recentes - 1 coluna - Estilo Apple */}
-          <Card className="lg:col-span-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl rounded-xl transition-all duration-500">
-            <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
+          <Card className="lg:col-span-1 bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
+            <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-700/30">
               <CardTitle className="flex items-center gap-2 text-base">
                 <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center shadow-sm">
                   <Clock className="h-4 w-4 text-white" />
@@ -623,7 +625,7 @@ export default function Dashboard() {
               {isLoading ? <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
                 </div> : recentQuotes.length > 0 ? recentQuotes.slice(0, 5).map((quote, index) => <div key={quote.id || index} className="group relative">
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-800/30 rounded-lg hover:from-gray-100 hover:to-gray-200/50 dark:hover:from-gray-800/70 dark:hover:to-gray-800/50 transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md">
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/30 dark:to-gray-800/20 rounded-lg hover:from-gray-100 hover:to-gray-200/50 dark:hover:from-gray-800/50 dark:hover:to-gray-800/30 transition-all duration-300 border border-gray-200 dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600/50 hover:shadow-md">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-emerald-100 dark:bg-emerald-900/30' : quote.status === 'pendente' || quote.status === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
                           {getStatusIcon(quote.status)}

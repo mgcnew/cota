@@ -179,10 +179,10 @@ export default function Analytics() {
   }
 
   return (
-    <div className="page-container">
+    <div className="page-container bg-gray-50/50 dark:bg-transparent">
       {/* Filters */}
       {isGenerating && (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-blue-200 dark:border-blue-700/30 bg-blue-50 dark:bg-blue-900/20">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
               <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
@@ -216,82 +216,33 @@ export default function Analytics() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
-          {/* Métricas Principais - Estilo Apple */}
-          <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
+          {/* Métricas Principais - Minimalista */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
             {metricas.map((metrica, index) => {
-              const iconConfigs = [
-                { 
-                  icon: DollarSign, 
-                  bgGradient: 'from-green-500/10 to-emerald-500/10', 
-                  iconColor: 'text-green-600', 
-                  borderColor: 'border-l-green-500',
-                  cardBg: 'from-green-50/50 to-emerald-50/30',
-                  trendColor: { positive: 'text-green-700 bg-green-100 hover:bg-green-200', negative: 'text-red-700 bg-red-100 hover:bg-red-200' },
-                  progressColor: { positive: 'bg-green-600', negative: 'bg-red-600' }
-                },
-                { 
-                  icon: Clock, 
-                  bgGradient: 'from-blue-500/10 to-indigo-500/10', 
-                  iconColor: 'text-blue-600', 
-                  borderColor: 'border-l-blue-500',
-                  cardBg: 'from-blue-50/50 to-indigo-50/30',
-                  trendColor: { positive: 'text-blue-700 bg-blue-100 hover:bg-blue-200', negative: 'text-red-700 bg-red-100 hover:bg-red-200' },
-                  progressColor: { positive: 'bg-blue-600', negative: 'bg-red-600' }
-                },
-                { 
-                  icon: CheckCircle, 
-                  bgGradient: 'from-emerald-500/10 to-teal-500/10', 
-                  iconColor: 'text-emerald-600', 
-                  borderColor: 'border-l-emerald-500',
-                  cardBg: 'from-emerald-50/50 to-teal-50/30',
-                  trendColor: { positive: 'text-emerald-700 bg-emerald-100 hover:bg-emerald-200', negative: 'text-red-700 bg-red-100 hover:bg-red-200' },
-                  progressColor: { positive: 'bg-emerald-600', negative: 'bg-red-600' }
-                },
-                { 
-                  icon: Users, 
-                  bgGradient: 'from-purple-500/10 to-pink-500/10', 
-                  iconColor: 'text-purple-600', 
-                  borderColor: 'border-l-purple-500',
-                  cardBg: 'from-purple-50/50 to-pink-50/30',
-                  trendColor: { positive: 'text-purple-700 bg-purple-100 hover:bg-purple-200', negative: 'text-red-700 bg-red-100 hover:bg-red-200' },
-                  progressColor: { positive: 'bg-purple-600', negative: 'bg-red-600' }
-                }
-              ];
-              const config = iconConfigs[index] || iconConfigs[0];
-              const Icon = config.icon;
+              const icons = [DollarSign, Clock, CheckCircle, Users];
+              const Icon = icons[index] || DollarSign;
               
               return (
-                <Card key={metrica.titulo} className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${config.bgGradient} flex items-center justify-center`}>
-                          <Icon className={`h-3.5 w-3.5 ${config.iconColor}`} />
+                <Card key={metrica.titulo} className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm hover:shadow-md dark:shadow-none hover:border-gray-300 dark:hover:border-gray-600/40 transition-all duration-200">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center shadow-sm dark:shadow-none">
+                          <Icon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                         </div>
-                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{metrica.titulo}</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{metrica.titulo}</span>
                       </div>
-                      <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${
-                        metrica.tipo === 'positivo' ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
-                      }`}>
-                        {metrica.tipo === 'positivo' ? (
-                          <TrendingUp className={`h-2.5 w-2.5 text-green-600`} />
-                        ) : (
-                          <TrendingDown className={`h-2.5 w-2.5 text-red-600`} />
-                        )}
-                        <span className={`text-xs font-semibold ${metrica.tipo === 'positivo' ? 'text-green-600' : 'text-red-600'}`}>{metrica.variacao}</span>
-                      </div>
+                      {metrica.variacao && (
+                        <span className={`text-xs font-medium ${
+                          metrica.tipo === 'positivo' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                        }`}>
+                          {metrica.tipo === 'positivo' ? '↑' : '↓'} {metrica.variacao}
+                        </span>
+                      )}
                     </div>
-                    <div className="mb-3">
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{metrica.valor}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{metrica.descricao}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-500 ${
-                          metrica.tipo === 'positivo' ? config.progressColor.positive : config.progressColor.negative
-                        }`} style={{ width: '75%' }}></div>
-                      </div>
-                      <span className="text-xs font-semibold text-gray-600">75%</span>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">{metrica.valor}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{metrica.descricao}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -299,35 +250,25 @@ export default function Analytics() {
             })}
           </div>
 
-          {/* Charts Row */}
-          <div className="grid gap-6 lg:grid-cols-2">
+          {/* Tendência e Fornecedores - Minimalista */}
+          <div className="grid gap-5 lg:grid-cols-2 mb-6">
             {/* Tendência de Economia */}
-            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                  <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  Tendência de Economia
-                </CardTitle>
+            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">Tendência Mensal</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-2.5">
                   {tendenciasMensais.map(item => (
-                    <div key={item.mes} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <div key={item.mes} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-sm font-medium text-blue-600 dark:text-blue-400">
-                          {item.mes}
-                        </div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-8">{item.mes}</span>
                         <div>
-                          <div className="font-medium text-gray-900 dark:text-white">{item.cotacoes} cotações</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            R$ {item.valor.toLocaleString('pt-BR')}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{item.cotacoes} cotações</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">R$ {item.valor.toLocaleString('pt-BR')}</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-green-600 dark:text-green-400">{item.economia}%</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">economia</div>
-                      </div>
+                      <span className="text-sm font-semibold text-green-600 dark:text-green-400">{item.economia}%</span>
                     </div>
                   ))}
                 </div>
@@ -335,34 +276,24 @@ export default function Analytics() {
             </Card>
 
             {/* Performance de Fornecedores */}
-            <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                  <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  Top Fornecedores
-                </CardTitle>
+            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">Top Fornecedores</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {performanceFornecedores.slice(0, 4).map(fornecedor => (
-                    <div key={fornecedor.fornecedor} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <div className="space-y-2.5">
+                  {performanceFornecedores.slice(0, 4).map((fornecedor, idx) => (
+                    <div key={fornecedor.fornecedor} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white ${
-                          fornecedor.score >= 90 ? 'bg-green-500' : 
-                          fornecedor.score >= 80 ? 'bg-blue-500' : 'bg-gray-500'
-                        }`}>
-                          {fornecedor.score}
-                        </div>
+                        <span className="text-sm font-medium text-gray-400 dark:text-gray-500 w-6">#{idx + 1}</span>
                         <div>
-                          <div className="font-medium text-gray-900 dark:text-white">{fornecedor.fornecedor}</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {fornecedor.cotacoes} cotações • {fornecedor.tempo}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{fornecedor.fornecedor}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{fornecedor.cotacoes} cotações</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold text-green-600 dark:text-green-400">-{fornecedor.economia}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">economia</div>
+                        <div className="text-sm font-semibold text-green-600 dark:text-green-400">-{fornecedor.economia}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Score {fornecedor.score}</div>
                       </div>
                     </div>
                   ))}
@@ -372,33 +303,28 @@ export default function Analytics() {
           </div>
 
           {/* Top Produtos */}
-          <Card className="bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-shadow duration-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                Top Produtos por Economia
-              </CardTitle>
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">Top Produtos</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-2.5">
                 {topProdutos.map((produto, index) => (
-                  <div key={produto.produto} className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-sm font-medium text-blue-600 dark:text-blue-400">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-white">{produto.produto}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">{produto.cotacoes} cotações realizadas</div>
+                  <div key={produto.produto} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <span className="text-sm font-medium text-gray-400 dark:text-gray-500 w-6">#{index + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{produto.produto}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{produto.cotacoes} cotações</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4 ml-4">
                       <div className="text-right">
-                        <div className="font-semibold text-gray-900 dark:text-white">{produto.valor}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">valor total</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{produto.valor}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">total</div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-green-600 dark:text-green-400">-{produto.economia}</div>
+                      <div className="text-right min-w-[60px]">
+                        <div className="text-sm font-semibold text-green-600 dark:text-green-400">-{produto.economia}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">economia</div>
                       </div>
                     </div>

@@ -244,59 +244,86 @@ export function AppSidebar() {
     });
   }, [location.pathname]);
   return <>
-      {/* Desktop Sidebar Sempre Flutuante - Estilo Canva */}
-      <div className="hidden md:flex fixed z-50 w-20 left-1 top-1 bottom-1 transition-all duration-500 ease-out bg-white dark:bg-gray-900 shadow-lg rounded-xl overflow-hidden">
-        {/* Container sempre flutuante */}
-        <div className="w-full flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/70 dark:hover:border-gray-600/70 transition-all duration-500 overflow-visible">
-          {/* Efeitos de vidro sempre aplicados */}
-          <>
-            {/* Efeito de vidro gloss */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 dark:from-gray-800/40 dark:via-gray-900/10 dark:to-gray-800/30 rounded-xl pointer-events-none"></div>
-            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 dark:ring-gray-700/50 pointer-events-none"></div>
-          </>
-          {/* ConteÃºdo principal */}
-          <div className="relative z-10 flex flex-col h-full">
-            {/* Logo sempre flutuante */}
-            <div className="flex items-center justify-center h-16 px-2 border-b border-gray-200/40 dark:border-gray-700/40 bg-gradient-to-b from-white/60 to-white/30 dark:from-gray-800/60 dark:to-gray-800/30 backdrop-blur-sm flex-shrink-0 transition-all duration-500">
-              <NavLink to="/" className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80 backdrop-blur-md flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] border border-gray-200/50 dark:border-gray-700/50 overflow-hidden hover:scale-105 hover:shadow-[0_6px_24px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_6px_24px_rgba(0,0,0,0.4)] hover:border-gray-300/60 dark:hover:border-gray-600/60 transition-all duration-300">
-                <LogoComponent />
-              </NavLink>
-            </div>
+      {/* Desktop Sidebar - Premium Final */}
+      <div className="hidden md:flex fixed z-50 w-20 left-1 top-1 bottom-1">
+        {/* Container Principal com Profundidade */}
+        <div className="w-full flex flex-col bg-white dark:bg-[#1C1F26] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-gray-300/80 dark:border-gray-600/50 overflow-hidden">
+          
+          {/* Header com Logo - Nível 1 */}
+          <div className="flex items-center justify-center h-20 px-4 border-b border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-b from-gray-50/50 to-white dark:from-transparent dark:to-transparent">
+            <NavLink 
+              to="/" 
+              className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-[0_4px_12px_rgba(99,102,241,0.3)] dark:shadow-[0_4px_16px_rgba(99,102,241,0.4)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] dark:hover:shadow-[0_6px_24px_rgba(99,102,241,0.5)] hover:scale-105 transition-all duration-300 relative overflow-hidden group"
+            >
+              {/* Efeito de brilho no hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10 font-bold text-white text-xl tracking-tight drop-shadow-lg">
+                B
+              </div>
+            </NavLink>
+          </div>
 
-            {/* Menu Items sempre flutuantes - Estilo Canva */}
-            <div className="flex-1 flex flex-col justify-start py-2 transition-all duration-500 overflow-visible px-[3px]">
-              <TooltipProvider delayDuration={200}>
-                <div className="space-y-1 px-[12px]">
-                  {menuItems.map((item, index) => {
-                  const isItemActive = isActive(item.url);
-                  const itemColor = colors[index] || colors[0];
-                  return <Tooltip key={item.title}>
-                        <TooltipTrigger asChild>
-                          <NavLink to={item.url} end={item.url === "/"} className={cn("flex items-center justify-center transition-all duration-500 group relative rounded-lg h-12 w-12 p-2", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-[0_8px_20px_${itemColor.shadowColor}] dark:shadow-[0_10px_25px_${itemColor.shadowColor}] border border-white/40 dark:border-white/20 scale-105 translate-y-[-2px]` : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200/60 dark:border-gray-700/50 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.2)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:border-gray-300/70 dark:hover:border-gray-600/70")}>
-                            {/* Indicador de ativo */}
-                            {isItemActive && <div className="absolute -left-0.5 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full shadow-[0_0_12px_rgba(255,255,255,0.8)] transition-all duration-500"></div>}
-
-
-
-                            {/* Ícone - Estilo Colorido */}
-                            <Icon icon={item.icon} className={cn("transition-all duration-500 flex-shrink-0", isItemActive ? "text-white drop-shadow-lg" : "text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white")} width="20" height="20" />
-                          </NavLink>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" sideOffset={15} className="font-medium bg-white text-gray-900 border-gray-200 shadow-xl z-[99999]">
-                          {item.title}
-                        </TooltipContent>
-                      </Tooltip>;
-                })}
-                </div>
-              </TooltipProvider>
-            </div>
+          {/* Menu Items - Nível 2 com Hierarquia */}
+          <div className="flex-1 flex flex-col justify-start py-4 px-3 space-y-2">
+            <TooltipProvider delayDuration={200}>
+              {menuItems.map((item, index) => {
+                const isItemActive = isActive(item.url);
+                const itemColor = colors[index] || colors[0];
+                
+                return (
+                  <Tooltip key={item.title}>
+                    <TooltipTrigger asChild>
+                      <NavLink 
+                        to={item.url} 
+                        end={item.url === "/"}
+                        className={cn(
+                          "relative flex items-center justify-center h-12 rounded-xl transition-all duration-300 group",
+                          isItemActive 
+                            ? `bg-gradient-to-br ${itemColor.bg} shadow-[0_4px_16px_${itemColor.shadowColor},0_2px_8px_${itemColor.shadowColor}] dark:shadow-[0_6px_20px_${itemColor.shadowColor}] scale-105` 
+                            : "bg-gray-100 dark:bg-gray-800/40 hover:bg-gray-200 dark:hover:bg-gray-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-none hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:scale-105"
+                        )}
+                      >
+                        {/* Indicador lateral premium */}
+                        {isItemActive && (
+                          <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full shadow-[0_0_8px_rgba(255,255,255,0.6)]"></div>
+                        )}
+                        
+                        {/* Ícone com profundidade */}
+                        <div className={cn(
+                          "flex items-center justify-center transition-all duration-300",
+                          isItemActive && "drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
+                        )}>
+                          <Icon 
+                            icon={item.icon} 
+                            className={cn(
+                              "transition-all duration-300",
+                              isItemActive 
+                                ? "text-white" 
+                                : "text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                            )} 
+                            width="22" 
+                            height="22" 
+                          />
+                        </div>
+                      </NavLink>
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      side="right" 
+                      sideOffset={20} 
+                      className="font-semibold text-sm bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-0 shadow-[0_4px_16px_rgba(0,0,0,0.2)] dark:shadow-[0_4px_16px_rgba(255,255,255,0.2)] px-3 py-2 rounded-lg"
+                    >
+                      {item.title}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </TooltipProvider>
           </div>
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation com Tema Claro */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-white/96 via-slate-50/96 to-gray-100/96 border-t border-gray-200/50 shadow-2xl backdrop-blur-xl">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200/60 to-transparent"></div>
+      {/* Mobile Bottom Navigation - Premium */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#1C1F26]/95 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
 
         <div className="flex items-center justify-around px-2 py-3 relative">
           {/* BotÃµes principais (4 primeiros) */}

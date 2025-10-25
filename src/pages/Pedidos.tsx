@@ -224,7 +224,7 @@ export default function Pedidos() {
       <div className="page-container">
         {/* Statistics Cards - Estilo Apple */}
         <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -253,7 +253,7 @@ export default function Pedidos() {
             </CardContent>
           </Card>
 
-          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -281,7 +281,7 @@ export default function Pedidos() {
             </CardContent>
           </Card>
 
-          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -305,7 +305,7 @@ export default function Pedidos() {
             </CardContent>
           </Card>
 
-          <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -331,7 +331,7 @@ export default function Pedidos() {
         </div>
 
         {/* Filters */}
-        <Card>
+        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
@@ -423,8 +423,8 @@ export default function Pedidos() {
               <CardContent className="p-0">
                 <div className="overflow-hidden">
                   <Table>
-                    <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
-                      <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
+                    <TableHeader className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700/30">
+                      <TableRow className="border-b-2 border-gray-200 dark:border-gray-700/30">
                         <TableHead className="font-semibold text-pink-900 dark:text-gray-200 py-4 px-4 text-xs">
                           <div className="flex items-center gap-2">
                             <ShoppingCart className="h-4 w-4" />
@@ -462,7 +462,7 @@ export default function Pedidos() {
                     <TableBody>
                       {paginatedData.items.map((pedido, index) => <TableRow key={pedido.id} className="group border-none">
                           <TableCell colSpan={7} className="p-3">
-                            <div className="flex items-center p-3 bg-card backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 hover:bg-accent/5">
+                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:-translate-y-0.5 transition-all duration-300">
                               {/* Pedido - Largura fixa */}
                               <div className="w-[15%] flex items-center gap-3 pr-4">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 dark:from-pink-400/20 dark:to-rose-400/20 flex items-center justify-center flex-shrink-0 border border-pink-200/50 dark:border-pink-700/50">
@@ -541,7 +541,7 @@ export default function Pedidos() {
                                   <Button variant="outline" size="sm" onClick={() => {
                                 setSelectedPedido(pedido);
                                 setViewDialogOpen(true);
-                              }} className="h-8 w-8 p-0 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 shadow-sm hover:shadow-md">
+                              }} className="h-8 w-8 p-0 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-200 shadow-sm hover:shadow-md">
                                     <Eye className="h-3 w-3" />
                                     <span className="sr-only">Ver pedido</span>
                                   </Button>
@@ -550,7 +550,7 @@ export default function Pedidos() {
                                   <Button variant="outline" size="sm" onClick={() => {
                                 setSelectedPedido(pedido);
                                 setEditDialogOpen(true);
-                              }} className="h-8 w-8 p-0 border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                              }} className="h-8 w-8 p-0 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-600 hover:text-amber-700 dark:hover:text-amber-300 transition-all duration-200 shadow-sm hover:shadow-md">
                                     <Edit className="h-3 w-3" />
                                   </Button>
 
@@ -558,7 +558,7 @@ export default function Pedidos() {
                                   <Button variant="outline" size="sm" onClick={() => {
                                 setSelectedPedido(pedido);
                                 setDeleteDialogOpen(true);
-                              }} className="h-8 w-8 p-0 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                              }} className="h-8 w-8 p-0 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 hover:border-red-300 dark:hover:border-red-600 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 shadow-sm hover:shadow-md">
                                     <Trash2 className="h-3 w-3" />
                                   </Button>
                                 </div>
@@ -571,7 +571,7 @@ export default function Pedidos() {
                 </div>
                 
                 {/* Paginação com melhor espaçamento */}
-                <div className="border-t border-pink-100/80 bg-gradient-to-r from-pink-50/30 to-rose-50/30 px-6 py-4">
+                <div className="border-t border-pink-100/80 dark:border-gray-700/30 bg-gradient-to-r from-pink-50/30 to-rose-50/30 dark:from-gray-800/30 dark:to-gray-800/20 px-6 py-4">
                   <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
                 </div>
               </CardContent>

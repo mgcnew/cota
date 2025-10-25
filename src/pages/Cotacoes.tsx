@@ -210,7 +210,7 @@ export default function Cotacoes() {
   return <div className="page-container">
       {/* Statistics Cards - Estilo Apple */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -241,7 +241,7 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -270,7 +270,7 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -312,7 +312,7 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -339,7 +339,7 @@ export default function Cotacoes() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
         <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
@@ -445,7 +445,7 @@ export default function Cotacoes() {
           }
         };
         const colors = getStatusColors(cotacao.status);
-        return <Card key={cotacao.id} className={cn("group hover:shadow-xl transition-all duration-300 border border-gray-200/60 hover:", colors.border, "bg-gradient-to-br", colors.bg, "backdrop-blur-sm")}>
+        return <Card key={cotacao.id} className={cn("group hover:shadow-xl dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 border border-gray-200/60 dark:border-gray-700/30 hover:", colors.border, "bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26] backdrop-blur-sm")}>
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3 flex-1">
@@ -453,7 +453,7 @@ export default function Cotacoes() {
                       <FileText className={cn("h-5 w-5 group-hover:scale-110 transition-transform duration-300", colors.iconColor)} />
                     </div>
                     <div className="space-y-2 flex-1 min-w-0">
-                      <CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-teal-700 transition-colors duration-300 truncate">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors duration-300 truncate">
                         {cotacao.produto}
                       </CardTitle>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -504,34 +504,34 @@ export default function Cotacoes() {
               </CardHeader>
               
               <CardContent className="space-y-4">
-                <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-200/60">
+                <div className="p-4 rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <FileText className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-600">ID</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">ID</span>
                       </div>
-                      <p className="text-sm font-bold text-gray-800 font-mono">
+                      <p className="text-sm font-bold text-gray-800 dark:text-gray-200 font-mono">
                         {cotacao.id.length > 12 ? `${cotacao.id.substring(0, 6)}...${cotacao.id.substring(cotacao.id.length - 4)}` : cotacao.id}
                       </p>
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <Building2 className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-700">Fornecedores</span>
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Fornecedores</span>
                       </div>
-                      <p className="text-sm font-bold text-blue-800">{cotacao.fornecedores}</p>
+                      <p className="text-sm font-bold text-blue-800 dark:text-blue-300">{cotacao.fornecedores}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-indigo-50/80 border border-indigo-200/60">
+                  <div className="p-3 rounded-lg bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-200/60 dark:border-indigo-700/30">
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="h-4 w-4 text-indigo-600" />
-                      <span className="text-sm font-medium text-indigo-700">Período</span>
+                      <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">Período</span>
                     </div>
-                    <p className="text-xs font-semibold text-indigo-800">{cotacao.dataInicio} - {cotacao.dataFim}</p>
+                    <p className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">{cotacao.dataInicio} - {cotacao.dataFim}</p>
                   </div>
                 </div>
 
@@ -644,8 +644,8 @@ export default function Cotacoes() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
-                  <TableRow className="border-b-2 border-gray-100 dark:border-gray-700">
+                <TableHeader className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700/30">
+                  <TableRow className="border-b-2 border-gray-200 dark:border-gray-700/30">
                     <TableHead className="font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
@@ -683,7 +683,7 @@ export default function Cotacoes() {
                 <TableBody>
                   {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group border-none">
                       <TableCell colSpan={7} className="p-3">
-                        <div className="flex items-center px-1.5 py-2 bg-card backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 hover:bg-accent/5">
+                        <div className="flex items-center px-1.5 py-2 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:-translate-y-0.5 transition-all duration-300">
                           {/* Cotação - Largura fixa */}
                           <div className="w-[18%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 dark:from-teal-400/20 dark:to-cyan-400/20 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50 dark:border-teal-700/50">
@@ -775,7 +775,7 @@ export default function Cotacoes() {
                           })} onConvertToOrder={(quoteId, orders) => convertToOrder({
                             quoteId,
                             orders
-                          })} isUpdating={isUpdating} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 transition-all duration-200 shadow-sm hover:shadow-md">
+                          })} isUpdating={isUpdating} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-200 shadow-sm hover:shadow-md">
                                     <Eye className="h-3 w-3" />
                                     <span className="sr-only">Ver detalhes da cotação</span>
                                   </Button>} />
@@ -784,13 +784,13 @@ export default function Cotacoes() {
                               {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
                             quoteId,
                             data
-                          })} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                          })} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-600 hover:text-amber-700 dark:hover:text-amber-300 transition-all duration-200 shadow-sm hover:shadow-md">
                                       <Edit className="h-3 w-3" />
                                       <span className="sr-only">Editar cotação</span>
                                     </Button>} />}
 
                               {/* Botão Excluir - Só aparece se não estiver concluída */}
-                              {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                              {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 hover:border-red-300 dark:hover:border-red-600 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 shadow-sm hover:shadow-md">
                                       <Trash2 className="h-3 w-3" />
                                       <span className="sr-only">Excluir cotação</span>
                                     </Button>} />}
@@ -804,17 +804,17 @@ export default function Cotacoes() {
             </div>
             
             {/* Paginação com melhor espaçamento */}
-            <div className="border-t border-teal-100/80 bg-gradient-to-r from-teal-50/30 to-cyan-50/30 px-6 py-4">
+            <div className="border-t border-teal-100/80 dark:border-gray-700/30 bg-gradient-to-r from-teal-50/30 to-cyan-50/30 dark:from-gray-800/30 dark:to-gray-800/20 px-6 py-4">
               <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>
         </Card>}
 
-      {filteredCotacoes.length === 0 && !isLoading && <Card>
+      {filteredCotacoes.length === 0 && !isLoading && <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
           <CardContent className="p-12 text-center">
             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhuma cotação encontrada</h3>
-            <p className="text-muted-foreground mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhuma cotação encontrada</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Tente ajustar os filtros ou crie uma nova cotação
             </p>
           </CardContent>

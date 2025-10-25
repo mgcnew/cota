@@ -220,7 +220,7 @@ export default function Produtos() {
         <div className="page-container">
           {/* Stats Cards - Estilo Apple */}
           <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -248,7 +248,7 @@ export default function Produtos() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -274,7 +274,7 @@ export default function Produtos() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -298,7 +298,7 @@ export default function Produtos() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -332,7 +332,7 @@ export default function Produtos() {
           </div>
 
           {/* Filters - Between stats cards and products table */}
-          <Card>
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
         <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
@@ -379,20 +379,20 @@ export default function Produtos() {
 
       {/* Visual Feedback do Filtro */}
       {selectedCategory !== "all" && <div className="mb-4 flex items-center gap-2 px-4">
-          <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+          <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700/50">
             Categoria: {selectedCategory}
           </Badge>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
             {filteredProducts.length} produtos encontrados
           </span>
-          {filteredProducts.length === 0 && <span className="text-sm text-amber-600">
+          {filteredProducts.length === 0 && <span className="text-sm text-amber-600 dark:text-amber-400">
               ⚠️ Nenhum produto nesta categoria
             </span>}
         </div>}
 
       {/* Products View */}
       {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map(product => <Card key={product.id} className="group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 border-0 md:shadow-[0_4px_12px_rgba(0,0,0,0.08)] md:hover:shadow-[0_6px_16px_rgba(0,0,0,0.12)] transition-all duration-300">
+          {paginatedData.items.map(product => <Card key={product.id} className="group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none md:hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-3 flex-1">
@@ -401,7 +401,7 @@ export default function Produtos() {
                         <Package className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-orange-700 transition-colors duration-300 truncate">
+                        <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-300 truncate">
                           {product.name}
                         </CardTitle>
                       </div>
@@ -445,11 +445,11 @@ export default function Produtos() {
               </CardHeader>
 
               <CardContent className="space-y-4">
-                <div className="p-4 rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 border border-green-200/60">
+                <div className="p-4 rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/60 dark:border-green-700/30">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-green-700 mb-1">Melhor Preço</p>
-                      <p className="text-2xl font-bold text-green-800">{product.lastQuotePrice}</p>
+                      <p className="text-sm font-medium text-green-700 dark:text-green-400 mb-1">Melhor Preço</p>
+                      <p className="text-2xl font-bold text-green-800 dark:text-green-300">{product.lastQuotePrice}</p>
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-1 mb-1">
@@ -464,29 +464,29 @@ export default function Produtos() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 border border-gray-200/60">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-600">Fornecedor</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fornecedor</span>
                     </div>
-                    <span className="font-semibold text-gray-900 truncate max-w-[120px]">{product.bestSupplier}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white truncate max-w-[120px]">{product.bestSupplier}</span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-blue-50/80 border border-blue-200/60 text-center">
+                    <div className="p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         <Quote className="h-4 w-4 text-blue-600" />
-                        <span className="text-xs font-medium text-blue-600">Cotações</span>
+                        <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
                       </div>
-                      <span className="text-lg font-bold text-blue-800">{product.quotesCount}</span>
+                      <span className="text-lg font-bold text-blue-800 dark:text-blue-300">{product.quotesCount}</span>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-purple-50/80 border border-purple-200/60 text-center">
+                    <div className="p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         <Clock className="h-4 w-4 text-purple-600" />
-                        <span className="text-xs font-medium text-purple-600">Atualizado</span>
+                        <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Atualizado</span>
                       </div>
-                      <span className="text-xs font-semibold text-purple-800">{product.lastUpdate}</span>
+                      <span className="text-xs font-semibold text-purple-800 dark:text-purple-300">{product.lastUpdate}</span>
                     </div>
                   </div>
                 </div>
@@ -498,14 +498,14 @@ export default function Produtos() {
               </CardContent>
 
               {/* Elemento decorativo */}
-              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-200 rounded-full opacity-20"></div>
+              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-200 dark:bg-orange-900/20 rounded-full opacity-20"></div>
             </Card>)}
         </div> : <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-muted dark:bg-accent/20 border-b border-primary/30 dark:border-primary/50">
-                  <TableRow className="border-b-2 border-border dark:border-primary/30">
+                <TableHeader className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700/30">
+                  <TableRow className="border-b-2 border-gray-200 dark:border-gray-700/30">
                     <TableHead className="font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs min-w-0">Produto</TableHead>
                     <TableHead className="hidden md:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Categoria</TableHead>
                     <TableHead className="hidden md:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Peso</TableHead>
@@ -519,7 +519,7 @@ export default function Produtos() {
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
                       <TableCell colSpan={8} className="p-3">
-                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/70 transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-0.5">
+                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-all duration-300 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20 group-hover:-translate-y-0.5">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -609,17 +609,17 @@ export default function Produtos() {
                 </TableBody>
               </Table>
             </div>
-            <div className="border-t border-orange-100/80 bg-gradient-to-r from-orange-50/30 to-amber-50/30 px-6 py-4">
+            <div className="border-t border-orange-100/80 dark:border-gray-700/30 bg-gradient-to-r from-orange-50/30 to-amber-50/30 dark:from-gray-800/30 dark:to-gray-800/20 px-6 py-4">
               <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>
         </Card>}
 
-      {filteredProducts.length === 0 && <Card>
+      {filteredProducts.length === 0 && <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30">
           <CardContent className="p-12 text-center">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum produto encontrado</h3>
-            <p className="text-muted-foreground mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhum produto encontrado</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Tente ajustar os filtros ou adicione novos produtos
             </p>
             <Button>
