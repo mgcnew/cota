@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { TrendingUp, FileText, Download, Calendar, BarChart3, PieChart, DollarSign, Users, Package, Building2, Eye, Settings, Loader2, RefreshCw, Filter, Clock, CheckCircle, AlertCircle, Star, FileSpreadsheet, FileImage, FileBarChart } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { TrendingUp, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock } from "lucide-react";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import { ReportFilters } from "@/components/reports/ReportFilters";
-import { ReportPreview } from "@/components/reports/ReportPreview";
-import { useReports } from "@/hooks/useReports";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useReports } from "@/hooks/useReports";
 import { supabase } from "@/integrations/supabase/client";
 
 // Tipos para melhor type safety
@@ -82,6 +82,12 @@ export default function Relatorios() {
     produtosCotados: 0,
     pedidosGerados: 0
   });
+  
+  // Novos estados para sistema unificado
+  const [selectedReportType, setSelectedReportType] = useState("economia");
+  const [showPreview, setShowPreview] = useState(false);
+  const [reportData, setReportData] = useState<any>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
 
   // Dados dos relatórios otimizados
   const relatoriosDisponiveis: ReportType[] = useMemo(() => [{
@@ -324,6 +330,95 @@ export default function Relatorios() {
   const handleRefresh = useCallback(() => {
     loadStatistics(true);
   }, [loadStatistics]);
+
+  // Nova função para visualizar relatório com dados reais
+  const handleVisualizarRelatorio = useCallback(async () => {
+    if (!startDate || !endDate) {
+      toast({
+        title: "Período obrigatório",
+        description: "Selecione um período válido",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setLoadingPreview(true);
+    setShowPreview(true);
+    
+    try {
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
+      
+      let data: any[] = [];
+      
+      // Buscar dados reais baseado no tipo de relatório
+      if (selectedReportType === 'economia') {
+        const { data: quotes } = await supabase
+          .from('quotes')
+          .select('id, data_inicio, quote_suppliers(valor_oferecido)')
+          .gte('data_inicio', startDateStr)
+          .lte('data_inicio', endDateStr)
+          .eq('status', 'finalizada');
+        
+        data = (quotes || []).map((q: any) => {
+          const valores = q.quote_suppliers?.map((s: any) => s.valor_oferecido || 0) || [];
+          const economia = valores.length >= 2 ? Math.max(...valores) - Math.min(...valores) : 0;
+          return {
+            data: new Date(q.data_inicio).toLocaleDateString('pt-BR'),
+            economia: `R$ ${economia.toFixed(2)}`,
+            percentual: valores.length >= 2 ? `${((economia / Math.max(...valores)) * 100).toFixed(1)}%` : '0%'
+          };
+        });
+      } else if (selectedReportType === 'fornecedores') {
+        const { data: suppliers } = await supabase
+          .from('suppliers')
+          .select('id, name, quote_suppliers(valor_oferecido)');
+        
+        data = (suppliers || []).map((s: any) => ({
+          nome: s.name,
+          cotacoes: s.quote_suppliers?.length || 0,
+          valorMedio: `R$ ${(s.quote_suppliers?.reduce((acc: number, qs: any) => acc + (qs.valor_oferecido || 0), 0) / (s.quote_suppliers?.length || 1)).toFixed(2)}`
+        }));
+      } else if (selectedReportType === 'produtos') {
+        const { data: products } = await supabase
+          .from('products')
+          .select('id, name, category, price');
+        
+        data = (products || []).map((p: any) => ({
+          nome: p.name,
+          categoria: p.category || 'Sem categoria',
+          preco: `R$ ${(p.price || 0).toFixed(2)}`
+        }));
+      } else if (selectedReportType === 'cotacoes') {
+        const { data: quotes } = await supabase
+          .from('quotes')
+          .select('id, data_inicio, status, quote_suppliers(id)')
+          .gte('data_inicio', startDateStr)
+          .lte('data_inicio', endDateStr);
+        
+        data = (quotes || []).map((q: any) => ({
+          id: q.id.substring(0, 8),
+          data: new Date(q.data_inicio).toLocaleDateString('pt-BR'),
+          fornecedores: q.quote_suppliers?.length || 0,
+          status: q.status
+        }));
+      }
+      
+      setReportData(data.length > 0 ? data : null);
+      setLoadingPreview(false);
+      
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      setLoadingPreview(false);
+      setReportData(null);
+      toast({
+        title: "Erro ao carregar relatório",
+        description: "Tente novamente",
+        variant: "destructive"
+      });
+    }
+  }, [startDate, endDate, selectedReportType, toast]);
+
   const applyDatePreset = useCallback((days: number) => {
     const end = new Date();
     const start = new Date();
@@ -604,7 +699,7 @@ export default function Relatorios() {
 
       {/* Resumo Executivo - Estilo Apple */}
       <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -626,7 +721,7 @@ export default function Relatorios() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -651,7 +746,7 @@ export default function Relatorios() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -677,7 +772,7 @@ export default function Relatorios() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 md:shadow-[0_1px_3px_rgba(0,0,0,0.05)] md:hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 hover:scale-[1.02]">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -699,56 +794,127 @@ export default function Relatorios() {
         </Card>
       </div>
 
-      {/* Seção de Relatórios Disponíveis */}
-      <Card className="hover:shadow-md transition-shadow duration-200">
+      {/* Card de Configuração Unificado */}
+      <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-purple-600" />
-            Relatórios Disponíveis
+            <BarChart3 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            Configurar Relatório
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {relatoriosDisponiveis.map((relatorio, index) => <Card key={relatorio.tipo} className="bg-white dark:bg-gray-900 border border-gray-200/60 dark:border-gray-700/60 hover:border-purple-300/60 dark:hover:border-purple-600/60 hover:shadow-lg transition-all duration-200">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-violet-500/10 dark:from-purple-400/20 dark:to-violet-400/20">
-                      <relatorio.icone className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">{relatorio.titulo}</CardTitle>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{relatorio.descricao}</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Período:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{relatorio.periodo}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Tempo estimado:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{relatorio.tempoEstimado}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={`text-xs ${relatorio.prioridade === 'alta' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-700' : relatorio.prioridade === 'media' ? 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-700' : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-700'}`}>
-                      {relatorio.prioridade === 'alta' ? 'Alta Prioridade' : relatorio.prioridade === 'media' ? 'Média Prioridade' : 'Baixa Prioridade'}
-                    </Badge>
-                  </div>
-                  <Button size="sm" className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white" onClick={() => generateReport(relatorio.tipo, {
-                startDate,
-                endDate,
-                fornecedores: selectedFornecedores,
-                produtos: selectedProdutos,
-                categorias: []
-              }, 'pdf')} disabled={isGenerating}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Gerar Relatório
-                  </Button>
-                </CardContent>
-              </Card>)}
+        <CardContent className="space-y-5">
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Tipo de Relatório</Label>
+              <Select value={selectedReportType} onValueChange={setSelectedReportType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {relatoriosDisponiveis.map(rel => (
+                    <SelectItem key={rel.tipo} value={rel.tipo}>{rel.titulo}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {relatoriosDisponiveis.find(r => r.tipo === selectedReportType)?.descricao}
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Período</Label>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-left font-normal"
+                onClick={() => setIsPeriodDialogOpen(true)}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                {dateRangeText}
+              </Button>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {startDate && endDate && `${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} dias selecionados`}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-3 border-t border-gray-200 dark:border-gray-700/30">
+            <Button 
+              onClick={handleVisualizarRelatorio}
+              disabled={loadingPreview || !startDate || !endDate}
+              className="flex-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              {loadingPreview ? "Carregando..." : "Visualizar"}
+            </Button>
+            
+            <Button 
+              onClick={() => handleDownloadReport(selectedReportType, 'pdf')}
+              disabled={isGenerating || !startDate || !endDate}
+              className="flex-1 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Baixar PDF
+            </Button>
+            
+            <Button 
+              onClick={() => handleDownloadReport(selectedReportType, 'excel')}
+              disabled={isGenerating || !startDate || !endDate}
+              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Baixar Excel
+            </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Área de Visualização do Relatório */}
+      {showPreview && (
+        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                Prévia do Relatório
+              </span>
+              <Badge variant="outline">{relatoriosDisponiveis.find(r => r.tipo === selectedReportType)?.titulo}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingPreview ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+              </div>
+            ) : reportData ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50 dark:bg-gray-800/30">
+                      {Object.keys(reportData[0] || {}).map(key => (
+                        <TableHead key={key} className="font-semibold capitalize">
+                          {key}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reportData.map((row: any, idx: number) => (
+                      <TableRow key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/20">
+                        {Object.values(row).map((value: any, i: number) => (
+                          <TableCell key={i}>{value}</TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                Nenhum dado disponível
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>;
 }
