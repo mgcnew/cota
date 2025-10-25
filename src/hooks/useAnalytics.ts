@@ -149,27 +149,38 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
       });
     }
 
-    // Taxa de Economia
+    // Taxa de Economia - Cálculo real baseado em quote_supplier_items
     let totalEconomia = 0;
-    let totalValor = 0;
+    let totalValorMenor = 0;
     let cotacoesComEconomia = 0;
 
     filteredQuotes.forEach(quote => {
-      const valores = quote.quote_suppliers
-        ?.map(qs => qs.valor_oferecido)
-        .filter(v => v && v > 0) || [];
+      // Agrupa valores por produto
+      const produtosComValores = new Map<string, number[]>();
+      
+      quote.quote_supplier_items?.forEach(item => {
+        if (item.valor_oferecido && item.valor_oferecido > 0) {
+          if (!produtosComValores.has(item.product_id)) {
+            produtosComValores.set(item.product_id, []);
+          }
+          produtosComValores.get(item.product_id)!.push(item.valor_oferecido);
+        }
+      });
 
-      if (valores.length >= 2) {
-        const max = Math.max(...valores);
-        const min = Math.min(...valores);
-        const economia = max - min;
-        totalEconomia += economia;
-        totalValor += max;
-        cotacoesComEconomia++;
-      }
+      // Calcula economia para cada produto
+      produtosComValores.forEach((valores) => {
+        if (valores.length >= 2) {
+          const max = Math.max(...valores);
+          const min = Math.min(...valores);
+          const economia = max - min;
+          totalEconomia += economia;
+          totalValorMenor += min;
+          cotacoesComEconomia++;
+        }
+      });
     });
 
-    const taxaEconomia = totalValor > 0 ? (totalEconomia / totalValor) * 100 : 0;
+    const taxaEconomia = totalValorMenor > 0 ? (totalEconomia / (totalValorMenor + totalEconomia)) * 100 : 0;
 
     // Tempo Médio de Cotação
     const tempos = filteredQuotes
@@ -390,26 +401,37 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
       });
 
       let economiaMes = 0;
-      let valorMes = 0;
+      let valorTotalMes = 0;
 
       cotacoesMes.forEach(q => {
-        const valores = q.quote_suppliers
-          ?.map(qs => qs.valor_oferecido)
-          .filter(v => v && v > 0) || [];
+        // Agrupa valores por produto
+        const produtosComValores = new Map<string, number[]>();
+        
+        q.quote_supplier_items?.forEach(item => {
+          if (item.valor_oferecido && item.valor_oferecido > 0) {
+            if (!produtosComValores.has(item.product_id)) {
+              produtosComValores.set(item.product_id, []);
+            }
+            produtosComValores.get(item.product_id)!.push(item.valor_oferecido);
+          }
+        });
 
-        if (valores.length >= 2) {
-          const max = Math.max(...valores);
-          const min = Math.min(...valores);
-          economiaMes += max - min;
-          valorMes += min;
-        }
+        // Calcula economia para cada produto
+        produtosComValores.forEach((valores) => {
+          if (valores.length >= 2) {
+            const max = Math.max(...valores);
+            const min = Math.min(...valores);
+            economiaMes += max - min;
+            valorTotalMes += min;
+          }
+        });
       });
 
       tendencias.push({
         mes: meses[mesData.getMonth()],
         cotacoes: cotacoesMes.length,
-        economia: valorMes > 0 ? ((economiaMes / valorMes) * 100) : 0,
-        valor: valorMes
+        economia: valorTotalMes > 0 ? ((economiaMes / (valorTotalMes + economiaMes)) * 100) : 0,
+        valor: valorTotalMes
       });
     }
 
