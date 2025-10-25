@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Building2, Package, DollarSign, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 
 export interface SupplierOrderProduct {
@@ -41,6 +41,14 @@ export default function ConvertToMultipleOrdersDialog({
   isLoading
 }: ConvertToMultipleOrdersDialogProps) {
   const [orders, setOrders] = useState<SupplierOrder[]>(supplierOrders);
+
+  // Sincronizar state interno quando supplierOrders mudar
+  useEffect(() => {
+    if (open && supplierOrders.length > 0) {
+      console.log('📦 Atualizando orders com', supplierOrders.length, 'fornecedores');
+      setOrders(supplierOrders);
+    }
+  }, [open, supplierOrders]);
 
   const handleDeliveryDateChange = (supplierId: string, date: string) => {
     setOrders(prevOrders =>
