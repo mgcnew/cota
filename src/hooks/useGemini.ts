@@ -22,7 +22,13 @@ export const useGemini = () => {
   const generateLocucao = useCallback(async (
     prompt: string,
     tipo: string,
-    apiKey: string
+    apiKey: string,
+    opcoes?: {
+      emocao?: string;
+      intensidade?: string;
+      velocidade?: string;
+      tom?: string;
+    }
   ): Promise<GeminiResponse> => {
     if (!apiKey) {
       toast({
@@ -36,7 +42,7 @@ export const useGemini = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
@@ -50,8 +56,8 @@ export const useGemini = () => {
             }],
             generationConfig: {
               temperature: 0.9,
-              topK: 1,
-              topP: 1,
+              topK: 40,
+              topP: 0.95,
               maxOutputTokens: 2048,
             },
             safetySettings: [
@@ -76,12 +82,29 @@ export const useGemini = () => {
         }
       );
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Erro na requisição');
+        const errorMsg = data.error?.message || 'Erro desconhecido';
+        console.error('Erro da API:', data);
+        toast({
+          title: "Erro ao gerar locução",
+          description: errorMsg,
+          variant: "destructive"
+        });
+        return { text: '', error: errorMsg };
       }
 
-      const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      if (!text) {
+        toast({
+          title: "Resposta vazia",
+          description: "A API não retornou texto. Tente novamente.",
+          variant: "destructive"
+        });
+        return { text: '', error: 'Resposta vazia' };
+      }
 
       // Adicionar ao histórico
       const novaLocucao: LocucaoHistorico = {
@@ -104,14 +127,15 @@ export const useGemini = () => {
       });
 
       return { text };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao gerar locução:', error);
+      const errorMessage = error.message || 'Erro ao processar requisição';
       toast({
         title: "Erro ao gerar locução",
-        description: "Verifique sua API Key e tente novamente",
+        description: errorMessage,
         variant: "destructive"
       });
-      return { text: '', error: 'Erro ao processar requisição' };
+      return { text: '', error: errorMessage };
     } finally {
       setLoading(false);
     }

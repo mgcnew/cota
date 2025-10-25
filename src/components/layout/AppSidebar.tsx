@@ -51,7 +51,7 @@ const menuItems = [{
 }, {
   title: "Locuções AI",
   url: "/locucoes",
-  icon: "fluent:mic-sparkle-32-filled"
+  icon: "fluent:mic-32-filled"
 }];
 
 // Cores para os itens com efeitos aprimorados
