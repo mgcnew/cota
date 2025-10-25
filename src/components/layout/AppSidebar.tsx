@@ -48,6 +48,10 @@ const menuItems = [{
   title: "Analytics",
   url: "/analytics",
   icon: "fluent:data-trending-32-filled"
+}, {
+  title: "Locuções AI",
+  url: "/locucoes",
+  icon: "fluent:mic-sparkle-32-filled"
 }];
 
 // Cores para os itens com efeitos aprimorados
@@ -107,6 +111,13 @@ const colors = [{
   to: '#10b981',
   shadowColor: 'rgba(34, 197, 94, 0.25)',
   glow: 'shadow-green-400/50'
+}, {
+  bg: 'from-fuchsia-500 to-pink-500',
+  shadow: 'shadow-fuchsia-500/25',
+  from: '#d946ef',
+  to: '#ec4899',
+  shadowColor: 'rgba(217, 70, 239, 0.25)',
+  glow: 'shadow-fuchsia-400/50'
 }];
 
 // Componente do botÃ£o "Mais" para mobile
