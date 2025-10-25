@@ -135,8 +135,8 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <div className="relative">
         {/* Header with gradient */}
-        <div className="relative border-b border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-r from-slate-50/80 to-white/80 dark:from-slate-800/80 dark:to-slate-700/80 backdrop-blur-sm">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 dark:from-blue-400/10 dark:to-purple-400/10" />
+        <div className="relative border-b border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-r from-gray-50/80 to-white/80 dark:from-[#1C1F26] dark:to-[#1C1F26] backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 dark:from-transparent dark:to-transparent" />
           <div className="relative flex items-center px-4 py-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 mr-3">
               <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -145,10 +145,10 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
               placeholder="Buscar cotaÃ§Ãµes, produtos, fornecedores..." 
               value={searchQuery}
               onValueChange={setSearchQuery}
-              className="flex-1 border-0 bg-transparent text-base placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:ring-0 focus:outline-none"
+              className="flex-1 border-0 bg-transparent text-base text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-0 focus:outline-none"
             />
             <div className="flex items-center gap-1 ml-3">
-              <kbd className="inline-flex h-6 w-6 select-none items-center justify-center rounded-md border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[10px] font-medium text-slate-500 dark:text-slate-400 shadow-sm">
+              <kbd className="inline-flex h-6 w-6 select-none items-center justify-center rounded-md border border-gray-300/60 dark:border-gray-600/60 bg-gradient-to-b from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-1 font-mono text-[10px] font-medium text-gray-500 dark:text-gray-400 shadow-sm">
                 ESC
               </kbd>
             </div>
@@ -164,19 +164,19 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                 <Search className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               Busca Global
             </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 max-w-sm mx-auto">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-sm mx-auto">
               Digite para buscar produtos, fornecedores, cotaÃ§Ãµes e pedidos em todo o sistema
             </p>
-            <div className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-500">
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
               <span>Pressione</span>
-              <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[10px] font-medium shadow-sm">
+              <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-gray-300/60 dark:border-gray-600/60 bg-gradient-to-b from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-1 font-mono text-[10px] font-medium shadow-sm">
                 âŒ˜
               </kbd>
               <span>+</span>
-              <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-slate-300/60 dark:border-slate-600/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 px-1 font-mono text-[10px] font-medium shadow-sm">
+              <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-gray-300/60 dark:border-gray-600/60 bg-gradient-to-b from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-1 font-mono text-[10px] font-medium shadow-sm">
                 K
               </kbd>
               <span>para abrir rapidamente</span>
@@ -187,14 +187,14 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         {searchQuery && !hasResults && (
           <div className="px-6 py-8 text-center">
             <div className="relative mb-4">
-              <div className="p-3 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 w-16 h-16 mx-auto flex items-center justify-center">
-                <Search className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+              <div className="p-3 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 w-16 h-16 mx-auto flex items-center justify-center">
+                <Search className="h-6 w-6 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
-            <h3 className="text-base font-medium text-slate-800 dark:text-slate-200 mb-1">
+            <h3 className="text-base font-medium text-gray-900 dark:text-white mb-1">
               Nenhum resultado encontrado
             </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Tente usar termos diferentes ou verifique a ortografia
             </p>
           </div>
@@ -215,10 +215,10 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors duration-200">
+                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors duration-200">
                     {produto.name}
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                     {produto.category}
                   </p>
                 </div>
@@ -245,10 +245,10 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors duration-200">
+                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors duration-200">
                     {fornecedor.name}
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                     {fornecedor.contact || fornecedor.email || "Sem contato"}
                   </p>
                 </div>
@@ -275,10 +275,10 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-200">
+                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-200">
                     {cotacao.id}
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                     {cotacao.produto} â€¢ {cotacao.melhorFornecedor}
                   </p>
                 </div>
@@ -305,10 +305,10 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-200">
+                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-200">
                     {new Date(pedido.order_date).toLocaleDateString('pt-BR')}
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                     {pedido.supplier_name} â€¢ {pedido.items?.length || 0} produto(s)
                   </p>
                 </div>
@@ -330,7 +330,7 @@ export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
       <Button
         variant="ghost"
         onClick={onClick}
-        className="relative w-full justify-start text-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300/70 dark:hover:border-gray-600/70 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl h-10 px-4 overflow-hidden group-hover:bg-white/90 dark:group-hover:bg-gray-800/90"
+        className="relative w-full justify-start text-sm bg-white/80 dark:bg-[#1C1F26]/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 hover:border-gray-300/70 dark:hover:border-gray-600/50 shadow-sm hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 rounded-xl h-10 px-4 overflow-hidden group-hover:bg-white/90 dark:group-hover:bg-[#1C1F26]/90"
       >
         {/* Efeito de vidro gloss */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 dark:from-gray-700/40 dark:via-gray-800/10 dark:to-gray-700/30 rounded-xl pointer-events-none" />
