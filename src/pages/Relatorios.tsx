@@ -14,6 +14,10 @@ import { ReportFilters } from "@/components/reports/ReportFilters";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useReports } from "@/hooks/useReports";
+import { useReportEconomia } from "@/hooks/useReportEconomia";
+import { useReportFornecedores } from "@/hooks/useReportFornecedores";
+import { useReportComparativo } from "@/hooks/useReportComparativo";
+import { useReportEficiencia } from "@/hooks/useReportEficiencia";
 import { supabase } from "@/integrations/supabase/client";
 
 // Tipos para melhor type safety
@@ -38,12 +42,8 @@ interface Estatisticas {
   pedidosGerados: number;
 }
 export default function Relatorios() {
-  const {
-    toast
-  } = useToast();
-  const {
-    user
-  } = useAuth();
+  const { toast } = useToast();
+  const { user } = useAuth();
   const {
     isGenerating,
     progress,
@@ -51,6 +51,12 @@ export default function Relatorios() {
     generateAllReports,
     getReportData
   } = useReports();
+  
+  // Hooks personalizados para cada tipo de relatório
+  const reportEconomia = useReportEconomia();
+  const reportFornecedores = useReportFornecedores();
+  const reportComparativo = useReportComparativo();
+  const reportEficiencia = useReportEficiencia();
 
   // Estados otimizados
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
@@ -89,10 +95,10 @@ export default function Relatorios() {
   const [reportData, setReportData] = useState<any>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
 
-  // Dados dos relatórios otimizados
+  // Relatórios estratégicos para tomada de decisão
   const relatoriosDisponiveis: ReportType[] = useMemo(() => [{
-    titulo: "Relatório de Economia",
-    descricao: "Análise detalhada da economia gerada pelas cotações com comparativos mensais",
+    titulo: "Análise de Economia Gerada",
+    descricao: "Economia real gerada por período, melhor fornecedor e oportunidades de redução de custos",
     tipo: "economia",
     icone: DollarSign,
     formato: ["PDF", "Excel"],
@@ -100,62 +106,40 @@ export default function Relatorios() {
     ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
     categoria: 'financeiro',
     prioridade: 'alta',
-    tempoEstimado: '2-3 min'
+    tempoEstimado: '1-2 min'
   }, {
     titulo: "Performance de Fornecedores",
-    descricao: "Avaliação completa de desempenho, preços e tempo de resposta dos fornecedores",
+    descricao: "Taxa de vitória, valor médio, tempo de resposta e score de cada fornecedor para decisões estratégicas",
     tipo: "fornecedores",
     icone: Building2,
     formato: ["PDF", "Excel"],
-    periodo: "Trimestral",
-    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
-    categoria: 'operacional',
-    prioridade: 'alta',
-    tempoEstimado: '3-4 min'
-  }, {
-    titulo: "Análise de Produtos",
-    descricao: "Histórico detalhado de preços, variações e tendências por categoria de produto",
-    tipo: "produtos",
-    icone: Package,
-    formato: ["PDF", "Excel", "CSV"],
-    periodo: "Semanal",
-    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
-    categoria: 'operacional',
-    prioridade: 'media',
-    tempoEstimado: '2-3 min'
-  }, {
-    titulo: "Cotações por Período",
-    descricao: "Resumo executivo de todas as cotações realizadas com métricas de eficiência",
-    tipo: "cotacoes",
-    icone: FileText,
-    formato: ["PDF", "Excel"],
-    periodo: "Mensal",
-    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
-    categoria: 'operacional',
-    prioridade: 'media',
-    tempoEstimado: '1-2 min'
-  }, {
-    titulo: "Dashboard Executivo",
-    descricao: "Visão estratégica com KPIs principais e insights para tomada de decisão",
-    tipo: "dashboard",
-    icone: BarChart3,
-    formato: ["PDF"],
     periodo: "Mensal",
     ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
     categoria: 'estrategico',
     prioridade: 'alta',
     tempoEstimado: '1-2 min'
   }, {
-    titulo: "Análise de Gastos",
-    descricao: "Controle detalhado de gastos, orçamento e projeções por categoria",
-    tipo: "gastos",
-    icone: PieChart,
+    titulo: "Comparativo de Preços",
+    descricao: "Variação de preços por produto, identificação de oportunidades e fornecedores mais competitivos",
+    tipo: "comparativo",
+    icone: BarChart3,
     formato: ["PDF", "Excel"],
     periodo: "Mensal",
     ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
-    categoria: 'financeiro',
-    prioridade: 'media',
-    tempoEstimado: '2-3 min'
+    categoria: 'operacional',
+    prioridade: 'alta',
+    tempoEstimado: '1-2 min'
+  }, {
+    titulo: "Eficiência do Processo",
+    descricao: "Taxa de conversão, tempo médio de cotação, ROI e indicadores de eficiência operacional",
+    tipo: "eficiencia",
+    icone: TrendingUp,
+    formato: ["PDF", "Excel"],
+    periodo: "Mensal",
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
+    categoria: 'estrategico',
+    prioridade: 'alta',
+    tempoEstimado: '1-2 min'
   }], []);
 
   // Função otimizada para carregar estatísticas
@@ -331,7 +315,7 @@ export default function Relatorios() {
     loadStatistics(true);
   }, [loadStatistics]);
 
-  // Nova função para visualizar relatório com dados reais
+  // Nova função para visualizar relatório com hooks personalizados
   const handleVisualizarRelatorio = useCallback(async () => {
     if (!startDate || !endDate) {
       toast({
@@ -346,65 +330,28 @@ export default function Relatorios() {
     setShowPreview(true);
     
     try {
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
-      
-      let data: any[] = [];
-      
-      // Buscar dados reais baseado no tipo de relatório
-      if (selectedReportType === 'economia') {
-        const { data: quotes } = await supabase
-          .from('quotes')
-          .select('id, data_inicio, quote_suppliers(valor_oferecido)')
-          .gte('data_inicio', startDateStr)
-          .lte('data_inicio', endDateStr)
-          .eq('status', 'finalizada');
-        
-        data = (quotes || []).map((q: any) => {
-          const valores = q.quote_suppliers?.map((s: any) => s.valor_oferecido || 0) || [];
-          const economia = valores.length >= 2 ? Math.max(...valores) - Math.min(...valores) : 0;
-          return {
-            data: new Date(q.data_inicio).toLocaleDateString('pt-BR'),
-            economia: `R$ ${economia.toFixed(2)}`,
-            percentual: valores.length >= 2 ? `${((economia / Math.max(...valores)) * 100).toFixed(1)}%` : '0%'
-          };
-        });
-      } else if (selectedReportType === 'fornecedores') {
-        const { data: suppliers } = await supabase
-          .from('suppliers')
-          .select('id, name, quote_suppliers(valor_oferecido)');
-        
-        data = (suppliers || []).map((s: any) => ({
-          nome: s.name,
-          cotacoes: s.quote_suppliers?.length || 0,
-          valorMedio: `R$ ${(s.quote_suppliers?.reduce((acc: number, qs: any) => acc + (qs.valor_oferecido || 0), 0) / (s.quote_suppliers?.length || 1)).toFixed(2)}`
-        }));
-      } else if (selectedReportType === 'produtos') {
-        const { data: products } = await supabase
-          .from('products')
-          .select('id, name, category, price');
-        
-        data = (products || []).map((p: any) => ({
-          nome: p.name,
-          categoria: p.category || 'Sem categoria',
-          preco: `R$ ${(p.price || 0).toFixed(2)}`
-        }));
-      } else if (selectedReportType === 'cotacoes') {
-        const { data: quotes } = await supabase
-          .from('quotes')
-          .select('id, data_inicio, status, quote_suppliers(id)')
-          .gte('data_inicio', startDateStr)
-          .lte('data_inicio', endDateStr);
-        
-        data = (quotes || []).map((q: any) => ({
-          id: q.id.substring(0, 8),
-          data: new Date(q.data_inicio).toLocaleDateString('pt-BR'),
-          fornecedores: q.quote_suppliers?.length || 0,
-          status: q.status
-        }));
+      // Usar hook apropriado baseado no tipo de relatório
+      switch (selectedReportType) {
+        case 'economia':
+          await reportEconomia.generateReport(startDate, endDate);
+          setReportData(reportEconomia.data);
+          break;
+        case 'fornecedores':
+          await reportFornecedores.generateReport(startDate, endDate);
+          setReportData(reportFornecedores.data);
+          break;
+        case 'comparativo':
+          await reportComparativo.generateReport(startDate, endDate);
+          setReportData(reportComparativo.data);
+          break;
+        case 'eficiencia':
+          await reportEficiencia.generateReport(startDate, endDate);
+          setReportData(reportEficiencia.data);
+          break;
+        default:
+          setReportData(null);
       }
       
-      setReportData(data.length > 0 ? data : null);
       setLoadingPreview(false);
       
     } catch (error) {
@@ -417,7 +364,7 @@ export default function Relatorios() {
         variant: "destructive"
       });
     }
-  }, [startDate, endDate, selectedReportType, toast]);
+  }, [startDate, endDate, selectedReportType, toast, reportEconomia, reportFornecedores, reportComparativo, reportEficiencia]);
 
   const applyDatePreset = useCallback((days: number) => {
     const end = new Date();
