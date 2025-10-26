@@ -122,7 +122,7 @@ export function CategorySelect({
                 className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-orange-600/70 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
-            <CommandList className="max-h-[min(500px,80vh)] overflow-y-auto">
+            <CommandList className="max-h-[min(500px,80vh)]">
               <CommandEmpty>
                 <div className="flex flex-col items-center gap-2 py-6 text-center">
                   <Package className="h-8 w-8 text-orange-400" />
