@@ -109,8 +109,8 @@ export default function Dashboard() {
         {/* Métricas Principais - Estilo Apple */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 overflow-visible">
           {/* Card 1: Cotações Ativas */}
-          <Card accent className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-              <CardContent className="p-6">
+          <Card accent accentColor="bg-purple-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+              <CardContent className="p-4">
                 {/* Header com ícone minimalista */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -149,7 +149,6 @@ export default function Dashboard() {
                       'from-violet-600 to-violet-500',
                       'from-purple-700 to-purple-600'
                     ];
-                    // Calcular o dia correspondente
                     const hoje = new Date();
                     const dia = new Date(hoje.getTime() - (6 - i) * 24 * 60 * 60 * 1000);
                     const diaNome = dia.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
@@ -157,16 +156,17 @@ export default function Dashboard() {
                     return (
                       <div 
                         key={i} 
-                        className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t opacity-60 hover:opacity-100 transition-all duration-300 relative group`} 
+                        className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t-lg opacity-60 hover:opacity-100 transition-opacity relative group cursor-pointer`} 
                         style={{ height: `${heightPercent}%`, minHeight: '8px' }}
-                        title={`${diaNome} - ${cotacoes} cotações`}
                       >
-                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 text-[10px] font-bold text-purple-600 dark:text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-lg border border-gray-200 dark:border-gray-700">
-                          <div className="text-center">
-                            <div className="text-gray-500 dark:text-gray-400">{diaNome}</div>
-                            <div className="font-bold">{cotacoes} {cotacoes === 1 ? 'cotação' : 'cotações'}</div>
+                        <div className="absolute -top-14 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-[100]">
+                          <div className="bg-white dark:bg-gray-800 px-2 py-1.5 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                            <div className="text-center">
+                              <div className="text-[10px] text-gray-500 dark:text-gray-400">{diaNome}</div>
+                              <div className="text-xs font-bold text-purple-600 dark:text-purple-400">{cotacoes} {cotacoes === 1 ? 'cotação' : 'cotações'}</div>
+                            </div>
                           </div>
-                        </span>
+                        </div>
                       </div>
                     );
                   })}
@@ -175,8 +175,8 @@ export default function Dashboard() {
           </Card>
 
           {/* Card 2: Economia Gerada */}
-          <Card accent className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-              <CardContent className="p-6">
+          <Card accent accentColor="bg-green-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
@@ -199,25 +199,19 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">economizados</p>
                 </div>
 
-                {/* Mini gráfico de linha */}
-                <div className="relative h-8">
-                  <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="rgb(34, 197, 94)" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="rgb(34, 197, 94)" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path d="M 0,30 L 15,25 L 30,28 L 45,15 L 60,20 L 75,10 L 90,12 L 100,8" fill="none" stroke="rgb(34, 197, 94)" strokeWidth="2" />
-                    <path d="M 0,30 L 15,25 L 30,28 L 45,15 L 60,20 L 75,10 L 90,12 L 100,8 L 100,40 L 0,40 Z" fill="url(#emeraldGradient)" />
-                  </svg>
+                {/* Indicador de progresso */}
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-2 bg-green-100 dark:bg-green-900/20 rounded-full overflow-hidden">
+                    <div className="h-full w-[75%] bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
+                  </div>
+                  <span className="text-xs font-semibold text-green-600">+{metrics.crescimentoEconomia}%</span>
                 </div>
               </CardContent>
           </Card>
 
           {/* Card 3: Fornecedores */}
-          <Card accent className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-              <CardContent className="p-6">
+          <Card accent accentColor="bg-blue-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
@@ -249,8 +243,8 @@ export default function Dashboard() {
           </Card>
 
           {/* Card 4: Taxa de Aprovação */}
-          <Card accent className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-              <CardContent className="p-6">
+          <Card accent accentColor="bg-yellow-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-yellow-400/10 flex items-center justify-center">
@@ -271,17 +265,12 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">de aprovação</p>
                 </div>
 
-                {/* Mini gráfico circular */}
-                <div className="flex items-center justify-center">
-                  <div className="relative w-12 h-12">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(243, 244, 246)" strokeWidth="3" />
-                      <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(250, 204, 21)" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 20 * (metrics.taxaAprovacao / 100)} ${2 * Math.PI * 20}`} strokeLinecap="round" className="transition-all duration-1000" />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[10px] font-bold text-yellow-600">{metrics.taxaAprovacao}%</span>
-                    </div>
+                {/* Barra de progresso */}
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAprovacao}%` }}></div>
                   </div>
+                  <span className="text-xs font-semibold text-yellow-600">{metrics.taxaAprovacao}%</span>
                 </div>
               </CardContent>
           </Card>
@@ -290,7 +279,7 @@ export default function Dashboard() {
         {/* Gráficos lado a lado - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Gráfico de Evolução - 2 colunas */}
-          <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
             <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700/30">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -384,7 +373,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Top Fornecedores - 1 coluna - Estilo Apple */}
-          <Card className="lg:col-span-1 bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-1 bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
             <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-700/30">
               <CardTitle className="flex items-center gap-2 text-base">
                 <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center shadow-sm">
@@ -423,7 +412,7 @@ export default function Dashboard() {
         {/* Economia Mensal e Cotações Recentes - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Gráfico de Economia - 2 colunas */}
-          <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
             <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700/30">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -612,7 +601,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Cotações Recentes - 1 coluna - Estilo Apple */}
-          <Card className="lg:col-span-1 bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
+          <Card className="lg:col-span-1 bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300">
             <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-700/30">
               <CardTitle className="flex items-center gap-2 text-base">
                 <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center shadow-sm">

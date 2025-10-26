@@ -4,13 +4,13 @@ import { cn } from "@/lib/utils";
 
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { accent?: boolean }
->(({ className, accent, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & { accent?: boolean; accentColor?: string }
+>(({ className, accent, accentColor = "bg-primary/20", ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl border bg-card text-card-foreground shadow-sm relative",
-      accent && "before:absolute before:top-0 before:left-0 before:right-0 before:h-0.5 before:bg-primary before:rounded-t-2xl",
+      "rounded-2xl border bg-card text-card-foreground shadow-sm relative overflow-hidden",
+      accent && `before:absolute before:top-0 before:right-0 before:w-24 before:h-24 before:${accentColor} before:-rotate-45 before:translate-x-12 before:-translate-y-12`,
       className
     )}
     {...props}

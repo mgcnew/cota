@@ -17,6 +17,7 @@ import { EditProductDialog } from "@/components/forms/EditProductDialog";
 import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
 import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
+import { DeleteDuplicateProductsDialog } from "@/components/forms/DeleteDuplicateProductsDialog";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
@@ -352,7 +353,7 @@ export default function Produtos() {
                     Ações
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
                   <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={triggerAddDialog}>
@@ -363,11 +364,17 @@ export default function Produtos() {
                     <FileUp className="h-4 w-4 mr-2" />
                     Importar Produtos
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={invalidateCache}>
+                  {/* TEMPORÁRIO: Função de excluir duplicatas (comentada) */}
+                  {/* <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <DeleteDuplicateProductsDialog onDuplicatesDeleted={invalidateCache} />
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator /> */}
+                  {/* TEMPORÁRIO: Função de limpar cache (comentada) */}
+                  {/* <DropdownMenuItem onClick={invalidateCache}>
                     <TrendingUp className="h-4 w-4 mr-2" />
                     Atualizar Cache
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

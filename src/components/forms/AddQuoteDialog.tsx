@@ -477,27 +477,22 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[1000px] h-[92vh] sm:h-[88vh] md:h-[85vh] max-h-[900px] p-0 gap-0 overflow-hidden border-teal-200/40 dark:border-gray-700 shadow-2xl rounded-lg sm:rounded-xl md:rounded-2xl flex flex-col animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-300 bg-white dark:bg-gray-900">
-        <DialogHeader className="relative px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 border-b border-teal-100/60 dark:border-gray-700 overflow-hidden flex-shrink-0">
-          <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 dark:from-teal-400/20 dark:to-cyan-400/20 rounded-full -translate-y-12 -translate-x-12"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-400/10 to-cyan-400/10 dark:from-teal-400/20 dark:to-cyan-400/20 rounded-full -translate-y-16 translate-x-16"></div>
-          
-          <div className="relative z-10">
-            {/* Compact Header */}
-            <div className="flex items-center justify-between gap-2 sm:gap-3">
-              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 text-white shadow-lg shadow-teal-500/25 ring-2 ring-white/20 dark:ring-teal-900/50 flex-shrink-0">
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
-                    Nova Cotação
-                  </DialogTitle>
-                  <DialogDescription className="text-gray-600 dark:text-gray-400 text-xs truncate">
-                    {Math.round(progress)}% concluído
-                  </DialogDescription>
-                </div>
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[1000px] h-[92vh] sm:h-[88vh] md:h-[85vh] max-h-[900px] p-0 gap-0 overflow-hidden border-gray-200 dark:border-gray-700 shadow-lg rounded-lg flex flex-col bg-white dark:bg-gray-900">
+        <DialogHeader className="px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="p-1 rounded bg-teal-600 text-white flex-shrink-0">
+                <FileText className="h-3.5 w-3.5" />
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                  Nova Cotação
+                </DialogTitle>
+                <DialogDescription className="text-gray-500 dark:text-gray-400 text-[10px] truncate">
+                  Etapa {currentTabIndex + 1}/{tabs.length}
+                </DialogDescription>
+              </div>
 
                 {/* Navigation Controls - Moved to left side */}
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -549,25 +544,24 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                 </div>
               </div>
 
-              {/* Close Button - Isolated on the right */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setOpen(false)}
-                className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 h-8 w-8 p-0 flex-shrink-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            {/* Close Button - Isolated on the right */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setOpen(false)}
+              className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 h-8 w-8 p-0 flex-shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
             
-            {/* Compact Progress Bar */}
-            <div className="mt-2">
-              <Progress 
-                value={progress} 
-                className="h-2 bg-teal-100/60 dark:bg-gray-700 [&>div]:bg-gradient-to-r [&>div]:from-teal-500 [&>div]:to-cyan-500"
-              />
-            </div>
+          {/* Minimal Progress Bar */}
+          <div className="mt-2">
+            <Progress 
+              value={progress} 
+              className="h-1 bg-gray-100 dark:bg-gray-800 [&>div]:bg-teal-600"
+            />
           </div>
         </DialogHeader>
         
@@ -583,8 +577,8 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
             <Form {...form}>
               <form id="quote-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
                 {/* Compact Tab Navigation */}
-                <div className="flex-shrink-0 px-2 sm:px-3 md:px-6 py-2 border-b border-teal-100/60 dark:border-gray-700 bg-gradient-to-r from-teal-50/40 to-cyan-50/30 dark:from-gray-800/50 dark:to-gray-800/50 backdrop-blur-sm">
-                  <div className="flex space-x-0.5 sm:space-x-1 bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg sm:rounded-xl p-0.5 sm:p-1 shadow-lg border border-teal-200/40 dark:border-gray-700 overflow-x-auto scrollbar-hide">
+                <div className="flex-shrink-0 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
                     {tabs.map((tab) => {
                       const Icon = tab.icon;
                       const status = getTabStatus(tab.id);
@@ -594,27 +588,21 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                           type="button"
                           onClick={() => setActiveTab(tab.id)}
                           className={cn(
-                            "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs font-semibold transition-all duration-300 relative overflow-hidden group whitespace-nowrap flex-shrink-0",
-                            status === "current" && "bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-xl shadow-teal-500/25 scale-105",
-                            status === "completed" && "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg",
-                            status === "pending" && "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 hover:text-teal-700 dark:hover:text-teal-400"
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap flex-shrink-0",
+                            status === "current" && "bg-teal-600 text-white",
+                            status === "completed" && "bg-green-600 text-white",
+                            status === "pending" && "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
                           )}
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                          
-                          <div className={cn(
-                            "flex items-center justify-center w-4 h-4 rounded transition-all",
-                            status === "current" && "bg-white/20",
-                            status === "completed" && "bg-white/20"
-                          )}>
+                          <div className="flex items-center justify-center w-4 h-4">
                             {status === "completed" ? (
-                              <Check className="h-3 w-3 text-white" />
+                              <Check className="h-3 w-3" />
                             ) : (
                               <Icon className="h-3 w-3" />
                             )}
                           </div>
                           
-                          <span className="relative z-10 hidden sm:inline">{tab.label}</span>
+                          <span className="hidden sm:inline">{tab.label}</span>
                         </button>
                       );
                     })}
