@@ -139,25 +139,25 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
         <div className="flex flex-col flex-1 overflow-hidden">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
-              <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              <div className="flex-1 overflow-y-auto p-5 space-y-5">
                 {/* Seção: Informações da Empresa */}
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <div className="space-y-3.5">
+                  <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-1">
                     <span className="w-1 h-4 bg-gradient-to-b from-green-600 to-emerald-600 rounded-full"></span>
                     Informações da Empresa
                   </h3>
                   
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
                     <FormField
                       control={form.control}
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Nome do Fornecedor *</FormLabel>
+                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Nome do Fornecedor *</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="Ex: Holambra Distribuidora" 
-                              className="h-9 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm"
+                              className="h-10 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm px-3.5"
                               {...field} 
                             />
                           </FormControl>
@@ -171,11 +171,11 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                       name="cnpj"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">CNPJ</FormLabel>
+                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">CNPJ</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="00.000.000/0000-00" 
-                              className="h-9 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm"
+                              className="h-10 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm px-3.5"
                               {...field} 
                             />
                           </FormControl>
@@ -190,11 +190,11 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Endereço Completo</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Endereço Completo</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Rua das Flores, 123, Centro, São Paulo - SP" 
-                            className="h-9 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm"
+                            className="h-10 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm px-3.5"
                             {...field} 
                           />
                         </FormControl>
@@ -205,8 +205,8 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                 </div>
 
                 {/* Seção: Informações de Contato */}
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <div className="space-y-3.5">
+                  <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-1">
                     <span className="w-1 h-4 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></span>
                     Informações de Contato
                   </h3>
@@ -216,11 +216,11 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     name="contact"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Nome do Contato Principal *</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Nome do Contato Principal *</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Ex: João Silva Santos" 
-                            className="h-9 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm"
+                            className="h-10 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm px-3.5"
                             {...field} 
                           />
                         </FormControl>
@@ -229,17 +229,17 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     )}
                   />
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <FormField
                       control={form.control}
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Telefone / WhatsApp</FormLabel>
+                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Telefone / WhatsApp</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="(11) 99999-9999" 
-                              className="h-9 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm"
+                              className="h-10 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm px-3.5"
                               {...field} 
                             />
                           </FormControl>
@@ -253,12 +253,12 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Email Comercial</FormLabel>
+                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Email Comercial</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="comercial@empresa.com" 
                               type="email" 
-                              className="h-9 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm"
+                              className="h-10 rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white text-sm px-3.5"
                               {...field} 
                             />
                           </FormControl>
