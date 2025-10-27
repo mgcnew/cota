@@ -39,28 +39,39 @@ export default function ViewPedidoDialog({ pedido, trigger, open: externalOpen, 
   };
 
   const formatDate = (dateString: string) => {
+    // Se já está formatado (dd/mm/yyyy), retorna como está
+    if (dateString && dateString.includes('/')) {
+      return dateString;
+    }
+    // Se não, tenta formatar
     try {
       const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return dateString || '-';
+      }
       return date.toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
       });
     } catch {
-      return dateString;
+      return dateString || '-';
     }
   };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-4xl h-[90vh] overflow-hidden p-0">
-        <DialogHeader className="px-4 py-3 border-b bg-card flex-shrink-0">
-          <div className="flex items-center justify-between gap-3">
+      <DialogContent className="w-[95vw] max-w-3xl h-auto max-h-[65vh] overflow-hidden p-0">
+        <DialogHeader className="px-4 py-2 border-b bg-gradient-to-r from-slate-50 to-gray-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <ShoppingCart className="h-4 w-4 text-primary flex-shrink-0" />
-              <DialogTitle className="text-base font-semibold truncate">Pedido #{pedido?.id}</DialogTitle>
+              <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm flex-shrink-0">
+                <ShoppingCart className="h-3.5 w-3.5" />
+              </div>
+              <DialogTitle className="text-sm font-semibold truncate">Pedido #{pedido?.id}</DialogTitle>
             </div>
             {pedido && getStatusBadge(pedido.status)}
           </div>
@@ -68,14 +79,22 @@ export default function ViewPedidoDialog({ pedido, trigger, open: externalOpen, 
 
         <div className="flex flex-col h-full overflow-hidden">
           <Tabs defaultValue="detalhes" className="w-full flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-3 m-3 mb-0">
-              <TabsTrigger value="detalhes" className="text-xs">Detalhes</TabsTrigger>
-              <TabsTrigger value="itens" className="text-xs">Itens</TabsTrigger>
-              <TabsTrigger value="entrega" className="text-xs">Entrega</TabsTrigger>
-            </TabsList>
+            <div className="px-3 py-1.5 border-b bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0">
+              <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-gray-800 rounded-lg p-0.5 shadow-sm border border-gray-200 dark:border-gray-700 h-8">
+                <TabsTrigger value="detalhes" className="rounded-md text-xs font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm">
+                  Detalhes
+                </TabsTrigger>
+                <TabsTrigger value="itens" className="rounded-md text-xs font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm">
+                  Itens
+                </TabsTrigger>
+                <TabsTrigger value="entrega" className="rounded-md text-xs font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm">
+                  Entrega
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-3 space-y-3">
-              <div className="grid grid-cols-2 gap-2">
+            <TabsContent value="detalhes" className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-2.5">
+              <div className="grid grid-cols-2 gap-2.5">
                 <div className="flex items-center gap-2 p-2 border rounded-lg bg-card">
                   <Building2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -144,8 +163,8 @@ export default function ViewPedidoDialog({ pedido, trigger, open: externalOpen, 
               )}
             </TabsContent>
 
-            <TabsContent value="itens" className="flex-1 overflow-y-auto p-3 space-y-2">
-              <div className="flex items-center gap-2 mb-2">
+            <TabsContent value="itens" className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-1.5">
+              <div className="flex items-center gap-2 mb-1.5">
                 <Package className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-xs font-medium text-muted-foreground">
                   {pedido?.detalhesItens?.length || pedido?.produtos?.length || 0} item(s)
@@ -193,8 +212,8 @@ export default function ViewPedidoDialog({ pedido, trigger, open: externalOpen, 
               )}
             </TabsContent>
 
-            <TabsContent value="entrega" className="flex-1 overflow-y-auto p-3 space-y-2">
-              <div className="grid grid-cols-2 gap-2 mb-2">
+            <TabsContent value="entrega" className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-1.5">
+              <div className="grid grid-cols-2 gap-2.5 mb-1.5">
                 <div className="flex items-center gap-2 p-2 border rounded-lg bg-card">
                   <Calendar className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -285,8 +304,13 @@ export default function ViewPedidoDialog({ pedido, trigger, open: externalOpen, 
             </TabsContent>
           </Tabs>
 
-          <div className="px-3 py-2 border-t bg-card flex-shrink-0 flex justify-end gap-2">
-            <Button onClick={() => setOpen(false)} size="sm" className="text-xs">
+          <div className="px-4 py-2 border-t bg-gradient-to-r from-slate-50 to-gray-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0 flex justify-end">
+            <Button 
+              onClick={() => setOpen(false)} 
+              size="sm" 
+              variant="outline"
+              className="text-xs h-8 px-4 font-medium"
+            >
               Fechar
             </Button>
           </div>
