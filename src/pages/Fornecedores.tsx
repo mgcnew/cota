@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown, Clock, MessageCircle } from "lucide-react";
+import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown, Clock, MessageCircle, Award } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -186,13 +187,81 @@ export default function Fornecedores() {
         {config.label}
       </Badge>;
   };
-  const renderStarRating = (rating: number) => {
-    return <div className="flex items-center gap-1">
-        {Array.from({
-        length: 5
-      }, (_, i) => <Star key={i} className={`h-3 w-3 ${i < Math.floor(rating) ? "fill-warning text-warning" : "text-muted-foreground"}`} />)}
-        <span className="text-xs text-muted-foreground ml-1">{rating}</span>
-      </div>;
+  const getPerformanceBadge = (rating: number) => {
+    if (rating >= 4.5) return { label: "Excelente", icon: Award, color: "bg-green-100 text-green-800 border-green-200" };
+    if (rating >= 3.5) return { label: "Bom", icon: TrendingUp, color: "bg-blue-100 text-blue-800 border-blue-200" };
+    if (rating >= 2.5) return { label: "Regular", icon: Clock, color: "bg-yellow-100 text-yellow-800 border-yellow-200" };
+    return { label: "Atenção", icon: MessageCircle, color: "bg-red-100 text-red-800 border-red-200" };
+  };
+
+  const renderStarRating = (rating: number, supplier?: Supplier) => {
+    const stars = Array.from({ length: 5 }, (_, i) => (
+      <Star 
+        key={i} 
+        className={`h-3.5 w-3.5 ${i < Math.floor(rating) ? "fill-warning text-warning" : "text-muted-foreground/30"}`} 
+      />
+    ));
+
+    if (!supplier) {
+      return (
+        <div className="flex items-center gap-1">
+          {stars}
+          <span className="text-xs text-muted-foreground ml-1 font-medium">{rating.toFixed(1)}</span>
+        </div>
+      );
+    }
+
+    const badge = getPerformanceBadge(rating);
+    const BadgeIcon = badge.icon;
+
+    return (
+      <TooltipProvider delayDuration={200}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-2 cursor-help">
+              <div className="flex items-center gap-1">
+                {stars}
+                <span className="text-xs text-muted-foreground ml-1 font-medium">{rating.toFixed(1)}</span>
+              </div>
+              <Badge variant="outline" className={`text-[10px] px-1.5 py-0.5 ${badge.color}`}>
+                <BadgeIcon className="h-2.5 w-2.5 mr-1" />
+                {badge.label}
+              </Badge>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right" className="w-64 p-3">
+            <div className="space-y-2">
+              <p className="font-semibold text-sm border-b pb-1.5">Detalhes da Avaliação</p>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">🏆 Taxa de Vitória</span>
+                  <span className="font-medium">30%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">💰 Competitividade</span>
+                  <span className="font-medium">25%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">⚡ Tempo de Resposta</span>
+                  <span className="font-medium">20%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">📦 Disponibilidade</span>
+                  <span className="font-medium">15%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">✅ Histórico Pedidos</span>
+                  <span className="font-medium">10%</span>
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground pt-1.5 border-t">
+                Avaliação baseada em preço, tempo de resposta, disponibilidade e entregas
+              </p>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
   };
 
   // Calculate real stats
@@ -482,7 +551,7 @@ export default function Fornecedores() {
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={supplier.status} />
-                      {renderStarRating(supplier.rating)}
+                      {renderStarRating(supplier.rating, supplier)}
                     </div>
                   </div>
                   <DropdownMenu>
@@ -639,7 +708,7 @@ export default function Fornecedores() {
                           {/* Avaliação - Largura fixa, hidden on large screens */}
                           <div className="hidden lg:block w-[8%] px-2">
                             <div className="flex justify-center">
-                              {renderStarRating(supplier.rating)}
+                              {renderStarRating(supplier.rating, supplier)}
                             </div>
                           </div>
 
