@@ -848,7 +848,7 @@ export default function Relatorios() {
                     {reportData.map((row: any, idx: number) => (
                       <TableRow key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/20">
                         {Object.values(row).map((value: any, i: number) => (
-                          <TableCell key={i}>{value}</TableCell>
+                          <TableCell key={i} className="px-1 py-3">{value}</TableCell>
                         ))}
                       </TableRow>
                     ))}

@@ -525,7 +525,7 @@ export default function Produtos() {
                 </TableHeader>
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
-                      <TableCell colSpan={8} className="p-3">
+                      <TableCell colSpan={8} className="px-1 py-3">
                         <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-all duration-300 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20 group-hover:-translate-y-0.5">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">

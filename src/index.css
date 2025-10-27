@@ -146,29 +146,46 @@
     @apply bg-background text-foreground font-inter antialiased;
     font-feature-settings: 'cv11', 'ss01';
     font-variation-settings: 'opsz' 32;
+    overflow-y: scroll !important;
     overflow-x: hidden;
-    scrollbar-gutter: stable both-edges;
   }
   
   html {
     scroll-behavior: smooth;
+    overflow-y: scroll !important;
     overflow-x: hidden;
-    scrollbar-gutter: stable both-edges;
   }
   
   /* Prevent horizontal overflow globally */
   * {
-    max-width: 100%;
     box-sizing: border-box;
   }
   
-  /* Ensure containers don't overflow */
-  .container, 
-  [class*="container"],
-  [class*="grid"],
-  [class*="flex"] {
-    max-width: 100%;
-    overflow-x: hidden;
+  /* Prevent layout shift when scrollbar disappears */
+  body[data-scroll-locked] {
+    padding-right: var(--scrollbar-width, 0) !important;
+  }
+  
+  /* Force scrollbar to always be visible */
+  ::-webkit-scrollbar {
+    width: 17px;
+    height: 17px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 10px;
+    border: 4px solid transparent;
+    background-clip: padding-box;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+    background-clip: padding-box;
   }
 }
 
@@ -373,29 +390,29 @@
   
   /* Page container utility for consistent responsive layout */
   .page-container {
-    @apply p-3 sm:p-4 space-y-4 sm:space-y-6 md:space-y-8 w-full overflow-x-hidden;
+    @apply p-4 space-y-4 sm:space-y-6 md:space-y-8 w-full;
     /* Mobile: padding generoso com mx-auto para centralizar */
     @apply max-w-7xl mx-auto;
   }
   
-  /* Desktop: padding equilibrado em ambos os lados */
+  /* Desktop: alinhado EXATAMENTE com topbar (left-24 + px-6 = pl-6, right-1 + px-6 = pr-7) */
   @media (min-width: 768px) {
     .page-container {
-      @apply mx-0 max-w-none px-1 pt-3 pb-6;
+      @apply mx-0 max-w-none pl-6 pr-7 pt-3 pb-6;
     }
   }
   
-  /* Large screens: padding proporcional para telas grandes */
+  /* Large screens: mantém alinhamento perfeito */
   @media (min-width: 1024px) {
     .page-container {
-      @apply pl-1 pr-0 pt-4 pb-8;
+      @apply pl-6 pr-7 pt-4 pb-8;
     }
   }
   
-  /* Extra large screens: padding balanceado para telas muito grandes */
+  /* Extra large screens: mantém alinhamento perfeito */
   @media (min-width: 1280px) {
     .page-container {
-      @apply pl-1 pr-0 pt-4 pb-10;
+      @apply pl-6 pr-7 pt-4 pb-10;
     }
   }
   

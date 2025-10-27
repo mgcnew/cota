@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { useEffect } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Produtos from "./pages/Produtos";
@@ -16,8 +17,17 @@ import Analytics from "./pages/Analytics";
 import Locucoes from "./pages/Locucoes";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
+import { initScrollbarFix } from "./utils/scrollbar-fix";
+
 const queryClient = new QueryClient();
-const App = () => <QueryClientProvider client={queryClient}>
+
+const App = () => {
+  useEffect(() => {
+    const cleanup = initScrollbarFix();
+    return cleanup;
+  }, []);
+
+  return <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <TooltipProvider>
         <Toaster />
@@ -43,4 +53,6 @@ const App = () => <QueryClientProvider client={queryClient}>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>;
+};
+
 export default App;

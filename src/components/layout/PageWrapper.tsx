@@ -13,7 +13,7 @@ export function PageWrapper({ children, className = "" }: PageWrapperProps) {
   // No mobile, usar div simples sem animação
   if (isMobile) {
     return (
-      <div className={`w-full overflow-hidden ${className}`}>
+      <div className={`w-full ${className}`}>
         {children}
       </div>
     );
@@ -29,7 +29,7 @@ export function PageWrapper({ children, className = "" }: PageWrapperProps) {
         ease: "easeOut",
         type: "tween"
       }}
-      className={`w-full overflow-hidden ${className}`}
+      className={`w-full ${className}`}
     >
       {children}
     </motion.div>

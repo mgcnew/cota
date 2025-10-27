@@ -388,7 +388,7 @@ export default function Dashboard() {
                 </div> : topSuppliers.length > 0 ? topSuppliers.slice(0, 5).map((supplier, index) => <div key={index} className="group relative">
                     <div className="flex items-center justify-between p-3 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/30 dark:to-gray-800/20 rounded-lg hover:from-gray-100 hover:to-gray-200/50 dark:hover:from-gray-800/50 dark:hover:to-gray-800/30 transition-all duration-300 border border-gray-200 dark:border-gray-700/30 hover:border-gray-300 dark:hover:border-gray-600/50 hover:shadow-md">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm flex-shrink-0 ${index === 0 ? 'bg-gradient-to-br from-purple-500 to-purple-600' : index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400' : index === 2 ? 'bg-gradient-to-br from-purple-400 to-purple-500' : 'bg-gradient-to-br from-slate-400 to-slate-500'}`}>
+                        <div className={`w-6 h-6 rounded-md flex items-center justify-center font-medium text-xs flex-shrink-0 transition-all ${index === 0 ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : index === 1 ? 'bg-slate-50 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400' : index === 2 ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400' : 'bg-gray-50 text-gray-600 dark:bg-gray-500/10 dark:text-gray-400'}`}>
                           {index + 1}
                         </div>
                         <div className="min-w-0 flex-1">

@@ -258,7 +258,7 @@ export function AppSidebar() {
       {/* Desktop Sidebar - Premium Final */}
       <div className="hidden md:flex fixed z-50 w-20 left-1 top-1 bottom-1">
         {/* Container Principal com Profundidade */}
-        <div className="w-full flex flex-col bg-white dark:bg-[#1C1F26] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-gray-300/80 dark:border-gray-600/50 overflow-hidden">
+        <div className="w-full flex flex-col bg-white dark:bg-[#1C1F26] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-gray-300/80 dark:border-gray-600/50">
           
           {/* Header com Logo - Nível 1 */}
           <div className="flex items-center justify-center h-20 px-4 border-b border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-b from-gray-50/50 to-white dark:from-transparent dark:to-transparent">
@@ -275,7 +275,7 @@ export function AppSidebar() {
           </div>
 
           {/* Menu Items - Nível 2 com Hierarquia */}
-          <div className="flex-1 flex flex-col justify-start py-4 px-3 space-y-2">
+          <div className="flex-1 flex flex-col justify-start py-4 px-3 space-y-2 overflow-y-auto scrollbar-hide">
             <TooltipProvider delayDuration={200}>
               {menuItems.map((item, index) => {
                 const isItemActive = isActive(item.url);
