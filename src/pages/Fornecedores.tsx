@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown, Clock, MessageCircle, Award } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown, Clock, MessageCircle, Award, Info } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -198,15 +199,15 @@ export default function Fornecedores() {
     const stars = Array.from({ length: 5 }, (_, i) => (
       <Star 
         key={i} 
-        className={`h-3.5 w-3.5 ${i < Math.floor(rating) ? "fill-warning text-warning" : "text-muted-foreground/30"}`} 
+        className={`h-4 w-4 transition-colors ${i < Math.floor(rating) ? "fill-warning text-warning" : "text-muted-foreground/30"}`} 
       />
     ));
 
     if (!supplier) {
       return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {stars}
-          <span className="text-xs text-muted-foreground ml-1 font-medium">{rating.toFixed(1)}</span>
+          <span className="text-sm text-muted-foreground ml-1 font-semibold">{rating.toFixed(1)}</span>
         </div>
       );
     }
@@ -214,53 +215,86 @@ export default function Fornecedores() {
     const badge = getPerformanceBadge(rating);
     const BadgeIcon = badge.icon;
 
+    // Dados para o detalhamento no Popover
+    const criteriaWeights = [
+      { icon: "🏆", label: "Taxa de Vitória", weight: 30, description: "Cotações vencidas" },
+      { icon: "💰", label: "Competitividade", weight: 25, description: "Preços oferecidos" },
+      { icon: "⚡", label: "Tempo de Resposta", weight: 20, description: "Velocidade nas respostas" },
+      { icon: "📦", label: "Disponibilidade", weight: 15, description: "Taxa de disponibilidade" },
+      { icon: "✅", label: "Histórico Pedidos", weight: 10, description: "Entregas realizadas" }
+    ];
+
     return (
-      <TooltipProvider delayDuration={200}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-2 cursor-help">
-              <div className="flex items-center gap-1">
-                {stars}
-                <span className="text-xs text-muted-foreground ml-1 font-medium">{rating.toFixed(1)}</span>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {stars}
+          <span className="text-sm text-muted-foreground ml-1 font-semibold">{rating.toFixed(1)}</span>
+        </div>
+        
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 rounded-full hover:bg-accent/50 transition-all"
+            >
+              <Info className="h-3.5 w-3.5 text-muted-foreground" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent 
+            side="top" 
+            align="center" 
+            className="w-80 p-4 shadow-lg"
+            sideOffset={8}
+          >
+            <div className="space-y-3">
+              {/* Header com classificação */}
+              <div className="flex items-center justify-between pb-2 border-b">
+                <h4 className="font-semibold text-sm">Avaliação do Fornecedor</h4>
+                <Badge variant="outline" className={`${badge.color} font-semibold`}>
+                  <BadgeIcon className="h-3 w-3 mr-1" />
+                  {badge.label}
+                </Badge>
               </div>
-              <Badge variant="outline" className={`text-[10px] px-1.5 py-0.5 ${badge.color}`}>
-                <BadgeIcon className="h-2.5 w-2.5 mr-1" />
-                {badge.label}
-              </Badge>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="right" className="w-64 p-3">
-            <div className="space-y-2">
-              <p className="font-semibold text-sm border-b pb-1.5">Detalhes da Avaliação</p>
-              <div className="space-y-1.5 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">🏆 Taxa de Vitória</span>
-                  <span className="font-medium">30%</span>
+
+              {/* Rating visual */}
+              <div className="flex items-center justify-between py-2 bg-accent/30 rounded-lg px-3">
+                <div className="flex items-center gap-2">
+                  {stars}
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">💰 Competitividade</span>
-                  <span className="font-medium">25%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">⚡ Tempo de Resposta</span>
-                  <span className="font-medium">20%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">📦 Disponibilidade</span>
-                  <span className="font-medium">15%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">✅ Histórico Pedidos</span>
-                  <span className="font-medium">10%</span>
-                </div>
+                <span className="text-2xl font-bold">{rating.toFixed(1)}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground pt-1.5 border-t">
-                Avaliação baseada em preço, tempo de resposta, disponibilidade e entregas
-              </p>
+
+              {/* Detalhamento dos critérios */}
+              <div className="space-y-2.5">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Critérios de Avaliação
+                </p>
+                {criteriaWeights.map((criteria, index) => (
+                  <div key={index} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span>{criteria.icon}</span>
+                        <span className="font-medium">{criteria.label}</span>
+                      </div>
+                      <span className="font-semibold text-primary">{criteria.weight}%</span>
+                    </div>
+                    <Progress value={criteria.weight * 3.33} className="h-1.5" />
+                    <p className="text-[10px] text-muted-foreground">{criteria.description}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer com info contextual */}
+              <div className="pt-2 border-t">
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Baseado em {supplier.totalQuotes} cotações analisadas
+                </p>
+              </div>
             </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+          </PopoverContent>
+        </Popover>
+      </div>
     );
   };
 
@@ -654,7 +688,7 @@ export default function Fornecedores() {
                     <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[15%]">Limite</TableHead>
                     <TableHead className="font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[15%]">Preço Médio</TableHead>
                     <TableHead className="hidden sm:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[10%]">Cotações</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[8%]">Avaliação</TableHead>
+                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[12%]">Avaliação</TableHead>
                     <TableHead className="text-right font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[10%]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -706,8 +740,8 @@ export default function Fornecedores() {
                           </div>
 
                           {/* Avaliação - Largura fixa, hidden on large screens */}
-                          <div className="hidden lg:block w-[8%] px-2">
-                            <div className="flex justify-center">
+                          <div className="hidden lg:block w-[12%] px-2 overflow-visible">
+                            <div className="flex justify-center py-1">
                               {renderStarRating(supplier.rating, supplier)}
                             </div>
                           </div>
