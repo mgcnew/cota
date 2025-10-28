@@ -161,9 +161,18 @@
     box-sizing: border-box;
   }
   
-  /* Prevent layout shift when scrollbar disappears */
+  /* Não aplicar compensação quando o scrollbar já é forçado */
   body[data-scroll-locked] {
-    padding-right: var(--scrollbar-width, 0) !important;
+    padding-right: 0 !important;
+  }
+  
+  /* Se alguma lib injetar inline padding-right durante o lock, anular também */
+  body[data-scroll-locked][style*="padding-right"] {
+    padding-right: 0 !important;
+  }
+  
+  html[data-scroll-locked] {
+    padding-right: 0 !important;
   }
   
   /* Force scrollbar to always be visible */

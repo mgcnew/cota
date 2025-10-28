@@ -22,6 +22,14 @@ export function initScrollbarFix() {
     return scrollbarWidth;
   };
 
+  // Check if scrollbars are forced to always be visible
+  const forceScrollbars = () => {
+    const htmlStyle = getComputedStyle(document.documentElement);
+    const bodyStyle = getComputedStyle(document.body);
+    return (htmlStyle.overflowY === 'scroll' || htmlStyle.overflow === 'scroll') &&
+           (bodyStyle.overflowY === 'scroll' || bodyStyle.overflow === 'scroll');
+  };
+
   // Set CSS variable with scrollbar width
   const scrollbarWidth = getScrollbarWidth();
   document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
@@ -41,8 +49,13 @@ export function initScrollbarFix() {
           body.hasAttribute('data-scroll-locked');
 
         if (isLocked) {
-          body.style.paddingRight = `${scrollbarWidth}px`;
-        } else if (!body.style.paddingRight || body.style.paddingRight === '0px') {
+          // Só aplicar padding se scrollbar não estiver forçado a sempre visível
+          if (!forceScrollbars()) {
+            body.style.paddingRight = `${scrollbarWidth}px`;
+          } else {
+            body.style.paddingRight = '';
+          }
+        } else {
           body.style.paddingRight = '';
         }
       }
