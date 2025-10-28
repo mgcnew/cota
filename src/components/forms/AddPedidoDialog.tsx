@@ -371,7 +371,7 @@ export default function AddPedidoDialog({
       description: `${selectedProduct.name} foi adicionado ao pedido`
     });
   };
-  const handleSubmit = async () => {
+  const handleSubmit = async (keepOpen = false) => {
     if (!user) {
       toast({
         title: "Erro",
@@ -435,7 +435,9 @@ export default function AddPedidoDialog({
       });
       toast({
         title: "Pedido criado",
-        description: "Pedido adicionado com sucesso"
+        description: keepOpen
+          ? "Pedido adicionado! Crie outro pedido."
+          : "Pedido adicionado com sucesso"
       });
       onAdd(order);
 
@@ -445,7 +447,16 @@ export default function AddPedidoDialog({
       setObservacoes("");
       setItens([]);
       setActiveTab("produtos");
-      onOpenChange(false);
+      
+      if (!keepOpen) {
+        onOpenChange(false);
+      } else {
+        // Focar no campo de busca de produto
+        setTimeout(() => {
+          const searchInput = document.querySelector<HTMLInputElement>('.product-search');
+          if (searchInput) searchInput.focus();
+        }, 100);
+      }
     } catch (error: any) {
       console.error('Error creating order:', error);
       toast({
@@ -847,23 +858,36 @@ export default function AddPedidoDialog({
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               ) : (
-                <Button 
-                  onClick={handleSubmit} 
-                  disabled={loading || !fornecedor || !dataEntrega || itens.some(item => !item.produto || item.quantidade <= 0)}
-                  className="bg-gradient-to-r from-pink-600 to-rose-600 dark:from-pink-500 dark:to-rose-500 hover:from-pink-700 hover:to-rose-700 dark:hover:from-pink-600 dark:hover:to-rose-600 text-white"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Criando...
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Criar Pedido
-                    </>
-                  )}
-                </Button>
+                <>
+                  <Button 
+                    type="button"
+                    onClick={() => handleSubmit(false)} 
+                    disabled={loading || !fornecedor || !dataEntrega || itens.some(item => !item.produto || item.quantidade <= 0)}
+                    className="bg-gradient-to-r from-pink-600 to-rose-600 dark:from-pink-500 dark:to-rose-500 hover:from-pink-700 hover:to-rose-700 dark:hover:from-pink-600 dark:hover:to-rose-600 text-white"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        Criando...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Criar Pedido
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    type="button"
+                    onClick={() => handleSubmit(true)} 
+                    disabled={loading || !fornecedor || !dataEntrega || itens.some(item => !item.produto || item.quantidade <= 0)}
+                    variant="outline"
+                    className="border-pink-500 dark:border-pink-400 text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-950/20"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Criar Mais
+                  </Button>
+                </>
               )}
             </div>
           </div>

@@ -282,7 +282,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
     );
   }, [products, debouncedProductSearch]);
 
-  const onSubmit = async (data: QuoteFormData) => {
+  const onSubmit = async (data: QuoteFormData, keepOpen = false) => {
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -367,14 +367,25 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       onAdd(data);
       toast({
         title: "✅ Cotação criada com sucesso",
-        description: "A cotação foi adicionada ao sistema.",
+        description: keepOpen
+          ? "A cotação foi adicionada! Crie outra cotação."
+          : "A cotação foi adicionada ao sistema.",
         className: "border-green-200 bg-green-50",
       });
+      
       form.reset();
       setSelectedSuppliers([]);
       setSupplierSearch("");
       setActiveTab("produtos");
-      setOpen(false);
+      
+      if (!keepOpen) {
+        setOpen(false);
+      } else {
+        // Focar no combobox de produtos
+        setTimeout(() => {
+          setProductPopoverOpen(true);
+        }, 100);
+      }
     } catch (error: any) {
       console.error("Erro ao criar cotação:", error);
       toast({
@@ -521,25 +532,43 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                       <ChevronRight className="h-3 w-3 ml-1" />
                     </Button>
                   ) : (
-                    <Button
-                      type="submit"
-                      size="sm"
-                      disabled={isSubmitting}
-                      className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
-                      form="quote-form"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
-                          <span className="hidden sm:inline">Criando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Check className="h-3 w-3 mr-1" />
-                          <span className="hidden sm:inline">Criar</span>
-                        </>
-                      )}
-                    </Button>
+                    <>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={isSubmitting}
+                        onClick={() => {
+                          const formElement = document.getElementById('quote-form') as HTMLFormElement;
+                          if (formElement) {
+                            formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                          }
+                        }}
+                        className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
+                            <span className="hidden sm:inline">Criando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="h-3 w-3 mr-1" />
+                            <span className="hidden sm:inline">Criar</span>
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={isSubmitting}
+                        onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
+                        variant="outline"
+                        className="border-teal-500 dark:border-teal-400 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/20 h-8 px-3"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        <span className="hidden sm:inline">Criar Mais</span>
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
@@ -575,7 +604,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
         ) : (
           <div className="flex flex-col h-full overflow-hidden">
             <Form {...form}>
-              <form id="quote-form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
+              <form id="quote-form" onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden">
                 {/* Compact Tab Navigation */}
                 <div className="flex-shrink-0 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <div className="flex space-x-1 overflow-x-auto scrollbar-hide">

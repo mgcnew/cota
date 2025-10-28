@@ -106,7 +106,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
     }
   }, [open]);
 
-  const onSubmit = async (data: ProductFormData) => {
+  const onSubmit = async (data: ProductFormData, keepOpen = false) => {
     // Determinar a categoria final
     const finalCategory = data.category === "nova" ? data.newCategory! : data.category;
     
@@ -163,13 +163,23 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
       
       toast({
         title: "Produto adicionado",
-        description: `${data.name} foi adicionado com sucesso.`,
+        description: keepOpen 
+          ? `${data.name} foi adicionado! Adicione outro produto.` 
+          : `${data.name} foi adicionado com sucesso.`,
       });
 
       onProductAdded(null);
       form.reset();
       setShowNewCategory(false);
-      setOpen(false);
+      
+      if (!keepOpen) {
+        setOpen(false);
+      } else {
+        // Focar no primeiro campo
+        setTimeout(() => {
+          document.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
+        }, 100);
+      }
     } catch (error) {
       console.error("Erro ao adicionar produto:", error);
       toast({
@@ -201,7 +211,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
         </DialogHeader>
         <div className="flex flex-col flex-1 overflow-hidden">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+            <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full">
               <div className="flex-1 overflow-y-auto p-5 space-y-4">
                 {/* Seção: Informações Básicas */}
                 <div className="space-y-3">
@@ -358,11 +368,21 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                     Cancelar
                   </Button>
                   <Button 
-                    type="submit"
+                    type="button"
+                    onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
                     className="h-9 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm px-6"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar
+                  </Button>
+                  <Button 
+                    type="button"
+                    onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
+                    variant="outline"
+                    className="h-9 rounded-lg border-orange-500 dark:border-orange-400 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-sm px-4"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Criar Mais
                   </Button>
                 </div>
               </div>

@@ -64,7 +64,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
     },
   });
 
-  const onSubmit = async (data: SupplierFormData) => {
+  const onSubmit = async (data: SupplierFormData, keepOpen = false) => {
     try {
       const { data: userData, error: userError } = await supabase.auth.getUser();
       
@@ -100,12 +100,22 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
 
       toast({
         title: "Fornecedor adicionado",
-        description: `${data.name} foi adicionado com sucesso.`,
+        description: keepOpen
+          ? `${data.name} foi adicionado! Adicione outro fornecedor.`
+          : `${data.name} foi adicionado com sucesso.`,
       });
       
       onAdd();
       form.reset();
-      setOpen(false);
+      
+      if (!keepOpen) {
+        setOpen(false);
+      } else {
+        // Focar no primeiro campo
+        setTimeout(() => {
+          document.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
+        }, 100);
+      }
     } catch (error: any) {
       toast({
         title: "Erro ao adicionar fornecedor",
@@ -138,7 +148,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
         </DialogHeader>
         <div className="flex flex-col flex-1 overflow-hidden">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+            <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full">
               <div className="flex-1 overflow-y-auto p-5 space-y-5">
                 {/* Seção: Informações da Empresa */}
                 <div className="space-y-3.5">
@@ -297,11 +307,21 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     Cancelar
                   </Button>
                   <Button 
-                    type="submit"
+                    type="button"
+                    onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
                     className="h-9 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm px-6"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar
+                  </Button>
+                  <Button 
+                    type="button"
+                    onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
+                    variant="outline"
+                    className="h-9 rounded-lg border-green-500 dark:border-green-400 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/20 text-sm px-4"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Criar Mais
                   </Button>
                 </div>
               </div>
