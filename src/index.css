@@ -388,33 +388,33 @@
     transition: var(--transition-smooth);
   }
   
-  /* Page container utility for consistent responsive layout */
-  .page-container {
-    @apply p-4 space-y-4 sm:space-y-6 md:space-y-8 w-full;
-    /* Mobile: padding generoso com mx-auto para centralizar */
-    @apply max-w-7xl mx-auto;
-  }
+/* Page container utility for consistent responsive layout */
+.page-container {
+  @apply px-[2px] py-4 space-y-4 sm:space-y-6 md:space-y-8 w-full;
+  /* Mobile: padding generoso com mx-auto para centralizar */
+  @apply max-w-7xl mx-auto;
+}
   
   /* Desktop: alinhado EXATAMENTE com topbar (left-24 + px-6 = pl-6, right-1 + px-6 = pr-7) */
   @media (min-width: 768px) {
     .page-container {
-      @apply mx-0 max-w-none pl-6 pr-7 pt-3 pb-6;
+      @apply mx-0 max-w-none px-[2px] pt-3 pb-6;
     }
   }
   
-  /* Large screens: mantém alinhamento perfeito */
-  @media (min-width: 1024px) {
-    .page-container {
-      @apply pl-6 pr-7 pt-4 pb-8;
-    }
+/* Large screens: mantém alinhamento perfeito */
+@media (min-width: 1024px) {
+  .page-container {
+    @apply px-[2px] pt-4 pb-8;
   }
+}
   
-  /* Extra large screens: mantém alinhamento perfeito */
-  @media (min-width: 1280px) {
-    .page-container {
-      @apply pl-6 pr-7 pt-4 pb-10;
-    }
+/* Extra large screens: mantém alinhamento perfeito */
+@media (min-width: 1280px) {
+  .page-container {
+    @apply px-[2px] pt-4 pb-10;
   }
+}
   
   /* Responsive grid utilities */
   .responsive-grid-1-2-4 {
