@@ -140,40 +140,36 @@ export function EditProductDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] sm:max-w-md overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-orange-50/80 via-amber-50/60 to-yellow-50/40 backdrop-blur-sm relative overflow-hidden">
-          {/* Efeitos decorativos de fundo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-400/5 via-amber-400/5 to-yellow-400/5"></div>
-          <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-orange-400/10 to-amber-400/10 rounded-full -translate-x-16 -translate-y-16"></div>
-          <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-yellow-400/10 to-orange-400/10 rounded-full translate-x-12 translate-y-12"></div>
-          
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+      <DialogContent className="w-[90vw] sm:max-w-md overflow-hidden border border-orange-200/60 dark:border-orange-900/60 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-[#111827]">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-4 border-b border-orange-100/70 dark:border-orange-900/50 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100 dark:from-orange-900/20 dark:via-orange-900/10 dark:to-amber-900/10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-r from-orange-600 to-amber-600 rounded-lg flex items-center justify-center shadow-md">
               <Package className="h-5 w-5 text-white" />
             </div>
             <div>
-              <DialogTitle className="text-lg font-bold bg-gradient-to-r from-orange-900 to-amber-700 bg-clip-text text-transparent">
+              <DialogTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">
                 Editar Produto
               </DialogTitle>
-              <p className="text-sm text-orange-600/80 mt-0.5">
-                Atualize as informações do produto
+              <p className="text-xs text-orange-600/80 dark:text-orange-300/80 mt-0.5">
+                Atualize as informações do item selecionado
               </p>
             </div>
           </div>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 bg-gradient-to-br from-white to-orange-50/30">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-[#0f1729]">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 text-sm">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome do Produto</FormLabel>
+                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Nome do Produto</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Ex: Coxa com Sobrecoxa"
+                      className="bg-white dark:bg-gray-900/40 dark:border-gray-700/60 dark:text-gray-200"
                       {...field}
                     />
                   </FormControl>
@@ -187,7 +183,7 @@ export function EditProductDialog({
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Categoria</FormLabel>
+                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Categoria</FormLabel>
                   <Select 
                     onValueChange={(value) => {
                       field.onChange(value);
@@ -229,6 +225,7 @@ export function EditProductDialog({
                     <FormControl>
                       <Input 
                         placeholder="Ex: Peixes, Laticínios"
+                        className="bg-white dark:bg-gray-900/40 dark:border-gray-700/60 dark:text-gray-200"
                         {...field}
                       />
                     </FormControl>
@@ -243,10 +240,11 @@ export function EditProductDialog({
               name="weight"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Peso/Quantidade (opcional)</FormLabel>
+                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Peso/Quantidade (opcional)</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Ex: 500kg, 15 metades"
+                      className="bg-white dark:bg-gray-900/40 dark:border-gray-700/60 dark:text-gray-200"
                       {...field}
                     />
                   </FormControl>
@@ -255,12 +253,12 @@ export function EditProductDialog({
               )}
             />
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
+                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 dark:bg-gray-900/50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-900/70"
               >
                 Cancelar
               </Button>

@@ -384,7 +384,7 @@ export default function Dashboard() {
                 <span className="font-bold text-gray-900 dark:text-white">Top Fornecedores</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-3 pt-3">
               {isLoading ? <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
                 </div> : topSuppliers.length > 0 ? topSuppliers.slice(0, 5).map((supplier, index) => <div key={index} className="group relative">
@@ -612,7 +612,7 @@ export default function Dashboard() {
                 <span className="font-bold text-gray-900 dark:text-white">Cotações Recentes</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-3 pt-3">
               {isLoading ? <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
                 </div> : recentQuotes.length > 0 ? recentQuotes.slice(0, 5).map((quote, index) => <div key={quote.id || index} className="group relative">

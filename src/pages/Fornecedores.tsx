@@ -7,10 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown, Clock, MessageCircle, Award, Info } from "lucide-react";
+import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, ChevronDown, Clock, MessageCircle, Award } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -196,108 +194,11 @@ export default function Fornecedores() {
     return { label: "Atenção", icon: MessageCircle, color: "bg-red-100 text-red-800 border-red-200" };
   };
 
-  const renderStarRating = (rating: number, supplier?: Supplier) => {
-    const stars = Array.from({ length: 5 }, (_, i) => (
-      <Star 
-        key={i} 
-        className={`h-4 w-4 transition-colors ${i < Math.floor(rating) ? "fill-warning text-warning" : "text-muted-foreground/30"}`} 
-      />
-    ));
-
-    if (!supplier) {
-      return (
-        <div className="flex items-center gap-1.5">
-          {stars}
-          <span className="text-sm text-muted-foreground ml-1 font-semibold">{rating.toFixed(1)}</span>
-        </div>
-      );
-    }
-
-    const badge = getPerformanceBadge(rating);
-    const BadgeIcon = badge.icon;
-
-    // Dados para o detalhamento no Popover
-    const criteriaWeights = [
-      { icon: "🏆", label: "Taxa de Vitória", weight: 30, description: "Cotações vencidas" },
-      { icon: "💰", label: "Competitividade", weight: 25, description: "Preços oferecidos" },
-      { icon: "⚡", label: "Tempo de Resposta", weight: 20, description: "Velocidade nas respostas" },
-      { icon: "📦", label: "Disponibilidade", weight: 15, description: "Taxa de disponibilidade" },
-      { icon: "✅", label: "Histórico Pedidos", weight: 10, description: "Entregas realizadas" }
-    ];
-
-    return (
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1.5">
-          {stars}
-          <span className="text-sm text-muted-foreground ml-1 font-semibold">{rating.toFixed(1)}</span>
-        </div>
-        
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-6 w-6 rounded-full hover:bg-accent/50 transition-all"
-            >
-              <Info className="h-3.5 w-3.5 text-muted-foreground" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent 
-            side="top" 
-            align="center" 
-            className="w-80 p-4 shadow-lg"
-            sideOffset={8}
-          >
-            <div className="space-y-3">
-              {/* Header com classificação */}
-              <div className="flex items-center justify-between pb-2 border-b">
-                <h4 className="font-semibold text-sm">Avaliação do Fornecedor</h4>
-                <Badge variant="outline" className={`${badge.color} font-semibold`}>
-                  <BadgeIcon className="h-3 w-3 mr-1" />
-                  {badge.label}
-                </Badge>
-              </div>
-
-              {/* Rating visual */}
-              <div className="flex items-center justify-between py-2 bg-accent/30 rounded-lg px-3">
-                <div className="flex items-center gap-2">
-                  {stars}
-                </div>
-                <span className="text-2xl font-bold">{rating.toFixed(1)}</span>
-              </div>
-
-              {/* Detalhamento dos critérios */}
-              <div className="space-y-2.5">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Critérios de Avaliação
-                </p>
-                {criteriaWeights.map((criteria, index) => (
-                  <div key={index} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <span>{criteria.icon}</span>
-                        <span className="font-medium">{criteria.label}</span>
-                      </div>
-                      <span className="font-semibold text-primary">{criteria.weight}%</span>
-                    </div>
-                    <Progress value={criteria.weight * 3.33} className="h-1.5" />
-                    <p className="text-[10px] text-muted-foreground">{criteria.description}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Footer com info contextual */}
-              <div className="pt-2 border-t">
-                <p className="text-[10px] text-muted-foreground text-center">
-                  Baseado em {supplier.totalQuotes} cotações analisadas
-                </p>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-    );
-  };
+  const renderNumericRating = (rating: number) => (
+    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+      {rating.toFixed(1)} / 10
+    </span>
+  );
 
   // Calculate real stats
   const stats = useMemo(() => {
@@ -586,7 +487,7 @@ export default function Fornecedores() {
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={supplier.status} />
-                      {renderStarRating(supplier.rating, supplier)}
+                      {renderNumericRating(supplier.rating)}
                     </div>
                   </div>
                   <DropdownMenu>
@@ -696,16 +597,16 @@ export default function Fornecedores() {
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Status</span>
                         </div>
                         <div className="hidden lg:flex w-[14%] pl-2">
-                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Contato</span>
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Limites</span>
                         </div>
                         <div className="hidden lg:flex w-[12%] pl-2">
-                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Telefone</span>
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Total</span>
                         </div>
                         <div className="hidden xl:flex w-[12%] pl-2">
-                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Último Pedido</span>
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Pedidos</span>
                         </div>
                         <div className="hidden xl:flex w-[10%] pl-2 justify-center">
-                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Cot. Ativas</span>
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Nota</span>
                         </div>
                         <div className="w-[10%] pl-4 flex justify-end">
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Ações</span>
@@ -762,9 +663,9 @@ export default function Fornecedores() {
                           </div>
 
                           {/* Avaliação - Largura fixa, hidden on large screens */}
-                          <div className="hidden lg:block w-[12%] px-2 overflow-visible">
-                            <div className="flex justify-center py-1">
-                              {renderStarRating(supplier.rating, supplier)}
+                          <div className="hidden lg:block w-[12%] px-2">
+                            <div className="flex justify-center">
+                              {renderNumericRating(supplier.rating)}
                             </div>
                           </div>
 

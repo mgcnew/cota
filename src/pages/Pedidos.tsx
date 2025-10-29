@@ -343,7 +343,7 @@ export default function Pedidos() {
                 <Input placeholder="Buscar por fornecedor, produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-pink-300/70 dark:hover:border-pink-600/70 focus:border-pink-400 dark:focus:border-pink-500 focus:ring-2 focus:ring-pink-200/50 dark:focus:ring-pink-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
               </div>
 
-              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="w-full sm:w-[180px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-pink-300/70 dark:hover:border-pink-600/70 focus:border-pink-400 dark:focus:border-pink-500 focus:ring-2 focus:ring-pink-200/50 dark:focus:ring-pink-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 px-3 text-gray-900 dark:text-white">
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="w-full sm:w-[180px] h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-pink-300/70 dark:hover:border-pink-500/70 focus:border-pink-400 dark:focus:border-pink-400 focus:ring-2 focus:ring-pink-200/40 dark:focus:ring-pink-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 px-3 text-gray-900 dark:text-gray-100">
                 <option value="all">Todos os Status</option>
                 <option value="pendente">Pendentes</option>
                 <option value="processando">Processando</option>
@@ -402,7 +402,7 @@ export default function Pedidos() {
                 </PopoverContent>
               </Popover>
 
-              <Button variant="outline" onClick={exportToCSV} className="h-10 bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 hover:border-pink-300/70 focus:border-pink-400 focus:ring-2 focus:ring-pink-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+              <Button variant="outline" onClick={exportToCSV} className="h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-pink-300/70 dark:hover:border-pink-500/70 focus:border-pink-400 dark:focus:border-pink-400 focus:ring-2 focus:ring-pink-200/40 dark:focus:ring-pink-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 text-gray-900 dark:text-gray-100">
                 <Download className="h-4 w-4 mr-2" />
                 Exportar CSV
               </Button>
