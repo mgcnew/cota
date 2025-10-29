@@ -61,7 +61,6 @@ export default function AddPedidoDialog({
   const [newProductPrice, setNewProductPrice] = useState("");
   
   // Novos estados para melhorias
-  const [frequentProducts, setFrequentProducts] = useState<any[]>([]);
   const [lastUsedPrices, setLastUsedPrices] = useState<Record<string, number>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -69,7 +68,6 @@ export default function AddPedidoDialog({
     if (open) {
       loadSuppliers();
       loadProducts();
-      loadFrequentProducts();
       loadLastPrices();
     }
   }, [open]);
@@ -121,29 +119,6 @@ export default function AddPedidoDialog({
       return;
     }
     setSuppliers(data || []);
-  };
-  const loadFrequentProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('order_items')
-        .select('product_id, product_name')
-        .limit(10);
-      
-      if (error) {
-        console.error('Error loading frequent products:', error);
-        return;
-      }
-      
-      if (data) {
-        // Remover duplicatas
-        const unique = data.filter((item: any, index: number, self: any[]) => 
-          index === self.findIndex((t: any) => t.product_id === item.product_id)
-        ).slice(0, 5);
-        setFrequentProducts(unique);
-      }
-    } catch (error) {
-      console.error('Error loading frequent products:', error);
-    }
   };
 
   const loadLastPrices = async () => {
@@ -537,28 +512,6 @@ export default function AddPedidoDialog({
                         </h3>
                       </div>
                       <div className="p-2 sm:p-3 space-y-2 sm:space-y-3 pb-3 sm:pb-4">
-                        {/* Produtos Frequentes */}
-                        {frequentProducts.length > 0 && !selectedProduct && (
-                          <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Produtos Recentes</Label>
-                            <div className="flex flex-wrap gap-1.5">
-                              {frequentProducts.map((fp) => (
-                                <button
-                                  key={fp.product_id}
-                                  type="button"
-                                  onClick={() => {
-                                    const product = products.find(p => p.id === fp.product_id);
-                                    if (product) handleProductSelect(product);
-                                  }}
-                                  className="px-2 py-1 text-xs bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300 rounded-md hover:bg-pink-100 dark:hover:bg-pink-900/30 transition-colors border border-pink-200 dark:border-pink-800"
-                                >
-                                  {fp.product_name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-foreground">Produto *</Label>
                           <Combobox options={filteredProducts.map(p => ({

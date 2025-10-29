@@ -288,17 +288,12 @@ export function AppSidebar() {
                         to={item.url} 
                         end={item.url === "/"}
                         className={cn(
-                          "relative flex items-center justify-center h-12 rounded-xl transition-all duration-300 group",
+                          "relative flex items-center justify-center h-12 rounded-xl transition-all duration-300 group transform-gpu",
                           isItemActive 
-                            ? `bg-gradient-to-br ${itemColor.bg} shadow-[0_4px_16px_${itemColor.shadowColor},0_2px_8px_${itemColor.shadowColor}] dark:shadow-[0_6px_20px_${itemColor.shadowColor}] scale-105` 
-                            : "bg-gray-100 dark:bg-gray-800/40 hover:bg-gray-200 dark:hover:bg-gray-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-none hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:scale-105"
+                            ? `bg-gradient-to-br ${itemColor.bg} shadow-[0_4px_16px_${itemColor.shadowColor},0_2px_8px_${itemColor.shadowColor}] dark:shadow-[0_6px_20px_${itemColor.shadowColor}]`
+                            : "bg-gray-100 dark:bg-gray-800/40 hover:bg-gray-200 dark:hover:bg-gray-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-none hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:-translate-y-[2px]"
                         )}
                       >
-                        {/* Indicador lateral premium */}
-                        {isItemActive && (
-                          <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full shadow-[0_0_8px_rgba(255,255,255,0.6)]"></div>
-                        )}
-                        
                         {/* Ícone com profundidade */}
                         <div className={cn(
                           "flex items-center justify-center transition-all duration-300",
@@ -321,9 +316,13 @@ export function AppSidebar() {
                     <TooltipContent 
                       side="right" 
                       sideOffset={20} 
-                      className="font-semibold text-sm bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-0 shadow-[0_4px_16px_rgba(0,0,0,0.2)] dark:shadow-[0_4px_16px_rgba(255,255,255,0.2)] px-3 py-2 rounded-lg"
+                      className="font-semibold text-sm px-3.5 py-2 rounded-xl bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white shadow-[0_10px_30px_rgba(15,23,42,0.18)] dark:shadow-[0_10px_30px_rgba(15,23,42,0.35)] border border-white/60 dark:border-gray-700/70 backdrop-blur-xl"
                     >
-                      {item.title}
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex h-2 w-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+                        <span className="tracking-wide uppercase text-xs font-bold text-gray-500 dark:text-gray-400">{index + 1}</span>
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">{item.title}</span>
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 );
