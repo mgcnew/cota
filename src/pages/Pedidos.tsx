@@ -484,7 +484,7 @@ export default function Pedidos() {
                               <div className="w-[18%] px-2">
                                 <div className="min-w-0">
                                   <div className="font-medium text-foreground truncate" title={pedido.fornecedor}>
-                                    {abbreviateSupplierName(pedido.fornecedor)}
+                                    {capitalize(abbreviateSupplierName(pedido.fornecedor))}
                                   </div>
                                   <div className="text-xs text-muted-foreground mt-1">
                                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
@@ -499,7 +499,7 @@ export default function Pedidos() {
                               <div className="hidden md:block w-[18%] px-2">
                                 <div className="min-w-0">
                                   <div className="text-sm text-foreground truncate max-w-[150px]">
-                                    {pedido.produtos[0]}
+                                    {capitalize(pedido.produtos[0])}
                                     {pedido.produtos.length > 1 && <span className="text-muted-foreground"> +{pedido.produtos.length - 1}</span>}
                                   </div>
                                   <div className="text-xs text-muted-foreground mt-1">

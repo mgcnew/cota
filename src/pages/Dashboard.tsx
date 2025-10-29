@@ -9,6 +9,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
 import { capitalize } from '@/lib/text-utils';
+import { CapitalizedText } from '@/components/ui/capitalized-text';
 
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6m');
@@ -620,11 +621,17 @@ export default function Dashboard() {
                         <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${quote.status === 'aprovada' || quote.status === 'approved' ? 'bg-emerald-100 dark:bg-emerald-900/30' : quote.status === 'pendente' || quote.status === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
                           {getStatusIcon(quote.status)}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-                            {quote.product}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{quote.supplier}</p>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div title={quote.productFull}>
+                            <CapitalizedText className="font-semibold text-gray-900 dark:text-white text-sm leading-tight truncate">
+                              {quote.product}
+                            </CapitalizedText>
+                          </div>
+                          <div title={quote.supplierFull}>
+                            <CapitalizedText className="text-xs text-gray-500 dark:text-gray-400 leading-snug truncate">
+                              {quote.supplier}
+                            </CapitalizedText>
+                          </div>
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0 ml-2">

@@ -69,6 +69,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { CapitalizedText } from "@/components/ui/capitalized-text";
 
 const productLineSchema = z.object({
   produtoId: z.string().min(1, "Produto é obrigatório"),
@@ -1091,7 +1092,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                                     onSelect={() => handleSupplierSelect(supplier)}
                                                   >
                                                     <Plus className="mr-2 h-4 w-4 text-green-600 dark:text-green-400" />
-                                                    {supplier.name}
+                                                    <CapitalizedText>{supplier.name}</CapitalizedText>
                                                   </CommandItem>
                                                 ))}
                                               </CommandGroup>
@@ -1146,7 +1147,9 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                             <div className="w-8 h-8 bg-green-100 dark:bg-green-800/40 rounded-full flex items-center justify-center flex-shrink-0">
                                               <Building2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                                             </div>
-                                            <span className="font-medium text-green-900 dark:text-green-100 truncate">{supplier.name}</span>
+                                            <CapitalizedText className="font-medium text-green-900 dark:text-green-100 truncate">
+                                              {supplier.name}
+                                            </CapitalizedText>
                                           </div>
                                           <Button
                                             type="button"
@@ -1309,7 +1312,9 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                         {selectedSuppliers.map((supplier) => (
                                           <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 rounded border border-gray-100 dark:border-gray-700">
                                             <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full"></div>
-                                            <span className="text-xs font-medium text-gray-900 dark:text-white">{supplier.name}</span>
+                                            <CapitalizedText className="text-xs font-medium text-gray-900 dark:text-white">
+                                              {supplier.name}
+                                            </CapitalizedText>
                                           </div>
                                         ))}
                                       </div>

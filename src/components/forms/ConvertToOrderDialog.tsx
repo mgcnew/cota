@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar, Package, DollarSign, Building2, CheckCircle2, AlertCircle, ShoppingCart } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CapitalizedText } from "@/components/ui/capitalized-text";
 
 interface ConvertToOrderDialogProps {
   open: boolean;
@@ -85,7 +86,9 @@ export default function ConvertToOrderDialog({
               </div>
               <div className="flex items-center gap-2">
                 <Badge className="bg-emerald-600 dark:bg-emerald-500 text-white text-xs">Melhor Preço</Badge>
-                <span className="font-bold text-sm text-slate-900 dark:text-white truncate">{supplier.name}</span>
+                <CapitalizedText className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                  {supplier.name}
+                </CapitalizedText>
               </div>
             </Card>
 

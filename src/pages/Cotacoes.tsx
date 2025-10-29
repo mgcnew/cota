@@ -24,6 +24,8 @@ import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import { cn } from "@/lib/utils";
+import { CapitalizedText } from "@/components/ui/capitalized-text";
+
 export default function Cotacoes() {
   const [searchParams, setSearchParams] = useSearchParams();
   const {
@@ -454,8 +456,10 @@ export default function Cotacoes() {
                       <FileText className={cn("h-5 w-5 group-hover:scale-110 transition-transform duration-300", colors.iconColor)} />
                     </div>
                     <div className="space-y-2 flex-1 min-w-0">
-                      <CardTitle className="card-title group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors duration-300 truncate">
-                        {capitalize(cotacao.produto)}
+                      <CardTitle className="card-title group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors duration-300 truncate" title={cotacao.produto}>
+                        <CapitalizedText>
+                          {cotacao.produtoResumo}
+                        </CapitalizedText>
                       </CardTitle>
                       <div className="flex items-center gap-2 flex-wrap">
                         {getStatusBadge(cotacao.status)}
@@ -694,14 +698,20 @@ export default function Cotacoes() {
                               <div className="font-semibold font-mono text-sm text-foreground truncate">
                                 #{cotacao.id.substring(0, 8)}
                               </div>
-                              <div className="text-xs text-muted-foreground md:hidden mt-1 truncate">{cotacao.produto}</div>
+                              <div className="text-xs text-muted-foreground md:hidden mt-1 truncate" title={cotacao.produto}>
+                                <CapitalizedText>
+                                  {cotacao.produtoResumo}
+                                </CapitalizedText>
+                              </div>
                             </div>
                           </div>
 
                           {/* Produto - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[20%] px-2">
                             <div className="min-w-0 max-w-[150px]">
-                              <div className="font-medium text-sm text-foreground truncate">{cotacao.produto}</div>
+                              <CapitalizedText className="font-medium text-sm text-foreground truncate" title={cotacao.produto}>
+                                {cotacao.produtoResumo}
+                              </CapitalizedText>
                               <div className="text-xs text-muted-foreground mt-1">
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded-md">
                                   <Package className="h-3 w-3" />

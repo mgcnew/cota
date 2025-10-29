@@ -223,16 +223,37 @@ export function useDashboard() {
   const recentQuotes = useMemo(() => {
     if (!data) return [];
 
+    const truncateText = (value: string, maxLength: number) => {
+      const normalized = (value || "").trim();
+      if (!normalized) return "-";
+      return normalized.length > maxLength
+        ? `${normalized.slice(0, Math.max(0, maxLength - 1))}…`
+        : normalized;
+    };
+
+    const summarizeProduct = (name: string, hasMore: boolean) => {
+      const normalized = (name || "Produto").trim();
+      const maxLength = hasMore ? 22 : 28;
+      let summary = truncateText(normalized, maxLength);
+      if (hasMore && !summary.endsWith("…")) {
+        summary = `${summary}…`;
+      }
+      return summary;
+    };
+
     return data.quotes.slice(0, 4).map((quote: any) => {
       const firstItem = quote.quote_items?.[0];
       
       if (!firstItem) {
+        const supplierName = quote.quote_suppliers?.[0]?.supplier_name || "-";
         return {
           id: quote.id.substring(0, 8),
           product: "Produto",
+          productFull: quote.quote_items?.map((item: any) => item.product_name).filter(Boolean).join(", ") || "Produto",
+          supplier: truncateText(supplierName, 24),
           quantity: "0",
           bestPrice: "Sem ofertas",
-          supplier: "-",
+          supplierFull: supplierName,
           date: new Date(quote.created_at).toLocaleDateString('pt-BR'),
           status: quote.status
         };
@@ -257,12 +278,21 @@ export function useDashboard() {
         });
       }
 
+      const productName = firstItem.product_name || "Produto";
+      const productFull = quote.quote_items?.map((item: any) => item.product_name || "Produto").join(", ") || productName;
+      const hasMultipleProducts = (quote.quote_items?.length || 0) > 1;
+      const productSummary = summarizeProduct(productName, hasMultipleProducts);
+      const supplierName = fornecedorMelhorOferta || "-";
+      const supplierSummary = truncateText(supplierName, 24);
+
       return {
         id: quote.id.substring(0, 8),
-        product: firstItem.product_name || "Produto",
+        product: productSummary,
+        productFull,
         quantity: firstItem.quantidade || "0",
         bestPrice: melhorPreco !== Infinity ? `R$ ${melhorPreco.toFixed(2)}` : "Sem ofertas",
-        supplier: fornecedorMelhorOferta || "-",
+        supplier: supplierSummary,
+        supplierFull: supplierName,
         date: new Date(quote.created_at).toLocaleDateString('pt-BR'),
         status: quote.status
       };

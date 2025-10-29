@@ -14,6 +14,8 @@ export interface FornecedorParticipante {
 export interface Quote {
   id: string;
   produto: string;
+  produtoResumo: string;
+  produtosLista: string[];
   quantidade: string;
   status: string;
   dataInicio: string;
@@ -139,13 +141,23 @@ export function useCotacoes() {
             : "0%";
         };
 
+        const produtosLista = items
+          .map(item => item.product_name || "Produto");
+
         const produtosTexto = items
           .map(item => `${item.product_name} (${item.quantidade}${item.unidade})`)
           .join(", ");
 
+        let produtoResumo = produtosLista[0] || "Sem produtos";
+        if (produtosLista.length > 1) {
+          produtoResumo = `${produtosLista[0]}...`;
+        }
+
         return {
           id: quote.id, // Use real UUID instead of index-based ID
           produto: produtosTexto || "Sem produtos",
+          produtoResumo,
+          produtosLista,
           quantidade: `${items.length || 0} produto(s)`,
           status: quote.status,
           dataInicio: new Date(quote.data_inicio).toLocaleDateString("pt-BR"),

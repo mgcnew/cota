@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Calendar, Building2, Package, DollarSign, ShoppingCart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
+import { CapitalizedText } from "@/components/ui/capitalized-text";
 
 export interface SupplierOrderProduct {
   productId: string;
@@ -116,7 +117,8 @@ export default function ConvertToMultipleOrdersDialog({
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
-                        Pedido {index + 1} - {order.supplierName}
+                        Pedido {index + 1} - {" "}
+                        <CapitalizedText as="span">{order.supplierName}</CapitalizedText>
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {order.products.length} produto(s)

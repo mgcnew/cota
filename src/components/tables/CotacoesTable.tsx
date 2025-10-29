@@ -6,6 +6,7 @@ import { FileText, Package, Calendar, DollarSign, Building2, MoreVertical, Eye, 
 import { cn } from "@/lib/utils";
 import { capitalize } from "@/lib/text-utils";
 import type { Quote } from "@/hooks/useCotacoes";
+import { CapitalizedText } from "@/components/ui/capitalized-text";
 
 interface CotacoesTableProps {
   cotacoes: Quote[];
@@ -76,14 +77,22 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                         : cotacao.id
                       }
                     </div>
-                    <div className="table-cell-secondary md:hidden mt-1 truncate">{capitalize(cotacao.produto)}</div>
+                    <div className="table-cell-secondary md:hidden mt-1 truncate" title={cotacao.produto}>
+                      <CapitalizedText className="block truncate">
+                        {cotacao.produtoResumo}
+                      </CapitalizedText>
+                    </div>
                   </div>
                 </div>
               </TableCell>
               
               <TableCell className="hidden md:table-cell py-4">
                 <div className="min-w-0">
-                  <div className="table-cell-primary truncate">{capitalize(cotacao.produto)}</div>
+                  <div className="table-cell-primary truncate" title={cotacao.produto}>
+                    <CapitalizedText>
+                      {cotacao.produtoResumo}
+                    </CapitalizedText>
+                  </div>
                   <div className="table-cell-secondary mt-1">
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
                       <Package className="h-3 w-3" />
@@ -113,7 +122,9 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
               <TableCell className="py-4">
                 <div className="space-y-1">
                   <div className="font-bold text-green-600 text-base">{cotacao.melhorPreco}</div>
-                  <div className="table-cell-secondary truncate max-w-[120px]">{capitalize(cotacao.melhorFornecedor)}</div>
+                  <CapitalizedText as="div" className="table-cell-secondary truncate max-w-[120px]">
+                    {cotacao.melhorFornecedor}
+                  </CapitalizedText>
                   <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium">
                     <DollarSign className="h-3 w-3" />
                     -{cotacao.economia}
