@@ -708,8 +708,8 @@ export default function Cotacoes() {
 
                           {/* Produto - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[20%] px-2">
-                            <div className="min-w-0 max-w-[150px]">
-                              <CapitalizedText className="font-medium text-sm text-foreground truncate" title={cotacao.produto}>
+                            <div className="min-w-0 max-w-[150px]" title={cotacao.produto}>
+                              <CapitalizedText className="font-medium text-sm text-foreground truncate">
                                 {cotacao.produtoResumo}
                               </CapitalizedText>
                               <div className="text-xs text-muted-foreground mt-1">

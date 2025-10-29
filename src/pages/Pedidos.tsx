@@ -424,40 +424,40 @@ export default function Pedidos() {
               <CardContent className="p-0">
                 <div className="overflow-hidden">
                   <Table>
-                    <TableHeader className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700/30">
-                      <TableRow className="border-b-2 border-gray-200 dark:border-gray-700/30">
-                        <TableHead className="font-semibold text-pink-900 dark:text-gray-200 py-4 px-4 text-xs">
-                          <div className="flex items-center gap-2">
-                            <ShoppingCart className="h-4 w-4" />
-                            Pedido
+                    <TableHeader className="bg-transparent">
+                      <TableRow>
+                        <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
+                          <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-pink-300/60 dark:border-pink-900/60 rounded-xl shadow-md backdrop-blur-sm px-4 py-3">
+                            <div className="w-[22%] flex items-center gap-2 pr-4 min-w-0">
+                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500/15 to-rose-500/15 flex items-center justify-center text-pink-600 dark:text-rose-300">
+                                <ShoppingCart className="h-4 w-4" />
+                              </div>
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Pedido</span>
+                            </div>
+                            <div className="w-[18%] flex items-center gap-2 pl-2 min-w-0">
+                              <Building2 className="h-4 w-4 text-pink-600 dark:text-pink-300" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Fornecedor</span>
+                            </div>
+                            <div className="hidden md:flex w-[18%] pl-2 items-center gap-2">
+                              <Package className="h-4 w-4 text-pink-600 dark:text-pink-300" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Produtos</span>
+                            </div>
+                            <div className="hidden lg:flex w-[15%] pl-2 items-center gap-2">
+                              <Calendar className="h-4 w-4 text-pink-600 dark:text-pink-300" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Entrega</span>
+                            </div>
+                            <div className="flex w-[13%] pl-2 justify-center">
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Status</span>
+                            </div>
+                            <div className="flex w-[16%] pl-2 justify-center items-center gap-2">
+                              <DollarSign className="h-4 w-4 text-pink-600 dark:text-pink-300" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Valor</span>
+                            </div>
+                            <div className="w-[10%] pl-4 flex justify-end">
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Ações</span>
+                            </div>
                           </div>
-                        </TableHead>
-                        <TableHead className="font-semibold text-pink-900 dark:text-gray-200 py-4 px-4 text-xs">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4" />
-                            Fornecedor
-                          </div>
-                        </TableHead>
-                        <TableHead className="hidden md:table-cell font-semibold text-pink-900 dark:text-gray-200 py-4 px-4 text-xs">
-                          <div className="flex items-center gap-2">
-                            <Package className="h-4 w-4" />
-                            Produtos
-                          </div>
-                        </TableHead>
-                        <TableHead className="hidden lg:table-cell font-semibold text-pink-900 dark:text-gray-200 py-4 px-4 text-xs">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            Entrega
-                          </div>
-                        </TableHead>
-                        <TableHead className="font-semibold text-pink-900 dark:text-gray-200 py-4 px-4 text-xs">Status</TableHead>
-                        <TableHead className="text-right font-semibold text-pink-900 dark:text-gray-200 py-4 px-4 text-xs">
-                          <div className="flex items-center justify-end gap-2">
-                            <DollarSign className="h-4 w-4" />
-                            Valor
-                          </div>
-                        </TableHead>
-                        <TableHead className="text-right font-semibold text-pink-900 dark:text-gray-200 py-4 px-4 w-32 text-xs">Ações</TableHead>
+                        </TableCell>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

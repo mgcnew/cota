@@ -682,15 +682,36 @@ export default function Fornecedores() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700/30">
-                  <TableRow className="border-b-2 border-gray-200 dark:border-gray-700/30">
-                    <TableHead className="table-header py-4 px-4 w-[30%]">Fornecedor</TableHead>
-                    <TableHead className="hidden md:table-cell table-header py-4 px-4 w-[12%]">Status</TableHead>
-                    <TableHead className="hidden lg:table-cell table-header py-4 px-4 w-[15%]">Limite</TableHead>
-                    <TableHead className="table-header py-4 px-4 w-[15%]">Preço Médio</TableHead>
-                    <TableHead className="hidden sm:table-cell table-header py-4 px-4 w-[10%]">Cotações</TableHead>
-                    <TableHead className="hidden lg:table-cell table-header py-4 px-4 w-[12%]">Avaliação</TableHead>
-                    <TableHead className="text-right table-header py-4 px-4 w-[10%]">Ações</TableHead>
+                <TableHeader>
+                  <TableRow>
+                    <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
+                      <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-blue-200/60 dark:border-blue-900/40 rounded-lg shadow-sm px-4 py-3">
+                        <div className="w-[30%] flex items-center gap-2 pr-4 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/15 to-cyan-500/15 flex items-center justify-center text-blue-600 dark:text-cyan-300">
+                            <Building2 className="h-4 w-4" />
+                          </div>
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Fornecedor</span>
+                        </div>
+                        <div className="hidden md:flex w-[12%] pl-2">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Status</span>
+                        </div>
+                        <div className="hidden lg:flex w-[14%] pl-2">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Contato</span>
+                        </div>
+                        <div className="hidden lg:flex w-[12%] pl-2">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Telefone</span>
+                        </div>
+                        <div className="hidden xl:flex w-[12%] pl-2">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Último Pedido</span>
+                        </div>
+                        <div className="hidden xl:flex w-[10%] pl-2 justify-center">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Cot. Ativas</span>
+                        </div>
+                        <div className="w-[10%] pl-4 flex justify-end">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Ações</span>
+                        </div>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

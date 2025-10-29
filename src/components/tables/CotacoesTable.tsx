@@ -20,40 +20,36 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
   return (
     <div className="overflow-x-auto">
       <Table>
-        <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
-          <TableRow className="hover:bg-transparent">
-            <TableHead className="table-header py-4 px-6">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Cotação
+        <TableHeader className="bg-transparent">
+          <TableRow>
+            <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
+              <div className="flex items-center bg-gradient-to-r from-teal-500/20 via-teal-400/15 to-cyan-500/20 dark:from-teal-900/40 dark:via-teal-900/35 dark:to-cyan-900/35 border border-teal-300/60 dark:border-teal-900/60 rounded-xl shadow-md backdrop-blur-sm px-4 py-3">
+                <div className="w-[22%] flex items-center gap-2 pr-4 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-white/70 dark:bg-gray-900/40 border border-teal-200/50 dark:border-teal-800/50 flex items-center justify-center text-teal-600 dark:text-cyan-300">
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Cotação</span>
+                </div>
+                <div className="hidden md:flex w-[20%] pl-2">
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Produto</span>
+                </div>
+                <div className="hidden lg:flex w-[18%] pl-2">
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Período</span>
+                </div>
+                <div className="hidden sm:flex w-[12%] pl-2 justify-center">
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Status</span>
+                </div>
+                <div className="flex w-[16%] pl-2 justify-center">
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Melhor Preço</span>
+                </div>
+                <div className="hidden sm:flex w-[12%] pl-2 justify-center">
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Fornecedores</span>
+                </div>
+                <div className="w-[10%] pl-4 flex justify-end">
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Ações</span>
+                </div>
               </div>
-            </TableHead>
-            <TableHead className="hidden md:table-cell table-header py-4">
-              <div className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                Produto
-              </div>
-            </TableHead>
-            <TableHead className="hidden lg:table-cell table-header py-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Período
-              </div>
-            </TableHead>
-            <TableHead className="table-header py-4">Status</TableHead>
-            <TableHead className="table-header py-4">
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Melhor Preço
-              </div>
-            </TableHead>
-            <TableHead className="hidden sm:table-cell table-header py-4">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Fornecedores
-              </div>
-            </TableHead>
-            <TableHead className="text-right table-header py-4 px-6">Ações</TableHead>
+            </TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>

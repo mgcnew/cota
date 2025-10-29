@@ -512,16 +512,39 @@ export default function Produtos() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700/30">
-                  <TableRow className="border-b-2 border-gray-200 dark:border-gray-700/30">
-                    <TableHead className="font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs min-w-0">Produto</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Categoria</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Peso</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Status</TableHead>
-                    <TableHead className="font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Melhor Preço</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Fornecedor</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Cotações</TableHead>
-                    <TableHead className="text-right font-semibold text-foreground dark:text-foreground py-4 px-4 text-xs">Ações</TableHead>
+                <TableHeader>
+                  <TableRow>
+                    <TableCell colSpan={8} className="px-1 pb-3 pt-0 border-none">
+                      <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-orange-200/60 dark:border-orange-800/40 rounded-lg shadow-sm px-4 py-3">
+                        <div className="w-[25%] flex items-center gap-2 pr-4 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/15 to-amber-500/15 flex items-center justify-center text-orange-600 dark:text-amber-300">
+                            <Package className="h-4 w-4" />
+                          </div>
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Produto</span>
+                        </div>
+                        <div className="hidden md:flex w-[15%] pl-2">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Categoria</span>
+                        </div>
+                        <div className="hidden md:flex w-[12%] pl-2">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Peso</span>
+                        </div>
+                        <div className="hidden sm:flex w-[13%] pl-2 justify-center">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Status</span>
+                        </div>
+                        <div className="w-[12%] pl-2 justify-center hidden sm:flex sm:justify-center sm:items-center">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Melhor Preço</span>
+                        </div>
+                        <div className="hidden lg:flex w-[15%] pl-2 justify-center">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Fornecedor</span>
+                        </div>
+                        <div className="hidden sm:flex w-[8%] pl-2 justify-center">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Cotações</span>
+                        </div>
+                        <div className="w-[10%] pl-4 flex justify-end">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Ações</span>
+                        </div>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
