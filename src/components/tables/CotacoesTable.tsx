@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { FileText, Package, Calendar, DollarSign, Building2, MoreVertical, Eye, Edit, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { capitalize } from "@/lib/text-utils";
 import type { Quote } from "@/hooks/useCotacoes";
 
 interface CotacoesTableProps {
@@ -20,38 +21,38 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
       <Table>
         <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
           <TableRow className="hover:bg-transparent">
-            <TableHead className="font-semibold text-teal-900 py-4 px-6">
+            <TableHead className="table-header py-4 px-6">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Cotação
               </div>
             </TableHead>
-            <TableHead className="hidden md:table-cell font-semibold text-teal-900 py-4">
+            <TableHead className="hidden md:table-cell table-header py-4">
               <div className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 Produto
               </div>
             </TableHead>
-            <TableHead className="hidden lg:table-cell font-semibold text-teal-900 py-4">
+            <TableHead className="hidden lg:table-cell table-header py-4">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 Período
               </div>
             </TableHead>
-            <TableHead className="font-semibold text-teal-900 py-4">Status</TableHead>
-            <TableHead className="font-semibold text-teal-900 py-4">
+            <TableHead className="table-header py-4">Status</TableHead>
+            <TableHead className="table-header py-4">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
                 Melhor Preço
               </div>
             </TableHead>
-            <TableHead className="hidden sm:table-cell font-semibold text-teal-900 py-4">
+            <TableHead className="hidden sm:table-cell table-header py-4">
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
                 Fornecedores
               </div>
             </TableHead>
-            <TableHead className="text-right font-semibold text-teal-900 py-4 px-6">Ações</TableHead>
+            <TableHead className="text-right table-header py-4 px-6">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -69,21 +70,21 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                     <FileText className="h-4 w-4 text-teal-600" />
                   </div>
                   <div className="min-w-0">
-                    <div className="font-semibold font-mono text-sm text-gray-900 truncate">
+                    <div className="table-cell-primary font-mono truncate">
                       {cotacao.id.length > 12 
                         ? `${cotacao.id.substring(0, 8)}...${cotacao.id.substring(cotacao.id.length - 4)}`
                         : cotacao.id
                       }
                     </div>
-                    <div className="text-xs text-gray-500 md:hidden mt-1 truncate">{cotacao.produto}</div>
+                    <div className="table-cell-secondary md:hidden mt-1 truncate">{capitalize(cotacao.produto)}</div>
                   </div>
                 </div>
               </TableCell>
               
               <TableCell className="hidden md:table-cell py-4">
                 <div className="min-w-0">
-                  <div className="font-medium text-gray-900 truncate">{cotacao.produto}</div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="table-cell-primary truncate">{capitalize(cotacao.produto)}</div>
+                  <div className="table-cell-secondary mt-1">
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
                       <Package className="h-3 w-3" />
                       {cotacao.quantidade}
@@ -112,7 +113,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
               <TableCell className="py-4">
                 <div className="space-y-1">
                   <div className="font-bold text-green-600 text-base">{cotacao.melhorPreco}</div>
-                  <div className="text-xs text-gray-600 truncate max-w-[120px]">{cotacao.melhorFornecedor}</div>
+                  <div className="table-cell-secondary truncate max-w-[120px]">{capitalize(cotacao.melhorFornecedor)}</div>
                   <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium">
                     <DollarSign className="h-3 w-3" />
                     -{cotacao.economia}

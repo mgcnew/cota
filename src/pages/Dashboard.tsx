@@ -8,6 +8,7 @@ import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loade
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell, ComposedChart, Area, ReferenceLine } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
+import { capitalize } from '@/lib/text-utils';
 
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6m');
@@ -129,10 +130,10 @@ export default function Dashboard() {
 
                 {/* Valor principal */}
                 <div className="mb-3">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                  <p className="metric-value">
                     {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.cotacoesAtivas}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ativas no momento</p>
+                  <p className="metric-description mt-0.5">Ativas no Momento</p>
                 </div>
 
                 {/* Mini gráfico de barras - Últimos 7 dias */}
@@ -193,10 +194,10 @@ export default function Dashboard() {
                 </div>
 
                 <div className="mb-3">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                  <p className="metric-value text-2xl">
                     {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `R$ ${metrics.economiaGerada?.toLocaleString('pt-BR') || '0'}`}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">economizados</p>
+                  <p className="metric-description mt-0.5">Economizados</p>
                 </div>
 
                 {/* Indicador de progresso */}
@@ -225,10 +226,10 @@ export default function Dashboard() {
                 </div>
 
                 <div className="mb-3">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                  <p className="metric-value">
                     {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.fornecedores}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">parceiros</p>
+                  <p className="metric-description mt-0.5">Parceiros</p>
                 </div>
 
                 {/* Mini indicador circular */}
@@ -259,10 +260,10 @@ export default function Dashboard() {
                 </div>
 
                 <div className="mb-3">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                  <p className="metric-value">
                     {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${metrics.taxaAprovacao}%`}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">de aprovação</p>
+                  <p className="metric-description mt-0.5">De Aprovação</p>
                 </div>
 
                 {/* Barra de progresso */}

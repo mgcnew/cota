@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, Scale, FileUp, Quote, Building2, Clock } from "lucide-react";
+import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -236,8 +237,8 @@ export default function Produtos() {
                   </div>
                 </div>
                 <div className="mb-3">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalProducts}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">no catálogo</p>
+                  <p className="metric-value">{stats.totalProducts}</p>
+                  <p className="metric-description mt-0.5">No Catálogo</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
@@ -264,8 +265,8 @@ export default function Produtos() {
                   </div>
                 </div>
                 <div className="mb-3">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalCategories}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">disponíveis</p>
+                  <p className="metric-value">{stats.totalCategories}</p>
+                  <p className="metric-description mt-0.5">Disponíveis</p>
                 </div>
                 {stats.topCategoria && (
                   <p className="text-[10px] text-gray-500 dark:text-gray-400">
@@ -290,8 +291,8 @@ export default function Produtos() {
                   </div>
                 </div>
                 <div className="mb-3">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.activeQuotes}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">total de cotações</p>
+                  <p className="metric-value">{stats.activeQuotes}</p>
+                  <p className="metric-description mt-0.5">Total de Cotações</p>
                 </div>
                 <p className="text-[10px] text-gray-500 dark:text-gray-400">
                   Média de <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stats.mediaCotacoesPorProduto}</span> cotações/produto
@@ -316,8 +317,8 @@ export default function Produtos() {
                   )}
                 </div>
                 <div className="mb-3">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.averageValue}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">valor médio por produto</p>
+                  <p className="metric-value text-2xl">{stats.averageValue}</p>
+                  <p className="metric-description mt-0.5">Valor Médio por Produto</p>
                 </div>
                 {stats.percentualEconomiaMedia > 0 ? (
                   <p className="text-[10px] text-gray-500 dark:text-gray-400">
@@ -533,15 +534,15 @@ export default function Produtos() {
                               <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-gray-900 dark:text-white text-sm truncate">{product.name}</div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 md:hidden mt-1">{product.category}</div>
+                              <div className="table-cell-primary truncate">{capitalize(product.name)}</div>
+                              <div className="table-cell-secondary md:hidden mt-1">{capitalize(product.category)}</div>
                             </div>
                           </div>
 
                           {/* Categoria - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[15%] px-2">
                             <Badge variant="outline" className="bg-orange-50/80 dark:bg-orange-900/30 border-orange-200/60 dark:border-orange-700/60 text-orange-700 dark:text-orange-400 font-medium text-xs w-full justify-center">
-                              {product.category}
+                              {capitalize(product.category)}
                             </Badge>
                           </div>
 
@@ -570,7 +571,7 @@ export default function Produtos() {
                           {/* Fornecedor - Largura fixa, hidden on mobile */}
                           <div className="hidden lg:block w-[15%] px-2">
                             <div className="text-center">
-                              <span className="text-gray-700 dark:text-gray-300 font-medium text-sm truncate block">{product.bestSupplier}</span>
+                              <span className="table-cell-primary truncate block">{capitalize(product.bestSupplier)}</span>
                             </div>
                           </div>
 

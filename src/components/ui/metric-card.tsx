@@ -84,7 +84,7 @@ export function MetricCard({
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
       <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="metric-label text-capitalize">
           {title}
         </CardTitle>
         <div className={cn(
@@ -96,13 +96,13 @@ export function MetricCard({
       </CardHeader>
       
       <CardContent className="relative">
-        <div className="text-xl md:text-2xl font-bold text-foreground group-hover:scale-105 transition-transform duration-300">{value}</div>
+        <div className="metric-value text-xl md:text-2xl group-hover:scale-105 transition-transform duration-300">{value}</div>
         {trend && (
           <div className="flex items-center gap-1 mt-1">
             <span className={cn("text-xs font-medium", trendColor)}>
               {trend.value}
             </span>
-            <span className="text-xs text-muted-foreground">
+            <span className="metric-description text-capitalize">
               {trend.label}
             </span>
           </div>

@@ -44,7 +44,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   return (
     <Badge 
       variant={variant}
-      className={cn(statusClass, "font-medium", className)}
+      className={cn(statusClass, "badge-label", className)}
     >
       {label}
     </Badge>

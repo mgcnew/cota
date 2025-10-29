@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -45,7 +46,7 @@ export function CategorySelect({
   }, [products]);
 
   const getCategoryLabel = (category: string) => {
-    return category === "all" ? "Todas as categorias" : category;
+    return category === "all" ? "Todas as Categorias" : capitalize(category);
   };
 
   const getCategoryCount = (category: string) => {
