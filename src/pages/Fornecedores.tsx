@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Star, Upload, Eye, ChevronDown, Clock, MessageCircle, Award, Info } from "lucide-react";
+import { capitalize } from "@/lib/text-utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -577,10 +578,10 @@ export default function Fornecedores() {
                         <Building2 className="h-5 w-5 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate">
-                          {supplier.name}
+                        <CardTitle className="card-title group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate">
+                          {capitalize(supplier.name)}
                         </CardTitle>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">{supplier.contact}</p>
+                        <p className="table-cell-secondary truncate mt-1">{capitalize(supplier.contact)}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -683,13 +684,13 @@ export default function Fornecedores() {
               <Table className="w-full">
                 <TableHeader className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700/30">
                   <TableRow className="border-b-2 border-gray-200 dark:border-gray-700/30">
-                    <TableHead className="font-semibold text-indigo-900 dark:text-gray-200 py-4 px-4 text-xs w-[30%]">Fornecedor</TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[12%]">Status</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[15%]">Limite</TableHead>
-                    <TableHead className="font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[15%]">Preço Médio</TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[10%]">Cotações</TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[12%]">Avaliação</TableHead>
-                    <TableHead className="text-right font-semibold text-indigo-900 dark:text-gray-300 py-4 px-4 text-xs w-[10%]">Ações</TableHead>
+                    <TableHead className="table-header py-4 px-4 w-[30%]">Fornecedor</TableHead>
+                    <TableHead className="hidden md:table-cell table-header py-4 px-4 w-[12%]">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell table-header py-4 px-4 w-[15%]">Limite</TableHead>
+                    <TableHead className="table-header py-4 px-4 w-[15%]">Preço Médio</TableHead>
+                    <TableHead className="hidden sm:table-cell table-header py-4 px-4 w-[10%]">Cotações</TableHead>
+                    <TableHead className="hidden lg:table-cell table-header py-4 px-4 w-[12%]">Avaliação</TableHead>
+                    <TableHead className="text-right table-header py-4 px-4 w-[10%]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -702,8 +703,8 @@ export default function Fornecedores() {
                               <Building2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-gray-900 dark:text-white text-sm truncate">{supplier.name}</div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{supplier.contact}</div>
+                              <div className="table-cell-primary truncate">{capitalize(supplier.name)}</div>
+                              <div className="table-cell-secondary mt-1">{capitalize(supplier.contact)}</div>
                             </div>
                           </div>
 

@@ -393,8 +393,8 @@ export default function Dashboard() {
                           {index + 1}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{supplier.name}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{supplier.quotes} {supplier.quotes === 1 ? 'vitória' : 'vitórias'}</p>
+                          <p className="table-cell-primary truncate">{capitalize(supplier.name)}</p>
+                          <p className="table-cell-secondary">{supplier.quotes} {supplier.quotes === 1 ? 'vitória' : 'vitórias'}</p>
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0 ml-2">

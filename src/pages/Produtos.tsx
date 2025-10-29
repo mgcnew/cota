@@ -409,14 +409,14 @@ export default function Produtos() {
                         <Package className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-300 truncate">
-                          {product.name}
+                        <CardTitle className="card-title group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-300 truncate">
+                          {capitalize(product.name)}
                         </CardTitle>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline" className="bg-orange-100/80 border-orange-300/60 text-orange-700 font-medium">
-                        {product.category}
+                        {capitalize(product.category)}
                       </Badge>
                       <Badge variant="secondary" className="bg-gray-100/80 text-gray-700 font-medium">
                         {product.weight}
@@ -471,13 +471,13 @@ export default function Produtos() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fornecedor</span>
-                    </div>
-                    <span className="font-semibold text-gray-900 dark:text-white truncate max-w-[120px]">{product.bestSupplier}</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fornecedor</span>
+                      </div>
+                      <span className="table-cell-primary truncate max-w-[120px]">{capitalize(product.bestSupplier)}</span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">

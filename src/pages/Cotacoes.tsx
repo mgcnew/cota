@@ -8,6 +8,7 @@ import type { Quote, FornecedorParticipante } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package } from "lucide-react";
+import { capitalize } from "@/lib/text-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -453,8 +454,8 @@ export default function Cotacoes() {
                       <FileText className={cn("h-5 w-5 group-hover:scale-110 transition-transform duration-300", colors.iconColor)} />
                     </div>
                     <div className="space-y-2 flex-1 min-w-0">
-                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors duration-300 truncate">
-                        {cotacao.produto}
+                      <CardTitle className="card-title group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors duration-300 truncate">
+                        {capitalize(cotacao.produto)}
                       </CardTitle>
                       <div className="flex items-center gap-2 flex-wrap">
                         {getStatusBadge(cotacao.status)}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -588,10 +589,10 @@ export default function Pedidos() {
                           </div>
                         </div>
                         <div>
-                          <CardTitle className="text-lg leading-tight" title={pedido.fornecedor}>
-                            {abbreviateSupplierName(pedido.fornecedor, 25)}
+                          <CardTitle className="card-title leading-tight" title={pedido.fornecedor}>
+                            {capitalize(abbreviateSupplierName(pedido.fornecedor, 25))}
                           </CardTitle>
-                          <p className="text-sm text-muted-foreground">#{pedido.id}</p>
+                          <p className="table-cell-secondary">#{pedido.id}</p>
                         </div>
                       </div>
                       {getStatusBadge(pedido.status)}
