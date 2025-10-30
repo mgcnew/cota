@@ -143,78 +143,50 @@ function MobileMoreButton({
         </button>
       </DialogTrigger>
 
-      <DialogContent className="w-[90vw] max-w-md p-0 border-0 shadow-2xl rounded-2xl bg-white/95 backdrop-blur-xl">
-        <DialogHeader className="px-4 py-3 border-b border-gray-100/60 bg-gradient-to-r from-blue-50/80 to-purple-50/80">
+      <DialogContent className="w-[90vw] max-w-sm p-0 border-0 shadow-2xl rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
+        <DialogHeader className="px-3 py-2.5 border-b border-gray-100/60 dark:border-gray-700/60 bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-900/40 dark:to-purple-900/40">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg">
               <Icon icon="fluent:more-horizontal-32-filled" width="16" height="16" className="text-white" />
             </div>
-            <DialogTitle className="text-lg font-bold bg-gradient-to-r from-blue-900 to-purple-800 bg-clip-text text-transparent">
-              Mais OpÃ§Ãµes
+            <DialogTitle className="text-lg font-bold bg-gradient-to-r from-blue-900 to-purple-800 dark:from-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
+              Mais Opções
             </DialogTitle>
           </div>
         </DialogHeader>
 
-        <div className="p-4 max-h-[70vh] overflow-y-auto">
+        <div className="p-3 space-y-4 bg-white/95 dark:bg-gray-900/95">
           {/* Seção Principal - Navegação */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-1">
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider mb-3 px-1">
               Navegação
             </h3>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {remainingItems.map((item, index) => {
               const isItemActive = location.pathname === item.url || item.url === "/" && location.pathname === "/";
               const itemColor = colors[(index + 4) % colors.length];
-              return <NavLink key={item.title} to={item.url} end={item.url === "/"} onClick={() => setOpen(false)} className={cn("flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-[1.02] active:scale-95", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-lg text-white ring-2 ring-white/20 dark:ring-white/10` : "bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700/80 hover:shadow-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-blue-300 dark:hover:border-blue-500")}>
-                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm", isItemActive ? "bg-white/20 backdrop-blur-sm" : `bg-gradient-to-br ${itemColor.bg} group-hover:scale-110`)}>
-                      <Icon icon={item.icon} width="16" height="16" className="transition-all duration-200 text-white" />
+              return <NavLink key={item.title} to={item.url} end={item.url === "/"} onClick={() => setOpen(false)} className={cn("flex flex-col items-center gap-2 p-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-[1.02] active:scale-95", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-md text-white ring-2 ring-white/20 dark:ring-white/10` : "bg-white/85 dark:bg-gray-800/85 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-blue-300 dark:hover:border-blue-500")}>
+                    <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200", isItemActive ? "bg-white/20 backdrop-blur-sm" : `bg-gradient-to-br ${itemColor.bg} group-hover:scale-105`)}>
+                      <Icon icon={item.icon} width="18" height="18" className="transition-all duration-200 text-white" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className={cn("font-medium text-sm transition-all duration-200 truncate", isItemActive ? "text-white" : "text-gray-900 dark:text-gray-200 group-hover:text-blue-900 dark:group-hover:text-blue-300")}>
-                        {item.title}
-                      </div>
-                    </div>
+                    <div className={cn("text-xs font-semibold transition-all duration-200 text-center", isItemActive ? "text-white" : "text-gray-900 dark:text-gray-200 group-hover:text-blue-900 dark:group-hover:text-blue-300")}>{item.title}</div>
                   </NavLink>;
             })}
             </div>
           </div>
 
-          {/* Seção Ações Rápidas */}
-          <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-1">
-              Ações Rápidas
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => {
-              setOpen(false);
-              window.location.href = '/cotacoes';
-            }} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95">
-                <Icon icon="fluent:document-text-32-filled" width="20" height="20" />
-                <span className="text-xs font-medium">Nova Cotação</span>
-              </button>
-
-              <button onClick={() => {
-              setOpen(false);
-              window.location.href = '/relatorios';
-            }} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95">
-                <Icon icon="fluent:data-bar-vertical-32-filled" width="20" height="20" />
-                <span className="text-xs font-medium">Relatório</span>
-              </button>
-            </div>
-          </div>
-
           {/* Seção Configurações */}
           <div>
-            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-1">
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-1">
               Sistema
             </h3>
             <div className="space-y-2">
               <button onClick={() => {
               setOpen(false);
               window.location.href = '/configuracoes';
-            }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 hover:scale-[1.02] active:scale-95">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
-                  <Icon icon="fluent:settings-32-filled" width="16" height="16" className="text-white" />
+            }} className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/85 dark:bg-gray-800/85 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
+                  <Icon icon="fluent:settings-32-filled" width="18" height="18" className="text-white" />
                 </div>
                 <div className="flex-1 text-left">
                   <div className="font-medium text-sm text-gray-900 dark:text-white">Configurações</div>
@@ -232,6 +204,11 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isActive = (path: string) => currentPath === path;
   const [isScrolled, setIsScrolled] = useState(false);
+  const mobilePrimaryOrder = ["/pedidos", "/cotacoes", "/", "/produtos"];
+  const primaryMobileItems = mobilePrimaryOrder
+    .map(path => menuItems.find(item => item.url === path))
+    .filter((item): item is typeof menuItems[number] => Boolean(item));
+  const remainingMobileItems = menuItems.filter(item => !mobilePrimaryOrder.includes(item.url));
 
   // Hook para detectar scroll e aplicar animaÃ§Ãµes no sidebar
   useEffect(() => {
@@ -327,32 +304,44 @@ export function AppSidebar() {
       </div>
 
       {/* Mobile Bottom Navigation - Premium */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#1C1F26]/95 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#1C1F26]/95 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)] rounded-t-3xl">
 
         <div className="flex items-center justify-around px-2 py-3 relative">
-          {/* BotÃµes principais (4 primeiros) */}
-          {menuItems.slice(0, 4).map((item, index) => {
+          {/* Botões principais personalizados */}
+          {primaryMobileItems.map((item, index) => {
           const isItemActive = isActive(item.url);
-          const itemColor = colors[index];
+          const itemColor = colors[index % colors.length];
+          const isDashboard = item.url === "/";
+          const background = isItemActive ? `linear-gradient(135deg, ${itemColor.from}, ${itemColor.to})` : 'transparent';
+          const boxShadow = isItemActive ? `0 8px 25px -5px ${itemColor.shadow}, 0 4px 10px -3px ${itemColor.shadow}` : 'none';
+          const transform = isItemActive
+            ? (isDashboard ? 'translateY(-4px) scale(1.07)' : 'translateY(-2px) scale(1.05)')
+            : (isDashboard ? 'translateY(-4px)' : 'none');
+          const iconSizeClass = isDashboard ? "w-8 h-8" : "w-7 h-7";
           return <NavLink key={item.title} to={item.url} end={item.url === "/"} className="mobile-nav-button flex flex-col items-center justify-center transition-all duration-200 rounded-2xl group relative overflow-hidden backdrop-blur-sm h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] touch-manipulation active:bg-gray-200" style={{
-            background: isItemActive ? `linear-gradient(135deg, ${itemColor.from}, ${itemColor.to})` : 'transparent',
-            boxShadow: isItemActive ? `0 8px 25px -5px ${itemColor.shadow}, 0 4px 10px -3px ${itemColor.shadow}` : 'none',
-            transform: isItemActive ? 'translateY(-2px) scale(1.05)' : 'none'
+            background,
+            boxShadow,
+            transform
           }}>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full opacity-0 group-hover:opacity-100"></div>
 
-                <div className={cn("flex items-center justify-center mb-1 relative z-10 transition-all duration-300 w-7 h-7 rounded-xl", isItemActive ? "bg-white/20 backdrop-blur-sm shadow-inner" : "group-hover:bg-white/60 group-hover:shadow-md")}>
+                <div className={cn("flex items-center justify-center mb-1 relative z-10 transition-all duration-300 rounded-xl",
+                  iconSizeClass,
+                  isItemActive ? "bg-white/20 backdrop-blur-sm shadow-inner" : "group-hover:bg-white/60 group-hover:shadow-md"
+                )}>
                   <Icon icon={item.icon} width="16" height="16" className={cn("transition-all duration-200 flex-shrink-0", isItemActive ? "text-white drop-shadow-md" : "text-gray-500 group-hover:text-gray-700")} />
                 </div>
 
-                <span className={cn("text-[9px] font-bold text-center leading-tight transition-all duration-300 truncate max-w-[65px] relative z-10 tracking-wide", isItemActive ? "text-white drop-shadow-md" : "text-gray-600 group-hover:text-gray-800 group-hover:font-extrabold")}>
+                <span className={cn("text-[9px] font-bold text-center leading-tight transition-all duration-300 truncate max-w-[65px] relative z-10 tracking-wide",
+                  isItemActive ? "text-white drop-shadow-md" : "text-gray-600 group-hover:text-gray-800 group-hover:font-extrabold"
+                )}>
                   {item.title}
                 </span>
               </NavLink>;
         })}
 
-          {/* BotÃ£o Mais */}
-          <MobileMoreButton remainingItems={menuItems.slice(4)} />
+          {/* Botão Mais */}
+          <MobileMoreButton remainingItems={remainingMobileItems} />
         </div>
       </div>
     </>;

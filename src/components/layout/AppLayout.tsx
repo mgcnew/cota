@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
-import { Bell, User, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
@@ -59,18 +60,10 @@ export function AppLayout() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center shrink-0 gap-1 transition-all duration-300">
-              <div className="hidden md:block">
-                <ThemeToggle />
-              </div>
+            <div className="flex items-center shrink-0 gap-2 transition-all duration-300">
+              <ThemeToggle />
               <Button variant="ghost" size="sm" onClick={() => navigate('/configuracoes')} className="hidden md:flex p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg md:backdrop-blur-sm transition-opacity duration-200 text-gray-500">
                 <Settings className="h-3.5 w-3.5 transition-all duration-300" />
-              </Button>
-              <Button variant="ghost" size="sm" className="p-0 rounded-xl h-8 w-8 hover:bg-gray-100 md:hover:bg-white/40 md:hover:ring-1 md:hover:ring-white/30 md:hover:shadow-lg md:backdrop-blur-sm transition-opacity duration-200 text-gray-600">
-                <Bell className="h-3.5 w-3.5 transition-opacity duration-200" />
-              </Button>
-              <Button variant="ghost" size="sm" className="p-0 rounded-xl h-8 w-8 hover:bg-gray-100 md:hover:bg-white/40 md:hover:ring-1 md:hover:ring-white/30 md:hover:shadow-lg md:backdrop-blur-sm transition-opacity duration-200 text-gray-600">
-                <User className="h-3.5 w-3.5 transition-opacity duration-200" />
               </Button>
             </div>
           </div>
