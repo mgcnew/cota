@@ -26,6 +26,7 @@ import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
+import { useIsMobile } from "@/hooks/use-mobile";
 export default function Produtos() {
   const navigate = useNavigate();
   const {
@@ -37,6 +38,7 @@ export default function Produtos() {
     viewMode,
     setViewMode
   } = useResponsiveViewMode();
+  const isMobile = useIsMobile();
   const {
     paginate
   } = usePagination<Product>({
@@ -337,47 +339,72 @@ export default function Produtos() {
           <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
         <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            {!isMobile && (
+              <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            )}
 
-            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
-              <div className="relative">
+            <div className="flex flex-wrap items-center gap-3 sm:justify-end w-full">
+              <div className="relative flex-1 min-w-[220px]">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                <Input placeholder="Buscar produtos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+                <Input
+                  placeholder="Buscar produtos..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-12 pr-4 w-full h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
+                />
               </div>
 
-              <CategorySelect categories={categories} products={products} selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} className="w-full sm:w-auto h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+              {!isMobile && (
+                <CategorySelect
+                  categories={categories}
+                  products={products}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={setSelectedCategory}
+                  className="w-full sm:w-auto h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
+                />
+              )}
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Ações
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
-                  <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={triggerAddDialog}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Novo Produto
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={triggerImportDialog}>
-                    <FileUp className="h-4 w-4 mr-2" />
-                    Importar Produtos
-                  </DropdownMenuItem>
-                  {/* TEMPORÁRIO: Função de excluir duplicatas (comentada) */}
-                  {/* <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <DeleteDuplicateProductsDialog onDuplicatesDeleted={invalidateCache} />
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator /> */}
-                  {/* TEMPORÁRIO: Função de limpar cache (comentada) */}
-                  {/* <DropdownMenuItem onClick={invalidateCache}>
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Atualizar Cache
-                  </DropdownMenuItem> */}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {isMobile ? (
+                <Button
+                  onClick={triggerAddDialog}
+                  className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar
+                </Button>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Criar
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
+                    <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={triggerAddDialog}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Novo Produto
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={triggerImportDialog}>
+                      <FileUp className="h-4 w-4 mr-2" />
+                      Importar Produtos
+                    </DropdownMenuItem>
+                    {/* TEMPORÁRIO: Função de excluir duplicatas (comentada) */}
+                    {/* <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <DeleteDuplicateProductsDialog onDuplicatesDeleted={invalidateCache} />
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator /> */}
+                    {/* TEMPORÁRIO: Função de limpar cache (comentada) */}
+                    {/* <DropdownMenuItem onClick={invalidateCache}>
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Atualizar Cache
+                    </DropdownMenuItem> */}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
         </CardContent>
@@ -471,14 +498,16 @@ export default function Produtos() {
                   </div>
                 </div>
 
-                  <div className="space-y-3">
+                <div className="space-y-3">
+                  {!isMobile && (
                     <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-gray-500" />
                         <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fornecedor</span>
                       </div>
                       <span className="table-cell-primary truncate max-w-[120px]">{capitalize(product.bestSupplier)}</span>
-                  </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
