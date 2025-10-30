@@ -288,29 +288,23 @@ export function AppSidebar() {
                         to={item.url} 
                         end={item.url === "/"}
                         className={cn(
-                          "relative flex items-center justify-center h-12 rounded-xl transition-all duration-300 group transform-gpu",
+                          "relative flex items-center justify-center h-12 rounded-xl transition-all duration-300 group",
                           isItemActive 
                             ? `bg-gradient-to-br ${itemColor.bg} shadow-[0_4px_16px_${itemColor.shadowColor},0_2px_8px_${itemColor.shadowColor}] dark:shadow-[0_6px_20px_${itemColor.shadowColor}]`
                             : "bg-gray-100 dark:bg-gray-800/40 hover:bg-gray-200 dark:hover:bg-gray-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-none hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:-translate-y-[2px]"
                         )}
                       >
-                        {/* Ícone com profundidade */}
-                        <div className={cn(
-                          "flex items-center justify-center transition-all duration-300",
-                          isItemActive && "drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
-                        )}>
-                          <Icon 
-                            icon={item.icon} 
-                            className={cn(
-                              "transition-all duration-300",
-                              isItemActive 
-                                ? "text-white" 
-                                : "text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                            )} 
-                            width="22" 
-                            height="22" 
-                          />
-                        </div>
+                        <Icon 
+                          icon={item.icon} 
+                          className={cn(
+                            "transition-colors duration-300",
+                            isItemActive 
+                              ? "text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]" 
+                              : "text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                          )} 
+                          width="22" 
+                          height="22" 
+                        />
                       </NavLink>
                     </TooltipTrigger>
                     <TooltipContent 
