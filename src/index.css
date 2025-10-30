@@ -400,6 +400,7 @@
 /* Page container utility for consistent responsive layout */
 .page-container {
   @apply px-[2px] py-4 space-y-4 sm:space-y-6 md:space-y-8 w-full;
+  margin-right: calc(100% - 100vw);
   /* Mobile: padding generoso com mx-auto para centralizar */
   @apply max-w-7xl mx-auto;
 }
@@ -408,6 +409,7 @@
   @media (min-width: 768px) {
     .page-container {
       @apply mx-0 max-w-none px-[2px] pt-3 pb-6;
+      margin-right: calc(100% - 100vw);
     }
   }
   
@@ -415,6 +417,7 @@
 @media (min-width: 1024px) {
   .page-container {
     @apply px-[2px] pt-4 pb-8;
+    margin-right: calc(100% - 100vw);
   }
 }
   
@@ -422,6 +425,7 @@
 @media (min-width: 1280px) {
   .page-container {
     @apply px-[2px] pt-4 pb-10;
+    margin-right: calc(100% - 100vw);
   }
 }
   
