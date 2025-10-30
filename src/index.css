@@ -148,12 +148,21 @@
     font-variation-settings: 'opsz' 32;
     overflow-y: scroll !important;
     overflow-x: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
   html {
     scroll-behavior: smooth;
     overflow-y: scroll !important;
     overflow-x: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  body::-webkit-scrollbar,
+  html::-webkit-scrollbar {
+    display: none;
   }
   
   /* Prevent horizontal overflow globally */
@@ -399,33 +408,42 @@
   
 /* Page container utility for consistent responsive layout */
 .page-container {
-  @apply px-[2px] py-4 space-y-4 sm:space-y-6 md:space-y-8 w-full;
-  margin-right: calc(100% - 100vw);
-  /* Mobile: padding generoso com mx-auto para centralizar */
-  @apply max-w-7xl mx-auto;
+  @apply px-[2px] py-4 space-y-4 sm:space-y-6 md:space-y-8 w-full max-w-full;
 }
-  
+
+/* Wrapper used in AppLayout to align content with fixed header padding */
+.page-content-wrapper {
+  width: 100%;
+  margin-right: 0;
+  max-width: none;
+  padding-right: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .page-content-wrapper {
+    width: 100%;
+    padding-right: 0.25rem;
+  }
+}
+
   /* Desktop: alinhado EXATAMENTE com topbar (left-24 + px-6 = pl-6, right-1 + px-6 = pr-7) */
   @media (min-width: 768px) {
     .page-container {
-      @apply mx-0 max-w-none px-[2px] pt-3 pb-6;
-      margin-right: calc(100% - 100vw);
+      @apply px-[2px] pt-3 pb-6 max-w-full;
     }
   }
   
 /* Large screens: mantém alinhamento perfeito */
 @media (min-width: 1024px) {
   .page-container {
-    @apply px-[2px] pt-4 pb-8;
-    margin-right: calc(100% - 100vw);
+    @apply px-[2px] pt-4 pb-8 max-w-full;
   }
 }
   
 /* Extra large screens: mantém alinhamento perfeito */
 @media (min-width: 1280px) {
   .page-container {
-    @apply px-[2px] pt-4 pb-10;
-    margin-right: calc(100% - 100vw);
+    @apply px-[2px] pt-4 pb-10 max-w-full;
   }
 }
   
