@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useActivityLog } from "@/hooks/useActivityLog";
+import { parseDecimalInput, formatDecimalDisplay } from "@/lib/text-utils";
 interface PedidoItem {
   produto: string;
   quantidade: number;
@@ -327,10 +328,21 @@ export default function AddPedidoDialog({
       });
       return;
     }
+    
+    const quantidade = parseDecimalInput(newProductQuantity);
+    if (!quantidade || quantidade <= 0) {
+      toast({
+        title: "Erro",
+        description: "Quantidade deve ser um número válido maior que zero",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const newItem: PedidoItem = {
       produto: selectedProduct.name,
-      quantidade: parseFloat(newProductQuantity),
-      valorUnitario: parseFloat(newProductPrice),
+      quantidade: quantidade,
+      valorUnitario: parseFloat(newProductPrice.replace(',', '.')),
       unidade: newProductUnit
     };
     setItens([...itens, newItem]);
@@ -386,13 +398,18 @@ export default function AddPedidoDialog({
       // Insert order items
       const orderItems = itens.map(item => {
         const product = products.find(p => p.name === item.produto);
+        // Garantir que quantidade é number
+        const quantidade = typeof item.quantidade === 'string' 
+          ? parseDecimalInput(item.quantidade) || 0
+          : item.quantidade;
+        
         return {
           order_id: order.id,
           product_id: product?.id || null,
           product_name: item.produto,
-          quantity: item.quantidade,
+          quantity: quantidade,
           unit_price: item.valorUnitario,
-          total_price: item.quantidade * item.valorUnitario,
+          total_price: quantidade * item.valorUnitario,
           unit: item.unidade
         };
       });
@@ -530,15 +547,17 @@ export default function AddPedidoDialog({
                           <div className="space-y-2">
                             <Label className="text-sm font-medium text-foreground">Quantidade *</Label>
                             <Input 
-                              type="number" 
+                              type="text" 
                               value={newProductQuantity} 
                               onChange={e => {
-                                setNewProductQuantity(e.target.value);
-                                if (errors.quantity) setErrors({...errors, quantity: ""});
+                                const value = e.target.value;
+                                // Permitir apenas números, vírgula e ponto
+                                if (/^\d*[,.]?\d*$/.test(value) || value === '') {
+                                  setNewProductQuantity(value);
+                                  if (errors.quantity) setErrors({...errors, quantity: ""});
+                                }
                               }} 
-                              placeholder="0" 
-                              min="0" 
-                              step="0.01" 
+                              placeholder="Ex: 98,5 ou 100" 
                               className={`text-sm ${errors.quantity ? 'border-red-500 dark:border-red-400' : ''}`} 
                             />
                             {errors.quantity && (
@@ -645,7 +664,7 @@ export default function AddPedidoDialog({
                                 <div className="grid grid-cols-3 gap-1 text-xs text-muted-foreground">
                                   <div>
                                     <span className="font-medium">Qtd:</span> 
-                                    <span>{item.quantidade} {item.unidade}</span>
+                                    <span>{formatDecimalDisplay(item.quantidade)} {item.unidade}</span>
                                   </div>
                                   <div>
                                     <span className="font-medium">Unit:</span> 
@@ -758,7 +777,7 @@ export default function AddPedidoDialog({
                                 <div className="space-y-1">
                                   {itens.map((item, index) => <div key={index} className="text-xs text-gray-600 dark:text-gray-400 flex justify-between gap-2">
                                       <span className="truncate flex-1">{item.produto}</span>
-                                      <span className="flex-shrink-0">{item.quantidade} {item.unidade}</span>
+                                      <span className="flex-shrink-0">{formatDecimalDisplay(item.quantidade)} {item.unidade}</span>
                                     </div>)}
                                 </div>
                               </div>

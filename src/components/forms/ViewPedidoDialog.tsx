@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Package, Building2, Calendar, DollarSign, Truck, FileText, Clock, MapPin, Phone, User, Hash } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatDecimalDisplay } from "@/lib/text-utils";
 interface ViewPedidoDialogProps {
   pedido: any;
   trigger?: React.ReactNode;
@@ -187,10 +188,10 @@ export default function ViewPedidoDialog({ pedido, trigger, open: externalOpen, 
                         {pedido.detalhesItens.map((item: any, index: number) => (
                           <tr key={index} className="border-b last:border-0 hover:bg-muted/30">
                             <td className="p-2 font-medium">{item.produto}</td>
-                            <td className="p-2 text-right">{item.quantidade}</td>
-                            <td className="p-2 text-right">R$ {item.valorUnitario.toFixed(2)}</td>
+                            <td className="p-2 text-right">{formatDecimalDisplay(Number(item.quantidade))}</td>
+                            <td className="p-2 text-right">R$ {Number(item.valorUnitario).toFixed(2)}</td>
                             <td className="p-2 text-right font-semibold">
-                              R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
+                              R$ {(Number(item.quantidade) * Number(item.valorUnitario)).toFixed(2)}
                             </td>
                           </tr>
                         ))}

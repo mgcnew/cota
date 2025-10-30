@@ -74,7 +74,15 @@ import { CapitalizedText } from "@/components/ui/capitalized-text";
 const productLineSchema = z.object({
   produtoId: z.string().min(1, "Produto é obrigatório"),
   produtoNome: z.string().min(1, "Produto é obrigatório"),
-  quantidade: z.string().min(1, "Quantidade é obrigatória"),
+  quantidade: z.string()
+    .min(1, "Quantidade é obrigatória")
+    .refine(
+      (val) => {
+        const num = parseFloat(val.replace(',', '.'));
+        return !isNaN(num) && num > 0;
+      },
+      { message: "Quantidade deve ser um número válido maior que zero" }
+    ),
   unidade: z.string().min(1, "Unidade é obrigatória"),
 });
 

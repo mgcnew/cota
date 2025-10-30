@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { cn } from "@/lib/utils";
+import { parseDecimalInput, formatDecimalDisplay } from "@/lib/text-utils";
 
 interface PedidoItem {
   produto: string;
@@ -244,14 +245,19 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
       // Insert new items
       const orderItems = itens.map(item => {
         const product = products.find(p => p.name === item.produto);
+        // Garantir que quantidade é number
+        const quantidade = typeof item.quantidade === 'string' 
+          ? parseDecimalInput(item.quantidade) || 0
+          : item.quantidade;
+        
         return {
           order_id: pedido.id,
           product_id: product?.id || null,
           product_name: item.produto,
-          quantity: item.quantidade,
+          quantity: quantidade,
           unit: item.unidade,
           unit_price: item.valorUnitario,
-          total_price: item.quantidade * item.valorUnitario,
+          total_price: quantidade * item.valorUnitario,
         };
       });
 

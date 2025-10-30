@@ -32,3 +32,29 @@ export function capitalizeSentence(text: string | null | undefined): string {
   if (!text) return '';
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
+
+/**
+ * Normaliza input numérico brasileiro (vírgula) para formato de banco (ponto)
+ * Exemplos: "98,5" → 98.5 | "100" → 100 | "1.234,56" → 1234.56
+ */
+export function parseDecimalInput(value: string): number | null {
+  if (!value) return null;
+  
+  // Remove espaços e substitui vírgula por ponto
+  const normalized = value.trim().replace(',', '.');
+  
+  const parsed = parseFloat(normalized);
+  
+  return isNaN(parsed) ? null : parsed;
+}
+
+/**
+ * Formata número para exibição brasileira com vírgula
+ * Exemplos: 98.5 → "98,5" | 100 → "100" | 1234.56 → "1.234,56"
+ */
+export function formatDecimalDisplay(value: number, decimals: number = 2): string {
+  return value.toLocaleString('pt-BR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: decimals
+  });
+}
