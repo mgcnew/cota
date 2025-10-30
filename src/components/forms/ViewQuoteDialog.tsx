@@ -175,66 +175,91 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
     return bestSupplier ? { ...bestSupplier, totalValue: lowestTotal } : null;
   };
 
+  const buildProductSelections = () => {
+    if (!products || products.length === 0) {
+      return [];
+    }
+
+    return products.map((item: any) => {
+      const supplierOptions = quote.fornecedoresParticipantes
+        .map(fornecedor => {
+          const supplierItem = (quote._supplierItems || quote._raw?.quote_supplier_items || []).find(
+            (si: any) => si.supplier_id === fornecedor.id && si.product_id === item.product_id
+          );
+
+          return {
+            supplierId: fornecedor.id,
+            supplierName: fornecedor.nome,
+            price: supplierItem?.valor_oferecido || 0,
+            isBest: false
+          };
+        })
+        .filter(s => s.price > 0);
+
+      if (supplierOptions.length > 0) {
+        const minPrice = Math.min(...supplierOptions.map(s => s.price));
+        supplierOptions.forEach(option => {
+          if (option.price === minPrice) {
+            option.isBest = true;
+          }
+        });
+      }
+
+      const bestSupplierOption = supplierOptions.find(option => option.isBest);
+
+      return {
+        productId: item.product_id,
+        productName: item.product_name,
+        quantity: item.quantidade,
+        unit: item.unidade,
+        selectedSupplierId: bestSupplierOption?.supplierId || "",
+        selectedSupplierName: bestSupplierOption?.supplierName || "",
+        supplierOptions
+      };
+    });
+  };
+
   const handleConvertToOrder = () => {
-    // Verificar se há múltiplos produtos
-    if (products && products.length > 1) {
-      // Preparar dados para seleção individual de fornecedores
-      const productSelections = products.map((item: any) => {
-        const supplierOptions = quote.fornecedoresParticipantes
-          .map(fornecedor => {
-            const supplierItem = (quote._supplierItems || quote._raw?.quote_supplier_items || []).find(
-              (si: any) => si.supplier_id === fornecedor.id && si.product_id === item.product_id
-            );
+    const productSelections = buildProductSelections();
 
-            return {
-              supplierId: fornecedor.id,
-              supplierName: fornecedor.nome,
-              price: supplierItem?.valor_oferecido || 0,
-              isBest: false
-            };
-          })
-          .filter(s => s.price > 0);
+    if (productSelections.length === 0) {
+      return;
+    }
 
-        // Marcar o melhor preço
-        if (supplierOptions.length > 0) {
-          const minPrice = Math.min(...supplierOptions.map(s => s.price));
-          supplierOptions.forEach(s => {
-            if (s.price === minPrice) {
-              s.isBest = true;
-            }
+    const hasMultipleProducts = productSelections.length > 1;
+    const hasTiedBestPrices = productSelections.some(selection =>
+      selection.supplierOptions.filter(option => option.isBest).length > 1
+    );
+
+    if (hasMultipleProducts || hasTiedBestPrices) {
+      const initialSelections = new Map<string, { supplierId: string; supplierName: string }>();
+      productSelections.forEach(selection => {
+        if (selection.selectedSupplierId) {
+          initialSelections.set(selection.productId, {
+            supplierId: selection.selectedSupplierId,
+            supplierName: selection.selectedSupplierName
+          });
+        } else if (selection.supplierOptions.length > 0) {
+          const fallback = selection.supplierOptions[0];
+          initialSelections.set(selection.productId, {
+            supplierId: fallback.supplierId,
+            supplierName: fallback.supplierName
           });
         }
-
-        // Selecionar automaticamente o fornecedor com melhor preço
-        const bestSupplier = supplierOptions.find(s => s.isBest);
-
-        return {
-          productId: item.product_id,
-          productName: item.product_name,
-          quantity: item.quantidade,
-          unit: item.unidade,
-          selectedSupplierId: bestSupplier?.supplierId || '',
-          selectedSupplierName: bestSupplier?.supplierName || '',
-          supplierOptions
-        };
       });
 
-      setSelectedSuppliers(new Map(productSelections.map((p: any) => [
-        p.productId,
-        { supplierId: p.selectedSupplierId, supplierName: p.selectedSupplierName }
-      ])));
-
+      setSelectedSuppliers(initialSelections);
       setShowSelectSupplierDialog(true);
-    } else {
-      // Um único produto, usar fluxo simples
-      const bestSupplier = getBestSupplier();
-      if (bestSupplier) {
-        setSelectedSupplierForConversion({
-          id: bestSupplier.id,
-          name: bestSupplier.nome
-        });
-        setConvertDialogOpen(true);
-      }
+      return;
+    }
+
+    const bestSupplier = getBestSupplier();
+    if (bestSupplier) {
+      setSelectedSupplierForConversion({
+        id: bestSupplier.id,
+        name: bestSupplier.nome
+      });
+      setConvertDialogOpen(true);
     }
   };
 

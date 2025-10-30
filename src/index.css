@@ -417,12 +417,14 @@
   margin-right: 0;
   max-width: none;
   padding-right: 0.25rem;
+  padding-left: 0.25rem;
 }
 
 @media (min-width: 768px) {
   .page-content-wrapper {
     width: 100%;
     padding-right: 0.25rem;
+    padding-left: 0;
   }
 }
 
