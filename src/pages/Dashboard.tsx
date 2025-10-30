@@ -109,10 +109,10 @@ export default function Dashboard() {
   return <PageWrapper>
       <div className="page-container">
         {/* Métricas Principais - Estilo Apple */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 overflow-visible">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 overflow-visible">
           {/* Card 1: Cotações Ativas */}
           <Card accent accentColor="bg-purple-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 {/* Header com ícone minimalista */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export default function Dashboard() {
 
           {/* Card 2: Economia Gerada */}
           <Card accent accentColor="bg-green-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
@@ -213,7 +213,7 @@ export default function Dashboard() {
 
           {/* Card 3: Fornecedores */}
           <Card accent accentColor="bg-blue-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
@@ -246,7 +246,7 @@ export default function Dashboard() {
 
           {/* Card 4: Taxa de Aprovação */}
           <Card accent accentColor="bg-yellow-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-yellow-400/10 flex items-center justify-center">
