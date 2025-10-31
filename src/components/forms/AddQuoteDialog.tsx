@@ -308,7 +308,6 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       const { data: quote, error: quoteError } = await supabase
         .from("quotes")
         .insert({
-          user_id: user.id,
           data_inicio: data.dataInicio.toISOString().split('T')[0],
           data_fim: data.dataFim.toISOString().split('T')[0],
           observacoes: data.observacoes || null,

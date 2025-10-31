@@ -86,7 +86,6 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
           phone: data.phone || null,
           email: data.email || null,
           address: data.address || null,
-          user_id: userData.user.id,
         });
 
       if (error) throw error;

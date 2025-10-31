@@ -437,7 +437,6 @@ export function useCotacoes() {
         const { data: orderData, error: orderError } = await supabase
           .from("orders")
           .insert({
-            user_id: user.id,
             supplier_id: supplierId,
             supplier_name: supplierData.name,
             total_value: totalValue,

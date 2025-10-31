@@ -25,7 +25,6 @@ export const useActivityLog = () => {
 
     try {
       const { error } = await supabase.from("activity_log").insert({
-        user_id: user.id,
         tipo,
         acao,
         detalhes,

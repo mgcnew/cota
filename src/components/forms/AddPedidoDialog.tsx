@@ -385,7 +385,6 @@ export default function AddPedidoDialog({
         data: order,
         error: orderError
       } = await supabase.from('orders').insert({
-        user_id: user.id,
         supplier_id: fornecedor,
         supplier_name: selectedSupplier?.name || '',
         total_value: total,

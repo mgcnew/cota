@@ -231,9 +231,6 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         email: s.email || null,
         address: s.address || null,
         cnpj: null, // CNPJ não está no template, mas pode ser adicionado
-        user_id: user.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
       }));
 
       // 3. Inserir fornecedores no banco de dados

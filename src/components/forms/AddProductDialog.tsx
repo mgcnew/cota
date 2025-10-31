@@ -133,7 +133,6 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
           name: data.name,
           category: finalCategory,
           weight: data.weight || null,
-          user_id: userData.user.id,
         });
 
       if (error) throw error;
