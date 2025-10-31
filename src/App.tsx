@@ -2,10 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { useEffect } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
+import { AuthProvider } from "./components/auth/AuthProvider";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Produtos from "./pages/Produtos";
 import Fornecedores from "./pages/Fornecedores";
@@ -16,6 +18,7 @@ import Relatorios from "./pages/Relatorios";
 import Analytics from "./pages/Analytics";
 import Locucoes from "./pages/Locucoes";
 import Configuracoes from "./pages/Configuracoes";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { initScrollbarFix } from "./utils/scrollbar-fix";
 
@@ -27,32 +30,49 @@ const App = () => {
     return cleanup;
   }, []);
 
-  return <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<AppLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="produtos" element={<Produtos />} />
-              <Route path="fornecedores" element={<Fornecedores />} />
-              <Route path="cotacoes" element={<Cotacoes />} />
-              <Route path="pedidos" element={<Pedidos />} />
-              <Route path="historico" element={<Historico />} />
-              <Route path="relatorios" element={<Relatorios />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="locucoes" element={<Locucoes />} />
-              <Route path="configuracoes" element={<Configuracoes />} />
-            </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                {/* Rota pública de autenticação */}
+                <Route path="/auth" element={<Auth />} />
+
+                {/* Rotas protegidas */}
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="produtos" element={<Produtos />} />
+                  <Route path="fornecedores" element={<Fornecedores />} />
+                  <Route path="cotacoes" element={<Cotacoes />} />
+                  <Route path="pedidos" element={<Pedidos />} />
+                  <Route path="historico" element={<Historico />} />
+                  <Route path="relatorios" element={<Relatorios />} />
+                  <Route path="analytics" element={<Analytics />} />
+                  <Route path="locucoes" element={<Locucoes />} />
+                  <Route path="configuracoes" element={<Configuracoes />} />
+                </Route>
+
+                {/* Rota 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
 };
 
 export default App;

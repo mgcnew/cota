@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
-import { Settings } from "lucide-react";
+import { Settings, LogOut } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -24,8 +26,27 @@ const pageTitles: Record<string, string> = {
 export function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { signOut } = useAuth();
+  const { toast } = useToast();
   const [searchOpen, setSearchOpen] = useState(false);
   const pageTitle = pageTitles[location.pathname] || "";
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logout realizado com sucesso!",
+        description: "Você saiu do sistema.",
+      });
+      navigate("/auth", { replace: true });
+    } catch (error) {
+      toast({
+        title: "Erro ao sair",
+        description: "Ocorreu um erro ao fazer logout. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-[#F6F7F9] dark:bg-[#16181D] overflow-x-hidden">
@@ -64,6 +85,14 @@ export function AppLayout() {
               <ThemeToggle />
               <Button variant="ghost" size="sm" onClick={() => navigate('/configuracoes')} className="hidden md:flex p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg md:backdrop-blur-sm transition-opacity duration-200 text-gray-500">
                 <Settings className="h-3.5 w-3.5 transition-all duration-300" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLogout} 
+                className="hidden md:flex p-0 rounded-xl h-8 w-8 hover:bg-destructive/10 hover:ring-1 hover:ring-destructive/30 hover:shadow-lg md:backdrop-blur-sm transition-all duration-200 text-destructive hover:text-destructive"
+              >
+                <LogOut className="h-3.5 w-3.5 transition-all duration-300" />
               </Button>
             </div>
           </div>

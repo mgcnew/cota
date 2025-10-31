@@ -11,8 +11,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<{ error: any | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: any | null }>;
   signOut: () => Promise<void>;
   forceReAuth: (reason: 'inactivity' | 'update' | 'security') => void;
 }
@@ -98,12 +98,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
     
-    if (error) throw error;
+    if (error) {
+      return { error };
+    }
     
     toast({
       title: "Conta criada com sucesso!",
       description: "Você já pode fazer login.",
     });
+    
+    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -112,12 +116,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password 
     });
     
-    if (error) throw error;
+    if (error) {
+      return { error };
+    }
     
     toast({
       title: "Login realizado!",
       description: "Bem-vindo de volta.",
     });
+    
+    return { error: null };
   };
 
   const signOut = async () => {
