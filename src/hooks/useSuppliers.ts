@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export interface Supplier {
   id: string;
@@ -21,6 +22,7 @@ export interface Supplier {
 export function useSuppliers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { canViewSensitiveData } = useUserRole();
 
   const { data: suppliers = [], isLoading, error } = useQuery({
     queryKey: ['suppliers'],
@@ -166,6 +168,9 @@ export function useSuppliers() {
           supabase.from('suppliers').update({ rating: Number(rating.toFixed(2)) }).eq('id', s.id).then();
         }
 
+        // Mask sensitive data for non-admin users (SECURITY: LGPD compliance)
+        const maskSensitiveData = !canViewSensitiveData;
+        
         return {
           id: s.id,
           name: s.name,
@@ -177,9 +182,9 @@ export function useSuppliers() {
           lastOrder: lastOrderDate,
           rating: rating || 0,
           status: "active" as const,
-          phone: s.phone || undefined,
-          email: s.email || undefined,
-          address: s.address || undefined,
+          phone: maskSensitiveData ? undefined : (s.phone || undefined),
+          email: maskSensitiveData ? undefined : (s.email || undefined),
+          address: maskSensitiveData ? undefined : (s.address || undefined),
         };
       });
 

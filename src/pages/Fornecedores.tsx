@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
+import { useUserRole } from "@/hooks/useUserRole";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ export default function Fornecedores() {
     user,
     loading
   } = useAuth();
+  const { canViewSensitiveData } = useUserRole();
   const {
     suppliers,
     isLoading: suppliersLoading,
@@ -118,6 +120,15 @@ export default function Fornecedores() {
 
   // Função para abrir WhatsApp
   const openWhatsApp = (supplier: Supplier) => {
+    if (!canViewSensitiveData) {
+      toast({
+        title: "Acesso restrito",
+        description: "Apenas administradores podem visualizar e usar os contatos dos fornecedores.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (!supplier.phone) {
       toast({
         title: "Telefone não encontrado",
@@ -553,18 +564,36 @@ export default function Fornecedores() {
                 </div>
 
                 <div className="space-y-3 p-4 rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
-                  {supplier.phone && <div className="flex items-center gap-3">
+                  {supplier.phone ? (
+                    <div className="flex items-center gap-3">
                       <div className="p-1.5 rounded-lg bg-green-100">
                         <Phone className="h-3 w-3 text-green-600" />
                       </div>
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.phone}</span>
-                    </div>}
-                  {supplier.email && <div className="flex items-center gap-3">
+                    </div>
+                  ) : !canViewSensitiveData && (
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-gray-100">
+                        <Phone className="h-3 w-3 text-gray-400" />
+                      </div>
+                      <span className="text-xs text-gray-400 italic">Restrito a admins</span>
+                    </div>
+                  )}
+                  {supplier.email ? (
+                    <div className="flex items-center gap-3">
                       <div className="p-1.5 rounded-lg bg-blue-100">
                         <Mail className="h-3 w-3 text-blue-600" />
                       </div>
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{supplier.email}</span>
-                    </div>}
+                    </div>
+                  ) : !canViewSensitiveData && (
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-gray-100">
+                        <Mail className="h-3 w-3 text-gray-400" />
+                      </div>
+                      <span className="text-xs text-gray-400 italic">Restrito a admins</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3">
                     <div className="p-1.5 rounded-lg bg-orange-100">
                       <FileText className="h-3 w-3 text-orange-600" />
