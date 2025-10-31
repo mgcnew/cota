@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -53,6 +54,18 @@ export function CompanyUsersManager() {
 
   const handleSendInvitation = () => {
     if (!inviteEmail) return;
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(inviteEmail)) {
+      toast({
+        title: "Email inválido",
+        description: "Por favor, insira um email válido.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     sendInvitation({ email: inviteEmail, role: inviteRole });
     setInviteEmail("");
     setInviteRole("member");

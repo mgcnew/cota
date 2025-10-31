@@ -20,6 +20,7 @@ import Analytics from "./pages/Analytics";
 import Locucoes from "./pages/Locucoes";
 import Configuracoes from "./pages/Configuracoes";
 import Auth from "./pages/Auth";
+import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 import { initScrollbarFix } from "./utils/scrollbar-fix";
 
@@ -41,9 +42,10 @@ const App = () => {
             <AuthProvider>
               <CompanyAutoSetup />
               <Routes>
-                {/* Rota pública de autenticação */}
+                {/* Rotas públicas de autenticação */}
                 <Route path="/auth" element={<Auth />} />
-
+                <Route path="/accept-invite" element={<AcceptInvite />} />
+                
                 {/* Rotas protegidas */}
                 <Route
                   path="/"

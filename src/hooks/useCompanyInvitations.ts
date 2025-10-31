@@ -84,11 +84,23 @@ export function useCompanyInvitations() {
 
       return { email, token };
     },
-    onSuccess: ({ email }) => {
+    onSuccess: ({ email, token }) => {
       queryClient.invalidateQueries({ queryKey: ["company-invitations"] });
-      toast({
-        title: "Convite enviado",
-        description: `Um convite foi enviado para ${email}.`,
+      
+      // Generate invite link
+      const inviteLink = `${window.location.origin}/accept-invite?token=${token}`;
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(inviteLink).then(() => {
+        toast({
+          title: "Convite criado e copiado!",
+          description: `Link de convite para ${email} copiado para a área de transferência.`,
+        });
+      }).catch(() => {
+        toast({
+          title: "Convite criado!",
+          description: `Link de convite criado para ${email}. Copie manualmente: ${inviteLink}`,
+        });
       });
     },
     onError: (error: any) => {
