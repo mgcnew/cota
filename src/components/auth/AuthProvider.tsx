@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useInactivityDetector } from "@/hooks/useInactivityDetector";
 import { useUpdateDetector } from "@/hooks/useUpdateDetector";
-import { useCompanySetup } from "@/hooks/useCompanySetup";
 import { ReAuthDialog } from "./ReAuthDialog";
 import { Loader2 } from "lucide-react";
 
@@ -28,9 +27,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [reAuthRequired, setReAuthRequired] = useState(false);
   const [reAuthReason, setReAuthReason] = useState<'inactivity' | 'update' | 'security'>('security');
   const { toast } = useToast();
-
-  // Setup company auto-creation for new users
-  useCompanySetup();
 
   // Constantes de configuração
   const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 horas em milissegundos

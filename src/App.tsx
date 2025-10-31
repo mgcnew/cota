@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { useEffect } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
 import { AuthProvider } from "./components/auth/AuthProvider";
+import { CompanyAutoSetup } from "./components/auth/CompanyAutoSetup";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Produtos from "./pages/Produtos";
@@ -38,6 +39,7 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+              <CompanyAutoSetup />
               <Routes>
                 {/* Rota pública de autenticação */}
                 <Route path="/auth" element={<Auth />} />
