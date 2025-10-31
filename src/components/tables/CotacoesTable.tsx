@@ -57,7 +57,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
             <TableRow 
               key={cotacao.id}
               className={cn(
-                "hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-cyan-50/30 transition-colors duration-200 border-b border-gray-100/60",
+                "hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-cyan-50/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md border-b border-gray-100/60",
                 index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
               )}
             >

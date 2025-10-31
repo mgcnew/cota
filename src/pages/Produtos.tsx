@@ -579,7 +579,7 @@ export default function Produtos() {
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
                       <TableCell colSpan={8} className="px-1 py-3">
-                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-colors duration-300 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20">
+                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center flex-shrink-0 shadow-sm">
