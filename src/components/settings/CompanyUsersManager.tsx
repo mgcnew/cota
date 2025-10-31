@@ -31,6 +31,7 @@ export function CompanyUsersManager() {
   const [selectedRole, setSelectedRole] = useState<Record<string, string>>({});
 
   const currentUserRole = users.find((u) => u.user_id === currentUser?.id)?.role;
+  // Check if current user has admin or owner role using server-side validation
   const canManageUsers = currentUserRole === "owner" || currentUserRole === "admin";
 
   if (isLoading) {
