@@ -305,9 +305,21 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
         return;
       }
 
+      // Get company_id
+      const { data: companyData } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!companyData) {
+        throw new Error("Empresa não encontrada");
+      }
+
       const { data: quote, error: quoteError } = await supabase
         .from("quotes")
         .insert({
+          company_id: companyData.company_id,
           data_inicio: data.dataInicio.toISOString().split('T')[0],
           data_fim: data.dataFim.toISOString().split('T')[0],
           observacoes: data.observacoes || null,

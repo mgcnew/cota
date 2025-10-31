@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,7 @@ interface AddSupplierDialogProps {
 export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogProps) {
   const [open, setOpen] = useState(false);
   const { logActivity } = useActivityLog();
+  const { user } = useAuth();
 
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
@@ -77,9 +79,25 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
         return;
       }
 
+      if (!user?.id) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      // Get company_id
+      const { data: companyData } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!companyData) {
+        throw new Error("Empresa não encontrada");
+      }
+
       const { error } = await supabase
         .from('suppliers')
         .insert({
+          company_id: companyData.company_id,
           name: data.name,
           cnpj: data.cnpj || null,
           contact: data.contact,

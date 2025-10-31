@@ -223,8 +223,20 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         throw new Error("Usuário não autenticado");
       }
 
-      // 2. Preparar dados para inserção
+      // 2. Get company_id
+      const { data: companyData } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!companyData) {
+        throw new Error("Empresa não encontrada");
+      }
+
+      // 3. Preparar dados para inserção
       const suppliersToInsert = parsedData.map(s => ({
+        company_id: companyData.company_id,
         name: s.name,
         contact: s.contact,
         phone: s.phone || null,
@@ -233,7 +245,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         cnpj: null, // CNPJ não está no template, mas pode ser adicionado
       }));
 
-      // 3. Inserir fornecedores no banco de dados
+      // 4. Inserir fornecedores no banco de dados
       const { data, error } = await supabase
         .from('suppliers')
         .insert(suppliersToInsert)

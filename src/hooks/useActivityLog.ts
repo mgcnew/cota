@@ -21,10 +21,23 @@ export const useActivityLog = () => {
     valor,
     economia
   }: LogActivityParams) => {
-    if (!user) return;
+    if (!user?.id) return;
 
     try {
+      // Get company_id
+      const { data: companyData } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!companyData) {
+        console.error("Empresa não encontrada");
+        return;
+      }
+
       const { error } = await supabase.from("activity_log").insert({
+        company_id: companyData.company_id,
         tipo,
         acao,
         detalhes,

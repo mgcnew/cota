@@ -380,11 +380,23 @@ export default function AddPedidoDialog({
       const total = calculateTotal();
       const selectedSupplier = suppliers.find(s => s.id === fornecedor);
 
+      // Get company_id
+      const { data: companyData } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!companyData) {
+        throw new Error("Empresa não encontrada");
+      }
+
       // Insert order
       const {
         data: order,
         error: orderError
       } = await supabase.from('orders').insert({
+        company_id: companyData.company_id,
         supplier_id: fornecedor,
         supplier_name: selectedSupplier?.name || '',
         total_value: total,

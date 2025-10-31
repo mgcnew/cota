@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Sun, Moon, Monitor, Bell, Palette, Globe, Info, RotateCcw, Settings, User } from "lucide-react";
 import { toast } from "sonner";
+import { CompanyInfo } from "@/components/settings/CompanyInfo";
+import { CompanyUsersManager } from "@/components/settings/CompanyUsersManager";
 
 export default function Configuracoes() {
   const {
@@ -69,16 +71,10 @@ export default function Configuracoes() {
         </div>
       </div>
 
-      {/* Ações Rápidas */}
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Button variant="outline" className="flex items-center justify-center gap-2 h-12 rounded-xl border-violet-200 bg-white/70 hover:bg-white dark:border-violet-700/40 dark:bg-gray-900/70 dark:hover:bg-gray-900/60 transition-all duration-200">
-          <Bell className="h-4 w-4 text-violet-600 dark:text-violet-300" />
-          <span className="font-medium">Central de Notificações</span>
-        </Button>
-        <Button variant="outline" className="flex items-center justify-center gap-2 h-12 rounded-xl border-violet-200 bg-white/70 hover:bg-white dark:border-violet-700/40 dark:bg-gray-900/70 dark:hover:bg-gray-900/60 transition-all duration-200">
-          <User className="h-4 w-4 text-violet-600 dark:text-violet-300" />
-          <span className="font-medium">Preferências de Perfil</span>
-        </Button>
+      {/* Empresa e Usuários */}
+      <div className="space-y-6">
+        <CompanyInfo />
+        <CompanyUsersManager />
       </div>
 
       {/* Tema */}

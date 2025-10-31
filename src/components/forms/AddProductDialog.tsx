@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 import {
   Dialog,
   DialogContent,
@@ -64,6 +65,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
   const [loadingCategories, setLoadingCategories] = useState(true);
   const { toast } = useToast();
   const { logActivity } = useActivityLog();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   
   const form = useForm<ProductFormData>({
@@ -127,9 +129,25 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
         return;
       }
 
+      if (!user?.id) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      // Get company_id
+      const { data: companyData } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!companyData) {
+        throw new Error("Empresa não encontrada");
+      }
+
       const { error } = await supabase
         .from('products')
         .insert({
+          company_id: companyData.company_id,
           name: data.name,
           category: finalCategory,
           weight: data.weight || null,

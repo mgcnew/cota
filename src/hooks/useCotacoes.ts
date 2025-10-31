@@ -391,6 +391,17 @@ export function useCotacoes() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // Get company_id
+      const { data: companyData } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!companyData) {
+        throw new Error("Empresa não encontrada");
+      }
+
       // Fetch quote details to get quote items
       const { data: quoteData, error: quoteError } = await supabase
         .from("quotes")
@@ -437,6 +448,7 @@ export function useCotacoes() {
         const { data: orderData, error: orderError } = await supabase
           .from("orders")
           .insert({
+            company_id: companyData.company_id,
             supplier_id: supplierId,
             supplier_name: supplierData.name,
             total_value: totalValue,
