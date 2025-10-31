@@ -91,6 +91,50 @@ export type Database = {
         }
         Relationships: []
       }
+      company_invitations: {
+        Row: {
+          company_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["app_role"]
+          status: string
+          token: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: string
+          token: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invitations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_users: {
         Row: {
           company_id: string

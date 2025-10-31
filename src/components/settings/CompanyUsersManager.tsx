@@ -1,8 +1,11 @@
 import { useCompanyUsers } from "@/hooks/useCompanyUsers";
+import { useCompanyInvitations } from "@/hooks/useCompanyInvitations";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,18 +24,40 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Users, Trash2, Shield, UserCog } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Users, Trash2, Shield, UserCog, UserPlus, Mail, Clock, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 
 export function CompanyUsersManager() {
   const { user: currentUser } = useAuth();
   const { users, isLoading, updateRole, removeUser } = useCompanyUsers();
+  const { invitations, sendInvitation, cancelInvitation, isSendingInvitation } = useCompanyInvitations();
   const [selectedRole, setSelectedRole] = useState<Record<string, string>>({});
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"admin" | "member">("member");
 
   const currentUserRole = users.find((u) => u.user_id === currentUser?.id)?.role;
   // Check if current user has admin or owner role using server-side validation
   const canManageUsers = currentUserRole === "owner" || currentUserRole === "admin";
+
+  const handleSendInvitation = () => {
+    if (!inviteEmail) return;
+    sendInvitation({ email: inviteEmail, role: inviteRole });
+    setInviteEmail("");
+    setInviteRole("member");
+    setInviteDialogOpen(false);
+  };
 
   if (isLoading) {
     return (
@@ -83,16 +108,71 @@ export function CompanyUsersManager() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Usuários da Empresa
-        </CardTitle>
-        <CardDescription>
-          Gerencie os usuários que têm acesso à sua empresa ({users.length} {users.length === 1 ? "usuário" : "usuários"})
-        </CardDescription>
-      </CardHeader>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Usuários da Empresa
+              </CardTitle>
+              <CardDescription>
+                Gerencie os usuários que têm acesso à sua empresa ({users.length} {users.length === 1 ? "usuário" : "usuários"})
+              </CardDescription>
+            </div>
+            {canManageUsers && (
+              <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Convidar Usuário
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Convidar novo usuário</DialogTitle>
+                    <DialogDescription>
+                      Envie um convite por email para adicionar um novo usuário à sua empresa
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="usuario@exemplo.com"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="role">Função</Label>
+                      <Select value={inviteRole} onValueChange={(value: "admin" | "member") => setInviteRole(value)}>
+                        <SelectTrigger id="role">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="member">Membro</SelectItem>
+                          <SelectItem value="admin">Administrador</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={handleSendInvitation} disabled={!inviteEmail || isSendingInvitation}>
+                      {isSendingInvitation ? "Enviando..." : "Enviar Convite"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        </CardHeader>
       <CardContent>
         <div className="space-y-3">
           {users.map((user) => {
@@ -183,5 +263,55 @@ export function CompanyUsersManager() {
         )}
       </CardContent>
     </Card>
+
+    {/* Convites Pendentes */}
+    {canManageUsers && invitations.length > 0 && (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            Convites Pendentes
+          </CardTitle>
+          <CardDescription>
+            Convites enviados aguardando resposta ({invitations.length})
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {invitations.map((invitation) => (
+              <div
+                key={invitation.id}
+                className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-medium">{invitation.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Badge variant="outline" className="text-xs">
+                      {invitation.role === "admin" ? "Administrador" : "Membro"}
+                    </Badge>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Expira em {new Date(invitation.expires_at).toLocaleDateString("pt-BR")}
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive"
+                  onClick={() => cancelInvitation(invitation.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )}
+    </div>
   );
 }
