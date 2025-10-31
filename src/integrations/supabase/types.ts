@@ -47,6 +47,80 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          cnpj: string | null
+          created_at: string | null
+          id: string
+          max_users: number | null
+          name: string
+          subscription_expires_at: string | null
+          subscription_plan: string | null
+          subscription_status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          created_at?: string | null
+          id?: string
+          max_users?: number | null
+          name: string
+          subscription_expires_at?: string | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          created_at?: string | null
+          id?: string
+          max_users?: number | null
+          name?: string
+          subscription_expires_at?: string | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      company_users: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          invited_by: string | null
+          joined_at: string | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_users_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -390,7 +464,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_company_id: { Args: { p_user_id: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
