@@ -57,11 +57,11 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
             <TableRow 
               key={cotacao.id}
               className={cn(
-                "hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-cyan-50/30 transition-all duration-200 border-b border-gray-100/60",
+                "hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-cyan-50/30 transition-colors duration-200 border-b border-gray-100/60",
                 index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
               )}
             >
-              <TableCell className="py-4 px-6">
+              <TableCell className="py-4 px-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 border border-teal-200/50">
                     <FileText className="h-4 w-4 text-teal-600" />
@@ -138,7 +138,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                 </Badge>
               </TableCell>
               
-              <TableCell className="py-4 px-6">
+              <TableCell className="py-4 px-4">
                 <div className="flex justify-end">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -147,7 +147,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                         size="sm"
                         className="h-8 w-8 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200"
                       >
-                        <MoreVertical className="h-4 w-4" />
+                        <MoreVertical className="h-4 w-4 transition-colors duration-200" />
                         <span className="sr-only">Abrir menu de ações</span>
                       </Button>
                     </DropdownMenuTrigger>
