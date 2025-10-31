@@ -23,7 +23,6 @@ export type Database = {
           economia: number | null
           id: string
           tipo: string
-          user_id: string
           valor: number | null
         }
         Insert: {
@@ -34,7 +33,6 @@ export type Database = {
           economia?: number | null
           id?: string
           tipo: string
-          user_id: string
           valor?: number | null
         }
         Update: {
@@ -45,7 +43,6 @@ export type Database = {
           economia?: number | null
           id?: string
           tipo?: string
-          user_id?: string
           valor?: number | null
         }
         Relationships: [
@@ -196,7 +193,6 @@ export type Database = {
           supplier_name: string
           total_value: number
           updated_at: string
-          user_id: string
         }
         Insert: {
           company_id: string
@@ -210,7 +206,6 @@ export type Database = {
           supplier_name: string
           total_value?: number
           updated_at?: string
-          user_id: string
         }
         Update: {
           company_id?: string
@@ -224,7 +219,6 @@ export type Database = {
           supplier_name?: string
           total_value?: number
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
@@ -251,7 +245,6 @@ export type Database = {
           id: string
           name: string
           updated_at: string
-          user_id: string
           weight: string | null
         }
         Insert: {
@@ -261,7 +254,6 @@ export type Database = {
           id?: string
           name: string
           updated_at?: string
-          user_id: string
           weight?: string | null
         }
         Update: {
@@ -271,7 +263,6 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
-          user_id?: string
           weight?: string | null
         }
         Relationships: [
@@ -426,7 +417,6 @@ export type Database = {
           observacoes: string | null
           status: string
           updated_at: string
-          user_id: string
         }
         Insert: {
           company_id: string
@@ -437,7 +427,6 @@ export type Database = {
           observacoes?: string | null
           status?: string
           updated_at?: string
-          user_id: string
         }
         Update: {
           company_id?: string
@@ -448,7 +437,6 @@ export type Database = {
           observacoes?: string | null
           status?: string
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
@@ -473,7 +461,6 @@ export type Database = {
           phone: string | null
           rating: number | null
           updated_at: string
-          user_id: string
         }
         Insert: {
           address?: string | null
@@ -487,7 +474,6 @@ export type Database = {
           phone?: string | null
           rating?: number | null
           updated_at?: string
-          user_id: string
         }
         Update: {
           address?: string | null
@@ -501,7 +487,6 @@ export type Database = {
           phone?: string | null
           rating?: number | null
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
