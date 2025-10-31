@@ -129,11 +129,10 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
         return;
       }
 
-      // Get total count
+      // Get total count (RLS filtra por company_id automaticamente)
       const { count: totalCount, error: countError } = await supabase
         .from('products')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('*', { count: 'exact', head: true });
       
       if (countError) throw countError;
       if (!totalCount || totalCount === 0) {
@@ -155,7 +154,6 @@ export default function EditPedidoDialog({ open, onOpenChange, pedido, onEdit }:
         const { data: pageData, error: pageError } = await supabase
           .from('products')
           .select('*')
-          .eq('user_id', user.id)
           .order('name')
           .range(from, to);
         

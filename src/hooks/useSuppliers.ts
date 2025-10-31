@@ -25,7 +25,7 @@ export function useSuppliers() {
   const { data: suppliers = [], isLoading, error } = useQuery({
     queryKey: ['suppliers'],
     queryFn: async () => {
-      // Fetch suppliers with their related quotes and orders
+      // Fetch suppliers (RLS filtra por company_id automaticamente)
       const { data: suppliersData, error: suppliersError } = await supabase
         .from('suppliers')
         .select('*')

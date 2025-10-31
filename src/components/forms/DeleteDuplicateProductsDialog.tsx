@@ -66,7 +66,6 @@ export function DeleteDuplicateProductsDialog({ onDuplicatesDeleted }: DeleteDup
         const { data: pageData, error } = await supabase
           .from('products')
           .select('id, name, category, created_at')
-          .eq('user_id', user.id)
           .order('created_at', { ascending: true })
           .range(from, to);
 

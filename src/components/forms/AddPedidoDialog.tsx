@@ -167,7 +167,7 @@ export default function AddPedidoDialog({
       } = await supabase.from('products').select('*', {
         count: 'exact',
         head: true
-      }).eq('user_id', user.id);
+      });
       if (countError) throw countError;
       if (!totalCount || totalCount === 0) {
         setProducts([]);
@@ -185,7 +185,7 @@ export default function AddPedidoDialog({
         const {
           data: pageData,
           error: pageError
-        } = await supabase.from('products').select('*').eq('user_id', user.id).order('name').range(from, to);
+        } = await supabase.from('products').select('*').order('name').range(from, to);
         if (pageError) throw pageError;
         if (pageData && pageData.length > 0) {
           allProducts.push(...pageData);

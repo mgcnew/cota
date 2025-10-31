@@ -207,11 +207,10 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
         throw new Error("Usuário não autenticado");
       }
 
-      // 2. Buscar produtos existentes para evitar duplicatas
+      // 2. Buscar produtos existentes para evitar duplicatas (RLS filtra por company_id)
       const { data: existingProducts } = await supabase
         .from('products')
-        .select('name, category')
-        .eq('user_id', user.id);
+        .select('name, category');
 
       const existingSet = new Set(
         existingProducts?.map(p => `${p.name.toLowerCase()}|${p.category.toLowerCase()}`) || []
@@ -231,7 +230,6 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
           name: p.name,
           category: p.category,
           weight: p.weight || null,
-          user_id: user.id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }));

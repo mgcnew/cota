@@ -223,20 +223,18 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Load suppliers (usually few)
+      // Load suppliers (RLS filtra por company_id automaticamente)
       const suppliersRes = await supabase
         .from("suppliers")
         .select("id, name")
-        .eq('user_id', user.id)
         .order("name");
 
       if (suppliersRes.data) setSuppliers(suppliersRes.data);
 
-      // Load products in batches
+      // Load products in batches (RLS filtra por company_id automaticamente)
       const { count: totalCount, error: countError } = await supabase
         .from('products')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('*', { count: 'exact', head: true });
 
       if (countError) throw countError;
       
@@ -259,7 +257,6 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
         const { data: pageData, error: pageError } = await supabase
           .from('products')
           .select('id, name')
-          .eq('user_id', user.id)
           .order('name')
           .range(from, to);
 

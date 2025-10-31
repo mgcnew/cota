@@ -40,7 +40,6 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
             observacoes
           )
         `)
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (startDate) {
@@ -84,8 +83,7 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
 
       let query = supabase
         .from('orders')
-        .select('*')
-        .eq('user_id', user.id);
+        .select('*');
 
       if (startDate) {
         query = query.gte('order_date', startDate.toISOString().split('T')[0]);

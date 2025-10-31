@@ -27,11 +27,10 @@ export function useProducts() {
 
       console.log('[PRODUCTS DEBUG] Fetching products for user:', user.id);
 
-      // Primeiro, obter a contagem total de produtos do usuário
+      // Primeiro, obter a contagem total de produtos (RLS filtra por company_id automaticamente)
       const { count: totalCount, error: countError } = await supabase
         .from('products')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('*', { count: 'exact', head: true });
 
       if (countError) throw countError;
 
@@ -60,7 +59,6 @@ export function useProducts() {
         const { data: pageData, error: pageError } = await supabase
           .from('products')
           .select('*')
-          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .range(from, to);
 
@@ -200,8 +198,7 @@ export function useProducts() {
 
       const { data, error } = await supabase
         .from('products')
-        .select('category')
-        .eq('user_id', user.id);
+        .select('category');
 
       if (error) throw error;
 
