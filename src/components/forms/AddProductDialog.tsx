@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { useQueryClient } from '@tanstack/react-query';
@@ -40,6 +40,13 @@ const productSchema = z.object({
     .max(100, "Nome deve ter no máximo 100 caracteres"),
   category: z.string()
     .min(1, "Categoria é obrigatória"),
+  unit: z.string()
+    .min(1, "Unidade é obrigatória"),
+  barcode: z.string()
+    .trim()
+    .max(13, "Código de barras deve ter no máximo 13 caracteres")
+    .optional()
+    .or(z.literal("")),
   newCategory: z.string()
     .trim()
     .max(50, "Categoria deve ter no máximo 50 caracteres")
@@ -73,6 +80,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
     defaultValues: {
       name: "",
       category: "",
+      unit: "un",
+      barcode: "",
       newCategory: "",
       weight: "",
     },
@@ -150,6 +159,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
           company_id: companyData.company_id,
           name: data.name,
           category: finalCategory,
+          unit: data.unit,
+          barcode: data.barcode || null,
           weight: data.weight || null,
         });
 
@@ -257,16 +268,52 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
 
                   <FormField
                     control={form.control}
-                    name="weight"
+                    name="unit"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Peso/Quantidade Padrão</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Unidade de Medida *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-9 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:bg-gray-800 dark:text-white text-sm">
+                              <SelectValue placeholder="Selecione a unidade" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-background border z-50 rounded-lg">
+                            <SelectItem value="un">Unidade (un)</SelectItem>
+                            <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                            <SelectItem value="g">Grama (g)</SelectItem>
+                            <SelectItem value="lt">Litro (lt)</SelectItem>
+                            <SelectItem value="ml">Mililitro (ml)</SelectItem>
+                            <SelectItem value="cx">Caixa (cx)</SelectItem>
+                            <SelectItem value="pc">Pacote (pc)</SelectItem>
+                            <SelectItem value="dz">Dúzia (dz)</SelectItem>
+                            <SelectItem value="m">Metro (m)</SelectItem>
+                            <SelectItem value="m2">Metro² (m²)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="barcode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Código de Barras (Opcional)</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Ex: 500kg, 15 metades, 1 caixa com 20kg"
-                            className="h-9 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:bg-gray-800 dark:text-white text-sm"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Input 
+                              {...field} 
+                              placeholder="EAN-13, EAN-8, UPC..."
+                              className="h-9 pr-10 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:bg-gray-800 dark:text-white text-sm"
+                              maxLength={13}
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              <Package className="h-4 w-4 text-gray-400" />
+                            </div>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

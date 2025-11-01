@@ -705,6 +705,8 @@ export default function Produtos() {
             data: {
               name: updatedProduct.name,
               category: updatedProduct.category,
+              unit: updatedProduct.unit,
+              barcode: updatedProduct.barcode,
               weight: updatedProduct.weight
             }
           });

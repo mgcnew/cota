@@ -35,6 +35,13 @@ const productSchema = z.object({
     .max(100, "Nome deve ter no máximo 100 caracteres"),
   category: z.string()
     .min(1, "Categoria é obrigatória"),
+  unit: z.string()
+    .min(1, "Unidade é obrigatória"),
+  barcode: z.string()
+    .trim()
+    .max(13, "Código de barras deve ter no máximo 13 caracteres")
+    .optional()
+    .or(z.literal("")),
   newCategory: z.string()
     .trim()
     .max(50, "Categoria deve ter no máximo 50 caracteres")
@@ -52,6 +59,9 @@ interface Product {
   id: string;
   name: string;
   category: string;
+  unit: string;
+  barcode?: string;
+  image_url?: string;
   weight: string;
   lastQuotePrice: string;
   bestSupplier: string;
@@ -85,6 +95,8 @@ export function EditProductDialog({
     defaultValues: {
       name: "",
       category: "",
+      unit: "un",
+      barcode: "",
       newCategory: "",
       weight: "",
     },
@@ -97,6 +109,8 @@ export function EditProductDialog({
       form.reset({
         name: product.name,
         category: product.category,
+        unit: product.unit || "un",
+        barcode: product.barcode || "",
         newCategory: "",
         weight: product.weight === "N/A" ? "" : product.weight,
       });
@@ -119,6 +133,8 @@ export function EditProductDialog({
       ...product,
       name: data.name,
       category: finalCategory,
+      unit: data.unit,
+      barcode: data.barcode || undefined,
       weight: data.weight || "N/A",
       lastUpdate: new Date().toLocaleDateString('pt-BR'),
     };
@@ -234,6 +250,60 @@ export function EditProductDialog({
                 )}
               />
             )}
+
+            <FormField
+              control={form.control}
+              name="unit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Unidade de Medida *</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Selecione a unidade" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-background border z-50 rounded-lg">
+                      <SelectItem value="un">Unidade (un)</SelectItem>
+                      <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                      <SelectItem value="g">Grama (g)</SelectItem>
+                      <SelectItem value="lt">Litro (lt)</SelectItem>
+                      <SelectItem value="ml">Mililitro (ml)</SelectItem>
+                      <SelectItem value="cx">Caixa (cx)</SelectItem>
+                      <SelectItem value="pc">Pacote (pc)</SelectItem>
+                      <SelectItem value="dz">Dúzia (dz)</SelectItem>
+                      <SelectItem value="m">Metro (m)</SelectItem>
+                      <SelectItem value="m2">Metro² (m²)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="barcode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Código de Barras (Opcional)</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input 
+                        {...field} 
+                        placeholder="EAN-13, EAN-8, UPC..."
+                        className="pr-10 bg-white dark:bg-gray-900/40 dark:border-gray-700/60 dark:text-gray-200"
+                        maxLength={13}
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Package className="h-4 w-4 text-gray-400" />
+                      </div>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

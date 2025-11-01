@@ -280,29 +280,38 @@ export type Database = {
       }
       products: {
         Row: {
+          barcode: string | null
           category: string
           company_id: string
           created_at: string
           id: string
+          image_url: string | null
           name: string
+          unit: string
           updated_at: string
           weight: string | null
         }
         Insert: {
+          barcode?: string | null
           category: string
           company_id: string
           created_at?: string
           id?: string
+          image_url?: string | null
           name: string
+          unit?: string
           updated_at?: string
           weight?: string | null
         }
         Update: {
+          barcode?: string | null
           category?: string
           company_id?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           name?: string
+          unit?: string
           updated_at?: string
           weight?: string | null
         }
