@@ -2,6 +2,167 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo } from 'react';
 
+const COMPETITIVE_THRESHOLD = 0.05;
+const APPROVAL_TARGET = 75;
+const PENDING_SLA_DAYS = 3;
+const APPROVED_STATUSES = new Set(['finalizada', 'concluida', 'approved', 'aprovada']);
+const PENDING_STATUSES = new Set(['pendente', 'pending', 'ativa']);
+const REJECTED_STATUSES = new Set(['rejeitada', 'rejected', 'cancelada', 'expirada']);
+
+type SupplierTotals = {
+  supplierId: string;
+  total: number;
+  productTotals: Record<string, number>;
+};
+
+type QuoteEconomics = {
+  economiaRealizada: number;
+  economiaPotencial: number;
+  fornecedoresCompetitivos: number;
+  fornecedoresValidos: number;
+};
+
+type EconomyBreakdown = {
+  economiaRealizada: number;
+  economiaPotencial: number;
+  eficienciaEconomia: number;
+};
+
+type ApprovalHistoryPoint = {
+  label: string;
+  taxa: number;
+  aprovadas: number;
+  total: number;
+};
+
+const buildSupplierTotals = (quote: any): SupplierTotals[] => {
+  const totalsMap = new Map<string, { total: number; productTotals: Record<string, number> }>();
+
+  quote.quote_supplier_items?.forEach((item: any) => {
+    const supplierId = item.supplier_id;
+    if (!supplierId) return;
+
+    const rawValor = Number(item.valor_oferecido);
+    if (!Number.isFinite(rawValor) || rawValor <= 0) return;
+
+    const quoteItem = quote.quote_items?.find((qi: any) => qi.product_id === item.product_id);
+    const parsedQuantity = parseFloat(quoteItem?.quantidade ?? '1');
+    const quantidade = Number.isFinite(parsedQuantity) && parsedQuantity > 0 ? parsedQuantity : 1;
+    const valorTotal = rawValor * quantidade;
+
+    if (valorTotal <= 0) return;
+
+    const supplierKey = String(supplierId);
+    const entry = totalsMap.get(supplierKey) || { total: 0, productTotals: {} };
+    entry.total += valorTotal;
+    const productKey = String(item.product_id);
+    entry.productTotals[productKey] = (entry.productTotals[productKey] || 0) + valorTotal;
+    totalsMap.set(supplierKey, entry);
+  });
+
+  return Array.from(totalsMap.entries())
+    .map(([supplierId, data]) => ({
+      supplierId,
+      total: data.total,
+      productTotals: data.productTotals,
+    }))
+    .filter(({ total }) => total > 0);
+};
+
+const calculateQuoteEconomics = (supplierTotals: SupplierTotals[]): QuoteEconomics => {
+  const validSuppliers = supplierTotals.filter(({ total }) => total > 0);
+
+  if (validSuppliers.length < 2) {
+    const participantes = validSuppliers.length;
+    return {
+      economiaRealizada: 0,
+      economiaPotencial: 0,
+      fornecedoresCompetitivos: participantes,
+      fornecedoresValidos: participantes,
+    };
+  }
+
+  const productOffers = new Map<string, Array<{ supplierId: string; value: number }>>();
+
+  validSuppliers.forEach(({ supplierId, productTotals }) => {
+    Object.entries(productTotals).forEach(([productId, value]) => {
+      if (!Number.isFinite(value) || value <= 0) return;
+      const list = productOffers.get(productId) || [];
+      list.push({ supplierId, value });
+      productOffers.set(productId, list);
+    });
+  });
+
+  let economiaRealizada = 0;
+  let economiaPotencial = 0;
+
+  const bestValuePerProduct = new Map<string, number>();
+
+  productOffers.forEach((offers, productId) => {
+    if (offers.length < 2) return;
+
+    let minValue = Infinity;
+    let maxValue = -Infinity;
+
+    offers.forEach(({ value }) => {
+      if (value < minValue) minValue = value;
+      if (value > maxValue) maxValue = value;
+    });
+
+    if (!Number.isFinite(minValue) || minValue <= 0) return;
+
+    economiaRealizada += Math.max(maxValue - minValue, 0);
+
+    offers.forEach(({ value }) => {
+      if (value > minValue) {
+        economiaPotencial += value - minValue;
+      }
+    });
+
+    bestValuePerProduct.set(productId, minValue);
+  });
+
+  if (economiaRealizada < 0) economiaRealizada = 0;
+  if (economiaPotencial < 0) economiaPotencial = 0;
+
+  let fornecedoresCompetitivos = 0;
+  let fornecedoresValidos = 0;
+
+  validSuppliers.forEach(({ productTotals }) => {
+    let supplierTotal = 0;
+    let comparableBestTotal = 0;
+
+    Object.entries(productTotals).forEach(([productId, value]) => {
+      const bestValue = bestValuePerProduct.get(productId);
+      if (!bestValue || value <= 0) return;
+      supplierTotal += value;
+      comparableBestTotal += bestValue;
+    });
+
+    if (supplierTotal <= 0 || comparableBestTotal <= 0) {
+      return;
+    }
+
+    fornecedoresValidos += 1;
+
+    const diffPercent = (supplierTotal - comparableBestTotal) / comparableBestTotal;
+    if (diffPercent <= COMPETITIVE_THRESHOLD) {
+      fornecedoresCompetitivos += 1;
+    }
+  });
+
+  if (fornecedoresCompetitivos === 0 && fornecedoresValidos > 0) {
+    fornecedoresCompetitivos = 1;
+  }
+
+  return {
+    economiaRealizada,
+    economiaPotencial,
+    fornecedoresCompetitivos,
+    fornecedoresValidos,
+  };
+};
+
 export function useDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
@@ -38,44 +199,38 @@ export function useDashboard() {
 
   // OPTIMIZED: Memoize expensive calculations
   const metrics = useMemo(() => {
-    if (!data) return { cotacoesAtivas: 0, fornecedores: 0, economiaGerada: 0, produtosCotados: 0 };
+    if (!data) {
+      return {
+        cotacoesAtivas: 0,
+        fornecedores: 0,
+        economiaGerada: 0,
+        economiaPotencial: 0,
+        eficienciaEconomia: 0,
+        competitividadeMedia: 0,
+        mediaFornecedoresParticipantes: 0,
+        produtosCotados: 0,
+        taxaAtividade: 0,
+        taxaAprovacao: 0,
+        taxaAprovacaoAnterior: 0,
+        variacaoTaxaAprovacao: 0,
+        aprovacoesTotal: 0,
+        pendenciasTotal: 0,
+        rejeicoesTotal: 0,
+        aprovacoesMesAtual: 0,
+        aprovacoesMesAnterior: 0,
+        pendenciasAtrasadas: 0,
+        taxaAprovacaoMeta: APPROVAL_TARGET,
+        ultimasRejeicoes: [],
+        crescimentoCotacoes: 0,
+        crescimentoEconomia: 0,
+        economiaPotencialCrescimento: 0,
+        ultimos7DiasCotacoes: Array(7).fill(0),
+        economiaPorPeriodo: [],
+      };
+    }
 
-    const cotacoesAtivas = data.quotes.filter(q => q.status === 'ativa').length;
+    const cotacoesAtivas = data.quotes.filter((q: any) => q.status === 'ativa').length;
     const fornecedoresCount = data.suppliers.length;
-    
-    let economiaTotal = 0;
-    
-    // Calcular economia APENAS para cotações finalizadas/concluídas
-    const cotacoesFinalizadas = data.quotes.filter((q: any) => 
-      q.status === 'finalizada' || q.status === 'concluida'
-    );
-    
-    cotacoesFinalizadas.forEach((quote: any) => {
-      if (quote.quote_supplier_items && quote.quote_supplier_items.length >= 2) {
-        // Agrupar itens por fornecedor e calcular valor total de cada fornecedor
-        const fornecedoresMap = new Map();
-        
-        quote.quote_supplier_items.forEach((item: any) => {
-          const supplierId = item.supplier_id;
-          const quoteItem = quote.quote_items?.find((qi: any) => qi.product_id === item.product_id);
-          const quantidade = parseInt(quoteItem?.quantidade || "1") || 1;
-          const valorTotal = (item.valor_oferecido || 0) * quantidade;
-          
-          if (!fornecedoresMap.has(supplierId)) {
-            fornecedoresMap.set(supplierId, 0);
-          }
-          fornecedoresMap.set(supplierId, fornecedoresMap.get(supplierId) + valorTotal);
-        });
-
-        // Calcular economia: diferença entre o maior e menor valor total
-        const valoresFornecedores = Array.from(fornecedoresMap.values()).filter(v => v > 0);
-        if (valoresFornecedores.length >= 2) {
-          const menorValorTotal = Math.min(...valoresFornecedores);
-          const maiorValorTotal = Math.max(...valoresFornecedores);
-          economiaTotal += maiorValorTotal - menorValorTotal;
-        }
-      }
-    });
 
     const produtosUnicos = new Set();
     data.quotes.forEach((quote: any) => {
@@ -84,7 +239,33 @@ export function useDashboard() {
       });
     });
 
-    // Calcular taxa de atividade: fornecedores que participaram de cotações
+    const cotacoesFinalizadas = data.quotes.filter((q: any) =>
+      q.status === 'finalizada' || q.status === 'concluida'
+    );
+
+    let economiaTotalRealizada = 0;
+    let economiaPotencialTotal = 0;
+    let fornecedoresValidosTotal = 0;
+    let competitividadePercentualSoma = 0;
+    let cotacoesComCompetitividade = 0;
+    let cotacoesProcessadas = 0;
+
+    cotacoesFinalizadas.forEach((quote: any) => {
+      const supplierTotals = buildSupplierTotals(quote);
+      if (supplierTotals.length === 0) return;
+
+      const economics = calculateQuoteEconomics(supplierTotals);
+      economiaTotalRealizada += economics.economiaRealizada;
+      economiaPotencialTotal += economics.economiaPotencial;
+      fornecedoresValidosTotal += economics.fornecedoresValidos;
+      cotacoesProcessadas += 1;
+
+      if (economics.fornecedoresValidos > 0) {
+        competitividadePercentualSoma += economics.fornecedoresCompetitivos / economics.fornecedoresValidos;
+        cotacoesComCompetitividade += 1;
+      }
+    });
+
     const fornecedoresAtivos = new Set();
     data.quotes.forEach((quote: any) => {
       quote.quote_suppliers?.forEach((qs: any) => {
@@ -93,95 +274,108 @@ export function useDashboard() {
         }
       });
     });
-    
-    const taxaAtividade = fornecedoresCount > 0 
-      ? Math.round((fornecedoresAtivos.size / fornecedoresCount) * 100) 
+
+    const taxaAtividade = fornecedoresCount > 0
+      ? Math.round((fornecedoresAtivos.size / fornecedoresCount) * 100)
       : 0;
 
-    // Calcular taxa de aprovação: cotações finalizadas/aprovadas vs total
-    const cotacoesAprovadas = data.quotes.filter((q: any) => 
-      q.status === 'finalizada' || q.status === 'concluida' || q.status === 'approved' || q.status === 'aprovada'
-    ).length;
-    
+    const cotacoesAprovadas = data.quotes.filter((q: any) =>
+      APPROVED_STATUSES.has(q.status)
+    );
+
+    const cotacoesPendentes = data.quotes.filter((q: any) =>
+      PENDING_STATUSES.has(q.status)
+    );
+
+    const cotacoesRejeitadas = data.quotes.filter((q: any) =>
+      REJECTED_STATUSES.has(q.status)
+    );
+
     const taxaAprovacao = data.quotes.length > 0
-      ? Math.round((cotacoesAprovadas / data.quotes.length) * 100)
+      ? Math.round((cotacoesAprovadas.length / data.quotes.length) * 100)
       : 0;
 
-    // Calcular crescimento comparando mês atual com mês anterior
     const now = new Date();
     const mesAtualInicio = new Date(now.getFullYear(), now.getMonth(), 1);
     const mesAnteriorInicio = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const mesAnteriorFim = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
-    // Cotações do mês atual
-    const cotacoesMesAtual = data.quotes.filter((q: any) => {
+    const cotacoesMesAtualLista = data.quotes.filter((q: any) => {
       const dataInicio = new Date(q.data_inicio || q.created_at);
       return dataInicio >= mesAtualInicio;
-    }).length;
+    });
 
-    // Cotações do mês anterior
-    const cotacoesMesAnterior = data.quotes.filter((q: any) => {
+    const cotacoesMesAnteriorLista = data.quotes.filter((q: any) => {
       const dataInicio = new Date(q.data_inicio || q.created_at);
       return dataInicio >= mesAnteriorInicio && dataInicio <= mesAnteriorFim;
+    });
+
+    const cotacoesMesAtual = cotacoesMesAtualLista.length;
+    const cotacoesMesAnterior = cotacoesMesAnteriorLista.length;
+
+    const aprovacoesMesAtual = cotacoesMesAtualLista.filter((q: any) => APPROVED_STATUSES.has(q.status)).length;
+    const aprovacoesMesAnterior = cotacoesMesAnteriorLista.filter((q: any) => APPROVED_STATUSES.has(q.status)).length;
+
+    const taxaAprovacaoAnterior = cotacoesMesAnterior > 0
+      ? Math.round((aprovacoesMesAnterior / cotacoesMesAnterior) * 100)
+      : 0;
+
+    const variacaoTaxaAprovacao = taxaAprovacao - taxaAprovacaoAnterior;
+
+    const slaLimit = new Date();
+    slaLimit.setDate(slaLimit.getDate() - PENDING_SLA_DAYS);
+
+    const pendenciasAtrasadas = cotacoesPendentes.filter((q: any) => {
+      const dataInicio = new Date(q.data_inicio || q.created_at);
+      return dataInicio < slaLimit;
     }).length;
 
-    // Economia do mês atual
+    const ultimasRejeicoes = data.quotes
+      .filter((q: any) => REJECTED_STATUSES.has(q.status))
+      .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 3)
+      .map((quote: any) => {
+        const firstItem = quote.quote_items?.[0];
+        const productName = firstItem?.product_name || 'Produto';
+        const supplierName = quote.quote_suppliers?.[0]?.supplier_name || '-';
+
+        return {
+          id: quote.id,
+          product: productName,
+          supplier: supplierName,
+          status: quote.status,
+          date: new Date(quote.created_at).toLocaleDateString('pt-BR'),
+        };
+      });
+
     let economiaMesAtual = 0;
-    const cotacoesFinalizadasMesAtual = data.quotes.filter((q: any) => {
-      const dataInicio = new Date(q.data_inicio || q.created_at);
-      const isFinalized = q.status === 'finalizada' || q.status === 'concluida';
-      return dataInicio >= mesAtualInicio && isFinalized;
+    let economiaPotencialMesAtual = 0;
+    data.quotes.forEach((quote: any) => {
+      const dataInicio = new Date(quote.data_inicio || quote.created_at);
+      const isFinalized = quote.status === 'finalizada' || quote.status === 'concluida';
+      if (!isFinalized || dataInicio < mesAtualInicio) return;
+
+      const supplierTotals = buildSupplierTotals(quote);
+      if (supplierTotals.length === 0) return;
+      const economics = calculateQuoteEconomics(supplierTotals);
+      economiaMesAtual += economics.economiaRealizada;
+      economiaPotencialMesAtual += economics.economiaPotencial;
     });
 
-    cotacoesFinalizadasMesAtual.forEach((quote: any) => {
-      if (quote.quote_supplier_items && quote.quote_supplier_items.length >= 2) {
-        const fornecedoresMap = new Map();
-        quote.quote_supplier_items.forEach((item: any) => {
-          const supplierId = item.supplier_id;
-          const quoteItem = quote.quote_items?.find((qi: any) => qi.product_id === item.product_id);
-          const quantidade = parseInt(quoteItem?.quantidade || "1") || 1;
-          const valorTotal = (item.valor_oferecido || 0) * quantidade;
-          if (!fornecedoresMap.has(supplierId)) {
-            fornecedoresMap.set(supplierId, 0);
-          }
-          fornecedoresMap.set(supplierId, fornecedoresMap.get(supplierId) + valorTotal);
-        });
-        const valoresFornecedores = Array.from(fornecedoresMap.values()).filter(v => v > 0);
-        if (valoresFornecedores.length >= 2) {
-          economiaMesAtual += Math.max(...valoresFornecedores) - Math.min(...valoresFornecedores);
-        }
-      }
-    });
-
-    // Economia do mês anterior
     let economiaMesAnterior = 0;
-    const cotacoesFinalizadasMesAnterior = data.quotes.filter((q: any) => {
-      const dataInicio = new Date(q.data_inicio || q.created_at);
-      const isFinalized = q.status === 'finalizada' || q.status === 'concluida';
-      return dataInicio >= mesAnteriorInicio && dataInicio <= mesAnteriorFim && isFinalized;
+    let economiaPotencialMesAnterior = 0;
+    data.quotes.forEach((quote: any) => {
+      const dataInicio = new Date(quote.data_inicio || quote.created_at);
+      const isFinalized = quote.status === 'finalizada' || quote.status === 'concluida';
+      if (!isFinalized || dataInicio < mesAnteriorInicio || dataInicio > mesAnteriorFim) return;
+
+      const supplierTotals = buildSupplierTotals(quote);
+      if (supplierTotals.length === 0) return;
+      const economics = calculateQuoteEconomics(supplierTotals);
+      economiaMesAnterior += economics.economiaRealizada;
+      economiaPotencialMesAnterior += economics.economiaPotencial;
     });
 
-    cotacoesFinalizadasMesAnterior.forEach((quote: any) => {
-      if (quote.quote_supplier_items && quote.quote_supplier_items.length >= 2) {
-        const fornecedoresMap = new Map();
-        quote.quote_supplier_items.forEach((item: any) => {
-          const supplierId = item.supplier_id;
-          const quoteItem = quote.quote_items?.find((qi: any) => qi.product_id === item.product_id);
-          const quantidade = parseInt(quoteItem?.quantidade || "1") || 1;
-          const valorTotal = (item.valor_oferecido || 0) * quantidade;
-          if (!fornecedoresMap.has(supplierId)) {
-            fornecedoresMap.set(supplierId, 0);
-          }
-          fornecedoresMap.set(supplierId, fornecedoresMap.get(supplierId) + valorTotal);
-        });
-        const valoresFornecedores = Array.from(fornecedoresMap.values()).filter(v => v > 0);
-        if (valoresFornecedores.length >= 2) {
-          economiaMesAnterior += Math.max(...valoresFornecedores) - Math.min(...valoresFornecedores);
-        }
-      }
-    });
-
-    // Calcular percentuais de crescimento
     const crescimentoCotacoes = cotacoesMesAnterior > 0
       ? Math.round(((cotacoesMesAtual - cotacoesMesAnterior) / cotacoesMesAnterior) * 100)
       : cotacoesMesAtual > 0 ? 100 : 0;
@@ -190,33 +384,148 @@ export function useDashboard() {
       ? Math.round(((economiaMesAtual - economiaMesAnterior) / economiaMesAnterior) * 100)
       : economiaMesAtual > 0 ? 100 : 0;
 
-    // Calcular cotações dos últimos 7 dias para o mini gráfico
-    const ultimos7Dias = [];
+    const economiaPotencialCrescimento = economiaPotencialMesAnterior > 0
+      ? Math.round(((economiaPotencialMesAtual - economiaPotencialMesAnterior) / economiaPotencialMesAnterior) * 100)
+      : economiaPotencialMesAtual > 0 ? 100 : 0;
+
+    const ultimos7Dias: number[] = [];
     const hoje = new Date();
-    
+
     for (let i = 6; i >= 0; i--) {
       const dia = new Date(hoje.getTime() - i * 24 * 60 * 60 * 1000);
       const diaInicio = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(), 0, 0, 0);
       const diaFim = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(), 23, 59, 59);
-      
+
       const cotacoesDoDia = data.quotes.filter((q: any) => {
         const dataCriacao = new Date(q.data_inicio || q.created_at);
         return dataCriacao >= diaInicio && dataCriacao <= diaFim;
       }).length;
-      
+
       ultimos7Dias.push(cotacoesDoDia);
     }
+
+    const eficienciaEconomia = economiaPotencialTotal > 0
+      ? Math.round((economiaTotalRealizada / economiaPotencialTotal) * 100)
+      : 0;
+
+    const competitividadeMedia = cotacoesComCompetitividade > 0
+      ? Math.round((competitividadePercentualSoma / cotacoesComCompetitividade) * 100)
+      : 0;
+
+    const mediaFornecedoresParticipantes = cotacoesProcessadas > 0
+      ? Math.round(fornecedoresValidosTotal / cotacoesProcessadas)
+      : 0;
+
+    const computeEconomyBreakdown = (start: Date, end: Date): EconomyBreakdown => {
+      let totalRealizada = 0;
+      let totalPotencial = 0;
+
+      data.quotes.forEach((quote: any) => {
+        const dataInicio = new Date(quote.data_inicio || quote.created_at);
+        const isFinalized = quote.status === 'finalizada' || quote.status === 'concluida';
+        if (!isFinalized || dataInicio < start || dataInicio > end) return;
+
+        const supplierTotals = buildSupplierTotals(quote);
+        if (supplierTotals.length < 2) return;
+
+        const economics = calculateQuoteEconomics(supplierTotals);
+        totalRealizada += economics.economiaRealizada;
+        totalPotencial += economics.economiaPotencial;
+      });
+
+      const eficienciaPeriodo = totalPotencial > 0
+        ? Math.round((totalRealizada / totalPotencial) * 100)
+        : 0;
+
+      return {
+        economiaRealizada: totalRealizada,
+        economiaPotencial: totalPotencial,
+        eficienciaEconomia: eficienciaPeriodo,
+      };
+    };
+
+    const fimMesAtual = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    const doisMesesAtrasInicio = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    const doisMesesAtrasFim = new Date(now.getFullYear(), now.getMonth() - 1, 0, 23, 59, 59);
+
+    const economiaPorPeriodo = [
+      {
+        key: 'current',
+        label: 'Mês atual',
+        ...computeEconomyBreakdown(mesAtualInicio, fimMesAtual),
+      },
+      {
+        key: 'previous',
+        label: 'Mês anterior',
+        ...computeEconomyBreakdown(mesAnteriorInicio, mesAnteriorFim),
+      },
+      {
+        key: 'twoMonthsAgo',
+        label: 'Há 2 meses',
+        ...computeEconomyBreakdown(doisMesesAtrasInicio, doisMesesAtrasFim),
+      },
+    ];
+
+    const approvalHistory: ApprovalHistoryPoint[] = [];
+    const historyMap = new Map<string, { date: Date; aprovadas: number; total: number }>();
+
+    data.quotes.forEach((quote: any) => {
+      const dataInicio = new Date(quote.data_inicio || quote.created_at);
+      if (Number.isNaN(dataInicio.getTime())) return;
+
+      const monthStart = new Date(dataInicio.getFullYear(), dataInicio.getMonth(), 1);
+      const key = monthStart.toISOString();
+
+      const entry = historyMap.get(key) || { date: monthStart, aprovadas: 0, total: 0 };
+      entry.total += 1;
+      if (APPROVED_STATUSES.has(quote.status)) {
+        entry.aprovadas += 1;
+      }
+
+      historyMap.set(key, entry);
+    });
+
+    const sortedHistory = Array.from(historyMap.values())
+      .filter((entry) => entry.total > 0)
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    sortedHistory.forEach((entry) => {
+      const taxaMes = entry.total > 0 ? Math.round((entry.aprovadas / entry.total) * 100) : 0;
+      approvalHistory.push({
+        label: entry.date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
+        taxa: taxaMes,
+        aprovadas: entry.aprovadas,
+        total: entry.total,
+      });
+    });
 
     return {
       cotacoesAtivas,
       fornecedores: fornecedoresCount,
-      economiaGerada: economiaTotal,
+      economiaGerada: economiaTotalRealizada,
+      economiaPotencial: economiaPotencialTotal,
+      eficienciaEconomia,
+      competitividadeMedia,
+      mediaFornecedoresParticipantes,
       produtosCotados: produtosUnicos.size,
       taxaAtividade,
       taxaAprovacao,
+      taxaAprovacaoAnterior,
+      variacaoTaxaAprovacao,
+      aprovacoesTotal: cotacoesAprovadas.length,
+      pendenciasTotal: cotacoesPendentes.length,
+      rejeicoesTotal: cotacoesRejeitadas.length,
+      aprovacoesMesAtual,
+      aprovacoesMesAnterior,
+      pendenciasAtrasadas,
+      taxaAprovacaoMeta: APPROVAL_TARGET,
+      ultimasRejeicoes,
       crescimentoCotacoes,
       crescimentoEconomia,
-      ultimos7DiasCotacoes: ultimos7Dias
+      economiaPotencialCrescimento,
+      ultimos7DiasCotacoes: ultimos7Dias,
+      economiaPorPeriodo,
+      approvalHistory,
     };
   }, [data]);
 

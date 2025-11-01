@@ -1,39 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loader2, Target, Award, Clock, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell, ComposedChart, Area, ReferenceLine } from 'recharts';
+import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loader2, Target, Award, Clock, CheckCircle, AlertCircle, XCircle, Info } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell, ComposedChart, Area, ReferenceLine } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
 import { capitalize } from '@/lib/text-utils';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
+
+const DEFAULT_METRICS = {
+  cotacoesAtivas: 0,
+  fornecedores: 0,
+  economiaGerada: 0,
+  economiaPotencial: 0,
+  eficienciaEconomia: 0,
+  competitividadeMedia: 0,
+  mediaFornecedoresParticipantes: 0,
+  produtosCotados: 0,
+  taxaAtividade: 0,
+  taxaAprovacao: 0,
+  taxaAprovacaoAnterior: 0,
+  variacaoTaxaAprovacao: 0,
+  aprovacoesTotal: 0,
+  pendenciasTotal: 0,
+  rejeicoesTotal: 0,
+  aprovacoesMesAtual: 0,
+  aprovacoesMesAnterior: 0,
+  pendenciasAtrasadas: 0,
+  taxaAprovacaoMeta: 0,
+  ultimasRejeicoes: [] as Array<{ id: string; product: string; supplier: string; status: string; date: string }>,
+  approvalHistory: [] as Array<{ label: string; taxa: number; aprovadas: number; total: number }>,
+  crescimentoCotacoes: 0,
+  crescimentoEconomia: 0,
+  economiaPotencialCrescimento: 0,
+  ultimos7DiasCotacoes: [0, 0, 0, 0, 0, 0, 0],
+  economiaPorPeriodo: [] as Array<{ key: string; label: string; economiaRealizada: number; economiaPotencial: number; eficienciaEconomia: number; }>,
+};
 
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('6m');
   const [evolutionPeriod, setEvolutionPeriod] = useState('7d');
   const [economyPeriod, setEconomyPeriod] = useState('7d');
   const [showReportModal, setShowReportModal] = useState(false);
-  const {
-    metrics = {
-      cotacoesAtivas: 0,
-      fornecedores: 0,
-      economiaGerada: 0,
-      produtosCotados: 0,
-      taxaAtividade: 0,
-      taxaAprovacao: 0,
-      crescimentoCotacoes: 0,
-      crescimentoEconomia: 0,
-      ultimos7DiasCotacoes: [0, 0, 0, 0, 0, 0, 0]
-    },
-    recentQuotes = [],
-    topSuppliers = [],
-    monthlyData = [],
-    dailyData = [],
-    isLoading = false
-  } = useDashboard() || {};
+  const [showEconomyModal, setShowEconomyModal] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approvalModalTab, setApprovalModalTab] = useState('resumo');
+  const [showFullApprovalHistory, setShowFullApprovalHistory] = useState(false);
+  const [economyModalPeriod, setEconomyModalPeriod] = useState('current');
+
+  const navigate = useNavigate();
+
+  const dashboardData = useDashboard();
+  const metrics = dashboardData?.metrics ?? DEFAULT_METRICS;
+  const recentQuotes = dashboardData?.recentQuotes ?? [];
+  const topSuppliers = dashboardData?.topSuppliers ?? [];
+  const monthlyData = dashboardData?.monthlyData ?? [];
+  const dailyData = dashboardData?.dailyData ?? [];
+  const isLoading = dashboardData?.isLoading ?? false;
 
   // Função para filtrar dados por período
   const filterDataByPeriod = (period: string) => {
@@ -58,12 +87,76 @@ export default function Dashboard() {
     return filteredData;
   };
 
+  const formatCurrency = (value?: number) => {
+    const safeValue = Number.isFinite(value) ? Number(value) : 0;
+    return `R$ ${safeValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const formatPercent = (value?: number) => {
+    if (!Number.isFinite(value)) return '0%';
+    return `${Math.round(value || 0)}%`;
+  };
+
   // Dados filtrados por período
   const evolutionData = filterDataByPeriod(evolutionPeriod);
   const economyData = filterDataByPeriod(economyPeriod).map((item, index) => ({
     ...item,
     fill: ['#10b981', '#34d399', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'][index % 6]
   }));
+
+  const economyBreakdowns = useMemo(() => {
+    if (metrics.economiaPorPeriodo && metrics.economiaPorPeriodo.length > 0) {
+      return metrics.economiaPorPeriodo;
+    }
+
+    return [
+      {
+        key: 'current',
+        label: 'Mês atual',
+        economiaRealizada: metrics.economiaGerada || 0,
+        economiaPotencial: metrics.economiaPotencial || 0,
+        eficienciaEconomia: metrics.eficienciaEconomia || 0,
+      },
+    ];
+  }, [
+    metrics.economiaPorPeriodo,
+    metrics.economiaGerada,
+    metrics.economiaPotencial,
+    metrics.eficienciaEconomia,
+  ]);
+
+  useEffect(() => {
+    if (!showEconomyModal) {
+      setEconomyModalPeriod('current');
+    } else if (!economyModalPeriod && economyBreakdowns.length > 0) {
+      setEconomyModalPeriod(economyBreakdowns[0].key);
+    }
+  }, [showEconomyModal, economyBreakdowns, economyModalPeriod]);
+
+  useEffect(() => {
+    if (!showApprovalModal) {
+      setApprovalModalTab('resumo');
+      setShowFullApprovalHistory(false);
+    }
+  }, [showApprovalModal]);
+
+  const selectedEconomyBreakdown = useMemo(() => {
+    const found = economyBreakdowns.find((item) => item.key === economyModalPeriod);
+    return found || economyBreakdowns[0];
+  }, [economyBreakdowns, economyModalPeriod]);
+
+  const selectedEconomyLabel = selectedEconomyBreakdown?.label || 'Mês atual';
+  const approvalTarget = metrics.taxaAprovacaoMeta ?? 0;
+  const isApprovalOnTarget = metrics.taxaAprovacao >= approvalTarget;
+  const totalStatusCount = (metrics.aprovacoesTotal || 0) + (metrics.pendenciasTotal || 0) + (metrics.rejeicoesTotal || 0);
+  const approvalHistory = metrics.approvalHistory || [];
+  const approvalHistoryVisible = useMemo(() => {
+    if (!approvalHistory || approvalHistory.length === 0) return [];
+    if (showFullApprovalHistory) return approvalHistory;
+    const start = Math.max(approvalHistory.length - 3, 0);
+    return approvalHistory.slice(start);
+  }, [approvalHistory, showFullApprovalHistory]);
+  const approvalHistoryHasMore = approvalHistory.length > approvalHistoryVisible.length;
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
@@ -179,34 +272,57 @@ export default function Dashboard() {
           {/* Card 2: Economia Gerada */}
           <Card accent accentColor="bg-green-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-start justify-between mb-3 gap-2">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
                       <DollarSign className="h-3.5 w-3.5 text-green-600" />
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
                   </div>
-                  {metrics.crescimentoEconomia !== 0 && (
-                    <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${metrics.crescimentoEconomia > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                      <TrendingUp className={`h-2.5 w-2.5 ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
-                      <span className={`text-xs font-semibold ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoEconomia)}%</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {metrics.crescimentoEconomia !== 0 && (
+                      <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${metrics.crescimentoEconomia > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                        <TrendingUp className={`h-2.5 w-2.5 ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
+                        <span className={`text-xs font-semibold ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoEconomia)}%</span>
+                      </div>
+                    )}
+                    <TooltipProvider>
+                      <UiTooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-green-600 hover:bg-green-50 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-900/10 flex items-center justify-center"
+                            onClick={() => setShowEconomyModal(true)}
+                            aria-label="Ver detalhes da economia"
+                          >
+                            <Info className="h-3.5 w-3.5 pointer-events-none" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent sideOffset={6}>
+                          <span>Ver detalhes da economia</span>
+                        </TooltipContent>
+                      </UiTooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
 
                 <div className="mb-3">
                   <p className="metric-value text-2xl">
-                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `R$ ${metrics.economiaGerada?.toLocaleString('pt-BR') || '0'}`}
+                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}
                   </p>
-                  <p className="metric-description mt-0.5">Economizados</p>
+                  <p className="metric-description mt-0.5">Economizados • {selectedEconomyLabel}</p>
                 </div>
 
                 {/* Indicador de progresso */}
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-2 bg-green-100 dark:bg-green-900/20 rounded-full overflow-hidden">
-                    <div className="h-full w-[75%] bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
+                    <div
+                      className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all"
+                      style={{ width: `${Math.min(Math.max(metrics.eficienciaEconomia || 0, 0), 100)}%` }}
+                    ></div>
                   </div>
-                  <span className="text-xs font-semibold text-green-600">+{metrics.crescimentoEconomia}%</span>
+                  <span className="text-xs font-semibold text-green-600">Eficiência {formatPercent(selectedEconomyBreakdown?.eficienciaEconomia)}</span>
                 </div>
               </CardContent>
           </Card>
@@ -245,36 +361,80 @@ export default function Dashboard() {
           </Card>
 
           {/* Card 4: Taxa de Aprovação */}
-          <Card accent accentColor="bg-yellow-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-3">
+          <Card accent accentColor="bg-yellow-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600/50">
+            <CardContent className="p-3 sm:p-5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-yellow-400/10 flex items-center justify-center">
-                      <Target className="h-3.5 w-3.5 text-yellow-600" />
+                    <div className="w-8 h-8 rounded-xl bg-yellow-500/15 flex items-center justify-center">
+                      <Target className="h-4 w-4 text-yellow-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aprovação</span>
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Taxa de aprovação</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">Performance das cotações finalizadas</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-green-600" />
-                    <span className="text-xs font-semibold text-green-600">5%</span>
+                  <div className="flex items-end gap-3">
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white leading-none">
+                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${metrics.taxaAprovacao || 0}%`}
+                    </p>
+                    {metrics.variacaoTaxaAprovacao !== 0 && (
+                      <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${metrics.variacaoTaxaAprovacao > 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
+                        <TrendingUp className={`h-3 w-3 ${metrics.variacaoTaxaAprovacao > 0 ? '' : 'rotate-180'}`} />
+                        {metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{metrics.variacaoTaxaAprovacao || 0} p.p
+                      </div>
+                    )}
                   </div>
+                  <div className="flex gap-2 text-[11px] text-gray-500 dark:text-gray-400 overflow-x-auto sm:flex-nowrap">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/10 dark:bg-yellow-500/15 whitespace-nowrap">
+                    <span className="font-semibold text-gray-900 dark:text-white">{metrics.aprovacoesTotal || 0}</span>
+                    <span>aprovadas</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/10 dark:bg-amber-500/15 whitespace-nowrap">
+                    <span className="font-semibold text-gray-900 dark:text-white">{metrics.pendenciasTotal || 0}</span>
+                    <span>pendentes</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/10 dark:bg-red-500/15 whitespace-nowrap">
+                    <span className="font-semibold text-gray-900 dark:text-white">{metrics.rejeicoesTotal || 0}</span>
+                    <span>rejeitadas</span>
+                  </span>
                 </div>
-
-                <div className="mb-3">
-                  <p className="metric-value">
-                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${metrics.taxaAprovacao}%`}
-                  </p>
-                  <p className="metric-description mt-0.5">De Aprovação</p>
                 </div>
+                <TooltipProvider>
+                  <UiTooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700 dark:text-yellow-400 dark:hover:bg-yellow-900/10"
+                        onClick={() => setShowApprovalModal(true)}
+                        aria-label="Ver detalhes de aprovação"
+                      >
+                        <Info className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent sideOffset={6}>
+                      <span>Ver detalhes de aprovação</span>
+                    </TooltipContent>
+                  </UiTooltip>
+                </TooltipProvider>
+              </div>
 
-                {/* Barra de progresso */}
+              <div className="mt-4 space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAprovacao}%` }}></div>
+                  <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAprovacao || 0}%` }}></div>
                   </div>
-                  <span className="text-xs font-semibold text-yellow-600">{metrics.taxaAprovacao}%</span>
+                  <span className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">{metrics.taxaAprovacao || 0}%</span>
                 </div>
-              </CardContent>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-gray-500 dark:text-gray-400">Meta {approvalTarget}%</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${isApprovalOnTarget ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
+                    <span className="font-semibold">{isApprovalOnTarget ? 'Dentro da meta' : 'Abaixo da meta'}</span>
+                  </span>
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </div>
 
@@ -335,16 +495,17 @@ export default function Dashboard() {
                   fontSize: '12px',
                   fontWeight: 500
                 }} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                  padding: '8px 12px'
-                }} labelStyle={{
-                  fontWeight: 600,
-                  color: '#374151'
-                }} />
+                    <RechartsTooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        padding: '8px 12px'
+                      }} labelStyle={{
+                        fontWeight: 600,
+                        color: '#374151'
+                      }} />
                     <Legend wrapperStyle={{
                   paddingTop: '10px'
                 }} iconType="circle" />
@@ -478,7 +639,7 @@ export default function Dashboard() {
                       axisLine={false}
                       tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
                     />
-                    <Tooltip 
+                    <RechartsTooltip 
                       content={({ active, payload, label }) => {
                         if (active && payload && payload.length) {
                           // Encontrar os valores corretos de economia e cotações
@@ -648,6 +809,234 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Modal de Detalhes da Economia */}
+        <Dialog open={showEconomyModal} onOpenChange={setShowEconomyModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-lg">
+                <div className="p-2 bg-green-500/15 rounded-lg">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                </div>
+                Detalhes da Economia
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              <Tabs
+                value={selectedEconomyBreakdown?.key || economyBreakdowns[0]?.key}
+                onValueChange={(value) => setEconomyModalPeriod(value)}
+                className="w-full"
+              >
+                <TabsList className="grid grid-cols-3 gap-2 bg-muted/40 dark:bg-muted/20">
+                  {economyBreakdowns.map((period) => (
+                    <TabsTrigger key={period.key} value={period.key} className="text-xs">
+                      {period.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="rounded-xl border border-green-100 dark:border-green-900/30 bg-green-50/40 dark:bg-green-900/15 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-green-600">Economia Realizada</p>
+                  <p className="text-xl font-bold text-green-700 dark:text-green-300 mt-2">{formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Total economizado nas cotações finalizadas do período selecionado.</p>
+                </div>
+                <div className="rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/40 dark:bg-emerald-900/10 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Economia Potencial</p>
+                  <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300 mt-2">{formatCurrency(selectedEconomyBreakdown?.economiaPotencial)}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Diferença acumulada entre o fornecedor vencedor e as demais ofertas do período.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="rounded-xl bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/40 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Eficiência da Economia</p>
+                  <p className="text-lg font-bold text-green-600 dark:text-green-400 mt-2">{formatPercent(selectedEconomyBreakdown?.eficienciaEconomia)}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Percentual da economia potencial convertida em economia real no período.</p>
+                </div>
+                <div className="rounded-xl bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/40 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Competitividade Média</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-2">{formatPercent(metrics.competitividadeMedia)}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Participantes que ficaram até 5% do preço vencedor.</p>
+                </div>
+                <div className="rounded-xl bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/40 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Fornecedores por Cotação</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-2">{metrics.mediaFornecedoresParticipantes || 0}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Média de participantes válidos nas cotações finalizadas.</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/40 p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Crescimento Potencial</p>
+                    <p className={`text-lg font-bold mt-2 ${metrics.economiaPotencialCrescimento >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {formatPercent(metrics.economiaPotencialCrescimento)}
+                    </p>
+                  </div>
+                  <Badge className="w-fit" variant="outline">Comparação mês atual vs anterior</Badge>
+                </div>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-3">
+                  Indica o quanto a economia potencial evoluiu em relação ao mês anterior. Valores positivos sinalizam aumento de oportunidade; negativos indicam queda na concorrência.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEconomyModal(false)}>
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Detalhes de Aprovação */}
+        <Dialog open={showApprovalModal} onOpenChange={setShowApprovalModal}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-lg">
+                <div className="p-2 bg-yellow-500/15 rounded-lg">
+                  <Target className="h-5 w-5 text-yellow-600" />
+                </div>
+                Detalhes da Aprovação
+              </DialogTitle>
+            </DialogHeader>
+            <Tabs value={approvalModalTab} onValueChange={setApprovalModalTab} className="w-full">
+              <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <TabsTrigger value="resumo">Resumo</TabsTrigger>
+                <TabsTrigger value="funnel">Funil</TabsTrigger>
+                <TabsTrigger value="rejeicoes">Rejeições</TabsTrigger>
+                <TabsTrigger value="historico">Histórico</TabsTrigger>
+              </TabsList>
+              <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
+                <TabsContent value="resumo" className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="rounded-xl border border-yellow-200 dark:border-yellow-900/30 bg-yellow-50/60 dark:bg-yellow-900/15 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-yellow-600">Taxa atual</p>
+                      <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-300 mt-2">{metrics.taxaAprovacao || 0}%</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">{metrics.aprovacoesTotal || 0} aprovadas de {totalStatusCount} cotações analisadas.</p>
+                    </div>
+                    <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-900/10 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Variação mensal</p>
+                      <p className={`text-xl font-bold mt-2 ${metrics.variacaoTaxaAprovacao >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{metrics.variacaoTaxaAprovacao || 0} p.p
+                      </p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Taxa anterior: {metrics.taxaAprovacaoAnterior || 0}%</p>
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700/40 p-4 bg-white dark:bg-[#1C1F26]">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Meta interna</p>
+                        <p className="text-xl font-bold text-gray-800 dark:text-white mt-1">{approvalTarget}%</p>
+                      </div>
+                      <div className={`rounded-lg px-3 py-2 text-sm font-semibold ${isApprovalOnTarget ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
+                        {isApprovalOnTarget ? 'Dentro da meta' : 'Abaixo da meta'}
+                      </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="flex items-center justify-between">
+                        <span>Mês atual</span>
+                        <span className="font-semibold text-gray-900 dark:text-white">{metrics.aprovacoesMesAtual || 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Mês anterior</span>
+                        <span className="font-semibold text-gray-900 dark:text-white">{metrics.aprovacoesMesAnterior || 0}</span>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <Button variant="outline" size="sm" className="text-xs" onClick={() => navigate('/quotes/pending')}>
+                        Ver cotações pendentes
+                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-[10px]">
+                          Meta interna: {approvalTarget}%
+                        </Badge>
+                        <Button size="sm" className="text-xs" onClick={() => setShowReportModal(true)}>
+                          Gerar relatório de aprovação
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="funnel" className="space-y-4">
+                  <div className="rounded-xl bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/40 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">Distribuição de status</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+                      <div className="rounded-lg bg-yellow-500/10 dark:bg-yellow-500/20 py-3">
+                        <p className="text-xs font-semibold text-yellow-600">Aprovadas</p>
+                        <p className="text-lg font-bold text-yellow-700 dark:text-yellow-400">{metrics.aprovacoesTotal || 0}</p>
+                      </div>
+                      <div className="rounded-lg bg-amber-500/10 dark:bg-amber-500/20 py-3">
+                        <p className="text-xs font-semibold text-amber-600">Pendentes</p>
+                        <p className="text-lg font-bold text-amber-700 dark:text-amber-400">{metrics.pendenciasTotal || 0}</p>
+                      </div>
+                      <div className="rounded-lg bg-red-500/10 dark:bg-red-500/20 py-3">
+                        <p className="text-xs font-semibold text-red-600">Rejeitadas</p>
+                        <p className="text-lg font-bold text-red-700 dark:text-red-400">{metrics.rejeicoesTotal || 0}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 py-3 px-4 text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <span className="font-semibold text-amber-600">Pendências fora do SLA</span>
+                      <span className="text-lg font-bold text-amber-700 dark:text-amber-300">{metrics.pendenciasAtrasadas || 0}</span>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="rejeicoes" className="space-y-4">
+                  <div className="rounded-xl bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/40 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">Últimas rejeições</p>
+                    {metrics.ultimasRejeicoes && metrics.ultimasRejeicoes.length > 0 ? (
+                      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                        {metrics.ultimasRejeicoes.map((item: any) => (
+                          <div key={item.id} className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-gray-700/40 px-3 py-2">
+                            <div className="min-w-0">
+                              <p className="font-medium text-gray-800 dark:text-gray-100 truncate">{item.product}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.supplier}</p>
+                            </div>
+                            <span className="text-xs text-gray-400" title={item.date}>{item.date}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Nenhuma rejeição recente.</p>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="historico" className="space-y-4">
+                  <div className="rounded-xl bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/40 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">Histórico de aprovações</p>
+                    {approvalHistoryVisible && approvalHistoryVisible.length > 0 ? (
+                      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                        {approvalHistoryVisible.map((item) => (
+                          <div key={item.label} className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-gray-700/40 px-3 py-2">
+                            <div className="min-w-0">
+                              <p className="font-medium text-gray-800 dark:text-gray-100 truncate">{item.label}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.aprovadas}/{item.total} aprovadas</p>
+                            </div>
+                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">{item.taxa}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Nenhum histórico disponível.</p>
+                    )}
+                    {approvalHistoryHasMore && (
+                      <div className="mt-3 text-right">
+                        <Button variant="ghost" size="sm" className="text-xs" onClick={() => setShowFullApprovalHistory((prev) => !prev)}>
+                          {showFullApprovalHistory ? 'Ver menos meses' : 'Ver histórico completo'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </DialogContent>
+        </Dialog>
 
         {/* Modal de Relatório */}
         <Dialog open={showReportModal} onOpenChange={setShowReportModal}>
