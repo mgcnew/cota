@@ -524,90 +524,89 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                     </p>
                   </div>
                 </div>
-              </div>
 
-              {/* Seção: Categorização */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-1 h-4 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></span>
-                  Categorização
-                </h3>
+                {/* Seção: Categorização */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1 h-4 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></span>
+                    Categorização
+                  </h3>
 
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Categoria do Produto *</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          setShowNewCategory(value === "nova");
-                          if (value !== "nova") {
-                            form.setValue("newCategory", "");
-                          }
-                        }} 
-                        defaultValue={field.value}
-                        disabled={loadingCategories}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-9 bg-background dark:bg-gray-800 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white text-sm">
-                            <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Selecione uma categoria existente"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-background border z-50 rounded-lg">
-                          {loadingCategories ? (
-                            <SelectItem value="loading" disabled className="rounded-lg">
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                                Carregando categorias...
-                              </div>
-                            </SelectItem>
-                          ) : (
-                            <>
-                              {categories.map((category) => (
-                                <SelectItem key={category} value={category} className="rounded-lg">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                    {category}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                              <SelectItem value="nova" className="text-primary font-medium rounded-lg border-t mt-1 pt-2">
-                                <div className="flex items-center gap-2">
-                                  <Plus className="h-3 w-3" />
-                                  Criar nova categoria
-                                </div>
-                              </SelectItem>
-                            </>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {showNewCategory && (
                   <FormField
                     control={form.control}
-                    name="newCategory"
+                    name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Nome da Nova Categoria *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Ex: Peixes, Laticínios, Temperos"
-                            className="h-9 rounded-lg border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 bg-orange-50/30 dark:bg-orange-900/20 dark:text-white text-sm"
-                            {...field}
-                          />
-                        </FormControl>
+                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Categoria do Produto *</FormLabel>
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setShowNewCategory(value === "nova");
+                            if (value !== "nova") {
+                              form.setValue("newCategory", "");
+                            }
+                          }} 
+                          defaultValue={field.value}
+                          disabled={loadingCategories}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-9 bg-background dark:bg-gray-800 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white text-sm">
+                              <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Selecione uma categoria existente"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-background border z-50 rounded-lg">
+                            {loadingCategories ? (
+                              <SelectItem value="loading" disabled className="rounded-lg">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                                  Carregando categorias...
+                                </div>
+                              </SelectItem>
+                            ) : (
+                              <>
+                                {categories.map((category) => (
+                                  <SelectItem key={category} value={category} className="rounded-lg">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                      {category}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                                <SelectItem value="nova" className="text-primary font-medium rounded-lg border-t mt-1 pt-2">
+                                  <div className="flex items-center gap-2">
+                                    <Plus className="h-3 w-3" />
+                                    Criar nova categoria
+                                  </div>
+                                </SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                )}
-              </div>
+
+                  {showNewCategory && (
+                    <FormField
+                      control={form.control}
+                      name="newCategory"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Nome da Nova Categoria *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Ex: Peixes, Laticínios, Temperos"
+                              className="h-9 rounded-lg border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 bg-orange-50/30 dark:bg-orange-900/20 dark:text-white text-sm"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
 
                 {/* Dica de preenchimento */}
                 <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border border-orange-200/50 dark:border-orange-800/30 rounded-lg p-3">
