@@ -463,6 +463,11 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-0.5">Prazo</p>
                         <p className="font-bold text-sm text-amber-900 dark:text-amber-100 truncate">{quote.dataFim}</p>
+                        {quote._raw?.data_planejada && (
+                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                            📅 Agendada: {new Date(quote._raw.data_planejada).toLocaleDateString("pt-BR")}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </Card>

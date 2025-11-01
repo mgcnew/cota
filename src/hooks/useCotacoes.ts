@@ -18,8 +18,10 @@ export interface Quote {
   produtosLista: string[];
   quantidade: string;
   status: string;
+  statusReal: string;
   dataInicio: string;
   dataFim: string;
+  dataPlanejada?: string;
   fornecedores: number;
   melhorPreco: string;
   melhorFornecedor: string;
@@ -45,6 +47,7 @@ export function useCotacoes() {
             quote_items(*),
             quote_suppliers(*)
           `)
+          .order("data_planejada", { ascending: true, nullsFirst: false })
           .order("created_at", { ascending: false });
 
         if (quotesError) {
@@ -153,23 +156,38 @@ export function useCotacoes() {
           produtoResumo = `${produtosLista[0]}...`;
         }
 
+        // Calcular status real baseado em data_planejada
+        let statusReal = quote.status;
+        if (quote.data_planejada) {
+          const hoje = new Date();
+          hoje.setHours(0, 0, 0, 0);
+          const planejada = new Date(quote.data_planejada);
+          planejada.setHours(0, 0, 0, 0);
+          
+          if (planejada > hoje && quote.status === 'planejada') {
+            statusReal = 'planejada';
+          } else if (planejada <= hoje && quote.status === 'planejada') {
+            statusReal = 'ativa';
+          }
+        }
+
         return {
-          id: quote.id, // Use real UUID instead of index-based ID
+          id: quote.id,
           produto: produtosTexto || "Sem produtos",
           produtoResumo,
           produtosLista,
           quantidade: `${items.length || 0} produto(s)`,
           status: quote.status,
+          statusReal,
           dataInicio: new Date(quote.data_inicio).toLocaleDateString("pt-BR"),
           dataFim: new Date(quote.data_fim).toLocaleDateString("pt-BR"),
+          dataPlanejada: quote.data_planejada,
           fornecedores: fornecedoresParticipantes.length,
           melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
           melhorFornecedor: fornecedorMelhorPreco?.nome || "Aguardando",
           economia: calcularEconomia(),
           fornecedoresParticipantes,
-          // Add raw data for editing
           _raw: quote,
-          // Add supplier items for detailed view
           _supplierItems: quoteSupplierItems
         };
       });

@@ -229,7 +229,24 @@ export function useDashboard() {
       };
     }
 
-    const cotacoesAtivas = data.quotes.filter((q: any) => q.status === 'ativa').length;
+    // Helper para calcular status real
+    const getStatusReal = (quote: any): string => {
+      if (quote.data_planejada) {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        const planejada = new Date(quote.data_planejada);
+        planejada.setHours(0, 0, 0, 0);
+        
+        if (planejada > hoje && quote.status === 'planejada') {
+          return 'planejada';
+        } else if (planejada <= hoje && quote.status === 'planejada') {
+          return 'ativa';
+        }
+      }
+      return quote.status;
+    };
+
+    const cotacoesAtivas = data.quotes.filter((q: any) => getStatusReal(q) === 'ativa').length;
     const fornecedoresCount = data.suppliers.length;
 
     const produtosUnicos = new Set();
@@ -239,9 +256,10 @@ export function useDashboard() {
       });
     });
 
-    const cotacoesFinalizadas = data.quotes.filter((q: any) =>
-      q.status === 'finalizada' || q.status === 'concluida'
-    );
+    const cotacoesFinalizadas = data.quotes.filter((q: any) => {
+      const statusReal = getStatusReal(q);
+      return q.status === 'finalizada' || q.status === 'concluida';
+    });
 
     let economiaTotalRealizada = 0;
     let economiaPotencialTotal = 0;
@@ -279,13 +297,15 @@ export function useDashboard() {
       ? Math.round((fornecedoresAtivos.size / fornecedoresCount) * 100)
       : 0;
 
-    const cotacoesAprovadas = data.quotes.filter((q: any) =>
-      APPROVED_STATUSES.has(q.status)
-    );
+    const cotacoesAprovadas = data.quotes.filter((q: any) => {
+      const statusReal = getStatusReal(q);
+      return APPROVED_STATUSES.has(q.status);
+    });
 
-    const cotacoesPendentes = data.quotes.filter((q: any) =>
-      PENDING_STATUSES.has(q.status)
-    );
+    const cotacoesPendentes = data.quotes.filter((q: any) => {
+      const statusReal = getStatusReal(q);
+      return PENDING_STATUSES.has(statusReal);
+    });
 
     const cotacoesRejeitadas = data.quotes.filter((q: any) =>
       REJECTED_STATUSES.has(q.status)

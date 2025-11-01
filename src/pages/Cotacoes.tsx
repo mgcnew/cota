@@ -7,7 +7,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import type { Quote, FornecedorParticipante } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package } from "lucide-react";
+import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package, Clock } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -72,14 +72,16 @@ export default function Cotacoes() {
       concluida: "secondary",
       pendente: "outline",
       expirada: "destructive",
-      finalizada: "default"
+      finalizada: "default",
+      planejada: "outline"
     };
     const labels = {
       ativa: "Ativa",
       concluida: "Concluída",
       pendente: "Pendente",
       expirada: "Expirada",
-      finalizada: "Finalizada"
+      finalizada: "Finalizada",
+      planejada: "Planejada"
     };
     return <Badge variant={variants[status as keyof typeof variants] as any}>
         {labels[status as keyof typeof labels]}
@@ -115,7 +117,7 @@ export default function Cotacoes() {
   const filteredCotacoes = useMemo(() => {
     return cotacoes.filter(cotacao => {
       const matchesSearch = cotacao.produto.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || cotacao.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-      const matchesStatus = statusFilter === "all" || cotacao.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || cotacao.statusReal === statusFilter;
 
       // Filtro por fornecedor - verifica se algum fornecedor participante corresponde
       const matchesSupplier = supplierFilter === "all" || cotacao.fornecedoresParticipantes?.some(fornecedor => fornecedor.nome.toLowerCase().includes(supplierFilter.toLowerCase()));
@@ -126,10 +128,11 @@ export default function Cotacoes() {
   // Calcular estatísticas dinâmicas
   const stats = useMemo(() => {
     const porStatus = {
-      ativas: cotacoes.filter(c => c.status === "ativa").length,
+      ativas: cotacoes.filter(c => c.statusReal === "ativa").length,
       pendentes: cotacoes.filter(c => c.status === "pendente").length,
       concluidas: cotacoes.filter(c => c.status === "concluida" || c.status === "finalizada").length,
-      expiradas: cotacoes.filter(c => c.status === "expirada").length
+      expiradas: cotacoes.filter(c => c.status === "expirada").length,
+      planejadas: cotacoes.filter(c => c.statusReal === "planejada").length
     };
     
     const percentualAtivas = cotacoes.length > 0 ? Math.round((porStatus.ativas / cotacoes.length) * 100) : 0;
@@ -360,6 +363,7 @@ export default function Cotacoes() {
                 <SelectContent>
                   <SelectItem value="all">Todos os Status</SelectItem>
                   <SelectItem value="ativa">Ativas</SelectItem>
+                  <SelectItem value="planejada">Planejadas</SelectItem>
                   <SelectItem value="pendente">Pendentes</SelectItem>
                   <SelectItem value="concluida">Concluídas</SelectItem>
                   <SelectItem value="expirada">Expiradas</SelectItem>
@@ -737,8 +741,14 @@ export default function Cotacoes() {
 
                           {/* Status - Largura fixa */}
                           <div className="w-[12%] px-2">
-                            <div className="flex justify-center">
-                              {getStatusBadge(cotacao.status)}
+                            <div className="flex flex-col gap-1 items-center">
+                              {getStatusBadge(cotacao.statusReal)}
+                              {cotacao.statusReal === 'planejada' && cotacao.dataPlanejada && (
+                                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 text-xs">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  {new Date(cotacao.dataPlanejada).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+                                </Badge>
+                              )}
                             </div>
                           </div>
 

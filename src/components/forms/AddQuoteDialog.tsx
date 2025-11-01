@@ -49,6 +49,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -90,11 +92,20 @@ const quoteSchema = z.object({
   produtos: z.array(productLineSchema).min(1, "Adicione pelo menos um produto"),
   dataInicio: z.date({ required_error: "Data de início é obrigatória" }),
   dataFim: z.date({ required_error: "Data de fim é obrigatória" }),
+  dataPlanejada: z.date().optional(),
   fornecedoresIds: z.array(z.string()).min(1, "Selecione pelo menos um fornecedor"),
   observacoes: z.string().optional(),
 }).refine((data) => data.dataFim > data.dataInicio, {
   message: "Data de fim deve ser posterior à data de início",
   path: ["dataFim"],
+}).refine((data) => {
+  if (data.dataPlanejada && data.dataInicio) {
+    return data.dataPlanejada >= data.dataInicio;
+  }
+  return true;
+}, {
+  message: "Data planejada deve ser igual ou posterior à data de início",
+  path: ["dataPlanejada"],
 });
 
 type QuoteFormData = z.infer<typeof quoteSchema>;
@@ -135,6 +146,9 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
   const [productPopoverOpen, setProductPopoverOpen] = useState(false);
   const [supplierPopoverOpen, setSupplierPopoverOpen] = useState(false);
   
+  // Estados para agendamento
+  const [isScheduled, setIsScheduled] = useState(false);
+  
   // Refs para auto-foco
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const productSearchRef = useRef<HTMLInputElement>(null);
@@ -145,6 +159,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       produtos: [],
       dataInicio: new Date(),
       dataFim: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      dataPlanejada: undefined,
       fornecedoresIds: [],
       observacoes: "",
     },
@@ -313,14 +328,28 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
         throw new Error("Empresa não encontrada");
       }
 
+      // Calcular status baseado em data_planejada
+      let quoteStatus = 'ativa';
+      if (data.dataPlanejada) {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        const planejada = new Date(data.dataPlanejada);
+        planejada.setHours(0, 0, 0, 0);
+        
+        if (planejada > hoje) {
+          quoteStatus = 'planejada';
+        }
+      }
+
       const { data: quote, error: quoteError } = await supabase
         .from("quotes")
         .insert({
           company_id: companyData.company_id,
           data_inicio: data.dataInicio.toISOString().split('T')[0],
           data_fim: data.dataFim.toISOString().split('T')[0],
+          data_planejada: data.dataPlanejada?.toISOString() || null,
           observacoes: data.observacoes || null,
-          status: 'ativa'
+          status: quoteStatus
         })
         .select()
         .single();
@@ -454,6 +483,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
     { id: "produtos", label: "Produtos", icon: Package },
     { id: "periodo", label: "Período", icon: Clock },
     { id: "fornecedores", label: "Fornecedores", icon: Building2 },
+    { id: "agendamento", label: "Agendamento", icon: Zap },
     { id: "detalhes", label: "Detalhes", icon: FileText }
   ];
 
@@ -1190,6 +1220,110 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                               </CardContent>
                             </Card>
                           </div>
+                        </TabsContent>
+
+                        {/* Agendamento Tab */}
+                        <TabsContent value="agendamento" className="flex-1 overflow-y-auto p-3 sm:p-4 m-0">
+                          <Card className="border-amber-100 dark:border-gray-700 bg-gradient-to-br from-white to-amber-50/20 dark:from-gray-800/50 dark:to-gray-800/50">
+                            <CardHeader className="border-b border-amber-100/60 dark:border-gray-700">
+                              <CardTitle className="text-lg flex items-center gap-2 text-amber-900 dark:text-white">
+                                <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                                Agendar Cotação (Opcional)
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4 pt-4">
+                              <div className="flex items-center space-x-2 p-3 bg-amber-50/50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                                <Switch
+                                  checked={isScheduled}
+                                  onCheckedChange={(checked) => {
+                                    setIsScheduled(checked);
+                                    if (!checked) {
+                                      form.setValue("dataPlanejada", undefined);
+                                    }
+                                  }}
+                                />
+                                <label className="text-sm font-medium text-amber-900 dark:text-amber-200 cursor-pointer">
+                                  Agendar esta cotação para uma data futura
+                                </label>
+                              </div>
+                              
+                              {isScheduled && (
+                                <div className="space-y-4 animate-in fade-in-50">
+                                  <FormField
+                                    control={form.control}
+                                    name="dataPlanejada"
+                                    render={({ field }) => (
+                                      <FormItem className="flex flex-col">
+                                        <FormLabel>Data de Ativação</FormLabel>
+                                        <Popover>
+                                          <PopoverTrigger asChild>
+                                            <FormControl>
+                                              <Button
+                                                variant="outline"
+                                                className={cn(
+                                                  "pl-3 text-left font-normal",
+                                                  !field.value && "text-muted-foreground"
+                                                )}
+                                              >
+                                                {field.value ? (
+                                                  format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                                ) : (
+                                                  <span>Selecione a data</span>
+                                                )}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                              </Button>
+                                            </FormControl>
+                                          </PopoverTrigger>
+                                          <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                                            <Calendar
+                                              mode="single"
+                                              selected={field.value}
+                                              onSelect={field.onChange}
+                                              disabled={(date) => {
+                                                const startDate = form.getValues("dataInicio");
+                                                return startDate ? date < startDate : date < new Date();
+                                              }}
+                                              initialFocus
+                                              className="pointer-events-auto"
+                                            />
+                                          </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                        <p className="text-sm text-muted-foreground">
+                                          A cotação só aparecerá nas métricas e será ativada a partir desta data
+                                        </p>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  
+                                  {form.watch("dataPlanejada") && (
+                                    <Alert className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+                                      <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                      <AlertDescription className="text-amber-800 dark:text-amber-200">
+                                        Esta cotação será ativada em {format(form.watch("dataPlanejada")!, "dd/MM/yyyy", { locale: ptBR })}
+                                      </AlertDescription>
+                                    </Alert>
+                                  )}
+                                </div>
+                              )}
+                              
+                              {!isScheduled && (
+                                <div className="bg-gradient-to-r from-blue-50/60 to-indigo-50/40 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-800/40 rounded-lg p-4">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                                      <span className="text-white text-xs">💡</span>
+                                    </div>
+                                    <h4 className="font-bold text-blue-900 dark:text-blue-300 text-sm">Por que agendar?</h4>
+                                  </div>
+                                  <ul className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
+                                    <li>• Prepare cotações com antecedência</li>
+                                    <li>• Otimize seu planejamento de compras</li>
+                                    <li>• Métricas precisas por período</li>
+                                  </ul>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
                         </TabsContent>
 
                         {/* Detalhes Tab */}

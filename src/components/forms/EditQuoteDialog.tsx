@@ -61,6 +61,7 @@ const quoteSchema = z.object({
   produtos: z.array(productLineSchema).min(1, "Adicione pelo menos um produto"),
   dataInicio: z.date({ required_error: "Data de início é obrigatória" }),
   dataFim: z.date({ required_error: "Data de fim é obrigatória" }),
+  dataPlanejada: z.date().optional(),
   fornecedoresIds: z.array(z.string()).optional(),
   observacoes: z.string().optional(),
   status: z.string().min(1, "Status é obrigatório"),
@@ -105,6 +106,7 @@ export default function EditQuoteDialog({
       produtos: [{ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" }],
       dataInicio: new Date(),
       dataFim: new Date(),
+      dataPlanejada: undefined,
       fornecedoresIds: [],
       observacoes: "",
       status: "ativa",
@@ -182,6 +184,7 @@ export default function EditQuoteDialog({
           produtos: produtosData,
           dataInicio: new Date(quoteData.data_inicio),
           dataFim: new Date(quoteData.data_fim),
+          dataPlanejada: quoteData.data_planejada ? new Date(quoteData.data_planejada) : undefined,
           fornecedoresIds: suppliersData.map((s: any) => s.id),
           observacoes: quoteData.observacoes || "",
           status: quoteData.status,
@@ -489,6 +492,48 @@ export default function EditQuoteDialog({
                 />
               </div>
 
+              {/* Data Planejada */}
+              <FormField
+                control={form.control}
+                name="dataPlanejada"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-xs text-slate-700 dark:text-gray-300">Data Planejada (Opcional)</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "pl-3 text-left font-normal h-9 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white",
+                              !field.value && "text-muted-foreground dark:text-gray-500"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                            ) : (
+                              <span>Não agendada</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Status */}
               <FormField
                 control={form.control}
@@ -504,6 +549,7 @@ export default function EditQuoteDialog({
                       </FormControl>
                       <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
                         <SelectItem value="ativa">Ativa</SelectItem>
+                        <SelectItem value="planejada">Planejada</SelectItem>
                         <SelectItem value="pendente">Pendente</SelectItem>
                         <SelectItem value="concluida">Concluída</SelectItem>
                         <SelectItem value="expirada">Expirada</SelectItem>
