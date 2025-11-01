@@ -454,6 +454,7 @@ export type Database = {
           created_at: string
           data_fim: string
           data_inicio: string
+          data_planejada: string | null
           id: string
           observacoes: string | null
           status: string
@@ -464,6 +465,7 @@ export type Database = {
           created_at?: string
           data_fim: string
           data_inicio: string
+          data_planejada?: string | null
           id?: string
           observacoes?: string | null
           status?: string
@@ -474,6 +476,7 @@ export type Database = {
           created_at?: string
           data_fim?: string
           data_inicio?: string
+          data_planejada?: string | null
           id?: string
           observacoes?: string | null
           status?: string
