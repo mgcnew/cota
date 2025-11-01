@@ -585,7 +585,7 @@ export default function Produtos() {
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div 
-                              className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20"
+                              className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 cursor-pointer transition-all duration-300 bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 group-hover:shadow-md"
                               onClick={() => setImagePreviewUrl(product.image_url || null)}
                             >
                               {product.image_url ? (
@@ -595,7 +595,7 @@ export default function Produtos() {
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <Package className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                                <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
