@@ -59,14 +59,25 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Erro na API:", errorText);
+      console.error("Erro na API - Status:", response.status);
+      console.error("Erro na API - Response:", errorText);
       throw new Error(`Erro ao gerar imagem: ${response.statusText}`);
     }
 
     const data = await response.json();
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    console.log("Resposta da API recebida");
+    console.log("Data completo:", JSON.stringify(data, null, 2));
+    
+    // Tentar diferentes caminhos para encontrar a imagem
+    const imageUrl = 
+      data.choices?.[0]?.message?.images?.[0]?.image_url?.url ||
+      data.choices?.[0]?.message?.image_url?.url ||
+      data.choices?.[0]?.message?.content;
+
+    console.log("Image URL encontrada:", imageUrl ? "Sim" : "Não");
 
     if (!imageUrl) {
+      console.error("Estrutura da resposta:", JSON.stringify(data, null, 2));
       throw new Error("Nenhuma imagem foi gerada pela IA");
     }
 
