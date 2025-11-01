@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -28,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Package } from "lucide-react";
+import { Plus, Package, Sparkles, Upload, Loader2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { useQueryClient } from '@tanstack/react-query';
@@ -70,6 +71,9 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [productImage, setProductImage] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const { toast } = useToast();
   const { logActivity } = useActivityLog();
   const { user } = useAuth();
@@ -117,6 +121,112 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
     }
   }, [open]);
 
+  const handleGenerateImage = async () => {
+    const productName = form.getValues("name");
+    const category = form.getValues("category");
+    
+    if (!productName) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Digite o nome do produto antes de gerar a imagem",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsGeneratingImage(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-product-image", {
+        body: { productName, category },
+      });
+      
+      if (error) throw error;
+      
+      if (data.success) {
+        setProductImage(data.imageUrl);
+        toast({
+          title: "✨ Imagem gerada!",
+          description: "Imagem do produto criada com IA",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao gerar imagem:", error);
+      toast({
+        title: "Erro ao gerar imagem",
+        description: "Tente novamente ou faça upload manual",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Selecione uma imagem válida",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "Tamanho máximo: 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsUploadingImage(true);
+    
+    try {
+      const { data: companyData } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user!.id)
+        .single();
+      
+      if (!companyData) throw new Error("Empresa não encontrada");
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${companyData.company_id}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, file);
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+      
+      setProductImage(data.publicUrl);
+      
+      toast({
+        title: "✅ Upload concluído",
+        description: "Imagem do produto enviada com sucesso",
+      });
+    } catch (error) {
+      console.error("Erro no upload:", error);
+      toast({
+        title: "Erro no upload",
+        description: "Tente novamente",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const onSubmit = async (data: ProductFormData, keepOpen = false) => {
     // Determinar a categoria final
     const finalCategory = data.category === "nova" ? data.newCategory! : data.category;
@@ -162,6 +272,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
           unit: data.unit,
           barcode: data.barcode || null,
           weight: data.weight || null,
+          image_url: productImage || null,
         });
 
       if (error) throw error;
@@ -198,6 +309,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
 
       onProductAdded(null);
       form.reset();
+      setProductImage(null);
       setShowNewCategory(false);
       
       if (!keepOpen) {
@@ -321,88 +433,181 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                   />
                 </div>
 
-                {/* Seção: Categorização */}
+                {/* Seção de Foto do Produto */}
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-1 h-4 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></span>
-                    Categorização
+                    <span className="w-1 h-4 bg-gradient-to-b from-blue-500 to-cyan-600 rounded-full"></span>
+                    Foto do Produto
                   </h3>
-
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Categoria do Produto *</FormLabel>
-                        <Select 
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setShowNewCategory(value === "nova");
-                            if (value !== "nova") {
-                              form.setValue("newCategory", "");
-                            }
-                          }} 
-                          defaultValue={field.value}
-                          disabled={loadingCategories}
+                  
+                  <div className="space-y-4 p-4 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold text-gray-600 dark:text-gray-400">Imagem (Opcional)</Label>
+                      {productImage && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setProductImage(null)}
+                          className="h-7 text-xs"
                         >
-                          <FormControl>
-                            <SelectTrigger className="h-9 bg-background dark:bg-gray-800 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white text-sm">
-                              <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Selecione uma categoria existente"} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-background border z-50 rounded-lg">
-                            {loadingCategories ? (
-                              <SelectItem value="loading" disabled className="rounded-lg">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                                  Carregando categorias...
-                                </div>
-                              </SelectItem>
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Remover
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {productImage && (
+                      <div className="relative w-full h-48 bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <img 
+                          src={productImage} 
+                          alt="Preview do produto"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1 h-9 text-sm"
+                        onClick={handleGenerateImage}
+                        disabled={isGeneratingImage || !form.getValues("name")}
+                      >
+                        {isGeneratingImage ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Gerando...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Gerar com IA
+                          </>
+                        )}
+                      </Button>
+                      
+                      <label className="flex-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-9 text-sm"
+                          disabled={isUploadingImage}
+                          asChild
+                        >
+                          <div>
+                            {isUploadingImage ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Enviando...
+                              </>
                             ) : (
                               <>
-                                {categories.map((category) => (
-                                  <SelectItem key={category} value={category} className="rounded-lg">
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                      {category}
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                                <SelectItem value="nova" className="text-primary font-medium rounded-lg border-t mt-1 pt-2">
-                                  <div className="flex items-center gap-2">
-                                    <Plus className="h-3 w-3" />
-                                    Criar nova categoria
-                                  </div>
-                                </SelectItem>
+                                <Upload className="h-4 w-4 mr-2" />
+                                Fazer Upload
                               </>
                             )}
-                          </SelectContent>
-                        </Select>
+                          </div>
+                        </Button>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                      </label>
+                    </div>
+                    
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                      Formatos aceitos: JPG, PNG, WEBP (máx. 5MB)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção: Categorização */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1 h-4 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></span>
+                  Categorização
+                </h3>
+
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Categoria do Produto *</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setShowNewCategory(value === "nova");
+                          if (value !== "nova") {
+                            form.setValue("newCategory", "");
+                          }
+                        }} 
+                        defaultValue={field.value}
+                        disabled={loadingCategories}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-9 bg-background dark:bg-gray-800 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white text-sm">
+                            <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Selecione uma categoria existente"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-background border z-50 rounded-lg">
+                          {loadingCategories ? (
+                            <SelectItem value="loading" disabled className="rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                                Carregando categorias...
+                              </div>
+                            </SelectItem>
+                          ) : (
+                            <>
+                              {categories.map((category) => (
+                                <SelectItem key={category} value={category} className="rounded-lg">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    {category}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="nova" className="text-primary font-medium rounded-lg border-t mt-1 pt-2">
+                                <div className="flex items-center gap-2">
+                                  <Plus className="h-3 w-3" />
+                                  Criar nova categoria
+                                </div>
+                              </SelectItem>
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {showNewCategory && (
+                  <FormField
+                    control={form.control}
+                    name="newCategory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Nome da Nova Categoria *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Ex: Peixes, Laticínios, Temperos"
+                            className="h-9 rounded-lg border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 bg-orange-50/30 dark:bg-orange-900/20 dark:text-white text-sm"
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  {showNewCategory && (
-                    <FormField
-                      control={form.control}
-                      name="newCategory"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400">Nome da Nova Categoria *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Ex: Peixes, Laticínios, Temperos"
-                              className="h-9 rounded-lg border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 bg-orange-50/30 dark:bg-orange-900/20 dark:text-white text-sm"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
+                )}
+              </div>
 
                 {/* Dica de preenchimento */}
                 <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border border-orange-200/50 dark:border-orange-800/30 rounded-lg p-3">
