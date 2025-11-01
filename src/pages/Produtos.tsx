@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, Scale, FileUp, Quote, Building2, Clock } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
@@ -49,6 +50,7 @@ export default function Produtos() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const addDialogTriggerRef = useRef<HTMLDivElement>(null);
   const importDialogTriggerRef = useRef<HTMLDivElement>(null);
   const triggerAddDialog = () => {
@@ -582,8 +584,19 @@ export default function Produtos() {
                         <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center flex-shrink-0 shadow-sm">
-                              <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                            <div 
+                              className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20"
+                              onClick={() => setImagePreviewUrl(product.image_url || null)}
+                            >
+                              {product.image_url ? (
+                                <img 
+                                  src={product.image_url} 
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <Package className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                              )}
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="table-cell-primary truncate">{capitalize(product.name)}</div>
@@ -713,6 +726,28 @@ export default function Produtos() {
         }} onCategoryAdded={() => {}} categories={categories} />
 
       <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={id => deleteProduct(id)} />
+
+      {/* Image Preview Dialog */}
+      <Dialog open={!!imagePreviewUrl} onOpenChange={() => setImagePreviewUrl(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Imagem do Produto</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center p-4">
+            {imagePreviewUrl ? (
+              <img 
+                src={imagePreviewUrl} 
+                alt="Preview"
+                className="max-w-full max-h-[70vh] object-contain rounded-lg"
+              />
+            ) : (
+              <div className="w-full h-64 bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 rounded-lg flex items-center justify-center">
+                <Package className="h-16 w-16 text-orange-600 dark:text-orange-400" />
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
         </div>
       </PageWrapper>
     </>;
