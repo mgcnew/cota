@@ -22,23 +22,23 @@ serve(async (req) => {
     }
 
     // Criar prompt otimizado para gerar foto de produto profissional
-    const prompt = `Crie uma foto profissional e realista de produto para e-commerce do seguinte item: "${productName}" da categoria "${category || 'produto'}". 
+    const prompt = `Create a professional, realistic product photo for e-commerce of: "${productName}" from category "${category || 'product'}". 
 
-    Requisitos:
-    - Fundo branco limpo e minimalista
-    - Iluminação profissional de estúdio com sombras suaves
-    - Produto centralizado e em foco nítido
-    - Perspectiva frontal levemente inclinada
-    - Alta qualidade fotográfica e realista
-    - Estilo comercial e profissional tipo Amazon ou Mercado Livre
-    - Composição limpa e simples
-    
-    NÃO incluir texto, marcas, logos, preços, embalagens com rótulos ou pessoas na imagem.
-    O produto deve estar sozinho em um fundo branco puro.`;
+Requirements:
+- Clean white background
+- Professional studio lighting with soft shadows
+- Product centered and in sharp focus
+- Slightly angled frontal perspective
+- High photographic quality and realistic
+- Commercial style like Amazon or Mercado Livre
+- Clean and simple composition
+
+DO NOT include text, brands, logos, prices, packaging with labels or people in the image.
+The product should be alone on a pure white background.`;
 
     console.log("Gerando imagem para:", productName);
 
-    // Chamar Lovable AI (Gemini 2.5 Flash Image Preview)
+    // Chamar Lovable AI com modelo de imagem correto
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -46,14 +46,14 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
+        model: "google/gemini-2.0-flash-exp",
         messages: [
           {
             role: "user",
             content: prompt,
           },
         ],
-        modalities: ["image", "text"],
+        response_format: { type: "b64_json" },
       }),
     });
 
@@ -66,19 +66,29 @@ serve(async (req) => {
 
     const data = await response.json();
     console.log("Resposta da API recebida");
-    console.log("Data completo:", JSON.stringify(data, null, 2));
     
-    // Tentar diferentes caminhos para encontrar a imagem
-    const imageUrl = 
-      data.choices?.[0]?.message?.images?.[0]?.image_url?.url ||
-      data.choices?.[0]?.message?.image_url?.url ||
-      data.choices?.[0]?.message?.content;
+    // A resposta virá em formato b64_json
+    const imageB64 = data.choices?.[0]?.message?.content;
 
-    console.log("Image URL encontrada:", imageUrl ? "Sim" : "Não");
+    console.log("Imagem base64 encontrada:", imageB64 ? "Sim" : "Não");
 
-    if (!imageUrl) {
-      console.error("Estrutura da resposta:", JSON.stringify(data, null, 2));
-      throw new Error("Nenhuma imagem foi gerada pela IA");
+    if (!imageB64 || typeof imageB64 !== 'string' || !imageB64.startsWith('data:image')) {
+      console.error("Formato de resposta inválido. Usando geração externa...");
+      
+      // Fallback: usar imagegen tool do Lovable em vez da API de chat
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Geração de imagem não disponível no momento. Por favor, faça upload manual de uma imagem." 
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     console.log("Imagem gerada com sucesso!");
@@ -86,7 +96,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        imageUrl,
+        imageUrl: imageB64,
         message: "Imagem gerada com sucesso!" 
       }),
       {

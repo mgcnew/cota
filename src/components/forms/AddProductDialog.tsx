@@ -468,26 +468,6 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                     )}
                     
                     <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="flex-1 h-9 text-sm"
-                        onClick={handleGenerateImage}
-                        disabled={isGeneratingImage || !form.getValues("name")}
-                      >
-                        {isGeneratingImage ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Gerando...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            Gerar com IA
-                          </>
-                        )}
-                      </Button>
-                      
                       <label className="flex-1">
                         <Button
                           type="button"
@@ -505,7 +485,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
                             ) : (
                               <>
                                 <Upload className="h-4 w-4 mr-2" />
-                                Fazer Upload
+                                Fazer Upload da Imagem
                               </>
                             )}
                           </div>
