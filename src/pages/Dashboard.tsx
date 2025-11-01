@@ -50,6 +50,7 @@ export default function Dashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showEconomyModal, setShowEconomyModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showCotacoesModal, setShowCotacoesModal] = useState(false);
   const [approvalModalTab, setApprovalModalTab] = useState('resumo');
   const [showFullApprovalHistory, setShowFullApprovalHistory] = useState(false);
   const [economyModalPeriod, setEconomyModalPeriod] = useState('current');
@@ -157,6 +158,23 @@ export default function Dashboard() {
     return approvalHistory.slice(start);
   }, [approvalHistory, showFullApprovalHistory]);
   const approvalHistoryHasMore = approvalHistory.length > approvalHistoryVisible.length;
+  const dailyCotacoesTarget = 20;
+  const totalCotacoesSemana = useMemo(() => {
+    if (!metrics.ultimos7DiasCotacoes || metrics.ultimos7DiasCotacoes.length === 0) return 0;
+    return metrics.ultimos7DiasCotacoes.reduce((acc, value) => acc + value, 0);
+  }, [metrics.ultimos7DiasCotacoes]);
+  const mediaCotacoesDiaria = metrics.ultimos7DiasCotacoes && metrics.ultimos7DiasCotacoes.length > 0
+    ? Math.round(totalCotacoesSemana / metrics.ultimos7DiasCotacoes.length)
+    : 0;
+  const metaCotacoesAtingida = mediaCotacoesDiaria >= dailyCotacoesTarget;
+  const cotacoesLabels = useMemo(() => {
+    const values = metrics.ultimos7DiasCotacoes || [];
+    const hoje = new Date();
+    return values.map((_, index) => {
+      const dia = new Date(hoje.getTime() - (6 - index) * 24 * 60 * 60 * 1000);
+      return dia.toLocaleDateString('pt-BR', { weekday: 'short' });
+    });
+  }, [metrics.ultimos7DiasCotacoes]);
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'approved':
@@ -207,19 +225,39 @@ export default function Dashboard() {
           <Card accent accentColor="bg-purple-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
               <CardContent className="p-3 sm:p-4">
                 {/* Header com ícone minimalista */}
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
                       <ShoppingCart className="h-3.5 w-3.5 text-purple-600" />
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
                   </div>
-                  {metrics.crescimentoCotacoes !== 0 && (
-                    <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${metrics.crescimentoCotacoes > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                      <TrendingUp className={`h-2.5 w-2.5 ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
-                      <span className={`text-xs font-semibold ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoCotacoes)}%</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {metrics.crescimentoCotacoes !== 0 && (
+                      <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${metrics.crescimentoCotacoes > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                        <TrendingUp className={`h-2.5 w-2.5 ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
+                        <span className={`text-xs font-semibold ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoCotacoes)}%</span>
+                      </div>
+                    )}
+                    <TooltipProvider>
+                      <UiTooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:text-purple-300 dark:hover:bg-purple-900/20"
+                            onClick={() => setShowCotacoesModal(true)}
+                            aria-label="Ver detalhes de cotações"
+                          >
+                            <Info className="h-3.5 w-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent sideOffset={6}>
+                          <span>Ver detalhes da semana</span>
+                        </TooltipContent>
+                      </UiTooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
 
                 {/* Valor principal */}
@@ -228,44 +266,58 @@ export default function Dashboard() {
                     {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.cotacoesAtivas}
                   </p>
                   <p className="metric-description mt-0.5">Ativas no Momento</p>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                    <span>Média diária: <span className="font-semibold text-gray-900 dark:text-white">{mediaCotacoesDiaria}</span></span>
+                    <span className={metaCotacoesAtingida ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-red-600 dark:text-red-400 font-semibold'}>
+                      {metaCotacoesAtingida ? 'Meta atingida' : 'Meta abaixo'} ({dailyCotacoesTarget}/dia)
+                    </span>
+                  </div>
                 </div>
 
                 {/* Mini gráfico de barras - Últimos 7 dias */}
-                <div className="flex items-end gap-0.5 h-8">
-                  {(metrics.ultimos7DiasCotacoes || []).map((cotacoes, i) => {
-                    const maxValue = Math.max(...(metrics.ultimos7DiasCotacoes || [0]), 1);
-                    const heightPercent = maxValue > 0 ? (cotacoes / maxValue) * 100 : 20;
-                    const cores = [
-                      'from-purple-500 to-purple-400',
-                      'from-violet-500 to-violet-400',
-                      'from-purple-600 to-purple-500',
-                      'from-indigo-500 to-indigo-400',
-                      'from-purple-400 to-purple-300',
-                      'from-violet-600 to-violet-500',
-                      'from-purple-700 to-purple-600'
-                    ];
-                    const hoje = new Date();
-                    const dia = new Date(hoje.getTime() - (6 - i) * 24 * 60 * 60 * 1000);
-                    const diaNome = dia.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
-                    
-                    return (
-                      <div 
-                        key={i} 
-                        className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t-lg opacity-60 hover:opacity-100 transition-opacity relative group cursor-pointer`} 
-                        style={{ height: `${heightPercent}%`, minHeight: '8px' }}
-                      >
-                        <div className="absolute -top-14 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-[100]">
-                          <div className="bg-white dark:bg-gray-800 px-2 py-1.5 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 whitespace-nowrap">
-                            <div className="text-center">
-                              <div className="text-[10px] text-gray-500 dark:text-gray-400">{diaNome}</div>
-                              <div className="text-xs font-bold text-purple-600 dark:text-purple-400">{cotacoes} {cotacoes === 1 ? 'cotação' : 'cotações'}</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <TooltipProvider>
+                  <div className="flex items-end gap-0.5 h-8">
+                    {(metrics.ultimos7DiasCotacoes || []).map((cotacoes, i) => {
+                      const maxValue = Math.max(...(metrics.ultimos7DiasCotacoes || [0]), 1);
+                      const heightPercent = maxValue > 0 ? (cotacoes / maxValue) * 100 : 20;
+                      const cores = [
+                        'from-purple-500 to-purple-400',
+                        'from-violet-500 to-violet-400',
+                        'from-purple-600 to-purple-500',
+                        'from-indigo-500 to-indigo-400',
+                        'from-purple-400 to-purple-300',
+                        'from-violet-600 to-violet-500',
+                        'from-purple-700 to-purple-600'
+                      ];
+                      const hoje = new Date();
+                      const dia = new Date(hoje.getTime() - (6 - i) * 24 * 60 * 60 * 1000);
+                      const diaNome = dia.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+
+                      return (
+                        <UiTooltip key={i}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t-lg opacity-60 hover:opacity-100 transition-opacity cursor-pointer`}
+                              style={{ height: `${heightPercent}%`, minHeight: '8px' }}
+                              aria-label={`${diaNome}: ${cotacoes} ${cotacoes === 1 ? 'cotação' : 'cotações'}`}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" sideOffset={8} className="py-1.5 px-2.5 text-xs text-gray-700 dark:text-gray-200">
+                            <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">{diaNome}</div>
+                            <div className="font-semibold text-purple-600 dark:text-purple-300">{cotacoes} {cotacoes === 1 ? 'cotação' : 'cotações'}</div>
+                          </TooltipContent>
+                        </UiTooltip>
+                      );
+                    })}
+                  </div>
+                </TooltipProvider>
+
+                <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                  {(cotacoesLabels.length > 0 ? cotacoesLabels : ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb']).map((label, index) => (
+                    <span key={index}>{label.slice(0, 3)}</span>
+                  ))}
                 </div>
+
               </CardContent>
           </Card>
 
