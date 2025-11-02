@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus, Edit, Plus, Trash2, Check, ChevronsUpDown, Loader2, Calendar as CalendarIcon, BarChart3, AlertCircle } from "lucide-react";
+import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus, Edit, Plus, Trash2, Check, ChevronsUpDown, Loader2, Calendar as CalendarIcon, BarChart3, AlertCircle, Eye } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -103,9 +103,10 @@ interface ViewQuoteDialogProps {
   trigger?: React.ReactNode;
   isUpdating?: boolean;
   defaultTab?: string;
+  readOnly?: boolean;
 }
 
-export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab = "detalhes" }: ViewQuoteDialogProps) {
+export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab = "detalhes", readOnly = false }: ViewQuoteDialogProps) {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
@@ -615,7 +616,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         <div className="flex flex-col flex-1 min-h-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-1 min-h-0">
             <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-gray-200/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm flex-shrink-0">
-              <TabsList className={`grid w-full ${onEdit && quote.status !== "concluida" ? "grid-cols-4" : "grid-cols-3"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
+              <TabsList className={`grid w-full ${onEdit && quote.status !== "concluida" && !readOnly ? "grid-cols-4" : "grid-cols-3"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
                 <TabsTrigger
                   value="detalhes"
                   className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-blue-600 dark:data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-blue-700 dark:data-[state=active]:hover:bg-blue-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
@@ -635,19 +636,21 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                   <span className="hidden xs:inline">Comparativo</span>
                 </TabsTrigger>
-                <TabsTrigger
-                  value="atualizacao"
-                  className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-emerald-600 dark:data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-emerald-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-emerald-700 dark:data-[state=active]:hover:bg-emerald-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                >
-                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span className="hidden xs:inline">Valores</span>
-                  {products.length > 0 && (
-                    <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 data-[state=active]:bg-emerald-500/20 dark:data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-100 dark:data-[state=active]:text-emerald-100">
-                      {products.length}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-                {onEdit && quote.status !== "concluida" && (
+                {!readOnly && (
+                  <TabsTrigger
+                    value="atualizacao"
+                    className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-emerald-600 dark:data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-emerald-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-emerald-700 dark:data-[state=active]:hover:bg-emerald-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
+                  >
+                    <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="hidden xs:inline">Valores</span>
+                    {products.length > 0 && (
+                      <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 data-[state=active]:bg-emerald-500/20 dark:data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-100 dark:data-[state=active]:text-emerald-100">
+                        {products.length}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                )}
+                {onEdit && quote.status !== "concluida" && !readOnly && (
                   <TabsTrigger
                     value="edicao"
                     className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-orange-600 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-orange-700 dark:data-[state=active]:hover:bg-orange-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
@@ -833,15 +836,26 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
             </TabsContent>
 
             <TabsContent value="atualizacao" className="flex-1 overflow-hidden p-3 sm:p-4 md:p-5 animate-in fade-in-0 slide-in-from-right-2 duration-300">
-              <div className="h-full flex flex-col lg:flex-row gap-4 sm:gap-5">
-                {/* Painel Esquerdo - Seleção de Fornecedor Melhorada */}
-                <div className="lg:w-80 flex-shrink-0 flex flex-col gap-2.5 sm:gap-3 min-h-0">
-                  {/* Card de Seleção Principal */}
-                  <Card className="border-2 border-emerald-200/80 dark:border-gray-700/30 bg-white dark:bg-[#1C1F26] shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200 rounded-lg">
-                    <div className="p-2.5 sm:p-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-gray-700/50">
-                          <Building2 className="h-3.5 w-3.5 text-emerald-600 dark:text-gray-300" />
+              {readOnly ? (
+                <div className="flex items-center justify-center h-full p-6">
+                  <div className="text-center">
+                    <Eye className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Modo Visualização</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Esta cotação está sendo visualizada em modo somente leitura.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex flex-col lg:flex-row gap-4 sm:gap-5">
+                  {/* Painel Esquerdo - Seleção de Fornecedor Melhorada */}
+                  <div className="lg:w-80 flex-shrink-0 flex flex-col gap-2.5 sm:gap-3 min-h-0">
+                    {/* Card de Seleção Principal */}
+                    <Card className="border-2 border-emerald-200/80 dark:border-gray-700/30 bg-white dark:bg-[#1C1F26] shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200 rounded-lg">
+                      <div className="p-2.5 sm:p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-gray-700/50">
+                            <Building2 className="h-3.5 w-3.5 text-emerald-600 dark:text-gray-300" />
                         </div>
                         <div>
                           <h3 className="text-xs font-semibold text-gray-900 dark:text-white">
@@ -1136,6 +1150,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   )}
                 </div>
               </div>
+              )}
             </TabsContent>
 
             <TabsContent value="comparativo" className="flex-1 overflow-hidden animate-in fade-in-0 slide-in-from-right-2 duration-300">
@@ -1301,18 +1316,18 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                 </div>
 
                 {/* Rodapé com Ação de Converter */}
-                {bestSupplier && quote.status !== 'finalizada' && (
-                  <div className="flex-shrink-0 p-2.5 sm:p-3 border-t-2 border-purple-200/80 dark:border-gray-700/30 bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-100/50 dark:bg-[#1C1F26]">
+                {bestSupplier && quote.status !== 'finalizada' && !readOnly && (
+                  <div className="flex-shrink-0 p-2.5 sm:p-3 border-t-2 border-purple-200/80 dark:border-gray-700/30 bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-100/50 dark:from-purple-500/10 dark:to-transparent">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                       <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-purple-600 dark:bg-gray-700 text-white shadow-sm">
+                        <div className="p-2 rounded-lg bg-purple-600 dark:bg-purple-600 text-white shadow-sm">
                           <Star className="h-3.5 w-3.5 fill-current" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-purple-900 dark:text-purple-100">
+                          <p className="text-xs font-bold text-purple-900 dark:text-white">
                             Melhor: <span className="text-emerald-600 dark:text-emerald-400">{bestSupplier.nome}</span>
                           </p>
-                          <p className="text-[10px] text-purple-700 dark:text-purple-300 mt-0.5">
+                          <p className="text-[10px] text-purple-700 dark:text-purple-400 mt-0.5">
                             R$ {bestSupplier.totalValue.toFixed(2)} • Eco: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{quote.economia}</span>
                           </p>
                         </div>
@@ -1321,7 +1336,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                         onClick={handleConvertToOrder}
                         disabled={isUpdating}
                         size="sm"
-                        className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 dark:bg-gray-700 dark:hover:bg-gray-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold text-xs shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all h-8"
+                        className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-600 dark:to-indigo-600 hover:from-purple-700 hover:to-indigo-700 dark:hover:from-purple-700 dark:hover:to-indigo-700 text-white font-semibold text-xs shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all h-8"
                       >
                         <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
                         Converter
