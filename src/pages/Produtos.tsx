@@ -1,3 +1,4 @@
+// Página de Produtos - Gerenciamento completo com código de barras e upload de imagens
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";

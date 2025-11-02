@@ -1,3 +1,4 @@
+// EditProductDialog - Formulário de edição de produtos com upload de imagem e código de barras
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
