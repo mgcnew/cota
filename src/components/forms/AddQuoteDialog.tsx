@@ -535,98 +535,98 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[1000px] h-[92vh] sm:h-[88vh] md:h-[85vh] max-h-[900px] p-0 gap-0 overflow-hidden border-gray-200 dark:border-gray-700 shadow-lg rounded-lg flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        <DialogHeader className="px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="p-1 rounded bg-teal-600 text-white flex-shrink-0">
-                <FileText className="h-3.5 w-3.5" />
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center text-white flex-shrink-0">
+                <FileText className="h-4 w-4" />
               </div>
               
               <div className="flex-1 min-w-0">
-                <DialogTitle className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                   Nova Cotação
                 </DialogTitle>
-                <DialogDescription className="text-gray-500 dark:text-gray-400 text-[10px] truncate">
+                <DialogDescription className="text-gray-500 dark:text-gray-400 text-xs truncate">
                   Etapa {currentTabIndex + 1}/{tabs.length}
                 </DialogDescription>
               </div>
+            </div>
 
-                {/* Navigation Controls - Moved to left side */}
-                <div className="flex items-center gap-2 sm:gap-3">
-                  {currentTabIndex > 0 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handlePrevious}
-                      className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200 h-8 px-3"
-                    >
-                      <ChevronLeft className="h-3 w-3 mr-1" />
-                      <span className="hidden sm:inline">Voltar</span>
-                    </Button>
-                  )}
-                  
-                  {currentTabIndex < tabs.length - 1 ? (
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleNext}
-                      disabled={!canProceedToNext()}
-                      className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
-                    >
-                      <span className="hidden sm:inline">Próximo</span>
-                      <ChevronRight className="h-3 w-3 ml-1" />
-                    </Button>
-                  ) : (
-                    <>
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={isSubmitting}
-                        onClick={() => {
-                          const formElement = document.getElementById('quote-form') as HTMLFormElement;
-                          if (formElement) {
-                            formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                          }
-                        }}
-                        className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
-                            <span className="hidden sm:inline">Criando...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Check className="h-3 w-3 mr-1" />
-                            <span className="hidden sm:inline">Criar</span>
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={isSubmitting}
-                        onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
-                        variant="outline"
-                        className="border-teal-500 dark:border-teal-400 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/20 h-8 px-3"
-                      >
-                        <Plus className="h-3 w-3 mr-1" />
-                        <span className="hidden sm:inline">Criar Mais</span>
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-            {/* Close Button - Isolated on the right */}
+            {/* Navigation Controls */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {currentTabIndex > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePrevious}
+                  className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200 h-8 px-3"
+                >
+                  <ChevronLeft className="h-3 w-3 mr-1" />
+                  <span className="hidden sm:inline">Voltar</span>
+                </Button>
+              )}
+              
+              {currentTabIndex < tabs.length - 1 ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleNext}
+                  disabled={!canProceedToNext()}
+                  className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
+                >
+                  <span className="hidden sm:inline">Próximo</span>
+                  <ChevronRight className="h-3 w-3 ml-1" />
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      const formElement = document.getElementById('quote-form') as HTMLFormElement;
+                      if (formElement) {
+                        formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                      }
+                    }}
+                    className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
+                        <span className="hidden sm:inline">Criando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-3 w-3 mr-1" />
+                        <span className="hidden sm:inline">Criar</span>
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={isSubmitting}
+                    onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
+                    variant="outline"
+                    className="border-teal-500 dark:border-teal-400 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/20 h-8 px-3"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    <span className="hidden sm:inline">Criar Mais</span>
+                  </Button>
+                </>
+              )}
+            </div>
+            
+            {/* Close Button */}
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => setOpen(false)}
-              className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 h-8 w-8 p-0 flex-shrink-0"
+              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <X className="h-4 w-4" />
             </Button>

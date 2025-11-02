@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Combobox } from "@/components/ui/combobox";
-import { Plus, Trash2, Loader2, ShoppingCart, Package, Building2, Calendar, DollarSign, CheckCircle, ChevronRight, ChevronLeft, Clock, FileText, ChevronDown, Copy } from "lucide-react";
+import { Plus, Trash2, Loader2, ShoppingCart, Package, Building2, Calendar, DollarSign, CheckCircle, ChevronRight, ChevronLeft, Clock, FileText, ChevronDown, Copy, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
@@ -472,24 +472,31 @@ export default function AddPedidoDialog({
     }
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-4xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden border-0 dark:border dark:border-gray-700 shadow-2xl rounded-lg sm:rounded-xl p-0 flex flex-col bg-white dark:bg-gray-900">
-        <DialogHeader className="flex-shrink-0 px-3 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
-          <div className="flex items-center gap-2">
-            <div className="p-1 rounded bg-pink-600 dark:bg-pink-500 flex-shrink-0">
-              <ShoppingCart className="h-3.5 w-3.5 text-white" />
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white flex-shrink-0">
+                <ShoppingCart className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+                  Novo Pedido
+                </DialogTitle>
+                <DialogDescription className="text-gray-500 dark:text-gray-400 text-xs truncate">
+                  Etapa {currentTabIndex + 1}/{tabs.length}
+                </DialogDescription>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <DialogTitle className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                Novo Pedido
-              </DialogTitle>
-            </div>
-            <div className="text-xs text-slate-600 dark:text-gray-400">
-              {currentTabIndex + 1}/{tabs.length}
-            </div>
-          </div>
-          {/* Dica de atalhos */}
-          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            <span className="hidden sm:inline">💡 Dica: Use Ctrl+→/← para navegar • Ctrl+Enter para avançar</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
 

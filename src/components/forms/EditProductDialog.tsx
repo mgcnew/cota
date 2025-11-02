@@ -223,24 +223,30 @@ export function EditProductDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] sm:max-w-md overflow-hidden border border-orange-200/60 dark:border-orange-900/60 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-[#111827]">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-4 border-b border-orange-100/70 dark:border-orange-900/50 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100 dark:from-orange-900/20 dark:via-orange-900/10 dark:to-amber-900/10">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-r from-orange-600 to-amber-600 rounded-lg flex items-center justify-center shadow-md">
-              <Package className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <DialogTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0">
+                <Package className="h-4 w-4" />
+              </div>
+              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                 Editar Produto
               </DialogTitle>
-              <p className="text-xs text-orange-600/80 dark:text-orange-300/80 mt-0.5">
-                Atualize as informações do item selecionado
-              </p>
             </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-[#0f1729]">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-gray-900">
           {/* Product Image Preview */}
           {(product?.image_url || newImageUrl) && (
             <div className="flex flex-col items-center gap-3 pb-2">

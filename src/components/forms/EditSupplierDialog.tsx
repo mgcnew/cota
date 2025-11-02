@@ -28,7 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Building2 } from "lucide-react";
+import { Building2, X } from "lucide-react";
 
 const supplierSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -106,29 +106,30 @@ export default function EditSupplierDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] sm:max-w-[500px] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-indigo-50/80 via-blue-50/60 to-indigo-50/40 backdrop-blur-sm relative overflow-hidden">
-          {/* Efeitos decorativos de fundo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/5 via-blue-400/5 to-indigo-400/5"></div>
-          <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-indigo-400/10 to-blue-400/10 rounded-full -translate-x-16 -translate-y-16"></div>
-          <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-blue-400/10 to-indigo-400/10 rounded-full translate-x-12 translate-y-12"></div>
-          
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Building2 className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <DialogTitle className="text-lg font-bold bg-gradient-to-r from-indigo-900 to-blue-700 bg-clip-text text-transparent">
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0">
+                <Building2 className="h-4 w-4" />
+              </div>
+              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                 Editar Fornecedor
               </DialogTitle>
-              <DialogDescription className="text-sm text-indigo-600/80 mt-0.5">
-                Atualize os dados do fornecedor
-              </DialogDescription>
             </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 bg-gradient-to-br from-white to-indigo-50/30">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 sm:py-5 bg-white dark:bg-gray-900">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -242,18 +243,18 @@ export default function EditSupplierDialog({
               />
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200/60 dark:border-gray-700/40">
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => onOpenChange(false)}
-                className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
+                className="h-9 rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm dark:text-white px-4"
               >
                 Cancelar
               </Button>
               <Button 
                 type="submit"
-                className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                className="h-9 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm px-6"
               >
                 Salvar Alterações
               </Button>

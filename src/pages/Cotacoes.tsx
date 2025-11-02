@@ -13,7 +13,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
-import EditQuoteDialog from "@/components/forms/EditQuoteDialog";
 import DeleteQuoteDialog from "@/components/forms/DeleteQuoteDialog";
 import ViewQuoteDialog from "@/components/forms/ViewQuoteDialog";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -499,24 +498,30 @@ export default function Cotacoes() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                    quoteId,
-                    supplierId,
-                    productId,
-                    newValue
-                  })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ver Detalhes
-                          </DropdownMenuItem>} />
-                      
-                      {/* Só permite editar se não estiver concluída */}
-                      {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                    quoteId,
-                    data
-                  })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>} />}
+                      {/* Opção de editar - abre diretamente na tab de edição */}
+                      {cotacao.status !== "concluida" && <ViewQuoteDialog 
+                        quote={cotacao} 
+                        onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                          quoteId,
+                          supplierId,
+                          productId,
+                          newValue
+                        })} 
+                        onConvertToOrder={(quoteId, orders) => convertToOrder({
+                          quoteId,
+                          orders
+                        })}
+                        onEdit={(quoteId, data) => updateQuote({
+                          quoteId,
+                          data
+                        })}
+                        defaultTab="edicao"
+                        isUpdating={isUpdating} 
+                        trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>} 
+                      />}
                       
                       {/* Só permite excluir se não estiver concluída */}
                       {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
@@ -589,30 +594,59 @@ export default function Cotacoes() {
                 {/* Mobile: Botões de ação diretos e intuitivos */}
                 <div className="md:hidden pt-3 border-t border-gray-200/60">
                   <div className="flex items-center gap-2">
-                    {/* Botão principal - Ver Detalhes */}
-                    <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                  quoteId,
-                  supplierId,
-                  productId,
-                  newValue
-                })} trigger={<Button size="sm" className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                    {/* Botão principal - Editar (se não estiver concluída) ou Ver Detalhes (se concluída) */}
+                    {cotacao.status !== "concluida" ? (
+                      <ViewQuoteDialog 
+                        quote={cotacao} 
+                        onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                          quoteId,
+                          supplierId,
+                          productId,
+                          newValue
+                        })} 
+                        onConvertToOrder={(quoteId, orders) => convertToOrder({
+                          quoteId,
+                          orders
+                        })}
+                        onEdit={(quoteId, data) => updateQuote({
+                          quoteId,
+                          data
+                        })}
+                        defaultTab="edicao"
+                        isUpdating={isUpdating} 
+                        trigger={<Button size="sm" className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                          <Edit className="h-3 w-3 mr-2" />
+                          Editar
+                        </Button>} 
+                      />
+                    ) : (
+                      <ViewQuoteDialog 
+                        quote={cotacao} 
+                        onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                          quoteId,
+                          supplierId,
+                          productId,
+                          newValue
+                        })} 
+                        onConvertToOrder={(quoteId, orders) => convertToOrder({
+                          quoteId,
+                          orders
+                        })}
+                        isUpdating={isUpdating} 
+                        trigger={<Button size="sm" className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
                           <Eye className="h-3 w-3 mr-2" />
                           Ver Detalhes
-                        </Button>} />
+                        </Button>} 
+                      />
+                    )}
 
-                    {/* Botões secundários baseados no status */}
-                    {cotacao.status !== "concluida" ? <>
-                        <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                    quoteId,
-                    data
-                  })} trigger={<Button size="sm" variant="outline" className="bg-white/80 hover:bg-blue-50 border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800">
-                              <Edit className="h-3 w-3" />
-                            </Button>} />
-                        
-                        <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button size="sm" variant="outline" className="bg-white/80 hover:bg-red-50 border-red-200 hover:border-red-300 text-red-600 hover:text-red-700">
-                              <Trash2 className="h-3 w-3" />
-                            </Button>} />
-                      </> : <div className="flex items-center gap-1 px-3 py-1.5 bg-green-50 border border-green-200 rounded-md">
+                    {/* Botão secundário - Excluir (apenas para cotações não concluídas) */}
+                    {cotacao.status !== "concluida" && (
+                      <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button size="sm" variant="outline" className="bg-white/80 hover:bg-red-50 border-red-200 hover:border-red-300 text-red-600 hover:text-red-700">
+                        <Trash2 className="h-3 w-3" />
+                      </Button>} />
+                    )}
+                    {cotacao.status === "concluida" && <div className="flex items-center gap-1 px-3 py-1.5 bg-green-50 border border-green-200 rounded-md">
                         <FileText className="h-3 w-3 text-green-600" />
                         <span className="text-xs font-medium text-green-700">Concluída</span>
                       </div>}
@@ -628,27 +662,30 @@ export default function Cotacoes() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                    quoteId,
-                    supplierId,
-                    productId,
-                    newValue
-                  })} onConvertToOrder={(quoteId, orders) => convertToOrder({
-                    quoteId,
-                    orders
-                  })} isUpdating={isUpdating} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Visualizar
-                        </DropdownMenuItem>} />
-                      
-                      {/* Só permite editar se não estiver concluída */}
-                      {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                    quoteId,
-                    data
-                  })} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                      {/* Opção de editar - abre diretamente na tab de edição */}
+                      {cotacao.status !== "concluida" && <ViewQuoteDialog 
+                        quote={cotacao} 
+                        onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                          quoteId,
+                          supplierId,
+                          productId,
+                          newValue
+                        })} 
+                        onConvertToOrder={(quoteId, orders) => convertToOrder({
+                          quoteId,
+                          orders
+                        })}
+                        onEdit={(quoteId, data) => updateQuote({
+                          quoteId,
+                          data
+                        })}
+                        defaultTab="edicao"
+                        isUpdating={isUpdating} 
+                        trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
                           <Edit className="h-4 w-4 mr-2" />
                           Editar
-                        </DropdownMenuItem>} />}
+                        </DropdownMenuItem>} 
+                      />}
                       
                       {/* Só permite excluir se não estiver concluída */}
                       {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
@@ -803,28 +840,52 @@ export default function Cotacoes() {
                           {/* Ações - Largura fixa */}
                           <div className="w-[10%] px-2">
                             <div className="flex items-center justify-end gap-2">
-                              {/* Botão Detalhes - Direto na tabela */}
-                              <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                            quoteId,
-                            supplierId,
-                            productId,
-                            newValue
-                          })} onConvertToOrder={(quoteId, orders) => convertToOrder({
-                            quoteId,
-                            orders
-                          })} isUpdating={isUpdating} trigger={<Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 p-0 h-8 w-8 rounded-lg border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                              {/* Botão Editar ou Ver Detalhes baseado no status */}
+                              {cotacao.status !== "concluida" ? (
+                                <ViewQuoteDialog 
+                                  quote={cotacao} 
+                                  onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                                    quoteId,
+                                    supplierId,
+                                    productId,
+                                    newValue
+                                  })} 
+                                  onConvertToOrder={(quoteId, orders) => convertToOrder({
+                                    quoteId,
+                                    orders
+                                  })}
+                                  onEdit={(quoteId, data) => updateQuote({
+                                    quoteId,
+                                    data
+                                  })}
+                                  defaultTab="edicao"
+                                  isUpdating={isUpdating} 
+                                  trigger={<Button variant="ghost" size="sm" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 p-0 h-8 w-8 rounded-lg border border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                                    <Edit className="h-4 w-4" />
+                                    <span className="sr-only">Editar cotação</span>
+                                  </Button>} 
+                                />
+                              ) : (
+                                <ViewQuoteDialog 
+                                  quote={cotacao} 
+                                  onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
+                                    quoteId,
+                                    supplierId,
+                                    productId,
+                                    newValue
+                                  })} 
+                                  onConvertToOrder={(quoteId, orders) => convertToOrder({
+                                    quoteId,
+                                    orders
+                                  })}
+                                  isUpdating={isUpdating} 
+                                  trigger={<Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 p-0 h-8 w-8 rounded-lg border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
                                     <Eye className="h-4 w-4" />
                                     <span className="sr-only">Ver detalhes da cotação</span>
-                                  </Button>} />
+                                  </Button>} 
+                                />
+                              )}
 
-                              {/* Botão Editar - Só aparece se não estiver concluída */}
-                              {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
-                            quoteId,
-                            data
-                          })} trigger={<Button variant="ghost" size="sm" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 p-0 h-8 w-8 rounded-lg border border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
-                                      <Edit className="h-4 w-4" />
-                                      <span className="sr-only">Editar cotação</span>
-                                    </Button>} />}
 
                               {/* Botão Excluir - Só aparece se não estiver concluída */}
                               {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button variant="ghost" size="sm" className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 p-0 h-8 w-8 rounded-lg border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">

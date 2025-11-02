@@ -4,6 +4,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 // Logo Component
 function LogoComponent() {
@@ -204,6 +205,8 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isActive = (path: string) => currentPath === path;
   const [isScrolled, setIsScrolled] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const mobilePrimaryOrder = ["/pedidos", "/cotacoes", "/", "/produtos"];
   const primaryMobileItems = mobilePrimaryOrder
     .map(path => menuItems.find(item => item.url === path))
@@ -267,9 +270,14 @@ export function AppSidebar() {
                         className={cn(
                           "relative flex items-center justify-center h-12 rounded-xl transition-[background-color,box-shadow] duration-300 group",
                           isItemActive 
-                            ? `bg-gradient-to-br ${itemColor.bg} shadow-[0_4px_16px_${itemColor.shadowColor},0_2px_8px_${itemColor.shadowColor}] dark:shadow-[0_6px_20px_${itemColor.shadowColor}]`
+                            ? `bg-gradient-to-br ${itemColor.bg}`
                             : "bg-gray-100 dark:bg-gray-800/40 hover:bg-gray-200 dark:hover:bg-gray-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-none hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
                         )}
+                        style={isItemActive ? {
+                          boxShadow: isDark 
+                            ? `0 6px 20px ${itemColor.shadowColor}` 
+                            : `0 4px 16px ${itemColor.shadowColor}, 0 2px 8px ${itemColor.shadowColor}`
+                        } : undefined}
                       >
                         <Icon 
                           icon={item.icon} 

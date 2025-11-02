@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Package, Sparkles, Upload, Loader2, Trash2 } from "lucide-react";
+import { Plus, Package, Sparkles, Upload, Loader2, Trash2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { useQueryClient } from '@tanstack/react-query';
@@ -338,15 +338,26 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
           Novo Produto
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border-0 shadow-2xl rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900">
-        <DialogHeader className="flex-shrink-0 px-5 py-3 border-b border-gray-200/40 dark:border-gray-700/40 bg-white dark:bg-gray-900">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white shadow-md">
-              <Plus className="h-4 w-4" />
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0">
+                <Plus className="h-4 w-4" />
+              </div>
+              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+                Novo Produto
+              </DialogTitle>
             </div>
-            <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
-              Novo Produto
-            </DialogTitle>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setOpen(false)}
+              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
         <div className="flex flex-col flex-1 overflow-hidden">
@@ -605,7 +616,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
               </div>
 
               {/* Footer com botões */}
-              <div className="flex-shrink-0 px-5 py-3 border-t border-gray-200/40 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30">
+              <div className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30">
                 <div className="flex gap-2 justify-end">
                   <Button
                     type="button"

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Package, Building2, Calendar, DollarSign, Truck, FileText, Clock, MapPin, Phone, User, Hash } from "lucide-react";
+import { ShoppingCart, Package, Building2, Calendar, DollarSign, Truck, FileText, Clock, MapPin, Phone, User, Hash, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDecimalDisplay } from "@/lib/text-utils";
 interface ViewPedidoDialogProps {
@@ -65,18 +65,30 @@ export default function ViewPedidoDialog({ pedido, trigger, open: externalOpen, 
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border-0 shadow-2xl rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900">
-        <DialogHeader className="px-2 sm:px-4 py-2 sm:py-3 border-b bg-gradient-to-r from-slate-50 to-gray-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0">
-          <div className="flex items-center justify-between gap-1 sm:gap-2">
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
-              <div className="p-1 sm:p-1.5 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm flex-shrink-0">
-                <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+      <DialogContent className="w-[90vw] max-w-[640px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white flex-shrink-0">
+                <ShoppingCart className="h-4 w-4" />
               </div>
-              <DialogTitle className="text-xs sm:text-sm font-semibold truncate">Pedido #{pedido?.id}</DialogTitle>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+                  Pedido #{pedido?.id}
+                </DialogTitle>
+                <div className="hidden sm:block">
+                  {pedido && getStatusBadge(pedido.status)}
+                </div>
+              </div>
             </div>
-            <div className="hidden sm:block">
-              {pedido && getStatusBadge(pedido.status)}
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={() => setOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
 
