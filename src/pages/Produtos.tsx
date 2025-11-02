@@ -177,9 +177,9 @@ export default function Produtos() {
     };
   }, [products, categories]);
   const getTrendIcon = (trend: "up" | "down" | "stable") => {
-    if (trend === "up") return <TrendingUp className="h-4 w-4 text-success transition-none" />;
-    if (trend === "down") return <TrendingUp className="h-4 w-4 text-error rotate-180 transition-none" />;
-    return <span className="h-4 w-4 rounded-full bg-muted-foreground/50 transition-none" />;
+    if (trend === "up") return <TrendingUp className="h-4 w-4 text-success" />;
+    if (trend === "down") return <TrendingUp className="h-4 w-4 text-error rotate-180" />;
+    return <span className="h-4 w-4 rounded-full bg-muted-foreground/50" />;
   };
 
   // Função para determinar status do produto baseado em dados
@@ -346,13 +346,13 @@ export default function Produtos() {
             )}
 
             <div className="flex flex-wrap items-center gap-3 sm:justify-end w-full">
-              <div className="relative flex-1 min-w-[220px]">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
                 <Input
                   placeholder="Buscar produtos..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 w-full h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
+                  className="pl-10 pr-4 w-full h-9 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-lg shadow-sm transition-all duration-200 text-sm text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -447,9 +447,11 @@ export default function Produtos() {
                       <Badge variant="outline" className="bg-orange-100/80 border-orange-300/60 text-orange-700 font-medium">
                         {capitalize(product.category)}
                       </Badge>
-                      <Badge variant="secondary" className="bg-gray-100/80 text-gray-700 font-medium">
-                        {product.weight}
-                      </Badge>
+                      {product.barcode && (
+                        <Badge variant="secondary" className="bg-gray-100/80 text-gray-700 font-medium">
+                          {product.barcode}
+                        </Badge>
+                      )}
                       {getStatusBadge(getProductStatus(product))}
                     </div>
                   </div>
@@ -557,7 +559,7 @@ export default function Produtos() {
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Categoria</span>
                         </div>
                         <div className="hidden md:flex w-[12%] pl-2">
-                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Peso</span>
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Código</span>
                         </div>
                         <div className="hidden sm:flex w-[13%] pl-2 justify-center">
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Status</span>
@@ -581,11 +583,11 @@ export default function Produtos() {
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
                       <TableCell colSpan={8} className="px-1 py-3">
-                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20">
+                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-all duration-200 group-hover:bg-white dark:group-hover:bg-gray-800/70 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20 group-hover:border-orange-300/60 dark:group-hover:border-orange-700/50 [&_*]:!transition-none">
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div 
-                              className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 cursor-pointer bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20"
+                              className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 cursor-pointer bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 hover:scale-105"
                               onClick={() => setImagePreviewUrl(product.image_url || null)}
                             >
                               {product.image_url ? (
@@ -606,28 +608,28 @@ export default function Produtos() {
 
                           {/* Categoria - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[15%] px-2">
-                            <Badge variant="outline" className="bg-orange-50/80 dark:bg-orange-900/30 border-orange-200/60 dark:border-orange-700/60 text-orange-700 dark:text-orange-400 font-medium text-xs w-full justify-center transition-none">
+                            <Badge variant="outline" className="bg-orange-50/80 dark:bg-orange-900/30 border-orange-200/60 dark:border-orange-700/60 text-orange-700 dark:text-orange-400 font-medium text-xs w-full justify-center pointer-events-none">
                               {capitalize(product.category)}
                             </Badge>
                           </div>
 
-                          {/* Peso - Largura fixa, hidden on mobile */}
+                          {/* Código de Barras - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[12%] px-2">
-                            <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-xs w-full justify-center transition-none">
-                              {product.weight}
+                            <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-xs w-full justify-center pointer-events-none">
+                              {product.barcode || "N/A"}
                             </Badge>
                           </div>
 
                           {/* Status - Largura fixa, hidden on small screens */}
                           <div className="hidden sm:block w-[13%] px-2">
-                            <div className="flex justify-center">
+                            <div className="flex justify-center pointer-events-none">
                               {getStatusBadge(getProductStatus(product))}
                             </div>
                           </div>
 
                           {/* Melhor Preço - Largura fixa */}
                           <div className="w-[12%] px-2">
-                            <div className="flex items-center justify-center gap-2">
+                            <div className="flex items-center justify-center gap-2 pointer-events-none">
                               <span className="font-bold text-green-700 dark:text-green-400 text-sm">{product.lastQuotePrice}</span>
                               {getTrendIcon(product.trend)}
                             </div>
@@ -635,14 +637,14 @@ export default function Produtos() {
 
                           {/* Fornecedor - Largura fixa, hidden on mobile */}
                           <div className="hidden lg:block w-[15%] px-2">
-                            <div className="text-center">
+                            <div className="text-center pointer-events-none">
                               <span className="table-cell-primary truncate block">{capitalize(product.bestSupplier)}</span>
                             </div>
                           </div>
 
                           {/* Cotações - Largura fixa, hidden on small screens */}
                           <div className="hidden sm:block w-[8%] px-2">
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="flex items-center justify-center gap-1 pointer-events-none">
                               <Quote className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                               <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount}</span>
                             </div>
@@ -650,21 +652,21 @@ export default function Produtos() {
 
                           {/* Ações - Largura fixa */}
                           <div className="w-[10%] pl-4">
-                            <div className="flex items-center justify-end gap-2">
-                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 flex items-center justify-center transition-none">
-                                    <Clock className="h-4 w-4 transition-none" />
+                            <div className="flex items-center justify-end gap-2 pointer-events-auto">
+                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 flex items-center justify-center !transition-colors">
+                                    <Clock className="h-4 w-4" />
                                   </Button>} />
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 h-8 w-8 p-0 rounded-full transition-none">
-                                    <MoreVertical className="h-4 w-4 transition-none" />
+                                  <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 h-8 w-8 p-0 rounded-full !transition-colors">
+                                    <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
                                   <DropdownMenuLabel className="text-gray-600 font-medium">Mais Ações</DropdownMenuLabel>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 cursor-pointer">
+                                  <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 cursor-pointer transition-colors">
                                     <Edit className="h-4 w-4 mr-2 text-amber-600" />
                                     Editar
                                   </DropdownMenuItem>
@@ -719,8 +721,7 @@ export default function Produtos() {
               name: updatedProduct.name,
               category: updatedProduct.category,
               unit: updatedProduct.unit,
-              barcode: updatedProduct.barcode,
-              weight: updatedProduct.weight
+              barcode: updatedProduct.barcode
             }
           });
         }} onCategoryAdded={() => {}} categories={categories} />
@@ -729,20 +730,22 @@ export default function Produtos() {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!imagePreviewUrl} onOpenChange={() => setImagePreviewUrl(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Imagem do Produto</DialogTitle>
+            <DialogTitle className="text-center">Imagem do Produto</DialogTitle>
           </DialogHeader>
-          <div className="flex items-center justify-center p-4">
+          <div className="flex items-center justify-center p-2">
             {imagePreviewUrl ? (
-              <img 
-                src={imagePreviewUrl} 
-                alt="Preview"
-                className="max-w-full max-h-[70vh] object-contain rounded-lg"
-              />
+              <div className="w-full aspect-square rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-lg">
+                <img 
+                  src={imagePreviewUrl} 
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             ) : (
-              <div className="w-full h-64 bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 rounded-lg flex items-center justify-center">
-                <Package className="h-16 w-16 text-orange-600 dark:text-orange-400" />
+              <div className="w-full aspect-square bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 rounded-xl flex items-center justify-center border-2 border-orange-200 dark:border-orange-800">
+                <Package className="h-24 w-24 text-orange-600 dark:text-orange-400" />
               </div>
             )}
           </div>

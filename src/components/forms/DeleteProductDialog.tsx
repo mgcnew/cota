@@ -14,7 +14,6 @@ interface Product {
   id: string;
   name: string;
   category: string;
-  weight: string;
   lastQuotePrice: string;
   bestSupplier: string;
   quotesCount: number;

@@ -9,7 +9,6 @@ export interface Product {
   unit: string;
   barcode?: string;
   image_url?: string;
-  weight: string;
   lastQuotePrice: string;
   bestSupplier: string;
   quotesCount: number;
@@ -174,7 +173,6 @@ export function useProducts() {
           unit: p.unit || "un",
           barcode: p.barcode,
           image_url: p.image_url,
-          weight: p.weight || "N/A",
           lastQuotePrice,
           bestSupplier,
           quotesCount,
@@ -242,7 +240,7 @@ export function useProducts() {
   const updateMutation = useMutation({
     mutationFn: async ({ productId, data }: { 
       productId: string, 
-      data: { name: string, category: string, unit: string, barcode?: string, weight: string } 
+      data: { name: string, category: string, unit: string, barcode?: string } 
     }) => {
       const { error } = await supabase
         .from('products')
@@ -251,7 +249,6 @@ export function useProducts() {
           category: data.category,
           unit: data.unit,
           barcode: data.barcode || null,
-          weight: data.weight || null,
           updated_at: new Date().toISOString()
         })
         .eq('id', productId);

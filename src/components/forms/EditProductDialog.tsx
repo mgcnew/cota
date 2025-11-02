@@ -26,7 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Package } from "lucide-react";
+import { Package, Upload, Loader2, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const productSchema = z.object({
   name: z.string()
@@ -46,11 +47,6 @@ const productSchema = z.object({
     .trim()
     .max(50, "Categoria deve ter no máximo 50 caracteres")
     .optional(),
-  weight: z.string()
-    .trim()
-    .max(50, "Peso deve ter no máximo 50 caracteres")
-    .optional()
-    .or(z.literal("")),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -62,7 +58,6 @@ interface Product {
   unit: string;
   barcode?: string;
   image_url?: string;
-  weight: string;
   lastQuotePrice: string;
   bestSupplier: string;
   quotesCount: number;
@@ -88,6 +83,9 @@ export function EditProductDialog({
   categories 
 }: EditProductDialogProps) {
   const [showNewCategory, setShowNewCategory] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [newImageUrl, setNewImageUrl] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const { toast } = useToast();
   
   const form = useForm<ProductFormData>({
@@ -98,7 +96,6 @@ export function EditProductDialog({
       unit: "un",
       barcode: "",
       newCategory: "",
-      weight: "",
     },
   });
 
@@ -112,11 +109,80 @@ export function EditProductDialog({
         unit: product.unit || "un",
         barcode: product.barcode || "",
         newCategory: "",
-        weight: product.weight === "N/A" ? "" : product.weight,
       });
       setShowNewCategory(false);
+      setNewImageUrl(null);
     }
   }, [product, open, form]);
+
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !product) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione uma imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar tamanho (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      // Upload para o Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${product.id}-${Date.now()}.${fileExt}`;
+      const filePath = `product-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('products')
+        .getPublicUrl(filePath);
+
+      setNewImageUrl(publicUrl);
+      setImageFile(file);
+      
+      toast({
+        title: "Imagem carregada!",
+        description: "A nova imagem foi enviada com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao fazer upload:', error);
+      toast({
+        title: "Erro ao enviar imagem",
+        description: "Não foi possível fazer upload da imagem. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleRemoveNewImage = () => {
+    setNewImageUrl(null);
+    setImageFile(null);
+  };
 
   const onSubmit = (data: ProductFormData) => {
     if (!product) return;
@@ -135,8 +201,8 @@ export function EditProductDialog({
       category: finalCategory,
       unit: data.unit,
       barcode: data.barcode || undefined,
-      weight: data.weight || "N/A",
       lastUpdate: new Date().toLocaleDateString('pt-BR'),
+      image_url: newImageUrl || product.image_url,
     };
 
     onProductUpdated(updatedProduct);
@@ -174,6 +240,69 @@ export function EditProductDialog({
         </DialogHeader>
         
         <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-[#0f1729]">
+          {/* Product Image Preview */}
+          {(product?.image_url || newImageUrl) && (
+            <div className="flex flex-col items-center gap-3 pb-2">
+              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-md relative group">
+                {isUploadingImage ? (
+                  <div className="w-full h-full bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 text-orange-600 animate-spin" />
+                  </div>
+                ) : (
+                  <>
+                    <img 
+                      src={newImageUrl || product.image_url} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {newImageUrl && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveNewImage}
+                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <label htmlFor="image-upload">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isUploadingImage}
+                    className="text-xs border-orange-300 hover:bg-orange-50 dark:border-orange-700 dark:hover:bg-orange-900/30 cursor-pointer"
+                    asChild
+                  >
+                    <span>
+                      {isUploadingImage ? (
+                        <>
+                          <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-3 w-3 mr-1.5" />
+                          Trocar Imagem
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </label>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+          )}
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 text-sm">
             <FormField
@@ -299,24 +428,6 @@ export function EditProductDialog({
                         <Package className="h-4 w-4 text-gray-400" />
                       </div>
                     </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="weight"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Peso/Quantidade (opcional)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Ex: 500kg, 15 metades"
-                      className="bg-white dark:bg-gray-900/40 dark:border-gray-700/60 dark:text-gray-200"
-                      {...field}
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
