@@ -221,35 +221,34 @@ export default function Dashboard() {
       <div className="page-container">
         {/* Métricas Principais - Estilo Apple */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
-          {/* Card 1: Cotações Ativas */}
-          <Card accent accentColor="bg-purple-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-2.5 sm:p-4">
-                {/* Header com ícone minimalista */}
-                <div className="flex items-start justify-between mb-1.5 sm:mb-3">
-                  <div className="flex items-center gap-1 sm:gap-2 min-w-0">
-                    <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                      <ShoppingCart className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-purple-600" />
+          {/* Card 1: Cotações Ativas - Design Compacto */}
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-purple-500/60 dark:border-purple-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-purple-900/10 hover:border-purple-400/40 dark:hover:border-purple-400/40 transition-all duration-200">
+              <CardContent className="p-3 sm:p-4">
+                {/* Header compacto em linha */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-purple-500/15 dark:group-hover:bg-purple-500/25 transition-colors">
+                      <ShoppingCart className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <span className="text-[9px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Cotações</span>
-                  </div>
-                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Cotações</span>
                     {metrics.crescimentoCotacoes !== 0 && (
-                      <div className={`flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 rounded-full ${metrics.crescimentoCotacoes > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                        <TrendingUp className={`h-2 w-2 sm:h-2.5 sm:w-2.5 ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
-                        <span className={`text-[9px] sm:text-xs font-semibold ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoCotacoes)}%</span>
+                      <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold ${metrics.crescimentoCotacoes > 0 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
+                        <TrendingUp className={`h-2 w-2 ${metrics.crescimentoCotacoes > 0 ? '' : 'rotate-180'}`} />
+                        {Math.abs(metrics.crescimentoCotacoes)}%
                       </div>
                     )}
+                  </div>
                     <TooltipProvider>
                       <UiTooltip>
                         <TooltipTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-5 w-5 sm:h-7 sm:w-7 text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:text-purple-300 dark:hover:bg-purple-900/20"
+                          className="h-7 w-7 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 transition-colors rounded-lg flex-shrink-0"
                             onClick={() => setShowCotacoesModal(true)}
                             aria-label="Ver detalhes de cotações"
                           >
-                            <Info className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
+                          <Info className="h-3.5 w-3.5" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent sideOffset={6}>
@@ -257,26 +256,28 @@ export default function Dashboard() {
                         </TooltipContent>
                       </UiTooltip>
                     </TooltipProvider>
+                </div>
+
+                {/* Valor e info lado a lado */}
+                <div className="flex items-end justify-between mb-2 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                      {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-purple-500" /> : metrics.cotacoesAtivas}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Ativas</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-xs font-semibold text-gray-700 dark:text-gray-300">{mediaCotacoesDiaria}/dia</p>
+                    <p className={`text-[9px] font-medium ${metaCotacoesAtingida ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {metaCotacoesAtingida ? '✓ OK' : 'Meta: ' + dailyCotacoesTarget}
+                    </p>
                   </div>
                 </div>
 
-                {/* Valor principal */}
-                <div className="mb-1.5 sm:mb-3">
-                  <p className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {isLoading ? <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" /> : metrics.cotacoesAtivas}
-                  </p>
-                  <p className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ativas no Momento</p>
-                  <div className="mt-1 sm:mt-2 flex flex-col gap-0.5 sm:gap-1 text-[8px] sm:text-[11px] text-gray-500 dark:text-gray-400">
-                    <span className="truncate">Média: <span className="font-semibold text-gray-900 dark:text-white">{mediaCotacoesDiaria}</span>/dia</span>
-                    <span className={`truncate ${metaCotacoesAtingida ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-red-600 dark:text-red-400 font-semibold'}`}>
-                      {metaCotacoesAtingida ? 'Meta OK' : 'Abaixo'} ({dailyCotacoesTarget})
-                    </span>
-                  </div>
-                </div>
-
-                {/* Mini gráfico de barras - Últimos 7 dias */}
+                {/* Gráfico compacto */}
+                <div className="h-[40px] sm:h-[50px] flex flex-col justify-end">
                 <TooltipProvider>
-                  <div className="flex items-end gap-0.5 h-6 sm:h-8">
+                    <div className="flex items-end gap-0.5 h-5 sm:h-6 mb-1">
                     {(metrics.ultimos7DiasCotacoes || []).map((cotacoes, i) => {
                       const maxValue = Math.max(...(metrics.ultimos7DiasCotacoes || [0]), 1);
                       const heightPercent = maxValue > 0 ? (cotacoes / maxValue) * 100 : 20;
@@ -297,8 +298,8 @@ export default function Dashboard() {
                         <UiTooltip key={i}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t-lg opacity-60 hover:opacity-100 transition-opacity cursor-pointer`}
-                              style={{ height: `${heightPercent}%`, minHeight: '6px' }}
+                                className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t opacity-60 hover:opacity-100 transition-opacity cursor-pointer`}
+                                style={{ height: `${heightPercent}%`, minHeight: '4px' }}
                               aria-label={`${diaNome}: ${cotacoes} ${cotacoes === 1 ? 'cotação' : 'cotações'}`}
                             />
                           </TooltipTrigger>
@@ -311,44 +312,44 @@ export default function Dashboard() {
                     })}
                   </div>
                 </TooltipProvider>
-
-                <div className="mt-1.5 sm:mt-2 flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                  <div className="flex items-center justify-between text-[8px] uppercase tracking-wide text-gray-400 dark:text-gray-500">
                   {(cotacoesLabels.length > 0 ? cotacoesLabels : ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb']).map((label, index) => (
                     <span key={index}>{label.slice(0, 3)}</span>
                   ))}
+                  </div>
                 </div>
 
               </CardContent>
           </Card>
 
-          {/* Card 2: Economia Gerada */}
-          <Card accent accentColor="bg-green-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-2.5 sm:p-4">
-                <div className="flex items-start justify-between mb-1.5 sm:mb-3 gap-1 sm:gap-2">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
-                      <DollarSign className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-green-600" />
+          {/* Card 2: Economia Gerada - Design Compacto */}
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-emerald-500/60 dark:border-emerald-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-emerald-900/10 hover:border-emerald-400/40 dark:hover:border-emerald-400/40 transition-all duration-200">
+              <CardContent className="p-3 sm:p-4">
+                {/* Header compacto em linha */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/15 dark:group-hover:bg-emerald-500/25 transition-colors">
+                      <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <span className="text-[9px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
-                  </div>
-                  <div className="flex items-center gap-1 sm:gap-2">
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Economia</span>
                     {metrics.crescimentoEconomia !== 0 && (
-                      <div className={`flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 rounded-full ${metrics.crescimentoEconomia > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                        <TrendingUp className={`h-2 w-2 sm:h-2.5 sm:w-2.5 ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
-                        <span className={`text-[9px] sm:text-xs font-semibold ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoEconomia)}%</span>
+                      <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold ${metrics.crescimentoEconomia > 0 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
+                        <TrendingUp className={`h-2 w-2 ${metrics.crescimentoEconomia > 0 ? '' : 'rotate-180'}`} />
+                        {Math.abs(metrics.crescimentoEconomia)}%
                       </div>
                     )}
+                  </div>
                     <TooltipProvider>
                       <UiTooltip>
                         <TooltipTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-5 w-5 sm:h-7 sm:w-7 text-green-600 hover:bg-green-50 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-900/10 flex items-center justify-center"
+                          className="h-7 w-7 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors rounded-lg flex-shrink-0"
                             onClick={() => setShowEconomyModal(true)}
                             aria-label="Ver detalhes da economia"
                           >
-                            <Info className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 pointer-events-none" />
+                          <Info className="h-3.5 w-3.5" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent sideOffset={6}>
@@ -356,105 +357,131 @@ export default function Dashboard() {
                         </TooltipContent>
                       </UiTooltip>
                     </TooltipProvider>
-                  </div>
                 </div>
 
-                <div className="mb-1.5 sm:mb-3">
-                  <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none">
-                    {isLoading ? <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" /> : formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}
-                  </p>
-                  <p className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Economizados • {selectedEconomyLabel}</p>
-                </div>
-
-                {/* Indicador de progresso */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="flex-1 h-1.5 sm:h-2 bg-green-100 dark:bg-green-900/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all"
-                      style={{ width: `${Math.min(Math.max(metrics.eficienciaEconomia || 0, 0), 100)}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-[9px] sm:text-xs font-semibold text-green-600 whitespace-nowrap">Efic. {formatPercent(selectedEconomyBreakdown?.eficienciaEconomia)}</span>
-                </div>
-              </CardContent>
-          </Card>
-
-          {/* Card 3: Fornecedores */}
-          <Card accent accentColor="bg-blue-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-2.5 sm:p-4">
-                <div className="flex items-center justify-between mb-1.5 sm:mb-3">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <Users className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-purple-600" />
-                    </div>
-                    <span className="text-[9px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
-                  </div>
-                  <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 rounded-full">
-                    <span className="text-[9px] sm:text-xs font-semibold text-purple-600">+3</span>
-                  </div>
-                </div>
-
-                <div className="mb-1.5 sm:mb-3">
-                  <p className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {isLoading ? <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" /> : metrics.fornecedores}
-                  </p>
-                  <p className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Parceiros</p>
-                </div>
-
-                {/* Mini indicador circular */}
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="flex-1 h-1 sm:h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAtividade}%` }}></div>
-                  </div>
-                  <span className="text-[9px] sm:text-xs font-bold text-purple-600">{isLoading ? '-' : `${metrics.taxaAtividade}%`}</span>
-                </div>
-                <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1">taxa de atividade</p>
-              </CardContent>
-          </Card>
-
-          {/* Card 4: Taxa de Aprovação */}
-          <Card accent accentColor="bg-yellow-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-            <CardContent className="p-2.5 sm:p-4">
-              <div className="flex items-start justify-between gap-1 sm:gap-2">
-                <div className="space-y-1.5 sm:space-y-2 min-w-0 flex-1">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-yellow-500/15 flex items-center justify-center flex-shrink-0">
-                      <Target className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-yellow-600" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[9px] sm:text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate">Aprovação</span>
-                      <span className="text-[8px] sm:text-[10px] text-gray-400 dark:text-gray-500 truncate hidden sm:block">Performance das cotações</span>
-                    </div>
-                  </div>
-                  <div className="flex items-end gap-2 sm:gap-3">
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-none">
-                      {isLoading ? <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" /> : `${metrics.taxaAprovacao || 0}%`}
+                {/* Valor e info lado a lado */}
+                <div className="flex items-end justify-between mb-2 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5 truncate">
+                      {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-emerald-500" /> : formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}
                     </p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{selectedEconomyLabel}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      {formatPercent(selectedEconomyBreakdown?.eficienciaEconomia)}
+                    </p>
+                    <p className="text-[9px] text-gray-500 dark:text-gray-400">Eficiência</p>
+                  </div>
+                </div>
+
+                {/* Barra de progresso compacta com tooltip */}
+                <div className="h-[32px] sm:h-[40px] flex items-end">
+                  <TooltipProvider>
+                    <UiTooltip>
+                      <TooltipTrigger asChild>
+                        <div className="w-full">
+                          <div className="flex-1 h-1.5 bg-emerald-100/50 dark:bg-emerald-900/20 rounded-full overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
+                            <div
+                              className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full transition-all duration-500"
+                              style={{ width: `${Math.min(Math.max(metrics.eficienciaEconomia || 0, 0), 100)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" sideOffset={8} className="py-2 px-3 text-xs">
+                        <div className="space-y-1">
+                          <div className="font-semibold text-gray-900 dark:text-white">Eficiência de Economia</div>
+                          <div className="text-emerald-600 dark:text-emerald-400 font-bold">
+                            {formatPercent(selectedEconomyBreakdown?.eficienciaEconomia)}
+                          </div>
+                          <div className="text-gray-600 dark:text-gray-400 text-[10px] pt-1 border-t border-gray-200 dark:border-gray-700">
+                            Percentual da economia potencial convertida em economia real no período {selectedEconomyLabel.toLowerCase()}.
+                          </div>
+                        </div>
+                      </TooltipContent>
+                    </UiTooltip>
+                  </TooltipProvider>
+                </div>
+              </CardContent>
+          </Card>
+
+          {/* Card 3: Fornecedores - Design Compacto */}
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-indigo-500/60 dark:border-indigo-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-indigo-900/10 hover:border-indigo-400/40 dark:hover:border-indigo-400/40 transition-all duration-200">
+              <CardContent className="p-3 sm:p-4">
+                {/* Header compacto em linha */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-500/15 dark:group-hover:bg-indigo-500/25 transition-colors">
+                      <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Fornecedores</span>
+                    <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300">
+                      +3
+                  </div>
+                  </div>
+                </div>
+
+                {/* Valor e info lado a lado */}
+                <div className="flex items-end justify-between mb-2 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                      {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-indigo-500" /> : metrics.fornecedores}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Parceiros</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                      {isLoading ? '-' : `${metrics.taxaAtividade}%`}
+                    </p>
+                    <p className="text-[9px] text-gray-500 dark:text-gray-400">Atividade</p>
+                  </div>
+                </div>
+
+                {/* Barra de progresso compacta com tooltip */}
+                <div className="h-[32px] sm:h-[40px] flex items-end">
+                  <TooltipProvider>
+                    <UiTooltip>
+                      <TooltipTrigger asChild>
+                        <div className="w-full">
+                          <div className="flex-1 h-1.5 bg-indigo-100/50 dark:bg-indigo-900/20 rounded-full overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
+                            <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAtividade}%` }}></div>
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" sideOffset={8} className="py-2 px-3 text-xs">
+                        <div className="space-y-1">
+                          <div className="font-semibold text-gray-900 dark:text-white">Taxa de Atividade</div>
+                          <div className="text-indigo-600 dark:text-indigo-400 font-bold">
+                            {isLoading ? '-' : `${metrics.taxaAtividade}%`}
+                          </div>
+                          <div className="text-gray-600 dark:text-gray-400 text-[10px] pt-1 border-t border-gray-200 dark:border-gray-700">
+                            Percentual de fornecedores que participaram ativamente das cotações no período.
+                          </div>
+                        </div>
+                      </TooltipContent>
+                    </UiTooltip>
+                  </TooltipProvider>
+                </div>
+              </CardContent>
+          </Card>
+
+          {/* Card 4: Taxa de Aprovação - Design Compacto */}
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-yellow-500/60 dark:border-yellow-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-yellow-900/10 hover:border-yellow-400/40 dark:hover:border-yellow-400/40 transition-all duration-200">
+            <CardContent className="p-3 sm:p-4">
+              {/* Header compacto em linha */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="w-8 h-8 rounded-lg bg-yellow-500/10 dark:bg-yellow-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-yellow-500/15 dark:group-hover:bg-yellow-500/25 transition-colors">
+                    <Target className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                    </div>
+                  <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Aprovação</span>
                     {metrics.variacaoTaxaAprovacao !== 0 && (
-                      <div className={`flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-xs font-semibold ${metrics.variacaoTaxaAprovacao > 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
-                        <TrendingUp className={`h-2 w-2 sm:h-3 sm:w-3 ${metrics.variacaoTaxaAprovacao > 0 ? '' : 'rotate-180'}`} />
-                        <span className="hidden sm:inline">{metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{metrics.variacaoTaxaAprovacao || 0} p.p</span>
-                        <span className="sm:hidden">{metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{metrics.variacaoTaxaAprovacao || 0}</span>
+                    <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold ${metrics.variacaoTaxaAprovacao > 0 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
+                      <TrendingUp className={`h-2 w-2 ${metrics.variacaoTaxaAprovacao > 0 ? '' : 'rotate-180'}`} />
+                      {metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{metrics.variacaoTaxaAprovacao || 0}
                       </div>
                     )}
-                  </div>
-                  <div className="flex flex-wrap gap-1 sm:gap-1.5 text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">
-                  <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full bg-yellow-500/10 dark:bg-yellow-500/15 whitespace-nowrap">
-                    <span className="font-semibold text-gray-900 dark:text-white">{metrics.aprovacoesTotal || 0}</span>
-                    <span className="hidden sm:inline">aprovadas</span>
-                    <span className="sm:hidden">apr.</span>
-                  </span>
-                  <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full bg-amber-500/10 dark:bg-amber-500/15 whitespace-nowrap">
-                    <span className="font-semibold text-gray-900 dark:text-white">{metrics.pendenciasTotal || 0}</span>
-                    <span className="hidden sm:inline">pendentes</span>
-                    <span className="sm:hidden">pend.</span>
-                  </span>
-                  <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full bg-red-500/10 dark:bg-red-500/15 whitespace-nowrap">
-                    <span className="font-semibold text-gray-900 dark:text-white">{metrics.rejeicoesTotal || 0}</span>
-                    <span className="hidden sm:inline">rejeitadas</span>
-                    <span className="sm:hidden">rej.</span>
-                  </span>
-                </div>
                 </div>
                 <TooltipProvider>
                   <UiTooltip>
@@ -462,11 +489,11 @@ export default function Dashboard() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700 dark:text-yellow-400 dark:hover:bg-yellow-900/10 flex-shrink-0"
+                        className="h-7 w-7 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors rounded-lg flex-shrink-0"
                         onClick={() => setShowApprovalModal(true)}
                         aria-label="Ver detalhes de aprovação"
                       >
-                        <Info className="h-2.5 w-2.5 sm:h-4 sm:w-4" />
+                        <Info className="h-3.5 w-3.5" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent sideOffset={6}>
@@ -476,20 +503,55 @@ export default function Dashboard() {
                 </TooltipProvider>
               </div>
 
-              <div className="mt-2 sm:mt-4 space-y-2 sm:space-y-3">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="flex-1 h-1.5 sm:h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAprovacao || 0}%` }}></div>
+              {/* Valor e info lado a lado */}
+              <div className="flex items-end justify-between mb-2 gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-yellow-500" /> : `${metrics.taxaAprovacao || 0}%`}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Performance</p>
                   </div>
-                  <span className="text-[9px] sm:text-xs font-semibold text-yellow-600 dark:text-yellow-400">{metrics.taxaAprovacao || 0}%</span>
+                <div className="text-right flex-shrink-0">
+                  <div className="flex items-center gap-1 text-[9px] mb-0.5">
+                    <span className="px-1 py-0.5 rounded bg-yellow-500/10 dark:bg-yellow-500/15 font-semibold text-gray-900 dark:text-white">{metrics.aprovacoesTotal || 0}</span>
+                    <span className="px-1 py-0.5 rounded bg-amber-500/10 dark:bg-amber-500/15 font-semibold text-gray-900 dark:text-white">{metrics.pendenciasTotal || 0}</span>
+                    <span className="px-1 py-0.5 rounded bg-red-500/10 dark:bg-red-500/15 font-semibold text-gray-900 dark:text-white">{metrics.rejeicoesTotal || 0}</span>
                 </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-xs">
-                  <span className="text-gray-500 dark:text-gray-400">Meta {approvalTarget}%</span>
-                  <span className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-full ${isApprovalOnTarget ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
-                    <span className="font-semibold hidden sm:inline">{isApprovalOnTarget ? 'Dentro da meta' : 'Abaixo da meta'}</span>
-                    <span className="font-semibold sm:hidden">{isApprovalOnTarget ? 'OK' : 'Baixo'}</span>
-                  </span>
+                  <p className={`text-[9px] font-medium ${isApprovalOnTarget ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                    {isApprovalOnTarget ? '✓ Meta OK' : `Meta: ${approvalTarget}%`}
+                  </p>
                 </div>
+              </div>
+
+              {/* Barra de progresso compacta com tooltip */}
+              <div className="h-[32px] sm:h-[40px] flex items-end">
+                <TooltipProvider>
+                  <UiTooltip>
+                    <TooltipTrigger asChild>
+                      <div className="w-full">
+                        <div className="flex-1 h-1.5 bg-yellow-100/50 dark:bg-yellow-900/20 rounded-full overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
+                          <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAprovacao || 0}%` }}></div>
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={8} className="py-2 px-3 text-xs">
+                      <div className="space-y-1">
+                        <div className="font-semibold text-gray-900 dark:text-white">Taxa de Aprovação</div>
+                        <div className="text-yellow-600 dark:text-yellow-400 font-bold">
+                          {metrics.taxaAprovacao || 0}%
+                        </div>
+                        <div className="text-gray-600 dark:text-gray-400 text-[10px] pt-1 border-t border-gray-200 dark:border-gray-700 space-y-0.5">
+                          <div>Meta: {approvalTarget}%</div>
+                          <div className="flex items-center gap-2 mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
+                            <span className="text-emerald-600 dark:text-emerald-400">{metrics.aprovacoesTotal || 0} aprovadas</span>
+                            <span className="text-amber-600 dark:text-amber-400">{metrics.pendenciasTotal || 0} pendentes</span>
+                            <span className="text-red-600 dark:text-red-400">{metrics.rejeicoesTotal || 0} rejeitadas</span>
+                          </div>
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </UiTooltip>
+                </TooltipProvider>
               </div>
             </CardContent>
           </Card>
@@ -524,69 +586,183 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              {isLoading ? <div className="flex items-center justify-center h-[280px]">
+              {isLoading ? <div className="flex items-center justify-center h-[320px]">
                   <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-                </div> : evolutionData && evolutionData.length > 0 ? <ResponsiveContainer width="100%" height={280}>
-                  <LineChart data={evolutionData} margin={{
-                top: 5,
-                right: 20,
+                </div> : evolutionData && evolutionData.length > 0 ? <ResponsiveContainer width="100%" height={320}>
+                  <ComposedChart data={evolutionData} margin={{
+                top: 10,
+                right: 30,
                 left: 0,
-                bottom: 5
+                bottom: 10
               }}>
                     <defs>
                       <linearGradient id="colorCotacoes" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#7C3AED" stopOpacity={0.05} />
                       </linearGradient>
                       <linearGradient id="colorFornecedores" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#22C55E" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#22C55E" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#22C55E" stopOpacity={0.35} />
+                        <stop offset="95%" stopColor="#22C55E" stopOpacity={0.05} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.5} />
-                    <XAxis dataKey={evolutionPeriod === '7d' ? 'day' : 'month'} stroke="#6b7280" className="dark:stroke-gray-500" style={{
-                  fontSize: '12px',
-                  fontWeight: 500
-                }} tickLine={false} />
-                    <YAxis stroke="#6b7280" className="dark:stroke-gray-500" style={{
-                  fontSize: '12px',
-                  fontWeight: 500
-                }} tickLine={false} axisLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
+                    <XAxis 
+                      dataKey={evolutionPeriod === '7d' ? 'day' : 'month'} 
+                      stroke="#6b7280" 
+                      className="dark:stroke-gray-500" 
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 500
+                      }} 
+                      tickLine={false}
+                      axisLine={{ stroke: '#e5e7eb', className: 'dark:stroke-gray-700' }}
+                    />
+                    <YAxis 
+                      yAxisId="left"
+                      stroke="#6b7280" 
+                      className="dark:stroke-gray-500" 
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 500
+                      }} 
+                      tickLine={false} 
+                      axisLine={false}
+                    />
+                    <YAxis 
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#22C55E"
+                      className="dark:stroke-green-400"
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 500
+                      }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
                     <RechartsTooltip 
-                      contentStyle={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                        padding: '8px 12px'
-                      }} labelStyle={{
-                        fontWeight: 600,
-                        color: '#374151'
-                      }} />
-                    <Legend wrapperStyle={{
-                  paddingTop: '10px'
-                }} iconType="circle" />
-                    <Line type="monotone" dataKey="cotacoes" stroke="#7C3AED" strokeWidth={3} name="Cotações" dot={{
-                  fill: '#7C3AED',
-                  strokeWidth: 2,
-                  r: 4
-                }} activeDot={{
-                  r: 6,
-                  strokeWidth: 2
-                }} fill="url(#colorCotacoes)" />
-                    <Line type="monotone" dataKey="fornecedores" stroke="#22C55E" strokeWidth={3} name="Fornecedores" dot={{
-                  fill: '#22C55E',
-                  strokeWidth: 2,
-                  r: 4
-                }} activeDot={{
-                  r: 6,
-                  strokeWidth: 2
-                }} fill="url(#colorFornecedores)" />
-                  </LineChart>
-                </ResponsiveContainer> : <div className="flex items-center justify-center h-[280px] text-slate-500">
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const cotacoesItem = payload.find(p => p.dataKey === 'cotacoes');
+                          const fornecedoresItem = payload.find(p => p.dataKey === 'fornecedores');
+                          
+                          return (
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 backdrop-blur-sm">
+                              <p className="font-semibold text-gray-900 dark:text-white mb-2.5 text-sm">{label}</p>
+                              <div className="space-y-1.5">
+                                {cotacoesItem && (
+                                  <div className="flex items-center justify-between gap-4">
+                                    <span className="text-sm text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+                                      <div className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-sm"></div>
+                                      Cotações
+                                    </span>
+                                    <span className="font-bold text-purple-600 dark:text-purple-400">
+                                      {cotacoesItem.value || 0}
+                                    </span>
+                                  </div>
+                                )}
+                                {fornecedoresItem && (
+                                  <div className="flex items-center justify-between gap-4">
+                                    <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1.5">
+                                      <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
+                                      Fornecedores
+                                    </span>
+                                    <span className="font-bold text-green-600 dark:text-green-400">
+                                      {fornecedoresItem.value || 0}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Legend 
+                      wrapperStyle={{
+                        paddingTop: '15px'
+                      }}
+                      iconType="circle"
+                      iconSize={8}
+                    />
+                    {/* Área de Cotações com gradiente */}
+                    <Area 
+                      type="monotone" 
+                      dataKey="cotacoes" 
+                      fill="url(#colorCotacoes)" 
+                      stroke="none"
+                      yAxisId="left"
+                      name="Cotações"
+                      isAnimationActive={true}
+                      animationDuration={800}
+                    />
+                    {/* Linha de Cotações */}
+                    <Line 
+                      type="monotone" 
+                      dataKey="cotacoes" 
+                      stroke="#7C3AED" 
+                      strokeWidth={3} 
+                      name="Cotações"
+                      yAxisId="left"
+                      dot={{ 
+                        fill: '#7C3AED', 
+                        strokeWidth: 2, 
+                        r: 4,
+                        stroke: '#fff',
+                        className: 'drop-shadow-sm'
+                      }} 
+                      activeDot={{ 
+                        r: 7,
+                        strokeWidth: 3,
+                        stroke: '#fff',
+                        fill: '#7C3AED',
+                        className: 'drop-shadow-md'
+                      }}
+                      isAnimationActive={true}
+                      animationDuration={800}
+                    />
+                    {/* Área de Fornecedores com gradiente */}
+                    <Area 
+                      type="monotone" 
+                      dataKey="fornecedores" 
+                      fill="url(#colorFornecedores)" 
+                      stroke="none"
+                      yAxisId="right"
+                      name="Fornecedores"
+                      isAnimationActive={true}
+                      animationDuration={1000}
+                    />
+                    {/* Linha de Fornecedores */}
+                    <Line 
+                      type="monotone" 
+                      dataKey="fornecedores" 
+                      stroke="#22C55E" 
+                      strokeWidth={3} 
+                      name="Fornecedores"
+                      yAxisId="right"
+                      dot={{ 
+                        fill: '#22C55E', 
+                        strokeWidth: 2, 
+                        r: 4,
+                        stroke: '#fff',
+                        className: 'drop-shadow-sm'
+                      }} 
+                      activeDot={{ 
+                        r: 7,
+                        strokeWidth: 3,
+                        stroke: '#fff',
+                        fill: '#22C55E',
+                        className: 'drop-shadow-md'
+                      }}
+                      isAnimationActive={true}
+                      animationDuration={1000}
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer> : <div className="flex items-center justify-center h-[320px] text-slate-500">
                   <div className="text-center">
                     <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p className="rounded-sm bg-white">Dados insuficientes para gráfico</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Dados insuficientes para gráfico</p>
                   </div>
                 </div>}
             </CardContent>

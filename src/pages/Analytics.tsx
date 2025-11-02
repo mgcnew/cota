@@ -216,33 +216,50 @@ export default function Analytics() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
-          {/* Métricas Principais - Minimalista */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          {/* Métricas Principais - Grid Profissional 2 Colunas */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
             {metricas.map((metrica, index) => {
               const icons = [DollarSign, Clock, CheckCircle, Users];
               const Icon = icons[index] || DollarSign;
+              const colors = [
+                { border: 'border-emerald-500/60 dark:border-emerald-400/60', bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', text: 'text-emerald-600 dark:text-emerald-400', hover: 'hover:bg-emerald-500/15 dark:hover:bg-emerald-500/25' },
+                { border: 'border-blue-500/60 dark:border-blue-400/60', bg: 'bg-blue-500/10 dark:bg-blue-500/20', text: 'text-blue-600 dark:text-blue-400', hover: 'hover:bg-blue-500/15 dark:hover:bg-blue-500/25' },
+                { border: 'border-purple-500/60 dark:border-purple-400/60', bg: 'bg-purple-500/10 dark:bg-purple-500/20', text: 'text-purple-600 dark:text-purple-400', hover: 'hover:bg-purple-500/15 dark:hover:bg-purple-500/25' },
+                { border: 'border-orange-500/60 dark:border-orange-400/60', bg: 'bg-orange-500/10 dark:bg-orange-500/20', text: 'text-orange-600 dark:text-orange-400', hover: 'hover:bg-orange-500/15 dark:hover:bg-orange-500/25' }
+              ];
+              const color = colors[index] || colors[0];
               
               return (
-                <Card key={metrica.titulo} className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm hover:shadow-md dark:shadow-none hover:border-gray-300 dark:hover:border-gray-600/40 transition-all duration-200">
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center shadow-sm dark:shadow-none">
-                          <Icon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <Card key={metrica.titulo} className={`group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 ${color.border} border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200`}>
+                  <CardContent className="p-3 sm:p-4">
+                    {/* Header compacto em linha */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className={`w-8 h-8 rounded-lg ${color.bg} ${color.hover} flex items-center justify-center flex-shrink-0 transition-colors`}>
+                          <Icon className={`h-4 w-4 ${color.text}`} />
                         </div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{metrica.titulo}</span>
+                        <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">{metrica.titulo}</span>
+                        {metrica.variacao && (
+                          <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold ${
+                            metrica.tipo === 'positivo' 
+                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' 
+                              : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'
+                          }`}>
+                            <TrendingUp className={`h-2 w-2 ${metrica.tipo === 'negativo' ? 'rotate-180' : ''}`} />
+                            {metrica.variacao}
+                          </div>
+                        )}
                       </div>
-                      {metrica.variacao && (
-                        <span className={`text-xs font-medium ${
-                          metrica.tipo === 'positivo' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                        }`}>
-                          {metrica.tipo === 'positivo' ? '↑' : '↓'} {metrica.variacao}
-                        </span>
-                      )}
                     </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">{metrica.valor}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{metrica.descricao}</p>
+
+                    {/* Valor e descrição */}
+                    <div className="flex items-end justify-between mb-2 gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5 truncate">
+                          {metrica.valor}
+                        </p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{metrica.descricao}</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -250,89 +267,128 @@ export default function Analytics() {
             })}
           </div>
 
-          {/* Tendência e Fornecedores - Minimalista */}
-          <div className="grid gap-5 lg:grid-cols-2 mb-6">
+          {/* Tendência e Fornecedores - Grid Profissional 2 Colunas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4 mb-6">
             {/* Tendência de Economia */}
-            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">Tendência Mensal</CardTitle>
+            <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-purple-500/60 dark:border-purple-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Tendência Mensal</CardTitle>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2.5">
-                  {tendenciasMensais.map(item => (
-                    <div key={item.mes} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-8">{item.mes}</span>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">{item.cotacoes} cotações</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">R$ {item.valor.toLocaleString('pt-BR')}</div>
+              <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+                {tendenciasMensais.length === 0 ? (
+                  <div className="text-center py-8">
+                    <TrendingUp className="h-10 w-10 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum dado disponível</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 sm:space-y-2.5">
+                    {tendenciasMensais.map(item => (
+                    <div key={item.mes} className="flex items-center justify-between py-2 sm:py-2.5 border-b border-gray-100 dark:border-gray-800/50 last:border-0">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 w-10 sm:w-12 flex-shrink-0">{item.mes}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">{item.cotacoes} cotações</div>
+                          <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">R$ {item.valor.toLocaleString('pt-BR')}</div>
                         </div>
                       </div>
-                      <span className="text-sm font-semibold text-green-600 dark:text-green-400">{item.economia}%</span>
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <span className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400">{item.economia.toFixed(1)}%</span>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Performance de Fornecedores */}
-            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">Top Fornecedores</CardTitle>
+            <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-indigo-500/60 dark:border-indigo-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center">
+                    <Building2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Top Fornecedores</CardTitle>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2.5">
-                  {performanceFornecedores.slice(0, 4).map((fornecedor, idx) => (
-                    <div key={fornecedor.fornecedor} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-gray-400 dark:text-gray-500 w-6">#{idx + 1}</span>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">{fornecedor.fornecedor}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">{fornecedor.cotacoes} cotações</div>
+              <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+                {performanceFornecedores.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Building2 className="h-10 w-10 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum fornecedor encontrado</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 sm:space-y-2.5">
+                    {performanceFornecedores.slice(0, 4).map((fornecedor, idx) => (
+                    <div key={fornecedor.fornecedor} className="flex items-center justify-between py-2 sm:py-2.5 border-b border-gray-100 dark:border-gray-800/50 last:border-0">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <span className="text-[10px] sm:text-xs font-medium text-gray-400 dark:text-gray-500 w-5 sm:w-6 flex-shrink-0">#{idx + 1}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">{fornecedor.fornecedor}</div>
+                          <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{fornecedor.cotacoes} cotações</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-semibold text-green-600 dark:text-green-400">-{fornecedor.economia}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Score {fornecedor.score}</div>
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <div className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400">{fornecedor.economia}</div>
+                        <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Score {fornecedor.score}</div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Top Produtos */}
-          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">Top Produtos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2.5">
-                {topProdutos.map((produto, index) => (
-                  <div key={produto.produto} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-sm font-medium text-gray-400 dark:text-gray-500 w-6">#{index + 1}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{produto.produto}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{produto.cotacoes} cotações</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 ml-4">
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{produto.valor}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">total</div>
-                      </div>
-                      <div className="text-right min-w-[60px]">
-                        <div className="text-sm font-semibold text-green-600 dark:text-green-400">-{produto.economia}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">economia</div>
+          {/* Top Produtos - Grid Profissional 2 Colunas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4">
+            {topProdutos.length === 0 ? (
+              <Card className="col-span-full bg-white dark:bg-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm">
+                <CardContent className="p-6 text-center">
+                  <Package className="h-12 w-12 mx-auto mb-3 text-gray-400 dark:text-gray-500" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum produto encontrado no período selecionado</p>
+                </CardContent>
+              </Card>
+            ) : (
+              topProdutos.slice(0, 6).map((produto, index) => (
+              <Card key={produto.produto} className="bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="text-xs sm:text-sm font-medium text-gray-400 dark:text-gray-500 w-5 sm:w-6 flex-shrink-0">#{index + 1}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate mb-1">{produto.produto}</div>
+                        <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{produto.cotacoes} cotações</div>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2 border-t border-gray-100 dark:border-gray-800/50">
+                    <div>
+                      <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-0.5">Valor Total</div>
+                      <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
+                        R$ {produto.valorTotal?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0,00'}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-0.5">Taxa de Economia</div>
+                      <div className="text-sm sm:text-base font-semibold text-green-600 dark:text-green-400">
+                        {produto.economia}
+                      </div>
+                      <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                        R$ {produto.economiaTotal?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0,00'}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6 mt-6">

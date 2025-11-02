@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { TrendingUp, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock } from "lucide-react";
+import { TrendingUp, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import { ReportFilters } from "@/components/reports/ReportFilters";
 import { useToast } from "@/hooks/use-toast";
@@ -441,17 +442,14 @@ export default function Relatorios() {
     return <LoadingSkeleton />;
   }
   return <div className="page-container">
-      <div className="flex flex-wrap gap-3 mb-6">
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 flex items-center gap-2 text-gray-900 dark:text-white">
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Atualizar
-            </Button>
-            
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6">
+            {/* Botão Período - Sempre visível */}
             <Dialog open={isPeriodDialogOpen} onOpenChange={setIsPeriodDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className={`bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 flex items-center gap-2 text-gray-900 dark:text-white ${startDate && endDate ? 'ring-2 ring-purple-500 dark:ring-purple-400 bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-600' : ''}`}>
                   <Calendar className="h-4 w-4" />
-                  {dateRangeText}
+                  <span className="hidden sm:inline">{dateRangeText}</span>
+                  <span className="sm:hidden">Período</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
@@ -571,12 +569,25 @@ export default function Relatorios() {
               </DialogContent>
             </Dialog>
           
+            {/* Botão Atualizar - Visível apenas no desktop */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh} 
+              disabled={refreshing} 
+              className="hidden sm:flex bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 items-center gap-2 text-gray-900 dark:text-white"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+            
+            {/* Dialog de Filtros - Visível apenas no desktop */}
             <Dialog open={isFiltersDialogOpen} onOpenChange={setIsFiltersDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className={`bg-white/70 backdrop-blur-sm border-purple-200 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 flex items-center gap-2 ${hasFilters ? 'ring-2 ring-purple-500 bg-purple-50 border-purple-300' : ''}`}>
+                <Button variant="outline" size="sm" className={`hidden sm:flex bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 items-center gap-2 text-gray-900 dark:text-white ${hasFilters ? 'ring-2 ring-purple-500 dark:ring-purple-400 bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-600' : ''}`}>
                   <Filter className="h-4 w-4" />
                   Filtros
-                  {hasFilters && <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs bg-purple-100 text-purple-700">
+                  {hasFilters && <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
                       {selectedFornecedores.length + selectedProdutos.length}
                     </Badge>}
                 </Button>
@@ -622,10 +633,61 @@ export default function Relatorios() {
               </DialogContent>
             </Dialog>
           
-            <Button size="sm" onClick={handleExportAll} disabled={isGenerating} className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0">
+            {/* Botão Exportar Todos - Visível apenas no desktop */}
+            <Button 
+              size="sm" 
+              onClick={handleExportAll} 
+              disabled={isGenerating} 
+              className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+            >
               <Download className="h-4 w-4" />
               {isGenerating ? 'Gerando...' : 'Exportar Todos'}
             </Button>
+
+            {/* Dropdown Menu Mobile - Consolidar ações */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="sm:hidden bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 h-10 w-10 p-0"
+                >
+                  <MoreVertical className="h-4 w-4 text-gray-900 dark:text-white" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                <DropdownMenuLabel className="text-gray-600 dark:text-gray-400 font-medium">Ações</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={handleRefresh} 
+                  disabled={refreshing}
+                  className="cursor-pointer"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                  Atualizar
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setIsFiltersDialogOpen(true)}
+                  className="cursor-pointer"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filtros
+                  {hasFilters && (
+                    <Badge variant="secondary" className="ml-auto px-1.5 py-0.5 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
+                      {selectedFornecedores.length + selectedProdutos.length}
+                    </Badge>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={handleExportAll} 
+                  disabled={isGenerating}
+                  className="cursor-pointer"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {isGenerating ? 'Gerando...' : 'Exportar Todos'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
       {/* Progress Bar Melhorado */}
@@ -644,173 +706,315 @@ export default function Relatorios() {
           </CardContent>
         </Card>}
 
-      {/* Resumo Executivo - Estilo Apple */}
-      <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
+      {/* Resumo Executivo - Grid Responsivo Mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
+        {/* Card 1: Economia - Design Equilibrado Mobile */}
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-emerald-500/60 dark:border-emerald-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-emerald-900/10 sm:hover:border-emerald-400/40 sm:dark:hover:border-emerald-400/40 transition-all duration-200">
+          <CardContent className="p-3 sm:p-4">
+            {/* Header compacto em linha */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/15 dark:group-hover:bg-emerald-500/25 transition-colors">
+                  <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
-              </div>
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                <TrendingUp className="h-2.5 w-2.5 text-green-600" />
-                <span className="text-xs font-semibold text-green-600">+{estatisticasGerais.economiaPercentual}</span>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Economia</span>
+                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                  <TrendingUp className="h-2 w-2" />
+                  +{estatisticasGerais.economiaPercentual}
+                </div>
               </div>
             </div>
-            <div className="mb-3">
-              <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{estatisticasGerais.economiaTotal}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">total gerada</p>
-            </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">Meta: R$ 50.000</p>
-          </CardContent>
-        </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                  <FileText className="h-3.5 w-3.5 text-purple-600" />
-                </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
-              </div>
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 rounded-full">
-                <span className="text-xs font-semibold text-purple-600">+12%</span>
+            {/* Valor e info lado a lado */}
+            <div className="flex items-end justify-between mb-2 gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5 truncate">
+                  {estatisticasGerais.economiaTotal}
+                </p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Total gerada</p>
               </div>
             </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{estatisticasGerais.cotacoesRealizadas}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">realizadas</p>
-            </div>
-            <div className="flex items-end gap-0.5 h-8">
-              {[55, 70, 60, 85, 70, 90, 75].map((height, i) => (
-                <div key={i} className="flex-1 bg-gradient-to-t from-purple-500 to-violet-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
-              ))}
+
+            {/* Info adicional compacta */}
+            <div className="h-[32px] sm:h-[40px] flex items-end">
+              <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+                Meta: R$ 50.000
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Building2 className="h-3.5 w-3.5 text-blue-600" />
+        {/* Card 2: Cotações - Design Equilibrado Mobile */}
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-purple-500/60 dark:border-purple-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-purple-900/10 sm:hover:border-purple-400/40 sm:dark:hover:border-purple-400/40 transition-all duration-200">
+          <CardContent className="p-3 sm:p-4">
+            {/* Header compacto em linha */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-purple-500/15 dark:group-hover:bg-purple-500/25 transition-colors">
+                  <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
-              </div>
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                <span className="text-xs font-semibold text-blue-600">+5</span>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Cotações</span>
+                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
+                  +12%
+                </div>
               </div>
             </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{estatisticasGerais.fornecedoresAtivos}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ativos</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" style={{ width: '90%' }}></div>
+
+            {/* Valor e info lado a lado */}
+            <div className="flex items-end justify-between mb-2 gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                  {estatisticasGerais.cotacoesRealizadas}
+                </p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Realizadas</p>
               </div>
-              <span className="text-xs font-semibold text-blue-600">90%</span>
+            </div>
+
+            {/* Mini gráfico compacto */}
+            <div className="h-[32px] sm:h-[40px] flex items-end">
+              <div className="w-full">
+                <div className="flex items-end gap-0.5 h-5 sm:h-6 mb-1">
+                  {[55, 70, 60, 85, 70, 90, 75].map((height, i) => (
+                    <div 
+                      key={i} 
+                      className="flex-1 bg-gradient-to-t from-purple-500 to-violet-400 rounded-t opacity-60 hover:opacity-100 transition-opacity"
+                      style={{ height: `${height}%`, minHeight: '4px' }}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                  <Package className="h-3.5 w-3.5 text-orange-600" />
+        {/* Card 3: Fornecedores - Design Equilibrado Mobile */}
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-blue-500/60 dark:border-blue-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-blue-900/10 sm:hover:border-blue-400/40 sm:dark:hover:border-blue-400/40 transition-all duration-200">
+          <CardContent className="p-3 sm:p-4">
+            {/* Header compacto em linha */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/15 dark:group-hover:bg-blue-500/25 transition-colors">
+                  <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Produtos</span>
-              </div>
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-full">
-                <span className="text-xs font-semibold text-orange-600">+8%</span>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Fornecedores</span>
+                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+                  +5
+                </div>
               </div>
             </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{estatisticasGerais.produtosCotados}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotados</p>
+
+            {/* Valor e info lado a lado */}
+            <div className="flex items-end justify-between mb-2 gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                  {estatisticasGerais.fornecedoresAtivos}
+                </p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Ativos</p>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400">
+                  90%
+                </p>
+                <p className="text-[9px] text-gray-500 dark:text-gray-400">Taxa</p>
+              </div>
             </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">{Math.floor(estatisticasGerais.produtosCotados * 0.6)} com economia gerada</p>
+
+            {/* Barra de progresso compacta */}
+            <div className="h-[32px] sm:h-[40px] flex items-end">
+              <div className="w-full">
+                <div className="flex-1 h-1.5 bg-blue-100/50 dark:bg-blue-900/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style={{ width: '90%' }}></div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card 4: Produtos - Design Equilibrado Mobile */}
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-orange-900/10 sm:hover:border-orange-400/40 sm:dark:hover:border-orange-400/40 transition-all duration-200">
+          <CardContent className="p-3 sm:p-4">
+            {/* Header compacto em linha */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/15 dark:group-hover:bg-orange-500/25 transition-colors">
+                  <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                </div>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Produtos</span>
+                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
+                  +8%
+                </div>
+              </div>
+            </div>
+
+            {/* Valor e info lado a lado */}
+            <div className="flex items-end justify-between mb-2 gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                  {estatisticasGerais.produtosCotados}
+                </p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Cotados</p>
+              </div>
+            </div>
+
+            {/* Info adicional compacta */}
+            <div className="h-[32px] sm:h-[40px] flex items-end">
+              <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+                {Math.floor(estatisticasGerais.produtosCotados * 0.6)} com economia gerada
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Card de Configuração Unificado */}
       <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400" />
             Configurar Relatório
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="grid gap-5 md:grid-cols-2">
+        <CardContent className="space-y-4 sm:space-y-5 p-3 sm:p-4">
+          {/* Mobile: Layout Vertical Compacto */}
+          <div className="sm:hidden space-y-3">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Tipo de Relatório</Label>
+              <Label className="text-xs font-medium">Tipo de Relatório</Label>
               <Select value={selectedReportType} onValueChange={setSelectedReportType}>
-                <SelectTrigger>
+                <SelectTrigger className="h-9 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {relatoriosDisponiveis.map(rel => (
-                    <SelectItem key={rel.tipo} value={rel.tipo}>{rel.titulo}</SelectItem>
+                    <SelectItem key={rel.tipo} value={rel.tipo} className="text-sm">{rel.titulo}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {relatoriosDisponiveis.find(r => r.tipo === selectedReportType)?.descricao}
-              </p>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Período</Label>
+              <Label className="text-xs font-medium">Período</Label>
               <Button 
                 variant="outline" 
-                className="w-full justify-start text-left font-normal"
+                className="w-full justify-start text-left font-normal h-9 text-sm"
                 onClick={() => setIsPeriodDialogOpen(true)}
               >
-                <Calendar className="h-4 w-4 mr-2" />
-                {dateRangeText}
+                <Calendar className="h-3.5 w-3.5 mr-2" />
+                <span className="truncate">{dateRangeText}</span>
               </Button>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {startDate && endDate && `${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} dias selecionados`}
-              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2 border-t border-gray-200 dark:border-gray-700/30">
+              <Button 
+                onClick={handleVisualizarRelatorio}
+                disabled={loadingPreview || !startDate || !endDate}
+                className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white h-10 text-sm"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                {loadingPreview ? "Carregando..." : "Visualizar"}
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline"
+                    disabled={isGenerating || !startDate || !endDate}
+                    className="w-full justify-between h-10 text-sm border-gray-300 dark:border-gray-600"
+                  >
+                    <div className="flex items-center">
+                      <Download className="h-4 w-4 mr-2" />
+                      <span>Baixar Relatório</span>
+                    </div>
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel className="text-xs">Formato de Download</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={() => handleDownloadReport(selectedReportType, 'pdf')}
+                    disabled={isGenerating || !startDate || !endDate}
+                    className="cursor-pointer"
+                  >
+                    <FileText className="h-4 w-4 mr-2 text-purple-600" />
+                    Baixar PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => handleDownloadReport(selectedReportType, 'excel')}
+                    disabled={isGenerating || !startDate || !endDate}
+                    className="cursor-pointer"
+                  >
+                    <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" />
+                    Baixar Excel
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 pt-3 border-t border-gray-200 dark:border-gray-700/30">
-            <Button 
-              onClick={handleVisualizarRelatorio}
-              disabled={loadingPreview || !startDate || !endDate}
-              className="flex-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              {loadingPreview ? "Carregando..." : "Visualizar"}
-            </Button>
-            
-            <Button 
-              onClick={() => handleDownloadReport(selectedReportType, 'pdf')}
-              disabled={isGenerating || !startDate || !endDate}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Baixar PDF
-            </Button>
-            
-            <Button 
-              onClick={() => handleDownloadReport(selectedReportType, 'excel')}
-              disabled={isGenerating || !startDate || !endDate}
-              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Baixar Excel
-            </Button>
+          {/* Desktop: Layout Original em Grid */}
+          <div className="hidden sm:block space-y-5">
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Tipo de Relatório</Label>
+                <Select value={selectedReportType} onValueChange={setSelectedReportType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {relatoriosDisponiveis.map(rel => (
+                      <SelectItem key={rel.tipo} value={rel.tipo}>{rel.titulo}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {relatoriosDisponiveis.find(r => r.tipo === selectedReportType)?.descricao}
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Período</Label>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start text-left font-normal"
+                  onClick={() => setIsPeriodDialogOpen(true)}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  {dateRangeText}
+                </Button>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {startDate && endDate && `${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} dias selecionados`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-3 border-t border-gray-200 dark:border-gray-700/30">
+              <Button 
+                onClick={handleVisualizarRelatorio}
+                disabled={loadingPreview || !startDate || !endDate}
+                className="flex-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                {loadingPreview ? "Carregando..." : "Visualizar"}
+              </Button>
+              
+              <Button 
+                onClick={() => handleDownloadReport(selectedReportType, 'pdf')}
+                disabled={isGenerating || !startDate || !endDate}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Baixar PDF
+              </Button>
+              
+              <Button 
+                onClick={() => handleDownloadReport(selectedReportType, 'excel')}
+                disabled={isGenerating || !startDate || !endDate}
+                className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Baixar Excel
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

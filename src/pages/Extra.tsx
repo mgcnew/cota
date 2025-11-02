@@ -11,6 +11,14 @@ const funcionalidades = [
     icon: 'fluent:mic-32-filled',
     rota: '/locucoes',
     gradient: 'from-purple-500 to-pink-500'
+  },
+  {
+    id: 'whatsapp',
+    titulo: 'WhatsApp em Massa',
+    descricao: 'Envio de mensagens e imagens para múltiplos contatos',
+    icon: 'fluent:chat-multiple-32-filled',
+    rota: '/whatsapp-mensagens',
+    gradient: 'from-green-500 to-emerald-500'
   }
   // Adicione mais funcionalidades aqui no futuro
 ];

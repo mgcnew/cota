@@ -300,9 +300,10 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
         produto: p.produto,
         cotacoes: p.cotacoes,
         economia: p.valorTotal > 0 ? `${((p.economiaTotal / p.valorTotal) * 100).toFixed(1)}%` : "0%",
-        valor: `R$ ${p.economiaTotal.toFixed(2)}`
+        economiaTotal: p.economiaTotal,
+        valorTotal: p.valorTotal + p.economiaTotal // Valor total = mínimo + economia
       }))
-      .sort((a, b) => parseFloat(b.valor.replace(/[R$\s]/g, '')) - parseFloat(a.valor.replace(/[R$\s]/g, '')))
+      .sort((a, b) => b.economiaTotal - a.economiaTotal)
       .slice(0, 5);
   }, [quotes, selectedFornecedores, selectedProdutos]);
 
@@ -321,7 +322,6 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
       fornecedor: string;
       cotacoes: number;
       respondidas: number;
-      economiaGerada: number;
       tempoTotal: number;
       respostasComTempo: number;
     }>();
@@ -333,7 +333,6 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
             fornecedor: qs.supplier_name,
             cotacoes: 0,
             respondidas: 0,
-            economiaGerada: 0,
             tempoTotal: 0,
             respostasComTempo: 0
           });
@@ -358,11 +357,65 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
       });
     });
 
-    return Array.from(fornecedoresMap.values())
-      .filter(f => selectedFornecedores.length === 0 || selectedFornecedores.includes(f.fornecedor))
-      .map(f => {
+    // Calcular economia real por fornecedor
+    const fornecedoresComEconomia = new Map<string, number>();
+    filteredQuotes.forEach(quote => {
+      const produtosComValores = new Map<string, Map<string, number>>();
+      
+      quote.quote_supplier_items?.forEach(item => {
+        if (item.valor_oferecido && item.valor_oferecido > 0) {
+          if (!produtosComValores.has(item.product_id)) {
+            produtosComValores.set(item.product_id, new Map());
+          }
+          produtosComValores.get(item.product_id)!.set(item.supplier_id, item.valor_oferecido);
+        }
+      });
+
+      // Para cada produto, encontrar o menor valor e calcular economia por fornecedor
+      produtosComValores.forEach((valoresPorFornecedor) => {
+        if (valoresPorFornecedor.size >= 2) {
+          const valores = Array.from(valoresPorFornecedor.values());
+          const min = Math.min(...valores);
+          const max = Math.max(...valores);
+          const economia = max - min;
+          
+          // O fornecedor com menor valor "gera" a economia
+          valoresPorFornecedor.forEach((valor, supplierId) => {
+            if (valor === min) {
+              const atual = fornecedoresComEconomia.get(supplierId) || 0;
+              fornecedoresComEconomia.set(supplierId, atual + economia);
+            }
+          });
+        }
+      });
+    });
+
+    // Criar um mapa reverso: supplier_id -> dados do fornecedor
+    const fornecedoresPorId = new Map<string, { fornecedor: string; supplierId: string }>();
+    filteredQuotes.forEach(quote => {
+      quote.quote_suppliers?.forEach(qs => {
+        if (!fornecedoresPorId.has(qs.supplier_id)) {
+          fornecedoresPorId.set(qs.supplier_id, {
+            fornecedor: qs.supplier_name,
+            supplierId: qs.supplier_id
+          });
+        }
+      });
+    });
+
+    return Array.from(fornecedoresMap.entries())
+      .filter(([supplierId]) => {
+        if (selectedFornecedores.length === 0) return true;
+        const fornecedorData = fornecedoresPorId.get(supplierId);
+        return fornecedorData && selectedFornecedores.includes(fornecedorData.fornecedor);
+      })
+      .map(([supplierId, f]) => {
         const taxaResposta = f.cotacoes > 0 ? (f.respondidas / f.cotacoes) * 100 : 0;
         const tempoMedio = f.respostasComTempo > 0 ? f.tempoTotal / f.respostasComTempo : 0;
+        
+        // Buscar economia calculada do fornecedor
+        const economiaGerada = fornecedoresComEconomia.get(supplierId) || 0;
+        
         const score = Math.round(
           (taxaResposta * 0.5) + 
           (f.cotacoes * 2) + 
@@ -373,7 +426,8 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
           fornecedor: f.fornecedor,
           score,
           cotacoes: f.cotacoes,
-          economia: `${taxaResposta.toFixed(0)}%`,
+          taxaResposta: `${taxaResposta.toFixed(0)}%`,
+          economia: economiaGerada > 0 ? `R$ ${economiaGerada.toFixed(2)}` : 'R$ 0,00',
           tempo: tempoMedio > 0 ? `${tempoMedio.toFixed(1)} dias` : "N/A"
         };
       })
@@ -400,6 +454,7 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
 
       let economiaMes = 0;
       let valorTotalMes = 0;
+      let valorMinimoMes = 0;
 
       cotacoesMes.forEach(q => {
         // Agrupa valores por produto
@@ -414,22 +469,24 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
           }
         });
 
-        // Calcula economia para cada produto
+        // Calcula economia e valores para cada produto
         produtosComValores.forEach((valores) => {
           if (valores.length >= 2) {
             const max = Math.max(...valores);
             const min = Math.min(...valores);
             economiaMes += max - min;
-            valorTotalMes += min;
+            valorMinimoMes += min;
           }
+          // Soma todos os valores para ter o total real
+          valores.forEach(v => valorTotalMes += v);
         });
       });
 
       tendencias.push({
         mes: meses[mesData.getMonth()],
         cotacoes: cotacoesMes.length,
-        economia: valorTotalMes > 0 ? ((economiaMes / (valorTotalMes + economiaMes)) * 100) : 0,
-        valor: valorTotalMes
+        economia: valorMinimoMes > 0 ? ((economiaMes / (valorMinimoMes + economiaMes)) * 100) : 0,
+        valor: valorTotalMes // Agora mostra o valor total das cotações
       });
     }
 

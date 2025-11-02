@@ -19,6 +19,7 @@ import Relatorios from "./pages/Relatorios";
 import Analytics from "./pages/Analytics";
 import Locucoes from "./pages/Locucoes";
 import Extra from "./pages/Extra";
+import WhatsAppMensagens from "./pages/WhatsAppMensagens";
 import Configuracoes from "./pages/Configuracoes";
 import Auth from "./pages/Auth";
 import AcceptInvite from "./pages/AcceptInvite";
@@ -67,6 +68,7 @@ const App = () => {
                   <Route path="analytics" element={<Analytics />} />
                   <Route path="locucoes" element={<Locucoes />} />
                   <Route path="extra" element={<Extra />} />
+                  <Route path="whatsapp-mensagens" element={<WhatsAppMensagens />} />
                   <Route path="configuracoes" element={<Configuracoes />} />
                 </Route>
 

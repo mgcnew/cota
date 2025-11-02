@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, BarChart3 } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -13,6 +14,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  ComposedChart,
+  Area,
 } from "recharts";
 
 interface Fornecedor {
@@ -20,6 +23,7 @@ interface Fornecedor {
   score: number;
   cotacoes: number;
   economia: string;
+  taxaResposta?: string;
   tempo: string;
 }
 
@@ -27,7 +31,7 @@ interface TendenciaMensal {
   mes: string;
   cotacoes: number;
   economia: number;
-  valor?: number;
+  valor: number;
 }
 
 interface PerformanceChartsProps {
@@ -50,58 +54,157 @@ export function PerformanceCharts({
     name: f.fornecedor.substring(0, 20) + (f.fornecedor.length > 20 ? '...' : ''),
     value: f.score,
     color: COLORS[index % COLORS.length],
+    fullName: f.fornecedor,
   }));
 
-  // Dados para economia total por fornecedor
+  // Dados para economia total por fornecedor - extrair de "R$ X,XX"
   const economiaData = topFornecedores.map(f => {
-    const economiaNum = parseFloat(f.economia.replace('%', '')) || 0;
+    // Extrair valor numérico de "R$ X,XX" (formato brasileiro: R$ 1.234,56)
+    let economiaNum = 0;
+    if (f.economia) {
+      if (f.economia.includes('R$')) {
+        // Remove "R$" e espaços, depois trata separador decimal brasileiro
+        let economiaStr = f.economia.replace(/[R$\s]/g, '').trim();
+        // Se tem vírgula, é separador decimal brasileiro
+        if (economiaStr.includes(',')) {
+          // Remove pontos (milhares) e troca vírgula por ponto (decimal)
+          economiaStr = economiaStr.replace(/\./g, '').replace(',', '.');
+        }
+        economiaNum = parseFloat(economiaStr) || 0;
+      } else if (f.economia.includes('%')) {
+        // Se for porcentagem (fallback)
+        const economiaStr = f.economia.replace(/[%\s]/g, '').replace(',', '.');
+        economiaNum = parseFloat(economiaStr) || 0;
+      }
+    }
     return {
       fornecedor: f.fornecedor.substring(0, 15) + (f.fornecedor.length > 15 ? '...' : ''),
       economia: economiaNum,
+      fullName: f.fornecedor,
+      score: f.score,
     };
   });
 
+  // Dados para taxa de resposta por fornecedor - extrair de taxaResposta
+  const taxaRespostaData = topFornecedores.map(f => {
+    // Extrair taxa de resposta de taxaResposta (formato "XX%")
+    let taxaResposta = 0;
+    if (f.taxaResposta) {
+      const taxaStr = f.taxaResposta.replace(/[%\s]/g, '').replace(',', '.');
+      taxaResposta = parseFloat(taxaStr) || 0;
+    } else {
+      // Fallback: calcular a partir de cotacoes e respondidas se disponível
+      // Isso não está disponível nos dados, então deixamos como 0
+      taxaResposta = 0;
+    }
+    return {
+      fornecedor: f.fornecedor.substring(0, 15) + (f.fornecedor.length > 15 ? '...' : ''),
+      taxaResposta: taxaResposta,
+      fullName: f.fornecedor,
+      score: f.score,
+    };
+  });
+
+  // Custom Tooltip Component
+  const CustomTooltip = ({ active, payload, label, formatter }: any) => {
+    if (!active || !payload || !Array.isArray(payload) || payload.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 backdrop-blur-sm">
+        {label && <p className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">{label}</p>}
+        <div className="space-y-1.5">
+          {payload
+            .filter((entry: any) => entry && entry.value !== undefined && entry.value !== null)
+            .map((entry: any, index: number) => {
+              const value = entry.value ?? 0;
+              const name = entry.name || entry.dataKey || '';
+              const color = entry.color || entry.fill || COLORS[index % COLORS.length];
+              
+              return (
+                <div key={index} className="flex items-center justify-between gap-4">
+                  <span className="text-sm flex items-center gap-1.5" style={{ color }}>
+                    <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: color }}></div>
+                    {name}
+                  </span>
+                  <span className="font-bold" style={{ color }}>
+                    {formatter ? formatter(value, name, entry) : String(value)}
+                  </span>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+    );
+  };
+
+  // Verificar se há dados
+  const hasData = topFornecedores.length > 0 || tendenciasMensais.length > 0;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground mb-1">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">
           Análise de Performance
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Visualizações detalhadas de métricas e tendências
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {!hasData ? (
+        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm">
+          <CardContent className="p-12 text-center">
+            <BarChart3 className="h-16 w-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+            <p className="text-base text-gray-600 dark:text-gray-400 mb-2">Nenhum dado disponível</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500">Não há dados para exibir nos gráficos no período selecionado</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4">
         {/* Comparativo de Fornecedores */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-blue-500/60 dark:border-blue-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Top 5 Fornecedores - Score de Performance
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topFornecedores} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis type="number" domain={[0, 100]} />
+          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+            {topFornecedores.length === 0 ? (
+              <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+                <BarChart data={topFornecedores} layout="vertical" margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} />
+                  <XAxis 
+                    type="number" 
+                    domain={[0, 100]} 
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    style={{ fontSize: '11px', fontWeight: 500 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
                 <YAxis 
                   type="category" 
                   dataKey="fornecedor" 
-                  width={100}
-                  tick={{ fontSize: 12 }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                />
+                    width={80}
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    tick={{ fontSize: '11px', fontWeight: 500 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
                 <Bar 
                   dataKey="score" 
-                  radius={[0, 4, 4, 0]}
-                  name="Score"
+                    radius={[0, 6, 6, 0]}
+                    name="Score de Performance"
+                    isAnimationActive={true}
+                    animationDuration={800}
                 >
                   {topFornecedores.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -109,195 +212,344 @@ export function PerformanceCharts({
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
         {/* Pizza Chart - Distribuição de Performance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-purple-500/60 dark:border-purple-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Distribuição de Performance - Top 5
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+            {pieData.length === 0 ? (
+              <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
               <PieChart>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                  outerRadius={80}
+                    label={({ name, percent }) => {
+                      const label = name.length > 12 ? name.substring(0, 12) + '...' : name;
+                      return `${label} (${(percent * 100).toFixed(0)}%)`;
+                    }}
+                    outerRadius={70}
+                    innerRadius={25}
                   fill="#8884d8"
                   dataKey="value"
+                    isAnimationActive={true}
+                    animationDuration={800}
                 >
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#fff" strokeWidth={2} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                  formatter={(value: number) => [`Score: ${value.toFixed(1)}`, '']}
-                />
+                  <Tooltip 
+                    content={<CustomTooltip formatter={(value: number, name: string, entry: any) => {
+                      // Para o gráfico de pizza, tentar obter nome completo
+                      let fullName = name;
+                      try {
+                        if (entry?.payload?.fullName) {
+                          fullName = entry.payload.fullName;
+                        } else if (entry?.payload?.name) {
+                          fullName = entry.payload.name;
+                        }
+                      } catch (e) {
+                        // Ignorar erro e usar o nome padrão
+                      }
+                      return `Score: ${value.toFixed(1)}${fullName !== name ? ` (${fullName})` : ''}`;
+                    }} />}
+                  />
               </PieChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
         {/* Tendência Mensal - Cotações */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-emerald-500/60 dark:border-emerald-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Evolução Mensal - Número de Cotações
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={tendenciasMensais}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+            {tendenciasMensais.length === 0 ? (
+              <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+                <ComposedChart data={tendenciasMensais} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                  <defs>
+                    <linearGradient id="colorCotacoes" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
                 <XAxis 
                   dataKey="mes" 
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis />
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    style={{ fontSize: '11px', fontWeight: 500 }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e5e7eb', className: 'dark:stroke-gray-700' }}
+                  />
+                  <YAxis 
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    style={{ fontSize: '11px', fontWeight: 500 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
                 <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                />
-                <Legend />
+                    content={<CustomTooltip formatter={(value: number) => `${value} cotações`} />}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }}
+                    iconType="circle"
+                    iconSize={8}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="cotacoes"
+                    fill="url(#colorCotacoes)"
+                    stroke="none"
+                    name="Cotações"
+                    isAnimationActive={true}
+                    animationDuration={800}
+                  />
                 <Line
                   type="monotone"
                   dataKey="cotacoes"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
+                    stroke="#10b981"
+                    strokeWidth={3}
                   name="Cotações"
-                  dot={{ fill: 'hsl(var(--primary))' }}
-                />
-              </LineChart>
+                    dot={{ 
+                      fill: '#10b981', 
+                      strokeWidth: 2, 
+                      r: 4, 
+                      stroke: '#fff',
+                      className: 'drop-shadow-sm'
+                    }}
+                    activeDot={{ 
+                      r: 7, 
+                      strokeWidth: 3, 
+                      stroke: '#fff', 
+                      fill: '#10b981',
+                      className: 'drop-shadow-md'
+                    }}
+                    isAnimationActive={true}
+                    animationDuration={800}
+                  />
+                </ComposedChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
         {/* Tendência Mensal - Economia */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-green-500/60 dark:border-green-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Evolução Mensal - Taxa de Economia
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={tendenciasMensais}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+            {tendenciasMensais.length === 0 ? (
+              <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
+                <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+                <ComposedChart data={tendenciasMensais} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                  <defs>
+                    <linearGradient id="colorEconomia" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
                 <XAxis 
                   dataKey="mes" 
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis />
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    style={{ fontSize: '11px', fontWeight: 500 }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e5e7eb', className: 'dark:stroke-gray-700' }}
+                  />
+                  <YAxis 
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    style={{ fontSize: '11px', fontWeight: 500 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
                 <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                  formatter={(value: number) => `${value.toFixed(1)}%`}
-                />
-                <Legend />
+                    content={<CustomTooltip formatter={(value: number) => `${value.toFixed(1)}%`} />}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }}
+                    iconType="circle"
+                    iconSize={8}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="economia"
+                    fill="url(#colorEconomia)"
+                    stroke="none"
+                    name="Taxa de Economia (%)"
+                    isAnimationActive={true}
+                    animationDuration={800}
+                  />
                 <Line
                   type="monotone"
                   dataKey="economia"
-                  stroke="hsl(var(--chart-2))"
-                  strokeWidth={2}
+                    stroke="#22c55e"
+                    strokeWidth={3}
                   name="Taxa de Economia (%)"
-                  dot={{ fill: 'hsl(var(--chart-2))' }}
-                />
-              </LineChart>
+                    dot={{ 
+                      fill: '#22c55e', 
+                      strokeWidth: 2, 
+                      r: 4, 
+                      stroke: '#fff',
+                      className: 'drop-shadow-sm'
+                    }}
+                    activeDot={{ 
+                      r: 7, 
+                      strokeWidth: 3, 
+                      stroke: '#fff', 
+                      fill: '#22c55e',
+                      className: 'drop-shadow-md'
+                    }}
+                    isAnimationActive={true}
+                    animationDuration={800}
+                  />
+                </ComposedChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
         {/* Gráfico de Barras - Taxa de Resposta */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-indigo-500/60 dark:border-indigo-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Taxa de Resposta por Fornecedor
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topFornecedores}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+            {taxaRespostaData.length === 0 ? (
+              <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+                <BarChart data={taxaRespostaData} margin={{ top: 10, right: 10, left: 0, bottom: 60 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
                 <XAxis 
                   dataKey="fornecedor" 
-                  tick={{ fontSize: 11 }}
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    style={{ fontSize: '10px', fontWeight: 500 }}
                   angle={-45}
                   textAnchor="end"
-                  height={100}
-                />
-                <YAxis domain={[0, 100]} />
+                    height={80}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e5e7eb', className: 'dark:stroke-gray-700' }}
+                  />
+                  <YAxis 
+                    domain={[0, 100]} 
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    style={{ fontSize: '11px', fontWeight: 500 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
                 <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                  formatter={(value: number) => `${value.toFixed(1)}%`}
-                />
-                <Legend />
-                <Bar 
-                  dataKey="score" 
-                  radius={[4, 4, 0, 0]}
-                  name="Score de Performance"
-                >
-                  {topFornecedores.map((entry, index) => (
+                    content={<CustomTooltip formatter={(value: number) => `${value.toFixed(1)}%`} />}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }}
+                    iconType="circle"
+                    iconSize={8}
+                  />
+                  <Bar 
+                    dataKey="taxaResposta" 
+                    radius={[6, 6, 0, 0]}
+                    name="Taxa de Resposta (%)"
+                    isAnimationActive={true}
+                    animationDuration={800}
+                  >
+                    {taxaRespostaData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
         {/* Novo Gráfico - Economia Total por Fornecedor */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Economia Alcançada por Fornecedor
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={economiaData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+            {economiaData.length === 0 ? (
+              <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
+                <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
+                <BarChart data={economiaData} margin={{ top: 10, right: 10, left: 0, bottom: 60 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
                 <XAxis 
                   dataKey="fornecedor" 
-                  tick={{ fontSize: 11 }}
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    style={{ fontSize: '10px', fontWeight: 500 }}
                   angle={-45}
                   textAnchor="end"
-                  height={100}
-                />
-                <YAxis />
+                    height={80}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e5e7eb', className: 'dark:stroke-gray-700' }}
+                  />
+                  <YAxis 
+                    stroke="#6b7280"
+                    className="dark:stroke-gray-500"
+                    style={{ fontSize: '11px', fontWeight: 500 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
                 <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                  formatter={(value: number) => `${value.toFixed(1)}%`}
-                />
-                <Legend />
+                    content={<CustomTooltip formatter={(value: number) => {
+                      // Economia sempre em reais
+                      return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    }} />}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }}
+                    iconType="circle"
+                    iconSize={8}
+                  />
                 <Bar 
                   dataKey="economia" 
-                  radius={[4, 4, 0, 0]}
-                  name="Taxa de Economia (%)"
+                    radius={[6, 6, 0, 0]}
+                    name="Economia Gerada"
+                    isAnimationActive={true}
+                    animationDuration={800}
                 >
                   {economiaData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -305,9 +557,11 @@ export function PerformanceCharts({
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
+      )}
     </div>
   );
 }

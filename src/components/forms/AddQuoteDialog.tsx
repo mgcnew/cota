@@ -535,7 +535,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[1000px] h-[92vh] sm:h-[88vh] md:h-[85vh] max-h-[900px] p-0 gap-0 overflow-hidden border-gray-200 dark:border-gray-700 shadow-lg rounded-lg flex flex-col bg-white dark:bg-gray-900">
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[1000px] h-[92vh] sm:h-[88vh] md:h-[85vh] max-h-[900px] p-0 gap-0 overflow-hidden border-gray-200 dark:border-gray-700 shadow-lg rounded-lg flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
         <DialogHeader className="px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">

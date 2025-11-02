@@ -28,6 +28,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
+import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 interface Supplier {
   id: string;
   name: string;
@@ -279,152 +280,214 @@ export default function Fornecedores() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Stats Cards - Estilo Apple */}
-          <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                      <Building2 className="h-3.5 w-3.5 text-indigo-600" />
+          {/* Stats Cards - Grid Responsivo Similar ao Dashboard */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
+            {/* Card 1: Total de Fornecedores - Design Equilibrado Mobile */}
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-indigo-500/60 dark:border-indigo-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-indigo-900/10 sm:hover:border-indigo-400/40 sm:dark:hover:border-indigo-400/40 transition-all duration-200">
+              <CardContent className="p-3 sm:p-4">
+                {/* Header compacto em linha */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-500/15 dark:group-hover:bg-indigo-500/25 transition-colors">
+                      <Building2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
-                  </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-indigo-600" />
-                    <span className="text-xs font-semibold text-indigo-600">+{Math.floor(stats.total * 0.15)}</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Fornecedores</span>
+                    <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300">
+                      +{Math.floor(stats.total * 0.15)}
+                    </div>
                   </div>
                 </div>
-                <div className="mb-3">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.total}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cadastrados</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualAtivos}%` }}></div>
-                  </div>
-                  <span className="text-xs font-semibold text-indigo-600">{stats.percentualAtivos}%</span>
-                </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{stats.active} ativos • {stats.inactive} inativos • {stats.pending} pendentes</p>
-              </CardContent>
-            </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                      <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
-                    </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ativos</span>
+                {/* Valor e info lado a lado */}
+                <div className="flex items-end justify-between mb-2 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                      {stats.total}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Cadastrados</p>
                   </div>
-                  {stats.percentualAtivos > 0 && (
-                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                      <TrendingUp className="h-2.5 w-2.5 text-green-600" />
-                      <span className="text-xs font-semibold text-green-600">{stats.percentualAtivos}%</span>
-                    </div>
-                  )}
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                      {stats.percentualAtivos}%
+                    </p>
+                    <p className="text-[9px] text-gray-500 dark:text-gray-400">Ativos</p>
+                  </div>
                 </div>
-                <div className="mb-3">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.active}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">fornecedores ativos</p>
-                </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">
-                  {stats.percentualAtivos}% da base • {stats.inactive} inativos • {stats.pending} pendentes
-                </p>
-              </CardContent>
-            </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                      <DollarSign className="h-3.5 w-3.5 text-blue-600" />
+                {/* Barra de progresso compacta */}
+                <div className="h-[32px] sm:h-[40px] flex items-end">
+                  <div className="w-full">
+                    <div className="flex-1 h-1.5 bg-indigo-100/50 dark:bg-indigo-900/20 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualAtivos}%` }}></div>
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Limite</span>
+                    <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1">{stats.active} ativos • {stats.inactive} inativos • {stats.pending} pendentes</p>
                   </div>
-                  {stats.active > 0 && (
-                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                      <span className="text-xs font-semibold text-blue-600">{stats.active} ativos</span>
-                    </div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalLimit}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">limite total</p>
-                </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-2">
-                  Média de <span className="font-semibold text-blue-600 dark:text-blue-400">R$ {stats.limiteMedioPorAtivo}k</span> por fornecedor ativo
-                </p>
-                <div className="relative h-8">
-                  <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path d="M 0,25 L 15,20 L 30,22 L 45,18 L 60,15 L 75,12 L 90,10 L 100,8" fill="none" stroke="rgb(59, 130, 246)" strokeWidth="2" />
-                    <path d="M 0,25 L 15,20 L 30,22 L 45,18 L 60,15 L 75,12 L 90,10 L 100,8 L 100,40 L 0,40 Z" fill="url(#blueGradient)" />
-                  </svg>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                      <FileText className="h-3.5 w-3.5 text-orange-600" />
+            {/* Card 2: Fornecedores Ativos - Design Equilibrado Mobile */}
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-emerald-500/60 dark:border-emerald-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-emerald-900/10 sm:hover:border-emerald-400/40 sm:dark:hover:border-emerald-400/40 transition-all duration-200">
+              <CardContent className="p-3 sm:p-4">
+                {/* Header compacto em linha */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/15 dark:group-hover:bg-emerald-500/25 transition-colors">
+                      <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
-                  </div>
-                  {stats.mediaCotacoesPorFornecedor !== "0.0" && (
-                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-full">
-                      <span className="text-xs font-semibold text-orange-600">{stats.mediaCotacoesPorFornecedor} média</span>
-                    </div>
-                  )}
-                </div>
-                <div className="mb-3">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.activeQuotes}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotações ativas</p>
-                </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-2">
-                  Média de <span className="font-semibold text-orange-600 dark:text-orange-400">{stats.mediaCotacoesPorFornecedor}</span> cotações por fornecedor
-                </p>
-                {/* Mini gráfico de distribuição de cotações */}
-                <div className="flex items-end gap-0.5 h-8">
-                  {stats.distribuicaoCotacoes.map((count, i) => {
-                    const maxCount = Math.max(...stats.distribuicaoCotacoes, 1);
-                    const heightPercent = (count / maxCount) * 100;
-                    const cores = [
-                      'from-gray-400 to-gray-300',
-                      'from-orange-400 to-orange-300',
-                      'from-orange-500 to-orange-400',
-                      'from-amber-500 to-amber-400',
-                      'from-yellow-500 to-yellow-400',
-                      'from-green-500 to-green-400',
-                      'from-emerald-500 to-emerald-400'
-                    ];
-                    const labels = ['0', '1-2', '3-5', '6-8', '9-12', '13-20', '20+'];
-                    return (
-                      <div 
-                        key={i} 
-                        className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t opacity-60 hover:opacity-100 transition-all duration-300 relative group`}
-                        style={{ height: `${Math.max(heightPercent, 10)}%`, minHeight: '8px' }}
-                        title={`${count} fornecedores com ${labels[i]} cotações`}
-                      >
-                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-orange-600 dark:text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-lg border border-gray-200 dark:border-gray-700">
-                          <div className="text-center">
-                            <div className="text-gray-500 dark:text-gray-400">{labels[i]} cotações</div>
-                            <div className="font-bold">{count} fornecedores</div>
-                          </div>
-                        </span>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Ativos</span>
+                    {stats.percentualAtivos > 0 && (
+                      <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+                        {stats.percentualAtivos}%
                       </div>
-                    );
-                  })}
+                    )}
+                  </div>
+                </div>
+
+                {/* Valor e info lado a lado */}
+                <div className="flex items-end justify-between mb-2 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                      {stats.active}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Fornecedores</p>
+                  </div>
+                </div>
+
+                {/* Info adicional compacta */}
+                <div className="h-[32px] sm:h-[40px] flex items-end">
+                  <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+                    {stats.percentualAtivos}% da base • {stats.inactive} inativos • {stats.pending} pendentes
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 3: Limite Total - Design Equilibrado Mobile */}
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-blue-500/60 dark:border-blue-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-blue-900/10 sm:hover:border-blue-400/40 sm:dark:hover:border-blue-400/40 transition-all duration-200">
+              <CardContent className="p-3 sm:p-4">
+                {/* Header compacto em linha */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/15 dark:group-hover:bg-blue-500/25 transition-colors">
+                      <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Limite</span>
+                    {stats.active > 0 && (
+                      <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+                        {stats.active} ativos
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Valor e info lado a lado */}
+                <div className="flex items-end justify-between mb-2 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5 truncate">
+                      {stats.totalLimit}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">Limite Total</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400">
+                      R$ {stats.limiteMedioPorAtivo}k
+                    </p>
+                    <p className="text-[9px] text-gray-500 dark:text-gray-400">Média</p>
+                  </div>
+                </div>
+
+                {/* Mini gráfico compacto */}
+                <div className="h-[32px] sm:h-[40px] flex items-end">
+                  <div className="w-full">
+                    <div className="relative h-6">
+                      <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d="M 0,25 L 15,20 L 30,22 L 45,18 L 60,15 L 75,12 L 90,10 L 100,8" fill="none" stroke="rgb(59, 130, 246)" strokeWidth="2" />
+                        <path d="M 0,25 L 15,20 L 30,22 L 45,18 L 60,15 L 75,12 L 90,10 L 100,8 L 100,40 L 0,40 Z" fill="url(#blueGradient)" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 4: Cotações Ativas - Design Equilibrado Mobile */}
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-orange-900/10 sm:hover:border-orange-400/40 sm:dark:hover:border-orange-400/40 transition-all duration-200">
+              <CardContent className="p-3 sm:p-4">
+                {/* Header compacto em linha */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/15 dark:group-hover:bg-orange-500/25 transition-colors">
+                      <FileText className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Cotações</span>
+                    {stats.mediaCotacoesPorFornecedor !== "0.0" && (
+                      <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
+                        {stats.mediaCotacoesPorFornecedor}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Valor e info lado a lado */}
+                <div className="flex items-end justify-between mb-2 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                      {stats.activeQuotes}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Ativas</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-xs font-semibold text-orange-600 dark:text-orange-400">
+                      {stats.mediaCotacoesPorFornecedor} média
+                    </p>
+                    <p className="text-[9px] text-gray-500 dark:text-gray-400">Por fornecedor</p>
+                  </div>
+                </div>
+
+                {/* Mini gráfico de distribuição compacto */}
+                <div className="h-[32px] sm:h-[40px] flex items-end">
+                  <div className="w-full">
+                    <div className="flex items-end gap-0.5 h-5 sm:h-6 mb-1">
+                      {stats.distribuicaoCotacoes.map((count, i) => {
+                        const maxCount = Math.max(...stats.distribuicaoCotacoes, 1);
+                        const heightPercent = (count / maxCount) * 100;
+                        const cores = [
+                          'from-gray-400 to-gray-300',
+                          'from-orange-400 to-orange-300',
+                          'from-orange-500 to-orange-400',
+                          'from-amber-500 to-amber-400',
+                          'from-yellow-500 to-yellow-400',
+                          'from-green-500 to-green-400',
+                          'from-emerald-500 to-emerald-400'
+                        ];
+                        const labels = ['0', '1-2', '3-5', '6-8', '9-12', '13-20', '20+'];
+                        return (
+                          <TooltipProvider key={i}>
+                            <UiTooltip>
+                              <TooltipTrigger asChild>
+                                <div 
+                                  className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t opacity-60 hover:opacity-100 transition-opacity cursor-pointer`}
+                                  style={{ height: `${Math.max(heightPercent, 10)}%`, minHeight: '4px' }}
+                                  title={`${count} fornecedores com ${labels[i]} cotações`}
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent side="top" sideOffset={8} className="py-1.5 px-2.5 text-xs">
+                                <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">{labels[i]} cotações</div>
+                                <div className="font-semibold text-orange-600 dark:text-orange-300">{count} fornecedores</div>
+                              </TooltipContent>
+                            </UiTooltip>
+                          </TooltipProvider>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -434,29 +497,47 @@ export default function Fornecedores() {
           <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
             <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            {/* ViewToggle - Escondido no mobile */}
+            <div className="hidden sm:block">
+              <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            </div>
 
             <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                <Input placeholder="Buscar fornecedores..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-indigo-300/70 dark:hover:border-indigo-600/70 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/50 dark:focus:ring-indigo-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+              {/* Mobile: Busca e Botão Criar lado a lado */}
+              <div className="flex gap-2 sm:gap-3">
+                <div className="relative flex-1 sm:flex-none">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                  <Input placeholder="Buscar fornecedores..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-indigo-300/70 dark:hover:border-indigo-600/70 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/50 dark:focus:ring-indigo-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+                </div>
+
+                {/* Botão Criar - Visível apenas no mobile */}
+                <Button 
+                  onClick={() => addSupplierRef.current?.click()}
+                  className="sm:hidden bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl px-4 flex-shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
 
-              <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-indigo-300/70 dark:hover:border-indigo-600/70 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/50 dark:focus:ring-indigo-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="active">Ativos</SelectItem>
-                  <SelectItem value="inactive">Inativos</SelectItem>
-                  <SelectItem value="pending">Pendentes</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Select Status - Escondido no mobile */}
+              <div className="hidden sm:block">
+                <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
+                  <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-indigo-300/70 dark:hover:border-indigo-600/70 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/50 dark:focus:ring-indigo-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="active">Ativos</SelectItem>
+                    <SelectItem value="inactive">Inativos</SelectItem>
+                    <SelectItem value="pending">Pendentes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
+              {/* Dropdown Ações - Escondido no mobile */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
+                  <Button className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
                     <Plus className="h-4 w-4 mr-2" />
                     Ações
                   </Button>
@@ -480,20 +561,20 @@ export default function Fornecedores() {
       </Card>
 
       {/* Suppliers View */}
-      {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map(supplier => <Card key={supplier.id} className="group hover:shadow-xl dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 border border-gray-200/60 dark:border-gray-700/30 hover:border-indigo-300/60 dark:hover:border-indigo-600/50 bg-gradient-to-br from-white to-indigo-50/30 dark:from-[#1C1F26] dark:to-[#1C1F26] backdrop-blur-sm">
-              <CardHeader className="pb-4">
+      {viewMode === "grid" ? <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedData.items.map(supplier => <Card key={supplier.id} className="group sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 transition-all duration-300 border border-gray-200/60 dark:border-gray-700/30 sm:hover:border-indigo-300/60 sm:dark:hover:border-indigo-600/50 bg-white dark:bg-[#1C1F26] sm:bg-gradient-to-br sm:from-white sm:to-indigo-50/30 sm:dark:from-[#1C1F26] sm:dark:to-[#1C1F26] sm:backdrop-blur-sm">
+              <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
                 <div className="flex items-start justify-between">
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 group-hover:from-indigo-500/20 group-hover:to-blue-500/20 transition-all duration-300">
-                        <Building2 className="h-5 w-5 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
+                  <div className="space-y-2 sm:space-y-3 flex-1">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="hidden sm:block p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 group-hover:from-indigo-500/20 group-hover:to-blue-500/20 transition-all duration-300 flex-shrink-0">
+                        <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="card-title group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors duration-300 truncate">
+                        <CardTitle className="text-base sm:text-base font-semibold text-gray-900 dark:text-white sm:group-hover:text-indigo-700 sm:dark:group-hover:text-indigo-400 transition-colors duration-300 truncate">
                           {capitalize(supplier.name)}
                         </CardTitle>
-                        <p className="table-cell-secondary truncate mt-1">{capitalize(supplier.contact)}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5 sm:mt-1">{capitalize(supplier.contact)}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -503,8 +584,8 @@ export default function Fornecedores() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-indigo-100">
-                        <MoreVertical className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 sm:hover:bg-indigo-100 h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4 text-gray-400 dark:text-gray-500 sm:text-gray-600" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -525,87 +606,136 @@ export default function Fornecedores() {
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-4">
-                <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50/80 to-cyan-50/80 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200/60 dark:border-blue-700/30">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <DollarSign className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Limite</span>
-                      </div>
-                      <p className="text-lg font-bold text-blue-800 dark:text-blue-300">{supplier.limit}</p>
+              <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4">
+                {/* Mobile: Layout Profissional Equilibrado */}
+                <div className="sm:hidden space-y-2.5">
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Limite</span>
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium text-green-700 dark:text-green-400">Preço Médio</span>
-                      </div>
-                      <p className="text-lg font-bold text-green-800 dark:text-green-300">{supplier.avgPrice}</p>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.limit}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Preço Médio</span>
                     </div>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.avgPrice}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Cotações Ativas</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.activeQuotes}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Total</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.totalQuotes}</span>
+                  </div>
+                  
+                  {/* Botão Nova Cotação - Mobile */}
+                  <div className="pt-2.5">
+                    <AddQuoteDialog onAdd={handleAddQuote} trigger={
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="w-full border-2 border-indigo-500/60 dark:border-indigo-400/60 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-all duration-200 text-xs h-9 shadow-sm"
+                      >
+                        <Plus className="h-3.5 w-3.5 mr-1.5" />
+                        Nova Cotação
+                      </Button>
+                    } />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-lg bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-200/60 dark:border-indigo-700/30 text-center">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <FileText className="h-4 w-4 text-indigo-600" />
-                      <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">Cotações Ativas</span>
+                {/* Desktop: Layout Original Decorativo */}
+                <div className="hidden sm:block space-y-4">
+                  <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50/80 to-cyan-50/80 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200/60 dark:border-blue-700/30">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <DollarSign className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Limite</span>
+                        </div>
+                        <p className="text-lg font-bold text-blue-800 dark:text-blue-300">{supplier.limit}</p>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingUp className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-700 dark:text-green-400">Preço Médio</span>
+                        </div>
+                        <p className="text-lg font-bold text-green-800 dark:text-green-300">{supplier.avgPrice}</p>
+                      </div>
                     </div>
-                    <span className="text-lg font-bold text-indigo-800 dark:text-indigo-300">{supplier.activeQuotes}</span>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <Star className="h-4 w-4 text-purple-600" />
-                      <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Total</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-200/60 dark:border-indigo-700/30 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <FileText className="h-4 w-4 text-indigo-600" />
+                        <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">Cotações Ativas</span>
+                      </div>
+                      <span className="text-lg font-bold text-indigo-800 dark:text-indigo-300">{supplier.activeQuotes}</span>
                     </div>
-                    <span className="text-lg font-bold text-purple-800 dark:text-purple-300">{supplier.totalQuotes}</span>
+
+                    <div className="p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <Star className="h-4 w-4 text-purple-600" />
+                        <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Total</span>
+                      </div>
+                      <span className="text-lg font-bold text-purple-800 dark:text-purple-300">{supplier.totalQuotes}</span>
+                    </div>
                   </div>
+
+                  <div className="space-y-3 p-4 rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
+                    {supplier.phone ? (
+                      <div className="flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-green-100">
+                          <Phone className="h-3 w-3 text-green-600" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.phone}</span>
+                      </div>
+                    ) : !canViewSensitiveData && (
+                      <div className="flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-gray-100">
+                          <Phone className="h-3 w-3 text-gray-400" />
+                        </div>
+                        <span className="text-xs text-gray-400 italic">Restrito a admins</span>
+                      </div>
+                    )}
+                    {supplier.email ? (
+                      <div className="flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-blue-100">
+                          <Mail className="h-3 w-3 text-blue-600" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{supplier.email}</span>
+                      </div>
+                    ) : !canViewSensitiveData && (
+                      <div className="flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-gray-100">
+                          <Mail className="h-3 w-3 text-gray-400" />
+                        </div>
+                        <span className="text-xs text-gray-400 italic">Restrito a admins</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-orange-100">
+                        <FileText className="h-3 w-3 text-orange-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Último: {supplier.lastOrder}</span>
+                    </div>
+                  </div>
+
+                  <AddQuoteDialog onAdd={handleAddQuote} trigger={<Button size="sm" className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nova Cotação
+                    </Button>} />
                 </div>
-
-                <div className="space-y-3 p-4 rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
-                  {supplier.phone ? (
-                    <div className="flex items-center gap-3">
-                      <div className="p-1.5 rounded-lg bg-green-100">
-                        <Phone className="h-3 w-3 text-green-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.phone}</span>
-                    </div>
-                  ) : !canViewSensitiveData && (
-                    <div className="flex items-center gap-3">
-                      <div className="p-1.5 rounded-lg bg-gray-100">
-                        <Phone className="h-3 w-3 text-gray-400" />
-                      </div>
-                      <span className="text-xs text-gray-400 italic">Restrito a admins</span>
-                    </div>
-                  )}
-                  {supplier.email ? (
-                    <div className="flex items-center gap-3">
-                      <div className="p-1.5 rounded-lg bg-blue-100">
-                        <Mail className="h-3 w-3 text-blue-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{supplier.email}</span>
-                    </div>
-                  ) : !canViewSensitiveData && (
-                    <div className="flex items-center gap-3">
-                      <div className="p-1.5 rounded-lg bg-gray-100">
-                        <Mail className="h-3 w-3 text-gray-400" />
-                      </div>
-                      <span className="text-xs text-gray-400 italic">Restrito a admins</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-lg bg-orange-100">
-                      <FileText className="h-3 w-3 text-orange-600" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Último: {supplier.lastOrder}</span>
-                  </div>
-                </div>
-
-                <AddQuoteDialog onAdd={handleAddQuote} trigger={<Button size="sm" className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Cotação
-                  </Button>} />
               </CardContent>
             </Card>)}
         </div> : <Card className="border-0 bg-transparent">
