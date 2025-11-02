@@ -1,4 +1,3 @@
-// Página de Produtos - Gerenciamento completo com código de barras e upload de imagens
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -227,7 +226,7 @@ export default function Produtos() {
         <div className="page-container">
           {/* Stats Cards - Estilo Apple */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 overflow-visible">
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -255,7 +254,7 @@ export default function Produtos() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -281,7 +280,7 @@ export default function Produtos() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -305,7 +304,7 @@ export default function Produtos() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -549,17 +548,17 @@ export default function Produtos() {
                 <TableHeader>
                   <TableRow>
                     <TableCell colSpan={8} className="px-1 pb-3 pt-0 border-none">
-                      <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-orange-200/60 dark:border-orange-800/40 rounded-lg shadow-sm px-4 py-3">
-                        <div className="w-[25%] flex items-center gap-2 pr-4 min-w-0">
+                      <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-orange-200/60 dark:border-orange-800/40 rounded-lg shadow-sm px-1.5 py-3">
+                        <div className="w-[25%] flex items-center gap-2 px-2 min-w-0">
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/15 to-amber-500/15 flex items-center justify-center text-orange-600 dark:text-amber-300">
                             <Package className="h-4 w-4" />
                           </div>
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Produto</span>
                         </div>
-                        <div className="hidden md:flex w-[15%] pl-2">
+                        <div className="hidden md:flex w-[15%] pl-2 justify-center">
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Categoria</span>
                         </div>
-                        <div className="hidden md:flex w-[12%] pl-2">
+                        <div className="hidden md:flex w-[12%] pl-2 justify-center">
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Código</span>
                         </div>
                         <div className="hidden sm:flex w-[13%] pl-2 justify-center">
@@ -584,9 +583,9 @@ export default function Produtos() {
                 <TableBody>
                   {paginatedData.items.map((product, index) => <TableRow key={product.id} className="group border-none">
                       <TableCell colSpan={8} className="px-1 py-3">
-                        <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-all duration-200 group-hover:bg-white dark:group-hover:bg-gray-800/70 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20 group-hover:border-orange-300/60 dark:group-hover:border-orange-700/50 [&_*]:!transition-none">
+                        <div className="flex items-center px-1.5 py-2 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-all duration-200 group-hover:bg-white dark:group-hover:bg-gray-800/70 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20 group-hover:border-orange-300/60 dark:group-hover:border-orange-700/50 [&_*]:!transition-none">
                           {/* Produto - Largura fixa */}
-                          <div className="w-[25%] flex items-center gap-3 pr-4">
+                          <div className="w-[25%] flex items-center gap-3 px-2">
                             <div 
                               className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 cursor-pointer bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 hover:scale-105"
                               onClick={() => setImagePreviewUrl(product.image_url || null)}
@@ -601,9 +600,9 @@ export default function Produtos() {
                                 <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                               )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="table-cell-primary truncate">{capitalize(product.name)}</div>
-                              <div className="table-cell-secondary md:hidden mt-1">{capitalize(product.category)}</div>
+                            <div className="min-w-0 flex-1 max-w-[200px]">
+                              <div className="table-cell-primary truncate" title={product.name}>{capitalize(product.name)}</div>
+                              <div className="table-cell-secondary md:hidden mt-1 truncate">{capitalize(product.category)}</div>
                             </div>
                           </div>
 

@@ -216,7 +216,7 @@ export default function Cotacoes() {
   return <div className="page-container">
       {/* Statistics Cards - Estilo Apple */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -247,7 +247,7 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -318,7 +318,7 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -653,46 +653,42 @@ export default function Cotacoes() {
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
-                <TableHeader className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-200 dark:border-gray-700/30">
-                  <TableRow className="border-b-2 border-gray-200 dark:border-gray-700/30">
-                    <TableHead className="font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        Cotação
+                <TableHeader>
+                  <TableRow>
+                    <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
+                      <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-teal-200/60 dark:border-teal-800/40 rounded-lg shadow-sm px-4 py-3">
+                        <div className="w-[18%] flex items-center gap-2 pr-4 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/15 to-cyan-500/15 flex items-center justify-center text-teal-600 dark:text-cyan-300">
+                            <FileText className="h-4 w-4" />
+                          </div>
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Cotação</span>
+                        </div>
+                        <div className="hidden md:flex w-[20%] pl-2">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Produto</span>
+                        </div>
+                        <div className="hidden lg:flex w-[15%] pl-2">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Período</span>
+                        </div>
+                        <div className="w-[12%] pl-2 justify-center flex">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Status</span>
+                        </div>
+                        <div className="w-[15%] pl-2 flex">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Melhor Preço</span>
+                        </div>
+                        <div className="hidden sm:flex w-[10%] pl-2 justify-center">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Fornecedores</span>
+                        </div>
+                        <div className="w-[10%] pl-4 flex justify-end">
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Ações</span>
+                        </div>
                       </div>
-                    </TableHead>
-                    <TableHead className="hidden md:table-cell font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        Produto
-                      </div>
-                    </TableHead>
-                    <TableHead className="hidden lg:table-cell font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Período
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">Status</TableHead>
-                    <TableHead className="font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        Melhor Preço
-                      </div>
-                    </TableHead>
-                    <TableHead className="hidden sm:table-cell font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 text-xs">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4" />
-                        Fornecedores
-                      </div>
-                    </TableHead>
-                    <TableHead className="text-right font-semibold text-teal-900 dark:text-gray-200 py-4 px-4 w-32 text-xs">Ações</TableHead>
+                    </TableCell>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group border-none">
                       <TableCell colSpan={7} className="px-1 py-3">
-                        <div className="flex items-center px-1.5 py-2 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:-translate-y-0.5 transition-all duration-300">
+                        <div className="flex items-center px-1.5 py-2 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-teal-300/60 dark:hover:border-teal-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                           {/* Cotação - Largura fixa */}
                           <div className="w-[18%] flex items-center gap-3 pr-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 dark:from-teal-400/20 dark:to-cyan-400/20 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50 dark:border-teal-700/50">

@@ -225,7 +225,7 @@ export default function Pedidos() {
       <div className="page-container">
         {/* Statistics Cards - Estilo Apple */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 overflow-visible">
-          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -254,7 +254,7 @@ export default function Pedidos() {
             </CardContent>
           </Card>
 
-          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
             <CardContent className="p-4 md:p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function Pedidos() {
             </CardContent>
           </Card>
 
-          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -306,7 +306,7 @@ export default function Pedidos() {
             </CardContent>
           </Card>
 
-          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
+          <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -428,28 +428,28 @@ export default function Pedidos() {
                       <TableRow>
                         <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
                           <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-pink-300/60 dark:border-pink-900/60 rounded-xl shadow-md backdrop-blur-sm px-4 py-3">
-                            <div className="w-[22%] flex items-center gap-2 pr-4 min-w-0">
+                            <div className="w-[15%] flex items-center gap-2 pr-4 min-w-0">
                               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500/15 to-rose-500/15 flex items-center justify-center text-pink-600 dark:text-rose-300">
                                 <ShoppingCart className="h-4 w-4" />
                               </div>
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Pedido</span>
                             </div>
-                            <div className="w-[18%] flex items-center gap-2 pl-2 min-w-0">
+                            <div className="w-[18%] flex items-center gap-2 px-2 min-w-0">
                               <Building2 className="h-4 w-4 text-pink-600 dark:text-pink-300" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Fornecedor</span>
                             </div>
-                            <div className="hidden md:flex w-[18%] pl-2 items-center gap-2">
+                            <div className="hidden md:flex w-[18%] px-2 items-center gap-2">
                               <Package className="h-4 w-4 text-pink-600 dark:text-pink-300" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Produtos</span>
                             </div>
-                            <div className="hidden lg:flex w-[15%] pl-2 items-center gap-2">
+                            <div className="hidden lg:flex w-[15%] px-2 items-center gap-2">
                               <Calendar className="h-4 w-4 text-pink-600 dark:text-pink-300" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Entrega</span>
                             </div>
-                            <div className="flex w-[13%] pl-2 justify-center">
+                            <div className="flex w-[12%] px-2 justify-center">
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Status</span>
                             </div>
-                            <div className="flex w-[16%] pl-2 justify-center items-center gap-2">
+                            <div className="flex w-[12%] px-2 justify-center items-center gap-2">
                               <DollarSign className="h-4 w-4 text-pink-600 dark:text-pink-300" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Valor</span>
                             </div>
@@ -463,7 +463,7 @@ export default function Pedidos() {
                     <TableBody>
                       {paginatedData.items.map((pedido, index) => <TableRow key={pedido.id} className="group border-none">
                           <TableCell colSpan={7} className="px-1 py-3">
-                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:-translate-y-0.5 transition-all duration-300">
+                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-pink-300/60 dark:hover:border-pink-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                               {/* Pedido - Largura fixa */}
                               <div className="w-[15%] flex items-center gap-3 pr-4">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 dark:from-pink-400/20 dark:to-rose-400/20 flex items-center justify-center flex-shrink-0 border border-pink-200/50 dark:border-pink-700/50">
