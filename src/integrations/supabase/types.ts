@@ -58,6 +58,7 @@ export type Database = {
       companies: {
         Row: {
           cnpj: string | null
+          corporate_group_id: string | null
           created_at: string | null
           id: string
           max_users: number | null
@@ -69,6 +70,7 @@ export type Database = {
         }
         Insert: {
           cnpj?: string | null
+          corporate_group_id?: string | null
           created_at?: string | null
           id?: string
           max_users?: number | null
@@ -80,6 +82,7 @@ export type Database = {
         }
         Update: {
           cnpj?: string | null
+          corporate_group_id?: string | null
           created_at?: string | null
           id?: string
           max_users?: number | null
@@ -89,7 +92,15 @@ export type Database = {
           subscription_status?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "companies_corporate_group_id_fkey"
+            columns: ["corporate_group_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_invitations: {
         Row: {
@@ -169,6 +180,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      corporate_groups: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          discount_percentage: number | null
+          id: string
+          max_companies: number | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          id?: string
+          max_companies?: number | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          id?: string
+          max_companies?: number | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       order_items: {
         Row: {
@@ -580,7 +621,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_group_discount: {
+        Args: { _corporate_group_id: string }
+        Returns: number
+      }
       get_user_company_id: { Args: { p_user_id: string }; Returns: string }
+      get_user_corporate_group_id: {
+        Args: { _user_id: string }
+        Returns: string
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -592,6 +641,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       user_has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -12,13 +12,18 @@ import { Sun, Moon, Monitor, Bell, Palette, Globe, Info, RotateCcw, Settings, Bu
 import { toast } from "sonner";
 import { CompanyInfo } from "@/components/settings/CompanyInfo";
 import { CompanyUsersManager } from "@/components/settings/CompanyUsersManager";
+import { SuperAdminDashboard } from "@/components/settings/SuperAdminDashboard";
+import { CorporateGroupManager } from "@/components/settings/CorporateGroupManager";
 import { cn } from "@/lib/utils";
+import { Shield } from "lucide-react";
 
-type SettingsSection = "empresa" | "usuarios" | "aparencia" | "notificacoes" | "sistema" | "sobre";
+type SettingsSection = "empresa" | "usuarios" | "grupo" | "superadmin" | "aparencia" | "notificacoes" | "sistema" | "sobre";
 
 const menuItems: Array<{ id: SettingsSection; label: string; icon: typeof Building2 }> = [
   { id: "empresa", label: "Empresa", icon: Building2 },
   { id: "usuarios", label: "Usuários", icon: Users },
+  { id: "grupo", label: "Grupo Corporativo", icon: Building2 },
+  { id: "superadmin", label: "Super Admin", icon: Shield },
   { id: "aparencia", label: "Aparência", icon: Palette },
   { id: "notificacoes", label: "Notificações", icon: Bell },
   { id: "sistema", label: "Sistema", icon: Globe },
@@ -126,6 +131,20 @@ export default function Configuracoes() {
           {activeSection === "usuarios" && (
             <div className="space-y-6">
               <CompanyUsersManager />
+            </div>
+          )}
+
+          {/* Grupo Corporativo */}
+          {activeSection === "grupo" && (
+            <div className="space-y-6">
+              <CorporateGroupManager />
+            </div>
+          )}
+
+          {/* Super Admin */}
+          {activeSection === "superadmin" && (
+            <div className="space-y-6">
+              <SuperAdminDashboard />
             </div>
           )}
 

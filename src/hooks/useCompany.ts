@@ -21,23 +21,58 @@ export function useCompany() {
     queryFn: async (): Promise<Company | null> => {
       if (!user?.id) return null;
 
-      // Get company_id from company_users table
-      const { data: companyUserData, error: companyUserError } = await supabase
-        .from("company_users")
-        .select("company_id")
-        .eq("user_id", user.id)
-        .single();
+      // Check if there's a selected company in localStorage
+      const selectedCompanyId = localStorage.getItem("selected_company_id");
 
-      if (companyUserError || !companyUserData) {
-        console.error("Error fetching company user:", companyUserError);
-        return null;
+      let companyId: string;
+
+      if (selectedCompanyId) {
+        // Verify user has access to this company
+        const { data: hasAccess } = await supabase
+          .from("company_users")
+          .select("company_id")
+          .eq("user_id", user.id)
+          .eq("company_id", selectedCompanyId)
+          .maybeSingle();
+
+        if (hasAccess) {
+          companyId = selectedCompanyId;
+        } else {
+          // User doesn't have access, get first company
+          const { data: companyUserData } = await supabase
+            .from("company_users")
+            .select("company_id")
+            .eq("user_id", user.id)
+            .limit(1)
+            .single();
+
+          if (!companyUserData) return null;
+          companyId = companyUserData.company_id;
+          localStorage.setItem("selected_company_id", companyId);
+        }
+      } else {
+        // No selected company, get first one
+        const { data: companyUserData, error: companyUserError } = await supabase
+          .from("company_users")
+          .select("company_id")
+          .eq("user_id", user.id)
+          .limit(1)
+          .single();
+
+        if (companyUserError || !companyUserData) {
+          console.error("Error fetching company user:", companyUserError);
+          return null;
+        }
+
+        companyId = companyUserData.company_id;
+        localStorage.setItem("selected_company_id", companyId);
       }
 
       // Get company details
       const { data: companyData, error: companyError } = await supabase
         .from("companies")
         .select("*")
-        .eq("id", companyUserData.company_id)
+        .eq("id", companyId)
         .single();
 
       if (companyError || !companyData) {

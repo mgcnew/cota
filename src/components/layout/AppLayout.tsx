@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
+import { CompanySelector } from "./CompanySelector";
 
 // Mapeamento de títulos por rota
 const pageTitles: Record<string, string> = {
@@ -82,6 +83,7 @@ export function AppLayout() {
 
             {/* Action Buttons */}
             <div className="flex items-center shrink-0 gap-2 transition-all duration-300">
+              <CompanySelector />
               <ThemeToggle />
               <Button variant="ghost" size="sm" onClick={() => navigate('/configuracoes')} className="hidden md:flex p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg md:backdrop-blur-sm transition-opacity duration-200 text-gray-500">
                 <Settings className="h-3.5 w-3.5 transition-all duration-300" />
