@@ -223,20 +223,20 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
           {/* Card 1: Cotações Ativas */}
           <Card accent accentColor="bg-purple-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-3 sm:p-4">
+              <CardContent className="p-2.5 sm:p-4">
                 {/* Header com ícone minimalista */}
-                <div className="flex items-start justify-between mb-2 sm:mb-3">
-                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                      <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600" />
+                <div className="flex items-start justify-between mb-1.5 sm:mb-3">
+                  <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+                    <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                      <ShoppingCart className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-purple-600" />
                     </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Cotações</span>
+                    <span className="text-[9px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Cotações</span>
                   </div>
                   <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     {metrics.crescimentoCotacoes !== 0 && (
                       <div className={`flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 rounded-full ${metrics.crescimentoCotacoes > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
                         <TrendingUp className={`h-2 w-2 sm:h-2.5 sm:w-2.5 ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
-                        <span className={`text-[10px] sm:text-xs font-semibold ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoCotacoes)}%</span>
+                        <span className={`text-[9px] sm:text-xs font-semibold ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoCotacoes)}%</span>
                       </div>
                     )}
                     <TooltipProvider>
@@ -245,11 +245,11 @@ export default function Dashboard() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 sm:h-7 sm:w-7 text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:text-purple-300 dark:hover:bg-purple-900/20"
+                            className="h-5 w-5 sm:h-7 sm:w-7 text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:text-purple-300 dark:hover:bg-purple-900/20"
                             onClick={() => setShowCotacoesModal(true)}
                             aria-label="Ver detalhes de cotações"
                           >
-                            <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                            <Info className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent sideOffset={6}>
@@ -261,12 +261,12 @@ export default function Dashboard() {
                 </div>
 
                 {/* Valor principal */}
-                <div className="mb-2 sm:mb-3">
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {isLoading ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : metrics.cotacoesAtivas}
+                <div className="mb-1.5 sm:mb-3">
+                  <p className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {isLoading ? <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" /> : metrics.cotacoesAtivas}
                   </p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ativas no Momento</p>
-                  <div className="mt-1.5 sm:mt-2 flex flex-col gap-0.5 sm:gap-1 text-[9px] sm:text-[11px] text-gray-500 dark:text-gray-400">
+                  <p className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ativas no Momento</p>
+                  <div className="mt-1 sm:mt-2 flex flex-col gap-0.5 sm:gap-1 text-[8px] sm:text-[11px] text-gray-500 dark:text-gray-400">
                     <span className="truncate">Média: <span className="font-semibold text-gray-900 dark:text-white">{mediaCotacoesDiaria}</span>/dia</span>
                     <span className={`truncate ${metaCotacoesAtingida ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-red-600 dark:text-red-400 font-semibold'}`}>
                       {metaCotacoesAtingida ? 'Meta OK' : 'Abaixo'} ({dailyCotacoesTarget})
@@ -276,7 +276,7 @@ export default function Dashboard() {
 
                 {/* Mini gráfico de barras - Últimos 7 dias */}
                 <TooltipProvider>
-                  <div className="flex items-end gap-0.5 h-8">
+                  <div className="flex items-end gap-0.5 h-6 sm:h-8">
                     {(metrics.ultimos7DiasCotacoes || []).map((cotacoes, i) => {
                       const maxValue = Math.max(...(metrics.ultimos7DiasCotacoes || [0]), 1);
                       const heightPercent = maxValue > 0 ? (cotacoes / maxValue) * 100 : 20;
@@ -298,7 +298,7 @@ export default function Dashboard() {
                           <TooltipTrigger asChild>
                             <div
                               className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t-lg opacity-60 hover:opacity-100 transition-opacity cursor-pointer`}
-                              style={{ height: `${heightPercent}%`, minHeight: '8px' }}
+                              style={{ height: `${heightPercent}%`, minHeight: '6px' }}
                               aria-label={`${diaNome}: ${cotacoes} ${cotacoes === 1 ? 'cotação' : 'cotações'}`}
                             />
                           </TooltipTrigger>
@@ -312,7 +312,7 @@ export default function Dashboard() {
                   </div>
                 </TooltipProvider>
 
-                <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                <div className="mt-1.5 sm:mt-2 flex items-center justify-between text-[8px] sm:text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">
                   {(cotacoesLabels.length > 0 ? cotacoesLabels : ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb']).map((label, index) => (
                     <span key={index}>{label.slice(0, 3)}</span>
                   ))}
@@ -323,19 +323,19 @@ export default function Dashboard() {
 
           {/* Card 2: Economia Gerada */}
           <Card accent accentColor="bg-green-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex items-start justify-between mb-3 gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
-                      <DollarSign className="h-3.5 w-3.5 text-green-600" />
+              <CardContent className="p-2.5 sm:p-4">
+                <div className="flex items-start justify-between mb-1.5 sm:mb-3 gap-1 sm:gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
+                      <DollarSign className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-green-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
+                    <span className="text-[9px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     {metrics.crescimentoEconomia !== 0 && (
-                      <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${metrics.crescimentoEconomia > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                        <TrendingUp className={`h-2.5 w-2.5 ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
-                        <span className={`text-xs font-semibold ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoEconomia)}%</span>
+                      <div className={`flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 rounded-full ${metrics.crescimentoEconomia > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                        <TrendingUp className={`h-2 w-2 sm:h-2.5 sm:w-2.5 ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
+                        <span className={`text-[9px] sm:text-xs font-semibold ${metrics.crescimentoEconomia > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoEconomia)}%</span>
                       </div>
                     )}
                     <TooltipProvider>
@@ -344,11 +344,11 @@ export default function Dashboard() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-green-600 hover:bg-green-50 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-900/10 flex items-center justify-center"
+                            className="h-5 w-5 sm:h-7 sm:w-7 text-green-600 hover:bg-green-50 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-900/10 flex items-center justify-center"
                             onClick={() => setShowEconomyModal(true)}
                             aria-label="Ver detalhes da economia"
                           >
-                            <Info className="h-3.5 w-3.5 pointer-events-none" />
+                            <Info className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 pointer-events-none" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent sideOffset={6}>
@@ -359,96 +359,97 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <p className="metric-value text-2xl">
-                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}
+                <div className="mb-1.5 sm:mb-3">
+                  <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none">
+                    {isLoading ? <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" /> : formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}
                   </p>
-                  <p className="metric-description mt-0.5">Economizados • {selectedEconomyLabel}</p>
+                  <p className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Economizados • {selectedEconomyLabel}</p>
                 </div>
 
                 {/* Indicador de progresso */}
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-green-100 dark:bg-green-900/20 rounded-full overflow-hidden">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="flex-1 h-1.5 sm:h-2 bg-green-100 dark:bg-green-900/20 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all"
                       style={{ width: `${Math.min(Math.max(metrics.eficienciaEconomia || 0, 0), 100)}%` }}
                     ></div>
                   </div>
-                  <span className="text-xs font-semibold text-green-600 whitespace-nowrap">Efic. {formatPercent(selectedEconomyBreakdown?.eficienciaEconomia)}</span>
+                  <span className="text-[9px] sm:text-xs font-semibold text-green-600 whitespace-nowrap">Efic. {formatPercent(selectedEconomyBreakdown?.eficienciaEconomia)}</span>
                 </div>
               </CardContent>
           </Card>
 
           {/* Card 3: Fornecedores */}
           <Card accent accentColor="bg-blue-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <Users className="h-3.5 w-3.5 text-purple-600" />
+              <CardContent className="p-2.5 sm:p-4">
+                <div className="flex items-center justify-between mb-1.5 sm:mb-3">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                      <Users className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-purple-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
+                    <span className="text-[9px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 rounded-full">
-                    <span className="text-xs font-semibold text-purple-600">+3</span>
+                  <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 rounded-full">
+                    <span className="text-[9px] sm:text-xs font-semibold text-purple-600">+3</span>
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <p className="metric-value">
-                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.fornecedores}
+                <div className="mb-1.5 sm:mb-3">
+                  <p className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {isLoading ? <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" /> : metrics.fornecedores}
                   </p>
-                  <p className="metric-description mt-0.5">Parceiros</p>
+                  <p className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Parceiros</p>
                 </div>
 
                 {/* Mini indicador circular */}
-                  <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="flex-1 h-1 sm:h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAtividade}%` }}></div>
                   </div>
-                  <span className="text-xs font-bold text-purple-600">{isLoading ? '-' : `${metrics.taxaAtividade}%`}</span>
+                  <span className="text-[9px] sm:text-xs font-bold text-purple-600">{isLoading ? '-' : `${metrics.taxaAtividade}%`}</span>
                 </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">taxa de atividade</p>
+                <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1">taxa de atividade</p>
               </CardContent>
           </Card>
 
           {/* Card 4: Taxa de Aprovação */}
           <Card accent accentColor="bg-yellow-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="space-y-2 min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-yellow-500/15 flex items-center justify-center flex-shrink-0">
-                      <Target className="h-3.5 w-3.5 text-yellow-600" />
+            <CardContent className="p-2.5 sm:p-4">
+              <div className="flex items-start justify-between gap-1 sm:gap-2">
+                <div className="space-y-1.5 sm:space-y-2 min-w-0 flex-1">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-yellow-500/15 flex items-center justify-center flex-shrink-0">
+                      <Target className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-yellow-600" />
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate">Aprovação</span>
-                      <span className="text-[10px] text-gray-400 dark:text-gray-500 truncate hidden sm:block">Performance das cotações</span>
+                      <span className="text-[9px] sm:text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate">Aprovação</span>
+                      <span className="text-[8px] sm:text-[10px] text-gray-400 dark:text-gray-500 truncate hidden sm:block">Performance das cotações</span>
                     </div>
                   </div>
-                  <div className="flex items-end gap-3">
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white leading-none">
-                      {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${metrics.taxaAprovacao || 0}%`}
+                  <div className="flex items-end gap-2 sm:gap-3">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-none">
+                      {isLoading ? <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" /> : `${metrics.taxaAprovacao || 0}%`}
                     </p>
                     {metrics.variacaoTaxaAprovacao !== 0 && (
-                      <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${metrics.variacaoTaxaAprovacao > 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
-                        <TrendingUp className={`h-3 w-3 ${metrics.variacaoTaxaAprovacao > 0 ? '' : 'rotate-180'}`} />
-                        {metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{metrics.variacaoTaxaAprovacao || 0} p.p
+                      <div className={`flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-xs font-semibold ${metrics.variacaoTaxaAprovacao > 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
+                        <TrendingUp className={`h-2 w-2 sm:h-3 sm:w-3 ${metrics.variacaoTaxaAprovacao > 0 ? '' : 'rotate-180'}`} />
+                        <span className="hidden sm:inline">{metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{metrics.variacaoTaxaAprovacao || 0} p.p</span>
+                        <span className="sm:hidden">{metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{metrics.variacaoTaxaAprovacao || 0}</span>
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/10 dark:bg-yellow-500/15 whitespace-nowrap">
+                  <div className="flex flex-wrap gap-1 sm:gap-1.5 text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+                  <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full bg-yellow-500/10 dark:bg-yellow-500/15 whitespace-nowrap">
                     <span className="font-semibold text-gray-900 dark:text-white">{metrics.aprovacoesTotal || 0}</span>
                     <span className="hidden sm:inline">aprovadas</span>
                     <span className="sm:hidden">apr.</span>
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/10 dark:bg-amber-500/15 whitespace-nowrap">
+                  <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full bg-amber-500/10 dark:bg-amber-500/15 whitespace-nowrap">
                     <span className="font-semibold text-gray-900 dark:text-white">{metrics.pendenciasTotal || 0}</span>
                     <span className="hidden sm:inline">pendentes</span>
                     <span className="sm:hidden">pend.</span>
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/10 dark:bg-red-500/15 whitespace-nowrap">
+                  <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full bg-red-500/10 dark:bg-red-500/15 whitespace-nowrap">
                     <span className="font-semibold text-gray-900 dark:text-white">{metrics.rejeicoesTotal || 0}</span>
                     <span className="hidden sm:inline">rejeitadas</span>
                     <span className="sm:hidden">rej.</span>
@@ -461,11 +462,11 @@ export default function Dashboard() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700 dark:text-yellow-400 dark:hover:bg-yellow-900/10"
+                        className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700 dark:text-yellow-400 dark:hover:bg-yellow-900/10 flex-shrink-0"
                         onClick={() => setShowApprovalModal(true)}
                         aria-label="Ver detalhes de aprovação"
                       >
-                        <Info className="h-4 w-4" />
+                        <Info className="h-2.5 w-2.5 sm:h-4 sm:w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent sideOffset={6}>
@@ -475,17 +476,18 @@ export default function Dashboard() {
                 </TooltipProvider>
               </div>
 
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div className="mt-2 sm:mt-4 space-y-2 sm:space-y-3">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="flex-1 h-1.5 sm:h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full transition-all duration-500" style={{ width: `${metrics.taxaAprovacao || 0}%` }}></div>
                   </div>
-                  <span className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">{metrics.taxaAprovacao || 0}%</span>
+                  <span className="text-[9px] sm:text-xs font-semibold text-yellow-600 dark:text-yellow-400">{metrics.taxaAprovacao || 0}%</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-xs">
                   <span className="text-gray-500 dark:text-gray-400">Meta {approvalTarget}%</span>
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${isApprovalOnTarget ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
-                    <span className="font-semibold">{isApprovalOnTarget ? 'Dentro da meta' : 'Abaixo da meta'}</span>
+                  <span className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-full ${isApprovalOnTarget ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}>
+                    <span className="font-semibold hidden sm:inline">{isApprovalOnTarget ? 'Dentro da meta' : 'Abaixo da meta'}</span>
+                    <span className="font-semibold sm:hidden">{isApprovalOnTarget ? 'OK' : 'Baixo'}</span>
                   </span>
                 </div>
               </div>
