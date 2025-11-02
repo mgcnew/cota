@@ -615,42 +615,42 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         <div className="flex flex-col flex-1 min-h-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-1 min-h-0">
             <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-gray-100/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:bg-[#1C1F26] backdrop-blur-sm flex-shrink-0">
-              <TabsList className={`grid w-full ${onEdit && quote.status !== "concluida" ? "grid-cols-4" : "grid-cols-3"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9`}>
+              <TabsList className={`grid w-full ${onEdit && quote.status !== "concluida" ? "grid-cols-4" : "grid-cols-3"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
                 <TabsTrigger
                   value="detalhes"
-                  className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-blue-600 dark:data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-blue-700 dark:data-[state=active]:hover:bg-gray-600 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2"
+                  className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-blue-600 dark:data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-blue-700 dark:data-[state=active]:hover:bg-blue-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
                 >
                   <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                   <span className="hidden xs:inline">Detalhes</span>
                   {quote.fornecedoresParticipantes.length > 0 && (
-                    <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-blue-100 dark:bg-gray-700 text-blue-700 dark:text-gray-300 data-[state=active]:bg-blue-500/20 dark:data-[state=active]:bg-gray-600 data-[state=active]:text-blue-100">
+                    <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 data-[state=active]:bg-blue-500/20 dark:data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-100 dark:data-[state=active]:text-blue-100">
                       {quote.fornecedoresParticipantes.length}
                     </Badge>
                   )}
                 </TabsTrigger>
                 <TabsTrigger
-                  value="atualizacao"
-                  className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-emerald-600 dark:data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-emerald-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-emerald-700 dark:data-[state=active]:hover:bg-gray-600 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2"
-                >
-                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span className="hidden xs:inline">Valores</span>
-                  {products.length > 0 && (
-                    <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-emerald-100 dark:bg-gray-700 text-emerald-700 dark:text-gray-300 data-[state=active]:bg-emerald-500/20 dark:data-[state=active]:bg-gray-600 data-[state=active]:text-emerald-100">
-                      {products.length}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger
                   value="comparativo"
-                  className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-purple-600 dark:data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-purple-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-purple-700 dark:data-[state=active]:hover:bg-gray-600 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2"
+                  className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-purple-600 dark:data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-purple-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-purple-700 dark:data-[state=active]:hover:bg-purple-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
                 >
                   <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                   <span className="hidden xs:inline">Comparativo</span>
                 </TabsTrigger>
+                <TabsTrigger
+                  value="atualizacao"
+                  className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-emerald-600 dark:data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-emerald-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-emerald-700 dark:data-[state=active]:hover:bg-emerald-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
+                >
+                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="hidden xs:inline">Valores</span>
+                  {products.length > 0 && (
+                    <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 data-[state=active]:bg-emerald-500/20 dark:data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-100 dark:data-[state=active]:text-emerald-100">
+                      {products.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
                 {onEdit && quote.status !== "concluida" && (
                   <TabsTrigger
                     value="edicao"
-                    className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-orange-600 dark:data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-orange-700 dark:data-[state=active]:hover:bg-gray-600 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2"
+                    className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-orange-600 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-orange-700 dark:data-[state=active]:hover:bg-orange-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
                   >
                     <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                     <span className="hidden xs:inline">Edição</span>
@@ -668,40 +668,40 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                 
                 {/* Seção 1: Resumo Executivo - Grid Compacto */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
-                  <Card className="p-2 sm:p-2.5 border border-blue-200/80 dark:border-gray-700/30 bg-gradient-to-br from-blue-50/90 to-blue-100/60 dark:bg-[#1C1F26] hover:border-blue-300 dark:hover:border-gray-600 hover:shadow-md dark:hover:shadow-lg transition-all duration-200 rounded-lg shadow-sm dark:shadow-none">
+                  <Card className="p-2 sm:p-2.5 border border-blue-200/80 dark:border-blue-800/30 bg-gradient-to-br from-blue-50/90 to-blue-100/60 dark:from-blue-500/10 dark:to-transparent hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200 rounded-lg shadow-sm dark:shadow-none">
                     <div className="flex items-center gap-1.5">
-                      <div className="p-1.5 rounded-lg bg-blue-600 dark:bg-gray-700 text-white dark:text-gray-300 flex-shrink-0">
+                      <div className="p-1.5 rounded-lg bg-blue-600 dark:bg-blue-600 text-white flex-shrink-0">
                         <Package className="h-3.5 w-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-medium text-blue-700 dark:text-gray-400 mb-0.5">Produtos</p>
+                        <p className="text-[10px] font-medium text-blue-700 dark:text-blue-400 mb-0.5">Produtos</p>
                         <p className="font-bold text-sm text-blue-900 dark:text-white">{products.length}</p>
                       </div>
                     </div>
                   </Card>
 
-                  <Card className="p-2 sm:p-2.5 border border-purple-200 dark:border-gray-700/30 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:bg-[#1C1F26] hover:border-purple-300 dark:hover:border-gray-600 transition-all rounded-lg shadow-sm dark:shadow-none">
+                  <Card className="p-2 sm:p-2.5 border border-purple-200 dark:border-purple-800/30 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-500/10 dark:to-transparent hover:border-purple-300 dark:hover:border-purple-700 transition-all rounded-lg shadow-sm dark:shadow-none">
                     <div className="flex items-center gap-1.5">
-                      <div className="p-1.5 rounded-lg bg-purple-600 dark:bg-gray-700 text-white dark:text-gray-300 flex-shrink-0">
+                      <div className="p-1.5 rounded-lg bg-purple-600 dark:bg-purple-600 text-white flex-shrink-0">
                         <Users className="h-3.5 w-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-medium text-purple-700 dark:text-gray-400 mb-0.5">Fornecedores</p>
+                        <p className="text-[10px] font-medium text-purple-700 dark:text-purple-400 mb-0.5">Fornecedores</p>
                         <p className="font-bold text-sm text-purple-900 dark:text-white">{quote.fornecedores}</p>
                       </div>
                     </div>
                   </Card>
 
-                  <Card className="p-2 sm:p-2.5 border border-amber-200 dark:border-gray-700/30 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:bg-[#1C1F26] hover:border-amber-300 dark:hover:border-gray-600 transition-all rounded-lg shadow-sm dark:shadow-none">
+                  <Card className="p-2 sm:p-2.5 border border-amber-200 dark:border-amber-800/30 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-500/10 dark:to-transparent hover:border-amber-300 dark:hover:border-amber-700 transition-all rounded-lg shadow-sm dark:shadow-none">
                     <div className="flex items-center gap-1.5">
-                      <div className="p-1.5 rounded-lg bg-amber-600 dark:bg-gray-700 text-white dark:text-gray-300 flex-shrink-0">
+                      <div className="p-1.5 rounded-lg bg-amber-600 dark:bg-amber-600 text-white flex-shrink-0">
                         <Clock className="h-3.5 w-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-medium text-amber-700 dark:text-gray-400 mb-0.5">Prazo</p>
+                        <p className="text-[10px] font-medium text-amber-700 dark:text-amber-400 mb-0.5">Prazo</p>
                         <p className="font-semibold text-xs text-amber-900 dark:text-white truncate">{quote.dataFim}</p>
                         {quote._raw?.data_planejada && (
-                          <p className="text-[9px] text-amber-600 dark:text-gray-500 mt-0.5 truncate">
+                          <p className="text-[9px] text-amber-600 dark:text-amber-500 mt-0.5 truncate">
                             {new Date(quote._raw.data_planejada).toLocaleDateString("pt-BR")}
                           </p>
                         )}
@@ -709,13 +709,13 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     </div>
                   </Card>
 
-                  <Card className="p-2 sm:p-2.5 border border-emerald-200 dark:border-gray-700/30 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:bg-[#1C1F26] hover:border-emerald-300 dark:hover:border-gray-600 transition-all rounded-lg shadow-sm dark:shadow-none">
+                  <Card className="p-2 sm:p-2.5 border border-emerald-200 dark:border-emerald-800/30 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-500/10 dark:to-transparent hover:border-emerald-300 dark:hover:border-emerald-700 transition-all rounded-lg shadow-sm dark:shadow-none">
                     <div className="flex items-center gap-1.5">
-                      <div className="p-1.5 rounded-lg bg-emerald-600 dark:bg-gray-700 text-white dark:text-gray-300 flex-shrink-0">
+                      <div className="p-1.5 rounded-lg bg-emerald-600 dark:bg-emerald-600 text-white flex-shrink-0">
                         <TrendingDown className="h-3.5 w-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-medium text-emerald-700 dark:text-gray-400 mb-0.5">Economia</p>
+                        <p className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 mb-0.5">Economia</p>
                         <p className="font-bold text-xs text-emerald-900 dark:text-white truncate">{quote.economia}</p>
                       </div>
                     </div>
@@ -724,21 +724,21 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                 {/* Seção 2: Melhor Oferta Destaque */}
                 {bestSupplier && (
-                  <Card className="p-3 sm:p-4 border-2 border-emerald-300/70 dark:border-gray-700/30 bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100/50 dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
+                  <Card className="p-3 sm:p-4 border-2 border-emerald-300/70 dark:border-emerald-800/30 bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100/50 dark:from-emerald-500/10 dark:to-transparent rounded-lg shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                        <div className="p-2 rounded-lg bg-emerald-600 dark:bg-gray-700 text-white dark:text-gray-300 flex-shrink-0">
+                        <div className="p-2 rounded-lg bg-emerald-600 dark:bg-emerald-600 text-white flex-shrink-0">
                           <Star className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-semibold text-emerald-700 dark:text-gray-400 uppercase mb-0.5">Melhor Fornecedor</p>
+                          <p className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase mb-0.5">Melhor Fornecedor</p>
                           <p className="font-bold text-sm text-emerald-900 dark:text-white truncate">{bestSupplier.nome}</p>
-                          <p className="text-xs text-emerald-700 dark:text-gray-400 font-medium mt-0.5">R$ {bestSupplier.totalValue.toFixed(2)}</p>
+                          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">R$ {bestSupplier.totalValue.toFixed(2)}</p>
                         </div>
                       </div>
                       <div className="flex-shrink-0 text-right">
-                        <p className="text-[10px] text-emerald-700 dark:text-gray-400 font-medium mb-0.5">Economia</p>
-                        <p className="text-base font-bold text-emerald-600 dark:text-white">{quote.economia}</p>
+                        <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mb-0.5">Economia</p>
+                        <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{quote.economia}</p>
                       </div>
                     </div>
                   </Card>
@@ -756,7 +756,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     </Badge>
                   </div>
                   
-                  <Card className="border border-slate-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200">
+                  <Card className="border border-slate-200/80 dark:border-gray-700/60 bg-white dark:bg-[#1C1F26] rounded-lg sm:rounded-xl overflow-hidden shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200">
                     <div className="overflow-x-auto">
                       <table className="w-full">
                         <thead className="bg-slate-50 dark:bg-gray-800/50 border-b border-slate-200 dark:border-gray-700">
@@ -1143,27 +1143,27 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                 {/* Resumo Comparativo Superior */}
                 {bestSupplier && (
-                  <Card className="mb-2.5 border-2 border-purple-200/80 dark:border-gray-700/30 bg-gradient-to-br from-purple-50 via-indigo-50 to-purple-100/50 dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none">
+                  <Card className="mb-2.5 border-2 border-purple-200/80 dark:border-purple-800/30 bg-gradient-to-br from-purple-50 via-indigo-50 to-purple-100/50 dark:from-purple-500/10 dark:to-transparent rounded-lg shadow-md dark:shadow-none">
                     <div className="p-2.5 sm:p-3">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                         <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-purple-600 dark:bg-gray-700 text-white shadow-sm">
+                          <div className="p-2 rounded-lg bg-purple-600 dark:bg-purple-600 text-white shadow-sm">
                             <BarChart3 className="h-4 w-4" />
                           </div>
                           <div>
-                            <h3 className="text-[10px] font-semibold text-purple-900 dark:text-purple-100 uppercase mb-0.5">
+                            <h3 className="text-[10px] font-semibold text-purple-900 dark:text-purple-300 uppercase mb-0.5">
                               Melhor Opção
                             </h3>
-                            <p className="font-bold text-sm text-purple-900 dark:text-purple-100">
+                            <p className="font-bold text-sm text-purple-900 dark:text-white">
                               {bestSupplier.nome}
                             </p>
-                            <p className="text-[10px] text-purple-700 dark:text-purple-300 mt-0.5">
+                            <p className="text-[10px] text-purple-700 dark:text-purple-400 mt-0.5">
                               Economia: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{quote.economia}</span>
                             </p>
                           </div>
                         </div>
                         <div className="text-center sm:text-right">
-                          <p className="text-[10px] text-purple-700 dark:text-purple-300 font-medium mb-0.5">Total</p>
+                          <p className="text-[10px] text-purple-700 dark:text-purple-400 font-medium mb-0.5">Total</p>
                           <p className="text-base font-bold text-purple-600 dark:text-purple-400">
                             R$ {bestSupplier.totalValue.toFixed(2)}
                           </p>
@@ -1174,7 +1174,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                 )}
 
                 {/* Tabela Comparativa - Foco Total */}
-                <Card className="flex-1 overflow-hidden border-2 border-purple-200/80 dark:border-purple-800/60 bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col">
+                <Card className="flex-1 overflow-hidden border-2 border-purple-200/80 dark:border-purple-800/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none flex flex-col">
                   <div className="flex-1 overflow-auto min-h-0">
                   <table className="w-full border-collapse min-w-max">
                       <thead className="sticky top-0 z-10 bg-purple-50/80 dark:bg-gray-900/95 backdrop-blur-sm">
@@ -1182,7 +1182,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           <th className="px-3 py-2 text-left bg-purple-100/80 dark:bg-gray-800/95 backdrop-blur-sm sticky left-0 z-20 shadow-sm">
                           <div className="flex items-center gap-1.5">
                               <Package className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-                              <span className="font-bold text-xs text-purple-900 dark:text-purple-100">Produto</span>
+                              <span className="font-bold text-xs text-purple-900 dark:text-white">Produto</span>
                           </div>
                         </th>
                         {quote.fornecedoresParticipantes.map(fornecedor => {
@@ -1214,11 +1214,14 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                               <p className={cn(
                                   "font-bold truncate",
                                 quote.fornecedoresParticipantes.length > 5 ? "text-[10px]" : "text-xs",
-                                  isWinning ? "text-emerald-700 dark:text-emerald-300" : "text-purple-900 dark:text-purple-100"
+                                  isWinning ? "text-emerald-700 dark:text-emerald-300" : "text-purple-900 dark:text-white"
                               )} title={fornecedor.nome}>
                                 {fornecedor.nome}
                               </p>
-                                <div className="mt-0.5 text-[9px] text-purple-600 dark:text-purple-400 font-medium">
+                                <div className={cn(
+                                  "mt-0.5 text-[9px] font-medium",
+                                  isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-purple-600 dark:text-purple-400"
+                                )}>
                                   R$ {totalValue.toFixed(2)}
                               </div>
                             </th>
@@ -1236,7 +1239,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                             index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-slate-50/50 dark:bg-gray-800/30"
                           )}>
                             <td className="px-3 py-2 bg-purple-50/50 dark:bg-gray-800/80 sticky left-0 z-10 shadow-sm border-r border-purple-200/40 dark:border-purple-700/40">
-                              <p className="font-bold text-xs text-purple-900 dark:text-purple-100 truncate max-w-[200px]" title={product.product_name}>
+                              <p className="font-bold text-xs text-purple-900 dark:text-white truncate max-w-[200px]" title={product.product_name}>
                                 {product.product_name}
                               </p>
                               <p className="text-[10px] text-purple-600 dark:text-purple-400 mt-0.5 font-medium">
