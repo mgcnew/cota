@@ -177,9 +177,9 @@ export default function Produtos() {
     };
   }, [products, categories]);
   const getTrendIcon = (trend: "up" | "down" | "stable") => {
-    if (trend === "up") return <TrendingUp className="h-4 w-4 text-success" />;
-    if (trend === "down") return <TrendingUp className="h-4 w-4 text-error rotate-180" />;
-    return <span className="h-4 w-4 rounded-full bg-muted-foreground/50" />;
+    if (trend === "up") return <TrendingUp className="h-4 w-4 text-success transition-none" />;
+    if (trend === "down") return <TrendingUp className="h-4 w-4 text-error rotate-180 transition-none" />;
+    return <span className="h-4 w-4 rounded-full bg-muted-foreground/50 transition-none" />;
   };
 
   // Função para determinar status do produto baseado em dados
@@ -585,7 +585,7 @@ export default function Produtos() {
                           {/* Produto - Largura fixa */}
                           <div className="w-[25%] flex items-center gap-3 pr-4">
                             <div 
-                              className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 cursor-pointer transition-all duration-300 bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 group-hover:shadow-md"
+                              className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 cursor-pointer bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20"
                               onClick={() => setImagePreviewUrl(product.image_url || null)}
                             >
                               {product.image_url ? (
@@ -606,14 +606,14 @@ export default function Produtos() {
 
                           {/* Categoria - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[15%] px-2">
-                            <Badge variant="outline" className="bg-orange-50/80 dark:bg-orange-900/30 border-orange-200/60 dark:border-orange-700/60 text-orange-700 dark:text-orange-400 font-medium text-xs w-full justify-center">
+                            <Badge variant="outline" className="bg-orange-50/80 dark:bg-orange-900/30 border-orange-200/60 dark:border-orange-700/60 text-orange-700 dark:text-orange-400 font-medium text-xs w-full justify-center transition-none">
                               {capitalize(product.category)}
                             </Badge>
                           </div>
 
                           {/* Peso - Largura fixa, hidden on mobile */}
                           <div className="hidden md:block w-[12%] px-2">
-                            <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-xs w-full justify-center">
+                            <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-xs w-full justify-center transition-none">
                               {product.weight}
                             </Badge>
                           </div>
@@ -651,24 +651,24 @@ export default function Produtos() {
                           {/* Ações - Largura fixa */}
                           <div className="w-[10%] pl-4">
                             <div className="flex items-center justify-end gap-2">
-                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 flex items-center justify-center">
-                                    <Clock className="h-4 w-4" />
+                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 flex items-center justify-center transition-none">
+                                    <Clock className="h-4 w-4 transition-none" />
                                   </Button>} />
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 h-8 w-8 p-0 rounded-full">
-                                    <MoreVertical className="h-4 w-4" />
+                                  <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 h-8 w-8 p-0 rounded-full transition-none">
+                                    <MoreVertical className="h-4 w-4 transition-none" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
                                   <DropdownMenuLabel className="text-gray-600 font-medium">Mais Ações</DropdownMenuLabel>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
+                                  <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 cursor-pointer">
                                     <Edit className="h-4 w-4 mr-2 text-amber-600" />
                                     Editar
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" onClick={() => setDeletingProduct(product)}>
+                                  <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer" onClick={() => setDeletingProduct(product)}>
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Excluir
                                   </DropdownMenuItem>
