@@ -614,7 +614,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
         <div className="flex flex-col flex-1 min-h-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-1 min-h-0">
-            <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-gray-100/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:bg-[#1C1F26] backdrop-blur-sm flex-shrink-0">
+            <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-gray-200/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm flex-shrink-0">
               <TabsList className={`grid w-full ${onEdit && quote.status !== "concluida" ? "grid-cols-4" : "grid-cols-3"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
                 <TabsTrigger
                   value="detalhes"
@@ -1347,10 +1347,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   <Form {...editForm}>
                     <form onSubmit={editForm.handleSubmit(handleEditSubmit)} className="space-y-3 max-w-4xl mx-auto">
                       {/* Seção 1: Produtos */}
-                      <Card className="border-2 border-orange-200/80 dark:border-orange-800/60 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                        <div className="p-2.5 border-b border-orange-200/60 dark:border-gray-700/30 bg-gradient-to-r from-orange-50/50 to-amber-50/30 dark:bg-[#1C1F26]">
+                      <Card className="border-2 border-orange-200/80 dark:border-orange-800/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none">
+                        <div className="p-2.5 border-b border-orange-200/60 dark:border-orange-800/30 bg-gradient-to-r from-orange-50/50 to-amber-50/30 dark:from-orange-500/10 dark:to-transparent">
                           <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-orange-600 dark:bg-gray-700 text-white">
+                            <div className="p-1.5 rounded-lg bg-orange-600 dark:bg-orange-600 text-white">
                               <Package className="h-3.5 w-3.5" />
                             </div>
                             <div>
@@ -1375,7 +1375,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                         </div>
 
                           {editFields.map((field, index) => (
-                            <Card key={field.id} className="border border-orange-200/60 dark:border-gray-700/30 rounded-md p-2.5 space-y-2 bg-gradient-to-br from-orange-50/30 to-amber-50/20 dark:bg-[#1C1F26]">
+                            <Card key={field.id} className="border border-orange-200/60 dark:border-orange-800/30 rounded-md p-2.5 space-y-2 bg-gradient-to-br from-orange-50/30 to-amber-50/20 dark:from-orange-500/5 dark:to-transparent">
                               <div className="flex items-center justify-between pb-1.5 border-b border-orange-200/40 dark:border-orange-800/30">
                                 <div className="flex items-center gap-1.5">
                                   <div className="p-1 rounded bg-orange-100 dark:bg-orange-900/40">
@@ -1506,10 +1506,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </Card>
 
                       {/* Seção 2: Período */}
-                      <Card className="border-2 border-blue-200/80 dark:border-blue-800/60 bg-white dark:bg-gray-800 rounded-xl shadow-md">
-                        <div className="p-4 border-b border-blue-200/60 dark:border-gray-700/30 bg-gradient-to-r from-blue-50/50 to-cyan-50/30 dark:bg-[#1C1F26]">
+                      <Card className="border-2 border-blue-200/80 dark:border-blue-800/60 bg-white dark:bg-[#1C1F26] rounded-xl shadow-md dark:shadow-none">
+                        <div className="p-4 border-b border-blue-200/60 dark:border-blue-800/30 bg-gradient-to-r from-blue-50/50 to-cyan-50/30 dark:from-blue-500/10 dark:to-transparent">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-600 dark:bg-blue-500 text-white">
+                            <div className="p-2 rounded-lg bg-blue-600 dark:bg-blue-600 text-white">
                               <Calendar className="h-4 w-4" />
                             </div>
                             <div>
@@ -1654,10 +1654,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </Card>
 
                       {/* Seção 3: Status */}
-                      <Card className="border-2 border-indigo-200/80 dark:border-indigo-800/60 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                        <div className="p-2.5 border-b border-indigo-200/60 dark:border-gray-700/30 bg-gradient-to-r from-indigo-50/50 to-purple-50/30 dark:bg-[#1C1F26]">
+                      <Card className="border-2 border-indigo-200/80 dark:border-indigo-800/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none">
+                        <div className="p-2.5 border-b border-indigo-200/60 dark:border-indigo-800/30 bg-gradient-to-r from-indigo-50/50 to-purple-50/30 dark:from-indigo-500/10 dark:to-transparent">
                           <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white">
+                            <div className="p-1.5 rounded-lg bg-indigo-600 dark:bg-indigo-600 text-white">
                               <FileText className="h-3.5 w-3.5" />
                             </div>
                             <div>
@@ -1695,10 +1695,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </Card>
 
                       {/* Seção 4: Fornecedores */}
-                      <Card className="border-2 border-teal-200/80 dark:border-teal-800/60 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                        <div className="p-2.5 border-b border-teal-200/60 dark:border-gray-700/30 bg-gradient-to-r from-teal-50/50 to-cyan-50/30 dark:bg-[#1C1F26]">
+                      <Card className="border-2 border-teal-200/80 dark:border-teal-800/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none">
+                        <div className="p-2.5 border-b border-teal-200/60 dark:border-teal-800/30 bg-gradient-to-r from-teal-50/50 to-cyan-50/30 dark:from-teal-500/10 dark:to-transparent">
                           <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-teal-600 dark:bg-teal-500 text-white">
+                            <div className="p-1.5 rounded-lg bg-teal-600 dark:bg-teal-600 text-white">
                               <Users className="h-3.5 w-3.5" />
                             </div>
                             <div>
@@ -1768,10 +1768,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </Card>
 
                       {/* Seção 5: Observações */}
-                      <Card className="border-2 border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                        <div className="p-2.5 border-b border-slate-200/60 dark:border-slate-700/40 bg-gradient-to-r from-slate-50/50 to-gray-50/30 dark:from-slate-900/20 dark:to-gray-900/20">
+                      <Card className="border-2 border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none">
+                        <div className="p-2.5 border-b border-slate-200/60 dark:border-slate-700/40 bg-gradient-to-r from-slate-50/50 to-gray-50/30 dark:from-slate-800/20 dark:to-gray-800/20">
                           <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-slate-600 dark:bg-slate-500 text-white">
+                            <div className="p-1.5 rounded-lg bg-slate-600 dark:bg-slate-600 text-white">
                               <FileText className="h-3.5 w-3.5" />
                             </div>
                             <div>
