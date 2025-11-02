@@ -3,6 +3,18 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 
+const funcionalidades = [
+  {
+    id: 'locucoes',
+    titulo: 'Locuções AI',
+    descricao: 'Geração de locuções com inteligência artificial',
+    icon: 'fluent:mic-32-filled',
+    rota: '/locucoes',
+    gradient: 'from-purple-500 to-pink-500'
+  }
+  // Adicione mais funcionalidades aqui no futuro
+];
+
 export default function Extra() {
   const navigate = useNavigate();
 
@@ -19,18 +31,25 @@ export default function Extra() {
           </div>
         </div>
 
-        <Card 
-          className="p-8 hover:shadow-lg transition-shadow cursor-pointer group"
-          onClick={() => navigate('/locucoes')}
-        >
-          <Icon icon="fluent:mic-32-filled" width="48" height="48" className="mx-auto mb-4 text-primary group-hover:scale-110 transition-transform" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Locuções AI
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Geração de locuções com inteligência artificial
-          </p>
-        </Card>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {funcionalidades.map((func) => (
+            <Card 
+              key={func.id}
+              className="p-6 hover:shadow-lg transition-all cursor-pointer group hover:scale-105"
+              onClick={() => navigate(func.rota)}
+            >
+              <div className={`w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br ${func.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                <Icon icon={func.icon} width="32" height="32" className="text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 text-center">
+                {func.titulo}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-center text-sm">
+                {func.descricao}
+              </p>
+            </Card>
+          ))}
+        </div>
       </div>
     </PageWrapper>
   );

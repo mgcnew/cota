@@ -49,10 +49,6 @@ const menuItems = [{
   url: "/analytics",
   icon: "fluent:data-trending-32-filled"
 }, {
-  title: "Locuções AI",
-  url: "/locucoes",
-  icon: "fluent:mic-32-filled"
-}, {
   title: "Extra",
   url: "/extra",
   icon: "fluent:star-32-filled"
