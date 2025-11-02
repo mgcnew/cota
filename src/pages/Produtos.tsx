@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, Scale, FileUp, Quote, Building2, Clock } from "lucide-react";
+import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, Scale, FileUp, FileText, Building2, History, Clock } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
@@ -285,7 +285,7 @@ export default function Produtos() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                      <Quote className="h-3.5 w-3.5 text-emerald-600" />
+                      <FileText className="h-3.5 w-3.5 text-emerald-600" />
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
                   </div>
@@ -465,7 +465,7 @@ export default function Produtos() {
                       <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
-                            <Quote className="h-4 w-4 mr-2 text-blue-600" />
+                            <History className="h-4 w-4 mr-2 text-blue-600" />
                             Ver Histórico de Preços
                           </DropdownMenuItem>} />
                       <DropdownMenuSeparator />
@@ -516,7 +516,7 @@ export default function Produtos() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
-                        <Quote className="h-4 w-4 text-blue-600" />
+                        <FileText className="h-4 w-4 text-blue-600" />
                         <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
                       </div>
                       <span className="text-lg font-bold text-blue-800 dark:text-blue-300">{product.quotesCount}</span>
@@ -533,7 +533,7 @@ export default function Produtos() {
                 </div>
 
                 <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="outline" className="w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 text-orange-700 hover:text-orange-800 transition-all duration-300">
-                      <Quote className="h-4 w-4 mr-2" />
+                      <History className="h-4 w-4 mr-2" />
                       Ver Histórico de Preços
                     </Button>} />
               </CardContent>
@@ -645,7 +645,9 @@ export default function Produtos() {
                           {/* Cotações - Largura fixa, hidden on small screens */}
                           <div className="hidden sm:block w-[8%] px-2">
                             <div className="flex items-center justify-center gap-1 pointer-events-none">
-                              <Quote className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              <div className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30">
+                                <FileText className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                              </div>
                               <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount}</span>
                             </div>
                           </div>
@@ -653,8 +655,8 @@ export default function Produtos() {
                           {/* Ações - Largura fixa */}
                           <div className="w-[10%] pl-4">
                             <div className="flex items-center justify-end gap-2 pointer-events-auto">
-                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 flex items-center justify-center !transition-colors">
-                                    <Clock className="h-4 w-4" />
+                              <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 p-0 h-8 w-8 rounded-lg border border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                                    <History className="h-4 w-4" />
                                   </Button>} />
 
                               <DropdownMenu>

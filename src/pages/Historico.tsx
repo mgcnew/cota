@@ -40,24 +40,77 @@ export default function Historico() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [historico, setHistorico] = useState<any[]>([]);
+
   useEffect(() => {
     if (user) {
       loadHistorico();
     }
   }, [user]);
+
   const loadHistorico = async () => {
     try {
       setLoading(true);
+
+      if (!user?.id) {
+        console.error("Usuário não autenticado");
+        setHistorico([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get user's company_id first
+      const { data: companyData, error: companyError } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (companyError) {
+        console.error("Erro ao buscar empresa:", companyError);
+        toast({
+          title: "Erro ao carregar empresa",
+          description: "Usuário não está associado a nenhuma empresa. Entre em contato com o administrador.",
+          variant: "destructive"
+        });
+        setHistorico([]);
+        setLoading(false);
+        return;
+      }
+
+      if (!companyData?.company_id) {
+        console.error("Company_id não encontrado");
+        toast({
+          title: "Empresa não encontrada",
+          description: "Usuário não está associado a nenhuma empresa.",
+          variant: "destructive"
+        });
+        setHistorico([]);
+        setLoading(false);
+        return;
+      }
+
+      console.log("Buscando histórico para company_id:", companyData.company_id);
+
       const {
         data,
         error
-      } = await supabase.from("activity_log").select("*").order("created_at", {
-        ascending: false
-      });
-      if (error) throw error;
+      } = await supabase
+        .from("activity_log")
+        .select("*")
+        .eq("company_id", companyData.company_id)
+        .order("created_at", {
+          ascending: false
+        });
+
+      if (error) {
+        console.error("Erro ao buscar activity_log:", error);
+        throw error;
+      }
+
+      console.log("Dados do histórico:", data?.length || 0, "registros");
 
       // Transform database data to match UI format
-      const formattedData = data.map(item => ({
+      const formattedData = (data || []).map(item => ({
         id: item.id,
         tipo: item.tipo,
         acao: item.acao,
@@ -69,18 +122,24 @@ export default function Historico() {
         valor: item.valor ? `R$ ${item.valor.toFixed(2).replace(".", ",")}` : "",
         economia: item.economia ? `${item.economia}%` : ""
       }));
+      
       setHistorico(formattedData);
+      
+      if (formattedData.length === 0) {
+        console.log("Nenhuma atividade encontrada para esta empresa");
+      }
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
       toast({
         title: "Erro ao carregar histórico",
-        description: "Não foi possível carregar o histórico de atividades",
+        description: "Não foi possível carregar o histórico de atividades. Verifique o console para mais detalhes.",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
+
   const getTipoIcon = (tipo: string) => {
     const icons = {
       cotacao: FileText,

@@ -690,7 +690,7 @@ export default function Cotacoes() {
                       <TableCell colSpan={7} className="px-1 py-3">
                         <div className="flex items-center px-1.5 py-2 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-teal-300/60 dark:hover:border-teal-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                           {/* Cotação - Largura fixa */}
-                          <div className="w-[18%] flex items-center gap-3 pr-4">
+                          <div className="w-[18%] flex items-center gap-3 px-2">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 dark:from-teal-400/20 dark:to-cyan-400/20 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50 dark:border-teal-700/50">
                               <FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                             </div>
@@ -781,7 +781,7 @@ export default function Cotacoes() {
                           </div>
 
                           {/* Ações - Largura fixa */}
-                          <div className="w-[10%] pl-4">
+                          <div className="w-[10%] px-2">
                             <div className="flex items-center justify-end gap-2">
                               {/* Botão Detalhes - Direto na tabela */}
                               <ViewQuoteDialog quote={cotacao} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
@@ -792,8 +792,8 @@ export default function Cotacoes() {
                           })} onConvertToOrder={(quoteId, orders) => convertToOrder({
                             quoteId,
                             orders
-                          })} isUpdating={isUpdating} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-200 shadow-sm hover:shadow-md">
-                                    <Eye className="h-3 w-3" />
+                          })} isUpdating={isUpdating} trigger={<Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 p-0 h-8 w-8 rounded-lg border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                                    <Eye className="h-4 w-4" />
                                     <span className="sr-only">Ver detalhes da cotação</span>
                                   </Button>} />
 
@@ -801,14 +801,14 @@ export default function Cotacoes() {
                               {cotacao.status !== "concluida" && <EditQuoteDialog quote={cotacao} onEdit={(quoteId, data) => updateQuote({
                             quoteId,
                             data
-                          })} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-600 hover:text-amber-700 dark:hover:text-amber-300 transition-all duration-200 shadow-sm hover:shadow-md">
-                                      <Edit className="h-3 w-3" />
+                          })} trigger={<Button variant="ghost" size="sm" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 p-0 h-8 w-8 rounded-lg border border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                                      <Edit className="h-4 w-4" />
                                       <span className="sr-only">Editar cotação</span>
                                     </Button>} />}
 
                               {/* Botão Excluir - Só aparece se não estiver concluída */}
-                              {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 hover:border-red-300 dark:hover:border-red-600 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 shadow-sm hover:shadow-md">
-                                      <Trash2 className="h-3 w-3" />
+                              {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button variant="ghost" size="sm" className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 p-0 h-8 w-8 rounded-lg border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                                      <Trash2 className="h-4 w-4" />
                                       <span className="sr-only">Excluir cotação</span>
                                     </Button>} />}
                             </div>

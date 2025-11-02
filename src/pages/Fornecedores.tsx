@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, ChevronDown, Clock, MessageCircle, Award, Star } from "lucide-react";
+import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, ChevronDown, History, MessageCircle, Award, Star, Clock } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -701,17 +701,17 @@ export default function Fornecedores() {
                           {/* Ações - Largura fixa */}
                           <div className="w-[10%] pl-4">
                             <div className="flex items-center justify-end gap-2">
-                              <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 flex items-center justify-center">
-                                    <Clock className="h-4 w-4" />
+                              <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<Button variant="ghost" size="sm" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 p-0 h-8 w-8 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:border-indigo-300 dark:hover:border-indigo-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                                    <History className="h-4 w-4" />
                                   </Button>} />
 
-                              <Button variant="ghost" size="sm" onClick={() => openWhatsApp(supplier)} className="text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all duration-200 p-0 h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 flex items-center justify-center" title={`Conversar com ${supplier.contact} no WhatsApp`}>
+                              <Button variant="ghost" size="sm" onClick={() => openWhatsApp(supplier)} className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 p-0 h-8 w-8 rounded-lg border border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all" title={`Conversar com ${supplier.contact} no WhatsApp`}>
                                 <MessageCircle className="h-4 w-4" />
                               </Button>
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 h-8 w-8 p-0 rounded-full">
+                                  <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 h-8 w-8 p-0 rounded-full !transition-colors">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
