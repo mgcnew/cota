@@ -12,7 +12,8 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
-import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp } from "lucide-react";
+import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import EditPedidoDialog from "@/components/forms/EditPedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
@@ -224,57 +225,57 @@ export default function Pedidos() {
   return <PageWrapper>
       <div className="page-container">
         {/* Statistics Cards - Estilo Apple */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 overflow-visible">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
           <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
             <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                    <Clock className="h-3.5 w-3.5 text-amber-600" />
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-600" />
                   </div>
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ativos</span>
+                  <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Ativos</span>
                 </div>
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 rounded-full">
-                  <Clock className="h-2.5 w-2.5 text-amber-600" />
-                  <span className="text-xs font-semibold text-amber-600">65%</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 rounded-full flex-shrink-0">
+                  <Clock className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-amber-600" />
+                  <span className="text-[10px] sm:text-xs font-semibold text-amber-600">65%</span>
                 </div>
               </div>
-              <div className="mb-3">
-                <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+              <div className="mb-2 sm:mb-3">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                   {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">em andamento</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">em andamento</p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full" style={{ width: '65%' }}></div>
                 </div>
-                <span className="text-xs font-semibold text-amber-600">65%</span>
+                <span className="text-[10px] sm:text-xs font-semibold text-amber-600 whitespace-nowrap">65%</span>
               </div>
             </CardContent>
           </Card>
 
           <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-            <CardContent className="p-4 md:p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                    <Truck className="h-3.5 w-3.5 text-emerald-600" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                    <Truck className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600" />
                   </div>
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Entregues</span>
+                  <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Entregues</span>
                 </div>
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                  <CheckCircle className="h-2.5 w-2.5 text-green-600" />
-                  <span className="text-xs font-semibold text-green-600">{Math.floor(pedidos.filter(p => p.status === "entregue").length / pedidos.length * 100)}%</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full flex-shrink-0">
+                  <CheckCircle className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-green-600" />
+                  <span className="text-[10px] sm:text-xs font-semibold text-green-600">{Math.floor(pedidos.filter(p => p.status === "entregue").length / pedidos.length * 100)}%</span>
                 </div>
               </div>
-              <div className="mb-3">
-                <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+              <div className="mb-2 sm:mb-3">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                   {pedidos.filter(p => p.status === "entregue").length}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">concluídos</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">concluídos</p>
               </div>
-              <div className="flex items-end gap-0.5 h-8">
+              <div className="flex items-end gap-0.5 h-6 sm:h-8">
                 {[55, 70, 60, 85, 75, 90, 80].map((height, i) => (
                   <div key={i} className="flex-1 bg-gradient-to-t from-emerald-500 to-green-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
                 ))}
@@ -283,50 +284,50 @@ export default function Pedidos() {
           </Card>
 
           <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                    <DollarSign className="h-3.5 w-3.5 text-blue-600" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                    <DollarSign className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
                   </div>
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Valor Total</span>
+                  <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Valor Total</span>
                 </div>
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                  <TrendingUp className="h-2.5 w-2.5 text-blue-600" />
-                  <span className="text-xs font-semibold text-blue-600">15%</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full flex-shrink-0">
+                  <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-blue-600" />
+                  <span className="text-[10px] sm:text-xs font-semibold text-blue-600">15%</span>
                 </div>
               </div>
-              <div className="mb-3">
-                <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+              <div className="mb-2 sm:mb-3">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
                   R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">em pedidos</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">em pedidos</p>
               </div>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400">Média: R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</p>
+              <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">Média: R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</p>
             </CardContent>
           </Card>
 
           <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                    <Package className="h-3.5 w-3.5 text-purple-600" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                    <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600" />
                   </div>
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Itens</span>
+                  <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Itens</span>
                 </div>
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 rounded-full">
-                  <Package className="h-2.5 w-2.5 text-purple-600" />
-                  <span className="text-xs font-semibold text-purple-600">Média</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 rounded-full flex-shrink-0">
+                  <Package className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-purple-600" />
+                  <span className="text-[10px] sm:text-xs font-semibold text-purple-600">Média</span>
                 </div>
               </div>
-              <div className="mb-3">
-                <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+              <div className="mb-2 sm:mb-3">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                   {pedidos.length > 0 ? Math.round(pedidos.reduce((acc, p) => acc + p.itens, 0) / pedidos.length) : 0}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">por pedido</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">por pedido</p>
               </div>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400">Total: {pedidos.reduce((acc, p) => acc + p.itens, 0)} itens em {pedidos.length} pedidos</p>
+              <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">Total: {pedidos.reduce((acc, p) => acc + p.itens, 0)} itens em {pedidos.length} pedidos</p>
             </CardContent>
           </Card>
         </div>
@@ -335,15 +336,29 @@ export default function Pedidos() {
         <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            {/* ViewToggle - Esconder no mobile */}
+            <div className="hidden lg:block">
+              <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                <Input placeholder="Buscar por fornecedor, produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-pink-300/70 dark:hover:border-pink-600/70 focus:border-pink-400 dark:focus:border-pink-500 focus:ring-2 focus:ring-pink-200/50 dark:focus:ring-pink-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end flex-1 lg:flex-initial">
+              {/* Barra de busca + Botão Criar (lado a lado no mobile) */}
+              <div className="flex gap-2 flex-1 sm:flex-initial">
+                <div className="relative flex-1 sm:flex-initial">
+                  <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                  <Input placeholder="Buscar por fornecedor, produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 sm:pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+                </div>
+                
+                {/* Botão Mobile - Apenas criar (ao lado da busca) */}
+                <Button 
+                  onClick={() => setAddDialogOpen(true)}
+                  className="sm:hidden bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl flex-shrink-0 px-4"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
 
-              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="w-full sm:w-[180px] h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-pink-300/70 dark:hover:border-pink-500/70 focus:border-pink-400 dark:focus:border-pink-400 focus:ring-2 focus:ring-pink-200/40 dark:focus:ring-pink-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 px-3 text-gray-900 dark:text-gray-100">
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="w-full sm:w-[180px] h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-orange-300/70 dark:hover:border-orange-500/70 focus:border-orange-400 dark:focus:border-orange-400 focus:ring-2 focus:ring-orange-200/40 dark:focus:ring-orange-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 px-3 text-gray-900 dark:text-gray-100 hidden sm:block">
                 <option value="all">Todos os Status</option>
                 <option value="pendente">Pendentes</option>
                 <option value="processando">Processando</option>
@@ -352,7 +367,8 @@ export default function Pedidos() {
                 <option value="cancelado">Cancelados</option>
               </select>
 
-              <Popover>
+              {/* Remover Filtros Avançados e Exportar CSV */}
+              {/* <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-pink-300/70 dark:hover:border-pink-600/70 focus:border-pink-400 dark:focus:border-pink-500 focus:ring-2 focus:ring-pink-200/50 dark:focus:ring-pink-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
                     <Filter className="h-4 w-4 mr-2" />
@@ -400,14 +416,13 @@ export default function Pedidos() {
                     </div>
                   </div>
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
 
-              <Button variant="outline" onClick={exportToCSV} className="h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-pink-300/70 dark:hover:border-pink-500/70 focus:border-pink-400 dark:focus:border-pink-400 focus:ring-2 focus:ring-pink-200/40 dark:focus:ring-pink-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 text-gray-900 dark:text-gray-100">
-                <Download className="h-4 w-4 mr-2" />
-                Exportar CSV
-              </Button>
-
-              <Button className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl" onClick={() => setAddDialogOpen(true)}>
+              {/* Botão Desktop */}
+              <Button 
+                onClick={() => setAddDialogOpen(true)}
+                className="hidden sm:flex bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Pedido
               </Button>
@@ -427,34 +442,34 @@ export default function Pedidos() {
                     <TableHeader className="bg-transparent">
                       <TableRow>
                         <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                          <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-pink-300/60 dark:border-pink-900/60 rounded-xl shadow-md backdrop-blur-sm px-4 py-3">
+                          <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-orange-300/60 dark:border-orange-900/60 rounded-xl shadow-md backdrop-blur-sm px-4 py-3">
                             <div className="w-[15%] flex items-center gap-2 pr-4 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500/15 to-rose-500/15 flex items-center justify-center text-pink-600 dark:text-rose-300">
+                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/15 to-amber-500/15 flex items-center justify-center text-orange-600 dark:text-amber-300">
                                 <ShoppingCart className="h-4 w-4" />
                               </div>
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Pedido</span>
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Pedido</span>
                             </div>
                             <div className="w-[18%] flex items-center gap-2 px-2 min-w-0">
-                              <Building2 className="h-4 w-4 text-pink-600 dark:text-pink-300" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Fornecedor</span>
+                              <Building2 className="h-4 w-4 text-orange-600 dark:text-orange-300" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Fornecedor</span>
                             </div>
                             <div className="hidden md:flex w-[18%] px-2 items-center gap-2">
-                              <Package className="h-4 w-4 text-pink-600 dark:text-pink-300" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Produtos</span>
+                              <Package className="h-4 w-4 text-orange-600 dark:text-orange-300" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Produtos</span>
                             </div>
                             <div className="hidden lg:flex w-[15%] px-2 items-center gap-2">
-                              <Calendar className="h-4 w-4 text-pink-600 dark:text-pink-300" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Entrega</span>
+                              <Calendar className="h-4 w-4 text-orange-600 dark:text-orange-300" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Entrega</span>
                             </div>
                             <div className="flex w-[12%] px-2 justify-center">
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Status</span>
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Status</span>
                             </div>
                             <div className="flex w-[12%] px-2 justify-center items-center gap-2">
-                              <DollarSign className="h-4 w-4 text-pink-600 dark:text-pink-300" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Valor</span>
+                              <DollarSign className="h-4 w-4 text-orange-600 dark:text-orange-300" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Valor</span>
                             </div>
                             <div className="w-[10%] pl-4 flex justify-end">
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-pink-900 dark:text-pink-100">Ações</span>
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Ações</span>
                             </div>
                           </div>
                         </TableCell>
@@ -463,11 +478,11 @@ export default function Pedidos() {
                     <TableBody>
                       {paginatedData.items.map((pedido, index) => <TableRow key={pedido.id} className="group border-none">
                           <TableCell colSpan={7} className="px-1 py-3">
-                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-pink-300/60 dark:hover:border-pink-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
+                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-orange-300/60 dark:hover:border-orange-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                               {/* Pedido - Largura fixa */}
                               <div className="w-[15%] flex items-center gap-3 pr-4">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/10 to-rose-500/10 dark:from-pink-400/20 dark:to-rose-400/20 flex items-center justify-center flex-shrink-0 border border-pink-200/50 dark:border-pink-700/50">
-                                  <ShoppingCart className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center flex-shrink-0 border border-orange-200/50 dark:border-orange-700/50">
+                                  <ShoppingCart className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="font-semibold font-mono text-sm text-foreground truncate">
@@ -512,7 +527,7 @@ export default function Pedidos() {
                               <div className="hidden lg:block w-[15%] px-2">
                                 <div className="text-sm space-y-1">
                                   <div className="flex items-center gap-1 text-foreground">
-                                    <Truck className="h-3 w-3 text-pink-600 dark:text-pink-400" />
+                                    <Truck className="h-3 w-3 text-orange-600 dark:text-orange-400" />
                                     {pedido.dataEntrega}
                                   </div>
                                   <div className="text-xs text-muted-foreground">
@@ -572,66 +587,131 @@ export default function Pedidos() {
                 </div>
                 
                 {/* Paginação com melhor espaçamento */}
-                <div className="border-t border-pink-100/80 dark:border-gray-700/30 bg-gradient-to-r from-pink-50/30 to-rose-50/30 dark:from-gray-800/30 dark:to-gray-800/20 px-6 py-4">
+                <div className="border-t border-orange-100/80 dark:border-gray-700/30 bg-gradient-to-r from-orange-50/30 to-amber-50/30 dark:from-gray-800/30 dark:to-gray-800/20 px-6 py-4">
                   <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
                 </div>
               </CardContent>
-            </Card> : <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {paginatedData.items.map(pedido => {
-            const cardClass = pedido.status === "entregue" ? "card-status-completed" : pedido.status === "confirmado" ? "card-status-active" : pedido.status === "processando" ? "card-status-pending" : pedido.status === "cancelado" ? "card-status-error" : "card-status-pending";
-            return <Card key={pedido.id} className={cn("group", cardClass)}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className={cn("p-2.5 rounded-xl transition-all duration-300 group-hover:scale-110", pedido.status === "entregue" ? "bg-success/10" : pedido.status === "confirmado" ? "bg-info/10" : pedido.status === "processando" ? "bg-warning/10" : pedido.status === "cancelado" ? "bg-error/10" : "bg-muted")}>
-                          <div className={cn(pedido.status === "entregue" ? "text-success" : pedido.status === "confirmado" ? "text-info" : pedido.status === "processando" ? "text-warning" : pedido.status === "cancelado" ? "text-error" : "text-muted-foreground")}>
+            </Card> : <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {paginatedData.items.map((pedido, index) => {
+            const getStatusColors = (status: string) => {
+              switch (status) {
+                case "entregue":
+                  return {
+                    border: "border-green-300/60",
+                    bg: "from-white to-green-50/30",
+                    iconBg: "from-green-500/10 to-emerald-500/10 group-hover:from-green-500/20 group-hover:to-emerald-500/20",
+                    iconColor: "text-green-600"
+                  };
+                case "confirmado":
+                  return {
+                    border: "border-blue-300/60",
+                    bg: "from-white to-blue-50/30",
+                    iconBg: "from-blue-500/10 to-cyan-500/10 group-hover:from-blue-500/20 group-hover:to-cyan-500/20",
+                    iconColor: "text-blue-600"
+                  };
+                case "processando":
+                  return {
+                    border: "border-amber-300/60",
+                    bg: "from-white to-amber-50/30",
+                    iconBg: "from-amber-500/10 to-yellow-500/10 group-hover:from-amber-500/20 group-hover:to-yellow-500/20",
+                    iconColor: "text-amber-600"
+                  };
+                case "cancelado":
+                  return {
+                    border: "border-red-300/60",
+                    bg: "from-white to-red-50/30",
+                    iconBg: "from-red-500/10 to-pink-500/10 group-hover:from-red-500/20 group-hover:to-pink-500/20",
+                    iconColor: "text-red-600"
+                  };
+                default:
+                  return {
+                    border: "border-gray-300/60",
+                    bg: "from-white to-gray-50/30",
+                    iconBg: "from-gray-500/10 to-slate-500/10 group-hover:from-gray-500/20 group-hover:to-slate-500/20",
+                    iconColor: "text-gray-600"
+                  };
+              }
+            };
+            const colors = getStatusColors(pedido.status);
+            const pedidoNumero = paginatedData.pagination.startIndex + index + 1;
+            return <Card key={pedido.id} className={cn("group hover:shadow-xl dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 border border-gray-200/60 dark:border-gray-700/30 hover:", colors.border, "bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26] backdrop-blur-sm")}>
+                  <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                        <div className={cn("p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-300", colors.iconBg)}>
+                          <div className={cn("h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform duration-300", colors.iconColor)}>
                             {getStatusIcon(pedido.status)}
                           </div>
                         </div>
-                        <div>
-                          <CardTitle className="card-title leading-tight" title={pedido.fornecedor}>
+                        <div className="space-y-1.5 sm:space-y-2 flex-1 min-w-0">
+                          <CardTitle className="text-sm sm:text-base font-bold text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-300 truncate" title={pedido.fornecedor}>
                             {capitalize(abbreviateSupplierName(pedido.fornecedor, 25))}
                           </CardTitle>
-                          <p className="table-cell-secondary">#{pedido.id}</p>
+                          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                            {getStatusBadge(pedido.status)}
+                          </div>
                         </div>
                       </div>
-                      {getStatusBadge(pedido.status)}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 hover:bg-orange-100 h-8 w-8 sm:h-9 sm:w-9 rounded-full">
+                            <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setViewDialogOpen(true); }}>
+                            <Eye className="h-4 w-4 mr-2" />Ver Detalhes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setEditDialogOpen(true); }}>
+                            <Edit className="h-4 w-4 mr-2" />Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setDeleteDialogOpen(true); }} className="text-destructive">
+                            <Trash2 className="h-4 w-4 mr-2" />Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Valor:</span>
-                        <span className="font-bold text-success">{pedido.total}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Entrega:</span>
-                        <span className="font-medium">{pedido.dataEntrega}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Itens:</span>
-                        <span className="font-medium">{pedido.itens} produtos</span>
+                  
+                  <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
+                    <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
+                            <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Pedido</span>
+                          </div>
+                          <p className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-200">
+                            #{pedidoNumero.toString().padStart(4, '0')}
+                          </p>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                            <Package className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
+                            <span className="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-400">Itens</span>
+                          </div>
+                          <p className="text-base sm:text-lg font-bold text-orange-800 dark:text-orange-300">{pedido.itens}</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex gap-1 pt-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                    setSelectedPedido(pedido);
-                    setViewDialogOpen(true);
-                  }}>
-                        <Eye className="h-4 w-4 mr-1" />Ver
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => {
-                    setSelectedPedido(pedido);
-                    setEditDialogOpen(true);
-                  }}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => {
-                    setSelectedPedido(pedido);
-                    setDeleteDialogOpen(true);
-                  }}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="p-2.5 sm:p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                          <span className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-400">Entrega</span>
+                        </div>
+                        <p className="text-[10px] sm:text-xs font-semibold text-blue-800 dark:text-blue-300">{pedido.dataEntrega}</p>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 sm:pt-3 border-t border-gray-200">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Valor Total</p>
+                          <p className="text-lg sm:text-xl font-bold text-success">{pedido.total}</p>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>;

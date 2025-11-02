@@ -225,55 +225,55 @@ export default function Produtos() {
       <PageWrapper>
         <div className="page-container">
           {/* Stats Cards - Estilo Apple */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 overflow-visible">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
             <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
               <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                      <Package className="h-3.5 w-3.5 text-orange-600" />
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                      <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-orange-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Produtos</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Produtos</span>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-orange-600" />
-                    <span className="text-xs font-semibold text-orange-600">+{Math.floor(stats.totalProducts * 0.1)}</span>
+                  <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-full flex-shrink-0">
+                    <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-orange-600" />
+                    <span className="text-[10px] sm:text-xs font-semibold text-orange-600">+{Math.floor(stats.totalProducts * 0.1)}</span>
                   </div>
                 </div>
-                <div className="mb-3">
-                  <p className="metric-value">{stats.totalProducts}</p>
-                  <p className="metric-description mt-0.5">No Catálogo</p>
+                <div className="mb-2 sm:mb-3">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalProducts}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">No Catálogo</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualComCotacao}%` }}></div>
                   </div>
-                  <span className="text-xs font-semibold text-orange-600">{stats.percentualComCotacao}%</span>
+                  <span className="text-[10px] sm:text-xs font-semibold text-orange-600 whitespace-nowrap">{stats.percentualComCotacao}%</span>
                 </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{stats.produtosPorStatus.ativos} ativos • {stats.produtosPorStatus.cotados} cotados • {stats.produtosPorStatus.semCotacao} sem cotação</p>
+                <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 truncate">{stats.produtosPorStatus.ativos} ativos • {stats.produtosPorStatus.cotados} cotados • {stats.produtosPorStatus.semCotacao} sem cotação</p>
               </CardContent>
             </Card>
 
             <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
               <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                      <Filter className="h-3.5 w-3.5 text-blue-600" />
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                      <Filter className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Categorias</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Categorias</span>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-blue-600" />
-                    <span className="text-xs font-semibold text-blue-600">+2</span>
+                  <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full flex-shrink-0">
+                    <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-blue-600" />
+                    <span className="text-[10px] sm:text-xs font-semibold text-blue-600">+2</span>
                   </div>
                 </div>
-                <div className="mb-3">
-                  <p className="metric-value">{stats.totalCategories}</p>
-                  <p className="metric-description mt-0.5">Disponíveis</p>
+                <div className="mb-2 sm:mb-3">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalCategories}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Disponíveis</p>
                 </div>
                 {stats.topCategoria && (
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                  <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
                     <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.topCategoria.nome}</span> • {stats.topCategoria.count} produtos
                   </p>
                 )}
@@ -282,23 +282,23 @@ export default function Produtos() {
 
             <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
               <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                      <FileText className="h-3.5 w-3.5 text-emerald-600" />
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                      <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Cotações</span>
                   </div>
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                    <TrendingUp className="h-2.5 w-2.5 text-green-600" />
-                    <span className="text-xs font-semibold text-green-600">15%</span>
+                  <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full flex-shrink-0">
+                    <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-green-600" />
+                    <span className="text-[10px] sm:text-xs font-semibold text-green-600">15%</span>
                   </div>
                 </div>
-                <div className="mb-3">
-                  <p className="metric-value">{stats.activeQuotes}</p>
-                  <p className="metric-description mt-0.5">Total de Cotações</p>
+                <div className="mb-2 sm:mb-3">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.activeQuotes}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total de Cotações</p>
                 </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
                   Média de <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stats.mediaCotacoesPorProduto}</span> cotações/produto
                 </p>
               </CardContent>
@@ -306,30 +306,30 @@ export default function Produtos() {
 
             <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
               <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <Scale className="h-3.5 w-3.5 text-purple-600" />
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                      <Scale className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Valor Médio</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Valor Médio</span>
                   </div>
                   {stats.percentualEconomiaMedia > 0 && (
-                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                      <TrendingUp className="h-2.5 w-2.5 text-green-600" />
-                      <span className="text-xs font-semibold text-green-600">{stats.percentualEconomiaMedia}%</span>
+                    <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full flex-shrink-0">
+                      <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-green-600" />
+                      <span className="text-[10px] sm:text-xs font-semibold text-green-600">{stats.percentualEconomiaMedia}%</span>
                     </div>
                   )}
                 </div>
-                <div className="mb-3">
-                  <p className="metric-value text-2xl">{stats.averageValue}</p>
-                  <p className="metric-description mt-0.5">Valor Médio por Produto</p>
+                <div className="mb-2 sm:mb-3">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.averageValue}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Valor Médio por Produto</p>
                 </div>
                 {stats.percentualEconomiaMedia > 0 ? (
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                  <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
                     Economia média de <span className="font-semibold text-green-600 dark:text-green-400">R$ {stats.economiaMediaPorProduto}</span> por produto
                   </p>
                 ) : (
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                  <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
                     <span className="font-semibold">{stats.productsWithPrices}</span> produtos com preço
                   </p>
                 )}
@@ -346,14 +346,27 @@ export default function Produtos() {
             )}
 
             <div className="flex flex-wrap items-center gap-3 sm:justify-end w-full">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                <Input
-                  placeholder="Buscar produtos..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 w-full h-9 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-lg shadow-sm transition-all duration-200 text-sm text-gray-900 dark:text-white"
-                />
+              {/* Barra de busca + Botão Criar (lado a lado no mobile) */}
+              <div className="flex gap-2 w-full sm:w-auto">
+                <div className="relative flex-1 sm:w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                  <Input
+                    placeholder="Buscar produtos..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4 w-full h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-lg shadow-sm transition-all duration-200 text-sm text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Botão Mobile - Apenas criar (ao lado da busca) */}
+                {isMobile && (
+                  <Button
+                    onClick={triggerAddDialog}
+                    className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl flex-shrink-0 px-4"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
 
               {!isMobile && (
@@ -366,15 +379,7 @@ export default function Produtos() {
                 />
               )}
 
-              {isMobile ? (
-                <Button
-                  onClick={triggerAddDialog}
-                  className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Criar
-                </Button>
-              ) : (
+              {!isMobile && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
@@ -428,27 +433,27 @@ export default function Produtos() {
         </div>}
 
       {/* Products View */}
-      {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {viewMode === "grid" ? <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedData.items.map(product => <Card key={product.id} className="group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none md:hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
                 <div className="flex items-start justify-between">
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300">
-                        <Package className="h-5 w-5 text-white" />
+                  <div className="space-y-2 sm:space-y-3 flex-1">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="p-1.5 sm:p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                        <Package className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="card-title group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-300 truncate">
+                        <CardTitle className="text-sm sm:text-base font-bold text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-300 truncate">
                           {capitalize(product.name)}
                         </CardTitle>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className="bg-orange-100/80 border-orange-300/60 text-orange-700 font-medium">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                      <Badge variant="outline" className="bg-orange-100/80 border-orange-300/60 text-orange-700 font-medium text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
                         {capitalize(product.category)}
                       </Badge>
                       {product.barcode && (
-                        <Badge variant="secondary" className="bg-gray-100/80 text-gray-700 font-medium">
+                        <Badge variant="secondary" className="bg-gray-100/80 text-gray-700 font-medium text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
                           {product.barcode}
                         </Badge>
                       )}
@@ -457,8 +462,8 @@ export default function Produtos() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full">
-                        <MoreVertical className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full h-8 w-8 sm:h-9 sm:w-9">
+                        <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
@@ -483,26 +488,26 @@ export default function Produtos() {
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-4">
-                <div className="p-4 rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/60 dark:border-green-700/30">
+              <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
+                <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/60 dark:border-green-700/30">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-green-700 dark:text-green-400 mb-1">Melhor Preço</p>
-                      <p className="text-2xl font-bold text-green-800 dark:text-green-300">{product.lastQuotePrice}</p>
+                      <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400 mb-1">Melhor Preço</p>
+                      <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-300">{product.lastQuotePrice}</p>
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-1 mb-1">
                         {getTrendIcon(product.trend)}
-                        <span className="text-sm font-medium text-green-600">Tendência</span>
+                        <span className="text-xs sm:text-sm font-medium text-green-600 hidden sm:inline">Tendência</span>
                       </div>
-                      <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                      <div className="text-[10px] sm:text-xs text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                         Atualizado
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {!isMobile && (
                     <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
                       <div className="flex items-center gap-2">
@@ -513,21 +518,21 @@ export default function Produtos() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div className="p-2 sm:p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
-                        <FileText className="h-4 w-4 text-blue-600" />
-                        <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
+                        <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                        <span className="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
                       </div>
-                      <span className="text-lg font-bold text-blue-800 dark:text-blue-300">{product.quotesCount}</span>
+                      <span className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-300">{product.quotesCount}</span>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
+                    <div className="p-2 sm:p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
-                        <Clock className="h-4 w-4 text-purple-600" />
-                        <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Atualizado</span>
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
+                        <span className="text-[10px] sm:text-xs font-medium text-purple-600 dark:text-purple-400">Atualizado</span>
                       </div>
-                      <span className="text-xs font-semibold text-purple-800 dark:text-purple-300">{product.lastUpdate}</span>
+                      <span className="text-[10px] sm:text-xs font-semibold text-purple-800 dark:text-purple-300">{product.lastUpdate}</span>
                     </div>
                   </div>
                 </div>

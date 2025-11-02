@@ -215,58 +215,58 @@ export default function Cotacoes() {
   const paginatedData = paginate(filteredCotacoes);
   return <div className="page-container">
       {/* Statistics Cards - Estilo Apple */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
         <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-teal-500/10 flex items-center justify-center">
-                  <FileText className="h-3.5 w-3.5 text-teal-600" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-teal-500/10 flex items-center justify-center flex-shrink-0">
+                  <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-teal-600" />
                 </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ativas</span>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Ativas</span>
               </div>
               {stats.percentualAtivas > 0 && (
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-teal-50 dark:bg-teal-900/20 rounded-full">
-                  <span className="text-xs font-semibold text-teal-600">{stats.percentualAtivas}%</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-teal-50 dark:bg-teal-900/20 rounded-full flex-shrink-0">
+                  <span className="text-[10px] sm:text-xs font-semibold text-teal-600">{stats.percentualAtivas}%</span>
                 </div>
               )}
             </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.porStatus.ativas}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotações ativas</p>
+            <div className="mb-2 sm:mb-3">
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.porStatus.ativas}</p>
+              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotações ativas</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualAtivas}%` }}></div>
               </div>
-              <span className="text-xs font-semibold text-teal-600">{stats.percentualAtivas}%</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-teal-600 whitespace-nowrap">{stats.percentualAtivas}%</span>
             </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 truncate">
               {stats.porStatus.pendentes} pendentes • {stats.porStatus.concluidas} finalizadas
             </p>
           </CardContent>
         </Card>
 
         <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <Calendar className="h-3.5 w-3.5 text-amber-600" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                  <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-600" />
                 </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pendentes</span>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Pendentes</span>
               </div>
               {stats.pendentesMais24h > 0 && (
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-50 dark:bg-red-900/20 rounded-full">
-                  <span className="text-xs font-semibold text-red-600">⚠ {stats.pendentesMais24h}</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-red-50 dark:bg-red-900/20 rounded-full flex-shrink-0">
+                  <span className="text-[10px] sm:text-xs font-semibold text-red-600">⚠ {stats.pendentesMais24h}</span>
                 </div>
               )}
             </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.porStatus.pendentes}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">aguardando resposta</p>
+            <div className="mb-2 sm:mb-3">
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.porStatus.pendentes}</p>
+              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">aguardando resposta</p>
             </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">
+            <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
               {stats.pendentesMais24h > 0 ? (
                 <span className="text-red-600 dark:text-red-400 font-semibold">{stats.pendentesMais24h} há mais de 24h</span>
               ) : (
@@ -277,23 +277,23 @@ export default function Cotacoes() {
         </Card>
 
         <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                  <DollarSign className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600" />
                 </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Economia</span>
               </div>
               {stats.economiaTotal > 0 && (
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full">
-                  <span className="text-xs font-semibold text-green-600">Total</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full flex-shrink-0">
+                  <span className="text-[10px] sm:text-xs font-semibold text-green-600">Total</span>
                 </div>
               )}
             </div>
-            <div className="mb-3">
-              <p className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.economiaFormatada}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">economizados</p>
+            <div className="mb-2 sm:mb-3">
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.economiaFormatada}</p>
+              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">economizados</p>
             </div>
             <div className="flex items-end gap-0.5 h-8">
               {stats.ultimas7Economias.map((economia, i) => {
@@ -319,25 +319,25 @@ export default function Cotacoes() {
         </Card>
 
         <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Building2 className="h-3.5 w-3.5 text-blue-600" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <Building2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
                 </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fornecedores</span>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Fornecedores</span>
               </div>
               {stats.totalFornecedoresUnicos > 0 && (
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                  <span className="text-xs font-semibold text-blue-600">{stats.totalFornecedoresUnicos} únicos</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full flex-shrink-0">
+                  <span className="text-[10px] sm:text-xs font-semibold text-blue-600">{stats.totalFornecedoresUnicos} únicos</span>
                 </div>
               )}
             </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.mediaFornecedores}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">média por cotação</p>
+            <div className="mb-2 sm:mb-3">
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.mediaFornecedores}</p>
+              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">média por cotação</p>
             </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">
+            <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
               {stats.totalFornecedoresUnicos} fornecedores únicos participantes
             </p>
           </CardContent>
@@ -348,16 +348,30 @@ export default function Cotacoes() {
       <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
         <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            {/* ViewToggle - Esconder no mobile */}
+            <div className="hidden lg:block">
+              <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                <Input placeholder="Buscar por produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-12 pr-4 w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end flex-1 lg:flex-initial">
+              {/* Barra de busca + Botão Criar (lado a lado no mobile) */}
+              <div className="flex gap-2 flex-1 sm:flex-initial">
+                <div className="relative flex-1 sm:flex-initial">
+                  <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                  <Input placeholder="Buscar por produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 sm:pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+                </div>
+                
+                {/* Botão Mobile - Apenas criar (ao lado da busca) */}
+                <Button 
+                  onClick={() => addQuoteRef.current?.click()}
+                  className="sm:hidden bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl flex-shrink-0 px-4"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
+                <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white hidden sm:flex">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -372,7 +386,7 @@ export default function Cotacoes() {
               </Select>
 
               <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-                <SelectTrigger className="w-full sm:w-[200px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
+                <SelectTrigger className="w-full sm:w-[200px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white hidden sm:flex">
                   <SelectValue placeholder="Fornecedor" />
                 </SelectTrigger>
                 <SelectContent>
@@ -383,26 +397,29 @@ export default function Cotacoes() {
                 </SelectContent>
               </Select>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Ações
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
-                  <DropdownMenuLabel className="text-gray-600 font-medium">Gerenciar Cotações</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => addQuoteRef.current?.click()}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Cotação
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Download className="h-4 w-4 mr-2" />
-                    Exportar
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Botão de Ações - Desktop: dropdown com exportar, Mobile: botão direto criar */}
+              <div className="hidden sm:block">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Ações
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                    <DropdownMenuLabel className="text-gray-600 font-medium">Gerenciar Cotações</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => addQuoteRef.current?.click()}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nova Cotação
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Download className="h-4 w-4 mr-2" />
+                      Exportar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
 
@@ -417,8 +434,8 @@ export default function Cotacoes() {
       </Card>
 
       {/* Cotações View */}
-      {viewMode === "grid" ? <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map(cotacao => {
+      {viewMode === "grid" ? <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {paginatedData.items.map((cotacao, index) => {
         const getStatusColors = (status: string) => {
           switch (status) {
             case "ativa":
@@ -452,22 +469,23 @@ export default function Cotacoes() {
           }
         };
         const colors = getStatusColors(cotacao.status);
+        const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
         return <Card key={cotacao.id} className={cn("group hover:shadow-xl dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 border border-gray-200/60 dark:border-gray-700/30 hover:", colors.border, "bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26] backdrop-blur-sm")}>
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className={cn("p-2.5 rounded-xl transition-all duration-300", colors.iconBg)}>
-                      <FileText className={cn("h-5 w-5 group-hover:scale-110 transition-transform duration-300", colors.iconColor)} />
+                  <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                    <div className={cn("p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-300", colors.iconBg)}>
+                      <FileText className={cn("h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform duration-300", colors.iconColor)} />
                     </div>
-                    <div className="space-y-2 flex-1 min-w-0">
-                      <CardTitle className="card-title group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors duration-300 truncate" title={cotacao.produto}>
+                    <div className="space-y-1.5 sm:space-y-2 flex-1 min-w-0">
+                      <CardTitle className="text-sm sm:text-base font-bold text-gray-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors duration-300 truncate" title={cotacao.produto}>
                         <CapitalizedText>
                           {cotacao.produtoResumo}
                         </CapitalizedText>
                       </CardTitle>
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         {getStatusBadge(cotacao.status)}
-                        <Badge variant="outline" className="bg-gray-50/80 border-gray-200/60 text-gray-700 font-medium text-xs">
+                        <Badge variant="outline" className="bg-gray-50/80 border-gray-200/60 text-gray-700 font-medium text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
                           {cotacao.quantidade}
                         </Badge>
                       </div>
@@ -476,8 +494,8 @@ export default function Cotacoes() {
                   {/* Desktop: Menu dropdown tradicional */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-teal-100 hidden md:flex">
-                        <MoreVertical className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 hover:bg-teal-100 h-8 w-8 sm:h-9 sm:w-9 rounded-full">
+                        <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -512,44 +530,44 @@ export default function Cotacoes() {
                 </div>
               </CardHeader>
               
-              <CardContent className="space-y-4">
-                <div className="p-4 rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
-                  <div className="grid grid-cols-2 gap-4">
+              <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
+                <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileText className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">ID</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                        <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
+                        <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Cotação</span>
                       </div>
-                      <p className="text-sm font-bold text-gray-800 dark:text-gray-200 font-mono">
-                        {cotacao.id.length > 12 ? `${cotacao.id.substring(0, 6)}...${cotacao.id.substring(cotacao.id.length - 4)}` : cotacao.id}
+                      <p className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-200">
+                        #{cotacaoNumero.toString().padStart(4, '0')}
                       </p>
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Building2 className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Fornecedores</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                        <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                        <span className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-400">Fornecedores</span>
                       </div>
-                      <p className="text-sm font-bold text-blue-800 dark:text-blue-300">{cotacao.fornecedores}</p>
+                      <p className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-300">{cotacao.fornecedores}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-200/60 dark:border-indigo-700/30">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Calendar className="h-4 w-4 text-indigo-600" />
-                      <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">Período</span>
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-200/60 dark:border-indigo-700/30">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-indigo-600" />
+                      <span className="text-xs sm:text-sm font-medium text-indigo-700 dark:text-indigo-400">Período</span>
                     </div>
-                    <p className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">{cotacao.dataInicio} - {cotacao.dataFim}</p>
+                    <p className="text-[10px] sm:text-xs font-semibold text-indigo-800 dark:text-indigo-300">{cotacao.dataInicio} - {cotacao.dataFim}</p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-gray-200">
+                <div className="pt-2 sm:pt-3 border-t border-gray-200">
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-sm text-muted-foreground">Melhor Preço</p>
-                      <p className="text-xl font-bold text-success">{cotacao.melhorPreco}</p>
-                      <p className="text-xs text-muted-foreground">{cotacao.melhorFornecedor}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Melhor Preço</p>
+                      <p className="text-lg sm:text-xl font-bold text-success">{cotacao.melhorPreco}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[120px]">{cotacao.melhorFornecedor}</p>
                     </div>
                     <div className="text-right">
                       {(() => {
@@ -686,7 +704,9 @@ export default function Cotacoes() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedData.items.map((cotacao, index) => <TableRow key={cotacao.id} className="group border-none">
+                  {paginatedData.items.map((cotacao, index) => {
+                    const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
+                    return <TableRow key={cotacao.id} className="group border-none">
                       <TableCell colSpan={7} className="px-1 py-3">
                         <div className="flex items-center px-1.5 py-2 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-teal-300/60 dark:hover:border-teal-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                           {/* Cotação - Largura fixa */}
@@ -695,8 +715,8 @@ export default function Cotacoes() {
                               <FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold font-mono text-sm text-foreground truncate">
-                                #{cotacao.id.substring(0, 8)}
+                              <div className="font-semibold text-sm text-foreground truncate">
+                                #{cotacaoNumero.toString().padStart(4, '0')}
                               </div>
                               <div className="text-xs text-muted-foreground md:hidden mt-1 truncate" title={cotacao.produto}>
                                 <CapitalizedText>
@@ -815,7 +835,8 @@ export default function Cotacoes() {
                           </div>
                         </div>
                       </TableCell>
-                    </TableRow>)}
+                    </TableRow>;
+                  })}
                 </TableBody>
               </Table>
             </div>

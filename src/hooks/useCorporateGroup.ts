@@ -78,20 +78,42 @@ export function useCorporateGroup() {
 
   const createGroup = useMutation({
     mutationFn: async (data: { name: string; description?: string }) => {
-      const { data: newGroup, error } = await supabase
+      if (!user?.id) throw new Error("User not authenticated");
+
+      // Get user's company
+      const { data: companyUser, error: companyUserError } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (companyUserError) throw companyUserError;
+      if (!companyUser) throw new Error("User not associated with a company");
+
+      // Create corporate group
+      const { data: newGroup, error: groupError } = await supabase
         .from("corporate_groups")
         .insert([data])
         .select()
         .single();
 
-      if (error) throw error;
+      if (groupError) throw groupError;
+
+      // Associate company with the new group
+      const { error: updateError } = await supabase
+        .from("companies")
+        .update({ corporate_group_id: newGroup.id })
+        .eq("id", companyUser.company_id);
+
+      if (updateError) throw updateError;
+
       return newGroup;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["corporate-group"] });
       toast({
         title: "Grupo criado",
-        description: "Grupo corporativo criado com sucesso.",
+        description: "Grupo corporativo criado e associado à sua empresa com sucesso.",
       });
     },
     onError: (error) => {

@@ -374,18 +374,20 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-6xl h-[92vh] sm:h-[88vh] md:h-[85vh] max-h-[950px] border-0 dark:border dark:border-gray-700 shadow-2xl rounded-lg sm:rounded-xl md:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900">
-        <DialogHeader className="px-3 sm:px-4 md:px-6 py-2 border-b border-gray-100/60 dark:border-gray-700 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
-          <div className="relative z-10 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg flex-shrink-0">
-                <Package className="h-4 w-4" />
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border-0 shadow-2xl rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900">
+        <DialogHeader className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 border-b border-gray-100/60 dark:border-gray-700 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/40 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 backdrop-blur-sm relative overflow-hidden flex-shrink-0">
+          <div className="relative z-10 flex items-center justify-between gap-1 sm:gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+              <div className="p-1 sm:p-1.5 rounded-lg bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg flex-shrink-0">
+                <Package className="h-3 w-3 sm:h-4 sm:w-4" />
               </div>
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <DialogTitle className="text-sm font-bold text-slate-900 dark:text-white truncate">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                <DialogTitle className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
                   Detalhes da Cotação
                 </DialogTitle>
-                {getStatusBadge(quote.status)}
+                <div className="hidden sm:block">
+                  {getStatusBadge(quote.status)}
+                </div>
               </div>
             </div>
             
@@ -402,84 +404,84 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
         <div className="flex flex-col flex-1 min-h-0">
           <Tabs defaultValue="detalhes" className="w-full flex flex-col flex-1 min-h-0">
-            <div className="px-3 sm:px-4 md:px-6 py-2 border-b border-gray-100/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:from-gray-800/50 dark:to-gray-800/50 backdrop-blur-sm flex-shrink-0">
-              <TabsList className="grid w-full grid-cols-3 bg-white/60 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg p-1 shadow-sm border border-gray-200/40 dark:border-gray-700 h-9">
+            <div className="px-2 sm:px-4 md:px-6 py-1.5 sm:py-2 border-b border-gray-100/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:from-gray-800/50 dark:to-gray-800/50 backdrop-blur-sm flex-shrink-0">
+              <TabsList className="grid w-full grid-cols-3 bg-white/60 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg p-0.5 sm:p-1 shadow-sm border border-gray-200/40 dark:border-gray-700 h-8 sm:h-9">
                 <TabsTrigger
                   value="detalhes"
-                  className="rounded-md font-medium text-xs transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-2 py-1"
+                  className="rounded-md font-medium text-[10px] sm:text-xs transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-1 sm:px-2 py-1"
                 >
                   Detalhes
                 </TabsTrigger>
                 <TabsTrigger
                   value="atualizacao"
-                  className="rounded-md font-medium text-xs transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-2 py-1"
+                  className="rounded-md font-medium text-[10px] sm:text-xs transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-1 sm:px-2 py-1"
                 >
                   Valores
                 </TabsTrigger>
                 <TabsTrigger
                   value="comparativo"
-                  className="rounded-md font-medium text-xs transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-2 py-1"
+                  className="rounded-md font-medium text-[10px] sm:text-xs transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-1 sm:px-2 py-1"
                 >
                   Comparativo
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-3 sm:p-4 animate-in fade-in-0 duration-300 min-h-0">
+            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-4 animate-in fade-in-0 duration-300 min-h-0">
               {/* Layout otimizado e compacto */}
-              <div className="max-w-5xl mx-auto space-y-4">
+              <div className="max-w-5xl mx-auto space-y-3 sm:space-y-4">
                 
                 {/* Seção 1: Resumo Executivo - Grid Compacto */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  <Card className="p-3 border border-blue-200 dark:border-blue-800/40 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 hover:border-blue-300 dark:hover:border-blue-700 transition-all rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-blue-600 dark:bg-blue-500 text-white flex-shrink-0">
-                        <Package className="h-4 w-4" />
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+                  <Card className="p-2 sm:p-3 border border-blue-200 dark:border-blue-800/40 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 hover:border-blue-300 dark:hover:border-blue-700 transition-all rounded-lg">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-blue-600 dark:bg-blue-500 text-white flex-shrink-0">
+                        <Package className="h-3 w-3 sm:h-4 sm:w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-0.5">Produtos</p>
-                        <p className="font-bold text-lg text-blue-900 dark:text-blue-100">{products.length}</p>
+                        <p className="text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-300 mb-0.5">Produtos</p>
+                        <p className="font-bold text-base sm:text-lg text-blue-900 dark:text-blue-100">{products.length}</p>
                       </div>
                     </div>
                   </Card>
 
-                  <Card className="p-3 border border-purple-200 dark:border-purple-800/40 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 hover:border-purple-300 dark:hover:border-purple-700 transition-all rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-purple-600 dark:bg-purple-500 text-white flex-shrink-0">
-                        <Users className="h-4 w-4" />
+                  <Card className="p-2 sm:p-3 border border-purple-200 dark:border-purple-800/40 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 hover:border-purple-300 dark:hover:border-purple-700 transition-all rounded-lg">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-purple-600 dark:bg-purple-500 text-white flex-shrink-0">
+                        <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-0.5">Fornecedores</p>
-                        <p className="font-bold text-lg text-purple-900 dark:text-purple-100">{quote.fornecedores}</p>
+                        <p className="text-[10px] sm:text-xs font-medium text-purple-700 dark:text-purple-300 mb-0.5">Fornecedores</p>
+                        <p className="font-bold text-base sm:text-lg text-purple-900 dark:text-purple-100">{quote.fornecedores}</p>
                       </div>
                     </div>
                   </Card>
 
-                  <Card className="p-3 border border-amber-200 dark:border-amber-800/40 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10 hover:border-amber-300 dark:hover:border-amber-700 transition-all rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-amber-600 dark:bg-amber-500 text-white flex-shrink-0">
-                        <Clock className="h-4 w-4" />
+                  <Card className="p-2 sm:p-3 border border-amber-200 dark:border-amber-800/40 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10 hover:border-amber-300 dark:hover:border-amber-700 transition-all rounded-lg">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-amber-600 dark:bg-amber-500 text-white flex-shrink-0">
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-0.5">Prazo</p>
-                        <p className="font-bold text-sm text-amber-900 dark:text-amber-100 truncate">{quote.dataFim}</p>
+                        <p className="text-[10px] sm:text-xs font-medium text-amber-700 dark:text-amber-300 mb-0.5">Prazo</p>
+                        <p className="font-bold text-xs sm:text-sm text-amber-900 dark:text-amber-100 truncate">{quote.dataFim}</p>
                         {quote._raw?.data_planejada && (
-                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                            📅 Agendada: {new Date(quote._raw.data_planejada).toLocaleDateString("pt-BR")}
+                          <p className="text-[9px] sm:text-xs text-amber-600 dark:text-amber-400 mt-1 truncate">
+                            📅 {new Date(quote._raw.data_planejada).toLocaleDateString("pt-BR")}
                           </p>
                         )}
                       </div>
                     </div>
                   </Card>
 
-                  <Card className="p-3 border border-emerald-200 dark:border-emerald-800/40 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-800/10 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-emerald-600 dark:bg-emerald-500 text-white flex-shrink-0">
-                        <TrendingDown className="h-4 w-4" />
+                  <Card className="p-2 sm:p-3 border border-emerald-200 dark:border-emerald-800/40 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-800/10 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all rounded-lg">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-emerald-600 dark:bg-emerald-500 text-white flex-shrink-0">
+                        <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300 mb-0.5">Economia</p>
-                        <p className="font-bold text-sm text-emerald-900 dark:text-emerald-100 truncate">{quote.economia}</p>
+                        <p className="text-[10px] sm:text-xs font-medium text-emerald-700 dark:text-emerald-300 mb-0.5">Economia</p>
+                        <p className="font-bold text-xs sm:text-sm text-emerald-900 dark:text-emerald-100 truncate">{quote.economia}</p>
                       </div>
                     </div>
                   </Card>

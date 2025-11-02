@@ -65,37 +65,39 @@ export default function ViewPedidoDialog({ pedido, trigger, open: externalOpen, 
       <DialogTrigger asChild>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-3xl h-auto max-h-[65vh] overflow-hidden p-0">
-        <DialogHeader className="px-4 py-2 border-b bg-gradient-to-r from-slate-50 to-gray-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm flex-shrink-0">
-                <ShoppingCart className="h-3.5 w-3.5" />
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border-0 shadow-2xl rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900">
+        <DialogHeader className="px-2 sm:px-4 py-2 sm:py-3 border-b bg-gradient-to-r from-slate-50 to-gray-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0">
+          <div className="flex items-center justify-between gap-1 sm:gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+              <div className="p-1 sm:p-1.5 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm flex-shrink-0">
+                <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </div>
-              <DialogTitle className="text-sm font-semibold truncate">Pedido #{pedido?.id}</DialogTitle>
+              <DialogTitle className="text-xs sm:text-sm font-semibold truncate">Pedido #{pedido?.id}</DialogTitle>
             </div>
-            {pedido && getStatusBadge(pedido.status)}
+            <div className="hidden sm:block">
+              {pedido && getStatusBadge(pedido.status)}
+            </div>
           </div>
         </DialogHeader>
 
         <div className="flex flex-col h-full overflow-hidden">
           <Tabs defaultValue="detalhes" className="w-full flex flex-col h-full">
-            <div className="px-3 py-1.5 border-b bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0">
+            <div className="px-2 sm:px-3 py-1.5 border-b bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0">
               <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-gray-800 rounded-lg p-0.5 shadow-sm border border-gray-200 dark:border-gray-700 h-8">
-                <TabsTrigger value="detalhes" className="rounded-md text-xs font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm">
+                <TabsTrigger value="detalhes" className="rounded-md text-[10px] sm:text-xs font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-1">
                   Detalhes
                 </TabsTrigger>
-                <TabsTrigger value="itens" className="rounded-md text-xs font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm">
+                <TabsTrigger value="itens" className="rounded-md text-[10px] sm:text-xs font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-1">
                   Itens
                 </TabsTrigger>
-                <TabsTrigger value="entrega" className="rounded-md text-xs font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm">
+                <TabsTrigger value="entrega" className="rounded-md text-[10px] sm:text-xs font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm px-1">
                   Entrega
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="detalhes" className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-2.5">
-              <div className="grid grid-cols-2 gap-2.5">
+            <TabsContent value="detalhes" className="flex-1 overflow-y-auto scrollbar-hide p-2 sm:p-4 space-y-2 sm:space-y-2.5">
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                 <div className="flex items-center gap-2 p-2 border rounded-lg bg-card">
                   <Building2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                   <div className="flex-1 min-w-0">

@@ -220,23 +220,23 @@ export default function Dashboard() {
   return <PageWrapper>
       <div className="page-container">
         {/* Métricas Principais - Estilo Apple */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6 overflow-visible">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
           {/* Card 1: Cotações Ativas */}
           <Card accent accentColor="bg-purple-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
               <CardContent className="p-3 sm:p-4">
                 {/* Header com ícone minimalista */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <ShoppingCart className="h-3.5 w-3.5 text-purple-600" />
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                      <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600" />
                     </div>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Cotações</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     {metrics.crescimentoCotacoes !== 0 && (
-                      <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${metrics.crescimentoCotacoes > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                        <TrendingUp className={`h-2.5 w-2.5 ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
-                        <span className={`text-xs font-semibold ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoCotacoes)}%</span>
+                      <div className={`flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 rounded-full ${metrics.crescimentoCotacoes > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                        <TrendingUp className={`h-2 w-2 sm:h-2.5 sm:w-2.5 ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600 rotate-180'}`} />
+                        <span className={`text-[10px] sm:text-xs font-semibold ${metrics.crescimentoCotacoes > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(metrics.crescimentoCotacoes)}%</span>
                       </div>
                     )}
                     <TooltipProvider>
@@ -245,11 +245,11 @@ export default function Dashboard() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:text-purple-300 dark:hover:bg-purple-900/20"
+                            className="h-6 w-6 sm:h-7 sm:w-7 text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:text-purple-300 dark:hover:bg-purple-900/20"
                             onClick={() => setShowCotacoesModal(true)}
                             aria-label="Ver detalhes de cotações"
                           >
-                            <Info className="h-3.5 w-3.5" />
+                            <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent sideOffset={6}>
@@ -261,15 +261,15 @@ export default function Dashboard() {
                 </div>
 
                 {/* Valor principal */}
-                <div className="mb-3">
-                  <p className="metric-value">
-                    {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.cotacoesAtivas}
+                <div className="mb-2 sm:mb-3">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {isLoading ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : metrics.cotacoesAtivas}
                   </p>
-                  <p className="metric-description mt-0.5">Ativas no Momento</p>
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                    <span>Média diária: <span className="font-semibold text-gray-900 dark:text-white">{mediaCotacoesDiaria}</span></span>
-                    <span className={metaCotacoesAtingida ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-red-600 dark:text-red-400 font-semibold'}>
-                      {metaCotacoesAtingida ? 'Meta atingida' : 'Meta abaixo'} ({dailyCotacoesTarget}/dia)
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ativas no Momento</p>
+                  <div className="mt-1.5 sm:mt-2 flex flex-col gap-0.5 sm:gap-1 text-[9px] sm:text-[11px] text-gray-500 dark:text-gray-400">
+                    <span className="truncate">Média: <span className="font-semibold text-gray-900 dark:text-white">{mediaCotacoesDiaria}</span>/dia</span>
+                    <span className={`truncate ${metaCotacoesAtingida ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-red-600 dark:text-red-400 font-semibold'}`}>
+                      {metaCotacoesAtingida ? 'Meta OK' : 'Abaixo'} ({dailyCotacoesTarget})
                     </span>
                   </div>
                 </div>
@@ -374,7 +374,7 @@ export default function Dashboard() {
                       style={{ width: `${Math.min(Math.max(metrics.eficienciaEconomia || 0, 0), 100)}%` }}
                     ></div>
                   </div>
-                  <span className="text-xs font-semibold text-green-600">Eficiência {formatPercent(selectedEconomyBreakdown?.eficienciaEconomia)}</span>
+                  <span className="text-xs font-semibold text-green-600 whitespace-nowrap">Efic. {formatPercent(selectedEconomyBreakdown?.eficienciaEconomia)}</span>
                 </div>
               </CardContent>
           </Card>
@@ -414,16 +414,16 @@ export default function Dashboard() {
 
           {/* Card 4: Taxa de Aprovação */}
           <Card accent accentColor="bg-yellow-500/15" className="group relative overflow-visible bg-white dark:bg-[#1C1F26] border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-            <CardContent className="p-3 sm:p-5">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-start justify-between gap-2">
-                <div className="space-y-2">
+                <div className="space-y-2 min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-yellow-500/15 flex items-center justify-center">
-                      <Target className="h-4 w-4 text-yellow-600" />
+                    <div className="w-7 h-7 rounded-lg bg-yellow-500/15 flex items-center justify-center flex-shrink-0">
+                      <Target className="h-3.5 w-3.5 text-yellow-600" />
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Taxa de aprovação</span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500">Performance das cotações finalizadas</span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate">Aprovação</span>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 truncate hidden sm:block">Performance das cotações</span>
                     </div>
                   </div>
                   <div className="flex items-end gap-3">
@@ -437,18 +437,21 @@ export default function Dashboard() {
                       </div>
                     )}
                   </div>
-                  <div className="flex gap-2 text-[11px] text-gray-500 dark:text-gray-400 overflow-x-auto sm:flex-nowrap">
+                  <div className="flex flex-wrap gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
                   <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/10 dark:bg-yellow-500/15 whitespace-nowrap">
                     <span className="font-semibold text-gray-900 dark:text-white">{metrics.aprovacoesTotal || 0}</span>
-                    <span>aprovadas</span>
+                    <span className="hidden sm:inline">aprovadas</span>
+                    <span className="sm:hidden">apr.</span>
                   </span>
                   <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/10 dark:bg-amber-500/15 whitespace-nowrap">
                     <span className="font-semibold text-gray-900 dark:text-white">{metrics.pendenciasTotal || 0}</span>
-                    <span>pendentes</span>
+                    <span className="hidden sm:inline">pendentes</span>
+                    <span className="sm:hidden">pend.</span>
                   </span>
                   <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/10 dark:bg-red-500/15 whitespace-nowrap">
                     <span className="font-semibold text-gray-900 dark:text-white">{metrics.rejeicoesTotal || 0}</span>
-                    <span>rejeitadas</span>
+                    <span className="hidden sm:inline">rejeitadas</span>
+                    <span className="sm:hidden">rej.</span>
                   </span>
                 </div>
                 </div>
