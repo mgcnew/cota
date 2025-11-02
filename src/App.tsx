@@ -18,6 +18,7 @@ import Historico from "./pages/Historico";
 import Relatorios from "./pages/Relatorios";
 import Analytics from "./pages/Analytics";
 import Locucoes from "./pages/Locucoes";
+import Extra from "./pages/Extra";
 import Configuracoes from "./pages/Configuracoes";
 import Auth from "./pages/Auth";
 import AcceptInvite from "./pages/AcceptInvite";
@@ -65,6 +66,7 @@ const App = () => {
                   <Route path="relatorios" element={<Relatorios />} />
                   <Route path="analytics" element={<Analytics />} />
                   <Route path="locucoes" element={<Locucoes />} />
+                  <Route path="extra" element={<Extra />} />
                   <Route path="configuracoes" element={<Configuracoes />} />
                 </Route>
 
