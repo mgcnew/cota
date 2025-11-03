@@ -42,15 +42,25 @@ export function useUserProfile() {
     mutationFn: async (updates: Partial<UserProfile>) => {
       if (!user?.id) throw new Error("No user logged in");
 
-      const { error } = await supabase
+      console.log("Updating profile with data:", updates);
+
+      const { data, error } = await supabase
         .from("profiles")
         .update({
           ...updates,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", user.id);
+        .eq("id", user.id)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Update profile error:", error);
+        throw error;
+      }
+
+      console.log("Profile updated successfully:", data);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
@@ -73,10 +83,13 @@ export function useUserProfile() {
     mutationFn: async (file: File) => {
       if (!user?.id) throw new Error("No user logged in");
 
+      console.log("Starting avatar upload for user:", user.id);
+
       // Delete old avatar if exists
       if (profile?.avatar_url) {
         const oldPath = profile.avatar_url.split("/").pop();
         if (oldPath) {
+          console.log("Deleting old avatar:", oldPath);
           await supabase.storage
             .from("avatars")
             .remove([`${user.id}/${oldPath}`]);
@@ -87,16 +100,23 @@ export function useUserProfile() {
       const fileExt = file.name.split(".").pop();
       const filePath = `${user.id}/${Date.now()}.${fileExt}`;
 
+      console.log("Uploading to path:", filePath);
+
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw uploadError;
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from("avatars")
         .getPublicUrl(filePath);
+
+      console.log("Avatar uploaded, public URL:", publicUrl);
 
       // Update profile with new avatar URL
       const { error: updateError } = await supabase
@@ -104,8 +124,12 @@ export function useUserProfile() {
         .update({ avatar_url: publicUrl })
         .eq("id", user.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Error updating profile with avatar URL:", updateError);
+        throw updateError;
+      }
 
+      console.log("Profile updated with new avatar URL");
       return publicUrl;
     },
     onSuccess: () => {

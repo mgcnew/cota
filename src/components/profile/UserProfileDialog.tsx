@@ -33,6 +33,7 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
 
   useEffect(() => {
     if (profile) {
+      console.log("Profile loaded:", profile);
       setFormData({
         full_name: profile.full_name || "",
         phone: profile.phone || "",
@@ -43,10 +44,12 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting profile update:", formData);
     updateProfile(formData);
   };
 
   const handleAvatarUpload = (file: File) => {
+    console.log("Uploading avatar:", file.name, file.size);
     uploadAvatar(file);
   };
 
