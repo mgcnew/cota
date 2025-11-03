@@ -31,13 +31,18 @@ export const useCompanySetup = () => {
         }
 
         // Create a new company for the user
+        const trialEndsAt = new Date();
+        trialEndsAt.setDate(trialEndsAt.getDate() + 14); // 14 dias de trial
+        
         const { data: newCompany, error: companyError } = await supabase
           .from("companies")
           .insert({
             name: `Empresa de ${user.email?.split('@')[0] || 'Usuário'}`,
             subscription_status: 'trial',
             subscription_plan: 'basic',
-            max_users: 5
+            max_users: 5,
+            trial_ends_at: trialEndsAt.toISOString(),
+            subscription_expires_at: trialEndsAt.toISOString(),
           })
           .select()
           .single();

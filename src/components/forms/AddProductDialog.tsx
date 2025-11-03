@@ -33,6 +33,8 @@ import { Plus, Package, Sparkles, Upload, Loader2, Trash2, X } from "lucide-reac
 import { useToast } from "@/hooks/use-toast";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { useQueryClient } from '@tanstack/react-query';
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
+import { LimitAlert } from "@/components/billing/LimitAlert";
 
 const productSchema = z.object({
   name: z.string()
@@ -78,6 +80,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
   const { logActivity } = useActivityLog();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const subscriptionLimits = useSubscriptionLimits();
   
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -263,6 +266,16 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
         throw new Error("Empresa não encontrada");
       }
 
+      // Verificar limite antes de inserir (validação adicional no frontend)
+      if (!subscriptionLimits.canAddProduct) {
+        toast({
+          title: "Limite atingido",
+          description: `Você atingiu o limite de ${subscriptionLimits.maxProducts} produtos. Faça upgrade do plano para adicionar mais produtos.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('products')
         .insert({
@@ -287,6 +300,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
       // Invalidar queries para atualizar dados em tempo real
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-limits'] });
 
       // Adicionar nova categoria à lista local se necessário
       if (data.category === "nova" && data.newCategory) {
@@ -364,6 +378,12 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
           <Form {...form}>
             <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full">
               <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                {/* Alerta de limite de produtos */}
+                <LimitAlert 
+                  resource="products"
+                  current={subscriptionLimits.currentProducts}
+                  max={subscriptionLimits.maxProducts}
+                />
                 {/* Seção: Informações Básicas */}
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">

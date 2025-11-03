@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,6 +61,17 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const isMobile = useMobile();
 
+  // Callbacks memoizados para navegação do carousel
+  const handlePrevCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
+  }, []);
+
+  const handleNextCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
+  }, []);
+
   const dashboardData = useDashboard();
   const metrics = dashboardData?.metrics ?? DEFAULT_METRICS;
   const recentQuotes = dashboardData?.recentQuotes ?? [];
@@ -69,8 +80,8 @@ export default function Dashboard() {
   const dailyData = dashboardData?.dailyData ?? [];
   const isLoading = dashboardData?.isLoading ?? false;
 
-  // Função para filtrar dados por período
-  const filterDataByPeriod = (period: string) => {
+  // Função para filtrar dados por período (memoizada)
+  const filterDataByPeriod = useCallback((period: string) => {
     if (period === '7d') {
       return dailyData;
     }
@@ -90,24 +101,24 @@ export default function Dashboard() {
       });
     }
     return filteredData;
-  };
+  }, [dailyData, monthlyData]);
 
-  const formatCurrency = (value?: number) => {
+  const formatCurrency = useCallback((value?: number) => {
     const safeValue = Number.isFinite(value) ? Number(value) : 0;
     return `R$ ${safeValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
+  }, []);
 
-  const formatPercent = (value?: number) => {
+  const formatPercent = useCallback((value?: number) => {
     if (!Number.isFinite(value)) return '0%';
     return `${Math.round(value || 0)}%`;
-  };
+  }, []);
 
-  // Dados filtrados por período
-  const evolutionData = filterDataByPeriod(evolutionPeriod);
-  const economyData = filterDataByPeriod(economyPeriod).map((item, index) => ({
+  // Dados filtrados por período (memoizados)
+  const evolutionData = useMemo(() => filterDataByPeriod(evolutionPeriod), [filterDataByPeriod, evolutionPeriod]);
+  const economyData = useMemo(() => filterDataByPeriod(economyPeriod).map((item, index) => ({
     ...item,
     fill: ['#10b981', '#34d399', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'][index % 6]
-  }));
+  })), [filterDataByPeriod, economyPeriod]);
 
   const economyBreakdowns = useMemo(() => {
     if (metrics.economiaPorPeriodo && metrics.economiaPorPeriodo.length > 0) {
@@ -179,7 +190,7 @@ export default function Dashboard() {
       return dia.toLocaleDateString('pt-BR', { weekday: 'short' });
     });
   }, [metrics.ultimos7DiasCotacoes]);
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = useCallback((status: string) => {
     switch (status) {
       case 'approved':
       case 'aprovada':
@@ -197,8 +208,8 @@ export default function Dashboard() {
       default:
         return <AlertCircle className="h-4 w-4 text-gray-500" />;
     }
-  };
-  const getStatusText = (status: string) => {
+  }, []);
+  const getStatusText = useCallback((status: string) => {
     switch (status) {
       case 'approved':
       case 'aprovada':
@@ -220,9 +231,14 @@ export default function Dashboard() {
       default:
         return status || 'Pendente';
     }
-  };
-  // Helper function para renderizar Card 1 - Cotações Ativas
-  const renderCard1 = () => (
+  }, []);
+  // Callbacks memoizados para handlers dos modais
+  const handleShowCotacoesModal = useCallback(() => setShowCotacoesModal(true), []);
+  const handleShowEconomyModal = useCallback(() => setShowEconomyModal(true), []);
+  const handleShowApprovalModal = useCallback(() => setShowApprovalModal(true), []);
+
+  // Helper function para renderizar Card 1 - Cotações Ativas (memoizada inline)
+  const renderCard1 = useMemo(() => (
     <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
       <svg
         className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5"
@@ -250,7 +266,7 @@ export default function Dashboard() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="bottom">
-              <DropdownMenuItem onClick={() => setShowCotacoesModal(true)}>
+              <DropdownMenuItem onClick={handleShowCotacoesModal}>
                 <Info className="h-4 w-4 mr-2" /> Ver Detalhes
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -294,10 +310,10 @@ export default function Dashboard() {
                 </div>
               </CardContent>
           </Card>
-  );
+  ), [isLoading, metrics, handleShowCotacoesModal]);
 
-  // Helper function para renderizar Card 2 - Economia Gerada
-  const renderCard2 = () => (
+  // Helper function para renderizar Card 2 - Economia Gerada (memoizada inline)
+  const renderCard2 = useMemo(() => (
     <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
       <svg
         className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
@@ -330,7 +346,7 @@ export default function Dashboard() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="bottom">
-              <DropdownMenuItem onClick={() => setShowEconomyModal(true)}>
+              <DropdownMenuItem onClick={handleShowEconomyModal}>
                 <Info className="h-4 w-4 mr-2" /> Ver Detalhes
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -374,10 +390,10 @@ export default function Dashboard() {
                 </div>
       </CardContent>
     </Card>
-  );
+  ), [isLoading, metrics, selectedEconomyBreakdown, formatCurrency, formatPercent, handleShowEconomyModal]);
 
-  // Helper function para renderizar Card 3 - Fornecedores
-  const renderCard3 = () => (
+  // Helper function para renderizar Card 3 - Fornecedores (memoizada inline)
+  const renderCard3 = useMemo(() => (
     <Card className="group relative overflow-hidden bg-indigo-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
       <svg
         className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
@@ -438,10 +454,10 @@ export default function Dashboard() {
                   </div>
       </CardContent>
     </Card>
-  );
+  ), [isLoading, metrics]);
 
-  // Helper function para renderizar Card 4 - Taxa de Aprovação
-  const renderCard4 = () => (
+  // Helper function para renderizar Card 4 - Taxa de Aprovação (memoizada inline)
+  const renderCard4 = useMemo(() => (
     <Card className="group relative overflow-hidden bg-yellow-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
       <svg
         className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
@@ -475,7 +491,7 @@ export default function Dashboard() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="bottom">
-              <DropdownMenuItem onClick={() => setShowApprovalModal(true)}>
+              <DropdownMenuItem onClick={handleShowApprovalModal}>
                 <Info className="h-4 w-4 mr-2" /> Ver Detalhes
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -535,7 +551,7 @@ export default function Dashboard() {
                 </div>
       </CardContent>
     </Card>
-  );
+  ), [isLoading, metrics, handleShowApprovalModal]);
 
   return <PageWrapper>
       <div className="page-container">
@@ -550,10 +566,7 @@ export default function Dashboard() {
                       <Button
                         variant="ghost"
                   size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
-                  }}
+                  onClick={handlePrevCard}
                   className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -566,10 +579,7 @@ export default function Dashboard() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
-                  }}
+                  onClick={handleNextCard}
                   className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -585,16 +595,16 @@ export default function Dashboard() {
                   }}
                 >
                   <div className="w-full flex-shrink-0">
-                    {renderCard1()}
+                    {renderCard1}
                         </div>
                   <div className="w-full flex-shrink-0">
-                    {renderCard2()}
+                    {renderCard2}
                       </div>
                   <div className="w-full flex-shrink-0">
-                    {renderCard3()}
+                    {renderCard3}
                         </div>
                   <div className="w-full flex-shrink-0">
-                    {renderCard4()}
+                    {renderCard4}
                           </div>
                         </div>
                       </div>
@@ -602,10 +612,10 @@ export default function Dashboard() {
         </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-8 overflow-visible">
-            {renderCard1()}
-            {renderCard2()}
-            {renderCard3()}
-            {renderCard4()}
+            {renderCard1}
+            {renderCard2}
+            {renderCard3}
+            {renderCard4}
           </div>
         )}
 

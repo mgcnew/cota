@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -104,8 +104,8 @@ export default function Fornecedores() {
     refetch();
   };
 
-  // Função para gerar mensagem personalizada do WhatsApp
-  const generateWhatsAppMessage = (supplierName: string, contactName: string) => {
+  // Função para gerar mensagem personalizada do WhatsApp (memoizada)
+  const generateWhatsAppMessage = useCallback((supplierName: string, contactName: string) => {
     const currentHour = new Date().getHours();
     let greeting = "";
     if (currentHour >= 5 && currentHour < 12) {
@@ -117,10 +117,10 @@ export default function Fornecedores() {
     }
     const message = `${greeting}, ${contactName}! Sou da equipe de compras da empresa. Gostaria de conversar sobre uma oportunidade de negócio com ${supplierName}. Podemos conversar?`;
     return encodeURIComponent(message);
-  };
+  }, []);
 
-  // Função para abrir WhatsApp
-  const openWhatsApp = (supplier: Supplier) => {
+  // Função para abrir WhatsApp (memoizada)
+  const openWhatsApp = useCallback((supplier: Supplier) => {
     if (!canViewSensitiveData) {
       toast({
         title: "Acesso restrito",
@@ -144,7 +144,7 @@ export default function Fornecedores() {
     const message = generateWhatsAppMessage(supplier.name, supplier.contact);
     const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${message}`;
     window.open(whatsappUrl, '_blank');
-  };
+  }, [canViewSensitiveData, generateWhatsAppMessage]);
 
   // Mock data de produtos para cotações
   const mockProducts = [{
@@ -169,13 +169,13 @@ export default function Fornecedores() {
       description: "A cotação foi criada e enviada aos fornecedores."
     });
   };
-  const filteredSuppliers = suppliers.filter(supplier => {
+  const filteredSuppliers = useMemo(() => suppliers.filter(supplier => {
     const matchesSearch = supplier.name.toLowerCase().includes(searchQuery.toLowerCase()) || supplier.contact.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || supplier.status === statusFilter;
     return matchesSearch && matchesStatus;
-  });
+  }), [suppliers, searchQuery, statusFilter]);
   const paginatedData = paginate(filteredSuppliers);
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = useCallback((status: string) => {
     const statusConfig = {
       active: {
         variant: "default" as const,
@@ -198,19 +198,19 @@ export default function Fornecedores() {
     return <Badge variant={config.variant} className={config.className}>
         {config.label}
       </Badge>;
-  };
-  const getPerformanceBadge = (rating: number) => {
+  }, []);
+  const getPerformanceBadge = useCallback((rating: number) => {
     if (rating >= 4.5) return { label: "Excelente", icon: Award, color: "bg-green-100 text-green-800 border-green-200" };
     if (rating >= 3.5) return { label: "Bom", icon: TrendingUp, color: "bg-blue-100 text-blue-800 border-blue-200" };
     if (rating >= 2.5) return { label: "Regular", icon: Clock, color: "bg-yellow-100 text-yellow-800 border-yellow-200" };
     return { label: "Atenção", icon: MessageCircle, color: "bg-red-100 text-red-800 border-red-200" };
-  };
+  }, []);
 
-  const renderNumericRating = (rating: number) => (
+  const renderNumericRating = useCallback((rating: number) => (
     <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
       {rating.toFixed(1)} / 10
     </span>
-  );
+  ), []);
 
   // Calculate real stats
   const stats = useMemo(() => {

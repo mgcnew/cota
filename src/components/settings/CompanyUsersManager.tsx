@@ -38,11 +38,14 @@ import { Users, Trash2, Shield, UserCog, UserPlus, Mail, Clock, X } from "lucide
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
+import { LimitAlert } from "@/components/billing/LimitAlert";
 
 export function CompanyUsersManager() {
   const { user: currentUser } = useAuth();
   const { users, isLoading, updateRole, removeUser } = useCompanyUsers();
   const { invitations, sendInvitation, cancelInvitation, isSendingInvitation } = useCompanyInvitations();
+  const subscriptionLimits = useSubscriptionLimits();
   const [selectedRole, setSelectedRole] = useState<Record<string, string>>({});
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -54,6 +57,16 @@ export function CompanyUsersManager() {
 
   const handleSendInvitation = () => {
     if (!inviteEmail) return;
+    
+    // Verificar limite antes de enviar convite
+    if (!subscriptionLimits.canAddUser) {
+      toast({
+        title: "Limite atingido",
+        description: `Você atingiu o limite de ${subscriptionLimits.maxUsers} usuários. Faça upgrade do plano para adicionar mais usuários.`,
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -122,6 +135,13 @@ export function CompanyUsersManager() {
 
   return (
     <div className="space-y-6">
+      {/* Alerta de limite de usuários */}
+      <LimitAlert 
+        resource="users"
+        current={subscriptionLimits.currentUsers}
+        max={subscriptionLimits.maxUsers}
+      />
+      
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

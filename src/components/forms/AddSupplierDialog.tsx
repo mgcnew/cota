@@ -32,6 +32,9 @@ import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useActivityLog } from "@/hooks/useActivityLog";
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
+import { LimitAlert } from "@/components/billing/LimitAlert";
+import { useQueryClient } from '@tanstack/react-query';
 
 const supplierSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -53,6 +56,8 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
   const [open, setOpen] = useState(false);
   const { logActivity } = useActivityLog();
   const { user } = useAuth();
+  const subscriptionLimits = useSubscriptionLimits();
+  const queryClient = useQueryClient();
 
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
@@ -94,6 +99,16 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
         throw new Error("Empresa não encontrada");
       }
 
+      // Verificar limite antes de inserir (validação adicional no frontend)
+      if (!subscriptionLimits.canAddSupplier) {
+        toast({
+          title: "Limite atingido",
+          description: `Você atingiu o limite de ${subscriptionLimits.maxSuppliers} fornecedores. Faça upgrade do plano para adicionar mais fornecedores.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('suppliers')
         .insert({
@@ -121,6 +136,10 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
           ? `${data.name} foi adicionado! Adicione outro fornecedor.`
           : `${data.name} foi adicionado com sucesso.`,
       });
+      
+      // Invalidar queries para atualizar dados em tempo real
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-limits'] });
       
       onAdd();
       form.reset();
@@ -178,6 +197,12 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
           <Form {...form}>
             <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full">
               <div className="flex-1 overflow-y-auto p-5 space-y-5">
+                {/* Alerta de limite de fornecedores */}
+                <LimitAlert 
+                  resource="suppliers"
+                  current={subscriptionLimits.currentSuppliers}
+                  max={subscriptionLimits.maxSuppliers}
+                />
                 {/* Seção: Informações da Empresa */}
                 <div className="space-y-3.5">
                   <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-1">

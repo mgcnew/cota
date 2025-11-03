@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
+import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
+import { SubscriptionBlocked } from "@/components/billing/SubscriptionBlocked";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
@@ -10,6 +12,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const subscriptionStatus = useSubscriptionGuard();
   const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
@@ -35,6 +38,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Renderizar conteúdo protegido se autenticado
+  // Bloquear acesso se assinatura não está ativa
+  if (!subscriptionStatus.canAccess) {
+    return <SubscriptionBlocked status={subscriptionStatus} />;
+  }
+
+  // Renderizar conteúdo protegido se autenticado e com assinatura ativa
   return <>{children}</>;
 }

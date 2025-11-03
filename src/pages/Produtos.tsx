@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -167,22 +167,22 @@ export default function Produtos() {
       percentualEconomiaMedia
     };
   }, [products, categories]);
-  const getTrendIcon = (trend: "up" | "down" | "stable") => {
+  const getTrendIcon = useCallback((trend: "up" | "down" | "stable") => {
     if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
     if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
     return <Minus className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />;
-  };
+  }, []);
 
-  // Função para determinar status do produto baseado em dados
-  const getProductStatus = (product: any) => {
+  // Função para determinar status do produto baseado em dados (memoizada)
+  const getProductStatus = useCallback((product: any) => {
     if (product.quotesCount === 0) return "sem_cotacao";
     if (product.lastQuotePrice === "R$ 0,00") return "pendente";
     if (product.quotesCount >= 3) return "ativo";
     return "cotado";
-  };
+  }, []);
 
-  // Função para renderizar badge de status com cores diferenciadas
-  const getStatusBadge = (status: string) => {
+  // Função para renderizar badge de status com cores diferenciadas (memoizada)
+  const getStatusBadge = useCallback((status: string) => {
     const statusConfig = {
       ativo: {
         label: "Ativo",
@@ -205,7 +205,7 @@ export default function Produtos() {
     return <Badge variant="outline" className={`text-xs font-medium ${config.className}`}>
         {config.label}
       </Badge>;
-  };
+  }, []);
   if (loading || productsLoading) {
     return <div className="flex items-center justify-center h-screen">
         <div className="text-center">Carregando...</div>

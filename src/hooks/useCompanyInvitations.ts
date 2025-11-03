@@ -86,6 +86,7 @@ export function useCompanyInvitations() {
     },
     onSuccess: ({ email, token }) => {
       queryClient.invalidateQueries({ queryKey: ["company-invitations"] });
+      queryClient.invalidateQueries({ queryKey: ["subscription-limits"] });
       
       // Generate invite link
       const inviteLink = `${window.location.origin}/accept-invite?token=${token}`;
