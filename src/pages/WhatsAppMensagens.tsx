@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { Icon } from '@iconify/react';
 import { 
   MessageSquare, 
   X, 
@@ -17,9 +19,13 @@ import {
   AlertCircle,
   CheckCircle2,
   Trash2,
-  FileUp
+  FileUp,
+  Image as ImageIcon,
+  Sparkles,
+  Zap
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface UploadedImage {
   id: string;
@@ -55,7 +61,6 @@ export default function WhatsAppMensagens() {
       description: `${newImages.length} imagem(ns) carregada(s) com sucesso`,
     });
 
-    // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -75,7 +80,7 @@ export default function WhatsAppMensagens() {
   };
 
   const handleAddContato = () => {
-    const numero = contatoInput.trim().replace(/\D/g, ""); // Remove caracteres não numéricos
+    const numero = contatoInput.trim().replace(/\D/g, "");
     
     if (!numero) {
       toast({
@@ -129,7 +134,6 @@ export default function WhatsAppMensagens() {
     try {
       const text = await file.text();
       
-      // Processar o arquivo (suporta CSV e TXT)
       const linhas = text
         .split(/\r?\n/)
         .map(linha => linha.trim())
@@ -140,9 +144,8 @@ export default function WhatsAppMensagens() {
       const contatosDuplicados: string[] = [];
 
       linhas.forEach((linha, index) => {
-        // Se for CSV, pegar a primeira coluna (assumindo que o número está na primeira coluna)
         const primeiraColuna = linha.split(/[,;]/)[0].trim();
-        const numero = primeiraColuna.replace(/\D/g, ""); // Remove caracteres não numéricos
+        const numero = primeiraColuna.replace(/\D/g, "");
 
         if (!numero || numero.length < 10) {
           contatosInvalidos.push(`Linha ${index + 1}: ${primeiraColuna}`);
@@ -165,17 +168,14 @@ export default function WhatsAppMensagens() {
         });
         setIsCarregandoLista(false);
         
-        // Reset input
         if (listaContatosRef.current) {
           listaContatosRef.current.value = "";
         }
         return;
       }
 
-      // Adicionar novos contatos à lista
       setContatos((prev) => [...prev, ...novosContatos]);
 
-      // Mensagem de sucesso com detalhes
       const mensagens: string[] = [];
       mensagens.push(`${novosContatos.length} contato(s) adicionado(s)`);
       
@@ -201,7 +201,6 @@ export default function WhatsAppMensagens() {
     } finally {
       setIsCarregandoLista(false);
       
-      // Reset input
       if (listaContatosRef.current) {
         listaContatosRef.current.value = "";
       }
@@ -209,7 +208,6 @@ export default function WhatsAppMensagens() {
   };
 
   const handleLimparTudo = () => {
-    // Limpar imagens e liberar URLs
     imagens.forEach((img) => URL.revokeObjectURL(img.preview));
     setImagens([]);
     setMensagem("");
@@ -243,10 +241,6 @@ export default function WhatsAppMensagens() {
     setIsEnviando(true);
 
     try {
-      // TODO: Implementar chamada à API do WhatsApp
-      // Aqui será a integração com a API
-      
-      // Simulação de envio (remover quando conectar a API real)
       await new Promise((resolve) => setTimeout(resolve, 2000));
       
       toast({
@@ -254,7 +248,6 @@ export default function WhatsAppMensagens() {
         description: `${contatos.length} mensagem(ns) enviada(s) com sucesso`,
       });
 
-      // Limpar após envio bem-sucedido
       handleLimparTudo();
     } catch (error) {
       toast({
@@ -267,7 +260,6 @@ export default function WhatsAppMensagens() {
     }
   };
 
-  // Cleanup das URLs ao desmontar
   useEffect(() => {
     return () => {
       imagens.forEach((img) => URL.revokeObjectURL(img.preview));
@@ -281,65 +273,144 @@ export default function WhatsAppMensagens() {
     <PageWrapper>
       <div className="page-container">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg">
-            <MessageSquare className="h-6 w-6 text-white" />
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center gap-4 mb-8"
+        >
+          <div className="relative">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-green-500/25">
+              <MessageSquare className="h-7 w-7 text-white" />
+            </div>
+            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-green-500 border-2 border-white dark:border-[#1C1F26] flex items-center justify-center">
+              <Sparkles className="h-3 w-3 text-white" />
+            </div>
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               Envio em Massa WhatsApp
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Envie mensagens e imagens para múltiplos contatos
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Envie mensagens e imagens para múltiplos contatos de forma profissional
             </p>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Painel Principal */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Card de Mensagem */}
-            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  Mensagem
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="mensagem">Texto da Mensagem</Label>
-                  <Textarea
-                    id="mensagem"
-                    value={mensagem}
-                    onChange={(e) => setMensagem(e.target.value)}
-                    placeholder="Digite sua mensagem aqui... Você pode enviar apenas imagens ou combinar texto com imagens."
-                    className="mt-2 min-h-[150px] dark:bg-gray-800 dark:border-gray-700 dark:text-white resize-none"
-                    maxLength={4096}
-                  />
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {totalCaracteres} / 4096 caracteres
-                    </p>
-                    {totalCaracteres > 3500 && (
-                      <Badge variant="outline" className="text-amber-600 dark:text-amber-400">
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                        Próximo do limite
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+            {/* Preview da Mensagem - Estilo WhatsApp */}
+            {(mensagem.trim() || imagens.length > 0) && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-b border-green-200/50 dark:border-green-700/30">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Zap className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      Preview da Mensagem
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="bg-[#ECE5DD] dark:bg-[#0B1419] min-h-[200px] p-6">
+                      {/* Simulação de chat WhatsApp */}
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-start gap-3 justify-end">
+                          <div className="max-w-[70%]">
+                            <div className="bg-[#DCF8C6] dark:bg-green-900/30 rounded-lg px-4 py-2.5 shadow-sm">
+                              {imagens.length > 0 && (
+                                <div className="grid grid-cols-2 gap-2 mb-2">
+                                  {imagens.slice(0, 4).map((img) => (
+                                    <div
+                                      key={img.id}
+                                      className="relative rounded-lg overflow-hidden aspect-square"
+                                    >
+                                      <img
+                                        src={img.preview}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {mensagem.trim() && (
+                                <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
+                                  {mensagem}
+                                </p>
+                              )}
+                              {!mensagem.trim() && imagens.length > 0 && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                                  Mensagem de imagem
+                                </p>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block text-right">
+                              Agora
+                            </span>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                            V
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
 
-                {/* Upload de Imagens */}
-                <div>
-                  <Label>Imagens</Label>
-                  <div className="mt-2 space-y-3">
-                    <div className="flex items-center gap-2">
+            {/* Card de Composição */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    Composição da Mensagem
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="mensagem">Texto da Mensagem</Label>
+                    <Textarea
+                      id="mensagem"
+                      value={mensagem}
+                      onChange={(e) => setMensagem(e.target.value)}
+                      placeholder="Digite sua mensagem aqui... Você pode enviar apenas imagens ou combinar texto com imagens."
+                      className="mt-2 min-h-[150px] resize-none"
+                      maxLength={4096}
+                    />
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {totalCaracteres} / 4096 caracteres
+                      </p>
+                      {totalCaracteres > 3500 && (
+                        <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-600/50">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          Próximo do limite
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Upload de Imagens */}
+                  <div>
+                    <Label>Imagens</Label>
+                    <div className="mt-2 space-y-3">
                       <Button
                         type="button"
                         variant="outline"
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex-1 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+                        className="w-full"
                       >
                         <Upload className="h-4 w-4 mr-2" />
                         Adicionar Imagens
@@ -352,96 +423,100 @@ export default function WhatsAppMensagens() {
                         onChange={handleImageUpload}
                         className="hidden"
                       />
-                    </div>
 
-                    {imagens.length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-                        {imagens.map((img) => (
-                          <div
-                            key={img.id}
-                            className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
+                      <AnimatePresence>
+                        {imagens.length > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="grid grid-cols-2 md:grid-cols-3 gap-3"
                           >
-                            <img
-                              src={img.preview}
-                              alt="Preview"
-                              className="w-full h-32 object-cover"
-                            />
-                            <button
-                              onClick={() => handleRemoveImage(img.id)}
-                              className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1.5 truncate">
-                              {img.file.name}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                            {imagens.map((img) => (
+                              <motion.div
+                                key={img.id}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                className="relative group rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 aspect-square"
+                              >
+                                <img
+                                  src={img.preview}
+                                  alt="Preview"
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  onClick={() => handleRemoveImage(img.id)}
+                                  className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-lg"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white text-xs p-2 truncate">
+                                  {img.file.name}
+                                </div>
+                              </motion.div>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Você pode adicionar múltiplas imagens. O WhatsApp permite até 10 imagens por mensagem.
-                    </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Máximo de 10 imagens por mensagem
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Card de Contatos */}
-            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  Contatos
-                  {contatos.length > 0 && (
-                    <Badge className="ml-2 bg-blue-600 dark:bg-blue-500">
-                      {contatos.length}
-                    </Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Adicionar contato manual */}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={contatoInput}
-                    onChange={(e) => setContatoInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Digite o número (ex: 5511999999999)"
-                    className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                  />
-                  <Button
-                    onClick={handleAddContato}
-                    className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-                  >
-                    Adicionar
-                  </Button>
-                </div>
-
-                {/* Separador ou upload de lista */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-300 dark:border-gray-700" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white dark:bg-[#1C1F26] px-2 text-gray-500 dark:text-gray-400">
-                      ou
-                    </span>
-                  </div>
-                </div>
-
-                {/* Upload de lista de contatos */}
-                <div className="space-y-2">
-                  <Label>Importar Lista de Contatos</Label>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    Lista de Contatos
+                    {contatos.length > 0 && (
+                      <Badge className="ml-2 bg-blue-600 dark:bg-blue-500">
+                        {contatos.length}
+                      </Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Adicionar contato manual */}
                   <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      value={contatoInput}
+                      onChange={(e) => setContatoInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Digite o número (ex: 5511999999999)"
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleAddContato}
+                      className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
+
+                  <Separator />
+
+                  {/* Upload de lista de contatos */}
+                  <div className="space-y-2">
+                    <Label>Importar Lista de Contatos</Label>
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => listaContatosRef.current?.click()}
                       disabled={isCarregandoLista}
-                      className="flex-1 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+                      className="w-full"
                     >
                       {isCarregandoLista ? (
                         <>
@@ -451,7 +526,7 @@ export default function WhatsAppMensagens() {
                       ) : (
                         <>
                           <FileUp className="h-4 w-4 mr-2" />
-                          Carregar Arquivo
+                          Carregar Arquivo (TXT ou CSV)
                         </>
                       )}
                     </Button>
@@ -462,234 +537,223 @@ export default function WhatsAppMensagens() {
                       onChange={handleListaContatosUpload}
                       className="hidden"
                     />
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Suporta arquivos TXT ou CSV. Um número por linha ou CSV com números na primeira coluna.
-                  </p>
-                </div>
-
-                {contatos.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm">Lista de Contatos</Label>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setContatos([])}
-                        className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 h-8"
-                      >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Limpar Tudo
-                      </Button>
-                    </div>
-                    <div className="max-h-[300px] overflow-y-auto space-y-2 p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                      {contatos.map((contato, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors"
-                        >
-                          <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            <span className="text-sm font-mono text-gray-900 dark:text-white">
-                              {contato}
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => handleRemoveContato(contato)}
-                            className="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-red-600 dark:text-red-400 transition-colors"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/30">
-                  <p className="text-xs text-blue-900 dark:text-blue-300 flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                    <span>
-                      <strong>Formato:</strong> Digite o número completo com código do país e DDD (ex: 5511999999999). 
-                      Não inclua espaços, parênteses ou hífens.
-                      <br />
-                      <strong>Arquivo:</strong> Para CSV, o número deve estar na primeira coluna. Para TXT, um número por linha.
-                    </span>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Botão de Envio */}
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      Pronto para enviar
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {contatos.length} contato(s) receberá(ão) a mensagem
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Suporta arquivos TXT ou CSV. Um número por linha ou CSV com números na primeira coluna.
                     </p>
                   </div>
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={handleLimparTudo}
-                      disabled={isEnviando}
-                      className="dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Limpar Tudo
-                    </Button>
-                    <Button
-                      onClick={handleEnviarMensagens}
-                      disabled={!podeEnviar || isEnviando}
-                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 h-12"
-                      size="lg"
-                    >
-                      {isEnviando ? (
-                        <>
-                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                          Enviando...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-5 w-5 mr-2" />
-                          Enviar Mensagens
-                        </>
-                      )}
-                    </Button>
+
+                  {contatos.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm">Contatos Adicionados</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setContatos([])}
+                          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 h-8"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Limpar
+                        </Button>
+                      </div>
+                      <ScrollArea className="h-[300px] rounded-lg border border-gray-200 dark:border-gray-700 p-2">
+                        <div className="space-y-2">
+                          {contatos.map((contato, index) => (
+                            <motion.div
+                              key={index}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <span className="text-sm font-mono text-gray-900 dark:text-white">
+                                  {contato}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => handleRemoveContato(contato)}
+                                className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md text-red-600 dark:text-red-400 transition-colors"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  )}
+
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/30">
+                    <p className="text-xs text-blue-900 dark:text-blue-300 flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <span>
+                        <strong>Formato:</strong> Digite o número completo com código do país e DDD (ex: 5511999999999). 
+                        Não inclua espaços, parênteses ou hífens.
+                      </span>
+                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Botão de Envio */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 border border-green-200 dark:border-green-700/30">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+                        <Send className="h-4 w-4" />
+                        Pronto para enviar
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {contatos.length} contato(s) receberá(ão) a mensagem
+                      </p>
+                    </div>
+                    <div className="flex gap-3 w-full sm:w-auto">
+                      <Button
+                        variant="outline"
+                        onClick={handleLimparTudo}
+                        disabled={isEnviando}
+                        className="flex-1 sm:flex-initial"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Limpar
+                      </Button>
+                      <Button
+                        onClick={handleEnviarMensagens}
+                        disabled={!podeEnviar || isEnviando}
+                        className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 flex-1 sm:flex-initial"
+                        size="lg"
+                      >
+                        {isEnviando ? (
+                          <>
+                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                            Enviando...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-5 w-5 mr-2" />
+                            Enviar Mensagens
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
 
           {/* Painel Lateral */}
           <div className="space-y-6">
             {/* Card de Resumo */}
-            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  Resumo
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Mensagem</span>
-                    <Badge variant={mensagem.trim() ? "default" : "outline"}>
-                      {mensagem.trim() ? "Configurada" : "Vazia"}
-                    </Badge>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    Resumo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Mensagem</span>
+                      <Badge variant={mensagem.trim() ? "default" : "outline"}>
+                        {mensagem.trim() ? "Configurada" : "Vazia"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <ImageIcon className="h-3 w-3" />
+                        Imagens
+                      </span>
+                      <Badge variant={imagens.length > 0 ? "default" : "outline"}>
+                        {imagens.length}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <Users className="h-3 w-3" />
+                        Contatos
+                      </span>
+                      <Badge variant={contatos.length > 0 ? "default" : "outline"}>
+                        {contatos.length}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Imagens</span>
-                    <Badge variant={imagens.length > 0 ? "default" : "outline"}>
-                      {imagens.length} imagem(ns)
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Contatos</span>
-                    <Badge variant={contatos.length > 0 ? "default" : "outline"}>
-                      {contatos.length} contato(s)
-                    </Badge>
-                  </div>
-                </div>
 
-                <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
+                  <Separator />
+
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-700/30">
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">
                       Total de Envios
                     </span>
-                    <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                       {contatos.length}
                     </span>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Card de Informações */}
-            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700/30">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  Informações Importantes
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
-                <div className="space-y-2">
-                  <p className="font-semibold">⚠️ API não conectada</p>
-                  <p className="text-xs">
-                    Esta página está preparada para conectar com a API do WhatsApp. 
-                    Atualmente, os envios são apenas simulações.
-                  </p>
-                </div>
-                <div className="space-y-2 pt-2 border-t border-purple-200 dark:border-purple-700/30">
-                  <p className="font-semibold">📱 Limitações do WhatsApp</p>
-                  <ul className="text-xs space-y-1 list-disc list-inside">
-                    <li>Máximo de 4096 caracteres por mensagem</li>
-                    <li>Até 10 imagens por mensagem</li>
-                    <li>Números devem estar no formato internacional</li>
-                    <li>Evite enviar para números que não autorizaram</li>
-                  </ul>
-                </div>
-                <div className="space-y-2 pt-2 border-t border-purple-200 dark:border-purple-700/30">
-                  <p className="font-semibold">🔒 Boas Práticas</p>
-                  <ul className="text-xs space-y-1 list-disc list-inside">
-                    <li>Respeite horários comerciais</li>
-                    <li>Evite spam e mensagens não solicitadas</li>
-                    <li>Mantenha mensagens claras e objetivas</li>
-                    <li>Personalize quando possível</li>
-                  </ul>
-                </div>
-                <div className="space-y-2 pt-2 border-t border-purple-200 dark:border-purple-700/30">
-                  <p className="font-semibold">📄 Formato de Arquivo</p>
-                  <div className="text-xs space-y-1">
-                    <p><strong>TXT:</strong> Um número por linha</p>
-                    <code className="block bg-white dark:bg-gray-800 px-2 py-1 rounded mt-1 text-[10px]">
-                      5511999999999<br />
-                      5511888888888<br />
-                      5511777777777
-                    </code>
-                    <p className="mt-2"><strong>CSV:</strong> Número na primeira coluna</p>
-                    <code className="block bg-white dark:bg-gray-800 px-2 py-1 rounded mt-1 text-[10px]">
-                      5511999999999,Nome Cliente<br />
-                      5511888888888,Outro Cliente
-                    </code>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700/30">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    Informações Importantes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                  <div className="space-y-2">
+                    <p className="font-semibold">⚠️ API não conectada</p>
+                    <p className="text-xs">
+                      Esta página está preparada para conectar com a API do WhatsApp. 
+                      Atualmente, os envios são apenas simulações.
+                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Card de Integração Futura */}
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700/30">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Icon icon="fluent:code-32-filled" width="16" height="16" className="text-blue-600 dark:text-blue-400" />
-                  Integração com API
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-xs text-gray-700 dark:text-gray-300">
-                <p>
-                  A função <code className="bg-white dark:bg-gray-800 px-1 rounded">handleEnviarMensagens</code> está preparada para receber a integração com a API do WhatsApp.
-                </p>
-                <p className="pt-2 border-t border-blue-200 dark:border-blue-700/30">
-                  <strong>Estrutura de dados disponível:</strong>
-                </p>
-                <ul className="space-y-1 list-disc list-inside">
-                  <li><code>mensagem</code> - Texto da mensagem</li>
-                  <li><code>imagens</code> - Array de arquivos de imagem</li>
-                  <li><code>contatos</code> - Array de números de telefone</li>
-                </ul>
-              </CardContent>
-            </Card>
+                  <Separator className="bg-purple-200 dark:bg-purple-700/30" />
+                  <div className="space-y-2">
+                    <p className="font-semibold">📱 Limitações do WhatsApp</p>
+                    <ul className="text-xs space-y-1 list-disc list-inside">
+                      <li>Máximo de 4096 caracteres por mensagem</li>
+                      <li>Até 10 imagens por mensagem</li>
+                      <li>Números devem estar no formato internacional</li>
+                      <li>Evite enviar para números que não autorizaram</li>
+                    </ul>
+                  </div>
+                  <Separator className="bg-purple-200 dark:bg-purple-700/30" />
+                  <div className="space-y-2">
+                    <p className="font-semibold">🔒 Boas Práticas</p>
+                    <ul className="text-xs space-y-1 list-disc list-inside">
+                      <li>Respeite horários comerciais</li>
+                      <li>Evite spam e mensagens não solicitadas</li>
+                      <li>Mantenha mensagens claras e objetivas</li>
+                      <li>Personalize quando possível</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
         </div>
       </div>
     </PageWrapper>
   );
 }
-

@@ -1,27 +1,96 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Mic, Sparkles, Copy, Trash2, Settings, History, Loader2, Volume2, Info, Play, Pause, Download } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
-import { useGemini } from "@/hooks/useGemini";
-import { useTextToSpeech } from "@/hooks/useTextToSpeech";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Mic, 
+  Play, 
+  Pause, 
+  Download, 
+  Volume2, 
+  Gauge, 
+  Music, 
+  Sparkles,
+  Clock,
+  Trash2,
+  Copy,
+  Settings,
+  Zap,
+  Radio,
+  Podcast,
+  MessageSquare,
+  BookOpen,
+  Megaphone,
+  Film,
+  History,
+  Loader2,
+  Info
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PageWrapper } from '@/components/layout/PageWrapper';
+import { useGemini } from '@/hooks/useGemini';
+import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useToast } from '@/hooks/use-toast';
 
-const tiposLocucao = [
-  { value: "atendimento", label: "Atendimento ao Cliente", icon: "📞" },
-  { value: "promocao", label: "Promoção/Oferta", icon: "🎉" },
-  { value: "institucional", label: "Institucional", icon: "🏢" },
-  { value: "espera", label: "Música de Espera", icon: "⏳" },
-  { value: "saudacao", label: "Saudação", icon: "👋" },
-  { value: "despedida", label: "Despedida", icon: "👋" },
-  { value: "informativo", label: "Informativo", icon: "ℹ️" },
-  { value: "personalizado", label: "Personalizado", icon: "✨" }
+interface VoiceType {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  description: string;
+  color: string;
+}
+
+const tiposLocucao: VoiceType[] = [
+  {
+    id: 'atendimento',
+    name: 'Atendimento',
+    icon: <MessageSquare className="w-5 h-5" />,
+    description: 'Atendimento ao Cliente',
+    color: 'from-blue-500 to-cyan-500'
+  },
+  {
+    id: 'promocao',
+    name: 'Promoção',
+    icon: <Megaphone className="w-5 h-5" />,
+    description: 'Propaganda e Ofertas',
+    color: 'from-purple-500 to-pink-500'
+  },
+  {
+    id: 'institucional',
+    name: 'Institucional',
+    icon: <BookOpen className="w-5 h-5" />,
+    description: 'Comunicados Empresariais',
+    color: 'from-orange-500 to-red-500'
+  },
+  {
+    id: 'espera',
+    name: 'Espera',
+    icon: <Radio className="w-5 h-5" />,
+    description: 'Música de Espera',
+    color: 'from-green-500 to-emerald-500'
+  },
+  {
+    id: 'podcast',
+    name: 'Podcast',
+    icon: <Podcast className="w-5 h-5" />,
+    description: 'Episódios e Entrevistas',
+    color: 'from-indigo-500 to-purple-500'
+  },
+  {
+    id: 'video',
+    name: 'Vídeo',
+    icon: <Film className="w-5 h-5" />,
+    description: 'Narração para Vídeos',
+    color: 'from-yellow-500 to-orange-500'
+  }
 ];
 
 export default function Locucoes() {
@@ -30,7 +99,6 @@ export default function Locucoes() {
   const [prompt, setPrompt] = useState("");
   const [tipoSelecionado, setTipoSelecionado] = useState("atendimento");
   const [resultado, setResultado] = useState("");
-  const [showHistorico, setShowHistorico] = useState(false);
   
   // Controles de voz
   const [voz, setVoz] = useState("feminina-padrao");
@@ -39,10 +107,13 @@ export default function Locucoes() {
   const [volume, setVolume] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   
   const { loading, historico, generateLocucao, carregarHistorico, limparHistorico } = useGemini();
   const { loading: loadingAudio, audioUrl, generateAudio, downloadAudio } = useTextToSpeech();
   const { toast } = useToast();
+  const waveformRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('geminiApiKey');
@@ -59,6 +130,12 @@ export default function Locucoes() {
     if (audioUrl) {
       const audio = new Audio(audioUrl);
       audio.onended = () => setIsPlaying(false);
+      audio.addEventListener('loadedmetadata', () => {
+        setDuration(audio.duration);
+      });
+      audio.addEventListener('timeupdate', () => {
+        setCurrentTime(audio.currentTime);
+      });
       setAudioElement(audio);
     }
   }, [audioUrl]);
@@ -82,8 +159,8 @@ export default function Locucoes() {
       return;
     }
 
-    const tipoInfo = tiposLocucao.find(t => t.value === tipoSelecionado);
-    const promptCompleto = `Crie uma locução profissional do tipo "${tipoInfo?.label}" com o seguinte contexto: ${prompt}. 
+    const tipoInfo = tiposLocucao.find(t => t.id === tipoSelecionado);
+    const promptCompleto = `Crie uma locução profissional do tipo "${tipoInfo?.name}" com o seguinte contexto: ${prompt}. 
     
 A locução deve ser:
 - Clara e objetiva
@@ -110,7 +187,6 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
 
   const handleUseFromHistory = (text: string) => {
     setResultado(text);
-    setShowHistorico(false);
     toast({
       title: "Locução carregada",
       description: "Texto carregado do histórico"
@@ -130,8 +206,8 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
     await generateAudio(resultado, apiKey, {
       voz,
       velocidade,
-      tom,
-      volume
+      tom: tom / 10, // Converter para escala 0-1
+      volume: (volume + 10) / 20 // Converter de -10 a 10 para 0-1
     });
   };
 
@@ -154,40 +230,71 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
     }
   };
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const WaveformVisualizer = () => {
+    const bars = 60;
+    return (
+      <div className="flex items-center justify-center gap-1 h-24" ref={waveformRef}>
+        {Array.from({ length: bars }).map((_, i) => {
+          const height = isPlaying && audioElement
+            ? Math.sin((currentTime * 5 + i * 0.3) * 0.5) * 30 + 40
+            : Math.random() * 20 + 20;
+          return (
+            <motion.div
+              key={i}
+              className="w-1 bg-gradient-to-t from-purple-500/50 to-purple-600 rounded-full"
+              animate={{
+                height: `${height}%`,
+                opacity: isPlaying && audioElement ? 1 : 0.3
+              }}
+              transition={{
+                duration: 0.3,
+                repeat: isPlaying && audioElement ? Infinity : 0,
+                repeatType: 'reverse'
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
-    <div className="page-container">
+    <PageWrapper>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-purple-500/5 dark:to-purple-500/10 p-4 md:p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 dark:from-purple-400/20 dark:to-pink-400/20">
-              <Mic className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center space-y-4"
+          >
+            <div className="flex items-center justify-center gap-3">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                className="p-3 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500"
+              >
+                <Sparkles className="w-8 h-8 text-white" />
+              </motion.div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent dark:from-purple-400 dark:via-pink-400 dark:to-orange-400">
+                AI Voice Studio
+              </h1>
             </div>
-            Locuções AI
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-muted-foreground text-lg">
             Crie locuções profissionais com inteligência artificial
           </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowHistorico(!showHistorico)}
-            className="bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30"
-          >
-            <History className="h-4 w-4 mr-2" />
-            Histórico
-          </Button>
-          
+            
+            {/* Botões de ação no header */}
+            <div className="flex items-center justify-center gap-2 pt-2">
           <Dialog open={showApiDialog} onOpenChange={setShowApiDialog}>
             <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30"
-              >
+                  <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4 mr-2" />
                 API Key
               </Button>
@@ -228,80 +335,89 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
             </DialogContent>
           </Dialog>
         </div>
-      </div>
+          </motion.div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Painel de Criação */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                Criar Nova Locução
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Tipo de Locução</Label>
-                <Select value={tipoSelecionado} onValueChange={setTipoSelecionado}>
-                  <SelectTrigger className="mt-2 dark:bg-gray-800 dark:border-gray-700">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tiposLocucao.map(tipo => (
-                      <SelectItem key={tipo.value} value={tipo.value}>
-                        <span className="flex items-center gap-2">
-                          <span>{tipo.icon}</span>
-                          <span>{tipo.label}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Text Input */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Card className="p-6 border-2 hover:border-purple-500/50 dark:hover:border-purple-500/30 transition-colors bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold flex items-center gap-2">
+                        <Mic className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                        Texto para Locução
+                      </h2>
+                      <Badge variant="secondary" className="gap-1">
+                        <Zap className="w-3 h-3" />
+                        {prompt.length} caracteres
+                      </Badge>
               </div>
-
-              <div>
-                <Label>Descreva sua Locução</Label>
                 <Textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Ex: Locução para atendimento telefônico da empresa de cotações, informando horário de funcionamento das 8h às 18h..."
-                  className="mt-2 min-h-[120px] dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Seja específico sobre o contexto, tom e informações que deseja incluir
-                </p>
-              </div>
-
-              <Button
-                onClick={handleGenerate}
-                disabled={loading || !apiKey}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 h-12"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                    Gerando Locução...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-5 w-5 mr-2" />
-                    Gerar Locução com AI
-                  </>
-                )}
-              </Button>
-
+                      className="min-h-[150px] text-base resize-none dark:bg-gray-800 dark:border-gray-700"
+                      placeholder="Digite ou cole seu texto aqui para gerar uma locução profissional..."
+                    />
               {!apiKey && (
                 <p className="text-sm text-amber-600 dark:text-amber-400 text-center">
                   Configure sua API Key do Gemini para começar
                 </p>
               )}
-            </CardContent>
-          </Card>
+                  </div>
+                </Card>
+              </motion.div>
 
-          {/* Resultado */}
+              {/* Voice Types */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Card className="p-6 bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <Music className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    Tipo de Locução
+                  </h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {tiposLocucao.map((type) => (
+                      <motion.button
+                        key={type.id}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setTipoSelecionado(type.id)}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          tipoSelecionado === type.id
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-purple-500/50 dark:hover:border-purple-500/30'
+                        }`}
+                      >
+                        <div className="space-y-2">
+                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${type.color} flex items-center justify-center text-white mx-auto`}>
+                            {type.icon}
+                          </div>
+                          <div className="text-sm font-medium dark:text-white">{type.name}</div>
+                          <div className="text-xs text-muted-foreground">{type.description}</div>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+          </Card>
+              </motion.div>
+
+              {/* Voice Controls */}
           {resultado && (
-            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Card className="p-6 bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
@@ -329,7 +445,7 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
                 {/* Controles de Voz */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200/60 dark:border-gray-700/30 space-y-4">
                   <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Mic className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                          <Settings className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                     Configurações de Voz
                   </h4>
                   
@@ -403,61 +519,107 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
                       </>
                     )}
                   </Button>
-
-                  {!apiKey && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
-                      Configure sua API Key para gerar áudio
-                    </p>
-                  )}
                 </div>
 
                 {/* Player de Áudio */}
                 {audioUrl && (
                   <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200/60 dark:border-blue-700/30">
+                          <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                              <h4 className="text-lg font-semibold">Player de Áudio</h4>
+                              <Badge variant="outline" className="gap-1">
+                                <Clock className="w-3 h-3" />
+                                {formatTime(currentTime)} / {formatTime(duration)}
+                              </Badge>
+                            </div>
+
+                            <WaveformVisualizer />
+
+                            <div className="space-y-4">
+                              <Slider
+                                value={[currentTime]}
+                                onValueChange={([value]) => {
+                                  setCurrentTime(value);
+                                  if (audioElement) {
+                                    audioElement.currentTime = value;
+                                  }
+                                }}
+                                min={0}
+                                max={duration || 100}
+                                step={0.1}
+                                className="w-full"
+                              />
+
+                              <div className="flex items-center justify-center gap-4">
                         <Button
+                                  size="lg"
                           onClick={handlePlayPause}
-                          size="sm"
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          {isPlaying ? (
-                            <Pause className="h-4 w-4" />
-                          ) : (
-                            <Play className="h-4 w-4" />
-                          )}
+                                  className="w-16 h-16 rounded-full bg-purple-600 hover:bg-purple-700"
+                                >
+                                  {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
                         </Button>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
-                          {isPlaying ? 'Reproduzindo...' : 'Áudio Pronto'}
-                        </span>
-                      </div>
                       <Button
+                                  size="lg" 
+                                  variant="outline" 
+                                  className="rounded-full"
                         onClick={handleDownload}
-                        variant="outline"
-                        size="sm"
-                        className="dark:bg-gray-800 dark:border-gray-700"
                       >
-                        <Download className="h-4 w-4 mr-2" />
-                        Baixar MP3
+                                  <Download className="w-5 h-5" />
                       </Button>
+                              </div>
+                            </div>
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
-          )}
+                </motion.div>
+              )}
+
+              {/* Generate Button */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <Button
+                  onClick={handleGenerate}
+                  disabled={loading || !apiKey}
+                  className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  {loading ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      >
+                        <Sparkles className="w-5 h-5 mr-2" />
+                      </motion.div>
+                      Gerando Locução...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      Gerar Locução com AI
+                    </>
+                  )}
+                </Button>
+              </motion.div>
         </div>
 
-        {/* Painel Lateral - Histórico */}
-        <div className="space-y-6">
-          {showHistorico && (
-            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <History className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            {/* History Sidebar */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="space-y-6"
+            >
+              <Card className="p-6 bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <History className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     Histórico
-                  </span>
+                  </h2>
                   {historico.length > 0 && (
                     <Button
                       variant="ghost"
@@ -468,47 +630,88 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </div>
+                <ScrollArea className="h-[calc(100vh-200px)]">
+                  <div className="space-y-3">
                 {historico.length === 0 ? (
                   <div className="text-center py-8">
                     <History className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                       Nenhuma locução gerada ainda
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                    {historico.map((item) => {
-                      const tipoInfo = tiposLocucao.find(t => t.value === item.tipo);
+                      <AnimatePresence>
+                        {historico.map((item, index) => {
+                          const tipoInfo = tiposLocucao.find(t => t.id === item.tipo);
                       return (
-                        <div
+                            <motion.div
                           key={item.id}
-                          className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200/60 dark:border-gray-700/30 hover:border-purple-300 dark:hover:border-purple-600/50 transition-all cursor-pointer"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, x: -20 }}
+                              transition={{ delay: index * 0.1 }}
+                            >
+                              <Card className="p-4 hover:border-purple-500/50 dark:hover:border-purple-500/30 transition-colors cursor-pointer group bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
+                                <div className="space-y-3">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium truncate dark:text-white">{item.resposta.substring(0, 50)}...</p>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <Badge variant="secondary" className="text-xs">
+                                          {tipoInfo?.icon} {tipoInfo?.name}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                    <Button 
+                                      size="icon" 
+                                      variant="ghost" 
+                                      className="opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => handleUseFromHistory(item.resposta)}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <Badge variant="outline" className="text-xs">
-                              {tipoInfo?.icon} {tipoInfo?.label}
-                            </Badge>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {new Date(item.timestamp).toLocaleDateString('pt-BR')}
-                            </span>
+                                      <Play className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                  <Separator />
+                                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                    <span>{new Date(item.timestamp).toLocaleTimeString()}</span>
+                                    <div className="flex gap-1">
+                                      <Button 
+                                        size="icon" 
+                                        variant="ghost" 
+                                        className="h-6 w-6"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(item.resposta);
+                                          toast({ title: "Copiado!", description: "Texto copiado para a área de transferência" });
+                                        }}
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </Button>
+                                      <Button 
+                                        size="icon" 
+                                        variant="ghost" 
+                                        className="h-6 w-6 text-destructive"
+                                        onClick={() => {
+                                          // Implementar remoção individual do histórico
+                                          toast({ title: "Funcionalidade em desenvolvimento", variant: "destructive" });
+                                        }}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                    </div>
                           </div>
-                          <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-                            {item.resposta}
-                          </p>
                         </div>
+                              </Card>
+                            </motion.div>
                       );
                     })}
+                      </AnimatePresence>
+                    )}
                   </div>
-                )}
-              </CardContent>
+                </ScrollArea>
             </Card>
-          )}
 
-          {/* Card de Marcações */}
+              {/* Info Card */}
           <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-700/30">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
@@ -523,32 +726,12 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
               <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[pausa-longa]</code> - Pausa longa (1s)</p>
               <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[rapido]texto[/rapido]</code> - Fala rápida</p>
               <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[lento]texto[/lento]</code> - Fala lenta</p>
-              <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[feliz]texto[/feliz]</code> - Tom alegre</p>
-              <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[triste]texto[/triste]</code> - Tom melancólico</p>
-              <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[animado]texto[/animado]</code> - Tom empolgado</p>
-              <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[calmo]texto[/calmo]</code> - Tom tranquilo</p>
             </CardContent>
           </Card>
-
-          {/* Card de Dicas */}
-          <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200/60 dark:border-purple-700/30">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                Dicas para Melhores Resultados
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-              <p>• Seja específico sobre o contexto</p>
-              <p>• Mencione o tom desejado (formal, casual, etc)</p>
-              <p>• Inclua informações importantes</p>
-              <p>• Defina o público-alvo</p>
-              <p>• Use marcações de ênfase no texto</p>
-              <p>• Teste diferentes configurações de voz</p>
-            </CardContent>
-          </Card>
+            </motion.div>
+          </div>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }
