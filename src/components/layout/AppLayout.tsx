@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
 import { MobilePageTransition } from "./MobilePageTransition";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/contexts/MobileProvider";
 import { Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
@@ -34,7 +34,7 @@ export function AppLayout() {
   const { signOut } = useAuth();
   const { toast } = useToast();
   const [searchOpen, setSearchOpen] = useState(false);
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
   const pageTitle = pageTitles[location.pathname] || "";
 
   const handleLogout = async () => {

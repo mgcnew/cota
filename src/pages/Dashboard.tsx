@@ -14,7 +14,7 @@ import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
 import { capitalize } from '@/lib/text-utils';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useMobile } from '@/contexts/MobileProvider';
 
 const DEFAULT_METRICS = {
   cotacoesAtivas: 0,
@@ -59,7 +59,7 @@ export default function Dashboard() {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
 
   const dashboardData = useDashboard();
   const metrics = dashboardData?.metrics ?? DEFAULT_METRICS;
@@ -242,7 +242,7 @@ export default function Dashboard() {
             <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
               Cotações Ativas
             </CardTitle>
-          </div>
+                    </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
@@ -255,7 +255,7 @@ export default function Dashboard() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+                      </div>
       </CardHeader>
       <CardContent className="space-y-2.5 z-10 relative">
         <div className="flex items-center gap-2.5">
@@ -263,37 +263,37 @@ export default function Dashboard() {
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.cotacoesAtivas}
           </span>
           {metrics.crescimentoCotacoes !== 0 && (
-            <TooltipProvider>
-              <UiTooltip>
-                <TooltipTrigger asChild>
+                    <TooltipProvider>
+                      <UiTooltip>
+                        <TooltipTrigger asChild>
                   <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
                     {metrics.crescimentoCotacoes > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {Math.abs(metrics.crescimentoCotacoes)}%
                   </Badge>
-                </TooltipTrigger>
+                        </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-xs">Crescimento comparado ao mês anterior</p>
-                </TooltipContent>
-              </UiTooltip>
-            </TooltipProvider>
+                        </TooltipContent>
+                      </UiTooltip>
+                    </TooltipProvider>
           )}
-        </div>
+                </div>
         <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
           <div className="flex items-center justify-between">
             <span>Vs mês anterior:</span>
             <span className="font-medium text-white dark:text-gray-300">
               {Math.round(metrics.cotacoesAtivas / (1 + metrics.crescimentoCotacoes / 100))}
             </span>
-          </div>
+                  </div>
           {metrics.produtosCotados > 0 && (
             <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
               <span>Produtos cotados:</span>
               <span className="font-medium">{metrics.produtosCotados}</span>
-            </div>
+                  </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+                </div>
+              </CardContent>
+          </Card>
   );
 
   // Helper function para renderizar Card 2 - Economia Gerada
@@ -322,7 +322,7 @@ export default function Dashboard() {
             <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
               Economia Gerada
             </CardTitle>
-          </div>
+                    </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
@@ -335,7 +335,7 @@ export default function Dashboard() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+                      </div>
       </CardHeader>
       <CardContent className="space-y-2.5 z-10 relative">
         <div className="flex items-center gap-2.5">
@@ -343,35 +343,35 @@ export default function Dashboard() {
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}
           </span>
           {metrics.crescimentoEconomia !== 0 && (
-            <TooltipProvider>
-              <UiTooltip>
-                <TooltipTrigger asChild>
+                    <TooltipProvider>
+                      <UiTooltip>
+                        <TooltipTrigger asChild>
                   <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
                     {metrics.crescimentoEconomia > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {Math.abs(metrics.crescimentoEconomia)}%
                   </Badge>
-                </TooltipTrigger>
+                        </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-xs">Crescimento comparado ao mês anterior</p>
-                </TooltipContent>
-              </UiTooltip>
-            </TooltipProvider>
+                        </TooltipContent>
+                      </UiTooltip>
+                    </TooltipProvider>
           )}
-        </div>
+                </div>
         <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
           <div className="flex items-center justify-between">
             <span>Vs mês anterior:</span>
             <span className="font-medium text-white dark:text-gray-300">
               {formatCurrency((selectedEconomyBreakdown?.economiaRealizada || 0) / (1 + (metrics.crescimentoEconomia || 0) / 100))}
             </span>
-          </div>
+                  </div>
           {metrics.eficienciaEconomia > 0 && (
             <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
               <span>Eficiência:</span>
               <span className="font-medium">{formatPercent(metrics.eficienciaEconomia)}</span>
-            </div>
+                  </div>
           )}
-        </div>
+                </div>
       </CardContent>
     </Card>
   );
@@ -408,34 +408,34 @@ export default function Dashboard() {
           <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.fornecedores}
           </span>
-          <TooltipProvider>
-            <UiTooltip>
-              <TooltipTrigger asChild>
+                  <TooltipProvider>
+                    <UiTooltip>
+                      <TooltipTrigger asChild>
                 <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
                   <ArrowUp className="w-3 h-3" />
                   +{isLoading ? '-' : metrics.taxaAtividade}%
                 </Badge>
-              </TooltipTrigger>
+                      </TooltipTrigger>
               <TooltipContent>
                 <p className="text-xs">Taxa de atividade dos fornecedores</p>
-              </TooltipContent>
-            </UiTooltip>
-          </TooltipProvider>
-        </div>
+                      </TooltipContent>
+                    </UiTooltip>
+                  </TooltipProvider>
+                </div>
         <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
           <div className="flex items-center justify-between">
             <span>Taxa de atividade:</span>
             <span className="font-medium text-white dark:text-gray-300">
               {isLoading ? '-' : `${metrics.taxaAtividade}%`}
             </span>
-          </div>
+                    </div>
           {metrics.mediaFornecedoresParticipantes > 0 && (
             <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
               <span>Média participantes:</span>
               <span className="font-medium">{metrics.mediaFornecedoresParticipantes.toFixed(1)}</span>
-            </div>
+                  </div>
           )}
-        </div>
+                  </div>
       </CardContent>
     </Card>
   );
@@ -467,7 +467,7 @@ export default function Dashboard() {
             <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
               Taxa de Aprovação
             </CardTitle>
-          </div>
+                  </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
@@ -480,7 +480,7 @@ export default function Dashboard() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+                  </div>
       </CardHeader>
       <CardContent className="space-y-2.5 z-10 relative">
         <div className="flex items-center gap-2.5">
@@ -488,28 +488,28 @@ export default function Dashboard() {
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${metrics.taxaAprovacao || 0}%`}
           </span>
           {metrics.variacaoTaxaAprovacao !== 0 && (
-            <TooltipProvider>
-              <UiTooltip>
-                <TooltipTrigger asChild>
+                  <TooltipProvider>
+                    <UiTooltip>
+                      <TooltipTrigger asChild>
                   <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
                     {metrics.variacaoTaxaAprovacao > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{Math.abs(metrics.variacaoTaxaAprovacao || 0)}%
                   </Badge>
-                </TooltipTrigger>
+                      </TooltipTrigger>
                 <TooltipContent>
                   <p className="text-xs">Variação comparada ao mês anterior</p>
-                </TooltipContent>
-              </UiTooltip>
-            </TooltipProvider>
+                      </TooltipContent>
+                    </UiTooltip>
+                  </TooltipProvider>
           )}
-        </div>
+                </div>
         <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
           <div className="flex items-center justify-between">
             <span>Vs mês anterior:</span>
             <span className="font-medium text-white dark:text-gray-300">
               {metrics.taxaAprovacaoAnterior || 0}%
             </span>
-          </div>
+                    </div>
           {(metrics.aprovacoesTotal > 0 || metrics.pendenciasTotal > 0 || metrics.rejeicoesTotal > 0) && (
             <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
               {metrics.aprovacoesTotal > 0 && (
@@ -530,9 +530,9 @@ export default function Dashboard() {
                   <span>{metrics.rejeicoesTotal}</span>
                 </span>
               )}
-            </div>
-          )}
-        </div>
+                      </div>
+                    )}
+                </div>
       </CardContent>
     </Card>
   );
@@ -547,8 +547,8 @@ export default function Dashboard() {
             <div className="relative">
               {/* Navegação integrada no topo do card (parece ser parte do card) */}
               <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
-                <Button
-                  variant="ghost"
+                      <Button
+                        variant="ghost"
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -557,12 +557,12 @@ export default function Dashboard() {
                   className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                </Button>
+                      </Button>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
                   <span className="text-xs font-semibold text-white dark:text-gray-200">
                     {activeCardIndex + 1} / 4
                   </span>
-                </div>
+              </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -586,20 +586,20 @@ export default function Dashboard() {
                 >
                   <div className="w-full flex-shrink-0">
                     {renderCard1()}
-                  </div>
+                        </div>
                   <div className="w-full flex-shrink-0">
                     {renderCard2()}
-                  </div>
+                      </div>
                   <div className="w-full flex-shrink-0">
                     {renderCard3()}
-                  </div>
+                        </div>
                   <div className="w-full flex-shrink-0">
                     {renderCard4()}
-                  </div>
-                </div>
+                          </div>
+                        </div>
+                      </div>
               </div>
-            </div>
-          </div>
+        </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-8 overflow-visible">
             {renderCard1()}
@@ -640,6 +640,12 @@ export default function Dashboard() {
             <CardContent>
               {isLoading ? <div className="flex items-center justify-center h-[320px]">
                   <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+                </div> : isMobile ? <div className="flex items-center justify-center h-[320px] text-slate-500">
+                  <div className="text-center">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Gráficos não disponíveis no mobile</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Use o desktop para visualizar os gráficos</p>
+                  </div>
                 </div> : evolutionData && evolutionData.length > 0 ? <ResponsiveContainer width="100%" height={320}>
                   <ComposedChart data={evolutionData} margin={{
                 top: 10,
@@ -888,6 +894,12 @@ export default function Dashboard() {
             <CardContent>
               {isLoading ? <div className="flex items-center justify-center h-[280px]">
                   <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+                </div> : isMobile ? <div className="flex items-center justify-center h-[280px] text-slate-500">
+                  <div className="text-center">
+                    <DollarSign className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Gráficos não disponíveis no mobile</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Use o desktop para visualizar os gráficos</p>
+                  </div>
                 </div> : economyData && economyData.length > 0 ? <ResponsiveContainer width="100%" height={280}>
                   <ComposedChart data={economyData} margin={{
                 top: 5,

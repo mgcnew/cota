@@ -27,7 +27,7 @@ import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/contexts/MobileProvider";
 export default function Produtos() {
   const navigate = useNavigate();
   const {
@@ -39,7 +39,7 @@ export default function Produtos() {
     viewMode,
     setViewMode
   } = useResponsiveViewMode();
-  const isMobile = useIsMobile();
+  const isMobile = useMobile();
   const {
     paginate
   } = usePagination<Product>({

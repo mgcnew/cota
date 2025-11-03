@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, BarChart3 } from "lucide-react";
+import { useMobile } from "@/contexts/MobileProvider";
 import {
   BarChart,
   Bar,
@@ -43,6 +44,19 @@ export function PerformanceCharts({
   performanceFornecedores,
   tendenciasMensais,
 }: PerformanceChartsProps) {
+  const isMobile = useMobile();
+  
+  // Componente para mensagem quando gráficos não estão disponíveis no mobile
+  const MobilePlaceholder = ({ title }: { title: string }) => (
+    <div className="flex items-center justify-center h-[250px] sm:h-[300px] text-slate-500">
+      <div className="text-center">
+        <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+        <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Use o desktop para visualizar os gráficos</p>
+      </div>
+    </div>
+  );
+
   // Top 5 fornecedores
   const topFornecedores = performanceFornecedores.slice(0, 5);
 
@@ -175,6 +189,8 @@ export function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               </div>
+            ) : isMobile ? (
+              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <BarChart data={topFornecedores} layout="vertical" margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
@@ -228,6 +244,8 @@ export function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
               </div>
+            ) : isMobile ? (
+              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
               <PieChart>
@@ -285,6 +303,8 @@ export function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
               </div>
+            ) : isMobile ? (
+              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <ComposedChart data={tendenciasMensais} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
@@ -368,6 +388,8 @@ export function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-green-500" />
               </div>
+            ) : isMobile ? (
+              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <ComposedChart data={tendenciasMensais} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
@@ -451,6 +473,8 @@ export function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
               </div>
+            ) : isMobile ? (
+              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <BarChart data={taxaRespostaData} margin={{ top: 10, right: 10, left: 0, bottom: 60 }}>
@@ -511,6 +535,8 @@ export function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
               </div>
+            ) : isMobile ? (
+              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <BarChart data={economiaData} margin={{ top: 10, right: 10, left: 0, bottom: 60 }}>
