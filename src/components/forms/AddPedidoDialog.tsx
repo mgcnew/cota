@@ -52,7 +52,9 @@ export default function AddPedidoDialog({
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [productSearch, setProductSearch] = useState("");
+  const [supplierSearch, setSupplierSearch] = useState("");
   const debouncedProductSearch = useDebounce(productSearch, 300);
+  const debouncedSupplierSearch = useDebounce(supplierSearch, 300);
 
   // Tab system states
   const [activeTab, setActiveTab] = useState("produtos");
@@ -114,7 +116,7 @@ export default function AddPedidoDialog({
     const {
       data,
       error
-    } = await supabase.from('suppliers').select('*').order('name');
+    } = await supabase.from('suppliers').select('id, name, contact').order('name');
     if (error) {
       console.error('Error loading suppliers:', error);
       return;
@@ -724,10 +726,25 @@ export default function AddPedidoDialog({
                           <Label htmlFor="fornecedor" className="text-xs font-medium text-gray-700 dark:text-gray-300">
                             Fornecedor *
                           </Label>
-                          <Combobox options={suppliers.map(s => ({
-                        value: s.id,
-                        label: s.name
-                      }))} value={fornecedor} onValueChange={setFornecedor} placeholder="Selecione um fornecedor..." searchPlaceholder="Buscar fornecedor..." emptyText="Nenhum fornecedor encontrado" className="w-full text-sm" />
+                          <Combobox 
+                            options={suppliers
+                              .filter(s => 
+                                !debouncedSupplierSearch || 
+                                s.name.toLowerCase().includes(debouncedSupplierSearch.toLowerCase()) ||
+                                (s.contact && s.contact.toLowerCase().includes(debouncedSupplierSearch.toLowerCase()))
+                              )
+                              .map(s => ({
+                                value: s.id,
+                                label: s.contact ? `${s.name} (${s.contact})` : s.name
+                              }))} 
+                            value={fornecedor} 
+                            onValueChange={setFornecedor} 
+                            placeholder="Selecione um fornecedor..." 
+                            searchPlaceholder="Buscar por nome ou vendedor..." 
+                            emptyText="Nenhum fornecedor encontrado" 
+                            className="w-full text-sm"
+                            onSearchChange={setSupplierSearch}
+                          />
                         </div>
                         
                         <div className="space-y-2">

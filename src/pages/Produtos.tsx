@@ -249,7 +249,7 @@ export default function Produtos() {
                     <TrendingUp className="w-3 h-3" />
                     +{Math.floor(stats.totalProducts * 0.1)}
                   </Badge>
-                </div>
+                    </div>
                 <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                   <div className="flex items-center justify-between">
                     <span>No Catálogo:</span>
@@ -298,7 +298,7 @@ export default function Produtos() {
                   <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                     Categorias
                   </CardTitle>
-                </div>
+                    </div>
               </CardHeader>
               <CardContent className="space-y-2.5 z-10 relative">
                 <div className="flex items-center gap-2.5">
@@ -309,7 +309,7 @@ export default function Produtos() {
                     <TrendingUp className="w-3 h-3" />
                     +2
                   </Badge>
-                </div>
+                  </div>
                 <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                   <div className="flex items-center justify-between">
                     <span>Disponíveis:</span>
@@ -321,7 +321,7 @@ export default function Produtos() {
                     <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
                       <span>Top categoria:</span>
                       <span className="font-medium">{stats.topCategoria.nome} • {stats.topCategoria.count} produtos</span>
-                    </div>
+                </div>
                   )}
                 </div>
               </CardContent>
@@ -364,7 +364,7 @@ export default function Produtos() {
                     <TrendingUp className="w-3 h-3" />
                     15%
                   </Badge>
-                </div>
+                    </div>
                 <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                   <div className="flex items-center justify-between">
                     <span>Total de cotações:</span>
@@ -407,7 +407,7 @@ export default function Produtos() {
                   <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                     Valor Médio
                   </CardTitle>
-                </div>
+                    </div>
               </CardHeader>
               <CardContent className="space-y-2.5 z-10 relative">
                 <div className="flex items-center gap-2.5">

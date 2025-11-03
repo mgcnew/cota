@@ -258,7 +258,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       // Load products and suppliers
       const [productsRes, suppliersRes] = await Promise.all([
         supabase.from("products").select("id, name").order("name"),
-        supabase.from("suppliers").select("id, name").order("name"),
+        supabase.from("suppliers").select("id, name, contact").order("name"),
       ]);
 
       if (productsRes.data) setEditProducts(productsRes.data);
@@ -342,7 +342,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
   const filteredEditSuppliers = editSuppliers.filter(supplier =>
     !editSelectedSuppliers.find(s => s.id === supplier.id) &&
-    supplier.name.toLowerCase().includes(editSupplierSearch.toLowerCase())
+    (supplier.name.toLowerCase().includes(editSupplierSearch.toLowerCase()) ||
+     (supplier.contact && supplier.contact.toLowerCase().includes(editSupplierSearch.toLowerCase())))
   );
 
   const handleEditSubmit = async (data: QuoteFormData) => {
@@ -1129,7 +1130,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                 <PopoverContent className="w-full sm:w-[400px] p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
                                   <Command className="dark:bg-gray-800">
                                     <CommandInput 
-                                      placeholder="Buscar fornecedor..." 
+                                      placeholder="Buscar por nome ou vendedor..." 
                                       value={editSupplierSearch}
                                       onValueChange={setEditSupplierSearch}
                                       className="dark:bg-gray-800 dark:text-white dark:border-gray-700"
@@ -1140,11 +1141,18 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                         {filteredEditSuppliers.map((supplier) => (
                                           <CommandItem
                                             key={supplier.id}
-                                            value={supplier.name}
+                                            value={`${supplier.name} ${supplier.contact || ''}`}
                                             onSelect={() => handleEditSupplierSelect(supplier)}
                                             className="dark:hover:bg-gray-700 dark:text-white"
                                           >
-                                            {supplier.name}
+                                            <div className="flex flex-col">
+                                              <span>{supplier.name}</span>
+                                              {supplier.contact && (
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                  Vendedor: {supplier.contact}
+                                                </span>
+                                              )}
+                                            </div>
                                           </CommandItem>
                                         ))}
                                       </CommandGroup>

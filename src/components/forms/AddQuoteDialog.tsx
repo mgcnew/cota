@@ -241,7 +241,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
       // Load suppliers (RLS filtra por company_id automaticamente)
       const suppliersRes = await supabase
         .from("suppliers")
-        .select("id, name")
+        .select("id, name, contact")
         .order("name");
 
       if (suppliersRes.data) setSuppliers(suppliersRes.data);
@@ -476,7 +476,8 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
 
   const filteredSuppliers = suppliers.filter(supplier =>
     !selectedSuppliers.find(s => s.id === supplier.id) &&
-    supplier.name.toLowerCase().includes(supplierSearch.toLowerCase())
+    (supplier.name.toLowerCase().includes(supplierSearch.toLowerCase()) ||
+     (supplier.contact && supplier.contact.toLowerCase().includes(supplierSearch.toLowerCase())))
   );
 
   const tabs = [
@@ -1124,7 +1125,7 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                         <PopoverContent className="w-full p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
                                           <Command>
                                             <CommandInput 
-                                              placeholder="Digite o nome do fornecedor..." 
+                                              placeholder="Digite o nome do fornecedor ou vendedor..." 
                                               value={supplierSearch}
                                               onValueChange={setSupplierSearch}
                                             />
@@ -1134,11 +1135,18 @@ export default function AddQuoteDialog({ onAdd, trigger }: AddQuoteDialogProps) 
                                                 {filteredSuppliers.map((supplier) => (
                                                   <CommandItem
                                                     key={supplier.id}
-                                                    value={supplier.name}
+                                                    value={`${supplier.name} ${supplier.contact || ''}`}
                                                     onSelect={() => handleSupplierSelect(supplier)}
                                                   >
                                                     <Plus className="mr-2 h-4 w-4 text-green-600 dark:text-green-400" />
-                                                    <CapitalizedText>{supplier.name}</CapitalizedText>
+                                                    <div className="flex flex-col">
+                                                      <CapitalizedText>{supplier.name}</CapitalizedText>
+                                                      {supplier.contact && (
+                                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                          Vendedor: {supplier.contact}
+                                                        </span>
+                                                      )}
+                                                    </div>
                                                   </CommandItem>
                                                 ))}
                                               </CommandGroup>
