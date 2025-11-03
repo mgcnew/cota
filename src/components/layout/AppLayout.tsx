@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
+import { MobilePageTransition } from "./MobilePageTransition";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +34,7 @@ export function AppLayout() {
   const { signOut } = useAuth();
   const { toast } = useToast();
   const [searchOpen, setSearchOpen] = useState(false);
+  const isMobile = useIsMobile();
   const pageTitle = pageTitles[location.pathname] || "";
 
   const handleLogout = async () => {
@@ -140,12 +143,18 @@ export function AppLayout() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 w-full pb-20 md:pb-0 relative pt-[4.5rem] md:pl-24 transition-none">
-          <div className="min-h-full w-full max-w-full page-content-wrapper">
-            <div className="w-full max-w-full">
-              <SmoothPageTransition>
-                <Outlet />
-              </SmoothPageTransition>
+        <main className={`flex-1 w-full pb-20 md:pb-0 relative pt-[4.5rem] md:pl-24 transition-none ${isMobile ? 'overflow-hidden' : ''}`}>
+          <div className={`min-h-full w-full max-w-full page-content-wrapper ${isMobile ? 'relative overflow-hidden' : ''}`}>
+            <div className={`w-full max-w-full ${isMobile ? 'h-full' : ''}`}>
+              {isMobile ? (
+                <MobilePageTransition>
+                  <Outlet />
+                </MobilePageTransition>
+              ) : (
+                <SmoothPageTransition>
+                  <Outlet />
+                </SmoothPageTransition>
+              )}
             </div>
           </div>
         </main>
