@@ -863,7 +863,7 @@ export default function Cotacoes() {
                                   isUpdating={isUpdating} 
                                   trigger={<Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 p-0 h-8 w-8 rounded-lg border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
                                     <Eye className="h-4 w-4" />
-                                    <span className="sr-only">Ver detalhes da cotação</span>
+                                    <span className="sr-only">Gerenciar cotação</span>
                                   </Button>} 
                                 />
                               )}

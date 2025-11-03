@@ -5,7 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus, Edit, Plus, Trash2, Check, ChevronsUpDown, Loader2, Calendar as CalendarIcon, BarChart3, AlertCircle, Eye } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus, Edit, Plus, Trash2, Check, ChevronsUpDown, Loader2, Calendar as CalendarIcon, BarChart3, AlertCircle, Eye, Info } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -106,9 +111,11 @@ interface ViewQuoteDialogProps {
   readOnly?: boolean;
 }
 
-export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab = "detalhes", readOnly = false }: ViewQuoteDialogProps) {
+export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab, readOnly = false }: ViewQuoteDialogProps) {
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  // Se não foi especificado um defaultTab, prioriza "edicao" se disponível, senão "detalhes"
+  const initialTab = defaultTab || (onEdit && quote.status !== "concluida" && !readOnly ? "edicao" : "detalhes");
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, number>>({});
@@ -586,15 +593,15 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         {trigger}
       </DialogTrigger>
       <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 space-y-0 border-b border-gray-200/60 dark:border-gray-700/40 bg-gradient-to-r from-gray-50/50 to-slate-50/50 dark:from-gray-800/50 dark:to-gray-900/50">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white flex-shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
                 <Package className="h-4 w-4" />
               </div>
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <DialogTitle className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                  Detalhes da Cotação
+                  Gerenciar Cotação
                 </DialogTitle>
                 <div className="hidden sm:block">
                   {getStatusBadge(quote.status)}
@@ -602,6 +609,9 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </div>
             </div>
             
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
@@ -610,6 +620,12 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
             >
               <X className="h-4 w-4" />
             </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Fechar</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </DialogHeader>
 
@@ -617,6 +633,18 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-1 min-h-0">
             <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-gray-200/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm flex-shrink-0">
               <TabsList className={`grid w-full ${onEdit && quote.status !== "concluida" && !readOnly ? "grid-cols-4" : "grid-cols-3"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
+                {onEdit && quote.status !== "concluida" && !readOnly && (
+                  <TabsTrigger
+                    value="edicao"
+                    className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-orange-600 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-orange-700 dark:data-[state=active]:hover:bg-orange-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
+                  >
+                    <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="hidden xs:inline">Edição</span>
+                    {editForm.formState.isDirty && (
+                      <AlertCircle className="h-3 w-3 text-orange-500 data-[state=active]:text-orange-100 animate-pulse flex-shrink-0" />
+                    )}
+                  </TabsTrigger>
+                )}
                 <TabsTrigger
                   value="detalhes"
                   className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-blue-600 dark:data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-blue-700 dark:data-[state=active]:hover:bg-blue-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
@@ -637,37 +665,560 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   <span className="hidden xs:inline">Comparativo</span>
                 </TabsTrigger>
                 {!readOnly && (
-                  <TabsTrigger
-                    value="atualizacao"
+                <TabsTrigger
+                  value="atualizacao"
                     className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-emerald-600 dark:data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-emerald-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-emerald-700 dark:data-[state=active]:hover:bg-emerald-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                  >
-                    <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="hidden xs:inline">Valores</span>
-                    {products.length > 0 && (
+                >
+                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="hidden xs:inline">Valores</span>
+                  {products.length > 0 && (
                       <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 data-[state=active]:bg-emerald-500/20 dark:data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-100 dark:data-[state=active]:text-emerald-100">
-                        {products.length}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                )}
-                {onEdit && quote.status !== "concluida" && !readOnly && (
-                  <TabsTrigger
-                    value="edicao"
-                    className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-orange-600 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-orange-700 dark:data-[state=active]:hover:bg-orange-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                  >
-                    <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="hidden xs:inline">Edição</span>
-                    {editForm.formState.isDirty && (
-                      <AlertCircle className="h-3 w-3 text-orange-500 data-[state=active]:text-orange-100 animate-pulse flex-shrink-0" />
-                    )}
-                  </TabsTrigger>
+                      {products.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
                 )}
               </TabsList>
             </div>
 
-            <TabsContent value="detalhes" className="flex-1 overflow-y-auto p-2.5 sm:p-3 md:p-4 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0">
-              {/* Layout otimizado e compacto */}
-              <div className="max-w-5xl mx-auto space-y-3">
+            {/* Tab de Edição - Primeira Tab */}
+            {onEdit && quote.status !== "concluida" && !readOnly && (
+              <TabsContent value="edicao" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0">
+                {editLoading ? (
+                  <ScrollArea className="h-full">
+                    <div className="flex items-center justify-center h-full min-h-[400px] p-6">
+                      <div className="text-center space-y-4 w-full max-w-md">
+                        <Loader2 className="h-8 w-8 animate-spin text-orange-500 mx-auto" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-3/4 mx-auto" />
+                          <Skeleton className="h-4 w-1/2 mx-auto" />
+                        </div>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <Form {...editForm}>
+                    <form onSubmit={editForm.handleSubmit(handleEditSubmit)} className="flex flex-col h-full">
+                      {/* Barra de Ações Fixa no Topo */}
+                      <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-2.5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Edit className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Editar Cotação</h3>
+                          {editForm.formState.isDirty && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant="outline" className="text-[10px] border-orange-300 dark:border-orange-700 text-orange-600 dark:text-orange-400 animate-pulse">
+                                    Alterações não salvas
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Você tem alterações não salvas</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  type="button" 
+                                  variant="outline" 
+                                  onClick={() => setActiveTab("detalhes")}
+                                  disabled={isSavingEdit}
+                                  size="sm"
+                                  className="h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                                >
+                                  Cancelar
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Cancelar edição e voltar aos detalhes</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  type="submit"
+                                  disabled={isSavingEdit || !editForm.formState.isDirty}
+                                  size="sm"
+                                  className="h-8 text-xs bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white disabled:opacity-50"
+                                >
+                                  {isSavingEdit ? (
+                                    <>
+                                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                      Salvando...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Save className="h-3.5 w-3.5 mr-1.5" />
+                                      Salvar
+                                    </>
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{editForm.formState.isDirty ? "Salvar alterações" : "Nenhuma alteração para salvar"}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </div>
+
+                      <ScrollArea className="flex-1">
+                        <div className="space-y-3 p-2.5 sm:p-3">
+                        {/* Seção 1: Campos Essenciais - Grid Compacto */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                          {/* Período */}
+                          <Card className="border border-blue-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                            <div className="p-2.5 border-b border-blue-200/60 dark:border-gray-700/40 bg-blue-50/50 dark:bg-gray-800">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Período*</h4>
+                              </div>
+                            </div>
+                            <div className="p-2.5 space-y-2.5">
+                              <div className="grid grid-cols-2 gap-2">
+                                <FormField
+                                  control={editForm.control}
+                                  name="dataInicio"
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                      <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Início*</FormLabel>
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              className={cn(
+                                                "pl-2.5 pr-2 text-left font-normal h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700",
+                                                !field.value && "text-muted-foreground"
+                                              )}
+                                            >
+                                              {field.value ? (
+                                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                              ) : (
+                                                <span className="text-[10px]">Data início</span>
+                                              )}
+                                              <CalendarIcon className="ml-auto h-3.5 w-3.5 opacity-50" />
+                                            </Button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                                          <CalendarComponent
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            disabled={(date) => date < new Date("1900-01-01")}
+                                            initialFocus
+                                            className="dark:bg-gray-800"
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage className="text-[10px]" />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={editForm.control}
+                                  name="dataFim"
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                      <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Fim*</FormLabel>
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              className={cn(
+                                                "pl-2.5 pr-2 text-left font-normal h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700",
+                                                !field.value && "text-muted-foreground"
+                                              )}
+                                            >
+                                              {field.value ? (
+                                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                              ) : (
+                                                <span className="text-[10px]">Data fim</span>
+                                              )}
+                                              <CalendarIcon className="ml-auto h-3.5 w-3.5 opacity-50" />
+                                            </Button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                                          <CalendarComponent
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            disabled={(date) => {
+                                              const startDate = editForm.getValues("dataInicio");
+                                              return startDate ? date <= startDate : false;
+                                            }}
+                                            initialFocus
+                                            className="dark:bg-gray-800"
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage className="text-[10px]" />
+                                    </FormItem>
+                                  )}
+                                />
+            </div>
+                              <FormField
+                                control={editForm.control}
+                                name="dataPlanejada"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-col">
+                                    <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Data Planejada (Opcional)</FormLabel>
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <FormControl>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className={cn(
+                                              "pl-2.5 pr-2 text-left font-normal h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700",
+                                              !field.value && "text-muted-foreground"
+                                            )}
+                                          >
+                                            {field.value ? (
+                                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                            ) : (
+                                              <span className="text-[10px]">Não agendada</span>
+                                            )}
+                                            <CalendarIcon className="ml-auto h-3.5 w-3.5 opacity-50" />
+                                          </Button>
+                                        </FormControl>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                                        <CalendarComponent
+                                          mode="single"
+                                          selected={field.value}
+                                          onSelect={field.onChange}
+                                          disabled={(date) => {
+                                            const startDate = editForm.getValues("dataInicio");
+                                            return startDate ? date < startDate : date < new Date();
+                                          }}
+                                          initialFocus
+                                          className="dark:bg-gray-800"
+                                        />
+                                      </PopoverContent>
+                                    </Popover>
+                                    <FormMessage className="text-[10px]" />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </Card>
+
+                          {/* Status */}
+                          <Card className="border border-indigo-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                            <div className="p-2.5 border-b border-indigo-200/60 dark:border-gray-700/40 bg-indigo-50/50 dark:bg-gray-800">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                                <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Status*</h4>
+                              </div>
+                            </div>
+                            <div className="p-2.5">
+                              <FormField
+                                control={editForm.control}
+                                name="status"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger className="h-9 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                                          <SelectValue placeholder="Selecione o status" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
+                                        <SelectItem value="ativa" className="dark:hover:bg-gray-700 dark:text-white">Ativa</SelectItem>
+                                        <SelectItem value="planejada" className="dark:hover:bg-gray-700 dark:text-white">Planejada</SelectItem>
+                                        <SelectItem value="pendente" className="dark:hover:bg-gray-700 dark:text-white">Pendente</SelectItem>
+                                        <SelectItem value="concluida" className="dark:hover:bg-gray-700 dark:text-white">Concluída</SelectItem>
+                                        <SelectItem value="expirada" className="dark:hover:bg-gray-700 dark:text-white">Expirada</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage className="text-[10px]" />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </Card>
+                        </div>
+
+                        {/* Seção 2: Produtos - Layout Compacto em Tabela */}
+                        <Card className="border border-orange-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                          <div className="p-2.5 border-b border-orange-200/60 dark:border-gray-700/40 bg-orange-50/50 dark:bg-gray-800 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                              <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Produtos*</h4>
+                              <Badge variant="secondary" className="text-[10px] h-5 px-1.5 dark:bg-gray-700 dark:text-gray-300">
+                                {editFields.length}
+                              </Badge>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => editAppend({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" })}
+                              className="h-7 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Adicionar
+                            </Button>
+                          </div>
+                          <div className="p-2.5 space-y-2">
+                            {editFields.map((field, index) => (
+                              <div key={field.id} className="border border-orange-200/60 dark:border-gray-700/40 rounded-md p-2.5 bg-orange-50/30 dark:bg-gray-800/50">
+                                <div className="grid grid-cols-12 gap-2 items-start">
+                                  <div className="col-span-12 sm:col-span-6 lg:col-span-5">
+                                    <FormField
+                                      control={editForm.control}
+                                      name={`produtos.${index}.produtoId`}
+                                      render={({ field: formField }) => {
+                                        const produtoNome = editForm.watch(`produtos.${index}.produtoNome`);
+                                        const displayName = produtoNome || (formField.value ? editProducts.find((p) => p.id === formField.value)?.name : null);
+                                        
+                                        return (
+                                          <FormItem className="flex flex-col">
+                                            <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Produto*</FormLabel>
+                                            <Popover>
+                                              <PopoverTrigger asChild>
+                                                <FormControl>
+                                                  <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    size="sm"
+                                                    className={cn(
+                                                      "justify-between h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700",
+                                                      !displayName && "text-muted-foreground"
+                                                    )}
+                                                  >
+                                                    <span className="truncate">{displayName || "Selecione..."}</span>
+                                                    <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                                                  </Button>
+                                                </FormControl>
+                                              </PopoverTrigger>
+                                              <PopoverContent className="w-full sm:w-[400px] p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                                                <Command className="dark:bg-gray-800">
+                                                  <CommandInput placeholder="Buscar produto..." className="dark:bg-gray-800 dark:text-white dark:border-gray-700" />
+                                                  <CommandList className="max-h-[200px]">
+                                                    <CommandEmpty className="dark:text-gray-400">Nenhum produto encontrado.</CommandEmpty>
+                                                    <CommandGroup>
+                                                      {editProducts.map((product) => (
+                                                        <CommandItem
+                                                          key={product.id}
+                                                          value={product.name}
+                                                          onSelect={() => {
+                                                            editForm.setValue(`produtos.${index}.produtoId`, product.id);
+                                                            editForm.setValue(`produtos.${index}.produtoNome`, product.name);
+                                                          }}
+                                                          className="dark:hover:bg-gray-700 dark:text-white"
+                                                        >
+                                                          <Check
+                                                            className={cn(
+                                                              "mr-2 h-4 w-4",
+                                                              product.id === formField.value ? "opacity-100" : "opacity-0"
+                                                            )}
+                                                          />
+                                                          {product.name}
+                                                        </CommandItem>
+                                                      ))}
+                                                    </CommandGroup>
+                                                  </CommandList>
+                                                </Command>
+                                              </PopoverContent>
+                                            </Popover>
+                                            <FormMessage className="text-[10px]" />
+                                          </FormItem>
+                                        );
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="col-span-6 sm:col-span-3 lg:col-span-3">
+                                    <FormField
+                                      control={editForm.control}
+                                      name={`produtos.${index}.quantidade`}
+                                      render={({ field: formField }) => (
+                                        <FormItem>
+                                          <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Quantidade*</FormLabel>
+                                          <FormControl>
+                                            <Input 
+                                              placeholder="Ex: 500" 
+                                              type="number" 
+                                              {...formField} 
+                                              className="h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700" 
+                                            />
+                                          </FormControl>
+                                          <FormMessage className="text-[10px]" />
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                  <div className="col-span-5 sm:col-span-2 lg:col-span-3">
+                                    <FormField
+                                      control={editForm.control}
+                                      name={`produtos.${index}.unidade`}
+                                      render={({ field: formField }) => (
+                                        <FormItem>
+                                          <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Unidade*</FormLabel>
+                                          <Select onValueChange={formField.onChange} value={formField.value}>
+                                            <FormControl>
+                                              <SelectTrigger className="h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                                                <SelectValue placeholder="Un" />
+                                              </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
+                                              <SelectItem value="kg" className="dark:hover:bg-gray-700 dark:text-white">Kg</SelectItem>
+                                              <SelectItem value="un" className="dark:hover:bg-gray-700 dark:text-white">Unidade</SelectItem>
+                                              <SelectItem value="cx" className="dark:hover:bg-gray-700 dark:text-white">Caixa</SelectItem>
+                                              <SelectItem value="g" className="dark:hover:bg-gray-700 dark:text-white">Grama</SelectItem>
+                                              <SelectItem value="l" className="dark:hover:bg-gray-700 dark:text-white">Litro</SelectItem>
+                                              <SelectItem value="ml" className="dark:hover:bg-gray-700 dark:text-white">Mililitro</SelectItem>
+                                              <SelectItem value="pct" className="dark:hover:bg-gray-700 dark:text-white">Pacote</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                          <FormMessage className="text-[10px]" />
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                  <div className="col-span-1 flex items-end pb-0.5">
+                                    {editFields.length > 1 && (
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => editRemove(index)}
+                                        className="h-8 w-8 p-0 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </Card>
+
+                        {/* Seção 3: Opcionais - Grid Horizontal */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                          {/* Fornecedores */}
+                          <Card className="border border-teal-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                            <div className="p-2.5 border-b border-teal-200/60 dark:border-gray-700/40 bg-teal-50/50 dark:bg-gray-800">
+                              <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                                <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Fornecedores (Opcional)</h4>
+                              </div>
+                            </div>
+                            <div className="p-2.5 space-y-2">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="outline" size="sm" className="w-full justify-between h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                                    Adicionar Fornecedor
+                                    <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full sm:w-[400px] p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                                  <Command className="dark:bg-gray-800">
+                                    <CommandInput 
+                                      placeholder="Buscar fornecedor..." 
+                                      value={editSupplierSearch}
+                                      onValueChange={setEditSupplierSearch}
+                                      className="dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                                    />
+                                    <CommandList className="max-h-[200px]">
+                                      <CommandEmpty className="dark:text-gray-400">Nenhum fornecedor encontrado.</CommandEmpty>
+                                      <CommandGroup>
+                                        {filteredEditSuppliers.map((supplier) => (
+                                          <CommandItem
+                                            key={supplier.id}
+                                            value={supplier.name}
+                                            onSelect={() => handleEditSupplierSelect(supplier)}
+                                            className="dark:hover:bg-gray-700 dark:text-white"
+                                          >
+                                            {supplier.name}
+                                          </CommandItem>
+                                        ))}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                              
+                              {editSelectedSuppliers.length > 0 && (
+                                <div className="max-h-[120px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-orange-200 dark:scrollbar-thumb-orange-800 scrollbar-track-transparent">
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {editSelectedSuppliers.map((supplier) => (
+                                      <div
+                                        key={supplier.id}
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 text-[10px] border border-teal-200 dark:border-teal-800"
+                                      >
+                                        {supplier.name}
+                                        <button
+                                          type="button"
+                                          onClick={() => handleEditSupplierRemove(supplier.id)}
+                                          className="ml-0.5 hover:text-red-600 dark:hover:text-red-400 font-bold transition-colors"
+                                        >
+                                          ×
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </Card>
+
+                          {/* Observações */}
+                          <Card className="border border-slate-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                            <div className="p-2.5 border-b border-slate-200/60 dark:border-gray-700/40 bg-slate-50/50 dark:bg-gray-800">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                                <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Observações</h4>
+                              </div>
+                            </div>
+                            <div className="p-2.5">
+                              <FormField
+                                control={editForm.control}
+                                name="observacoes"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Textarea 
+                                        placeholder="Adicione observações (opcional)..." 
+                                        className="resize-none text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700 min-h-[80px]" 
+                                        rows={3}
+                                        {...field} 
+                                      />
+                                    </FormControl>
+                                    <FormMessage className="text-[10px]" />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </Card>
+                        </div>
+                        </div>
+                      </ScrollArea>
+                    </form>
+                  </Form>
+                )}
+              </TabsContent>
+            )}
+
+            <TabsContent value="detalhes" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0">
+              <ScrollArea className="h-full">
+                <div className="p-2.5 sm:p-3 md:p-4">
+                  {/* Layout otimizado e compacto */}
+                  <div className="max-w-5xl mx-auto space-y-3">
                 
                 {/* Seção 1: Resumo Executivo - Grid Compacto */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
@@ -832,30 +1383,35 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     </div>
                   </Card>
                 </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="atualizacao" className="flex-1 overflow-hidden p-3 sm:p-4 md:p-5 animate-in fade-in-0 slide-in-from-right-2 duration-300">
-              {readOnly ? (
-                <div className="flex items-center justify-center h-full p-6">
-                  <div className="text-center">
-                    <Eye className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Modo Visualização</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Esta cotação está sendo visualizada em modo somente leitura.
-                    </p>
                   </div>
                 </div>
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="atualizacao" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300">
+              {readOnly ? (
+                <ScrollArea className="h-full">
+                  <div className="flex items-center justify-center h-full min-h-[400px] p-6">
+                    <div className="text-center">
+                      <Eye className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Modo Visualização</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Esta cotação está sendo visualizada em modo somente leitura.
+                      </p>
+                    </div>
+                  </div>
+                </ScrollArea>
               ) : (
-                <div className="h-full flex flex-col lg:flex-row gap-4 sm:gap-5">
-                  {/* Painel Esquerdo - Seleção de Fornecedor Melhorada */}
-                  <div className="lg:w-80 flex-shrink-0 flex flex-col gap-2.5 sm:gap-3 min-h-0">
-                    {/* Card de Seleção Principal */}
-                    <Card className="border-2 border-emerald-200/80 dark:border-gray-700/30 bg-white dark:bg-[#1C1F26] shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200 rounded-lg">
-                      <div className="p-2.5 sm:p-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-gray-700/50">
-                            <Building2 className="h-3.5 w-3.5 text-emerald-600 dark:text-gray-300" />
+              <ScrollArea className="h-full">
+                <div className="h-full flex flex-col lg:flex-row gap-4 sm:gap-5 p-3 sm:p-4 md:p-5">
+                {/* Painel Esquerdo - Seleção de Fornecedor Melhorada */}
+                <div className="lg:w-80 flex-shrink-0 flex flex-col gap-2.5 sm:gap-3 min-h-0">
+                  {/* Card de Seleção Principal */}
+                  <Card className="border-2 border-emerald-200/80 dark:border-gray-700/30 bg-white dark:bg-[#1C1F26] shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200 rounded-lg">
+                    <div className="p-2.5 sm:p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-gray-700/50">
+                          <Building2 className="h-3.5 w-3.5 text-emerald-600 dark:text-gray-300" />
                         </div>
                         <div>
                           <h3 className="text-xs font-semibold text-gray-900 dark:text-white">
@@ -966,14 +1522,15 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                   {/* Alerta de Cotação Finalizada */}
                   {quote.status === "concluida" && (
-                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-lg p-3">
-                      <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
-                        <ShoppingCart className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-xs font-medium">
-                          Cotação finalizada
-                        </span>
-                      </div>
-                    </div>
+                    <Alert className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40">
+                      <ShoppingCart className="h-4 w-4 text-amber-800 dark:text-amber-300" />
+                      <AlertTitle className="text-xs font-medium text-amber-800 dark:text-amber-300">
+                        Cotação finalizada
+                      </AlertTitle>
+                      <AlertDescription className="text-xs text-amber-700 dark:text-amber-400">
+                        Esta cotação já foi finalizada e não pode ser editada.
+                      </AlertDescription>
+                    </Alert>
                   )}
                 </div>
 
@@ -995,7 +1552,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     </Card>
                   ) : (
                     <Card className="h-full border-2 border-emerald-200/80 dark:border-emerald-800/60 bg-white dark:bg-gray-800 rounded-lg overflow-hidden flex flex-col shadow-md">
-                      <div className="p-2.5 border-b border-gray-200/60 dark:border-gray-700/50 bg-gradient-to-r from-emerald-50/50 to-green-50/30 dark:bg-[#1C1F26] flex items-center justify-between">
+                      <div className="p-2.5 border-b border-gray-200/60 dark:border-gray-700/50 bg-gradient-to-r from-emerald-50/50 to-green-50/30 dark:bg-[#1C1F26] flex items-center justify-between flex-shrink-0">
                         <div className="flex items-center gap-2">
                           <div className="p-1.5 rounded-lg bg-emerald-600 dark:bg-gray-700 text-white">
                             <DollarSign className="h-3.5 w-3.5" />
@@ -1011,7 +1568,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           {products.length}
                         </Badge>
                       </div>
-                      <div className="flex-1 overflow-auto">
+                      <ScrollArea className="flex-1">
+                        <div>
                         <table className="w-full">
                           <thead className="bg-slate-50 dark:bg-gray-800/50 border-b border-slate-200 dark:border-gray-700">
                             <tr>
@@ -1145,16 +1703,19 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           })}
                         </tbody>
                       </table>
-                    </div>
-                  </Card>
+                        </div>
+                      </ScrollArea>
+                    </Card>
                   )}
                 </div>
               </div>
+              </ScrollArea>
               )}
             </TabsContent>
 
-            <TabsContent value="comparativo" className="flex-1 overflow-hidden animate-in fade-in-0 slide-in-from-right-2 duration-300">
-              <div className="h-full flex flex-col p-2.5 sm:p-3">
+            <TabsContent value="comparativo" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300">
+              <ScrollArea className="h-full">
+                <div className="h-full flex flex-col p-2.5 sm:p-3">
 
                 {/* Resumo Comparativo Superior */}
                 {bestSupplier && (
@@ -1190,8 +1751,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                 {/* Tabela Comparativa - Foco Total */}
                 <Card className="flex-1 overflow-hidden border-2 border-purple-200/80 dark:border-purple-800/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none flex flex-col">
-                  <div className="flex-1 overflow-auto min-h-0">
-                  <table className="w-full border-collapse min-w-max">
+                  <ScrollArea className="flex-1">
+                    <table className="w-full border-collapse min-w-max">
                       <thead className="sticky top-0 z-10 bg-purple-50/80 dark:bg-gray-900/95 backdrop-blur-sm">
                         <tr className="border-b-2 border-purple-300/60 dark:border-purple-700/60">
                           <th className="px-3 py-2 text-left bg-purple-100/80 dark:bg-gray-800/95 backdrop-blur-sm sticky left-0 z-20 shadow-sm">
@@ -1313,7 +1874,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       })}
                     </tbody>
                   </table>
-                </div>
+                  </ScrollArea>
 
                 {/* Rodapé com Ação de Converter */}
                 {bestSupplier && quote.status !== 'finalizada' && !readOnly && (
@@ -1332,525 +1893,32 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           </p>
                         </div>
                       </div>
-                      <Button
-                        onClick={handleConvertToOrder}
-                        disabled={isUpdating}
-                        size="sm"
-                        className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-600 dark:to-indigo-600 hover:from-purple-700 hover:to-indigo-700 dark:hover:from-purple-700 dark:hover:to-indigo-700 text-white font-semibold text-xs shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all h-8"
-                      >
-                        <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-                        Converter
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              onClick={handleConvertToOrder}
+                              disabled={isUpdating}
+                              size="sm"
+                              className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-600 dark:to-indigo-600 hover:from-purple-700 hover:to-indigo-700 dark:hover:from-purple-700 dark:hover:to-indigo-700 text-white font-semibold text-xs shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all h-8"
+                            >
+                              <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                              Converter
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Converter cotação em pedido</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                 )}
                 </Card>
-              </div>
+                </div>
+              </ScrollArea>
             </TabsContent>
 
-            {/* Tab de Edição */}
-            {onEdit && quote.status !== "concluida" && (
-              <TabsContent value="edicao" className="flex-1 overflow-y-auto p-2.5 sm:p-3 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0">
-                {editLoading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-orange-500 mx-auto mb-4" />
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Carregando dados...</p>
-                    </div>
-                  </div>
-                ) : (
-                  <Form {...editForm}>
-                    <form onSubmit={editForm.handleSubmit(handleEditSubmit)} className="space-y-3 max-w-4xl mx-auto">
-                      {/* Seção 1: Produtos */}
-                      <Card className="border-2 border-orange-200/80 dark:border-orange-800/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none">
-                        <div className="p-2.5 border-b border-orange-200/60 dark:border-orange-800/30 bg-gradient-to-r from-orange-50/50 to-amber-50/30 dark:from-orange-500/10 dark:to-transparent">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-orange-600 dark:bg-orange-600 text-white">
-                              <Package className="h-3.5 w-3.5" />
-                            </div>
-                            <div>
-                              <h3 className="text-xs font-bold text-gray-900 dark:text-white">Produtos da Cotação</h3>
-                              <p className="text-[10px] text-gray-600 dark:text-gray-400">Gerencie os produtos incluídos</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-2.5 sm:p-3 space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <FormLabel className="text-xs font-semibold text-gray-900 dark:text-white">Produtos*</FormLabel>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => editAppend({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" })}
-                            className="h-7 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-                          >
-                            <Plus className="h-3 w-3 mr-1" />
-                            Adicionar
-                          </Button>
-                        </div>
-
-                          {editFields.map((field, index) => (
-                            <Card key={field.id} className="border border-orange-200/60 dark:border-orange-800/30 rounded-md p-2.5 space-y-2 bg-gradient-to-br from-orange-50/30 to-amber-50/20 dark:from-orange-500/5 dark:to-transparent">
-                              <div className="flex items-center justify-between pb-1.5 border-b border-orange-200/40 dark:border-orange-800/30">
-                                <div className="flex items-center gap-1.5">
-                                  <div className="p-1 rounded bg-orange-100 dark:bg-orange-900/40">
-                                    <Package className="h-3 w-3 text-orange-600 dark:text-orange-400" />
-                                  </div>
-                                  <span className="text-xs font-bold text-gray-900 dark:text-white">Produto {index + 1}</span>
-                                </div>
-                                {editFields.length > 1 && (
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => editRemove(index)}
-                                    className="h-7 w-7 p-0 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </Button>
-                                )}
-                              </div>
-
-                            <FormField
-                              control={editForm.control}
-                              name={`produtos.${index}.produtoId`}
-                              render={({ field: formField }) => {
-                                const produtoNome = editForm.watch(`produtos.${index}.produtoNome`);
-                                const displayName = produtoNome || (formField.value ? editProducts.find((p) => p.id === formField.value)?.name : null);
-                                
-                                return (
-                                  <FormItem className="flex flex-col">
-                                    <FormLabel className="text-xs text-gray-700 dark:text-gray-300">Produto*</FormLabel>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <FormControl>
-                                          <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            className={cn(
-                                              "justify-between h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700",
-                                              !displayName && "text-muted-foreground"
-                                            )}
-                                          >
-                                            {displayName || "Buscar produto..."}
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                          </Button>
-                                        </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-full sm:w-[400px] p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
-                                        <Command className="dark:bg-gray-800">
-                                          <CommandInput placeholder="Digite para buscar..." className="dark:bg-gray-800 dark:text-white dark:border-gray-700" />
-                                          <CommandList className="max-h-[200px]">
-                                            <CommandEmpty className="dark:text-gray-400">Nenhum produto encontrado.</CommandEmpty>
-                                            <CommandGroup>
-                                              {editProducts.map((product) => (
-                                                <CommandItem
-                                                  key={product.id}
-                                                  value={product.name}
-                                                  onSelect={() => {
-                                                    editForm.setValue(`produtos.${index}.produtoId`, product.id);
-                                                    editForm.setValue(`produtos.${index}.produtoNome`, product.name);
-                                                  }}
-                                                  className="dark:hover:bg-gray-700 dark:text-white"
-                                                >
-                                                  <Check
-                                                    className={cn(
-                                                      "mr-2 h-4 w-4",
-                                                      product.id === formField.value ? "opacity-100" : "opacity-0"
-                                                    )}
-                                                  />
-                                                  {product.name}
-                                                </CommandItem>
-                                              ))}
-                                            </CommandGroup>
-                                          </CommandList>
-                                        </Command>
-                                      </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                  </FormItem>
-                                );
-                              }}
-                            />
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                              <FormField
-                                control={editForm.control}
-                                name={`produtos.${index}.quantidade`}
-                                render={({ field: formField }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-xs text-gray-700 dark:text-gray-300">Quantidade*</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="Ex: 500" type="number" {...formField} className="h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700" />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-
-                              <FormField
-                                control={editForm.control}
-                                name={`produtos.${index}.unidade`}
-                                render={({ field: formField }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-xs text-gray-700 dark:text-gray-300">Unidade*</FormLabel>
-                                    <Select onValueChange={formField.onChange} value={formField.value}>
-                                      <FormControl>
-                                        <SelectTrigger className="h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                                          <SelectValue placeholder="Selecione" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
-                                        <SelectItem value="kg" className="dark:hover:bg-gray-700 dark:text-white">Kg</SelectItem>
-                                        <SelectItem value="un" className="dark:hover:bg-gray-700 dark:text-white">Unidade</SelectItem>
-                                        <SelectItem value="cx" className="dark:hover:bg-gray-700 dark:text-white">Caixa</SelectItem>
-                                        <SelectItem value="g" className="dark:hover:bg-gray-700 dark:text-white">Grama</SelectItem>
-                                        <SelectItem value="l" className="dark:hover:bg-gray-700 dark:text-white">Litro</SelectItem>
-                                        <SelectItem value="ml" className="dark:hover:bg-gray-700 dark:text-white">Mililitro</SelectItem>
-                                        <SelectItem value="pct" className="dark:hover:bg-gray-700 dark:text-white">Pacote</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
-                      </Card>
-
-                      {/* Seção 2: Período */}
-                      <Card className="border-2 border-blue-200/80 dark:border-blue-800/60 bg-white dark:bg-[#1C1F26] rounded-xl shadow-md dark:shadow-none">
-                        <div className="p-4 border-b border-blue-200/60 dark:border-blue-800/30 bg-gradient-to-r from-blue-50/50 to-cyan-50/30 dark:from-blue-500/10 dark:to-transparent">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-600 dark:bg-blue-600 text-white">
-                              <Calendar className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <h3 className="text-sm font-bold text-gray-900 dark:text-white">Período da Cotação</h3>
-                              <p className="text-xs text-gray-600 dark:text-gray-400">Configure as datas de início, fim e planejada</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-4 sm:p-5 space-y-4">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <FormField
-                          control={editForm.control}
-                          name="dataInicio"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormLabel className="text-xs text-gray-700 dark:text-gray-300">Data de Início*</FormLabel>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "pl-3 text-left font-normal h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                    >
-                                      {field.value ? (
-                                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                      ) : (
-                                        <span>Selecione a data</span>
-                                      )}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
-                                  <CalendarComponent
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    disabled={(date) => date < new Date("1900-01-01")}
-                                    initialFocus
-                                    className="dark:bg-gray-800"
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={editForm.control}
-                          name="dataFim"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormLabel className="text-xs text-gray-700 dark:text-gray-300">Data de Fim*</FormLabel>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "pl-3 text-left font-normal h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                    >
-                                      {field.value ? (
-                                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                      ) : (
-                                        <span>Selecione a data</span>
-                                      )}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
-                                  <CalendarComponent
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    disabled={(date) => {
-                                      const startDate = editForm.getValues("dataInicio");
-                                      return startDate ? date <= startDate : false;
-                                    }}
-                                    initialFocus
-                                    className="dark:bg-gray-800"
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                          </div>
-
-                          {/* Data Planejada */}
-                          <FormField
-                        control={editForm.control}
-                        name="dataPlanejada"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                            <FormLabel className="text-xs text-gray-700 dark:text-gray-300">Data Planejada (Opcional)</FormLabel>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant="outline"
-                                    className={cn(
-                                      "pl-3 text-left font-normal h-9 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                  >
-                                    {field.value ? (
-                                      format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                    ) : (
-                                      <span>Não agendada</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
-                                <CalendarComponent
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                  disabled={(date) => {
-                                    const startDate = editForm.getValues("dataInicio");
-                                    return startDate ? date < startDate : date < new Date();
-                                  }}
-                                  initialFocus
-                                  className="dark:bg-gray-800"
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                        />
-                        </div>
-                      </Card>
-
-                      {/* Seção 3: Status */}
-                      <Card className="border-2 border-indigo-200/80 dark:border-indigo-800/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none">
-                        <div className="p-2.5 border-b border-indigo-200/60 dark:border-indigo-800/30 bg-gradient-to-r from-indigo-50/50 to-purple-50/30 dark:from-indigo-500/10 dark:to-transparent">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-indigo-600 dark:bg-indigo-600 text-white">
-                              <FileText className="h-3.5 w-3.5" />
-                            </div>
-                            <div>
-                              <h3 className="text-xs font-bold text-gray-900 dark:text-white">Status</h3>
-                              <p className="text-[10px] text-gray-600 dark:text-gray-400">Defina o status atual</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-2.5 sm:p-3">
-                          <FormField
-                            control={editForm.control}
-                            name="status"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-xs text-gray-700 dark:text-gray-300">Status*</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger className="h-9 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                                      <SelectValue placeholder="Selecione o status" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
-                                    <SelectItem value="ativa" className="dark:hover:bg-gray-700 dark:text-white">Ativa</SelectItem>
-                                    <SelectItem value="planejada" className="dark:hover:bg-gray-700 dark:text-white">Planejada</SelectItem>
-                                    <SelectItem value="pendente" className="dark:hover:bg-gray-700 dark:text-white">Pendente</SelectItem>
-                                    <SelectItem value="concluida" className="dark:hover:bg-gray-700 dark:text-white">Concluída</SelectItem>
-                                    <SelectItem value="expirada" className="dark:hover:bg-gray-700 dark:text-white">Expirada</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </Card>
-
-                      {/* Seção 4: Fornecedores */}
-                      <Card className="border-2 border-teal-200/80 dark:border-teal-800/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none">
-                        <div className="p-2.5 border-b border-teal-200/60 dark:border-teal-800/30 bg-gradient-to-r from-teal-50/50 to-cyan-50/30 dark:from-teal-500/10 dark:to-transparent">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-teal-600 dark:bg-teal-600 text-white">
-                              <Users className="h-3.5 w-3.5" />
-                            </div>
-                            <div>
-                              <h3 className="text-xs font-bold text-gray-900 dark:text-white">Fornecedores Participantes</h3>
-                              <p className="text-[10px] text-gray-600 dark:text-gray-400">Selecione os fornecedores (opcional)</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-2.5 sm:p-3 space-y-2">
-                        <FormLabel className="text-xs text-gray-700 dark:text-gray-300">Fornecedores Participantes (Opcional)</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full justify-between h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                              Adicionar Fornecedor
-                              <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-full sm:w-[400px] p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
-                            <Command className="dark:bg-gray-800">
-                              <CommandInput 
-                                placeholder="Buscar fornecedor..." 
-                                value={editSupplierSearch}
-                                onValueChange={setEditSupplierSearch}
-                                className="dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                              />
-                              <CommandList className="max-h-[200px]">
-                                <CommandEmpty className="dark:text-gray-400">Nenhum fornecedor encontrado.</CommandEmpty>
-                                <CommandGroup>
-                                  {filteredEditSuppliers.map((supplier) => (
-                                    <CommandItem
-                                      key={supplier.id}
-                                      value={supplier.name}
-                                      onSelect={() => handleEditSupplierSelect(supplier)}
-                                      className="dark:hover:bg-gray-700 dark:text-white"
-                                    >
-                                      {supplier.name}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        
-                        {editSelectedSuppliers.length > 0 && (
-                          <div className="max-h-[150px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-orange-200 dark:scrollbar-thumb-orange-800 scrollbar-track-transparent">
-                            <div className="flex flex-wrap gap-1.5">
-                              {editSelectedSuppliers.map((supplier) => (
-                                <div
-                                  key={supplier.id}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs border border-orange-200 dark:border-orange-800"
-                                >
-                                  {supplier.name}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleEditSupplierRemove(supplier.id)}
-                                    className="ml-0.5 hover:text-red-600 dark:hover:text-red-400 font-bold transition-colors"
-                                  >
-                                    ×
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        </div>
-                      </Card>
-
-                      {/* Seção 5: Observações */}
-                      <Card className="border-2 border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none">
-                        <div className="p-2.5 border-b border-slate-200/60 dark:border-slate-700/40 bg-gradient-to-r from-slate-50/50 to-gray-50/30 dark:from-slate-800/20 dark:to-gray-800/20">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-slate-600 dark:bg-slate-600 text-white">
-                              <FileText className="h-3.5 w-3.5" />
-                            </div>
-                            <div>
-                              <h3 className="text-xs font-bold text-gray-900 dark:text-white">Observações</h3>
-                              <p className="text-[10px] text-gray-600 dark:text-gray-400">Adicione notas relevantes</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-2.5 sm:p-3">
-                          <FormField
-                            control={editForm.control}
-                            name="observacoes"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-xs text-gray-700 dark:text-gray-300">Observações</FormLabel>
-                                <FormControl>
-                                  <Textarea 
-                                    placeholder="Adicione observações..." 
-                                    className="resize-none text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700" 
-                                    rows={3}
-                                    {...field} 
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </Card>
-
-                      {/* Botões de ação */}
-                      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={() => setActiveTab("detalhes")}
-                          disabled={isSavingEdit}
-                          className="h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button 
-                          type="submit"
-                          disabled={isSavingEdit}
-                          className="h-8 text-xs bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white"
-                        >
-                          {isSavingEdit ? (
-                            <>
-                              <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                              Salvando...
-                            </>
-                          ) : (
-                            <>
-                              <Save className="h-3.5 w-3.5 mr-1.5" />
-                              Salvar
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                )}
-              </TabsContent>
-            )}
           </Tabs>
         </div>
 

@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useProducts } from "@/hooks/useProducts";
@@ -48,30 +51,52 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   }, [open, onOpenChange]);
 
   const filteredResults = useMemo(() => {
-    const query = debouncedSearch.toLowerCase();
+    const query = debouncedSearch.trim();
     
-    return {
-      produtos: products.filter(p =>
-        p.name.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query)
-      ),
-      fornecedores: suppliers.filter(f =>
-        f.name.toLowerCase().includes(query) ||
-        (f.contact && f.contact.toLowerCase().includes(query)) ||
-        (f.email && f.email.toLowerCase().includes(query))
-      ),
-      cotacoes: cotacoes.filter(c =>
-        c.id.toLowerCase().includes(query) ||
-        c.produto.toLowerCase().includes(query) ||
-        c.melhorFornecedor.toLowerCase().includes(query) ||
-        c.status.toLowerCase().includes(query)
-      ),
-      pedidos: pedidos.filter(p =>
-        p.supplier_name.toLowerCase().includes(query) ||
-        p.status.toLowerCase().includes(query) ||
-        p.items?.some(item => item.product_name.toLowerCase().includes(query))
-      ),
+    // Só busca se tiver pelo menos 2 caracteres
+    if (query.length < 2) {
+      return {
+        produtos: [],
+        fornecedores: [],
+        cotacoes: [],
+        pedidos: [],
+      };
+    }
+    
+    // Normalizar a query para busca case-insensitive
+    const queryLower = query.toLowerCase();
+    
+    const results = {
+      produtos: (products || []).filter(p => {
+        const name = (p.name || '').toLowerCase();
+        const category = (p.category || '').toLowerCase();
+        return name.includes(queryLower) || category.includes(queryLower);
+      }),
+      fornecedores: (suppliers || []).filter(f => {
+        const name = (f.name || '').toLowerCase();
+        const contact = (f.contact || '').toLowerCase();
+        const email = (f.email || '').toLowerCase();
+        return name.includes(queryLower) || contact.includes(queryLower) || email.includes(queryLower);
+      }),
+      cotacoes: (cotacoes || []).filter(c => {
+        const id = (c.id || '').toLowerCase();
+        const produto = (c.produto || '').toLowerCase();
+        const melhorFornecedor = (c.melhorFornecedor || '').toLowerCase();
+        const status = (c.status || '').toLowerCase();
+        return id.includes(queryLower) || produto.includes(queryLower) || melhorFornecedor.includes(queryLower) || status.includes(queryLower);
+      }),
+      pedidos: (pedidos || []).filter(p => {
+        const supplierName = (p.supplier_name || '').toLowerCase();
+        const status = (p.status || '').toLowerCase();
+        const hasItemMatch = (p.items || []).some(item => {
+          const productName = (item.product_name || '').toLowerCase();
+          return productName.includes(queryLower);
+        });
+        return supplierName.includes(queryLower) || status.includes(queryLower) || hasItemMatch;
+      }),
     };
+    
+    return results;
   }, [debouncedSearch, products, suppliers, cotacoes, pedidos]);
 
   const hasResults = 
@@ -122,8 +147,8 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
       "pendente": "bg-warning/10 text-warning border-warning/20",
       "ativa": "bg-info/10 text-info border-info/20",
       "aprovada": "bg-success/10 text-success border-success/20",
-      "concluÃ­da": "bg-success/10 text-success border-success/20",
-      "concluÃ­do": "bg-success/10 text-success border-success/20",
+      "concluida": "bg-success/10 text-success border-success/20",
+      "concluido": "bg-success/10 text-success border-success/20",
       "cancelada": "bg-destructive/10 text-destructive border-destructive/20",
       "recusada": "bg-destructive/10 text-destructive border-destructive/20",
       "em andamento": "bg-info/10 text-info border-info/20",
@@ -132,187 +157,213 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <div className="relative">
-        {/* Header with gradient */}
-        <div className="relative border-b border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-r from-gray-50/80 to-white/80 dark:from-[#1C1F26] dark:to-[#1C1F26] backdrop-blur-sm">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 dark:from-transparent dark:to-transparent" />
-          <div className="relative flex items-center px-4 py-3">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 mr-3">
-              <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+    <CommandDialog 
+      open={open} 
+      onOpenChange={onOpenChange}
+    >
+      <div className="relative h-full flex flex-col overflow-hidden">
+        {/* Header melhorado */}
+        <div className="relative border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
+          <div className="relative flex items-center px-3 sm:px-4 py-3 sm:py-3.5">
+            <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20 mr-2 sm:mr-3 shrink-0">
+              <Search className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
             <CommandInput 
-              placeholder="Buscar cotaÃ§Ãµes, produtos, fornecedores..." 
+              placeholder="Buscar cotações, produtos, fornecedores..." 
               value={searchQuery}
-              onValueChange={setSearchQuery}
-              className="flex-1 border-0 bg-transparent text-base text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-0 focus:outline-none"
+              onValueChange={(value) => {
+                setSearchQuery(value);
+              }}
+              className="flex-1 border-0 bg-transparent text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:ring-0 focus:outline-none h-auto"
             />
-            <div className="flex items-center gap-1 ml-3">
-              <kbd className="inline-flex h-6 w-6 select-none items-center justify-center rounded-md border border-gray-300/60 dark:border-gray-600/60 bg-gradient-to-b from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-1 font-mono text-[10px] font-medium text-gray-500 dark:text-gray-400 shadow-sm">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1 ml-2 sm:ml-3 shrink-0">
+                    <kbd className="hidden sm:inline-flex h-6 px-2 select-none items-center justify-center rounded border border-input bg-muted font-mono text-[10px] font-medium text-muted-foreground shadow-sm">
                 ESC
               </kbd>
             </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="text-xs">Fechar busca</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
-      </div>
-      <CommandList className="max-h-[400px] overflow-hidden">
+        <ScrollArea className="flex-1 min-h-0">
+          <CommandList>
         {!searchQuery && (
-          <div className="px-6 py-12 text-center">
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-xl opacity-60" />
-              <div className="relative p-4 rounded-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 w-20 h-20 mx-auto flex items-center justify-center">
-                <Search className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+          <div className="px-4 sm:px-6 py-6 sm:py-8 text-center">
+            <div className="relative mb-4 sm:mb-6">
+              <div className="relative p-3 sm:p-4 rounded-full bg-primary/10 dark:bg-primary/20 w-16 h-16 sm:w-20 sm:h-20 mx-auto flex items-center justify-center">
+                <Search className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">
               Busca Global
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-sm mx-auto">
-              Digite para buscar produtos, fornecedores, cotaÃ§Ãµes e pedidos em todo o sistema
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
+              Digite para buscar produtos, fornecedores, cotações e pedidos em todo o sistema
             </p>
-            <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <span>Pressione</span>
-              <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-gray-300/60 dark:border-gray-600/60 bg-gradient-to-b from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-1 font-mono text-[10px] font-medium shadow-sm">
-                âŒ˜
-              </kbd>
-              <span>+</span>
-              <kbd className="inline-flex h-5 w-5 select-none items-center justify-center rounded border border-gray-300/60 dark:border-gray-600/60 bg-gradient-to-b from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-1 font-mono text-[10px] font-medium shadow-sm">
-                K
-              </kbd>
-              <span>para abrir rapidamente</span>
-            </div>
           </div>
         )}
 
-        {searchQuery && !hasResults && (
-          <div className="px-6 py-8 text-center">
+        {searchQuery.trim().length >= 2 && !hasResults && (
+          <CommandEmpty>
+            <div className="px-4 sm:px-6 py-6 sm:py-8 text-center">
+              <div className="relative mb-4">
+                <div className="p-3 rounded-full bg-muted w-16 h-16 mx-auto flex items-center justify-center">
+                  <Search className="h-6 w-6 text-muted-foreground" />
+                </div>
+              </div>
+              <h3 className="text-base font-medium text-foreground mb-1">
+                Nenhum resultado encontrado
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Tente usar termos diferentes ou verifique a ortografia
+              </p>
+            </div>
+          </CommandEmpty>
+        )}
+        
+        {searchQuery.trim().length > 0 && searchQuery.trim().length < 2 && (
+          <div className="px-4 sm:px-6 py-6 sm:py-8 text-center">
             <div className="relative mb-4">
-              <div className="p-3 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 w-16 h-16 mx-auto flex items-center justify-center">
-                <Search className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+              <div className="p-3 rounded-full bg-muted w-16 h-16 mx-auto flex items-center justify-center">
+                <Search className="h-6 w-6 text-muted-foreground" />
               </div>
             </div>
-            <h3 className="text-base font-medium text-gray-900 dark:text-white mb-1">
-              Nenhum resultado encontrado
+            <h3 className="text-base font-medium text-foreground mb-1">
+              Digite pelo menos 2 caracteres
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Tente usar termos diferentes ou verifique a ortografia
+            <p className="text-sm text-muted-foreground">
+              Continue digitando para ver os resultados da busca
             </p>
           </div>
         )}
 
-        {filteredResults.produtos.length > 0 && (
-          <CommandGroup heading="ðŸŽ¯ Produtos" className="px-2">
+        {searchQuery.trim().length >= 2 && filteredResults.produtos.length > 0 && (
+          <>
+            <CommandGroup heading="Produtos">
             {filteredResults.produtos.slice(0, 5).map((produto) => (
               <CommandItem
                 key={produto.id}
                 value={`produto-${produto.id}`}
                 onSelect={() => handleSelect("produtos", produto.id)}
-                className="flex items-center gap-4 py-3 px-3 mx-1 rounded-xl hover:bg-gradient-to-r hover:from-emerald-50/80 hover:to-green-50/80 dark:hover:from-emerald-900/20 dark:hover:to-green-900/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-emerald-200/60 dark:hover:border-emerald-700/60"
-              >
-                <div className="relative">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/10 to-green-500/10 dark:from-emerald-400/20 dark:to-green-400/20 group-hover:from-emerald-500/20 group-hover:to-green-500/20 transition-all duration-200">
-                    <Package className="h-5 w-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-200" />
-                  </div>
+                  className="flex items-center gap-2 sm:gap-3 py-2 sm:py-2.5 px-2 sm:px-3 rounded-lg cursor-pointer aria-selected:bg-accent"
+                >
+                  <div className="p-2 rounded-lg bg-emerald-500/10 dark:bg-emerald-400/20 shrink-0">
+                    <Package className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors duration-200">
+                    <p className="font-medium text-sm text-foreground truncate">
                     {produto.name}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                     {produto.category}
                   </p>
                 </div>
-                <Badge variant="outline" className="shrink-0 bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/60 dark:border-emerald-700/60 text-emerald-700 dark:text-emerald-300 font-medium">
-                  {produto.quotesCount} cotaÃ§Ã£o(Ãµes)
+                  <Badge variant="secondary" className="shrink-0 text-xs">
+                    {produto.quotesCount} cotação(ões)
                 </Badge>
               </CommandItem>
             ))}
           </CommandGroup>
+            {(filteredResults.fornecedores.length > 0 || filteredResults.cotacoes.length > 0 || filteredResults.pedidos.length > 0) && (
+              <Separator />
+            )}
+          </>
         )}
 
-        {filteredResults.fornecedores.length > 0 && (
-          <CommandGroup heading="ðŸ¢ Fornecedores" className="px-2">
+        {searchQuery.trim().length >= 2 && filteredResults.fornecedores.length > 0 && (
+          <>
+            <CommandGroup heading="Fornecedores">
             {filteredResults.fornecedores.slice(0, 5).map((fornecedor) => (
               <CommandItem
                 key={fornecedor.id}
                 value={`fornecedor-${fornecedor.id}`}
                 onSelect={() => handleSelect("fornecedores", fornecedor.id)}
-                className="flex items-center gap-4 py-3 px-3 mx-1 rounded-xl hover:bg-gradient-to-r hover:from-amber-50/80 hover:to-orange-50/80 dark:hover:from-amber-900/20 dark:hover:to-orange-900/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-amber-200/60 dark:hover:border-amber-700/60"
-              >
-                <div className="relative">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 dark:from-amber-400/20 dark:to-orange-400/20 group-hover:from-amber-500/20 group-hover:to-orange-500/20 transition-all duration-200">
-                    <Building2 className="h-5 w-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform duration-200" />
-                  </div>
+                  className="flex items-center gap-2 sm:gap-3 py-2 sm:py-2.5 px-2 sm:px-3 rounded-lg cursor-pointer aria-selected:bg-accent"
+                >
+                  <div className="p-2 rounded-lg bg-amber-500/10 dark:bg-amber-400/20 shrink-0">
+                    <Building2 className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors duration-200">
+                    <p className="font-medium text-sm text-foreground truncate">
                     {fornecedor.name}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                     {fornecedor.contact || fornecedor.email || "Sem contato"}
                   </p>
                 </div>
-                <Badge variant="outline" className="shrink-0 bg-amber-50/80 dark:bg-amber-900/30 border-amber-200/60 dark:border-amber-700/60 text-amber-700 dark:text-amber-300 font-medium">
+                  <Badge variant="secondary" className="shrink-0 text-xs">
                   {fornecedor.activeQuotes} ativas
                 </Badge>
               </CommandItem>
             ))}
           </CommandGroup>
+            {(filteredResults.cotacoes.length > 0 || filteredResults.pedidos.length > 0) && (
+              <Separator />
+            )}
+          </>
         )}
 
-        {filteredResults.cotacoes.length > 0 && (
-          <CommandGroup heading="ðŸ“‹ CotaÃ§Ãµes" className="px-2">
+        {searchQuery.trim().length >= 2 && filteredResults.cotacoes.length > 0 && (
+          <>
+            <CommandGroup heading="Cotações">
             {filteredResults.cotacoes.slice(0, 5).map((cotacao) => (
               <CommandItem
                 key={cotacao.id}
                 value={`cotacao-${cotacao.id}`}
                 onSelect={() => handleSelect("cotacoes", cotacao.id)}
-                className="flex items-center gap-4 py-3 px-3 mx-1 rounded-xl hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-indigo-50/80 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-blue-200/60 dark:hover:border-blue-700/60"
-              >
-                <div className="relative">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 dark:from-blue-400/20 dark:to-indigo-400/20 group-hover:from-blue-500/20 group-hover:to-indigo-500/20 transition-all duration-200">
-                    <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
-                  </div>
+                  className="flex items-center gap-2 sm:gap-3 py-2 sm:py-2.5 px-2 sm:px-3 rounded-lg cursor-pointer aria-selected:bg-accent"
+                >
+                  <div className="p-2 rounded-lg bg-blue-500/10 dark:bg-blue-400/20 shrink-0">
+                    <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-200">
+                    <p className="font-medium text-sm text-foreground truncate">
                     {cotacao.id}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {cotacao.produto} â€¢ {cotacao.melhorFornecedor}
+                    <p className="text-xs text-muted-foreground truncate">
+                      {cotacao.produto} • {cotacao.melhorFornecedor}
                   </p>
                 </div>
-                <Badge variant="outline" className={cn("shrink-0 font-medium", getStatusColor(cotacao.status))}>
+                  <Badge variant="outline" className={cn("shrink-0 text-xs", getStatusColor(cotacao.status))}>
                   {cotacao.status}
                 </Badge>
               </CommandItem>
             ))}
           </CommandGroup>
+            {filteredResults.pedidos.length > 0 && (
+              <Separator />
+            )}
+          </>
         )}
 
-        {filteredResults.pedidos.length > 0 && (
-          <CommandGroup heading="ðŸ›’ Pedidos" className="px-2">
+        {searchQuery.trim().length >= 2 && filteredResults.pedidos.length > 0 && (
+          <CommandGroup heading="Pedidos">
             {filteredResults.pedidos.slice(0, 5).map((pedido) => (
               <CommandItem
                 key={pedido.id}
                 value={`pedido-${pedido.id}`}
                 onSelect={() => handleSelect("pedidos", pedido.id)}
-                className="flex items-center gap-4 py-3 px-3 mx-1 rounded-xl hover:bg-gradient-to-r hover:from-purple-50/80 hover:to-pink-50/80 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-200 cursor-pointer group border border-transparent hover:border-purple-200/60 dark:hover:border-purple-700/60"
+                className="flex items-center gap-2 sm:gap-3 py-2 sm:py-2.5 px-2 sm:px-3 rounded-lg cursor-pointer aria-selected:bg-accent"
               >
-                <div className="relative">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 dark:from-purple-400/20 dark:to-pink-400/20 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition-all duration-200">
-                    <ShoppingCart className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform duration-200" />
-                  </div>
+                <div className="p-2 rounded-lg bg-purple-500/10 dark:bg-purple-400/20 shrink-0">
+                  <ShoppingCart className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-200">
+                  <p className="font-medium text-sm text-foreground truncate">
                     {new Date(pedido.order_date).toLocaleDateString('pt-BR')}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {pedido.supplier_name} â€¢ {pedido.items?.length || 0} produto(s)
+                  <p className="text-xs text-muted-foreground truncate">
+                    {pedido.supplier_name} • {pedido.items?.length || 0} produto(s)
                   </p>
                 </div>
-                <Badge variant="outline" className={cn("shrink-0 font-medium", getStatusColor(pedido.status))}>
+                <Badge variant="outline" className={cn("shrink-0 text-xs", getStatusColor(pedido.status))}>
                   {pedido.status}
                 </Badge>
               </CommandItem>
@@ -320,51 +371,37 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
           </CommandGroup>
         )}
       </CommandList>
+        </ScrollArea>
+      </div>
     </CommandDialog>
   );
 }
 
 export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
   return (
-    <div className="relative group w-full">
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
       <Button
-        variant="ghost"
+            variant="outline"
         onClick={onClick}
-        className="relative w-full justify-start text-sm bg-white/80 dark:bg-[#1C1F26]/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 hover:border-gray-300/70 dark:hover:border-gray-600/50 shadow-sm hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 rounded-xl h-10 px-4 overflow-hidden group-hover:bg-white/90 dark:group-hover:bg-[#1C1F26]/90"
-      >
-        {/* Efeito de vidro gloss */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-white/30 dark:from-gray-700/40 dark:via-gray-800/10 dark:to-gray-700/30 rounded-xl pointer-events-none" />
-        
-        {/* Borda interna sutil */}
-        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/50 dark:ring-gray-600/50 pointer-events-none" />
-        
-        {/* Hover gradient effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 dark:from-blue-400/10 dark:to-purple-400/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
-        <div className="relative flex items-center w-full z-10">
-          <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 mr-2.5 group-hover:from-blue-500/15 group-hover:to-purple-500/15 dark:group-hover:from-blue-400/25 dark:group-hover:to-purple-400/25 transition-all duration-300 shadow-sm">
-            <Search className="h-4 w-4 text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform duration-300" />
-          </div>
-          
-          <div className="flex-1 text-left">
-            <span className="hidden md:inline-flex text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 font-medium text-sm transition-colors duration-300">
+            className="relative w-full justify-start text-sm h-10 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border border-input hover:bg-accent hover:text-accent-foreground transition-all duration-200"
+          >
+            <div className="flex items-center w-full gap-3">
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="hidden md:inline-flex text-muted-foreground font-normal flex-1 text-left">
               Buscar cotações, produtos, fornecedores...
             </span>
-            <span className="md:hidden text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 font-medium text-sm transition-colors duration-300">
+              <span className="md:hidden text-muted-foreground font-normal flex-1 text-left">
               Buscar...
             </span>
-          </div>
-          
-          <div className="flex items-center gap-1 ml-2">
-            <kbd className="hidden sm:inline-flex h-6 min-w-[24px] select-none items-center justify-center rounded-md border border-gray-200/60 dark:border-gray-600/60 bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-700 dark:to-gray-800/80 px-1.5 font-mono text-[10px] font-medium text-gray-500 dark:text-gray-400 shadow-sm backdrop-blur-sm">
-              K
-            </kbd>
-          </div>
         </div>
       </Button>
-      
-      {/* Subtle glow effect */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/10 to-purple-400/10 opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 -z-10" />
-    </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p className="text-xs">Pressione <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">⌘</kbd> + <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">K</kbd> para abrir</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

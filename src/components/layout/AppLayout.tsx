@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
 import { CompanySelector } from "./CompanySelector";
 
@@ -66,37 +68,74 @@ export function AppLayout() {
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700/20 to-transparent pointer-events-none"></div>
           </>
 
-          <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-6 w-full max-w-full gap-4 transition-opacity duration-200 md:transition-all md:duration-300">
+          <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-6 w-full max-w-full gap-3 md:gap-4 transition-opacity duration-200 md:transition-all md:duration-300">
             {/* Título da Página - Lado Esquerdo */}
             {pageTitle && (
-              <h1 className="text-xl md:text-2xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent hidden md:block tracking-tight leading-tight">
-                {pageTitle}
-              </h1>
+              <div className="hidden md:flex items-center gap-3 min-w-0">
+                <h1 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white tracking-tight leading-tight truncate">
+                  {pageTitle}
+                </h1>
+              </div>
             )}
             
             {/* Global Search - Centralizada com bom espaçamento */}
-            <div className={`flex-1 flex items-center ${pageTitle ? 'justify-end md:justify-center' : 'justify-center'} max-w-2xl ${pageTitle ? 'md:mx-0' : 'mx-auto'}`}>
+            <div className={`flex-1 flex items-center ${pageTitle ? 'justify-end md:justify-center' : 'justify-center'} max-w-2xl ${pageTitle ? 'md:mx-0' : 'mx-auto'} min-w-0`}>
               <div className="w-full max-w-xl">
                 <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center shrink-0 gap-2 transition-all duration-300">
-              <CompanySelector />
-              <ThemeToggle />
-              <Button variant="ghost" size="sm" onClick={() => navigate('/configuracoes')} className="hidden md:flex p-0 rounded-xl h-8 w-8 hover:bg-white/40 hover:ring-1 hover:ring-white/30 hover:shadow-lg md:backdrop-blur-sm transition-opacity duration-200 text-gray-500">
-                <Settings className="h-3.5 w-3.5 transition-all duration-300" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleLogout} 
-                className="hidden md:flex p-0 rounded-xl h-8 w-8 hover:bg-destructive/10 hover:ring-1 hover:ring-destructive/30 hover:shadow-lg md:backdrop-blur-sm transition-all duration-200 text-destructive hover:text-destructive"
-              >
-                <LogOut className="h-3.5 w-3.5 transition-all duration-300" />
-              </Button>
-            </div>
+            <TooltipProvider delayDuration={300}>
+              <div className="flex items-center shrink-0 gap-1.5 md:gap-2 transition-all duration-300">
+                <CompanySelector />
+                
+                <Separator orientation="vertical" className="h-6 bg-gray-200 dark:bg-gray-700/50 hidden md:flex" />
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <ThemeToggle />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Alternar tema</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => navigate('/configuracoes')} 
+                      className="hidden md:flex p-0 rounded-lg h-9 w-9 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                    >
+                      <Settings className="h-4 w-4 transition-all duration-300" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Configurações</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleLogout} 
+                      className="hidden md:flex p-0 rounded-lg h-9 w-9 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                    >
+                      <LogOut className="h-4 w-4 transition-all duration-300" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Sair</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
           </div>
         </header>
 
