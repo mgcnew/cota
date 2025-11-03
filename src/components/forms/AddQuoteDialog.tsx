@@ -118,6 +118,7 @@ interface Product {
 interface Supplier {
   id: string;
   name: string;
+  contact?: string | null;
 }
 
 interface AddQuoteDialogProps {
