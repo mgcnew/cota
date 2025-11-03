@@ -4,6 +4,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { UserAvatar } from "@/components/profile/UserAvatar";
+import { UserProfileDialog } from "@/components/profile/UserProfileDialog";
 import { 
   LayoutDashboard,
   Package, 
@@ -15,18 +19,10 @@ import {
   TrendingUp,
   Star,
   MoreHorizontal,
-  Settings
+  Settings,
+  User
 } from 'lucide-react';
 
-// Logo Component
-function LogoComponent() {
-  return <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-lg"></div>
-      <div className="relative z-10 font-bold text-white text-lg tracking-tight">
-        B
-      </div>
-    </div>;
-}
 
 // Menu items com ícones do Lucide React (recomendados)
 const menuItems = [{
@@ -134,13 +130,17 @@ const colors = [{
 }];
 
 // Componente do botÃ£o "Mais" para mobile
-function MobileMoreButton({
-  remainingItems
+function MobileMoreButtonContent({
+  remainingItems,
+  setProfileDialogOpen
 }: {
   remainingItems: any[];
+  setProfileDialogOpen: (open: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
+  const { profile } = useUserProfile();
   return <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="mobile-nav-button flex flex-col items-center justify-center transition-all duration-200 rounded-2xl group relative overflow-hidden backdrop-blur-sm h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] text-gray-500 hover:text-gray-700 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100/90 hover:shadow-lg touch-manipulation active:bg-gray-200">
@@ -169,6 +169,28 @@ function MobileMoreButton({
         </DialogHeader>
 
         <div className="p-3 space-y-4 bg-white/95 dark:bg-gray-900/95">
+          {/* Seção Perfil */}
+          <div className="mb-4">
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider mb-3 px-1">
+              Perfil
+            </h3>
+            <button 
+              onClick={() => {
+                setOpen(false);
+                setProfileDialogOpen(true);
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 border border-blue-200/60 dark:border-blue-700/40 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              <UserAvatar user={user} profile={profile} size="md" />
+              <div className="flex-1 text-left">
+                <div className="font-semibold text-sm text-gray-900 dark:text-white">
+                  {profile?.full_name || user?.email?.split('@')[0] || 'Usuário'}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</div>
+              </div>
+            </button>
+          </div>
+
           {/* Seção Principal - Navegação */}
           <div className="mb-6">
             <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider mb-3 px-1">
@@ -212,12 +234,29 @@ function MobileMoreButton({
       </DialogContent>
     </Dialog>;
 }
+
+function MobileMoreButton({
+  remainingItems,
+  setProfileDialogOpen
+}: {
+  remainingItems: any[];
+  setProfileDialogOpen: (open: boolean) => void;
+}) {
+  return <MobileMoreButtonContent 
+    remainingItems={remainingItems} 
+    setProfileDialogOpen={setProfileDialogOpen}
+  />;
+}
+
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const isActive = (path: string) => currentPath === path;
   const [isScrolled, setIsScrolled] = useState(false);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const { theme } = useTheme();
+  const { user } = useAuth();
+  const { profile } = useUserProfile();
   const isDark = theme === 'dark';
   const mobilePrimaryOrder = ["/pedidos", "/cotacoes", "/", "/produtos"];
   const primaryMobileItems = mobilePrimaryOrder
@@ -252,18 +291,16 @@ export function AppSidebar() {
         {/* Container Principal com Profundidade */}
         <div className="w-full flex flex-col bg-white dark:bg-[#1C1F26] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-gray-300/80 dark:border-gray-600/50">
           
-          {/* Header com Logo - Nível 1 */}
+          {/* Header com Avatar do Usuário - Nível 1 */}
           <div className="flex items-center justify-center h-20 px-4 border-b border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-b from-gray-50/50 to-white dark:from-transparent dark:to-transparent">
-            <NavLink 
-              to="/" 
-              className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-[0_4px_12px_rgba(99,102,241,0.3)] dark:shadow-[0_4px_16px_rgba(99,102,241,0.4)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.4)] dark:hover:shadow-[0_6px_24px_rgba(99,102,241,0.5)] hover:scale-105 transition-all duration-300 relative overflow-hidden group"
-            >
-              {/* Efeito de brilho no hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative z-10 font-bold text-white text-xl tracking-tight drop-shadow-lg">
-                B
-              </div>
-            </NavLink>
+            <UserAvatar
+              user={user}
+              profile={profile}
+              size="lg"
+              showStatus
+              clickable
+              onClick={() => setProfileDialogOpen(true)}
+            />
           </div>
 
           {/* Menu Items - Nível 2 com Hierarquia */}
@@ -358,8 +395,17 @@ export function AppSidebar() {
         })}
 
           {/* Botão Mais */}
-          <MobileMoreButton remainingItems={remainingMobileItems} />
+          <MobileMoreButton 
+            remainingItems={remainingMobileItems} 
+            setProfileDialogOpen={setProfileDialogOpen}
+          />
         </div>
       </div>
+
+      {/* Dialog de Perfil */}
+      <UserProfileDialog
+        open={profileDialogOpen}
+        onOpenChange={setProfileDialogOpen}
+      />
     </>;
 }
