@@ -213,132 +213,239 @@ export default function Cotacoes() {
   }
   const paginatedData = paginate(filteredCotacoes);
   return <div className="page-container">
-      {/* Statistics Cards - Estilo Apple */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-teal-500/10 flex items-center justify-center flex-shrink-0">
-                  <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-teal-600" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Ativas</span>
-              </div>
-              {stats.percentualAtivas > 0 && (
-                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-teal-50 dark:bg-teal-900/20 rounded-full flex-shrink-0">
-                  <span className="text-[10px] sm:text-xs font-semibold text-teal-600">{stats.percentualAtivas}%</span>
-                </div>
-              )}
-            </div>
-            <div className="mb-2 sm:mb-3">
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.porStatus.ativas}</p>
-              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">cotações ativas</p>
-            </div>
+      {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+        {/* Card 1: Cotações Ativas */}
+        <Card className="group relative overflow-hidden bg-teal-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 300 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
+            <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
+            <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
+            <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
+          </svg>
+
+          <CardHeader className="border-0 z-10 relative pb-3">
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualAtivas}%` }}></div>
-              </div>
-              <span className="text-[10px] sm:text-xs font-semibold text-teal-600 whitespace-nowrap">{stats.percentualAtivas}%</span>
+              <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Ativas
+              </CardTitle>
             </div>
-            <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 truncate">
-              {stats.porStatus.pendentes} pendentes • {stats.porStatus.concluidas} finalizadas
-            </p>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {stats.porStatus.ativas}
+              </span>
+              {stats.percentualAtivas > 0 && (
+                <Badge className="bg-white/20 text-white font-semibold border-0">
+                  {stats.percentualAtivas}%
+                </Badge>
+              )}
+            </div>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Cotações ativas:</span>
+                <span className="font-medium text-white dark:text-gray-300">
+                  {stats.porStatus.ativas}
+                </span>
+              </div>
+              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                <span>Percentual:</span>
+                <span className="font-medium">{stats.percentualAtivas}%</span>
+              </div>
+              <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+                <span>{stats.porStatus.pendentes} pendentes</span>
+                <span>•</span>
+                <span>{stats.porStatus.concluidas} finalizadas</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                  <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-600" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Pendentes</span>
-              </div>
+        {/* Card 2: Pendentes */}
+        <Card className="group relative overflow-hidden bg-amber-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 200 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <defs>
+              <filter id="blur-pendentes" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="10" />
+              </filter>
+            </defs>
+            <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-pendentes)" />
+            <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
+            <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
+            <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
+          </svg>
+
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Pendentes
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {stats.porStatus.pendentes}
+              </span>
               {stats.pendentesMais24h > 0 && (
-                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-red-50 dark:bg-red-900/20 rounded-full flex-shrink-0">
-                  <span className="text-[10px] sm:text-xs font-semibold text-red-600">⚠ {stats.pendentesMais24h}</span>
-                </div>
+                <Badge className="bg-white/20 text-white font-semibold border-0">
+                  ⚠ {stats.pendentesMais24h}
+                </Badge>
               )}
             </div>
-            <div className="mb-2 sm:mb-3">
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.porStatus.pendentes}</p>
-              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">aguardando resposta</p>
-            </div>
-            <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Aguardando resposta:</span>
+                <span className="font-medium text-white dark:text-gray-300">
+                  {stats.porStatus.pendentes}
+                </span>
+              </div>
               {stats.pendentesMais24h > 0 ? (
-                <span className="text-red-600 dark:text-red-400 font-semibold">{stats.pendentesMais24h} há mais de 24h</span>
+                <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                  <span>Com mais de 24h:</span>
+                  <span className="font-medium text-red-300">{stats.pendentesMais24h}</span>
+                </div>
               ) : (
-                <span className="text-green-600 dark:text-green-400">Todas dentro do prazo</span>
+                <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                  <span>Status:</span>
+                  <span className="font-medium text-green-300">Todas no prazo</span>
+                </div>
               )}
-            </p>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                  <DollarSign className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Economia</span>
-              </div>
+        {/* Card 3: Economia */}
+        <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 200 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <defs>
+              <filter id="blur-economia" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="12" />
+              </filter>
+            </defs>
+            <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur-economia)" />
+            <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
+            <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
+            <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
+          </svg>
+
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Economia
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
+                {stats.economiaFormatada}
+              </span>
               {stats.economiaTotal > 0 && (
-                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full flex-shrink-0">
-                  <span className="text-[10px] sm:text-xs font-semibold text-green-600">Total</span>
-                </div>
+                <Badge className="bg-white/20 text-white font-semibold border-0">
+                  Total
+                </Badge>
               )}
             </div>
-            <div className="mb-2 sm:mb-3">
-              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.economiaFormatada}</p>
-              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">economizados</p>
-            </div>
-            <div className="flex items-end gap-0.5 h-8">
-              {stats.ultimas7Economias.map((economia, i) => {
-                const maxEconomia = Math.max(...stats.ultimas7Economias, 1);
-                const heightPercent = (economia / maxEconomia) * 100;
-                return (
-                  <div 
-                    key={i} 
-                    className="flex-1 bg-gradient-to-t from-emerald-500 to-green-400 rounded-t opacity-60 hover:opacity-100 transition-all duration-300 relative group" 
-                    style={{ height: `${Math.max(heightPercent, 8)}%`, minHeight: '8px' }}
-                    title={economia > 0 ? `Economia: R$ ${economia.toLocaleString('pt-BR')}` : 'Sem economia'}
-                  >
-                    {economia > 0 && (
-                      <span className="absolute -top-10 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-lg border border-gray-200 dark:border-gray-700">
-                        R$ {economia.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Economizados:</span>
+                <span className="font-medium text-white dark:text-gray-300">
+                  {stats.economiaFormatada}
+                </span>
+              </div>
+              <div className="flex items-end gap-0.5 h-6 mt-2">
+                {stats.ultimas7Economias.map((economia, i) => {
+                  const maxEconomia = Math.max(...stats.ultimas7Economias, 1);
+                  const heightPercent = (economia / maxEconomia) * 100;
+                  return (
+                    <div 
+                      key={i} 
+                      className="flex-1 bg-white/30 rounded-t hover:bg-white/40 transition-colors duration-200" 
+                      style={{ height: `${Math.max(heightPercent, 10)}%`, minHeight: '4px' }}
+                      title={economia > 0 ? `Economia: R$ ${economia.toLocaleString('pt-BR')}` : 'Sem economia'}
+                    />
+                  );
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Building2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Fornecedores</span>
-              </div>
+        {/* Card 4: Fornecedores */}
+        <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 200 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <defs>
+              <filter id="blur-fornecedores-cotacoes" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="16" />
+              </filter>
+            </defs>
+            <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
+            <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-fornecedores-cotacoes)" />
+            <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
+            <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
+            <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
+          </svg>
+
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Fornecedores
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {stats.mediaFornecedores}
+              </span>
               {stats.totalFornecedoresUnicos > 0 && (
-                <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full flex-shrink-0">
-                  <span className="text-[10px] sm:text-xs font-semibold text-blue-600">{stats.totalFornecedoresUnicos} únicos</span>
-                </div>
+                <Badge className="bg-white/20 text-white font-semibold border-0">
+                  {stats.totalFornecedoresUnicos} únicos
+                </Badge>
               )}
             </div>
-            <div className="mb-2 sm:mb-3">
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.mediaFornecedores}</p>
-              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">média por cotação</p>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Média por cotação:</span>
+                <span className="font-medium text-white dark:text-gray-300">
+                  {stats.mediaFornecedores}
+                </span>
+              </div>
+              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                <span>Fornecedores únicos:</span>
+                <span className="font-medium">{stats.totalFornecedoresUnicos}</span>
+              </div>
             </div>
-            <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
-              {stats.totalFornecedoresUnicos} fornecedores únicos participantes
-            </p>
           </CardContent>
         </Card>
       </div>

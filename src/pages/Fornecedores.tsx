@@ -280,213 +280,226 @@ export default function Fornecedores() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Stats Cards - Grid Responsivo Similar ao Dashboard */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
-            {/* Card 1: Total de Fornecedores - Design Equilibrado Mobile */}
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-indigo-500/60 dark:border-indigo-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-indigo-900/10 sm:hover:border-indigo-400/40 sm:dark:hover:border-indigo-400/40 transition-all duration-200">
-              <CardContent className="p-3 sm:p-4">
-                {/* Header compacto em linha */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-500/15 dark:group-hover:bg-indigo-500/25 transition-colors">
-                      <Building2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Fornecedores</span>
-                    <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300">
-                      +{Math.floor(stats.total * 0.15)}
-                    </div>
-                  </div>
-                </div>
+          {/* Stats Cards - Inspiração Dashboard Statistics Card 2 */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+            {/* Card 1: Total de Fornecedores */}
+            <Card className="group relative overflow-hidden bg-indigo-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
+              {/* Decoração SVG sutil */}
+              <svg
+                className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5"
+                viewBox="0 0 300 200"
+                fill="none"
+                style={{ zIndex: 0 }}
+              >
+                <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
+                <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
+                <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
+                <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
+              </svg>
 
-                {/* Valor e info lado a lado */}
-                <div className="flex items-end justify-between mb-2 gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Fornecedores
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                    {stats.total}
+                  </span>
+                  <Badge className="bg-white/20 text-white font-semibold border-0">
+                    <TrendingUp className="w-3 h-3" />
+                    +{Math.floor(stats.total * 0.15)}
+                  </Badge>
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Cadastrados:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
                       {stats.total}
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Cadastrados</p>
+                    </span>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-[10px] sm:text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Percentual ativos:</span>
+                    <span className="font-medium">{stats.percentualAtivos}%</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>{stats.active} ativos</span>
+                    <span>•</span>
+                    <span>{stats.inactive} inativos</span>
+                    <span>•</span>
+                    <span>{stats.pending} pendentes</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 2: Fornecedores Ativos */}
+            <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
+              {/* Decoração SVG sutil */}
+              <svg
+                className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
+                viewBox="0 0 200 200"
+                fill="none"
+                style={{ zIndex: 0 }}
+              >
+                <defs>
+                  <filter id="blur-fornecedores-ativos" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="10" />
+                  </filter>
+                </defs>
+                <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-fornecedores-ativos)" />
+                <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
+                <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
+                <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
+              </svg>
+
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Ativos
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                    {stats.active}
+                  </span>
+                  {stats.percentualAtivos > 0 && (
+                    <Badge className="bg-white/20 text-white font-semibold border-0">
                       {stats.percentualAtivos}%
-                    </p>
-                    <p className="text-[9px] text-gray-500 dark:text-gray-400">Ativos</p>
-                  </div>
+                    </Badge>
+                  )}
                 </div>
-
-                {/* Barra de progresso compacta */}
-                <div className="h-[32px] sm:h-[40px] flex items-end">
-                  <div className="w-full">
-                    <div className="flex-1 h-1.5 bg-indigo-100/50 dark:bg-indigo-900/20 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualAtivos}%` }}></div>
-                    </div>
-                    <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1">{stats.active} ativos • {stats.inactive} inativos • {stats.pending} pendentes</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Card 2: Fornecedores Ativos - Design Equilibrado Mobile */}
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-emerald-500/60 dark:border-emerald-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-emerald-900/10 sm:hover:border-emerald-400/40 sm:dark:hover:border-emerald-400/40 transition-all duration-200">
-              <CardContent className="p-3 sm:p-4">
-                {/* Header compacto em linha */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/15 dark:group-hover:bg-emerald-500/25 transition-colors">
-                      <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Ativos</span>
-                    {stats.percentualAtivos > 0 && (
-                      <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
-                        {stats.percentualAtivos}%
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Valor e info lado a lado */}
-                <div className="flex items-end justify-between mb-2 gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Fornecedores ativos:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
                       {stats.active}
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Fornecedores</p>
+                    </span>
                   </div>
-                </div>
-
-                {/* Info adicional compacta */}
-                <div className="h-[32px] sm:h-[40px] flex items-end">
-                  <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">
-                    {stats.percentualAtivos}% da base • {stats.inactive} inativos • {stats.pending} pendentes
-                  </p>
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Percentual da base:</span>
+                    <span className="font-medium">{stats.percentualAtivos}%</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>{stats.inactive} inativos</span>
+                    <span>•</span>
+                    <span>{stats.pending} pendentes</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Card 3: Limite Total - Design Equilibrado Mobile */}
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-blue-500/60 dark:border-blue-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-blue-900/10 sm:hover:border-blue-400/40 sm:dark:hover:border-blue-400/40 transition-all duration-200">
-              <CardContent className="p-3 sm:p-4">
-                {/* Header compacto em linha */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/15 dark:group-hover:bg-blue-500/25 transition-colors">
-                      <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Limite</span>
-                    {stats.active > 0 && (
-                      <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
-                        {stats.active} ativos
-                      </div>
-                    )}
-                  </div>
-                </div>
+            {/* Card 3: Limite Total */}
+            <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
+              {/* Decoração SVG sutil */}
+              <svg
+                className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
+                viewBox="0 0 200 200"
+                fill="none"
+                style={{ zIndex: 0 }}
+              >
+                <defs>
+                  <filter id="blur-limite" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="12" />
+                  </filter>
+                </defs>
+                <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur-limite)" />
+                <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
+                <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
+                <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
+              </svg>
 
-                {/* Valor e info lado a lado */}
-                <div className="flex items-end justify-between mb-2 gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5 truncate">
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Limite Total
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
+                    {stats.totalLimit}
+                  </span>
+                  {stats.active > 0 && (
+                    <Badge className="bg-white/20 text-white font-semibold border-0">
+                      {stats.active} ativos
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Limite total:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
                       {stats.totalLimit}
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">Limite Total</p>
+                    </span>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400">
-                      R$ {stats.limiteMedioPorAtivo}k
-                    </p>
-                    <p className="text-[9px] text-gray-500 dark:text-gray-400">Média</p>
-                  </div>
-                </div>
-
-                {/* Mini gráfico compacto */}
-                <div className="h-[32px] sm:h-[40px] flex items-end">
-                  <div className="w-full">
-                    <div className="relative h-6">
-                      <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
-                        <defs>
-                          <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.3" />
-                            <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity="0" />
-                          </linearGradient>
-                        </defs>
-                        <path d="M 0,25 L 15,20 L 30,22 L 45,18 L 60,15 L 75,12 L 90,10 L 100,8" fill="none" stroke="rgb(59, 130, 246)" strokeWidth="2" />
-                        <path d="M 0,25 L 15,20 L 30,22 L 45,18 L 60,15 L 75,12 L 90,10 L 100,8 L 100,40 L 0,40 Z" fill="url(#blueGradient)" />
-                      </svg>
-                    </div>
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Média por ativo:</span>
+                    <span className="font-medium">R$ {stats.limiteMedioPorAtivo}k</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Card 4: Cotações Ativas - Design Equilibrado Mobile */}
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-orange-900/10 sm:hover:border-orange-400/40 sm:dark:hover:border-orange-400/40 transition-all duration-200">
-              <CardContent className="p-3 sm:p-4">
-                {/* Header compacto em linha */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/15 dark:group-hover:bg-orange-500/25 transition-colors">
-                      <FileText className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Cotações</span>
-                    {stats.mediaCotacoesPorFornecedor !== "0.0" && (
-                      <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
-                        {stats.mediaCotacoesPorFornecedor}
-                      </div>
-                    )}
-                  </div>
-                </div>
+            {/* Card 4: Cotações Ativas */}
+            <Card className="group relative overflow-hidden bg-orange-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
+              {/* Decoração SVG sutil */}
+              <svg
+                className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
+                viewBox="0 0 200 200"
+                fill="none"
+                style={{ zIndex: 0 }}
+              >
+                <defs>
+                  <filter id="blur-cotacoes-fornecedores" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="16" />
+                  </filter>
+                </defs>
+                <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
+                <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-cotacoes-fornecedores)" />
+                <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
+                <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
+                <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
+              </svg>
 
-                {/* Valor e info lado a lado */}
-                <div className="flex items-end justify-between mb-2 gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Cotações
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                    {stats.activeQuotes}
+                  </span>
+                  {stats.mediaCotacoesPorFornecedor !== "0.0" && (
+                    <Badge className="bg-white/20 text-white font-semibold border-0">
+                      {stats.mediaCotacoesPorFornecedor}
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Cotações ativas:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
                       {stats.activeQuotes}
-                    </p>
-                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Ativas</p>
+                    </span>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-[10px] sm:text-xs font-semibold text-orange-600 dark:text-orange-400">
-                      {stats.mediaCotacoesPorFornecedor} média
-                    </p>
-                    <p className="text-[9px] text-gray-500 dark:text-gray-400">Por fornecedor</p>
-                  </div>
-                </div>
-
-                {/* Mini gráfico de distribuição compacto */}
-                <div className="h-[32px] sm:h-[40px] flex items-end">
-                  <div className="w-full">
-                    <div className="flex items-end gap-0.5 h-5 sm:h-6 mb-1">
-                      {stats.distribuicaoCotacoes.map((count, i) => {
-                        const maxCount = Math.max(...stats.distribuicaoCotacoes, 1);
-                        const heightPercent = (count / maxCount) * 100;
-                        const cores = [
-                          'from-gray-400 to-gray-300',
-                          'from-orange-400 to-orange-300',
-                          'from-orange-500 to-orange-400',
-                          'from-amber-500 to-amber-400',
-                          'from-yellow-500 to-yellow-400',
-                          'from-green-500 to-green-400',
-                          'from-emerald-500 to-emerald-400'
-                        ];
-                        const labels = ['0', '1-2', '3-5', '6-8', '9-12', '13-20', '20+'];
-                        return (
-                          <TooltipProvider key={i}>
-                            <UiTooltip>
-                              <TooltipTrigger asChild>
-                                <div 
-                                  className={`flex-1 bg-gradient-to-t ${cores[i]} rounded-t opacity-60 hover:opacity-100 transition-opacity cursor-pointer`}
-                                  style={{ height: `${Math.max(heightPercent, 10)}%`, minHeight: '4px' }}
-                                  title={`${count} fornecedores com ${labels[i]} cotações`}
-                                />
-                              </TooltipTrigger>
-                              <TooltipContent side="top" sideOffset={8} className="py-1.5 px-2.5 text-xs">
-                                <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">{labels[i]} cotações</div>
-                                <div className="font-semibold text-orange-600 dark:text-orange-300">{count} fornecedores</div>
-                              </TooltipContent>
-                            </UiTooltip>
-                          </TooltipProvider>
-                        );
-                      })}
-                    </div>
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Média por fornecedor:</span>
+                    <span className="font-medium">{stats.mediaCotacoesPorFornecedor}</span>
                   </div>
                 </div>
               </CardContent>

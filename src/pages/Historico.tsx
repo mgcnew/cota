@@ -472,105 +472,198 @@ export default function Historico() {
         </CardContent>
       </Card>
 
-      {/* Statistics Cards - Estilo Apple */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 mb-6 overflow-visible">
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-slate-500/10 flex items-center justify-center">
-                  <History className="h-3.5 w-3.5 text-slate-600" />
-                </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</span>
-              </div>
-            </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalAcoes}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">registradas</p>
-            </div>
-            <div className="flex items-end gap-0.5 h-8">
-              {[45, 60, 50, 75, 55, 80, 65].map((height, i) => (
-                <div key={i} className="flex-1 bg-gradient-to-t from-slate-500 to-gray-400 rounded-t opacity-60 hover:opacity-100 transition-opacity" style={{ height: `${height}%` }}></div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+        {/* Card 1: Total de Ações */}
+        <Card className="group relative overflow-hidden bg-slate-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 300 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
+            <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
+            <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
+            <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
+          </svg>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <FileText className="h-3.5 w-3.5 text-blue-600" />
-                </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cotações</span>
-              </div>
-            </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.cotacoesFinalizadas}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">finalizadas</p>
-            </div>
+          <CardHeader className="border-0 z-10 relative pb-3">
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style={{ width: '75%' }}></div>
+              <History className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Ações
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {stats.totalAcoes}
+              </span>
+            </div>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Total registradas:</span>
+                <span className="font-medium text-white dark:text-gray-300">
+                  {stats.totalAcoes}
+                </span>
               </div>
-              <span className="text-xs font-semibold text-blue-600">75%</span>
+              <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+                <span>{stats.cotacoesFinalizadas} cotações</span>
+                <span>•</span>
+                <span>{stats.pedidosCriados} pedidos</span>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <ShoppingCart className="h-3.5 w-3.5 text-amber-600" />
-                </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pedidos</span>
+        {/* Card 2: Cotações Finalizadas */}
+        <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 200 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <defs>
+              <filter id="blur-cotacoes-historico" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="10" />
+              </filter>
+            </defs>
+            <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-cotacoes-historico)" />
+            <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
+            <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
+            <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
+          </svg>
+
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Cotações
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {stats.cotacoesFinalizadas}
+              </span>
+              <Badge className="bg-white/20 text-white font-semibold border-0">
+                75%
+              </Badge>
+            </div>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Finalizadas:</span>
+                <span className="font-medium text-white dark:text-gray-300">
+                  {stats.cotacoesFinalizadas}
+                </span>
               </div>
-            </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.pedidosCriados}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">criados</p>
-            </div>
-            <div className="relative h-8">
-              <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="amberGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="rgb(245, 158, 11)" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="rgb(245, 158, 11)" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path d="M 0,28 L 15,24 L 30,26 L 45,20 L 60,22 L 75,15 L 90,18 L 100,12" fill="none" stroke="rgb(245, 158, 11)" strokeWidth="2" />
-                <path d="M 0,28 L 15,24 L 30,26 L 45,20 L 60,22 L 75,15 L 90,18 L 100,12 L 100,40 L 0,40 Z" fill="url(#amberGradient)" />
-              </svg>
+              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                <span>Taxa de conclusão:</span>
+                <span className="font-medium">75%</span>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 hover:scale-[1.01] hover:border-gray-300 dark:hover:border-gray-600/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
-                </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Economia</span>
+        {/* Card 3: Pedidos Criados */}
+        <Card className="group relative overflow-hidden bg-amber-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 200 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <defs>
+              <filter id="blur-pedidos-historico" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="12" />
+              </filter>
+            </defs>
+            <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur-pedidos-historico)" />
+            <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
+            <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
+            <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
+          </svg>
+
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Pedidos
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {stats.pedidosCriados}
+              </span>
+            </div>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Criados:</span>
+                <span className="font-medium text-white dark:text-gray-300">
+                  {stats.pedidosCriados}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+                <span>No histórico</span>
               </div>
             </div>
-            <div className="mb-3">
-              <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">{stats.economiaTotal}%</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">acumulada</p>
+          </CardContent>
+        </Card>
+
+        {/* Card 4: Economia Acumulada */}
+        <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 200 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <defs>
+              <filter id="blur-economia-historico" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="16" />
+              </filter>
+            </defs>
+            <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
+            <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-economia-historico)" />
+            <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
+            <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
+            <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
+          </svg>
+
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Economia
+              </CardTitle>
             </div>
-            <div className="flex items-center justify-center">
-              <div className="relative w-12 h-12">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(243, 244, 246)" strokeWidth="3" />
-                  <circle cx="24" cy="24" r="20" fill="none" stroke="rgb(16, 185, 129)" strokeWidth="3" strokeDasharray={`${2 * Math.PI * 20 * (stats.economiaTotal / 100)} ${2 * Math.PI * 20}`} strokeLinecap="round" className="transition-all duration-1000" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-emerald-600">{stats.economiaTotal}%</span>
-                </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {stats.economiaTotal}%
+              </span>
+            </div>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Acumulada:</span>
+                <span className="font-medium text-white dark:text-gray-300">
+                  {stats.economiaTotal}%
+                </span>
+              </div>
+              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                <span>Total histórico</span>
+                <span className="font-medium">{stats.economiaTotal}%</span>
               </div>
             </div>
           </CardContent>

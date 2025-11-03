@@ -224,115 +224,231 @@ export default function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Stats Cards - Estilo Apple */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
-                      <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-orange-600" />
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Produtos</span>
-                  </div>
-                  <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-full flex-shrink-0">
-                    <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-orange-600" />
-                    <span className="text-[10px] sm:text-xs font-semibold text-orange-600">+{Math.floor(stats.totalProducts * 0.1)}</span>
-                  </div>
-                </div>
-                <div className="mb-2 sm:mb-3">
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalProducts}</p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">No Catálogo</p>
-                </div>
+          {/* Stats Cards - Inspiração Dashboard Statistics Card 2 */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+            {/* Card 1: Produtos */}
+            <Card className="group relative overflow-hidden bg-orange-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
+              {/* Decoração SVG sutil */}
+              <svg
+                className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5"
+                viewBox="0 0 300 200"
+                fill="none"
+                style={{ zIndex: 0 }}
+              >
+                <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
+                <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
+                <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
+                <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
+              </svg>
+
+              <CardHeader className="border-0 z-10 relative pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500" style={{ width: `${stats.percentualComCotacao}%` }}></div>
-                  </div>
-                  <span className="text-[10px] sm:text-xs font-semibold text-orange-600 whitespace-nowrap">{stats.percentualComCotacao}%</span>
+                  <Package className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Produtos
+                  </CardTitle>
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 truncate">{stats.produtosPorStatus.ativos} ativos • {stats.produtosPorStatus.cotados} cotados • {stats.produtosPorStatus.semCotacao} sem cotação</p>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                    {stats.totalProducts}
+                  </span>
+                  <Badge className="bg-white/20 text-white font-semibold border-0">
+                    <TrendingUp className="w-3 h-3" />
+                    +{Math.floor(stats.totalProducts * 0.1)}
+                  </Badge>
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>No Catálogo:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
+                      {stats.totalProducts}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Com cotação:</span>
+                    <span className="font-medium">{stats.percentualComCotacao}%</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>{stats.produtosPorStatus.ativos} ativos</span>
+                    <span>•</span>
+                    <span>{stats.produtosPorStatus.cotados} cotados</span>
+                    <span>•</span>
+                    <span>{stats.produtosPorStatus.semCotacao} sem cotação</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                      <Filter className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Categorias</span>
-                  </div>
-                  <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full flex-shrink-0">
-                    <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-blue-600" />
-                    <span className="text-[10px] sm:text-xs font-semibold text-blue-600">+2</span>
-                  </div>
-                </div>
-                <div className="mb-2 sm:mb-3">
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.totalCategories}</p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Disponíveis</p>
-                </div>
-                {stats.topCategoria && (
-                  <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                    <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.topCategoria.nome}</span> • {stats.topCategoria.count} produtos
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+            {/* Card 2: Categorias */}
+            <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
+              {/* Decoração SVG sutil */}
+              <svg
+                className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
+                viewBox="0 0 200 200"
+                fill="none"
+                style={{ zIndex: 0 }}
+              >
+                <defs>
+                  <filter id="blur-categorias" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="10" />
+                  </filter>
+                </defs>
+                <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-categorias)" />
+                <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
+                <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
+                <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
+              </svg>
 
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                      <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600" />
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Cotações</span>
-                  </div>
-                  <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full flex-shrink-0">
-                    <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-green-600" />
-                    <span className="text-[10px] sm:text-xs font-semibold text-green-600">15%</span>
-                  </div>
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Categorias
+                  </CardTitle>
                 </div>
-                <div className="mb-2 sm:mb-3">
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.activeQuotes}</p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total de Cotações</p>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                    {stats.totalCategories}
+                  </span>
+                  <Badge className="bg-white/20 text-white font-semibold border-0">
+                    <TrendingUp className="w-3 h-3" />
+                    +2
+                  </Badge>
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                  Média de <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stats.mediaCotacoesPorProduto}</span> cotações/produto
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-gray-400 dark:hover:border-gray-600/50 transition-[box-shadow,border-color] duration-300">
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                      <Scale className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600" />
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">Valor Médio</span>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Disponíveis:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
+                      {stats.totalCategories}
+                    </span>
                   </div>
-                  {stats.percentualEconomiaMedia > 0 && (
-                    <div className="flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-0.5 bg-green-50 dark:bg-green-900/20 rounded-full flex-shrink-0">
-                      <TrendingUp className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-green-600" />
-                      <span className="text-[10px] sm:text-xs font-semibold text-green-600">{stats.percentualEconomiaMedia}%</span>
+                  {stats.topCategoria && (
+                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                      <span>Top categoria:</span>
+                      <span className="font-medium">{stats.topCategoria.nome} • {stats.topCategoria.count} produtos</span>
                     </div>
                   )}
                 </div>
-                <div className="mb-2 sm:mb-3">
-                  <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stats.averageValue}</p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">Valor Médio por Produto</p>
+              </CardContent>
+            </Card>
+
+            {/* Card 3: Cotações */}
+            <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
+              {/* Decoração SVG sutil */}
+              <svg
+                className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
+                viewBox="0 0 200 200"
+                fill="none"
+                style={{ zIndex: 0 }}
+              >
+                <defs>
+                  <filter id="blur-cotacoes" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="12" />
+                  </filter>
+                </defs>
+                <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur-cotacoes)" />
+                <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
+                <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
+                <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
+              </svg>
+
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Cotações
+                  </CardTitle>
                 </div>
-                {stats.percentualEconomiaMedia > 0 ? (
-                  <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                    Economia média de <span className="font-semibold text-green-600 dark:text-green-400">R$ {stats.economiaMediaPorProduto}</span> por produto
-                  </p>
-                ) : (
-                  <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                    <span className="font-semibold">{stats.productsWithPrices}</span> produtos com preço
-                  </p>
-                )}
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                    {stats.activeQuotes}
+                  </span>
+                  <Badge className="bg-white/20 text-white font-semibold border-0">
+                    <TrendingUp className="w-3 h-3" />
+                    15%
+                  </Badge>
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Total de cotações:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
+                      {stats.activeQuotes}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Média por produto:</span>
+                    <span className="font-medium">{stats.mediaCotacoesPorProduto}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 4: Valor Médio */}
+            <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
+              {/* Decoração SVG sutil */}
+              <svg
+                className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
+                viewBox="0 0 200 200"
+                fill="none"
+                style={{ zIndex: 0 }}
+              >
+                <defs>
+                  <filter id="blur-valor" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="16" />
+                  </filter>
+                </defs>
+                <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
+                <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-valor)" />
+                <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
+                <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
+                <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
+              </svg>
+
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <Scale className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Valor Médio
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl font-semibold tracking-tight text-white dark:text-white">
+                    {stats.averageValue}
+                  </span>
+                  {stats.percentualEconomiaMedia > 0 && (
+                    <Badge className="bg-white/20 text-white font-semibold border-0">
+                      <TrendingUp className="w-3 h-3" />
+                      {stats.percentualEconomiaMedia}%
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Valor médio:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
+                      {stats.averageValue}
+                    </span>
+                  </div>
+                  {stats.percentualEconomiaMedia > 0 ? (
+                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                      <span>Economia média:</span>
+                      <span className="font-medium">R$ {stats.economiaMediaPorProduto}/produto</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                      <span>Produtos com preço:</span>
+                      <span className="font-medium">{stats.productsWithPrices}</span>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

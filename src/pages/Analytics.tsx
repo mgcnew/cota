@@ -216,50 +216,70 @@ export default function Analytics() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
-          {/* Métricas Principais - Grid Profissional 2 Colunas */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
+          {/* Métricas Principais - Inspiração Dashboard Statistics Card 2 */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
             {metricas.map((metrica, index) => {
               const icons = [DollarSign, Clock, CheckCircle, Users];
               const Icon = icons[index] || DollarSign;
-              const colors = [
-                { border: 'border-emerald-500/60 dark:border-emerald-400/60', bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', text: 'text-emerald-600 dark:text-emerald-400', hover: 'hover:bg-emerald-500/15 dark:hover:bg-emerald-500/25' },
-                { border: 'border-blue-500/60 dark:border-blue-400/60', bg: 'bg-blue-500/10 dark:bg-blue-500/20', text: 'text-blue-600 dark:text-blue-400', hover: 'hover:bg-blue-500/15 dark:hover:bg-blue-500/25' },
-                { border: 'border-purple-500/60 dark:border-purple-400/60', bg: 'bg-purple-500/10 dark:bg-purple-500/20', text: 'text-purple-600 dark:text-purple-400', hover: 'hover:bg-purple-500/15 dark:hover:bg-purple-500/25' },
-                { border: 'border-orange-500/60 dark:border-orange-400/60', bg: 'bg-orange-500/10 dark:bg-orange-500/20', text: 'text-orange-600 dark:text-orange-400', hover: 'hover:bg-orange-500/15 dark:hover:bg-orange-500/25' }
+              const cardColors = [
+                'bg-emerald-600',
+                'bg-blue-600',
+                'bg-purple-600',
+                'bg-orange-600'
               ];
-              const color = colors[index] || colors[0];
+              const bgColor = cardColors[index] || cardColors[0];
               
               return (
-                <Card key={metrica.titulo} className={`group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 ${color.border} border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200`}>
-                  <CardContent className="p-3 sm:p-4">
-                    {/* Header compacto em linha */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <div className={`w-8 h-8 rounded-lg ${color.bg} ${color.hover} flex items-center justify-center flex-shrink-0 transition-colors`}>
-                          <Icon className={`h-4 w-4 ${color.text}`} />
-                        </div>
-                        <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">{metrica.titulo}</span>
-                        {metrica.variacao && (
-                          <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold ${
-                            metrica.tipo === 'positivo' 
-                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' 
-                              : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'
-                          }`}>
-                            <TrendingUp className={`h-2 w-2 ${metrica.tipo === 'negativo' ? 'rotate-180' : ''}`} />
-                            {metrica.variacao}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                <Card key={metrica.titulo} className={`group relative overflow-hidden ${bgColor} dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300`}>
+                  {/* Decoração SVG sutil */}
+                  <svg
+                    className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+                    viewBox="0 0 300 200"
+                    fill="none"
+                    style={{ zIndex: 0 }}
+                  >
+                    <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
+                    <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
+                    <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
+                    <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
+                  </svg>
 
-                    {/* Valor e descrição */}
-                    <div className="flex items-end justify-between mb-2 gap-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5 truncate">
+                  <CardHeader className="border-0 z-10 relative pb-3">
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                      <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                        {metrica.titulo}
+                      </CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2.5 z-10 relative">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
+                        {metrica.valor}
+                      </span>
+                      {metrica.variacao && (
+                        <Badge className={`bg-white/20 text-white font-semibold border-0`}>
+                          {metrica.tipo === 'negativo' && <TrendingDown className="w-3 h-3" />}
+                          {metrica.tipo !== 'negativo' && <TrendingUp className="w-3 h-3" />}
+                          {metrica.variacao}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                      <div className="flex items-center justify-between">
+                        <span>{metrica.descricao}:</span>
+                        <span className="font-medium text-white dark:text-gray-300">
                           {metrica.valor}
-                        </p>
-                        <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{metrica.descricao}</p>
+                        </span>
                       </div>
+                      {metrica.variacao && (
+                        <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                          <span>Variação:</span>
+                          <span className={`font-medium ${metrica.tipo === 'negativo' ? 'text-red-300' : 'text-green-300'}`}>
+                            {metrica.variacao}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

@@ -706,161 +706,212 @@ export default function Relatorios() {
           </CardContent>
         </Card>}
 
-      {/* Resumo Executivo - Grid Responsivo Mobile */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4 mb-6 overflow-visible">
-        {/* Card 1: Economia - Design Equilibrado Mobile */}
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-emerald-500/60 dark:border-emerald-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-emerald-900/10 sm:hover:border-emerald-400/40 sm:dark:hover:border-emerald-400/40 transition-all duration-200">
-          <CardContent className="p-3 sm:p-4">
-            {/* Header compacto em linha */}
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/15 dark:group-hover:bg-emerald-500/25 transition-colors">
-                  <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Economia</span>
-                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
-                  <TrendingUp className="h-2 w-2" />
-                  +{estatisticasGerais.economiaPercentual}
-                </div>
-              </div>
-            </div>
+      {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+        {/* Card 1: Economia */}
+        <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 300 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
+            <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
+            <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
+            <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
+          </svg>
 
-            {/* Valor e info lado a lado */}
-            <div className="flex items-end justify-between mb-2 gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5 truncate">
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Economia
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
+                {estatisticasGerais.economiaTotal}
+              </span>
+              <Badge className="bg-white/20 text-white font-semibold border-0">
+                <TrendingUp className="w-3 h-3" />
+                +{estatisticasGerais.economiaPercentual}
+              </Badge>
+            </div>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Total gerada:</span>
+                <span className="font-medium text-white dark:text-gray-300">
                   {estatisticasGerais.economiaTotal}
-                </p>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Total gerada</p>
+                </span>
               </div>
-            </div>
-
-            {/* Info adicional compacta */}
-            <div className="h-[32px] sm:h-[40px] flex items-end">
-              <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">
-                Meta: R$ 50.000
-              </p>
+              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                <span>Percentual:</span>
+                <span className="font-medium">{estatisticasGerais.economiaPercentual}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+                <span>Meta: R$ 50.000</span>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Card 2: Cotações - Design Equilibrado Mobile */}
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-purple-500/60 dark:border-purple-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-purple-900/10 sm:hover:border-purple-400/40 sm:dark:hover:border-purple-400/40 transition-all duration-200">
-          <CardContent className="p-3 sm:p-4">
-            {/* Header compacto em linha */}
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="w-8 h-8 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-purple-500/15 dark:group-hover:bg-purple-500/25 transition-colors">
-                  <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Cotações</span>
-                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
-                  +12%
-                </div>
-              </div>
-            </div>
+        {/* Card 2: Cotações */}
+        <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 200 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <defs>
+              <filter id="blur-cotacoes-relatorios" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="10" />
+              </filter>
+            </defs>
+            <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-cotacoes-relatorios)" />
+            <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
+            <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
+            <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
+          </svg>
 
-            {/* Valor e info lado a lado */}
-            <div className="flex items-end justify-between mb-2 gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Cotações
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {estatisticasGerais.cotacoesRealizadas}
+              </span>
+              <Badge className="bg-white/20 text-white font-semibold border-0">
+                +12%
+              </Badge>
+            </div>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Realizadas:</span>
+                <span className="font-medium text-white dark:text-gray-300">
                   {estatisticasGerais.cotacoesRealizadas}
-                </p>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Realizadas</p>
+                </span>
               </div>
-            </div>
-
-            {/* Mini gráfico compacto */}
-            <div className="h-[32px] sm:h-[40px] flex items-end">
-              <div className="w-full">
-                <div className="flex items-end gap-0.5 h-5 sm:h-6 mb-1">
-                  {[55, 70, 60, 85, 70, 90, 75].map((height, i) => (
-                    <div 
-                      key={i} 
-                      className="flex-1 bg-gradient-to-t from-purple-500 to-violet-400 rounded-t opacity-60 hover:opacity-100 transition-opacity"
-                      style={{ height: `${height}%`, minHeight: '4px' }}
-                    />
-                  ))}
-                </div>
+              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                <span>Crescimento:</span>
+                <span className="font-medium">+12%</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Card 3: Fornecedores - Design Equilibrado Mobile */}
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-blue-500/60 dark:border-blue-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-blue-900/10 sm:hover:border-blue-400/40 sm:dark:hover:border-blue-400/40 transition-all duration-200">
-          <CardContent className="p-3 sm:p-4">
-            {/* Header compacto em linha */}
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/15 dark:group-hover:bg-blue-500/25 transition-colors">
-                  <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Fornecedores</span>
-                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
-                  +5
-                </div>
-              </div>
-            </div>
+        {/* Card 3: Fornecedores */}
+        <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 200 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <defs>
+              <filter id="blur-fornecedores-relatorios" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="12" />
+              </filter>
+            </defs>
+            <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur-fornecedores-relatorios)" />
+            <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
+            <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
+            <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
+          </svg>
 
-            {/* Valor e info lado a lado */}
-            <div className="flex items-end justify-between mb-2 gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Fornecedores
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {estatisticasGerais.fornecedoresAtivos}
+              </span>
+              <Badge className="bg-white/20 text-white font-semibold border-0">
+                +5
+              </Badge>
+            </div>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Ativos:</span>
+                <span className="font-medium text-white dark:text-gray-300">
                   {estatisticasGerais.fornecedoresAtivos}
-                </p>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Ativos</p>
+                </span>
               </div>
-              <div className="text-right flex-shrink-0">
-                <p className="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400">
-                  90%
-                </p>
-                <p className="text-[9px] text-gray-500 dark:text-gray-400">Taxa</p>
-              </div>
-            </div>
-
-            {/* Barra de progresso compacta */}
-            <div className="h-[32px] sm:h-[40px] flex items-end">
-              <div className="w-full">
-                <div className="flex-1 h-1.5 bg-blue-100/50 dark:bg-blue-900/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style={{ width: '90%' }}></div>
-                </div>
+              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                <span>Taxa de atividade:</span>
+                <span className="font-medium">90%</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Card 4: Produtos - Design Equilibrado Mobile */}
-        <Card className="group relative overflow-hidden bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg sm:dark:hover:shadow-orange-900/10 sm:hover:border-orange-400/40 sm:dark:hover:border-orange-400/40 transition-all duration-200">
-          <CardContent className="p-3 sm:p-4">
-            {/* Header compacto em linha */}
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="w-8 h-8 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/15 dark:group-hover:bg-orange-500/25 transition-colors">
-                  <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">Produtos</span>
-                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
-                  +8%
-                </div>
-              </div>
-            </div>
+        {/* Card 4: Produtos */}
+        <Card className="group relative overflow-hidden bg-orange-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+          {/* Decoração SVG sutil */}
+          <svg
+            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+            viewBox="0 0 200 200"
+            fill="none"
+            style={{ zIndex: 0 }}
+          >
+            <defs>
+              <filter id="blur-produtos-relatorios" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="16" />
+              </filter>
+            </defs>
+            <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
+            <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-produtos-relatorios)" />
+            <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
+            <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
+            <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
+          </svg>
 
-            {/* Valor e info lado a lado */}
-            <div className="flex items-end justify-between mb-2 gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight leading-none mb-0.5">
+          <CardHeader className="border-0 z-10 relative pb-3">
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-white/70 dark:text-gray-400" />
+              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                Produtos
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2.5 z-10 relative">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                {estatisticasGerais.produtosCotados}
+              </span>
+              <Badge className="bg-white/20 text-white font-semibold border-0">
+                +8%
+              </Badge>
+            </div>
+            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+              <div className="flex items-center justify-between">
+                <span>Cotados:</span>
+                <span className="font-medium text-white dark:text-gray-300">
                   {estatisticasGerais.produtosCotados}
-                </p>
-                <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Cotados</p>
+                </span>
               </div>
-            </div>
-
-            {/* Info adicional compacta */}
-            <div className="h-[32px] sm:h-[40px] flex items-end">
-              <p className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400">
-                {Math.floor(estatisticasGerais.produtosCotados * 0.6)} com economia gerada
-              </p>
+              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                <span>Com economia:</span>
+                <span className="font-medium">{Math.floor(estatisticasGerais.produtosCotados * 0.6)}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
