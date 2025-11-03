@@ -27,8 +27,8 @@ export function AvatarUpload({
     if (!validTypes.includes(file.type)) {
       return "Formato inválido. Use JPG, PNG, WEBP ou GIF.";
     }
-    if (file.size > 2 * 1024 * 1024) {
-      return "Arquivo muito grande. Máximo 2MB.";
+    if (file.size > 5 * 1024 * 1024) {
+      return "Arquivo muito grande. Máximo 5MB.";
     }
     return null;
   };
@@ -75,7 +75,7 @@ export function AvatarUpload({
     <div className={cn("flex flex-col items-center gap-4", className)}>
       <div
         className={cn(
-          "relative h-32 w-32 rounded-full border-2 border-dashed transition-colors",
+          "relative h-40 w-40 rounded-full border-2 border-dashed transition-colors",
           isDragging ? "border-primary bg-primary/10" : "border-muted-foreground/25",
           displayImage && "border-solid"
         )}
@@ -138,7 +138,7 @@ export function AvatarUpload({
       />
 
       <p className="text-xs text-muted-foreground text-center">
-        JPG, PNG, WEBP ou GIF. Máximo 2MB.
+        JPG, PNG, WEBP ou GIF. Máximo 5MB.
       </p>
     </div>
   );
