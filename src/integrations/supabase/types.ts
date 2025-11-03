@@ -66,6 +66,7 @@ export type Database = {
           subscription_expires_at: string | null
           subscription_plan: string | null
           subscription_status: string | null
+          trial_ends_at: string | null
           updated_at: string | null
         }
         Insert: {
@@ -78,6 +79,7 @@ export type Database = {
           subscription_expires_at?: string | null
           subscription_plan?: string | null
           subscription_status?: string | null
+          trial_ends_at?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -90,6 +92,7 @@ export type Database = {
           subscription_expires_at?: string | null
           subscription_plan?: string | null
           subscription_status?: string | null
+          trial_ends_at?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -318,6 +321,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plan_features: {
+        Row: {
+          advanced_analytics: boolean | null
+          api_access: boolean | null
+          created_at: string | null
+          max_products: number | null
+          max_quotes_per_month: number | null
+          max_suppliers: number | null
+          max_users: number | null
+          plan_name: string
+          priority_support: boolean | null
+        }
+        Insert: {
+          advanced_analytics?: boolean | null
+          api_access?: boolean | null
+          created_at?: string | null
+          max_products?: number | null
+          max_quotes_per_month?: number | null
+          max_suppliers?: number | null
+          max_users?: number | null
+          plan_name: string
+          priority_support?: boolean | null
+        }
+        Update: {
+          advanced_analytics?: boolean | null
+          api_access?: boolean | null
+          created_at?: string | null
+          max_products?: number | null
+          max_quotes_per_month?: number | null
+          max_suppliers?: number | null
+          max_users?: number | null
+          plan_name?: string
+          priority_support?: boolean | null
+        }
+        Relationships: []
       }
       products: {
         Row: {
@@ -655,6 +694,18 @@ export type Database = {
         Args: { _corporate_group_id: string }
         Returns: number
       }
+      get_plan_features: {
+        Args: { p_plan_name: string }
+        Returns: {
+          advanced_analytics: boolean
+          api_access: boolean
+          max_products: number
+          max_quotes_per_month: number
+          max_suppliers: number
+          max_users: number
+          priority_support: boolean
+        }[]
+      }
       get_user_company_id: { Args: { p_user_id: string }; Returns: string }
       get_user_corporate_group_id: {
         Args: { _user_id: string }
@@ -669,6 +720,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_subscription_active: {
+        Args: { p_company_id: string }
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
