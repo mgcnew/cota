@@ -296,7 +296,7 @@ export function AppSidebar() {
             <UserAvatar
               user={user}
               profile={profile}
-              size="lg"
+              size="md"
               showStatus
               clickable
               onClick={() => setProfileDialogOpen(true)}
