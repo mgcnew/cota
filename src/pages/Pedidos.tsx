@@ -750,17 +750,17 @@ export default function Pedidos() {
             };
             const colors = getStatusColors(pedido.status);
             const pedidoNumero = paginatedData.pagination.startIndex + index + 1;
-            return <Card key={pedido.id} className={cn("group hover:shadow-xl dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300 border border-gray-200/60 dark:border-gray-700/30 hover:", colors.border, "bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26] backdrop-blur-sm")}>
+            return <Card key={pedido.id} className={cn("group border border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26]", `sm:hover:${colors.border}`, "sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 sm:transition-shadow sm:duration-200", "backdrop-blur-sm")}>
                   <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2 sm:gap-3 flex-1">
-                        <div className={cn("p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-300", colors.iconBg)}>
-                          <div className={cn("h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform duration-300", colors.iconColor)}>
+                        <div className={cn("p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl", colors.iconBg, "sm:transition-all sm:duration-200")}>
+                          <div className={cn("h-4 w-4 sm:h-5 sm:w-5", colors.iconColor, "sm:group-hover:scale-110 sm:transition-transform sm:duration-200")}>
                             {getStatusIcon(pedido.status)}
                           </div>
                         </div>
                         <div className="space-y-1.5 sm:space-y-2 flex-1 min-w-0">
-                          <CardTitle className="text-sm sm:text-base font-bold text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-300 truncate" title={pedido.fornecedor}>
+                          <CardTitle className={cn("text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate", "sm:group-hover:text-orange-700 sm:dark:group-hover:text-orange-400 sm:transition-colors sm:duration-200")} title={pedido.fornecedor}>
                             {capitalize(abbreviateSupplierName(pedido.fornecedor, 25))}
                           </CardTitle>
                           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -770,7 +770,7 @@ export default function Pedidos() {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 hover:bg-orange-100 h-8 w-8 sm:h-9 sm:w-9 rounded-full">
+                          <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:transition-opacity sm:duration-200 sm:hover:bg-orange-100 h-8 w-8 sm:h-9 sm:w-9 rounded-full">
                             <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </Button>
                         </DropdownMenuTrigger>

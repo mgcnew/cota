@@ -72,16 +72,6 @@ export default function Produtos() {
     invalidateCache
   } = useProducts();
   useEffect(() => {
-    console.log('[FILTER] Categoria selecionada:', selectedCategory);
-  }, [selectedCategory]);
-  useEffect(() => {
-    console.log('[CATEGORIES DEBUG] Disponíveis:', categories);
-    console.log('[CATEGORIES DEBUG] Produtos por categoria:', categories.map(cat => ({
-      category: cat,
-      count: products.filter(p => (p.category || '').trim().toLowerCase() === (cat || '').trim().toLowerCase()).length
-    })));
-  }, [categories, products]);
-  useEffect(() => {
     if (!loading && !user) {
       setAuthDialogOpen(true);
     }
@@ -89,16 +79,17 @@ export default function Produtos() {
 
   // OPTIMIZED: Memoize filtered products to avoid unnecessary recalculations
   const filteredProducts = useMemo(() => {
-    console.log('[FILTER DEBUG] selectedCategory:', selectedCategory);
-    console.log('[FILTER DEBUG] Total products:', products.length);
+    if (!debouncedSearchQuery.trim() && selectedCategory === 'all') {
+      return products; // Retorna todos se não há filtros
+    }
+    
+    const searchLower = debouncedSearchQuery.toLowerCase();
+    const categoryNormalized = (selectedCategory || '').trim().toLowerCase();
+    
     return products.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
-
-      // Normalizar categorias para comparação
+      const matchesSearch = !searchLower || product.name.toLowerCase().includes(searchLower);
       const productCategory = (product.category || '').trim().toLowerCase();
-      const selectedCategoryNormalized = (selectedCategory || '').trim().toLowerCase();
-      const matchesCategory = selectedCategoryNormalized === "all" || productCategory === selectedCategoryNormalized;
-      console.log('[FILTER DEBUG] Product:', product.name, '| Category:', product.category, '| Matches:', matchesCategory);
+      const matchesCategory = categoryNormalized === "all" || productCategory === categoryNormalized;
       return matchesSearch && matchesCategory;
     });
   }, [products, debouncedSearchQuery, selectedCategory]);
@@ -550,16 +541,16 @@ export default function Produtos() {
 
       {/* Products View */}
       {viewMode === "grid" ? <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map(product => <Card key={product.id} className="group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none md:hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
+          {paginatedData.items.map(product => <Card key={product.id} className={`group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none ${isMobile ? '' : 'md:hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-shadow duration-200'}`}>
               <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2 sm:space-y-3 flex-1">
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg sm:rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                      <div className={`p-1.5 sm:p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg sm:rounded-xl shadow-lg ${isMobile ? '' : 'group-hover:scale-105 transition-transform duration-200'}`}>
                         <Package className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-sm sm:text-base font-bold text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-300 truncate">
+                        <CardTitle className={`text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate ${isMobile ? '' : 'group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-200'}`}>
                           {capitalize(product.name)}
                         </CardTitle>
                       </div>
@@ -653,7 +644,7 @@ export default function Produtos() {
                   </div>
                 </div>
 
-                <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="outline" className="w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 text-orange-700 hover:text-orange-800 transition-all duration-300">
+                <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="outline" className={`w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 text-orange-700 ${isMobile ? '' : 'hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 hover:text-orange-800 transition-all duration-200'}`}>
                       <History className="h-4 w-4 mr-2" />
                       Ver Histórico de Preços
                     </Button>} />

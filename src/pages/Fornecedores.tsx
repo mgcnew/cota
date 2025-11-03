@@ -575,16 +575,16 @@ export default function Fornecedores() {
 
       {/* Suppliers View */}
       {viewMode === "grid" ? <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map(supplier => <Card key={supplier.id} className="group sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 transition-all duration-300 border border-gray-200/60 dark:border-gray-700/30 sm:hover:border-indigo-300/60 sm:dark:hover:border-indigo-600/50 bg-white dark:bg-[#1C1F26] sm:bg-gradient-to-br sm:from-white sm:to-indigo-50/30 sm:dark:from-[#1C1F26] sm:dark:to-[#1C1F26] sm:backdrop-blur-sm">
+          {paginatedData.items.map(supplier => <Card key={supplier.id} className="group border border-gray-200/60 dark:border-gray-700/30 bg-white dark:bg-[#1C1F26] sm:bg-gradient-to-br sm:from-white sm:to-indigo-50/30 sm:dark:from-[#1C1F26] sm:dark:to-[#1C1F26] sm:backdrop-blur-sm sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 sm:hover:border-indigo-300/60 sm:dark:hover:border-indigo-600/50 sm:transition-shadow sm:duration-200">
               <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2 sm:space-y-3 flex-1">
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="hidden sm:block p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 group-hover:from-indigo-500/20 group-hover:to-blue-500/20 transition-all duration-300 flex-shrink-0">
-                        <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
+                      <div className="hidden sm:block p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-500/10 to-blue-500/10 sm:group-hover:from-indigo-500/20 sm:group-hover:to-blue-500/20 sm:transition-all sm:duration-200 flex-shrink-0">
+                        <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 sm:group-hover:scale-110 sm:transition-transform sm:duration-200" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base sm:text-base font-semibold text-gray-900 dark:text-white sm:group-hover:text-indigo-700 sm:dark:group-hover:text-indigo-400 transition-colors duration-300 truncate">
+                        <CardTitle className="text-base sm:text-base font-semibold text-gray-900 dark:text-white truncate sm:group-hover:text-indigo-700 sm:dark:group-hover:text-indigo-400 sm:transition-colors sm:duration-200">
                           {capitalize(supplier.name)}
                         </CardTitle>
                         <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5 sm:mt-1">{capitalize(supplier.contact)}</p>
@@ -597,7 +597,7 @@ export default function Fornecedores() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 sm:hover:bg-indigo-100 h-8 w-8 p-0">
+                      <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:transition-opacity sm:duration-200 sm:hover:bg-gray-100 sm:dark:hover:bg-gray-800 sm:hover:bg-indigo-100 h-8 w-8 p-0">
                         <MoreVertical className="h-4 w-4 text-gray-400 dark:text-gray-500 sm:text-gray-600" />
                       </Button>
                     </DropdownMenuTrigger>

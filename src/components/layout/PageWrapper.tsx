@@ -1,16 +1,16 @@
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PageWrapperProps {
   children: ReactNode;
   className?: string;
 }
 
-// Detectar se é mobile
-const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
 export function PageWrapper({ children, className = "" }: PageWrapperProps) {
-  // No mobile, usar div simples sem animação
+  const isMobile = useIsMobile();
+
+  // No mobile, usar div simples sem animação para melhor performance
   if (isMobile) {
     return (
       <div className={`w-full ${className}`}>
@@ -37,7 +37,9 @@ export function PageWrapper({ children, className = "" }: PageWrapperProps) {
 }
 
 export function PageSection({ children, className = "" }: PageWrapperProps) {
-  // No mobile, usar div simples sem animação
+  const isMobile = useIsMobile();
+
+  // No mobile, usar div simples sem animação para melhor performance
   if (isMobile) {
     return (
       <div className={className}>

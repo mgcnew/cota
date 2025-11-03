@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ViewMode } from '@/types/pagination';
 
 /**
  * Hook para gerenciar o modo de visualização responsivo
  * No mobile (< 768px), o padrão é "grid" (cards)
  * No desktop (>= 768px), o padrão é "table"
+ * Otimizado para mobile com debounce no resize
  */
 export function useResponsiveViewMode() {
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -16,24 +17,32 @@ export function useResponsiveViewMode() {
   });
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     const handleResize = () => {
-      const isMobile = window.innerWidth < 768;
-      
-      // Se mudou para mobile e está em table, muda para grid
-      if (isMobile && viewMode === 'table') {
-        setViewMode('grid');
-      }
-      // Se mudou para desktop e está em grid, pode manter ou mudar para table
-      // Deixamos o usuário escolher no desktop
+      // Debounce para evitar muitos re-renders no mobile
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const isMobile = window.innerWidth < 768;
+        
+        // Se mudou para mobile e está em table, muda para grid
+        if (isMobile && viewMode === 'table') {
+          setViewMode('grid');
+        }
+      }, 150); // Debounce de 150ms
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     
-    // Executa uma vez para garantir o estado correto
-    handleResize();
-
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [viewMode]);
 
-  return { viewMode, setViewMode };
+  const setViewModeMemo = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
+
+  return { viewMode, setViewMode: setViewModeMemo };
 }

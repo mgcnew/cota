@@ -89,7 +89,6 @@ export default function Historico() {
         return;
       }
 
-      console.log("Buscando histórico para company_id:", companyData.company_id);
 
       const {
         data,
@@ -107,7 +106,6 @@ export default function Historico() {
         throw error;
       }
 
-      console.log("Dados do histórico:", data?.length || 0, "registros");
 
       // Transform database data to match UI format
       const formattedData = (data || []).map(item => ({
@@ -126,7 +124,6 @@ export default function Historico() {
       setHistorico(formattedData);
       
       if (formattedData.length === 0) {
-        console.log("Nenhuma atividade encontrada para esta empresa");
       }
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
