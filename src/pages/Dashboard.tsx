@@ -8,12 +8,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loader2, Target, Award, Clock, CheckCircle, AlertCircle, XCircle, Info, ArrowUp, ArrowDown, MoreHorizontal } from 'lucide-react';
+import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loader2, Target, Award, Clock, CheckCircle, AlertCircle, XCircle, Info, ArrowUp, ArrowDown, MoreHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell, ComposedChart, Area, ReferenceLine } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
 import { capitalize } from '@/lib/text-utils';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const DEFAULT_METRICS = {
   cotacoesAtivas: 0,
@@ -55,8 +56,10 @@ export default function Dashboard() {
   const [approvalModalTab, setApprovalModalTab] = useState('resumo');
   const [showFullApprovalHistory, setShowFullApprovalHistory] = useState(false);
   const [economyModalPeriod, setEconomyModalPeriod] = useState('current');
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
 
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const dashboardData = useDashboard();
   const metrics = dashboardData?.metrics ?? DEFAULT_METRICS;
@@ -218,326 +221,393 @@ export default function Dashboard() {
         return status || 'Pendente';
     }
   };
+  // Helper function para renderizar Card 1 - Cotações Ativas
+  const renderCard1 = () => (
+    <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
+      <svg
+        className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5"
+        viewBox="0 0 300 200"
+        fill="none"
+        style={{ zIndex: 0 }}
+      >
+        <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
+        <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
+        <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
+        <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
+      </svg>
+      <CardHeader className="border-0 z-10 relative pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-white/70 dark:text-gray-400" />
+            <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+              Cotações Ativas
+            </CardTitle>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" side="bottom">
+              <DropdownMenuItem onClick={() => setShowCotacoesModal(true)}>
+                <Info className="h-4 w-4 mr-2" /> Ver Detalhes
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 z-10 relative">
+        <div className="flex items-center gap-2.5">
+          <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.cotacoesAtivas}
+          </span>
+          {metrics.crescimentoCotacoes !== 0 && (
+            <TooltipProvider>
+              <UiTooltip>
+                <TooltipTrigger asChild>
+                  <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
+                    {metrics.crescimentoCotacoes > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                    {Math.abs(metrics.crescimentoCotacoes)}%
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Crescimento comparado ao mês anterior</p>
+                </TooltipContent>
+              </UiTooltip>
+            </TooltipProvider>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+          <div className="flex items-center justify-between">
+            <span>Vs mês anterior:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {Math.round(metrics.cotacoesAtivas / (1 + metrics.crescimentoCotacoes / 100))}
+            </span>
+          </div>
+          {metrics.produtosCotados > 0 && (
+            <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+              <span>Produtos cotados:</span>
+              <span className="font-medium">{metrics.produtosCotados}</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Helper function para renderizar Card 2 - Economia Gerada
+  const renderCard2 = () => (
+    <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
+      <svg
+        className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
+        viewBox="0 0 200 200"
+        fill="none"
+        style={{ zIndex: 0 }}
+      >
+        <defs>
+          <filter id="blur2" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="10" />
+          </filter>
+        </defs>
+        <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur2)" />
+        <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
+        <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
+        <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
+      </svg>
+      <CardHeader className="border-0 z-10 relative pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
+            <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+              Economia Gerada
+            </CardTitle>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" side="bottom">
+              <DropdownMenuItem onClick={() => setShowEconomyModal(true)}>
+                <Info className="h-4 w-4 mr-2" /> Ver Detalhes
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 z-10 relative">
+        <div className="flex items-center gap-2.5">
+          <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}
+          </span>
+          {metrics.crescimentoEconomia !== 0 && (
+            <TooltipProvider>
+              <UiTooltip>
+                <TooltipTrigger asChild>
+                  <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
+                    {metrics.crescimentoEconomia > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                    {Math.abs(metrics.crescimentoEconomia)}%
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Crescimento comparado ao mês anterior</p>
+                </TooltipContent>
+              </UiTooltip>
+            </TooltipProvider>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+          <div className="flex items-center justify-between">
+            <span>Vs mês anterior:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {formatCurrency((selectedEconomyBreakdown?.economiaRealizada || 0) / (1 + (metrics.crescimentoEconomia || 0) / 100))}
+            </span>
+          </div>
+          {metrics.eficienciaEconomia > 0 && (
+            <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+              <span>Eficiência:</span>
+              <span className="font-medium">{formatPercent(metrics.eficienciaEconomia)}</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Helper function para renderizar Card 3 - Fornecedores
+  const renderCard3 = () => (
+    <Card className="group relative overflow-hidden bg-indigo-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
+      <svg
+        className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
+        viewBox="0 0 200 200"
+        fill="none"
+        style={{ zIndex: 0 }}
+      >
+        <defs>
+          <filter id="blur3" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="12" />
+          </filter>
+        </defs>
+        <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur3)" />
+        <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
+        <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
+        <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
+      </svg>
+      <CardHeader className="border-0 z-10 relative pb-3">
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-white/70 dark:text-gray-400" />
+          <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+            Fornecedores
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 z-10 relative">
+        <div className="flex items-center gap-2.5">
+          <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.fornecedores}
+          </span>
+          <TooltipProvider>
+            <UiTooltip>
+              <TooltipTrigger asChild>
+                <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
+                  <ArrowUp className="w-3 h-3" />
+                  +{isLoading ? '-' : metrics.taxaAtividade}%
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs">Taxa de atividade dos fornecedores</p>
+              </TooltipContent>
+            </UiTooltip>
+          </TooltipProvider>
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+          <div className="flex items-center justify-between">
+            <span>Taxa de atividade:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {isLoading ? '-' : `${metrics.taxaAtividade}%`}
+            </span>
+          </div>
+          {metrics.mediaFornecedoresParticipantes > 0 && (
+            <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+              <span>Média participantes:</span>
+              <span className="font-medium">{metrics.mediaFornecedoresParticipantes.toFixed(1)}</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Helper function para renderizar Card 4 - Taxa de Aprovação
+  const renderCard4 = () => (
+    <Card className="group relative overflow-hidden bg-yellow-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
+      <svg
+        className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
+        viewBox="0 0 200 200"
+        fill="none"
+        style={{ zIndex: 0 }}
+      >
+        <defs>
+          <filter id="blur4" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="16" />
+          </filter>
+        </defs>
+        <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
+        <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur4)" />
+        <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
+        <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
+        <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
+      </svg>
+      <CardHeader className="border-0 z-10 relative pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-white/70 dark:text-gray-400" />
+            <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+              Taxa de Aprovação
+            </CardTitle>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" side="bottom">
+              <DropdownMenuItem onClick={() => setShowApprovalModal(true)}>
+                <Info className="h-4 w-4 mr-2" /> Ver Detalhes
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 z-10 relative">
+        <div className="flex items-center gap-2.5">
+          <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${metrics.taxaAprovacao || 0}%`}
+          </span>
+          {metrics.variacaoTaxaAprovacao !== 0 && (
+            <TooltipProvider>
+              <UiTooltip>
+                <TooltipTrigger asChild>
+                  <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
+                    {metrics.variacaoTaxaAprovacao > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                    {metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{Math.abs(metrics.variacaoTaxaAprovacao || 0)}%
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Variação comparada ao mês anterior</p>
+                </TooltipContent>
+              </UiTooltip>
+            </TooltipProvider>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+          <div className="flex items-center justify-between">
+            <span>Vs mês anterior:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {metrics.taxaAprovacaoAnterior || 0}%
+            </span>
+          </div>
+          {(metrics.aprovacoesTotal > 0 || metrics.pendenciasTotal > 0 || metrics.rejeicoesTotal > 0) && (
+            <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+              {metrics.aprovacoesTotal > 0 && (
+                <span className="flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>{metrics.aprovacoesTotal}</span>
+                </span>
+              )}
+              {metrics.pendenciasTotal > 0 && (
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  <span>{metrics.pendenciasTotal}</span>
+                </span>
+              )}
+              {metrics.rejeicoesTotal > 0 && (
+                <span className="flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  <span>{metrics.rejeicoesTotal}</span>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return <PageWrapper>
       <div className="page-container">
         {/* Métricas Principais - Inspiração 21st.dev Statistics Card 2 */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-8 overflow-visible">
-          {/* Card 1: Cotações Ativas - Inspiração Statistics Card 2 */}
-          <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
-            {/* Decoração SVG sutil */}
-            <svg
-              className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5"
-              viewBox="0 0 300 200"
-              fill="none"
-              style={{ zIndex: 0 }}
-            >
-              <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
-              <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
-              <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
-              <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
-            </svg>
-
-            <CardHeader className="border-0 z-10 relative pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Cotações Ativas
-                  </CardTitle>
-                    </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" side="bottom">
-                    <DropdownMenuItem onClick={() => setShowCotacoesModal(true)}>
-                      <Info className="h-4 w-4 mr-2" /> Ver Detalhes
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                      </div>
-            </CardHeader>
-            <CardContent className="space-y-2.5 z-10 relative">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.cotacoesAtivas}
-                </span>
-                {metrics.crescimentoCotacoes !== 0 && (
-                    <TooltipProvider>
-                      <UiTooltip>
-                        <TooltipTrigger asChild>
-                        <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
-                          {metrics.crescimentoCotacoes > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-                          {Math.abs(metrics.crescimentoCotacoes)}%
-                        </Badge>
-                        </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs">Crescimento comparado ao mês anterior</p>
-                        </TooltipContent>
-                      </UiTooltip>
-                    </TooltipProvider>
-                )}
-                </div>
-              <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                <div className="flex items-center justify-between">
-                  <span>Vs mês anterior:</span>
-                  <span className="font-medium text-white dark:text-gray-300">
-                    {Math.round(metrics.cotacoesAtivas / (1 + metrics.crescimentoCotacoes / 100))}
+        {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
+        {isMobile ? (
+          <div className="mb-8">
+            {/* Card wrapper com navegação integrada no topo */}
+            <div className="relative">
+              {/* Navegação integrada no topo do card (parece ser parte do card) */}
+              <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
+                  }}
+                  className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
+                  <span className="text-xs font-semibold text-white dark:text-gray-200">
+                    {activeCardIndex + 1} / 4
                   </span>
-                  </div>
-                {metrics.produtosCotados > 0 && (
-                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>Produtos cotados:</span>
-                    <span className="font-medium">{metrics.produtosCotados}</span>
-                  </div>
-                )}
                 </div>
-              </CardContent>
-          </Card>
-
-          {/* Card 2: Economia Gerada - Inspiração Statistics Card 2 */}
-          <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
-            {/* Decoração SVG sutil */}
-            <svg
-              className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
-              viewBox="0 0 200 200"
-              fill="none"
-              style={{ zIndex: 0 }}
-            >
-              <defs>
-                <filter id="blur2" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="10" />
-                </filter>
-              </defs>
-              <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur2)" />
-              <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
-              <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
-              <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
-            </svg>
-
-            <CardHeader className="border-0 z-10 relative pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Economia Gerada
-                  </CardTitle>
-                    </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" side="bottom">
-                    <DropdownMenuItem onClick={() => setShowEconomyModal(true)}>
-                      <Info className="h-4 w-4 mr-2" /> Ver Detalhes
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                      </div>
-            </CardHeader>
-            <CardContent className="space-y-2.5 z-10 relative">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}
-                </span>
-                {metrics.crescimentoEconomia !== 0 && (
-                    <TooltipProvider>
-                      <UiTooltip>
-                        <TooltipTrigger asChild>
-                        <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
-                          {metrics.crescimentoEconomia > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-                          {Math.abs(metrics.crescimentoEconomia)}%
-                        </Badge>
-                        </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs">Crescimento comparado ao mês anterior</p>
-                        </TooltipContent>
-                      </UiTooltip>
-                    </TooltipProvider>
-                )}
-                </div>
-              <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                <div className="flex items-center justify-between">
-                  <span>Vs mês anterior:</span>
-                  <span className="font-medium text-white dark:text-gray-300">
-                    {formatCurrency((selectedEconomyBreakdown?.economiaRealizada || 0) / (1 + (metrics.crescimentoEconomia || 0) / 100))}
-                  </span>
-                  </div>
-                {metrics.eficienciaEconomia > 0 && (
-                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>Eficiência:</span>
-                    <span className="font-medium">{formatPercent(metrics.eficienciaEconomia)}</span>
-                  </div>
-                )}
-                </div>
-              </CardContent>
-          </Card>
-
-          {/* Card 3: Fornecedores - Inspiração Statistics Card 2 */}
-          <Card className="group relative overflow-hidden bg-indigo-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
-            {/* Decoração SVG sutil */}
-            <svg
-              className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
-              viewBox="0 0 200 200"
-              fill="none"
-              style={{ zIndex: 0 }}
-            >
-              <defs>
-                <filter id="blur3" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="12" />
-                </filter>
-              </defs>
-              <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur3)" />
-              <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
-              <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
-              <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
-            </svg>
-
-            <CardHeader className="border-0 z-10 relative pb-3">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                  Fornecedores
-                </CardTitle>
-                  </div>
-            </CardHeader>
-            <CardContent className="space-y-2.5 z-10 relative">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.fornecedores}
-                </span>
-                  <TooltipProvider>
-                    <UiTooltip>
-                      <TooltipTrigger asChild>
-                      <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
-                        <ArrowUp className="w-3 h-3" />
-                        +{isLoading ? '-' : metrics.taxaAtividade}%
-                      </Badge>
-                      </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">Taxa de atividade dos fornecedores</p>
-                      </TooltipContent>
-                    </UiTooltip>
-                  </TooltipProvider>
-                </div>
-              <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                <div className="flex items-center justify-between">
-                  <span>Taxa de atividade:</span>
-                  <span className="font-medium text-white dark:text-gray-300">
-                    {isLoading ? '-' : `${metrics.taxaAtividade}%`}
-                  </span>
-                    </div>
-                {metrics.mediaFornecedoresParticipantes > 0 && (
-                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>Média participantes:</span>
-                    <span className="font-medium">{metrics.mediaFornecedoresParticipantes.toFixed(1)}</span>
-                      </div>
-                    )}
-                </div>
-            </CardContent>
-          </Card>
-
-          {/* Card 4: Taxa de Aprovação - Inspiração Statistics Card 2 */}
-          <Card className="group relative overflow-hidden bg-yellow-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
-            {/* Decoração SVG sutil */}
-            <svg
-              className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
-              viewBox="0 0 200 200"
-              fill="none"
-              style={{ zIndex: 0 }}
-            >
-              <defs>
-                <filter id="blur4" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="16" />
-                </filter>
-              </defs>
-              <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
-              <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur4)" />
-              <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
-              <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
-              <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
-            </svg>
-
-            <CardHeader className="border-0 z-10 relative pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Target className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Taxa de Aprovação
-                  </CardTitle>
-                  </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" side="bottom">
-                    <DropdownMenuItem onClick={() => setShowApprovalModal(true)}>
-                      <Info className="h-4 w-4 mr-2" /> Ver Detalhes
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-2.5 z-10 relative">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${metrics.taxaAprovacao || 0}%`}
-                </span>
-                {metrics.variacaoTaxaAprovacao !== 0 && (
-                <TooltipProvider>
-                  <UiTooltip>
-                    <TooltipTrigger asChild>
-                        <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
-                          {metrics.variacaoTaxaAprovacao > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-                          {metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{Math.abs(metrics.variacaoTaxaAprovacao || 0)}%
-                        </Badge>
-                    </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs">Variação comparada ao mês anterior</p>
-                    </TooltipContent>
-                  </UiTooltip>
-                </TooltipProvider>
-                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
+                  }}
+                  className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
-              <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                <div className="flex items-center justify-between">
-                  <span>Vs mês anterior:</span>
-                  <span className="font-medium text-white dark:text-gray-300">
-                    {metrics.taxaAprovacaoAnterior || 0}%
-                  </span>
-                </div>
-                {(metrics.aprovacoesTotal > 0 || metrics.pendenciasTotal > 0 || metrics.rejeicoesTotal > 0) && (
-                  <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
-                    {metrics.aprovacoesTotal > 0 && (
-                      <span className="flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3" />
-                        <span>{metrics.aprovacoesTotal}</span>
-                      </span>
-                    )}
-                    {metrics.pendenciasTotal > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{metrics.pendenciasTotal}</span>
-                      </span>
-                    )}
-                    {metrics.rejeicoesTotal > 0 && (
-                      <span className="flex items-center gap-1">
-                        <XCircle className="w-3 h-3" />
-                        <span>{metrics.rejeicoesTotal}</span>
-                      </span>
-                    )}
+
+              {/* Container do carousel */}
+              <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
+                <div 
+                  className="flex transition-transform duration-300 ease-in-out"
+                  style={{ 
+                    transform: `translateX(-${activeCardIndex * 100}%)`,
+                  }}
+                >
+                  <div className="w-full flex-shrink-0">
+                    {renderCard1()}
                   </div>
-                )}
+                  <div className="w-full flex-shrink-0">
+                    {renderCard2()}
+                  </div>
+                  <div className="w-full flex-shrink-0">
+                    {renderCard3()}
+                  </div>
+                  <div className="w-full flex-shrink-0">
+                    {renderCard4()}
+                  </div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-8 overflow-visible">
+            {renderCard1()}
+            {renderCard2()}
+            {renderCard3()}
+            {renderCard4()}
+          </div>
+        )}
 
         {/* Gráficos lado a lado - Gráfico maior, Card menor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
