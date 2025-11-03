@@ -1,24 +1,31 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
+import { Mic, MessageSquare, Sparkles, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const funcionalidades = [
   {
     id: 'locucoes',
     titulo: 'Locuções AI',
-    descricao: 'Geração de locuções com inteligência artificial',
-    icon: 'fluent:mic-32-filled',
+    descricao: 'Gere locuções profissionais com inteligência artificial',
+    icon: Mic,
     rota: '/locucoes',
-    gradient: 'from-purple-500 to-pink-500'
+    gradient: 'from-purple-500 to-pink-500',
+    bgGradient: 'from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20',
+    borderColor: 'border-purple-200 dark:border-purple-800',
+    textColor: 'text-purple-700 dark:text-purple-300'
   },
   {
     id: 'whatsapp',
     titulo: 'WhatsApp em Massa',
-    descricao: 'Envio de mensagens e imagens para múltiplos contatos',
-    icon: 'fluent:chat-multiple-32-filled',
+    descricao: 'Envie mensagens e imagens para múltiplos contatos',
+    icon: MessageSquare,
     rota: '/whatsapp-mensagens',
-    gradient: 'from-green-500 to-emerald-500'
+    gradient: 'from-green-500 to-emerald-500',
+    bgGradient: 'from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20',
+    borderColor: 'border-green-200 dark:border-green-800',
+    textColor: 'text-green-700 dark:text-green-300'
   }
 ];
 
@@ -27,35 +34,66 @@ export default function Extra() {
 
   return (
     <PageWrapper>
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-            <Icon icon="fluent:star-32-filled" width="24" height="24" className="text-white" />
+      <div className="page-container">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6 sm:mb-8">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg flex-shrink-0">
+            <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Funcionalidades Extra</h1>
-            <p className="text-gray-600 dark:text-gray-400">Ferramentas e recursos adicionais</p>
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Funcionalidades Extra</h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">Ferramentas e recursos adicionais do sistema</p>
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {funcionalidades.map((func) => (
-            <Card 
-              key={func.id}
-              className="p-6 hover:shadow-lg transition-all cursor-pointer group hover:scale-105"
-              onClick={() => navigate(func.rota)}
-            >
-              <div className={`w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br ${func.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                <Icon icon={func.icon} width="32" height="32" className="text-white" />
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 text-center">
-                {func.titulo}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-center text-sm">
-                {func.descricao}
-              </p>
-            </Card>
-          ))}
+        {/* Cards Grid */}
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+          {funcionalidades.map((func) => {
+            const IconComponent = func.icon;
+            return (
+              <Card 
+                key={func.id}
+                className={`relative overflow-hidden border ${func.borderColor} bg-white dark:bg-gray-900 hover:shadow-md dark:hover:shadow-lg transition-shadow duration-200 cursor-pointer`}
+                onClick={() => navigate(func.rota)}
+              >
+                {/* Background Gradient - Sutil */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${func.bgGradient} opacity-30 dark:opacity-20`} />
+                
+                <CardContent className="relative p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                    {/* Icon Container */}
+                    <div className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gradient-to-br ${func.gradient} flex items-center justify-center`}>
+                      <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h2 className={`text-lg sm:text-xl font-semibold mb-2 ${func.textColor}`}>
+                        {func.titulo}
+                      </h2>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-3 sm:mb-4">
+                        {func.descricao}
+                      </p>
+                      
+                      {/* Action Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`${func.textColor} hover:bg-gray-50 dark:hover:bg-gray-800/50 -ml-2 transition-colors duration-200`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(func.rota);
+                        }}
+                      >
+                        Acessar
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </PageWrapper>

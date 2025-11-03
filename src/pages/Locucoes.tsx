@@ -266,27 +266,26 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
 
   return (
     <PageWrapper>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-purple-500/5 dark:to-purple-500/10 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="page-container">
       {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-4"
+            className="text-center space-y-3 sm:space-y-4 mb-6 sm:mb-8"
           >
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-2 sm:gap-3">
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                className="p-3 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500"
+                className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500 flex-shrink-0"
               >
-                <Sparkles className="w-8 h-8 text-white" />
+                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </motion.div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent dark:from-purple-400 dark:via-pink-400 dark:to-orange-400">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent dark:from-purple-400 dark:via-pink-400 dark:to-orange-400">
                 AI Voice Studio
               </h1>
             </div>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-sm sm:text-base text-muted-foreground">
             Crie locuções profissionais com inteligência artificial
           </p>
             
@@ -337,20 +336,20 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
         </div>
           </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Text Input */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <Card className="p-6 border-2 hover:border-purple-500/50 dark:hover:border-purple-500/30 transition-colors bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
-                  <div className="space-y-4">
+                <Card className="p-4 sm:p-6 border-2 hover:border-purple-500/50 dark:hover:border-purple-500/30 transition-colors bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
+                  <div className="space-y-3 sm:space-y-4">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-semibold flex items-center gap-2">
-                        <Mic className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                        <Mic className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
                         Texto para Locução
                       </h2>
                       <Badge variant="secondary" className="gap-1">
@@ -379,12 +378,12 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <Card className="p-6 bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Music className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <Card className="p-4 sm:p-6 bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
+                  <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                    <Music className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400" />
                     Tipo de Locução
                   </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                     {tiposLocucao.map((type) => (
                       <motion.button
                         key={type.id}
@@ -417,11 +416,11 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Card className="p-6 bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                  <Card className="p-4 sm:p-6 bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
+              <CardHeader className="p-0 pb-4">
+                <CardTitle className="flex items-center justify-between text-base sm:text-lg">
                   <span className="flex items-center gap-2">
-                    <Volume2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <Volume2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
                     Locução Gerada
                   </span>
                   <Button
@@ -435,21 +434,21 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
                   </Button>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200/60 dark:border-green-700/30">
-                  <p className="text-gray-900 dark:text-white leading-relaxed whitespace-pre-wrap">
+              <CardContent className="space-y-3 sm:space-y-4 p-0 pt-4">
+                <div className="p-3 sm:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200/60 dark:border-green-700/30">
+                  <p className="text-sm sm:text-base text-gray-900 dark:text-white leading-relaxed whitespace-pre-wrap">
                     {resultado}
                   </p>
                 </div>
 
                 {/* Controles de Voz */}
-                <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200/60 dark:border-gray-700/30 space-y-4">
-                  <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                          <Settings className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200/60 dark:border-gray-700/30 space-y-3 sm:space-y-4">
+                  <h4 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                          <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600 dark:text-purple-400" />
                     Configurações de Voz
                   </h4>
                   
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
                     <div>
                       <Label className="text-sm">Tipo de Voz</Label>
                       <Select value={voz} onValueChange={setVoz}>
@@ -605,19 +604,19 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
                   )}
                 </Button>
               </motion.div>
-        </div>
+            </div>
 
             {/* History Sidebar */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              className="space-y-6"
+              className="space-y-4 sm:space-y-6"
             >
-              <Card className="p-6 bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold flex items-center gap-2">
-                    <History className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <Card className="p-4 sm:p-6 bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                    <History className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
                     Histórico
                   </h2>
                   {historico.length > 0 && (
@@ -631,8 +630,8 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
                     </Button>
                   )}
                 </div>
-                <ScrollArea className="h-[calc(100vh-200px)]">
-                  <div className="space-y-3">
+                <ScrollArea className="h-[calc(100vh-200px)] sm:h-[calc(100vh-300px)]">
+                  <div className="space-y-2 sm:space-y-3">
                 {historico.length === 0 ? (
                   <div className="text-center py-8">
                     <History className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
@@ -652,8 +651,8 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
                               exit={{ opacity: 0, x: -20 }}
                               transition={{ delay: index * 0.1 }}
                             >
-                              <Card className="p-4 hover:border-purple-500/50 dark:hover:border-purple-500/30 transition-colors cursor-pointer group bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
-                                <div className="space-y-3">
+                              <Card className="p-3 sm:p-4 hover:border-purple-500/50 dark:hover:border-purple-500/30 transition-colors cursor-pointer group bg-white dark:bg-[#1C1F26] border-gray-300/80 dark:border-gray-700/30">
+                                <div className="space-y-2 sm:space-y-3">
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="flex-1 min-w-0">
                                       <p className="text-sm font-medium truncate dark:text-white">{item.resposta.substring(0, 50)}...</p>
@@ -712,14 +711,14 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
             </Card>
 
               {/* Info Card */}
-          <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-700/30">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-700/30">
+            <CardHeader className="p-0 pb-3 sm:pb-4">
+              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
                 Marcações de Ênfase
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-xs text-gray-700 dark:text-gray-300">
+            <CardContent className="space-y-1.5 sm:space-y-2 text-xs text-gray-700 dark:text-gray-300 p-0">
               <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[enfase]texto[/enfase]</code> - Ênfase forte</p>
               <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[suave]texto[/suave]</code> - Ênfase moderada</p>
               <p><code className="bg-white dark:bg-gray-800 px-1 rounded">[pausa]</code> - Pausa curta (500ms)</p>
@@ -730,7 +729,6 @@ Retorne apenas o texto da locução, sem explicações adicionais.`;
           </Card>
             </motion.div>
           </div>
-        </div>
       </div>
     </PageWrapper>
   );
