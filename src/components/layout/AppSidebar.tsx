@@ -1,10 +1,22 @@
-import { Icon } from '@iconify/react';
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
+import { 
+  LayoutDashboard,
+  Package, 
+  Building2, 
+  FileText, 
+  ShoppingCart, 
+  History, 
+  BarChart3, 
+  TrendingUp,
+  Star,
+  MoreHorizontal,
+  Settings
+} from 'lucide-react';
 
 // Logo Component
 function LogoComponent() {
@@ -16,43 +28,43 @@ function LogoComponent() {
     </div>;
 }
 
-// Menu items com ícones coloridos do Iconify
+// Menu items com ícones do Lucide React (recomendados)
 const menuItems = [{
   title: "Dashboard",
   url: "/",
-  icon: "fluent:home-32-filled"
+  icon: LayoutDashboard
 }, {
   title: "Produtos",
   url: "/produtos",
-  icon: "fluent:box-32-filled"
+  icon: Package
 }, {
   title: "Fornecedores",
   url: "/fornecedores",
-  icon: "fluent:building-32-filled"
+  icon: Building2
 }, {
   title: "Cotações",
   url: "/cotacoes",
-  icon: "fluent:document-text-32-filled"
+  icon: FileText
 }, {
   title: "Pedidos",
   url: "/pedidos",
-  icon: "fluent:shopping-bag-32-filled"
+  icon: ShoppingCart
 }, {
   title: "Histórico",
   url: "/historico",
-  icon: "fluent:history-32-filled"
+  icon: History
 }, {
   title: "Relatórios",
   url: "/relatorios",
-  icon: "fluent:data-bar-vertical-32-filled"
+  icon: BarChart3
 }, {
   title: "Analytics",
   url: "/analytics",
-  icon: "fluent:data-trending-32-filled"
+  icon: TrendingUp
 }, {
   title: "Extra",
   url: "/extra",
-  icon: "fluent:star-32-filled"
+  icon: Star
 }];
 
 // Cores para os itens com efeitos aprimorados
@@ -135,7 +147,7 @@ function MobileMoreButton({
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full opacity-0 group-hover:opacity-100"></div>
 
           <div className="flex items-center justify-center mb-1 relative z-10 transition-all duration-300 w-7 h-7 rounded-xl group-hover:bg-white/60 group-hover:shadow-md">
-            <Icon icon="fluent:more-horizontal-32-filled" width="16" height="16" className="transition-all duration-200 flex-shrink-0 text-gray-500 group-hover:text-gray-700" />
+            <MoreHorizontal className="w-4 h-4 transition-all duration-200 flex-shrink-0 text-gray-500 group-hover:text-gray-700" />
           </div>
 
           <span className="text-[9px] font-bold text-center leading-tight transition-all duration-300 truncate max-w-[65px] relative z-10 tracking-wide text-gray-600 group-hover:text-gray-800 group-hover:font-extrabold">
@@ -148,7 +160,7 @@ function MobileMoreButton({
         <DialogHeader className="px-3 py-2.5 border-b border-gray-100/60 dark:border-gray-700/60 bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-900/40 dark:to-purple-900/40">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg">
-              <Icon icon="fluent:more-horizontal-32-filled" width="16" height="16" className="text-white" />
+              <MoreHorizontal className="w-4 h-4 text-white" />
             </div>
             <DialogTitle className="text-lg font-bold bg-gradient-to-r from-blue-900 to-purple-800 dark:from-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
               Mais Opções
@@ -168,7 +180,7 @@ function MobileMoreButton({
               const itemColor = colors[(index + 4) % colors.length];
               return <NavLink key={item.title} to={item.url} end={item.url === "/"} onClick={() => setOpen(false)} className={cn("flex flex-col items-center gap-2 p-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-[1.02] active:scale-95", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-md text-white ring-2 ring-white/20 dark:ring-white/10` : "bg-white/85 dark:bg-gray-800/85 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-blue-300 dark:hover:border-blue-500")}>
                     <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200", isItemActive ? "bg-white/20 backdrop-blur-sm" : `bg-gradient-to-br ${itemColor.bg} group-hover:scale-105`)}>
-                      <Icon icon={item.icon} width="18" height="18" className="transition-all duration-200 text-white" />
+                      <item.icon className="w-[18px] h-[18px] transition-all duration-200 text-white" />
                     </div>
                     <div className={cn("text-xs font-semibold transition-all duration-200 text-center", isItemActive ? "text-white" : "text-gray-900 dark:text-gray-200 group-hover:text-blue-900 dark:group-hover:text-blue-300")}>{item.title}</div>
                   </NavLink>;
@@ -187,7 +199,7 @@ function MobileMoreButton({
               window.location.href = '/configuracoes';
             }} className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/85 dark:bg-gray-800/85 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
-                  <Icon icon="fluent:settings-32-filled" width="18" height="18" className="text-white" />
+                  <Settings className="w-[18px] h-[18px] text-white" />
                 </div>
                 <div className="flex-1 text-left">
                   <div className="font-medium text-sm text-gray-900 dark:text-white">Configurações</div>
@@ -279,16 +291,13 @@ export function AppSidebar() {
                             : `0 4px 16px ${itemColor.shadowColor}, 0 2px 8px ${itemColor.shadowColor}`
                         } : undefined}
                       >
-                        <Icon 
-                          icon={item.icon} 
+                        <item.icon 
                           className={cn(
-                            "transition-colors duration-300",
+                            "w-[22px] h-[22px] transition-colors duration-300",
                             isItemActive 
                               ? "text-white" 
                               : "text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                           )} 
-                          width="22" 
-                          height="22" 
                         />
                       </NavLink>
                     </TooltipTrigger>
@@ -337,7 +346,7 @@ export function AppSidebar() {
                   iconSizeClass,
                   isItemActive ? "bg-white/20 backdrop-blur-sm shadow-inner" : "group-hover:bg-white/60 group-hover:shadow-md"
                 )}>
-                  <Icon icon={item.icon} width="16" height="16" className={cn("transition-all duration-200 flex-shrink-0", isItemActive ? "text-white drop-shadow-md" : "text-gray-500 group-hover:text-gray-700")} />
+                  <item.icon className={cn("w-4 h-4 transition-all duration-200 flex-shrink-0", isItemActive ? "text-white drop-shadow-md" : "text-gray-500 group-hover:text-gray-700")} />
                 </div>
 
                 <span className={cn("text-[9px] font-bold text-center leading-tight transition-all duration-300 truncate max-w-[65px] relative z-10 tracking-wide",
