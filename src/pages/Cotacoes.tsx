@@ -7,7 +7,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import type { Quote, FornecedorParticipante } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package, Clock } from "lucide-react";
+import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package, Clock, CircleDot, ClipboardList } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -236,7 +236,7 @@ export default function Cotacoes() {
               <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                 Ativas
               </CardTitle>
-            </div>
+                </div>
           </CardHeader>
           <CardContent className="space-y-2.5 z-10 relative">
             <div className="flex items-center gap-2.5">
@@ -255,7 +255,7 @@ export default function Cotacoes() {
                 <span className="font-medium text-white dark:text-gray-300">
                   {stats.porStatus.ativas}
                 </span>
-              </div>
+            </div>
               <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
                 <span>Percentual:</span>
                 <span className="font-medium">{stats.percentualAtivas}%</span>
@@ -264,7 +264,7 @@ export default function Cotacoes() {
                 <span>{stats.porStatus.pendentes} pendentes</span>
                 <span>•</span>
                 <span>{stats.porStatus.concluidas} finalizadas</span>
-              </div>
+            </div>
             </div>
           </CardContent>
         </Card>
@@ -295,7 +295,7 @@ export default function Cotacoes() {
               <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                 Pendentes
               </CardTitle>
-            </div>
+                </div>
           </CardHeader>
           <CardContent className="space-y-2.5 z-10 relative">
             <div className="flex items-center gap-2.5">
@@ -314,7 +314,7 @@ export default function Cotacoes() {
                 <span className="font-medium text-white dark:text-gray-300">
                   {stats.porStatus.pendentes}
                 </span>
-              </div>
+            </div>
               {stats.pendentesMais24h > 0 ? (
                 <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
                   <span>Com mais de 24h:</span>
@@ -356,7 +356,7 @@ export default function Cotacoes() {
               <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                 Economia
               </CardTitle>
-            </div>
+                </div>
           </CardHeader>
           <CardContent className="space-y-2.5 z-10 relative">
             <div className="flex items-center gap-2.5">
@@ -375,20 +375,20 @@ export default function Cotacoes() {
                 <span className="font-medium text-white dark:text-gray-300">
                   {stats.economiaFormatada}
                 </span>
-              </div>
+            </div>
               <div className="flex items-end gap-0.5 h-6 mt-2">
-                {stats.ultimas7Economias.map((economia, i) => {
-                  const maxEconomia = Math.max(...stats.ultimas7Economias, 1);
-                  const heightPercent = (economia / maxEconomia) * 100;
-                  return (
-                    <div 
-                      key={i} 
+              {stats.ultimas7Economias.map((economia, i) => {
+                const maxEconomia = Math.max(...stats.ultimas7Economias, 1);
+                const heightPercent = (economia / maxEconomia) * 100;
+                return (
+                  <div 
+                    key={i} 
                       className="flex-1 bg-white/30 rounded-t hover:bg-white/40 transition-colors duration-200" 
                       style={{ height: `${Math.max(heightPercent, 10)}%`, minHeight: '4px' }}
-                      title={economia > 0 ? `Economia: R$ ${economia.toLocaleString('pt-BR')}` : 'Sem economia'}
+                    title={economia > 0 ? `Economia: R$ ${economia.toLocaleString('pt-BR')}` : 'Sem economia'}
                     />
-                  );
-                })}
+                );
+              })}
               </div>
             </div>
           </CardContent>
@@ -421,7 +421,7 @@ export default function Cotacoes() {
               <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                 Fornecedores
               </CardTitle>
-            </div>
+                </div>
           </CardHeader>
           <CardContent className="space-y-2.5 z-10 relative">
             <div className="flex items-center gap-2.5">
@@ -440,7 +440,7 @@ export default function Cotacoes() {
                 <span className="font-medium text-white dark:text-gray-300">
                   {stats.mediaFornecedores}
                 </span>
-              </div>
+            </div>
               <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
                 <span>Fornecedores únicos:</span>
                 <span className="font-medium">{stats.totalFornecedoresUnicos}</span>
@@ -812,26 +812,32 @@ export default function Cotacoes() {
                       <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-teal-200/60 dark:border-teal-800/40 rounded-lg shadow-sm px-4 py-3">
                         <div className="w-[18%] flex items-center gap-2 pr-4 min-w-0">
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/15 to-cyan-500/15 flex items-center justify-center text-teal-600 dark:text-cyan-300">
-                            <FileText className="h-4 w-4" />
+                            <ClipboardList className="h-4 w-4" />
                           </div>
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Cotação</span>
                         </div>
-                        <div className="hidden md:flex w-[20%] pl-2">
+                        <div className="hidden md:flex w-[20%] pl-2 items-center gap-1.5">
+                          <Package className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Produto</span>
                         </div>
-                        <div className="hidden lg:flex w-[15%] pl-2">
+                        <div className="hidden lg:flex w-[15%] pl-2 items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Período</span>
                         </div>
-                        <div className="w-[12%] pl-2 justify-center flex">
+                        <div className="w-[12%] pl-2 justify-center flex items-center gap-1.5">
+                          <CircleDot className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Status</span>
                         </div>
-                        <div className="w-[15%] pl-2 flex">
+                        <div className="w-[15%] pl-2 flex items-center gap-1.5">
+                          <DollarSign className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Melhor Preço</span>
                         </div>
-                        <div className="hidden sm:flex w-[10%] pl-2 justify-center">
+                        <div className="hidden sm:flex w-[10%] pl-2 justify-center items-center gap-1.5">
+                          <Building2 className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Fornecedores</span>
                         </div>
-                        <div className="w-[10%] pl-4 flex justify-end">
+                        <div className="w-[10%] pl-4 flex justify-end items-center gap-1.5">
+                          <MoreVertical className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-800 dark:text-teal-200">Ações</span>
                         </div>
                       </div>
@@ -847,7 +853,7 @@ export default function Cotacoes() {
                           {/* Cotação - Largura fixa */}
                           <div className="w-[18%] flex items-center gap-3 px-2">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500/10 to-cyan-500/10 dark:from-teal-400/20 dark:to-cyan-400/20 flex items-center justify-center flex-shrink-0 shadow-sm border border-teal-200/50 dark:border-teal-700/50">
-                              <FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                              <ClipboardList className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="font-semibold text-sm text-foreground truncate">

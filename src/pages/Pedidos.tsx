@@ -12,7 +12,7 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
-import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp, MoreVertical } from "lucide-react";
+import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp, MoreVertical, CircleDot } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import EditPedidoDialog from "@/components/forms/EditPedidoDialog";
@@ -563,26 +563,28 @@ export default function Pedidos() {
                               </div>
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Pedido</span>
                             </div>
-                            <div className="w-[18%] flex items-center gap-2 px-2 min-w-0">
-                              <Building2 className="h-4 w-4 text-orange-600 dark:text-orange-300" />
+                            <div className="w-[18%] flex items-center gap-1.5 px-2 min-w-0">
+                              <Building2 className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Fornecedor</span>
                             </div>
-                            <div className="hidden md:flex w-[18%] px-2 items-center gap-2">
-                              <Package className="h-4 w-4 text-orange-600 dark:text-orange-300" />
+                            <div className="hidden md:flex w-[18%] px-2 items-center gap-1.5">
+                              <Package className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Produtos</span>
                             </div>
-                            <div className="hidden lg:flex w-[15%] px-2 items-center gap-2">
-                              <Calendar className="h-4 w-4 text-orange-600 dark:text-orange-300" />
+                            <div className="hidden lg:flex w-[15%] px-2 items-center gap-1.5">
+                              <Truck className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Entrega</span>
                             </div>
-                            <div className="flex w-[12%] px-2 justify-center">
+                            <div className="flex w-[12%] px-2 justify-center items-center gap-1.5">
+                              <CircleDot className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Status</span>
                             </div>
-                            <div className="flex w-[12%] px-2 justify-center items-center gap-2">
-                              <DollarSign className="h-4 w-4 text-orange-600 dark:text-orange-300" />
+                            <div className="flex w-[12%] px-2 justify-center items-center gap-1.5">
+                              <DollarSign className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Valor</span>
                             </div>
-                            <div className="w-[10%] pl-4 flex justify-end">
+                            <div className="w-[10%] pl-4 flex justify-end items-center gap-1.5">
+                              <MoreVertical className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Ações</span>
                             </div>
                           </div>

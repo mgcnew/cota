@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, ChevronDown, History, MessageCircle, Award, Star, Clock } from "lucide-react";
+import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, ChevronDown, History, MessageCircle, Award, Star, Clock, CircleDot, CreditCard, ShoppingCart, ClipboardList } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -303,7 +303,7 @@ export default function Fornecedores() {
                   <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                     Fornecedores
                   </CardTitle>
-                </div>
+                    </div>
               </CardHeader>
               <CardContent className="space-y-2.5 z-10 relative">
                 <div className="flex items-center gap-2.5">
@@ -312,9 +312,9 @@ export default function Fornecedores() {
                   </span>
                   <Badge className="bg-white/20 text-white font-semibold border-0">
                     <TrendingUp className="w-3 h-3" />
-                    +{Math.floor(stats.total * 0.15)}
+                      +{Math.floor(stats.total * 0.15)}
                   </Badge>
-                </div>
+                    </div>
                 <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                   <div className="flex items-center justify-between">
                     <span>Cadastrados:</span>
@@ -363,19 +363,19 @@ export default function Fornecedores() {
                   <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                     Ativos
                   </CardTitle>
-                </div>
+                    </div>
               </CardHeader>
               <CardContent className="space-y-2.5 z-10 relative">
                 <div className="flex items-center gap-2.5">
                   <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
                     {stats.active}
                   </span>
-                  {stats.percentualAtivos > 0 && (
+                    {stats.percentualAtivos > 0 && (
                     <Badge className="bg-white/20 text-white font-semibold border-0">
-                      {stats.percentualAtivos}%
+                        {stats.percentualAtivos}%
                     </Badge>
-                  )}
-                </div>
+                    )}
+                  </div>
                 <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                   <div className="flex items-center justify-between">
                     <span>Fornecedores ativos:</span>
@@ -386,7 +386,7 @@ export default function Fornecedores() {
                   <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
                     <span>Percentual da base:</span>
                     <span className="font-medium">{stats.percentualAtivos}%</span>
-                  </div>
+                </div>
                   <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
                     <span>{stats.inactive} inativos</span>
                     <span>•</span>
@@ -422,19 +422,19 @@ export default function Fornecedores() {
                   <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                     Limite Total
                   </CardTitle>
-                </div>
+                    </div>
               </CardHeader>
               <CardContent className="space-y-2.5 z-10 relative">
                 <div className="flex items-center gap-2.5">
                   <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
                     {stats.totalLimit}
                   </span>
-                  {stats.active > 0 && (
+                    {stats.active > 0 && (
                     <Badge className="bg-white/20 text-white font-semibold border-0">
-                      {stats.active} ativos
+                        {stats.active} ativos
                     </Badge>
-                  )}
-                </div>
+                    )}
+                  </div>
                 <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                   <div className="flex items-center justify-between">
                     <span>Limite total:</span>
@@ -459,17 +459,17 @@ export default function Fornecedores() {
                 fill="none"
                 style={{ zIndex: 0 }}
               >
-                <defs>
+                        <defs>
                   <filter id="blur-cotacoes-fornecedores" x="-20%" y="-20%" width="140%" height="140%">
                     <feGaussianBlur stdDeviation="16" />
                   </filter>
-                </defs>
+                        </defs>
                 <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
                 <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-cotacoes-fornecedores)" />
                 <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
                 <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
                 <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
-              </svg>
+                      </svg>
 
               <CardHeader className="border-0 z-10 relative pb-3">
                 <div className="flex items-center gap-2">
@@ -477,19 +477,19 @@ export default function Fornecedores() {
                   <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
                     Cotações
                   </CardTitle>
-                </div>
+                    </div>
               </CardHeader>
               <CardContent className="space-y-2.5 z-10 relative">
                 <div className="flex items-center gap-2.5">
                   <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
                     {stats.activeQuotes}
                   </span>
-                  {stats.mediaCotacoesPorFornecedor !== "0.0" && (
+                    {stats.mediaCotacoesPorFornecedor !== "0.0" && (
                     <Badge className="bg-white/20 text-white font-semibold border-0">
-                      {stats.mediaCotacoesPorFornecedor}
+                        {stats.mediaCotacoesPorFornecedor}
                     </Badge>
-                  )}
-                </div>
+                    )}
+                  </div>
                 <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                   <div className="flex items-center justify-between">
                     <span>Cotações ativas:</span>
@@ -765,22 +765,28 @@ export default function Fornecedores() {
                           </div>
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Fornecedor</span>
                         </div>
-                        <div className="hidden md:flex w-[12%] pl-2 justify-center">
+                        <div className="hidden md:flex w-[12%] pl-2 justify-center items-center gap-1.5">
+                          <CircleDot className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Status</span>
                         </div>
-                        <div className="hidden lg:flex w-[14%] pl-2 justify-center">
+                        <div className="hidden lg:flex w-[14%] pl-2 justify-center items-center gap-1.5">
+                          <CreditCard className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Limites</span>
                         </div>
-                        <div className="hidden lg:flex w-[12%] pl-2 justify-center">
+                        <div className="hidden lg:flex w-[12%] pl-2 justify-center items-center gap-1.5">
+                          <DollarSign className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Total</span>
                         </div>
-                        <div className="hidden xl:flex w-[12%] pl-2 justify-center">
+                        <div className="hidden xl:flex w-[12%] pl-2 justify-center items-center gap-1.5">
+                          <ShoppingCart className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Pedidos</span>
                         </div>
-                        <div className="hidden xl:flex w-[10%] pl-2 justify-center">
+                        <div className="hidden xl:flex w-[10%] pl-2 justify-center items-center gap-1.5">
+                          <Star className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Nota</span>
                         </div>
-                        <div className="w-[10%] pl-4 flex justify-end">
+                        <div className="w-[10%] pl-4 flex justify-end items-center gap-1.5">
+                          <MoreVertical className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Ações</span>
                         </div>
                       </div>
@@ -826,8 +832,10 @@ export default function Fornecedores() {
                           {/* Cotações - Largura fixa, hidden on small screens */}
                           <div className="hidden sm:block w-[10%] px-2">
                             <div className="text-center">
-                              <div className="flex items-center justify-center gap-1 mb-1">
-                                <FileText className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                              <div className="flex items-center justify-center gap-1.5 mb-1">
+                                <div className="flex items-center justify-center w-5 h-5 rounded-md bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-200/50 dark:border-indigo-800/40">
+                                  <ClipboardList className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                                </div>
                                 <span className="font-semibold text-indigo-700 dark:text-indigo-400 text-xs">{supplier.activeQuotes}</span>
                               </div>
                               <div className="text-xs text-gray-500 dark:text-gray-400">{supplier.totalQuotes}</div>

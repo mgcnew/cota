@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, Scale, FileUp, FileText, Building2, History, Clock } from "lucide-react";
+import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, Clock, ClipboardList, Tags, DollarSign, CircleDot, Barcode } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
@@ -177,9 +177,9 @@ export default function Produtos() {
     };
   }, [products, categories]);
   const getTrendIcon = (trend: "up" | "down" | "stable") => {
-    if (trend === "up") return <TrendingUp className="h-4 w-4 text-success" />;
-    if (trend === "down") return <TrendingUp className="h-4 w-4 text-error rotate-180" />;
-    return <span className="h-4 w-4 rounded-full bg-muted-foreground/50" />;
+    if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
+    if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
+    return <Minus className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />;
   };
 
   // Função para determinar status do produto baseado em dados
@@ -676,25 +676,32 @@ export default function Produtos() {
                           </div>
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Produto</span>
                         </div>
-                        <div className="hidden md:flex w-[15%] pl-2 justify-center">
+                        <div className="hidden md:flex w-[15%] pl-2 justify-center items-center gap-1.5">
+                          <Tags className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Categoria</span>
                         </div>
-                        <div className="hidden md:flex w-[12%] pl-2 justify-center">
+                        <div className="hidden md:flex w-[12%] pl-2 justify-center items-center gap-1.5">
+                          <Barcode className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Código</span>
                         </div>
-                        <div className="hidden sm:flex w-[13%] pl-2 justify-center">
+                        <div className="hidden sm:flex w-[13%] pl-2 justify-center items-center gap-1.5">
+                          <CircleDot className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Status</span>
                         </div>
-                        <div className="w-[12%] pl-2 justify-center hidden sm:flex sm:justify-center sm:items-center">
+                        <div className="w-[12%] pl-2 justify-center hidden sm:flex sm:justify-center sm:items-center gap-1.5">
+                          <DollarSign className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Melhor Preço</span>
                         </div>
-                        <div className="hidden lg:flex w-[15%] pl-2 justify-center">
+                        <div className="hidden lg:flex w-[15%] pl-2 justify-center items-center gap-1.5">
+                          <Building2 className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Fornecedor</span>
                         </div>
-                        <div className="hidden sm:flex w-[8%] pl-2 justify-center">
+                        <div className="hidden sm:flex w-[8%] pl-2 justify-center items-center gap-1.5">
+                          <ClipboardList className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Cotações</span>
                         </div>
-                        <div className="w-[10%] pl-4 flex justify-end">
+                        <div className="w-[10%] pl-4 flex justify-end items-center gap-1.5">
+                          <MoreVertical className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                           <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Ações</span>
                         </div>
                       </div>
@@ -765,9 +772,9 @@ export default function Produtos() {
 
                           {/* Cotações - Largura fixa, hidden on small screens */}
                           <div className="hidden sm:block w-[8%] px-2">
-                            <div className="flex items-center justify-center gap-1 pointer-events-none">
-                              <div className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30">
-                                <FileText className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                            <div className="flex items-center justify-center gap-1.5 pointer-events-none">
+                              <div className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30 border border-blue-200/50 dark:border-blue-800/40">
+                                <ClipboardList className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                               </div>
                               <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount}</span>
                             </div>
