@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
+import { usePedidos } from "@/hooks/usePedidos";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +39,38 @@ export default function Pedidos() {
   } = usePagination<any>({
     initialItemsPerPage: 10
   });
+  
+  // Usar React Query para cachear dados e evitar recarregamento desnecessário
+  const { pedidos: pedidosData, isLoading, isFetching, refetch } = usePedidos();
+  
+  // Só mostrar loading no carregamento inicial - se houver dados em cache (mesmo que vazio), não mostrar loading
+  // Isso evita o "piscar" da tabela quando o usuário volta à página
+  const showLoading = isLoading && !pedidosData.length;
+  
+  // Formatar dados para o formato esperado pela página
+  const pedidos = useMemo(() => {
+    return pedidosData.map(order => ({
+      id: order.id,
+      fornecedor: order.supplier_name,
+      total: `R$ ${Number(order.total_value).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2
+      })}`,
+      status: order.status,
+      dataPedido: new Date(order.order_date).toLocaleDateString('pt-BR'),
+      dataEntrega: new Date(order.delivery_date).toLocaleDateString('pt-BR'),
+      itens: order.items?.length || 0,
+      produtos: order.items?.map((item: any) => item.product_name) || [],
+      observacoes: order.observations || "",
+      detalhesItens: order.items?.map((item: any) => ({
+        produto: item.product_name,
+        quantidade: item.quantity,
+        valorUnitario: Number(item.unit_price)
+      })) || [],
+      supplier_id: order.supplier_id || "",
+      delivery_date: order.delivery_date
+    }));
+  }, [pedidosData]);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [fornecedorFilter, setFornecedorFilter] = useState("all");
@@ -49,62 +82,9 @@ export default function Pedidos() {
   const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState<any>(null);
-  const [pedidos, setPedidos] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    loadOrders();
-  }, [user]);
-  const loadOrders = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const {
-        data: orders,
-        error
-      } = await supabase.from('orders').select(`
-          *,
-          order_items (
-            id,
-            product_name,
-            quantity,
-            unit_price,
-            total_price
-          )
-        `).order('created_at', {
-        ascending: false
-      });
-      if (error) throw error;
-      const formattedOrders = orders?.map(order => ({
-        id: order.id,
-        fornecedor: order.supplier_name,
-        total: `R$ ${Number(order.total_value).toLocaleString('pt-BR', {
-          minimumFractionDigits: 2
-        })}`,
-        status: order.status,
-        dataPedido: new Date(order.order_date).toLocaleDateString('pt-BR'),
-        dataEntrega: new Date(order.delivery_date).toLocaleDateString('pt-BR'),
-        itens: order.order_items?.length || 0,
-        produtos: order.order_items?.map((item: any) => item.product_name) || [],
-        observacoes: order.observations || "",
-        detalhesItens: order.order_items?.map((item: any) => ({
-          produto: item.product_name,
-          quantidade: item.quantity,
-          valorUnitario: Number(item.unit_price)
-        })) || [],
-        supplier_id: order.supplier_id,
-        delivery_date: order.delivery_date
-      })) || [];
-      setPedidos(formattedOrders);
-    } catch (error: any) {
-      console.error('Error loading orders:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar pedidos",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  
+  const loadOrders = () => {
+    refetch();
   };
   // Função para abreviar nomes longos de fornecedores
   const abbreviateSupplierName = (name: string, maxLength: number = 20) => {
@@ -543,7 +523,7 @@ export default function Pedidos() {
         </CardContent>
       </Card>
 
-      {loading ? <div className="flex items-center justify-center py-12">
+      {showLoading ? <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div> : <>
           {/* Pedidos View */}

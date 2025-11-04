@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface Pedido {
   id: string;
+  supplier_id?: string;
   supplier_name: string;
   order_date: string;
   delivery_date: string;
@@ -24,6 +25,10 @@ export function usePedidos() {
 
   const { data: pedidos = [], isLoading, error } = useQuery({
     queryKey: ['pedidos'],
+    staleTime: 5 * 60 * 1000, // 5 minutos - dados considerados frescos
+    gcTime: 10 * 60 * 1000, // 10 minutos - tempo de cache
+    refetchOnWindowFocus: false, // Não refazer fetch ao focar na janela
+    refetchOnMount: false, // Não refazer fetch ao montar componente se dados estão frescos
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
@@ -45,6 +50,7 @@ export function usePedidos() {
 
       const formattedPedidos: Pedido[] = ordersData.map(o => ({
         id: o.id,
+        supplier_id: o.supplier_id,
         supplier_name: o.supplier_name,
         order_date: o.order_date,
         delivery_date: o.delivery_date,
