@@ -694,6 +694,24 @@ export type Database = {
         Args: { _corporate_group_id: string }
         Returns: number
       }
+      get_all_companies_for_admin: {
+        Args: never
+        Returns: {
+          cnpj: string
+          corporate_group_id: string
+          created_at: string
+          id: string
+          name: string
+          products_count: number
+          subscription_expires_at: string
+          subscription_plan: string
+          subscription_status: string
+          suppliers_count: number
+          trial_ends_at: string
+          updated_at: string
+          users_count: number
+        }[]
+      }
       get_plan_features: {
         Args: { p_plan_name: string }
         Returns: {
@@ -704,6 +722,24 @@ export type Database = {
           max_suppliers: number
           max_users: number
           priority_support: boolean
+        }[]
+      }
+      get_system_stats: {
+        Args: never
+        Returns: {
+          active_companies: number
+          basic_plan_count: number
+          cancelled_companies: number
+          enterprise_plan_count: number
+          professional_plan_count: number
+          suspended_companies: number
+          total_companies: number
+          total_orders: number
+          total_products: number
+          total_quotes: number
+          total_suppliers: number
+          total_users: number
+          trial_companies: number
         }[]
       }
       get_user_company_id: { Args: { p_user_id: string }; Returns: string }
@@ -722,11 +758,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_current_user_system_admin: { Args: never; Returns: boolean }
       is_subscription_active: {
         Args: { p_company_id: string }
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_system_admin: { Args: { p_user_id: string }; Returns: boolean }
+      update_company_plan: {
+        Args: {
+          p_company_id: string
+          p_new_plan: string
+          p_new_status?: string
+        }
+        Returns: boolean
+      }
+      update_company_subscription_status: {
+        Args: {
+          p_company_id: string
+          p_expires_at?: string
+          p_new_status: string
+        }
+        Returns: boolean
+      }
       user_has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -736,7 +790,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "owner" | "admin" | "member"
+      app_role: "owner" | "admin" | "member" | "system_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -864,7 +918,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["owner", "admin", "member"],
+      app_role: ["owner", "admin", "member", "system_admin"],
     },
   },
 } as const
