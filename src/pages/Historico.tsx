@@ -90,36 +90,151 @@ export default function Historico() {
       }
 
 
-      const {
-        data,
-        error
-      } = await supabase
+      // Buscar dados do activity_log
+      const { data: activityData, error: activityError } = await supabase
         .from("activity_log")
         .select("*")
         .eq("company_id", companyData.company_id)
         .order("created_at", {
           ascending: false
-        });
+        })
+        .limit(1000); // Limitar para performance
 
-      if (error) {
-        console.error("Erro ao buscar activity_log:", error);
-        throw error;
+      if (activityError) {
+        console.error("Erro ao buscar activity_log:", activityError);
+        // Não lançar erro, apenas logar
       }
 
+      // Se não há dados no activity_log, buscar dados históricos de outras tabelas
+      let formattedData: any[] = [];
 
-      // Transform database data to match UI format
-      const formattedData = (data || []).map(item => ({
-        id: item.id,
-        tipo: item.tipo,
-        acao: item.acao,
-        detalhes: item.detalhes,
-        data: format(new Date(item.created_at), "dd/MM/yyyy HH:mm", {
-          locale: ptBR
-        }),
-        usuario: user?.email || "Usuário",
-        valor: item.valor ? `R$ ${item.valor.toFixed(2).replace(".", ",")}` : "",
-        economia: item.economia ? `${item.economia}%` : ""
-      }));
+      if (activityData && activityData.length > 0) {
+        // Transformar dados do activity_log
+        formattedData = activityData.map(item => ({
+          id: item.id,
+          tipo: item.tipo,
+          acao: item.acao,
+          detalhes: item.detalhes,
+          data: format(new Date(item.created_at), "dd/MM/yyyy HH:mm", {
+            locale: ptBR
+          }),
+          usuario: user?.email || "Usuário",
+          valor: item.valor ? `R$ ${parseFloat(item.valor.toString()).toFixed(2).replace(".", ",")}` : "",
+          economia: item.economia ? `${parseFloat(item.economia.toString()).toFixed(2)}%` : "",
+          created_at: item.created_at
+        }));
+      } else {
+        // Se não há dados no activity_log, buscar dados históricos de outras tabelas
+        console.log("Nenhum dado no activity_log, buscando dados históricos de outras tabelas...");
+        
+        // Buscar cotações recentes
+        const { data: quotesData } = await supabase
+          .from("quotes")
+          .select("id, status, created_at, company_id")
+          .eq("company_id", companyData.company_id)
+          .order("created_at", { ascending: false })
+          .limit(100);
+
+        // Buscar pedidos recentes
+        const { data: ordersData } = await supabase
+          .from("orders")
+          .select("id, status, supplier_name, total_value, created_at, company_id")
+          .eq("company_id", companyData.company_id)
+          .order("created_at", { ascending: false })
+          .limit(100);
+
+        // Buscar produtos recentes
+        const { data: productsData } = await supabase
+          .from("products")
+          .select("id, name, created_at, company_id")
+          .eq("company_id", companyData.company_id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        // Buscar fornecedores recentes
+        const { data: suppliersData } = await supabase
+          .from("suppliers")
+          .select("id, name, created_at, company_id")
+          .eq("company_id", companyData.company_id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        // Combinar todos os dados históricos
+        const allHistoricalData: any[] = [];
+
+        // Adicionar cotações
+        if (quotesData) {
+          quotesData.forEach(quote => {
+            allHistoricalData.push({
+              id: quote.id,
+              tipo: "cotacao",
+              acao: `Cotação ${quote.status === "concluida" ? "finalizada" : quote.status === "ativa" ? "criada" : quote.status}`,
+              detalhes: `Cotação ${quote.status === "concluida" ? "finalizada" : quote.status === "ativa" ? "criada" : quote.status}`,
+              data: format(new Date(quote.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+              usuario: user?.email || "Usuário",
+              valor: "",
+              economia: "",
+              created_at: quote.created_at
+            });
+          });
+        }
+
+        // Adicionar pedidos
+        if (ordersData) {
+          ordersData.forEach(order => {
+            allHistoricalData.push({
+              id: order.id,
+              tipo: "pedido",
+              acao: `Pedido ${order.status === "pendente" ? "criado" : order.status}`,
+              detalhes: `Pedido para ${order.supplier_name} - ${order.status}`,
+              data: format(new Date(order.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+              usuario: user?.email || "Usuário",
+              valor: order.total_value ? `R$ ${parseFloat(order.total_value.toString()).toFixed(2).replace(".", ",")}` : "",
+              economia: "",
+              created_at: order.created_at
+            });
+          });
+        }
+
+        // Adicionar produtos
+        if (productsData) {
+          productsData.forEach(product => {
+            allHistoricalData.push({
+              id: product.id,
+              tipo: "produto",
+              acao: "Produto criado",
+              detalhes: `Produto "${product.name}" adicionado ao catálogo`,
+              data: format(new Date(product.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+              usuario: user?.email || "Usuário",
+              valor: "",
+              economia: "",
+              created_at: product.created_at
+            });
+          });
+        }
+
+        // Adicionar fornecedores
+        if (suppliersData) {
+          suppliersData.forEach(supplier => {
+            allHistoricalData.push({
+              id: supplier.id,
+              tipo: "fornecedor",
+              acao: "Fornecedor criado",
+              detalhes: `Fornecedor "${supplier.name}" adicionado`,
+              data: format(new Date(supplier.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+              usuario: user?.email || "Usuário",
+              valor: "",
+              economia: "",
+              created_at: supplier.created_at
+            });
+          });
+        }
+
+        // Ordenar por data mais recente
+        formattedData = allHistoricalData.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      }
       
       setHistorico(formattedData);
       
