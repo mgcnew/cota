@@ -17,15 +17,15 @@ import { CompanySelector } from "./CompanySelector";
 
 // Mapeamento de títulos por rota
 const pageTitles: Record<string, string> = {
-  "/": "Dashboard",
-  "/produtos": "Produtos",
-  "/fornecedores": "Fornecedores",
-  "/cotacoes": "Cotações",
-  "/pedidos": "Pedidos",
-  "/historico": "Histórico",
-  "/analytics": "Analytics",
-  "/relatorios": "Relatórios",
-  "/configuracoes": "Configurações"
+  "/dashboard": "Dashboard",
+  "/dashboard/produtos": "Produtos",
+  "/dashboard/fornecedores": "Fornecedores",
+  "/dashboard/cotacoes": "Cotações",
+  "/dashboard/pedidos": "Pedidos",
+  "/dashboard/historico": "Histórico",
+  "/dashboard/analytics": "Analytics",
+  "/dashboard/relatorios": "Relatórios",
+  "/dashboard/configuracoes": "Configurações"
 };
 
 export function AppLayout() {
@@ -44,7 +44,7 @@ export function AppLayout() {
         title: "Logout realizado com sucesso!",
         description: "Você saiu do sistema.",
       });
-      navigate("/auth", { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       toast({
         title: "Erro ao sair",
@@ -111,7 +111,7 @@ export function AppLayout() {
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      onClick={() => navigate('/configuracoes')} 
+                      onClick={() => navigate('/dashboard/configuracoes')} 
                       className="hidden md:flex p-0 rounded-lg h-9 w-9 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                     >
                       <Settings className="h-4 w-4 transition-all duration-300" />

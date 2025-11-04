@@ -24,6 +24,8 @@ import Configuracoes from "./pages/Configuracoes";
 import Auth from "./pages/Auth";
 import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
+import Landing from "./pages/Landing";
+import Pricing from "./pages/Pricing";
 import { initScrollbarFix } from "./utils/scrollbar-fix";
 
 const queryClient = new QueryClient();
@@ -44,21 +46,22 @@ const App = () => {
             <AuthProvider>
               <CompanyAutoSetup />
               <Routes>
-                {/* Rotas públicas de autenticação */}
+                {/* Rotas públicas */}
+                <Route path="/" element={<Landing />} />
+                <Route path="/pricing" element={<Pricing />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/accept-invite" element={<AcceptInvite />} />
                 
                 {/* Rotas protegidas */}
                 <Route
-                  path="/"
+                  path="/dashboard/*"
                   element={
                     <ProtectedRoute>
                       <AppLayout />
                     </ProtectedRoute>
                   }
                 >
-                  <Route index element={<Navigate to="/dashboard" replace />} />
-                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route index element={<Dashboard />} />
                   <Route path="produtos" element={<Produtos />} />
                   <Route path="fornecedores" element={<Fornecedores />} />
                   <Route path="cotacoes" element={<Cotacoes />} />

@@ -60,7 +60,7 @@ export default function Auth() {
   // Redirecionar se já estiver autenticado
   useEffect(() => {
     if (user) {
-      const redirectTo = searchParams.get("redirect") || "/";
+      const redirectTo = searchParams.get("redirect") || "/dashboard";
       navigate(redirectTo, { replace: true });
     }
   }, [user, navigate, searchParams]);

@@ -70,7 +70,7 @@ export function SubscriptionBlocked({ status }: SubscriptionBlockedProps) {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => navigate("/configuracoes")}
+              onClick={() => navigate("/dashboard/configuracoes")}
               className="w-full"
             >
               Ir para Configurações

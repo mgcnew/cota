@@ -14,16 +14,20 @@ import { CompanyInfo } from "@/components/settings/CompanyInfo";
 import { CompanyUsersManager } from "@/components/settings/CompanyUsersManager";
 import { SuperAdminDashboard } from "@/components/settings/SuperAdminDashboard";
 import { CorporateGroupManager } from "@/components/settings/CorporateGroupManager";
+import { BillingSection } from "@/components/settings/BillingSection";
 import { cn } from "@/lib/utils";
 import { Shield } from "lucide-react";
+import { CreditCard } from "lucide-react";
+import { PageWrapper } from "@/components/layout/PageWrapper";
 
-type SettingsSection = "empresa" | "usuarios" | "grupo" | "superadmin" | "aparencia" | "notificacoes" | "sistema" | "sobre";
+type SettingsSection = "empresa" | "usuarios" | "grupo" | "superadmin" | "assinatura" | "aparencia" | "notificacoes" | "sistema" | "sobre";
 
 const menuItems: Array<{ id: SettingsSection; label: string; icon: typeof Building2 }> = [
   { id: "empresa", label: "Empresa", icon: Building2 },
   { id: "usuarios", label: "Usuários", icon: Users },
   { id: "grupo", label: "Grupo Corporativo", icon: Building2 },
   { id: "superadmin", label: "Super Admin", icon: Shield },
+  { id: "assinatura", label: "Assinatura", icon: CreditCard },
   { id: "aparencia", label: "Aparência", icon: Palette },
   { id: "notificacoes", label: "Notificações", icon: Bell },
   { id: "sistema", label: "Sistema", icon: Globe },
@@ -44,7 +48,8 @@ export default function Configuracoes() {
   };
 
   return (
-    <div className="page-container">
+    <PageWrapper>
+      <div className="page-container">
       {/* Header */}
       <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 rounded-2xl p-6 border border-violet-100 dark:border-violet-800 shadow-sm mb-6">
         <div className="flex items-center gap-4">
@@ -145,6 +150,13 @@ export default function Configuracoes() {
           {activeSection === "superadmin" && (
             <div className="space-y-6">
               <SuperAdminDashboard />
+            </div>
+          )}
+
+          {/* Assinatura */}
+          {activeSection === "assinatura" && (
+            <div className="space-y-6">
+              <BillingSection />
             </div>
           )}
 
@@ -452,6 +464,7 @@ export default function Configuracoes() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }

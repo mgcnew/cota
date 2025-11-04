@@ -15,6 +15,8 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { capitalize } from '@/lib/text-utils';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
 import { useMobile } from '@/contexts/MobileProvider';
+import { TrialBanner } from '@/components/billing/TrialBanner';
+import { useTrialNotifications } from '@/hooks/useTrialNotifications';
 
 const DEFAULT_METRICS = {
   cotacoesAtivas: 0,
@@ -60,6 +62,9 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
   const isMobile = useMobile();
+  
+  // Notificações de trial expirando
+  useTrialNotifications();
 
   // Callbacks memoizados para navegação do carousel
   const handlePrevCard = useCallback((e: React.MouseEvent) => {
@@ -553,8 +558,12 @@ export default function Dashboard() {
     </Card>
   ), [isLoading, metrics, handleShowApprovalModal]);
 
-  return <PageWrapper>
+  return (
+    <PageWrapper>
       <div className="page-container">
+        {/* Banner de Trial */}
+        <TrialBanner />
+        
         {/* Métricas Principais - Inspiração 21st.dev Statistics Card 2 */}
         {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
         {isMobile ? (
@@ -563,19 +572,19 @@ export default function Dashboard() {
             <div className="relative">
               {/* Navegação integrada no topo do card (parece ser parte do card) */}
               <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
-                      <Button
-                        variant="ghost"
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={handlePrevCard}
                   className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                      </Button>
+                </Button>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
                   <span className="text-xs font-semibold text-white dark:text-gray-200">
                     {activeCardIndex + 1} / 4
                   </span>
-              </div>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -596,20 +605,20 @@ export default function Dashboard() {
                 >
                   <div className="w-full flex-shrink-0">
                     {renderCard1}
-                        </div>
+                  </div>
                   <div className="w-full flex-shrink-0">
                     {renderCard2}
-                      </div>
+                  </div>
                   <div className="w-full flex-shrink-0">
                     {renderCard3}
-                        </div>
+                  </div>
                   <div className="w-full flex-shrink-0">
                     {renderCard4}
-                          </div>
-                        </div>
-                      </div>
+                  </div>
+                </div>
               </div>
-        </div>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-8 overflow-visible">
             {renderCard1}
@@ -1393,5 +1402,6 @@ export default function Dashboard() {
           </DialogContent>
         </Dialog>
       </div>
-    </PageWrapper>;
+    </PageWrapper>
+  );
 }

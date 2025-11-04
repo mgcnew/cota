@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -27,39 +27,39 @@ import {
 // Menu items com ícones do Lucide React (recomendados)
 const menuItems = [{
   title: "Dashboard",
-  url: "/",
+  url: "/dashboard",
   icon: LayoutDashboard
 }, {
   title: "Produtos",
-  url: "/produtos",
+  url: "/dashboard/produtos",
   icon: Package
 }, {
   title: "Fornecedores",
-  url: "/fornecedores",
+  url: "/dashboard/fornecedores",
   icon: Building2
 }, {
   title: "Cotações",
-  url: "/cotacoes",
+  url: "/dashboard/cotacoes",
   icon: FileText
 }, {
   title: "Pedidos",
-  url: "/pedidos",
+  url: "/dashboard/pedidos",
   icon: ShoppingCart
 }, {
   title: "Histórico",
-  url: "/historico",
+  url: "/dashboard/historico",
   icon: History
 }, {
   title: "Relatórios",
-  url: "/relatorios",
+  url: "/dashboard/relatorios",
   icon: BarChart3
 }, {
   title: "Analytics",
-  url: "/analytics",
+  url: "/dashboard/analytics",
   icon: TrendingUp
 }, {
   title: "Extra",
-  url: "/extra",
+  url: "/dashboard/extra",
   icon: Star
 }];
 
@@ -132,10 +132,12 @@ const colors = [{
 // Componente do botÃ£o "Mais" para mobile
 function MobileMoreButtonContent({
   remainingItems,
-  setProfileDialogOpen
+  setProfileDialogOpen,
+  navigate
 }: {
   remainingItems: any[];
   setProfileDialogOpen: (open: boolean) => void;
+  navigate: (path: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const location = useLocation();
@@ -218,7 +220,7 @@ function MobileMoreButtonContent({
             <div className="space-y-2">
               <button onClick={() => {
               setOpen(false);
-              window.location.href = '/configuracoes';
+              navigate('/dashboard/configuracoes');
             }} className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/85 dark:bg-gray-800/85 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-sm">
                   <Settings className="w-[18px] h-[18px] text-white" />
@@ -237,19 +239,23 @@ function MobileMoreButtonContent({
 
 function MobileMoreButton({
   remainingItems,
-  setProfileDialogOpen
+  setProfileDialogOpen,
+  navigate
 }: {
   remainingItems: any[];
   setProfileDialogOpen: (open: boolean) => void;
+  navigate: (path: string) => void;
 }) {
   return <MobileMoreButtonContent 
     remainingItems={remainingItems} 
     setProfileDialogOpen={setProfileDialogOpen}
+    navigate={navigate}
   />;
 }
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
   const isActive = (path: string) => currentPath === path;
   const [isScrolled, setIsScrolled] = useState(false);
@@ -398,6 +404,7 @@ export function AppSidebar() {
           <MobileMoreButton 
             remainingItems={remainingMobileItems} 
             setProfileDialogOpen={setProfileDialogOpen}
+            navigate={navigate}
           />
         </div>
       </div>
