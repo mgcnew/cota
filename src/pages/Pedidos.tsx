@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
-import { ShoppingCart, Plus, Search, Filter, Eye, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp, MoreVertical, CircleDot } from "lucide-react";
+import { ShoppingCart, Plus, Search, Filter, Eye, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp, MoreVertical, CircleDot, ChevronLeft, ChevronRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";
@@ -21,6 +21,7 @@ import { usePedidos } from "@/hooks/usePedidos";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PageWrapper } from "@/components/layout/PageWrapper";
+import { useMobile } from "@/contexts/MobileProvider";
 export default function Pedidos() {
   const {
     toast
@@ -56,10 +57,23 @@ export default function Pedidos() {
   const [dataFim, setDataFim] = useState("");
   const [valorMin, setValorMin] = useState("");
   const [valorMax, setValorMax] = useState("");
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const isMobile = useMobile();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState<any>(null);
+
+  // Callbacks memoizados para navegação do carousel
+  const handlePrevCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
+  }, []);
+
+  const handleNextCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
+  }, []);
   
   // Formatar os pedidos para o formato esperado pela página
   const pedidos = useMemo(() => {
@@ -275,10 +289,224 @@ export default function Pedidos() {
       pedidosProcessando: pedidos.filter(p => p.status === "processando").length
     };
   }, [pedidos]);
+
+  // Helper functions para renderizar Cards (memoizadas inline)
+  const renderCard1 = useMemo(() => (
+    <Card className="bg-amber-600 dark:bg-[#1C1F26] border border-amber-500/30 dark:border-gray-800 rounded-lg hover:border-amber-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-amber-700/50 dark:bg-gray-800">
+            <Clock className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Ativos
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.pedidosAtivos}
+          </span>
+          {stats.percentualAtivos > 0 && (
+            <Badge className="bg-amber-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+              {stats.percentualAtivos}%
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Em andamento:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.pedidosAtivos}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Percentual:</span>
+            <span className="font-medium">{stats.percentualAtivos}%</span>
+          </div>
+          <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+            <span>{stats.pedidosPendentes} pendentes</span>
+            <span>•</span>
+            <span>{stats.pedidosProcessando} processando</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
+  const renderCard2 = useMemo(() => (
+    <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
+            <Truck className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Entregues
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.pedidosEntregues}
+          </span>
+          {stats.taxaEntrega > 0 && (
+            <Badge className="bg-emerald-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+              {stats.taxaEntrega}%
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Concluídos:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.pedidosEntregues}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Taxa de entrega:</span>
+            <span className="font-medium">{stats.taxaEntrega}%</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
+  const renderCard3 = useMemo(() => (
+    <Card className="bg-blue-600 dark:bg-[#1C1F26] border border-blue-500/30 dark:border-gray-800 rounded-lg hover:border-blue-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-blue-700/50 dark:bg-gray-800">
+            <DollarSign className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Valor Total
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-xl font-bold tracking-tight text-white dark:text-white truncate">
+            {stats.totalValueFormatado}
+          </span>
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Em pedidos:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.totalValueFormatado}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Média por pedido:</span>
+            <span className="font-medium">{stats.valorMedioFormatado}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
+  const renderCard4 = useMemo(() => (
+    <Card className="bg-purple-600 dark:bg-[#1C1F26] border border-purple-500/30 dark:border-gray-800 rounded-lg hover:border-purple-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-purple-700/50 dark:bg-gray-800">
+            <Package className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Itens
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.mediaItensPorPedido}
+          </span>
+          <Badge className="bg-purple-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            Média
+          </Badge>
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Média por pedido:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.mediaItensPorPedido}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Total de itens:</span>
+            <span className="font-medium">{stats.totalItens}</span>
+          </div>
+          <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+            <span>{stats.totalPedidos} pedidos</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
   return <PageWrapper>
       <div className="page-container">
         {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+        {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
+        {isMobile ? (
+          <div className="mb-8">
+            {/* Card wrapper com navegação integrada no topo */}
+            <div className="relative">
+              {/* Navegação integrada no topo do card (parece ser parte do card) */}
+              <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePrevCard}
+                  className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
+                  <span className="text-xs font-semibold text-white dark:text-gray-200">
+                    {activeCardIndex + 1} / 4
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNextCard}
+                  className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Container do carousel */}
+              <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
+                <div 
+                  className="flex transition-transform duration-300 ease-in-out"
+                  style={{ 
+                    transform: `translateX(-${activeCardIndex * 100}%)`,
+                  }}
+                >
+                  <div className="w-full flex-shrink-0">
+                    {renderCard1}
+                  </div>
+                  <div className="w-full flex-shrink-0">
+                    {renderCard2}
+                  </div>
+                  <div className="w-full flex-shrink-0">
+                    {renderCard3}
+                  </div>
+                  <div className="w-full flex-shrink-0">
+                    {renderCard4}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
           {/* Card 1: Pedidos Ativos */}
           <Card className="group relative overflow-hidden bg-amber-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
             {/* Decoração SVG sutil */}
@@ -492,6 +720,7 @@ export default function Pedidos() {
             </CardContent>
           </Card>
         </div>
+        )}
 
         {/* Filters */}
         <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
