@@ -719,26 +719,34 @@ export default function Relatorios() {
         return;
       }
 
-      const { data: companyData } = await supabase
+      const { data: companyData, error: companyError } = await supabase
         .from("company_users")
         .select("company_id")
         .eq("user_id", user.id)
         .single();
 
-      if (!companyData?.company_id) {
+      if (companyError || !companyData?.company_id) {
+        console.error("Erro ao buscar empresa:", companyError);
         setHistorico([]);
         setLoadingHistorico(false);
         return;
       }
 
-      const { data: activityData } = await supabase
+      // Buscar dados do activity_log
+      const { data: activityData, error: activityError } = await supabase
         .from("activity_log")
         .select("*")
         .eq("company_id", companyData.company_id)
         .order("created_at", { ascending: false })
         .limit(1000);
 
+      if (activityError) {
+        console.error("Erro ao buscar activity_log:", activityError);
+      }
+
       let formattedData: any[] = [];
+      
+      // Se há dados no activity_log, usar eles
       if (activityData && activityData.length > 0) {
         formattedData = activityData.map(item => ({
           id: item.id,
@@ -751,15 +759,133 @@ export default function Relatorios() {
           economia: item.economia ? `${parseFloat(item.economia.toString()).toFixed(2)}%` : "",
           created_at: item.created_at
         }));
+      } else {
+        // Se não há dados no activity_log, buscar dados históricos de outras tabelas
+        console.log("Nenhum dado no activity_log, buscando dados históricos de outras tabelas...");
+        
+        // Buscar cotações recentes
+        const { data: quotesData } = await supabase
+          .from("quotes")
+          .select("id, status, data_inicio, created_at, company_id")
+          .eq("company_id", companyData.company_id)
+          .order("data_inicio", { ascending: false })
+          .limit(100);
+
+        // Buscar pedidos recentes
+        const { data: ordersData } = await supabase
+          .from("orders")
+          .select("id, status, supplier_name, total_value, created_at, company_id")
+          .eq("company_id", companyData.company_id)
+          .order("created_at", { ascending: false })
+          .limit(100);
+
+        // Buscar produtos recentes
+        const { data: productsData } = await supabase
+          .from("products")
+          .select("id, name, created_at, company_id")
+          .eq("company_id", companyData.company_id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        // Buscar fornecedores recentes
+        const { data: suppliersData } = await supabase
+          .from("suppliers")
+          .select("id, name, created_at, company_id")
+          .eq("company_id", companyData.company_id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        // Combinar todos os dados históricos
+        const allHistoricalData: any[] = [];
+
+        // Adicionar cotações
+        if (quotesData) {
+          quotesData.forEach(quote => {
+            const dateToUse = quote.data_inicio || quote.created_at;
+            allHistoricalData.push({
+              id: quote.id,
+              tipo: "cotacao",
+              acao: `Cotação ${quote.status === "concluida" || quote.status === "finalizada" ? "finalizada" : quote.status === "ativa" ? "criada" : quote.status}`,
+              detalhes: `Cotação ${quote.status === "concluida" || quote.status === "finalizada" ? "finalizada" : quote.status === "ativa" ? "criada" : quote.status}`,
+              data: format(new Date(dateToUse), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+              usuario: user?.email || "Usuário",
+              valor: "",
+              economia: "",
+              created_at: dateToUse
+            });
+          });
+        }
+
+        // Adicionar pedidos
+        if (ordersData) {
+          ordersData.forEach(order => {
+            allHistoricalData.push({
+              id: order.id,
+              tipo: "pedido",
+              acao: `Pedido ${order.status === "pendente" ? "criado" : order.status}`,
+              detalhes: `Pedido para ${order.supplier_name || "Fornecedor"} - ${order.status}`,
+              data: format(new Date(order.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+              usuario: user?.email || "Usuário",
+              valor: order.total_value ? `R$ ${parseFloat(order.total_value.toString()).toFixed(2).replace(".", ",")}` : "",
+              economia: "",
+              created_at: order.created_at
+            });
+          });
+        }
+
+        // Adicionar produtos
+        if (productsData) {
+          productsData.forEach(product => {
+            allHistoricalData.push({
+              id: product.id,
+              tipo: "produto",
+              acao: "Produto criado",
+              detalhes: `Produto "${product.name}" adicionado ao catálogo`,
+              data: format(new Date(product.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+              usuario: user?.email || "Usuário",
+              valor: "",
+              economia: "",
+              created_at: product.created_at
+            });
+          });
+        }
+
+        // Adicionar fornecedores
+        if (suppliersData) {
+          suppliersData.forEach(supplier => {
+            allHistoricalData.push({
+              id: supplier.id,
+              tipo: "fornecedor",
+              acao: "Fornecedor criado",
+              detalhes: `Fornecedor "${supplier.name}" adicionado`,
+              data: format(new Date(supplier.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+              usuario: user?.email || "Usuário",
+              valor: "",
+              economia: "",
+              created_at: supplier.created_at
+            });
+          });
+        }
+
+        // Ordenar por data mais recente
+        formattedData = allHistoricalData.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
       }
+      
       setHistorico(formattedData);
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
+      toast({
+        title: "Erro ao carregar histórico",
+        description: "Não foi possível carregar o histórico de atividades.",
+        variant: "destructive"
+      });
       setHistorico([]);
     } finally {
       setLoadingHistorico(false);
     }
-  }, [user]);
+  }, [user, toast]);
 
   useEffect(() => {
     if (user && activeUnifiedTab === "historico") {
