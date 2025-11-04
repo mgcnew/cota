@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import type { Quote, FornecedorParticipante } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package, Clock, CircleDot, ClipboardList } from "lucide-react";
+import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package, Clock, CircleDot, ClipboardList, ChevronLeft, ChevronRight } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -24,6 +24,7 @@ import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
 import { cn } from "@/lib/utils";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
+import { useMobile } from "@/contexts/MobileProvider";
 
 export default function Cotacoes() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,7 +41,20 @@ export default function Cotacoes() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState("all");
   const [supplierFilter, setSupplierFilter] = useState("all");
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const isMobile = useMobile();
   const addQuoteRef = useRef<HTMLButtonElement>(null);
+
+  // Callbacks memoizados para navegação do carousel
+  const handlePrevCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
+  }, []);
+
+  const handleNextCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
+  }, []);
 
   // Ler parâmetros da URL ao carregar a página
   useEffect(() => {
@@ -206,6 +220,185 @@ export default function Cotacoes() {
     };
   }, [cotacoes]);
 
+  // Helper functions para renderizar Cards (memoizadas inline)
+  const renderCard1 = useMemo(() => (
+    <Card className="bg-teal-600 dark:bg-[#1C1F26] border border-teal-500/30 dark:border-gray-800 rounded-lg hover:border-teal-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-teal-700/50 dark:bg-gray-800">
+            <FileText className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Ativas
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.porStatus.ativas}
+          </span>
+          {stats.percentualAtivas > 0 && (
+            <Badge className="bg-teal-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+              {stats.percentualAtivas}%
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Cotações ativas:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.porStatus.ativas}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Percentual:</span>
+            <span className="font-medium">{stats.percentualAtivas}%</span>
+          </div>
+          <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+            <span>{stats.porStatus.pendentes} pendentes</span>
+            <span>•</span>
+            <span>{stats.porStatus.concluidas} finalizadas</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
+  const renderCard2 = useMemo(() => (
+    <Card className="bg-amber-600 dark:bg-[#1C1F26] border border-amber-500/30 dark:border-gray-800 rounded-lg hover:border-amber-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-amber-700/50 dark:bg-gray-800">
+            <Calendar className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Pendentes
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.porStatus.pendentes}
+          </span>
+          {stats.pendentesMais24h > 0 && (
+            <Badge className="bg-amber-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+              ⚠ {stats.pendentesMais24h}
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Aguardando resposta:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.porStatus.pendentes}
+            </span>
+          </div>
+          {stats.pendentesMais24h > 0 ? (
+            <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+              <span>Com mais de 24h:</span>
+              <span className="font-medium text-red-300">{stats.pendentesMais24h}</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+              <span>Status:</span>
+              <span className="font-medium text-green-300">Todas no prazo</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
+  const renderCard3 = useMemo(() => (
+    <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
+            <DollarSign className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Economia
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-xl font-bold tracking-tight text-white dark:text-white truncate">
+            {stats.economiaFormatada}
+          </span>
+          {stats.economiaTotal > 0 && (
+            <Badge className="bg-emerald-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+              Total
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Economizados:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.economiaFormatada}
+            </span>
+          </div>
+          <div className="flex items-end gap-0.5 h-6 mt-2">
+            {stats.ultimas7Economias.map((economia, i) => {
+              const maxEconomia = Math.max(...stats.ultimas7Economias, 1);
+              const heightPercent = (economia / maxEconomia) * 100;
+              return (
+                <div 
+                  key={i} 
+                  className="flex-1 bg-white/30 rounded-t hover:bg-white/40 transition-colors duration-200" 
+                  style={{ height: `${Math.max(heightPercent, 10)}%`, minHeight: '4px' }}
+                  title={economia > 0 ? `Economia: R$ ${economia.toLocaleString('pt-BR')}` : 'Sem economia'}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
+  const renderCard4 = useMemo(() => (
+    <Card className="bg-blue-600 dark:bg-[#1C1F26] border border-blue-500/30 dark:border-gray-800 rounded-lg hover:border-blue-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-blue-700/50 dark:bg-gray-800">
+            <Building2 className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Fornecedores
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.mediaFornecedores}
+          </span>
+          {stats.totalFornecedoresUnicos > 0 && (
+            <Badge className="bg-blue-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+              {stats.totalFornecedoresUnicos} únicos
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Média por cotação:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.mediaFornecedores}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Fornecedores únicos:</span>
+            <span className="font-medium">{stats.totalFornecedoresUnicos}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
   if (isLoading) {
     return <div className="p-6 flex items-center justify-center min-h-screen">
         <p className="text-muted-foreground">Carregando cotações...</p>
@@ -214,241 +407,68 @@ export default function Cotacoes() {
   const paginatedData = paginate(filteredCotacoes);
   return <div className="page-container">
       {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
-        {/* Card 1: Cotações Ativas */}
-        <Card className="group relative overflow-hidden bg-teal-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-          {/* Decoração SVG sutil */}
-          <svg
-            className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
-            viewBox="0 0 300 200"
-            fill="none"
-            style={{ zIndex: 0 }}
-          >
-            <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
-            <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
-            <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
-            <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
-          </svg>
-
-          <CardHeader className="border-0 z-10 relative pb-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
-              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                Ativas
-              </CardTitle>
-                </div>
-          </CardHeader>
-          <CardContent className="space-y-2.5 z-10 relative">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                {stats.porStatus.ativas}
-              </span>
-              {stats.percentualAtivas > 0 && (
-                <Badge className="bg-white/20 text-white font-semibold border-0">
-                  {stats.percentualAtivas}%
-                </Badge>
-              )}
-            </div>
-            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-              <div className="flex items-center justify-between">
-                <span>Cotações ativas:</span>
-                <span className="font-medium text-white dark:text-gray-300">
-                  {stats.porStatus.ativas}
+      {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
+      {isMobile ? (
+        <div className="mb-8">
+          {/* Card wrapper com navegação integrada no topo */}
+          <div className="relative">
+            {/* Navegação integrada no topo do card (parece ser parte do card) */}
+            <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handlePrevCard}
+                className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
+                <span className="text-xs font-semibold text-white dark:text-gray-200">
+                  {activeCardIndex + 1} / 4
                 </span>
-            </div>
-              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                <span>Percentual:</span>
-                <span className="font-medium">{stats.percentualAtivas}%</span>
               </div>
-              <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
-                <span>{stats.porStatus.pendentes} pendentes</span>
-                <span>•</span>
-                <span>{stats.porStatus.concluidas} finalizadas</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleNextCard}
+                className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Card 2: Pendentes */}
-        <Card className="group relative overflow-hidden bg-amber-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-          {/* Decoração SVG sutil */}
-          <svg
-            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
-            viewBox="0 0 200 200"
-            fill="none"
-            style={{ zIndex: 0 }}
-          >
-            <defs>
-              <filter id="blur-pendentes" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="10" />
-              </filter>
-            </defs>
-            <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-pendentes)" />
-            <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
-            <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
-            <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
-          </svg>
-
-          <CardHeader className="border-0 z-10 relative pb-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-white/70 dark:text-gray-400" />
-              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                Pendentes
-              </CardTitle>
+            {/* Container do carousel */}
+            <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
+              <div 
+                className="flex transition-transform duration-300 ease-in-out"
+                style={{ 
+                  transform: `translateX(-${activeCardIndex * 100}%)`,
+                }}
+              >
+                <div className="w-full flex-shrink-0">
+                  {renderCard1}
                 </div>
-          </CardHeader>
-          <CardContent className="space-y-2.5 z-10 relative">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                {stats.porStatus.pendentes}
-              </span>
-              {stats.pendentesMais24h > 0 && (
-                <Badge className="bg-white/20 text-white font-semibold border-0">
-                  ⚠ {stats.pendentesMais24h}
-                </Badge>
-              )}
-            </div>
-            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-              <div className="flex items-center justify-between">
-                <span>Aguardando resposta:</span>
-                <span className="font-medium text-white dark:text-gray-300">
-                  {stats.porStatus.pendentes}
-                </span>
-            </div>
-              {stats.pendentesMais24h > 0 ? (
-                <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                  <span>Com mais de 24h:</span>
-                  <span className="font-medium text-red-300">{stats.pendentesMais24h}</span>
+                <div className="w-full flex-shrink-0">
+                  {renderCard2}
                 </div>
-              ) : (
-                <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                  <span>Status:</span>
-                  <span className="font-medium text-green-300">Todas no prazo</span>
+                <div className="w-full flex-shrink-0">
+                  {renderCard3}
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Card 3: Economia */}
-        <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-          {/* Decoração SVG sutil */}
-          <svg
-            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
-            viewBox="0 0 200 200"
-            fill="none"
-            style={{ zIndex: 0 }}
-          >
-            <defs>
-              <filter id="blur-economia" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="12" />
-              </filter>
-            </defs>
-            <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur-economia)" />
-            <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
-            <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
-            <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
-          </svg>
-
-          <CardHeader className="border-0 z-10 relative pb-3">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
-              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                Economia
-              </CardTitle>
+                <div className="w-full flex-shrink-0">
+                  {renderCard4}
                 </div>
-          </CardHeader>
-          <CardContent className="space-y-2.5 z-10 relative">
-            <div className="flex items-center gap-2.5">
-              <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
-                {stats.economiaFormatada}
-              </span>
-              {stats.economiaTotal > 0 && (
-                <Badge className="bg-white/20 text-white font-semibold border-0">
-                  Total
-                </Badge>
-              )}
-            </div>
-            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-              <div className="flex items-center justify-between">
-                <span>Economizados:</span>
-                <span className="font-medium text-white dark:text-gray-300">
-                  {stats.economiaFormatada}
-                </span>
-            </div>
-              <div className="flex items-end gap-0.5 h-6 mt-2">
-              {stats.ultimas7Economias.map((economia, i) => {
-                const maxEconomia = Math.max(...stats.ultimas7Economias, 1);
-                const heightPercent = (economia / maxEconomia) * 100;
-                return (
-                  <div 
-                    key={i} 
-                      className="flex-1 bg-white/30 rounded-t hover:bg-white/40 transition-colors duration-200" 
-                      style={{ height: `${Math.max(heightPercent, 10)}%`, minHeight: '4px' }}
-                    title={economia > 0 ? `Economia: R$ ${economia.toLocaleString('pt-BR')}` : 'Sem economia'}
-                    />
-                );
-              })}
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Card 4: Fornecedores */}
-        <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-          {/* Decoração SVG sutil */}
-          <svg
-            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
-            viewBox="0 0 200 200"
-            fill="none"
-            style={{ zIndex: 0 }}
-          >
-            <defs>
-              <filter id="blur-fornecedores-cotacoes" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="16" />
-              </filter>
-            </defs>
-            <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
-            <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-fornecedores-cotacoes)" />
-            <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
-            <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
-            <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
-          </svg>
-
-          <CardHeader className="border-0 z-10 relative pb-3">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-white/70 dark:text-gray-400" />
-              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                Fornecedores
-              </CardTitle>
-                </div>
-          </CardHeader>
-          <CardContent className="space-y-2.5 z-10 relative">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                {stats.mediaFornecedores}
-              </span>
-              {stats.totalFornecedoresUnicos > 0 && (
-                <Badge className="bg-white/20 text-white font-semibold border-0">
-                  {stats.totalFornecedoresUnicos} únicos
-                </Badge>
-              )}
-            </div>
-            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-              <div className="flex items-center justify-between">
-                <span>Média por cotação:</span>
-                <span className="font-medium text-white dark:text-gray-300">
-                  {stats.mediaFornecedores}
-                </span>
-            </div>
-              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                <span>Fornecedores únicos:</span>
-                <span className="font-medium">{stats.totalFornecedoresUnicos}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+          {renderCard1}
+          {renderCard2}
+          {renderCard3}
+          {renderCard4}
+        </div>
+      )}
 
       {/* Filters */}
       <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
