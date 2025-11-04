@@ -20,7 +20,8 @@ import {
   Star,
   MoreHorizontal,
   Settings,
-  User
+  User,
+  ClipboardList
 } from 'lucide-react';
 
 
@@ -45,6 +46,10 @@ const menuItems = [{
   title: "Pedidos",
   url: "/dashboard/pedidos",
   icon: ShoppingCart
+}, {
+  title: "Contagem de Estoque",
+  url: "/dashboard/contagem-estoque",
+  icon: ClipboardList
 }, {
   title: "Histórico",
   url: "/dashboard/historico",

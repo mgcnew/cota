@@ -1,4 +1,4 @@
-// VERSION: f4b3985 - Updated: 2025-01-XX - FORCE LOVABLE SYNC
+// VERSION: 90d0477 - Updated: 2025-01-21 - Otimizações de animações (150ms, sem conflitos)
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";

@@ -1,9 +1,16 @@
 {
-  "version": "f4b3985",
-  "commit": "f4b3985",
-  "message": "🚀 LOVABLE UPDATE REQUIRED - commit 84cc898 - versão funcional estável",
-  "timestamp": "2025-01-XX",
+  "version": "90d0477",
+  "commit": "90d0477",
+  "message": "🚀 LOVABLE UPDATE REQUIRED - Otimizações de animações de transição (150ms, sem conflitos)",
+  "timestamp": "2025-01-21",
   "forceSync": true,
-  "instructions": "Este arquivo força o Lovable a detectar que há uma nova versão disponível no repositório. Se você vê este arquivo, o código local precisa ser atualizado para a versão f4b3985 do repositório remoto."
+  "changes": [
+    "Otimização de transições de página: 300ms -> 150ms (50% mais rápido)",
+    "Remoção de animações duplicadas do PageWrapper",
+    "Correção de conflitos entre SmoothPageTransition e PageWrapper",
+    "Aceleração de hardware com requestAnimationFrame",
+    "Transições CSS puras para melhor performance"
+  ],
+  "instructions": "Este arquivo força o Lovable a detectar que há uma nova versão disponível no repositório. Se você vê este arquivo, o código local precisa ser atualizado para a versão 90d0477 do repositório remoto."
 }
 
