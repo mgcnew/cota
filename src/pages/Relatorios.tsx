@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { DataPagination } from "@/components/ui/data-pagination";
-import { TrendingUp, TrendingDown, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock, MoreVertical, History, Activity, ShoppingCart, X, Search, Users, Timer, Target, ArrowUpDown } from "lucide-react";
+import { TrendingUp, TrendingDown, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock, MoreVertical, History, Activity, ShoppingCart, X, Search, Users, Timer, Target, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import { ReportFilters } from "@/components/reports/ReportFilters";
@@ -39,6 +39,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useMobile } from "@/contexts/MobileProvider";
 
 // Tipos para melhor type safety
 interface ReportType {
@@ -165,6 +166,21 @@ export default function Relatorios() {
   const [historico, setHistorico] = useState<any[]>([]);
   const [loadingHistorico, setLoadingHistorico] = useState(true);
   const { paginate: paginateHistorico } = usePagination<any>({ initialItemsPerPage: 10 });
+
+  // Estados e hooks para carousel mobile
+  const isMobile = useMobile();
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+
+  // Callbacks memoizados para navegação do carousel
+  const handlePrevCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
+  }, []);
+
+  const handleNextCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
+  }, []);
 
   // Relatórios estratégicos para tomada de decisão
   const relatoriosDisponiveis: ReportType[] = useMemo(() => [{
@@ -1118,6 +1134,167 @@ export default function Relatorios() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activeUnifiedTab]); // Removido loadHistorico das dependências para evitar re-execuções
 
+  // Helper functions para renderizar Cards Analytics (memoizadas inline)
+  const renderAnalyticsCard1 = useMemo(() => {
+    if (!metricas[0]) return null;
+    const metrica = metricas[0];
+    return (
+      <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
+        <CardHeader className="pb-3 border-0">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
+              <DollarSign className="h-4 w-4 text-white dark:text-gray-400" />
+            </div>
+            <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+              {metrica.titulo}
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2.5 pt-0">
+          <div className="flex items-baseline gap-2.5">
+            <span className="text-xl font-bold tracking-tight text-white dark:text-white truncate">
+              {metrica.valor}
+            </span>
+            {metrica.variacao && (
+              <Badge className="bg-emerald-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+                {metrica.tipo === 'negativo' ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                {metrica.variacao}
+              </Badge>
+            )}
+          </div>
+          <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+            <div className="flex items-center justify-between">
+              <span>{metrica.descricao}:</span>
+              <span className="font-medium text-white dark:text-gray-300">
+                {metrica.valor}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }, [metricas]);
+
+  const renderAnalyticsCard2 = useMemo(() => {
+    if (!metricas[1]) return null;
+    const metrica = metricas[1];
+    return (
+      <Card className="bg-blue-600 dark:bg-[#1C1F26] border border-blue-500/30 dark:border-gray-800 rounded-lg hover:border-blue-400 dark:hover:border-gray-700 transition-colors duration-200">
+        <CardHeader className="pb-3 border-0">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-blue-700/50 dark:bg-gray-800">
+              <Clock className="h-4 w-4 text-white dark:text-gray-400" />
+            </div>
+            <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+              {metrica.titulo}
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2.5 pt-0">
+          <div className="flex items-baseline gap-2.5">
+            <span className="text-xl font-bold tracking-tight text-white dark:text-white truncate">
+              {metrica.valor}
+            </span>
+            {metrica.variacao && (
+              <Badge className="bg-blue-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+                {metrica.tipo === 'negativo' ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                {metrica.variacao}
+              </Badge>
+            )}
+          </div>
+          <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+            <div className="flex items-center justify-between">
+              <span>{metrica.descricao}:</span>
+              <span className="font-medium text-white dark:text-gray-300">
+                {metrica.valor}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }, [metricas]);
+
+  const renderAnalyticsCard3 = useMemo(() => {
+    if (!metricas[2]) return null;
+    const metrica = metricas[2];
+    return (
+      <Card className="bg-purple-600 dark:bg-[#1C1F26] border border-purple-500/30 dark:border-gray-800 rounded-lg hover:border-purple-400 dark:hover:border-gray-700 transition-colors duration-200">
+        <CardHeader className="pb-3 border-0">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-purple-700/50 dark:bg-gray-800">
+              <CheckCircle className="h-4 w-4 text-white dark:text-gray-400" />
+            </div>
+            <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+              {metrica.titulo}
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2.5 pt-0">
+          <div className="flex items-baseline gap-2.5">
+            <span className="text-xl font-bold tracking-tight text-white dark:text-white truncate">
+              {metrica.valor}
+            </span>
+            {metrica.variacao && (
+              <Badge className="bg-purple-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+                {metrica.tipo === 'negativo' ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                {metrica.variacao}
+              </Badge>
+            )}
+          </div>
+          <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+            <div className="flex items-center justify-between">
+              <span>{metrica.descricao}:</span>
+              <span className="font-medium text-white dark:text-gray-300">
+                {metrica.valor}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }, [metricas]);
+
+  const renderAnalyticsCard4 = useMemo(() => {
+    if (!metricas[3]) return null;
+    const metrica = metricas[3];
+    return (
+      <Card className="bg-orange-600 dark:bg-[#1C1F26] border border-orange-500/30 dark:border-gray-800 rounded-lg hover:border-orange-400 dark:hover:border-gray-700 transition-colors duration-200">
+        <CardHeader className="pb-3 border-0">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-orange-700/50 dark:bg-gray-800">
+              <Users className="h-4 w-4 text-white dark:text-gray-400" />
+            </div>
+            <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+              {metrica.titulo}
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2.5 pt-0">
+          <div className="flex items-baseline gap-2.5">
+            <span className="text-xl font-bold tracking-tight text-white dark:text-white truncate">
+              {metrica.valor}
+            </span>
+            {metrica.variacao && (
+              <Badge className="bg-orange-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+                {metrica.tipo === 'negativo' ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                {metrica.variacao}
+              </Badge>
+            )}
+          </div>
+          <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+            <div className="flex items-center justify-between">
+              <span>{metrica.descricao}:</span>
+              <span className="font-medium text-white dark:text-gray-300">
+                {metrica.valor}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }, [metricas]);
+
   // Componente de loading otimizado
   const LoadingSkeleton = () => <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -1470,61 +1647,117 @@ export default function Relatorios() {
           ) : (
             <>
           {/* Métricas Principais */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
-            {metricas.map((metrica, index) => {
-              const icons = [DollarSign, Clock, CheckCircle, Users];
-              const Icon = icons[index] || DollarSign;
-              const cardColors = ['bg-emerald-600', 'bg-blue-600', 'bg-purple-600', 'bg-orange-600'];
-              const bgColor = cardColors[index] || cardColors[0];
-              
-              return (
-                <Card key={metrica.titulo} className={`group relative overflow-hidden ${bgColor} dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300`}>
-          {/* Decoração SVG sutil */}
-          <svg
-            className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
-            viewBox="0 0 300 200"
-            fill="none"
-            style={{ zIndex: 0 }}
-          >
-            <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
-            <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
-            <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
-            <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
-          </svg>
+          {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
+          {isMobile ? (
+            <div className="mb-8">
+              {/* Card wrapper com navegação integrada no topo */}
+              <div className="relative">
+                {/* Navegação integrada no topo do card (parece ser parte do card) */}
+                <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handlePrevCard}
+                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
+                    <span className="text-xs font-semibold text-white dark:text-gray-200">
+                      {activeCardIndex + 1} / 4
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleNextCard}
+                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
 
-                  <CardHeader className="border-0 z-10 relative pb-3">
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                      <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                        {metrica.titulo}
-                      </CardTitle>
+                {/* Container do carousel */}
+                <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
+                  <div 
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{ 
+                      transform: `translateX(-${activeCardIndex * 100}%)`,
+                    }}
+                  >
+                    <div className="w-full flex-shrink-0">
+                      {renderAnalyticsCard1}
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2.5 z-10 relative">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
-                        {metrica.valor}
-                      </span>
-                      {metrica.variacao && (
-                        <Badge className="bg-white/20 text-white font-semibold border-0">
-                          {metrica.tipo === 'negativo' ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
-                          {metrica.variacao}
-                        </Badge>
-                      )}
+                    <div className="w-full flex-shrink-0">
+                      {renderAnalyticsCard2}
                     </div>
-                    <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                      <div className="flex items-center justify-between">
-                        <span>{metrica.descricao}:</span>
-                        <span className="font-medium text-white dark:text-gray-300">
+                    <div className="w-full flex-shrink-0">
+                      {renderAnalyticsCard3}
+                    </div>
+                    <div className="w-full flex-shrink-0">
+                      {renderAnalyticsCard4}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+              {metricas.map((metrica, index) => {
+                const icons = [DollarSign, Clock, CheckCircle, Users];
+                const Icon = icons[index] || DollarSign;
+                const cardColors = ['bg-emerald-600', 'bg-blue-600', 'bg-purple-600', 'bg-orange-600'];
+                const bgColor = cardColors[index] || cardColors[0];
+                
+                return (
+                  <Card key={metrica.titulo} className={`group relative overflow-hidden ${bgColor} dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300`}>
+            {/* Decoração SVG sutil */}
+            <svg
+              className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
+              viewBox="0 0 300 200"
+              fill="none"
+              style={{ zIndex: 0 }}
+            >
+              <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
+              <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
+              <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
+              <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
+            </svg>
+
+                    <CardHeader className="border-0 z-10 relative pb-3">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                        <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                          {metrica.titulo}
+                        </CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-2.5 z-10 relative">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
                           {metrica.valor}
                         </span>
+                        {metrica.variacao && (
+                          <Badge className="bg-white/20 text-white font-semibold border-0">
+                            {metrica.tipo === 'negativo' ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                            {metrica.variacao}
+                          </Badge>
+                        )}
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-      </div>
+                      <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                        <div className="flex items-center justify-between">
+                          <span>{metrica.descricao}:</span>
+                          <span className="font-medium text-white dark:text-gray-300">
+                            {metrica.valor}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
       {/* Performance Charts */}
       <PerformanceCharts 
