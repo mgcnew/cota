@@ -77,4 +77,3 @@ export function useTrialNotifications() {
     }
   }, [subscriptionStatus, toast, navigate]);
 }
-
