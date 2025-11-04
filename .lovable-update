@@ -1,0 +1,29 @@
+# 🚀 INSTRUÇÕES PARA LOVABLE ATUALIZAR CÓDIGO
+
+## ⚠️ ATENÇÃO: CÓDIGO ATUALIZADO - NECESSITA PULL
+
+**Data:** $(date)
+**Commit:** 84cc898
+**Branch:** main (e também lovable)
+**Tag:** v1.0-functional
+
+## 📋 O QUE FAZER NO LOVABLE:
+
+1. Execute: `git fetch origin`
+2. Execute: `git reset --hard origin/main`
+3. Ou use a branch: `git checkout lovable`
+4. Ou use a tag: `git checkout v1.0-functional`
+
+## ✅ VERIFICAÇÃO:
+
+Após atualizar, verifique se está no commit correto:
+```bash
+git log -1
+# Deve mostrar: 84cc898 - chore: garantir versão funcional estável salva no repositório
+```
+
+## 🔄 SINCRONIZAÇÃO:
+
+Este arquivo foi criado para forçar o Lovable a detectar que há atualizações no repositório.
+Se o Lovable não atualizar automaticamente, execute manualmente os comandos acima.
+
