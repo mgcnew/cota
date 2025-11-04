@@ -1,61 +1,51 @@
 import { useLocation } from "react-router-dom";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useMemo } from "react";
 
 interface SmoothPageTransitionProps {
   children: ReactNode;
 }
 
-// Constantes otimizadas para transições mais suaves
-const TRANSITION_DURATION = 300; // ms - Ligeiramente mais longo para suavidade
-const FADE_IN_DELAY = 50; // ms - Pequeno delay para entrada mais natural
-const TRANSITION_EASING = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'; // Easing mais suave
+// Constantes otimizadas para transições mais rápidas
+const TRANSITION_DURATION = 150; // ms - Reduzido de 300ms para 150ms (50% mais rápido)
+const TRANSITION_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)'; // Easing mais rápido e responsivo
 
 export function SmoothPageTransition({ children }: SmoothPageTransitionProps) {
   const location = useLocation();
   const [displayLocation, setDisplayLocation] = useState(location);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isEntering, setIsEntering] = useState(false);
 
   useEffect(() => {
-    if (location !== displayLocation) {
+    if (location.pathname !== displayLocation.pathname) {
       setIsTransitioning(true);
-      setIsEntering(false);
       
-      // Timing otimizado para transição mais natural
-      const timer = setTimeout(() => {
+      // Timeout otimizado - apenas o tempo necessário para fade out
+      const timeoutId = setTimeout(() => {
         setDisplayLocation(location);
-        setIsTransitioning(false);
-        
-        // Pequeno delay para entrada mais suave
-        setTimeout(() => {
-          setIsEntering(true);
-        }, FADE_IN_DELAY);
+        // Usar requestAnimationFrame para garantir que o DOM foi atualizado
+        requestAnimationFrame(() => {
+          setIsTransitioning(false);
+        });
       }, TRANSITION_DURATION / 2);
 
-      return () => clearTimeout(timer);
-    } else {
-      // Página inicial - entrada imediata mas suave
-      setIsEntering(true);
+      return () => clearTimeout(timeoutId);
     }
   }, [location, displayLocation]);
 
+  // Memoizar estilos para evitar recriação
+  const transitionStyles = useMemo(() => ({
+    transitionDuration: `${TRANSITION_DURATION}ms`,
+    transitionTimingFunction: TRANSITION_EASING,
+    transitionProperty: 'opacity',
+    willChange: isTransitioning ? 'opacity' : 'auto',
+    backfaceVisibility: 'hidden' as const,
+    WebkitBackfaceVisibility: 'hidden' as const,
+    transform: 'translateZ(0)', // Forçar aceleração de hardware
+  }), [isTransitioning]);
+
   return (
     <div
-      className={`w-full transition-opacity ${
-        isTransitioning 
-          ? "opacity-0" 
-          : isEntering
-          ? "opacity-100"
-          : "opacity-0"
-      }`}
-      style={{ 
-        transitionDuration: `${TRANSITION_DURATION}ms`,
-        transitionTimingFunction: TRANSITION_EASING,
-        willChange: isTransitioning || !isEntering ? 'opacity' : 'auto',
-        backfaceVisibility: 'hidden',
-        transformOrigin: 'center top',
-        transitionProperty: 'opacity'
-      }}
+      className={`w-full ${isTransitioning ? "opacity-0" : "opacity-100"}`}
+      style={transitionStyles}
     >
       {children}
     </div>

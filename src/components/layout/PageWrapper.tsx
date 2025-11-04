@@ -1,6 +1,4 @@
-import { motion } from "framer-motion";
 import { ReactNode } from "react";
-import { useMobile } from "@/contexts/MobileProvider";
 
 interface PageWrapperProps {
   children: ReactNode;
@@ -8,60 +6,20 @@ interface PageWrapperProps {
 }
 
 export function PageWrapper({ children, className = "" }: PageWrapperProps) {
-  const isMobile = useMobile();
-
-  // No mobile, usar div simples sem animação para melhor performance
-  if (isMobile) {
-    return (
-      <div className={`w-full ${className}`}>
-        {children}
-      </div>
-    );
-  }
-
-  // No desktop, usar animação
+  // Sempre usar div simples - SmoothPageTransition já cuida das animações de página
+  // Não precisamos animar PageWrapper para evitar conflitos e duplicações
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ 
-        duration: 0.2, 
-        ease: "easeOut",
-        type: "tween"
-      }}
-      className={`w-full ${className}`}
-    >
+    <div className={`w-full ${className}`}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
 export function PageSection({ children, className = "" }: PageWrapperProps) {
-  const isMobile = useMobile();
-
-  // No mobile, usar div simples sem animação para melhor performance
-  if (isMobile) {
-    return (
-      <div className={className}>
-        {children}
-      </div>
-    );
-  }
-
-  // No desktop, usar animação
+  // Sempre usar div simples - evita conflitos com animações de página
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ 
-        duration: 0.2, 
-        ease: [0.25, 0.46, 0.45, 0.94], 
-        delay: 0.05,
-        type: "tween"
-      }}
-      className={className}
-    >
+    <div className={className}>
       {children}
-    </motion.div>
+    </div>
   );
 }
