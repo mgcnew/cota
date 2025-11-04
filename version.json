@@ -1,16 +1,16 @@
 {
-  "version": "90d0477",
-  "commit": "90d0477",
-  "message": "🚀 LOVABLE UPDATE REQUIRED - Otimizações de animações de transição (150ms, sem conflitos)",
+  "version": "baf1ccb",
+  "commit": "baf1ccb",
+  "message": "🚀 LOVABLE UPDATE REQUIRED - Hooks de Contagem de Estoque adicionados",
   "timestamp": "2025-01-21",
   "forceSync": true,
   "changes": [
+    "Adicionados hooks: useStockCounts.ts, useStockSectors.ts, useStockCountItems.ts",
     "Otimização de transições de página: 300ms -> 150ms (50% mais rápido)",
     "Remoção de animações duplicadas do PageWrapper",
     "Correção de conflitos entre SmoothPageTransition e PageWrapper",
-    "Aceleração de hardware com requestAnimationFrame",
-    "Transições CSS puras para melhor performance"
+    "Aceleração de hardware com requestAnimationFrame"
   ],
-  "instructions": "Este arquivo força o Lovable a detectar que há uma nova versão disponível no repositório. Se você vê este arquivo, o código local precisa ser atualizado para a versão 90d0477 do repositório remoto."
+  "instructions": "Este arquivo força o Lovable a detectar que há uma nova versão disponível no repositório. Se você vê este arquivo, o código local precisa ser atualizado para a versão baf1ccb do repositório remoto."
 }
 
