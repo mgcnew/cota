@@ -1134,6 +1134,147 @@ export default function Relatorios() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activeUnifiedTab]); // Removido loadHistorico das dependências para evitar re-execuções
 
+  // Helper functions para renderizar Cards Relatórios (memoizadas inline)
+  const renderRelatoriosCard1 = useMemo(() => (
+    <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
+            <DollarSign className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Economia
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-xl font-bold tracking-tight text-white dark:text-white truncate">
+            {estatisticasGerais.economiaTotal}
+          </span>
+          {estatisticasGerais.economiaPercentual !== "0%" && (
+            <Badge className="bg-emerald-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+              <TrendingUp className="w-3 h-3" />
+              {estatisticasGerais.economiaPercentual}
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Total economizado:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {estatisticasGerais.economiaTotal}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Percentual:</span>
+            <span className="font-medium">{estatisticasGerais.economiaPercentual}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [estatisticasGerais]);
+
+  const renderRelatoriosCard2 = useMemo(() => (
+    <Card className="bg-purple-600 dark:bg-[#1C1F26] border border-purple-500/30 dark:border-gray-800 rounded-lg hover:border-purple-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-purple-700/50 dark:bg-gray-800">
+            <FileText className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Cotações
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {estatisticasGerais.cotacoesRealizadas}
+          </span>
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Total de cotações:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {estatisticasGerais.cotacoesRealizadas}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Pedidos gerados:</span>
+            <span className="font-medium">{estatisticasGerais.pedidosGerados}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [estatisticasGerais]);
+
+  const renderRelatoriosCard3 = useMemo(() => (
+    <Card className="bg-blue-600 dark:bg-[#1C1F26] border border-blue-500/30 dark:border-gray-800 rounded-lg hover:border-blue-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-blue-700/50 dark:bg-gray-800">
+            <Building2 className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Fornecedores
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {estatisticasGerais.fornecedoresAtivos}
+          </span>
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Ativos no período:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {estatisticasGerais.fornecedoresAtivos}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Participaram de cotações</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [estatisticasGerais]);
+
+  const renderRelatoriosCard4 = useMemo(() => (
+    <Card className="bg-orange-600 dark:bg-[#1C1F26] border border-orange-500/30 dark:border-gray-800 rounded-lg hover:border-orange-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-orange-700/50 dark:bg-gray-800">
+            <Package className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Produtos
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {estatisticasGerais.produtosCotados}
+          </span>
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Cotados no período:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {estatisticasGerais.produtosCotados}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Produtos únicos</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [estatisticasGerais]);
+
   // Helper functions para renderizar Cards Analytics (memoizadas inline)
   const renderAnalyticsCard1 = useMemo(() => {
     if (!metricas[0]) return null;
@@ -1805,135 +1946,191 @@ export default function Relatorios() {
         {/* Aba Relatórios */}
         <TabsContent value="relatorios" className="space-y-6 mt-0">
           {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
-            {/* Card 1: Economia */}
-            <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-              <CardHeader className="border-0 z-10 relative pb-3">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Economia
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2.5 z-10 relative">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
-                    {estatisticasGerais.economiaTotal}
-                  </span>
-                  {estatisticasGerais.economiaPercentual !== "0%" && (
-                    <Badge className="bg-white/20 text-white font-semibold border-0">
-                      <TrendingUp className="w-3 h-3" />
-                      {estatisticasGerais.economiaPercentual}
-                    </Badge>
-                  )}
-                </div>
-                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                  <div className="flex items-center justify-between">
-                    <span>Total economizado:</span>
-                    <span className="font-medium text-white dark:text-gray-300">
-                      {estatisticasGerais.economiaTotal}
+          {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
+          {isMobile ? (
+            <div className="mb-8">
+              {/* Card wrapper com navegação integrada no topo */}
+              <div className="relative">
+                {/* Navegação integrada no topo do card (parece ser parte do card) */}
+                <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handlePrevCard}
+                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
+                    <span className="text-xs font-semibold text-white dark:text-gray-200">
+                      {activeCardIndex + 1} / 4
                     </span>
                   </div>
-                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>Percentual:</span>
-                    <span className="font-medium">{estatisticasGerais.economiaPercentual}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleNextCard}
+                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Container do carousel */}
+                <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
+                  <div 
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{ 
+                      transform: `translateX(-${activeCardIndex * 100}%)`,
+                    }}
+                  >
+                    <div className="w-full flex-shrink-0">
+                      {renderRelatoriosCard1}
+                    </div>
+                    <div className="w-full flex-shrink-0">
+                      {renderRelatoriosCard2}
+                    </div>
+                    <div className="w-full flex-shrink-0">
+                      {renderRelatoriosCard3}
+                    </div>
+                    <div className="w-full flex-shrink-0">
+                      {renderRelatoriosCard4}
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+              {/* Card 1: Economia */}
+              <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+                <CardHeader className="border-0 z-10 relative pb-3">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                    <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                      Economia
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2.5 z-10 relative">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
+                      {estatisticasGerais.economiaTotal}
+                    </span>
+                    {estatisticasGerais.economiaPercentual !== "0%" && (
+                      <Badge className="bg-white/20 text-white font-semibold border-0">
+                        <TrendingUp className="w-3 h-3" />
+                        {estatisticasGerais.economiaPercentual}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                    <div className="flex items-center justify-between">
+                      <span>Total economizado:</span>
+                      <span className="font-medium text-white dark:text-gray-300">
+                        {estatisticasGerais.economiaTotal}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                      <span>Percentual:</span>
+                      <span className="font-medium">{estatisticasGerais.economiaPercentual}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Card 2: Cotações */}
-            <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-              <CardHeader className="border-0 z-10 relative pb-3">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Cotações
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2.5 z-10 relative">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                    {estatisticasGerais.cotacoesRealizadas}
-                  </span>
-                </div>
-                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                  <div className="flex items-center justify-between">
-                    <span>Total de cotações:</span>
-                    <span className="font-medium text-white dark:text-gray-300">
+              {/* Card 2: Cotações */}
+              <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+                <CardHeader className="border-0 z-10 relative pb-3">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                    <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                      Cotações
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2.5 z-10 relative">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
                       {estatisticasGerais.cotacoesRealizadas}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>Pedidos gerados:</span>
-                    <span className="font-medium">{estatisticasGerais.pedidosGerados}</span>
+                  <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                    <div className="flex items-center justify-between">
+                      <span>Total de cotações:</span>
+                      <span className="font-medium text-white dark:text-gray-300">
+                        {estatisticasGerais.cotacoesRealizadas}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                      <span>Pedidos gerados:</span>
+                      <span className="font-medium">{estatisticasGerais.pedidosGerados}</span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Card 3: Fornecedores */}
-            <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-              <CardHeader className="border-0 z-10 relative pb-3">
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Fornecedores
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2.5 z-10 relative">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                    {estatisticasGerais.fornecedoresAtivos}
-                  </span>
-                </div>
-                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                  <div className="flex items-center justify-between">
-                    <span>Ativos no período:</span>
-                    <span className="font-medium text-white dark:text-gray-300">
+              {/* Card 3: Fornecedores */}
+              <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+                <CardHeader className="border-0 z-10 relative pb-3">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                    <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                      Fornecedores
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2.5 z-10 relative">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
                       {estatisticasGerais.fornecedoresAtivos}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>Participaram de cotações</span>
+                  <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                    <div className="flex items-center justify-between">
+                      <span>Ativos no período:</span>
+                      <span className="font-medium text-white dark:text-gray-300">
+                        {estatisticasGerais.fornecedoresAtivos}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                      <span>Participaram de cotações</span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Card 4: Produtos */}
-            <Card className="group relative overflow-hidden bg-orange-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-              <CardHeader className="border-0 z-10 relative pb-3">
-                <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Produtos
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2.5 z-10 relative">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                    {estatisticasGerais.produtosCotados}
-                  </span>
-                </div>
-                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                  <div className="flex items-center justify-between">
-                    <span>Cotados no período:</span>
-                    <span className="font-medium text-white dark:text-gray-300">
+              {/* Card 4: Produtos */}
+              <Card className="group relative overflow-hidden bg-orange-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+                <CardHeader className="border-0 z-10 relative pb-3">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                    <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                      Produtos
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2.5 z-10 relative">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
                       {estatisticasGerais.produtosCotados}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>Produtos únicos</span>
+                  <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                    <div className="flex items-center justify-between">
+                      <span>Cotados no período:</span>
+                      <span className="font-medium text-white dark:text-gray-300">
+                        {estatisticasGerais.produtosCotados}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                      <span>Produtos únicos</span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
       {/* Card de Configuração Unificado */}
       <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none mb-6">
