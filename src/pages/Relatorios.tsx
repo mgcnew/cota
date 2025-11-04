@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,7 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { TrendingUp, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock, MoreVertical } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { TrendingUp, TrendingDown, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock, MoreVertical, History, Activity, ShoppingCart, X, Search, Users } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import { ReportFilters } from "@/components/reports/ReportFilters";
@@ -19,6 +25,15 @@ import { useReportEconomia } from "@/hooks/useReportEconomia";
 import { useReportFornecedores } from "@/hooks/useReportFornecedores";
 import { useReportComparativo } from "@/hooks/useReportComparativo";
 import { useReportEficiencia } from "@/hooks/useReportEficiencia";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { useInsights } from "@/hooks/useInsights";
+import { InsightsPanel } from "@/components/analytics/InsightsPanel";
+import { PerformanceCharts } from "@/components/analytics/PerformanceCharts";
+import ViewHistoricoDialog from "@/components/forms/ViewHistoricoDialog";
+import { usePagination } from "@/hooks/usePagination";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
 // Tipos para melhor type safety
@@ -45,6 +60,7 @@ interface Estatisticas {
 export default function Relatorios() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     isGenerating,
     progress,
@@ -95,6 +111,52 @@ export default function Relatorios() {
   const [showPreview, setShowPreview] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
+  
+  // Estado para aba ativa na página unificada - lê da query string ou usa padrão
+  const [activeUnifiedTab, setActiveUnifiedTab] = useState(() => {
+    const tabFromQuery = searchParams.get('tab');
+    return tabFromQuery && ['analytics', 'relatorios', 'historico'].includes(tabFromQuery) 
+      ? tabFromQuery 
+      : 'analytics';
+  });
+  
+  // Atualizar aba quando mudar na query string
+  useEffect(() => {
+    const tabFromQuery = searchParams.get('tab');
+    if (tabFromQuery && ['analytics', 'relatorios', 'historico'].includes(tabFromQuery)) {
+      setActiveUnifiedTab(tabFromQuery);
+    }
+  }, [searchParams]);
+  
+  // Atualizar query string quando mudar a aba
+  const handleTabChange = useCallback((value: string) => {
+    setActiveUnifiedTab(value);
+    setSearchParams({ tab: value }, { replace: true });
+  }, [setSearchParams]);
+  
+  // Hooks para Analytics
+  const { metricas, topProdutos, performanceFornecedores, tendenciasMensais, isLoading: isLoadingAnalytics } = useAnalytics({
+    startDate,
+    endDate,
+    selectedFornecedores,
+    selectedProdutos
+  });
+  const { insights, isGenerating: isGeneratingInsights, lastGenerated, generateInsights } = useInsights();
+  
+  // Estados para Histórico
+  const [historicoSearchTerm, setHistoricoSearchTerm] = useState("");
+  const [historicoTipoFilter, setHistoricoTipoFilter] = useState("all");
+  const [historicoUsuarioFilter, setHistoricoUsuarioFilter] = useState("all");
+  const [historicoValorMin, setHistoricoValorMin] = useState("");
+  const [historicoValorMax, setHistoricoValorMax] = useState("");
+  const [historicoEconomiaMin, setHistoricoEconomiaMin] = useState("");
+  const [historicoDataInicio, setHistoricoDataInicio] = useState<Date>();
+  const [historicoDataFim, setHistoricoDataFim] = useState<Date>();
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [historico, setHistorico] = useState<any[]>([]);
+  const [loadingHistorico, setLoadingHistorico] = useState(true);
+  const { paginate: paginateHistorico } = usePagination<any>({ initialItemsPerPage: 10 });
 
   // Relatórios estratégicos para tomada de decisão
   const relatoriosDisponiveis: ReportType[] = useMemo(() => [{
@@ -250,20 +312,186 @@ export default function Relatorios() {
       });
       return;
     }
+    
     try {
-      await generateReport(reportType, currentFilters, format);
+      let dataToExport: any[] = [];
+      
+      // Gerar dados usando hooks específicos (mesmo método da visualização)
+      switch (reportType) {
+        case 'economia':
+          await reportEconomia.generateReport(startDate, endDate);
+          dataToExport = reportEconomia.data;
+          break;
+        case 'fornecedores':
+          await reportFornecedores.generateReport(startDate, endDate);
+          dataToExport = reportFornecedores.data;
+          break;
+        case 'comparativo':
+          await reportComparativo.generateReport(startDate, endDate);
+          dataToExport = reportComparativo.data;
+          break;
+        case 'eficiencia':
+          await reportEficiencia.generateReport(startDate, endDate);
+          dataToExport = reportEficiencia.data;
+          break;
+        default:
+          toast({
+            title: "Tipo de relatório inválido",
+            description: "Selecione um tipo de relatório válido",
+            variant: "destructive"
+          });
+          return;
+      }
+      
+      if (!dataToExport || dataToExport.length === 0) {
+        toast({
+          title: "Nenhum dado encontrado",
+          description: "Não há dados para o período selecionado",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const reportTitle = relatoriosDisponiveis.find(r => r.tipo === reportType)?.titulo || reportType;
+      const baseFilename = `relatorio_${reportType}_${timestamp}`;
+      
+      // Função helper para formatar nome da coluna (usando mesmo mapeamento da função principal)
+      const formatHeaderName = (key: string): string => {
+        const columnMap: Record<string, string> = {
+          periodo: 'Período',
+          totalCotacoes: 'Total de Cotações',
+          economiaGerada: 'Economia Gerada',
+          economiaPercentual: 'Economia (%)',
+          melhorFornecedor: 'Melhor Fornecedor',
+          maiorEconomia: 'Maior Economia',
+          nome: 'Nome',
+          cotacoesVencidas: 'Cotações Vencidas',
+          taxaVitoria: 'Taxa de Vitória',
+          valorMedioOfertas: 'Valor Médio',
+          tempoMedioResposta: 'Tempo Médio Resposta',
+          score: 'Score',
+          produto: 'Produto',
+          categoria: 'Categoria',
+          cotacoes: 'Cotações',
+          menorPreco: 'Menor Preço',
+          maiorPreco: 'Maior Preço',
+          precoMedio: 'Preço Médio',
+          variacao: 'Variação (%)',
+          economiaMedia: 'Economia Média',
+          fornecedorMaisBarato: 'Fornecedor Mais Barato',
+          cotacoesIniciadas: 'Cotações Iniciadas',
+          cotacoesFinalizadas: 'Cotações Finalizadas',
+          taxaConversao: 'Taxa de Conversão (%)',
+          tempoMedioCotacao: 'Tempo Médio (dias)',
+          fornecedoresPorCotacao: 'Fornecedores/Cotação',
+          economiaTotal: 'Economia Total',
+          roi: 'ROI (%)'
+        };
+        return columnMap[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+      };
+      
+      // Obter headers e preparar dados
+      const headers = Object.keys(dataToExport[0] || {});
+      
+      if (format === 'pdf') {
+        const jsPDF = (await import('jspdf')).default;
+        const doc = new jsPDF();
+        
+        // Cabeçalho
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(reportTitle, 20, 20);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 30);
+        
+        // Preparar tabela
+        let y = 45;
+        const margin = 20;
+        const colWidth = (170) / headers.length;
+        const rowHeight = 8;
+        
+        // Headers da tabela
+        doc.setFillColor(240, 240, 240);
+        doc.rect(margin, y, 170, rowHeight, 'F');
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        
+        headers.forEach((header, index) => {
+          const headerText = formatHeaderName(header);
+          doc.text(headerText.substring(0, 25), margin + 2 + (index * colWidth), y + 5);
+        });
+        
+        // Linhas de dados
+        doc.setFont('helvetica', 'normal');
+        y += rowHeight;
+        
+        dataToExport.forEach((row) => {
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
+          
+          headers.forEach((header, index) => {
+            const value = row[header];
+            let cellValue = '-';
+            if (value !== null && value !== undefined && value !== '') {
+              cellValue = String(value);
+            }
+            doc.text(cellValue.substring(0, 25), margin + 2 + (index * colWidth), y + 5);
+          });
+          y += 6;
+        });
+        
+        doc.save(`${baseFilename}.pdf`);
+        
+      } else if (format === 'excel') {
+        const XLSX = await import('xlsx');
+        const { saveAs } = await import('file-saver');
+        
+        // Criar workbook
+        const workbook = XLSX.utils.book_new();
+        
+        // Converter dados para worksheet com formatação
+        const worksheetData = [
+          headers.map(h => formatHeaderName(h)), // Header row
+          ...dataToExport.map(row => 
+            headers.map(header => {
+              const value = row[header];
+              if (value === null || value === undefined || value === '') return '-';
+              // Formatar valores numéricos e monetários se necessário
+              if (typeof value === 'number') {
+                return value;
+              }
+              return String(value);
+            })
+          )
+        ];
+        
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        XLSX.utils.book_append_sheet(workbook, worksheet, reportTitle.substring(0, 31));
+        
+        // Salvar arquivo
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, `${baseFilename}.xlsx`);
+      }
+      
       toast({
-        title: "Download iniciado",
-        description: `Relatório ${reportType} será baixado em breve`
+        title: "Download concluído",
+        description: `Relatório ${reportTitle} baixado com sucesso`
       });
+      
     } catch (error) {
+      console.error('Erro ao gerar relatório:', error);
       toast({
         title: "Erro no download",
-        description: "Não foi possível gerar o relatório",
+        description: "Não foi possível gerar o relatório. Verifique o console para mais detalhes.",
         variant: "destructive"
       });
     }
-  }, [startDate, endDate, currentFilters, generateReport, toast]);
+  }, [startDate, endDate, selectedReportType, reportEconomia, reportFornecedores, reportComparativo, reportEficiencia, relatoriosDisponiveis, toast]);
   const handleExportAll = useCallback(async () => {
     if (!startDate || !endDate) {
       toast({
@@ -391,6 +619,153 @@ export default function Relatorios() {
       return acc;
     }, {} as Record<string, ReportType[]>);
   }, [relatoriosDisponiveis]);
+
+  // Funções de formatação para visualização dos relatórios
+  const formatColumnName = useCallback((key: string): string => {
+    const columnMap: Record<string, string> = {
+      periodo: 'Período',
+      totalCotacoes: 'Total de Cotações',
+      economiaGerada: 'Economia Gerada',
+      economiaPercentual: 'Economia (%)',
+      melhorFornecedor: 'Melhor Fornecedor',
+      maiorEconomia: 'Maior Economia',
+      nome: 'Nome',
+      cotacoesVencidas: 'Cotações Vencidas',
+      taxaVitoria: 'Taxa de Vitória',
+      valorMedioOfertas: 'Valor Médio',
+      tempoMedioResposta: 'Tempo Médio Resposta',
+      score: 'Score',
+      produto: 'Produto',
+      categoria: 'Categoria',
+      cotacoes: 'Cotações',
+      menorPreco: 'Menor Preço',
+      maiorPreco: 'Maior Preço',
+      precoMedio: 'Preço Médio',
+      variacao: 'Variação (%)',
+      economiaMedia: 'Economia Média',
+      fornecedorMaisBarato: 'Fornecedor Mais Barato',
+      cotacoesIniciadas: 'Cotações Iniciadas',
+      cotacoesFinalizadas: 'Cotações Finalizadas',
+      taxaConversao: 'Taxa de Conversão (%)',
+      tempoMedioCotacao: 'Tempo Médio (dias)',
+      fornecedoresPorCotacao: 'Fornecedores/Cotação',
+      economiaTotal: 'Economia Total',
+      roi: 'ROI (%)'
+    };
+    return columnMap[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+  }, []);
+
+  const formatCellValue = useCallback((key: string, value: any): React.ReactNode => {
+    if (value === null || value === undefined || value === '') {
+      return <span className="text-gray-400">-</span>;
+    }
+
+    // Formatação para valores monetários
+    if (key.includes('valor') || key.includes('preco') || key.includes('economia') || key.includes('oferta')) {
+      if (typeof value === 'number') {
+        return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+    }
+
+    // Formatação para porcentagens
+    if (key.includes('percentual') || key.includes('taxa') || key.includes('variacao') || key.includes('roi') || key.includes('conversao')) {
+      if (typeof value === 'number') {
+        return `${value.toFixed(1)}%`;
+      }
+      if (typeof value === 'string' && value.includes('%')) {
+        return value;
+      }
+    }
+
+    // Formatação para números inteiros
+    if (key.includes('total') || key.includes('cotacoes') || key.includes('score') || key === 'cotacoesVencidas') {
+      if (typeof value === 'number') {
+        return value.toLocaleString('pt-BR');
+      }
+    }
+
+    // Formatação para números decimais (dias, etc)
+    if (key.includes('tempo') || (key.includes('medio') && !key.includes('preco') && !key.includes('valor'))) {
+      if (typeof value === 'number') {
+        return `${value.toFixed(1)} dias`;
+      }
+      if (typeof value === 'string' && (value.includes('dias') || value.includes('dia'))) {
+        return value;
+      }
+    }
+    
+    // Formatação para fornecedoresPorCotacao
+    if (key.includes('fornecedoresPorCotacao')) {
+      if (typeof value === 'number') {
+        return value.toFixed(1);
+      }
+    }
+
+    // Retornar string formatada
+    if (typeof value === 'number') {
+      return value.toLocaleString('pt-BR');
+    }
+
+    return String(value);
+  }, []);
+
+  // Função para carregar histórico
+  const loadHistorico = useCallback(async () => {
+    try {
+      setLoadingHistorico(true);
+      if (!user?.id) {
+        setHistorico([]);
+        setLoadingHistorico(false);
+        return;
+      }
+
+      const { data: companyData } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!companyData?.company_id) {
+        setHistorico([]);
+        setLoadingHistorico(false);
+        return;
+      }
+
+      const { data: activityData } = await supabase
+        .from("activity_log")
+        .select("*")
+        .eq("company_id", companyData.company_id)
+        .order("created_at", { ascending: false })
+        .limit(1000);
+
+      let formattedData: any[] = [];
+      if (activityData && activityData.length > 0) {
+        formattedData = activityData.map(item => ({
+          id: item.id,
+          tipo: item.tipo,
+          acao: item.acao,
+          detalhes: item.detalhes,
+          data: format(new Date(item.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+          usuario: user?.email || "Usuário",
+          valor: item.valor ? `R$ ${parseFloat(item.valor.toString()).toFixed(2).replace(".", ",")}` : "",
+          economia: item.economia ? `${parseFloat(item.economia.toString()).toFixed(2)}%` : "",
+          created_at: item.created_at
+        }));
+      }
+      setHistorico(formattedData);
+    } catch (error) {
+      console.error("Erro ao carregar histórico:", error);
+      setHistorico([]);
+    } finally {
+      setLoadingHistorico(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user && activeUnifiedTab === "historico") {
+      loadHistorico();
+    }
+  }, [user, activeUnifiedTab, loadHistorico]);
 
   // Componente de loading otimizado
   const LoadingSkeleton = () => <div className="p-6 space-y-6">
@@ -691,7 +1066,7 @@ export default function Relatorios() {
           </div>
 
       {/* Progress Bar Melhorado */}
-      {isGenerating && <Card className="border-blue-200 bg-blue-50">
+      {isGenerating && <Card className="border-blue-200 bg-blue-50 mb-6">
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
               <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
@@ -706,10 +1081,53 @@ export default function Relatorios() {
           </CardContent>
         </Card>}
 
-      {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
-        {/* Card 1: Economia */}
-        <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+      {/* Tabs Unificadas - Analytics, Relatórios e Histórico */}
+             <Tabs value={activeUnifiedTab} onValueChange={handleTabChange} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6 bg-gray-100 dark:bg-gray-800 h-auto">
+          <TabsTrigger 
+            value="analytics" 
+            className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white text-gray-600 dark:text-gray-400 py-3"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span className="hidden sm:inline">Analytics</span>
+            <span className="sm:hidden">Analytics</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="relatorios" 
+            className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white text-gray-600 dark:text-gray-400 py-3"
+          >
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">Relatórios</span>
+            <span className="sm:hidden">Relatórios</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="historico" 
+            className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white text-gray-600 dark:text-gray-400 py-3"
+          >
+            <History className="h-4 w-4" />
+            <span className="hidden sm:inline">Histórico</span>
+            <span className="sm:hidden">Histórico</span>
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Aba Analytics */}
+        <TabsContent value="analytics" className="space-y-6 mt-0">
+          {isLoadingAnalytics ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+            </div>
+          ) : (
+            <>
+          {/* Métricas Principais */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+            {metricas.map((metrica, index) => {
+              const icons = [DollarSign, Clock, CheckCircle, Users];
+              const Icon = icons[index] || DollarSign;
+              const cardColors = ['bg-emerald-600', 'bg-blue-600', 'bg-purple-600', 'bg-orange-600'];
+              const bgColor = cardColors[index] || cardColors[0];
+              
+              return (
+                <Card key={metrica.titulo} className={`group relative overflow-hidden ${bgColor} dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300`}>
           {/* Decoração SVG sutil */}
           <svg
             className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
@@ -723,199 +1141,159 @@ export default function Relatorios() {
             <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
           </svg>
 
-          <CardHeader className="border-0 z-10 relative pb-3">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
-              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                Economia
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2.5 z-10 relative">
-            <div className="flex items-center gap-2.5">
-              <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
-                {estatisticasGerais.economiaTotal}
-              </span>
-              <Badge className="bg-white/20 text-white font-semibold border-0">
-                <TrendingUp className="w-3 h-3" />
-                +{estatisticasGerais.economiaPercentual}
-              </Badge>
-            </div>
-            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-              <div className="flex items-center justify-between">
-                <span>Total gerada:</span>
-                <span className="font-medium text-white dark:text-gray-300">
-                  {estatisticasGerais.economiaTotal}
-                </span>
-              </div>
-              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                <span>Percentual:</span>
-                <span className="font-medium">{estatisticasGerais.economiaPercentual}</span>
-              </div>
-              <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
-                <span>Meta: R$ 50.000</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  <CardHeader className="border-0 z-10 relative pb-3">
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                      <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                        {metrica.titulo}
+                      </CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2.5 z-10 relative">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
+                        {metrica.valor}
+                      </span>
+                      {metrica.variacao && (
+                        <Badge className="bg-white/20 text-white font-semibold border-0">
+                          {metrica.tipo === 'negativo' ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                          {metrica.variacao}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                      <div className="flex items-center justify-between">
+                        <span>{metrica.descricao}:</span>
+                        <span className="font-medium text-white dark:text-gray-300">
+                          {metrica.valor}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+      </div>
 
-        {/* Card 2: Cotações */}
-        <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-          {/* Decoração SVG sutil */}
-          <svg
-            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
-            viewBox="0 0 200 200"
-            fill="none"
-            style={{ zIndex: 0 }}
-          >
-            <defs>
-              <filter id="blur-cotacoes-relatorios" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="10" />
-              </filter>
-            </defs>
-            <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-cotacoes-relatorios)" />
-            <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
-            <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
-            <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
-          </svg>
+      {/* Performance Charts */}
+      <PerformanceCharts 
+        performanceFornecedores={performanceFornecedores}
+        tendenciasMensais={tendenciasMensais}
+      />
 
-          <CardHeader className="border-0 z-10 relative pb-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
-              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                Cotações
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2.5 z-10 relative">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                {estatisticasGerais.cotacoesRealizadas}
-              </span>
-              <Badge className="bg-white/20 text-white font-semibold border-0">
-                +12%
-              </Badge>
-            </div>
-            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-              <div className="flex items-center justify-between">
-                <span>Realizadas:</span>
-                <span className="font-medium text-white dark:text-gray-300">
+      {/* Insights Panel */}
+      <InsightsPanel
+        insights={insights}
+        isGenerating={isGeneratingInsights}
+        lastGenerated={lastGenerated}
+        onGenerate={() => {
+          const analyticsData = {
+            metricas: {
+              taxaEconomia: parseFloat(metricas[0]?.valor.replace('%', '') || '0'),
+              tempoMedioCotacao: parseFloat(metricas[1]?.valor.replace(' dias', '') || '0'),
+              taxaResposta: parseFloat(metricas[2]?.valor.replace('%', '') || '0'),
+              valorMedioPedido: parseFloat(metricas[3]?.valor.replace(/[^\d,]/g, '').replace(',', '.') || '0'),
+            },
+            topProdutos: topProdutos.map(p => ({
+              nome: p.produto,
+              economia: parseFloat(p.economia.replace('%', '') || '0'),
+              cotacoes: parseInt(p.cotacoes.toString()),
+            })),
+            performanceFornecedores: performanceFornecedores.map(f => ({
+              nome: f.fornecedor,
+              score: f.score,
+              cotacoes: f.cotacoes,
+              taxaResposta: parseFloat(f.tempo.replace(/[^\d,]/g, '').replace(',', '.') || '0'),
+            })),
+            tendenciasMensais: tendenciasMensais.map(t => ({
+              mes: t.mes,
+              cotacoes: t.cotacoes,
+              economia: parseFloat(t.economia.toString()),
+            })),
+          };
+          generateInsights(analyticsData);
+        }}
+      />
+            </>
+          )}
+        </TabsContent>
+
+        {/* Aba Relatórios */}
+        <TabsContent value="relatorios" className="space-y-6 mt-0">
+          {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+            {/* Card 1: Economia */}
+            <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Economia
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
+                    {estatisticasGerais.economiaTotal}
+                  </span>
+                  <Badge className="bg-white/20 text-white font-semibold border-0">
+                    <TrendingUp className="w-3 h-3" />
+                    +{estatisticasGerais.economiaPercentual}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cards similares para Cotações, Fornecedores e Produtos */}
+            <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Cotações
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
                   {estatisticasGerais.cotacoesRealizadas}
                 </span>
-              </div>
-              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                <span>Crescimento:</span>
-                <span className="font-medium">+12%</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* Card 3: Fornecedores */}
-        <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-          {/* Decoração SVG sutil */}
-          <svg
-            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
-            viewBox="0 0 200 200"
-            fill="none"
-            style={{ zIndex: 0 }}
-          >
-            <defs>
-              <filter id="blur-fornecedores-relatorios" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="12" />
-              </filter>
-            </defs>
-            <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur-fornecedores-relatorios)" />
-            <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
-            <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
-            <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
-          </svg>
-
-          <CardHeader className="border-0 z-10 relative pb-3">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-white/70 dark:text-gray-400" />
-              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                Fornecedores
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2.5 z-10 relative">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                {estatisticasGerais.fornecedoresAtivos}
-              </span>
-              <Badge className="bg-white/20 text-white font-semibold border-0">
-                +5
-              </Badge>
-            </div>
-            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-              <div className="flex items-center justify-between">
-                <span>Ativos:</span>
-                <span className="font-medium text-white dark:text-gray-300">
+            <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Fornecedores
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
                   {estatisticasGerais.fornecedoresAtivos}
                 </span>
-              </div>
-              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                <span>Taxa de atividade:</span>
-                <span className="font-medium">90%</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* Card 4: Produtos */}
-        <Card className="group relative overflow-hidden bg-orange-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
-          {/* Decoração SVG sutil */}
-          <svg
-            className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
-            viewBox="0 0 200 200"
-            fill="none"
-            style={{ zIndex: 0 }}
-          >
-            <defs>
-              <filter id="blur-produtos-relatorios" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="16" />
-              </filter>
-            </defs>
-            <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
-            <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-produtos-relatorios)" />
-            <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
-            <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
-            <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
-          </svg>
-
-          <CardHeader className="border-0 z-10 relative pb-3">
-            <div className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-white/70 dark:text-gray-400" />
-              <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                Produtos
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2.5 z-10 relative">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                {estatisticasGerais.produtosCotados}
-              </span>
-              <Badge className="bg-white/20 text-white font-semibold border-0">
-                +8%
-              </Badge>
-            </div>
-            <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-              <div className="flex items-center justify-between">
-                <span>Cotados:</span>
-                <span className="font-medium text-white dark:text-gray-300">
+            <Card className="group relative overflow-hidden bg-orange-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
+              <CardHeader className="border-0 z-10 relative pb-3">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4 text-white/70 dark:text-gray-400" />
+                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+                    Produtos
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 z-10 relative">
+                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
                   {estatisticasGerais.produtosCotados}
                 </span>
-              </div>
-              <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                <span>Com economia:</span>
-                <span className="font-medium">{Math.floor(estatisticasGerais.produtosCotados * 0.6)}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </div>
 
       {/* Card de Configuração Unificado */}
       <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none mb-6">
@@ -1087,14 +1465,14 @@ export default function Relatorios() {
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
               </div>
-            ) : reportData ? (
+            ) : reportData && reportData.length > 0 ? (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-50 dark:bg-gray-800/30">
                       {Object.keys(reportData[0] || {}).map(key => (
-                        <TableHead key={key} className="font-semibold capitalize">
-                          {key}
+                        <TableHead key={key} className="font-semibold">
+                          {formatColumnName(key)}
                         </TableHead>
                       ))}
                     </TableRow>
@@ -1102,8 +1480,10 @@ export default function Relatorios() {
                   <TableBody>
                     {reportData.map((row: any, idx: number) => (
                       <TableRow key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/20">
-                        {Object.values(row).map((value: any, i: number) => (
-                          <TableCell key={i} className="px-1 py-3">{value}</TableCell>
+                        {Object.keys(row).map((key: string, i: number) => (
+                          <TableCell key={i} className="px-4 py-3">
+                            {formatCellValue(key, row[key])}
+                          </TableCell>
                         ))}
                       </TableRow>
                     ))}
@@ -1118,5 +1498,88 @@ export default function Relatorios() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+
+        {/* Aba Histórico */}
+        <TabsContent value="historico" className="space-y-6 mt-0">
+          {loadingHistorico ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+            </div>
+          ) : (
+            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  Histórico de Atividades
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {historico.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm font-medium">Nenhuma atividade encontrada</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Buscar no histórico..."
+                        value={historicoSearchTerm}
+                        onChange={(e) => setHistoricoSearchTerm(e.target.value)}
+                        className="flex-1"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      {historico
+                        .filter(item => 
+                          item.acao?.toLowerCase().includes(historicoSearchTerm.toLowerCase()) ||
+                          item.detalhes?.toLowerCase().includes(historicoSearchTerm.toLowerCase())
+                        )
+                        .slice(0, 50)
+                        .map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setViewDialogOpen(true);
+                            }}
+                          >
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <Activity className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                  {item.acao}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                  {item.detalhes}
+                                </p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                  {item.data}
+                                </p>
+                              </div>
+                            </div>
+                            {item.valor && (
+                              <Badge variant="outline" className="ml-2 flex-shrink-0">
+                                {item.valor}
+                              </Badge>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      <ViewHistoricoDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        item={selectedItem}
+      />
     </div>;
 }

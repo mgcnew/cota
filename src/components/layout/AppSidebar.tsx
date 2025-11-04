@@ -14,9 +14,7 @@ import {
   Building2, 
   FileText, 
   ShoppingCart, 
-  History, 
   BarChart3, 
-  TrendingUp,
   Star,
   MoreHorizontal,
   Settings,
@@ -51,17 +49,9 @@ const menuItems = [{
   url: "/dashboard/contagem-estoque",
   icon: ClipboardList
 }, {
-  title: "Histórico",
-  url: "/dashboard/historico",
-  icon: History
-}, {
   title: "Relatórios",
   url: "/dashboard/relatorios",
   icon: BarChart3
-}, {
-  title: "Analytics",
-  url: "/dashboard/analytics",
-  icon: TrendingUp
 }, {
   title: "Extra",
   url: "/dashboard/extra",

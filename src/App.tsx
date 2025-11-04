@@ -69,9 +69,9 @@ const App = () => {
                   <Route path="fornecedores" element={<Fornecedores />} />
                   <Route path="cotacoes" element={<Cotacoes />} />
                   <Route path="pedidos" element={<Pedidos />} />
-                  <Route path="historico" element={<Historico />} />
+                  <Route path="historico" element={<Navigate to="/dashboard/relatorios?tab=historico" replace />} />
                   <Route path="relatorios" element={<Relatorios />} />
-                  <Route path="analytics" element={<Analytics />} />
+                  <Route path="analytics" element={<Navigate to="/dashboard/relatorios?tab=analytics" replace />} />
                   <Route path="locucoes" element={<Locucoes />} />
                   <Route path="extra" element={<Extra />} />
                   <Route path="whatsapp-mensagens" element={<WhatsAppMensagens />} />
