@@ -101,3 +101,4 @@ Se você usa variáveis de ambiente (Supabase, APIs, etc.), adicione-as nas conf
 
 **Quer que eu te ajude a configurar alguma plataforma específica agora?**
 
+

@@ -660,7 +660,7 @@ export default function Produtos() {
                 <TableHeader>
                   <TableRow>
                     <TableCell colSpan={8} className="px-1 pb-3 pt-0 border-none">
-                      <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-orange-200/60 dark:border-orange-800/40 rounded-lg shadow-sm px-1.5 py-3">
+                      <div className="flex items-center bg-gray-50 dark:bg-gray-800 border border-orange-200/60 dark:border-orange-800/40 rounded-lg shadow-sm px-1.5 py-3">
                         <div className="w-[25%] flex items-center gap-2 px-2 min-w-0">
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/15 to-amber-500/15 flex items-center justify-center text-orange-600 dark:text-amber-300">
                             <Package className="h-4 w-4" />

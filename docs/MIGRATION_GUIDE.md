@@ -96,3 +96,4 @@ Após aplicar a migração com sucesso:
 3. ✅ Criar página de preços
 4. ✅ Integrar Stripe para pagamentos
 
+

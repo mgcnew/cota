@@ -219,3 +219,4 @@ COMMENT ON FUNCTION check_max_suppliers() IS 'Valida limite de fornecedores ante
 COMMENT ON FUNCTION is_subscription_active(UUID) IS 'Verifica se assinatura da empresa está ativa';
 COMMENT ON FUNCTION get_plan_features(TEXT) IS 'Retorna features do plano especificado';
 
+

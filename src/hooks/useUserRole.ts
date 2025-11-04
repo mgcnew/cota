@@ -13,18 +13,43 @@ export function useUserRole() {
     queryFn: async (): Promise<AppRole | null> => {
       if (!user?.id) return null;
 
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      try {
+        // Primeiro tenta buscar da tabela user_roles
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching user role:", error);
-        return null;
+        if (error) {
+          console.error("Error fetching user role:", error);
+          // Se houver erro, tenta usar a função SECURITY DEFINER
+          const { data: roleData, error: funcError } = await supabase
+            .rpc('get_user_role', { _user_id: user.id });
+          
+          if (!funcError && roleData) {
+            return roleData as AppRole;
+          }
+          return 'member';
+        }
+
+        if (data?.role) {
+          return data.role as AppRole;
+        }
+
+        // Fallback: tenta usar a função SECURITY DEFINER
+        const { data: roleData, error: funcError } = await supabase
+          .rpc('get_user_role', { _user_id: user.id });
+        
+        if (!funcError && roleData) {
+          return roleData as AppRole;
+        }
+
+        return 'member';
+      } catch (error) {
+        console.error("Error in useUserRole:", error);
+        return 'member';
       }
-
-      return data?.role as AppRole || 'member';
     },
   });
 

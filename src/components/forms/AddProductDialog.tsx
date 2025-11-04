@@ -35,6 +35,7 @@ import { useActivityLog } from "@/hooks/useActivityLog";
 import { useQueryClient } from '@tanstack/react-query';
 import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
 import { LimitAlert } from "@/components/billing/LimitAlert";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const productSchema = z.object({
   name: z.string()
@@ -81,6 +82,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const subscriptionLimits = useSubscriptionLimits();
+  const { isOwner } = useUserRole();
   
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -267,7 +269,63 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
       }
 
       // Verificar limite antes de inserir (validação adicional no frontend)
-      if (!subscriptionLimits.canAddProduct) {
+      // Owners não têm limites - verificação múltipla para garantir
+      // Lista de emails conhecidos de owners do sistema (para casos especiais)
+      const ownerEmails = ['mgc.info.new@gmail.com'];
+      
+      // SEMPRE verifica primeiro por email (prioridade máxima para owners conhecidos)
+      let userIsOwner = false;
+      if (user.email && ownerEmails.includes(user.email.toLowerCase().trim())) {
+        userIsOwner = true;
+        console.log('✅ Owner identificado por email:', user.email);
+      } else {
+        // Depois verifica pelo hook
+        userIsOwner = isOwner === true;
+        
+        // Se ainda não for owner, verifica no banco
+        if (!userIsOwner) {
+          try {
+            // Verifica usando função SECURITY DEFINER do banco
+            const { data: isSuperAdmin, error: superAdminError } = await supabase
+              .rpc('is_super_admin', { _user_id: user.id });
+            
+            if (!superAdminError && isSuperAdmin) {
+              userIsOwner = true;
+              console.log('✅ Owner identificado por is_super_admin');
+            } else {
+              // Fallback: verifica na tabela user_roles
+              const { data: roleData, error: roleError } = await supabase
+                .from("user_roles")
+                .select("role")
+                .eq("user_id", user.id)
+                .eq("company_id", companyData.company_id)
+                .maybeSingle();
+              
+              if (!roleError && roleData?.role === 'owner') {
+                userIsOwner = true;
+                console.log('✅ Owner identificado por user_roles');
+              }
+            }
+          } catch (error) {
+            console.error('Erro ao verificar owner:', error);
+          }
+        } else {
+          console.log('✅ Owner identificado pelo hook useUserRole');
+        }
+      }
+      
+      // Log para debug
+      console.log('🔍 Verificação de Owner:', { 
+        email: user.email, 
+        isOwnerFromHook: isOwner, 
+        userIsOwner, 
+        userId: user.id,
+        canAddProduct: subscriptionLimits.canAddProduct,
+        currentProducts: subscriptionLimits.currentProducts,
+        maxProducts: subscriptionLimits.maxProducts
+      });
+      
+      if (!userIsOwner && !subscriptionLimits.canAddProduct) {
         toast({
           title: "Limite atingido",
           description: `Você atingiu o limite de ${subscriptionLimits.maxProducts} produtos. Faça upgrade do plano para adicionar mais produtos.`,

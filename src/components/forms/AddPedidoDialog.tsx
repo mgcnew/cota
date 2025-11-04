@@ -66,6 +66,7 @@ export default function AddPedidoDialog({
   // Novos estados para melhorias
   const [lastUsedPrices, setLastUsedPrices] = useState<Record<string, number>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -74,6 +75,15 @@ export default function AddPedidoDialog({
       loadLastPrices();
     }
   }, [open]);
+
+  // Prevenir scroll flash durante mudança de tab
+  useEffect(() => {
+    setIsTransitioning(true);
+    const timer = setTimeout(() => {
+      setIsTransitioning(false);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [activeTab]);
 
   // Atalhos de teclado
   useEffect(() => {
@@ -474,7 +484,7 @@ export default function AddPedidoDialog({
     }
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[85vw] lg:w-[900px] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
         <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -503,8 +513,8 @@ export default function AddPedidoDialog({
         </DialogHeader>
 
         {/* Tab Navigation */}
-        <div className="flex-shrink-0 px-3 sm:px-4 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
-          <div className="flex space-x-1 bg-white dark:bg-gray-900 rounded-md p-0.5 border border-gray-200 dark:border-gray-700">
+        <div className="flex-shrink-0 px-3 sm:px-4 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 overflow-x-hidden">
+          <div className="flex space-x-1 bg-white dark:bg-gray-900 rounded-md p-0.5 border border-gray-200 dark:border-gray-700 min-w-0">
             {tabs.map(tab => {
             const status = getTabStatus(tab.id);
             return <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={`
@@ -523,48 +533,52 @@ export default function AddPedidoDialog({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div 
+          className="flex-1 overflow-y-auto min-h-0 overflow-x-hidden"
+          style={{ 
+            scrollbarGutter: 'stable',
+            ...(isTransitioning && { overflowY: 'hidden' })
+          }}
+        >
           <AnimatePresence mode="wait">
-            <motion.div key={activeTab} initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} exit={{
-            opacity: 0,
-            y: -20
-          }} transition={{
-            duration: 0.25,
-            ease: "easeOut"
-          }} className="h-full">
-              <div className="p-3 sm:p-4">
-                {activeTab === 'produtos' && <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4 h-full">
+            <motion.div 
+              key={activeTab} 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="h-full w-full min-w-0"
+              style={{ willChange: 'opacity' }}
+            >
+              <div className="p-3 sm:p-4 pb-4 max-w-full overflow-x-hidden">
+                {activeTab === 'produtos' && <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4 max-w-full">
                   {/* Left Column - Add Product Form */}
-                    <Card className="border-gray-200 dark:border-gray-700 shadow-sm order-1 lg:order-1 h-fit dark:bg-gray-800">
+                    <Card className="border-gray-200 dark:border-gray-700 shadow-sm order-1 lg:order-1 h-fit dark:bg-gray-800 min-w-0">
                       <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
                         <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
                           <Package className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                           Adicionar Produto
                         </h3>
                       </div>
-                      <div className="p-2 sm:p-3 space-y-2 sm:space-y-3 pb-3 sm:pb-4">
-                        <div className="space-y-2">
+                      <div className="p-2 sm:p-3 space-y-2 sm:space-y-3 pb-3 sm:pb-4 min-w-0">
+                        <div className="space-y-2 min-w-0">
                           <Label className="text-sm font-medium text-foreground">Produto *</Label>
-                          <Combobox options={filteredProducts.map(p => ({
+                          <div className="min-w-0">
+                            <Combobox options={filteredProducts.map(p => ({
                         value: p.name,
                         label: p.name
                       }))} value={selectedProduct ? selectedProduct.name : ""} onValueChange={value => {
                         const product = products.find(p => p.name === value);
                         if (product) handleProductSelect(product);
-                      }} placeholder="Digite para buscar produtos..." searchPlaceholder={`Buscar entre ${products.length} produtos...`} emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."} className="w-full" onSearchChange={setProductSearch} />
+                      }} placeholder="Digite para buscar produtos..." searchPlaceholder={`Buscar entre ${products.length} produtos...`} emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."} className="w-full min-w-0" onSearchChange={setProductSearch} />
+                          </div>
                           {errors.product && (
                             <p className="text-xs text-red-500 dark:text-red-400">{errors.product}</p>
                           )}
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="space-y-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
+                          <div className="space-y-2 min-w-0">
                             <Label className="text-sm font-medium text-foreground">Quantidade *</Label>
                             <Input 
                               type="text" 
@@ -584,31 +598,33 @@ export default function AddPedidoDialog({
                               <p className="text-xs text-red-500 dark:text-red-400">{errors.quantity}</p>
                             )}
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-2 min-w-0">
                             <Label className="text-sm font-medium text-foreground">Unidade *</Label>
-                            <Select value={newProductUnit} onValueChange={value => {
-                              setNewProductUnit(value);
-                              if (errors.unit) setErrors({...errors, unit: ""});
-                            }}>
-                              <SelectTrigger className={`text-sm ${errors.unit ? 'border-red-500 dark:border-red-400' : ''}`}>
-                                <SelectValue placeholder="Unidade" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="un">Unidade (un)</SelectItem>
-                                <SelectItem value="kg">Quilograma (kg)</SelectItem>
-                                <SelectItem value="pc">Peça (pc)</SelectItem>
-                                <SelectItem value="caixa">Caixa</SelectItem>
-                                <SelectItem value="litro">Litro (L)</SelectItem>
-                                <SelectItem value="metro">Metro (m)</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <div className="min-w-0">
+                              <Select value={newProductUnit} onValueChange={value => {
+                                setNewProductUnit(value);
+                                if (errors.unit) setErrors({...errors, unit: ""});
+                              }}>
+                                <SelectTrigger className={`text-sm w-full min-w-0 ${errors.unit ? 'border-red-500 dark:border-red-400' : ''}`}>
+                                  <SelectValue placeholder="Unidade" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="un">Unidade (un)</SelectItem>
+                                  <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                                  <SelectItem value="pc">Peça (pc)</SelectItem>
+                                  <SelectItem value="caixa">Caixa</SelectItem>
+                                  <SelectItem value="litro">Litro (L)</SelectItem>
+                                  <SelectItem value="metro">Metro (m)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                             {errors.unit && (
                               <p className="text-xs text-red-500 dark:text-red-400">{errors.unit}</p>
                             )}
                           </div>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2 min-w-0">
                           <Label className="text-sm font-medium text-foreground">Valor Unitário *</Label>
                           <Input 
                             type="number" 
@@ -617,10 +633,10 @@ export default function AddPedidoDialog({
                               setNewProductPrice(e.target.value);
                               if (errors.price) setErrors({...errors, price: ""});
                             }} 
-                            placeholder="0,00" 
+                            placeholder="0,00"
                             min="0" 
                             step="0.01" 
-                            className={`text-sm ${errors.price ? 'border-red-500 dark:border-red-400' : ''}`} 
+                            className={`text-sm w-full min-w-0 ${errors.price ? 'border-red-500 dark:border-red-400' : ''}`} 
                           />
                           {errors.price && (
                             <p className="text-xs text-red-500 dark:text-red-400">{errors.price}</p>
@@ -640,7 +656,7 @@ export default function AddPedidoDialog({
                     </Card>
 
                     {/* Right Column - Products List */}
-                    <Card className="border-gray-200 dark:border-gray-700 shadow-sm order-2 lg:order-2 flex flex-col dark:bg-gray-800">
+                    <Card className="border-gray-200 dark:border-gray-700 shadow-sm order-2 lg:order-2 flex flex-col dark:bg-gray-800 min-w-0">
                       <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 flex-shrink-0">
                         <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
                           <Package className="h-4 w-4 text-pink-500 dark:text-pink-400" />
@@ -654,8 +670,8 @@ export default function AddPedidoDialog({
                               <p className="text-sm">Nenhum produto adicionado</p>
                               <p className="text-xs">Use o formulário ao lado para adicionar produtos</p>
                             </div> : itens.map((item, index) => <div key={index} className="border border-border rounded-lg p-2 bg-muted/50">
-                                <div className="flex items-start justify-between mb-1">
-                                  <h4 className="font-medium text-foreground text-xs pr-2 flex-1">
+                                <div className="flex items-start justify-between mb-1 gap-2 min-w-0">
+                                  <h4 className="font-medium text-foreground text-xs flex-1 truncate min-w-0">
                                     {item.produto || 'Produto não encontrado'}
                                   </h4>
                                   <div className="flex gap-1 flex-shrink-0">
@@ -681,17 +697,17 @@ export default function AddPedidoDialog({
                                     </Button>
                                   </div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-1 text-xs text-muted-foreground">
-                                  <div>
-                                    <span className="font-medium">Qtd:</span> 
-                                    <span>{formatDecimalDisplay(item.quantidade)} {item.unidade}</span>
+                                <div className="grid grid-cols-3 gap-1 sm:gap-2 text-xs text-muted-foreground min-w-0">
+                                  <div className="min-w-0 truncate">
+                                    <span className="font-medium">Qtd: </span> 
+                                    <span className="truncate">{formatDecimalDisplay(item.quantidade)} {item.unidade}</span>
                                   </div>
-                                  <div>
-                                    <span className="font-medium">Unit:</span> 
-                                    <span>R$ {item.valorUnitario.toFixed(2)}</span>
+                                  <div className="min-w-0 truncate">
+                                    <span className="font-medium">Unit: </span> 
+                                    <span className="truncate">R$ {item.valorUnitario.toFixed(2)}</span>
                                   </div>
-                                  <div className="text-right">
-                                    <span className="font-medium text-pink-600 dark:text-pink-400">
+                                  <div className="text-right min-w-0 truncate">
+                                    <span className="font-medium text-pink-600 dark:text-pink-400 truncate">
                                       R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
                                     </span>
                                   </div>
@@ -710,8 +726,8 @@ export default function AddPedidoDialog({
                     </Card>
                   </div>}
 
-                {activeTab === 'fornecedor' && <div className="max-w-2xl mx-auto space-y-3 sm:space-y-4 h-full">
-                    <Card className="border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800">
+                {activeTab === 'fornecedor' && <div className="max-w-2xl mx-auto w-full space-y-3 sm:space-y-4">
+                    <Card className="border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800 min-w-0">
                       <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
                         <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
                           <Building2 className="h-4 w-4 text-pink-500" />
@@ -721,12 +737,13 @@ export default function AddPedidoDialog({
                           Selecione o fornecedor e defina a data de entrega
                         </p>
                       </div>
-                      <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
-                        <div className="space-y-2">
+                      <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 min-w-0">
+                        <div className="space-y-2 min-w-0">
                           <Label htmlFor="fornecedor" className="text-xs font-medium text-gray-700 dark:text-gray-300">
                             Fornecedor *
                           </Label>
-                          <Combobox 
+                          <div className="min-w-0">
+                            <Combobox 
                             options={suppliers
                               .filter(s => 
                                 !debouncedSupplierSearch || 
@@ -742,38 +759,39 @@ export default function AddPedidoDialog({
                             placeholder="Selecione um fornecedor..." 
                             searchPlaceholder="Buscar por nome ou vendedor..." 
                             emptyText="Nenhum fornecedor encontrado" 
-                            className="w-full text-sm"
+                            className="w-full text-sm min-w-0"
                             onSearchChange={setSupplierSearch}
                           />
+                          </div>
                         </div>
                         
-                        <div className="space-y-2">
+                        <div className="space-y-2 min-w-0">
                           <Label htmlFor="dataEntrega" className="text-xs font-medium text-gray-700 dark:text-gray-300">
                             Data de Entrega *
                           </Label>
-                          <Input id="dataEntrega" type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className="w-full text-sm" />
+                          <Input id="dataEntrega" type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className="w-full text-sm min-w-0" />
                         </div>
                       </div>
                     </Card>
                   </div>}
 
-                {activeTab === 'detalhes' && <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 h-full">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+                {activeTab === 'detalhes' && <div className="max-w-4xl mx-auto w-full space-y-3 sm:space-y-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 w-full max-w-full">
                       {/* Observações */}
-                      <Card className="border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800">
+                      <Card className="border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800 min-w-0">
                         <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
                           <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
                             <FileText className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                             Observações
                           </h3>
                         </div>
-                        <div className="p-2 sm:p-3">
-                          <Textarea value={observacoes} onChange={e => setObservacoes(e.target.value)} placeholder="Observações adicionais sobre o pedido..." className="min-h-[80px] sm:min-h-[100px] resize-none text-sm dark:bg-gray-900 dark:border-gray-600 dark:text-white" />
+                        <div className="p-2 sm:p-3 min-w-0">
+                          <Textarea value={observacoes} onChange={e => setObservacoes(e.target.value)} placeholder="Observações adicionais sobre o pedido..." className="min-h-[80px] sm:min-h-[100px] resize-none text-sm w-full min-w-0 dark:bg-gray-900 dark:border-gray-600 dark:text-white" />
                         </div>
                       </Card>
 
                       {/* Resumo do Pedido */}
-                      <Card className="border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800">
+                      <Card className="border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800 min-w-0">
                         <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
                           <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
                             <Clock className="h-4 w-4 text-pink-500 dark:text-pink-400" />
@@ -781,7 +799,7 @@ export default function AddPedidoDialog({
                           </h3>
                         </div>
                         <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs">
+                                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs min-w-0">
                             <div>
                               <span className="text-gray-600 dark:text-gray-400">Produtos:</span>
                               <div className="font-medium dark:text-gray-200">{itens.length} itens</div>

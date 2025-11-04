@@ -40,12 +40,14 @@ import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
 import { LimitAlert } from "@/components/billing/LimitAlert";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export function CompanyUsersManager() {
   const { user: currentUser } = useAuth();
   const { users, isLoading, updateRole, removeUser } = useCompanyUsers();
   const { invitations, sendInvitation, cancelInvitation, isSendingInvitation } = useCompanyInvitations();
   const subscriptionLimits = useSubscriptionLimits();
+  const { isOwner } = useUserRole();
   const [selectedRole, setSelectedRole] = useState<Record<string, string>>({});
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -59,7 +61,8 @@ export function CompanyUsersManager() {
     if (!inviteEmail) return;
     
     // Verificar limite antes de enviar convite
-    if (!subscriptionLimits.canAddUser) {
+    // Owners não têm limites
+    if (!isOwner && !subscriptionLimits.canAddUser) {
       toast({
         title: "Limite atingido",
         description: `Você atingiu o limite de ${subscriptionLimits.maxUsers} usuários. Faça upgrade do plano para adicionar mais usuários.`,

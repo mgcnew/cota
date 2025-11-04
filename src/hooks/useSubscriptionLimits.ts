@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompany } from "./useCompany";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useUserRole } from "./useUserRole";
 
 export interface SubscriptionLimits {
   canAddUser: boolean;
@@ -19,6 +20,11 @@ export interface SubscriptionLimits {
 export function useSubscriptionLimits(): SubscriptionLimits {
   const { user } = useAuth();
   const { data: company } = useCompany();
+  const { isOwner } = useUserRole();
+
+  // Lista de emails conhecidos de owners do sistema (para casos especiais)
+  const ownerEmails = ['mgc.info.new@gmail.com'];
+  const userIsOwner = isOwner === true || (user?.email && ownerEmails.includes(user.email.toLowerCase().trim()));
 
   const { data: limits, isLoading } = useQuery({
     queryKey: ["subscription-limits", company?.id],
@@ -77,10 +83,15 @@ export function useSubscriptionLimits(): SubscriptionLimits {
     },
   });
 
+  // Owners não têm limites - sempre permitir adicionar recursos
+  const canAddUser = userIsOwner ? true : (limits ? limits.currentUsers < limits.maxUsers : false);
+  const canAddProduct = userIsOwner ? true : (limits ? limits.currentProducts < limits.maxProducts : false);
+  const canAddSupplier = userIsOwner ? true : (limits ? limits.currentSuppliers < limits.maxSuppliers : false);
+
   return {
-    canAddUser: limits ? limits.currentUsers < limits.maxUsers : false,
-    canAddProduct: limits ? limits.currentProducts < limits.maxProducts : false,
-    canAddSupplier: limits ? limits.currentSuppliers < limits.maxSuppliers : false,
+    canAddUser,
+    canAddProduct,
+    canAddSupplier,
     currentUsers: limits?.currentUsers ?? 0,
     currentProducts: limits?.currentProducts ?? 0,
     currentSuppliers: limits?.currentSuppliers ?? 0,
@@ -90,4 +101,5 @@ export function useSubscriptionLimits(): SubscriptionLimits {
     isLoading,
   };
 }
+
 

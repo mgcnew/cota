@@ -26,3 +26,4 @@ git log --oneline -1
 
 echo "✨ Atualização concluída!"
 
+

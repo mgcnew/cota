@@ -2,6 +2,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, ArrowUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface LimitAlertProps {
   resource: "users" | "products" | "suppliers";
@@ -12,6 +14,15 @@ interface LimitAlertProps {
 
 export function LimitAlert({ resource, current, max, onUpgrade }: LimitAlertProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isOwner } = useUserRole();
+  
+  // Lista de emails conhecidos de owners do sistema (para casos especiais)
+  const ownerEmails = ['mgc.info.new@gmail.com'];
+  const userIsOwner = isOwner === true || (user?.email && ownerEmails.includes(user.email.toLowerCase().trim()));
+  
+  // Owners não veem alertas de limite
+  if (userIsOwner) return null;
   
   const percentage = (current / max) * 100;
   const isNearLimit = percentage >= 80;
@@ -59,4 +70,5 @@ export function LimitAlert({ resource, current, max, onUpgrade }: LimitAlertProp
     </Alert>
   );
 }
+
 

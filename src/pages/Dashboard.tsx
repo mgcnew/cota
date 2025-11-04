@@ -15,8 +15,6 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { capitalize } from '@/lib/text-utils';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
 import { useMobile } from '@/contexts/MobileProvider';
-import { TrialBanner } from '@/components/billing/TrialBanner';
-import { useTrialNotifications } from '@/hooks/useTrialNotifications';
 
 const DEFAULT_METRICS = {
   cotacoesAtivas: 0,
@@ -62,9 +60,6 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
   const isMobile = useMobile();
-  
-  // Notificações de trial expirando
-  useTrialNotifications();
 
   // Callbacks memoizados para navegação do carousel
   const handlePrevCard = useCallback((e: React.MouseEvent) => {
@@ -244,29 +239,20 @@ export default function Dashboard() {
 
   // Helper function para renderizar Card 1 - Cotações Ativas (memoizada inline)
   const renderCard1 = useMemo(() => (
-    <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
-      <svg
-        className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5"
-        viewBox="0 0 300 200"
-        fill="none"
-        style={{ zIndex: 0 }}
-      >
-        <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
-        <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
-        <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
-        <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
-      </svg>
-      <CardHeader className="border-0 z-10 relative pb-3">
+    <Card className="bg-purple-600 dark:bg-[#1C1F26] border border-purple-500/30 dark:border-gray-800 rounded-lg hover:border-purple-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-white/70 dark:text-gray-400" />
-            <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-purple-700/50 dark:bg-gray-800">
+              <BarChart3 className="h-4 w-4 text-white dark:text-gray-400" />
+            </div>
+            <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
               Cotações Ativas
             </CardTitle>
                     </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-white/10 dark:text-gray-400 dark:hover:text-white">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -278,16 +264,16 @@ export default function Dashboard() {
           </DropdownMenu>
                       </div>
       </CardHeader>
-      <CardContent className="space-y-2.5 z-10 relative">
-        <div className="flex items-center gap-2.5">
-          <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.cotacoesAtivas}
           </span>
           {metrics.crescimentoCotacoes !== 0 && (
                     <TooltipProvider>
                       <UiTooltip>
                         <TooltipTrigger asChild>
-                  <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
+                  <Badge className="bg-purple-700/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
                     {metrics.crescimentoCotacoes > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {Math.abs(metrics.crescimentoCotacoes)}%
                   </Badge>
@@ -299,7 +285,7 @@ export default function Dashboard() {
                     </TooltipProvider>
           )}
                 </div>
-        <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
           <div className="flex items-center justify-between">
             <span>Vs mês anterior:</span>
             <span className="font-medium text-white dark:text-gray-300">
@@ -319,34 +305,20 @@ export default function Dashboard() {
 
   // Helper function para renderizar Card 2 - Economia Gerada (memoizada inline)
   const renderCard2 = useMemo(() => (
-    <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
-      <svg
-        className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
-        viewBox="0 0 200 200"
-        fill="none"
-        style={{ zIndex: 0 }}
-      >
-        <defs>
-          <filter id="blur2" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="10" />
-          </filter>
-        </defs>
-        <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur2)" />
-        <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
-        <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
-        <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
-      </svg>
-      <CardHeader className="border-0 z-10 relative pb-3">
+    <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-white/70 dark:text-gray-400" />
-            <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
+              <DollarSign className="h-4 w-4 text-white dark:text-gray-400" />
+            </div>
+            <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
               Economia Gerada
             </CardTitle>
                     </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-white/10 dark:text-gray-400 dark:hover:text-white">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -358,16 +330,16 @@ export default function Dashboard() {
           </DropdownMenu>
                       </div>
       </CardHeader>
-      <CardContent className="space-y-2.5 z-10 relative">
-        <div className="flex items-center gap-2.5">
-          <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : formatCurrency(selectedEconomyBreakdown?.economiaRealizada)}
           </span>
           {metrics.crescimentoEconomia !== 0 && (
                     <TooltipProvider>
                       <UiTooltip>
                         <TooltipTrigger asChild>
-                  <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
+                  <Badge className="bg-emerald-700/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
                     {metrics.crescimentoEconomia > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {Math.abs(metrics.crescimentoEconomia)}%
                   </Badge>
@@ -379,7 +351,7 @@ export default function Dashboard() {
                     </TooltipProvider>
           )}
                 </div>
-        <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
           <div className="flex items-center justify-between">
             <span>Vs mês anterior:</span>
             <span className="font-medium text-white dark:text-gray-300">
@@ -399,40 +371,26 @@ export default function Dashboard() {
 
   // Helper function para renderizar Card 3 - Fornecedores (memoizada inline)
   const renderCard3 = useMemo(() => (
-    <Card className="group relative overflow-hidden bg-indigo-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
-      <svg
-        className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
-        viewBox="0 0 200 200"
-        fill="none"
-        style={{ zIndex: 0 }}
-      >
-        <defs>
-          <filter id="blur3" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="12" />
-          </filter>
-        </defs>
-        <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur3)" />
-        <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
-        <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
-        <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
-      </svg>
-      <CardHeader className="border-0 z-10 relative pb-3">
-        <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-white/70 dark:text-gray-400" />
-          <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+    <Card className="bg-indigo-600 dark:bg-[#1C1F26] border border-indigo-500/30 dark:border-gray-800 rounded-lg hover:border-indigo-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-indigo-700/50 dark:bg-gray-800">
+            <Users className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
             Fornecedores
           </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2.5 z-10 relative">
-        <div className="flex items-center gap-2.5">
-          <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : metrics.fornecedores}
           </span>
                   <TooltipProvider>
                     <UiTooltip>
                       <TooltipTrigger asChild>
-                <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
+                <Badge className="bg-indigo-700/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
                   <ArrowUp className="w-3 h-3" />
                   +{isLoading ? '-' : metrics.taxaAtividade}%
                 </Badge>
@@ -443,7 +401,7 @@ export default function Dashboard() {
                     </UiTooltip>
                   </TooltipProvider>
                 </div>
-        <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
           <div className="flex items-center justify-between">
             <span>Taxa de atividade:</span>
             <span className="font-medium text-white dark:text-gray-300">
@@ -463,35 +421,20 @@ export default function Dashboard() {
 
   // Helper function para renderizar Card 4 - Taxa de Aprovação (memoizada inline)
   const renderCard4 = useMemo(() => (
-    <Card className="group relative overflow-hidden bg-yellow-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl sm:hover:shadow-xl sm:dark:hover:shadow-2xl rounded-xl sm:transition-all sm:duration-300">
-      <svg
-        className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
-        viewBox="0 0 200 200"
-        fill="none"
-        style={{ zIndex: 0 }}
-      >
-        <defs>
-          <filter id="blur4" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="16" />
-          </filter>
-        </defs>
-        <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
-        <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur4)" />
-        <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
-        <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
-        <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
-      </svg>
-      <CardHeader className="border-0 z-10 relative pb-3">
+    <Card className="bg-amber-600 dark:bg-[#1C1F26] border border-amber-500/30 dark:border-gray-800 rounded-lg hover:border-amber-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-white/70 dark:text-gray-400" />
-            <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-amber-700/50 dark:bg-gray-800">
+              <Target className="h-4 w-4 text-white dark:text-gray-400" />
+            </div>
+            <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
               Taxa de Aprovação
             </CardTitle>
                   </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/80 hover:text-white dark:text-gray-400 dark:hover:text-white">
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-white/10 dark:text-gray-400 dark:hover:text-white">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -503,16 +446,16 @@ export default function Dashboard() {
           </DropdownMenu>
                   </div>
       </CardHeader>
-      <CardContent className="space-y-2.5 z-10 relative">
-        <div className="flex items-center gap-2.5">
-          <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `${metrics.taxaAprovacao || 0}%`}
           </span>
           {metrics.variacaoTaxaAprovacao !== 0 && (
                   <TooltipProvider>
                     <UiTooltip>
                       <TooltipTrigger asChild>
-                  <Badge className="bg-white/20 text-white font-semibold border-0 cursor-help">
+                  <Badge className="bg-amber-700/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
                     {metrics.variacaoTaxaAprovacao > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{Math.abs(metrics.variacaoTaxaAprovacao || 0)}%
                   </Badge>
@@ -524,7 +467,7 @@ export default function Dashboard() {
                   </TooltipProvider>
           )}
                 </div>
-        <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
           <div className="flex items-center justify-between">
             <span>Vs mês anterior:</span>
             <span className="font-medium text-white dark:text-gray-300">
@@ -558,12 +501,8 @@ export default function Dashboard() {
     </Card>
   ), [isLoading, metrics, handleShowApprovalModal]);
 
-  return (
-    <PageWrapper>
+  return <PageWrapper>
       <div className="page-container">
-        {/* Banner de Trial */}
-        <TrialBanner />
-        
         {/* Métricas Principais - Inspiração 21st.dev Statistics Card 2 */}
         {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
         {isMobile ? (
@@ -572,19 +511,19 @@ export default function Dashboard() {
             <div className="relative">
               {/* Navegação integrada no topo do card (parece ser parte do card) */}
               <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
-                <Button
-                  variant="ghost"
+                      <Button
+                        variant="ghost"
                   size="sm"
                   onClick={handlePrevCard}
                   className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                </Button>
+                      </Button>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
                   <span className="text-xs font-semibold text-white dark:text-gray-200">
                     {activeCardIndex + 1} / 4
                   </span>
-                </div>
+              </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -605,20 +544,20 @@ export default function Dashboard() {
                 >
                   <div className="w-full flex-shrink-0">
                     {renderCard1}
-                  </div>
+                        </div>
                   <div className="w-full flex-shrink-0">
                     {renderCard2}
-                  </div>
+                      </div>
                   <div className="w-full flex-shrink-0">
                     {renderCard3}
-                  </div>
+                        </div>
                   <div className="w-full flex-shrink-0">
                     {renderCard4}
-                  </div>
-                </div>
+                          </div>
+                        </div>
+                      </div>
               </div>
-            </div>
-          </div>
+        </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-8 overflow-visible">
             {renderCard1}
@@ -1402,6 +1341,5 @@ export default function Dashboard() {
           </DialogContent>
         </Dialog>
       </div>
-    </PageWrapper>
-  );
+    </PageWrapper>;
 }

@@ -280,3 +280,4 @@ Após verificar tudo:
 1. ✅ Se tudo estiver correto → Continuar com Landing Page
 2. ❌ Se houver erros → Me informe qual query falhou e qual erro apareceu
 
+

@@ -123,3 +123,4 @@ Se você já tinha dados no Supabase do Lovable, você pode:
 
 **Precisa de ajuda com algum passo específico?**
 
+

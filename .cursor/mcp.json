@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "browser-tools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-browser-tools"
+      ],
+      "env": {
+        "BROWSER_TOOLS_HEADLESS": "false"
+      }
+    }
+  }
+}
+
+
+

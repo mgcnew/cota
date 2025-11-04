@@ -365,3 +365,4 @@ No Lovable: **Settings → Integrations → Resend**
 
 **Quer que eu detalhe alguma fase específica ou tem dúvidas sobre algum passo?**
 
+

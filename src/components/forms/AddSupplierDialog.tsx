@@ -35,6 +35,7 @@ import { useActivityLog } from "@/hooks/useActivityLog";
 import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
 import { LimitAlert } from "@/components/billing/LimitAlert";
 import { useQueryClient } from '@tanstack/react-query';
+import { useUserRole } from "@/hooks/useUserRole";
 
 const supplierSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -58,6 +59,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
   const { user } = useAuth();
   const subscriptionLimits = useSubscriptionLimits();
   const queryClient = useQueryClient();
+  const { isOwner } = useUserRole();
 
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
@@ -100,7 +102,8 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
       }
 
       // Verificar limite antes de inserir (validação adicional no frontend)
-      if (!subscriptionLimits.canAddSupplier) {
+      // Owners não têm limites
+      if (!isOwner && !subscriptionLimits.canAddSupplier) {
         toast({
           title: "Limite atingido",
           description: `Você atingiu o limite de ${subscriptionLimits.maxSuppliers} fornecedores. Faça upgrade do plano para adicionar mais fornecedores.`,

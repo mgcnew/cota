@@ -12,12 +12,11 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
-import { ShoppingCart, Plus, Search, Filter, Eye, Edit, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp, MoreVertical, CircleDot } from "lucide-react";
+import { ShoppingCart, Plus, Search, Filter, Eye, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp, MoreVertical, CircleDot } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
-import EditPedidoDialog from "@/components/forms/EditPedidoDialog";
+import PedidoDialog from "@/components/forms/PedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
-import ViewPedidoDialog from "@/components/forms/ViewPedidoDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
@@ -47,9 +46,8 @@ export default function Pedidos() {
   const [valorMin, setValorMin] = useState("");
   const [valorMax, setValorMax] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState<any>(null);
   const [pedidos, setPedidos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -669,21 +667,13 @@ export default function Pedidos() {
                               {/* Ações - Largura fixa */}
                               <div className="w-[10%] pl-4">
                                 <div className="flex justify-end gap-2">
-                                  {/* Botão Visualizar - Primário */}
+                                  {/* Botão Visualizar/Editar - Unificado */}
                                   <Button variant="outline" size="sm" onClick={() => {
                                 setSelectedPedido(pedido);
-                                setViewDialogOpen(true);
+                                setPedidoDialogOpen(true);
                               }} className="h-8 w-8 p-0 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-200 shadow-sm hover:shadow-md">
                                     <Eye className="h-3 w-3" />
-                                    <span className="sr-only">Ver pedido</span>
-                                  </Button>
-
-                                  {/* Botão Editar - Secundário */}
-                                  <Button variant="outline" size="sm" onClick={() => {
-                                setSelectedPedido(pedido);
-                                setEditDialogOpen(true);
-                              }} className="h-8 w-8 p-0 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-600 hover:text-amber-700 dark:hover:text-amber-300 transition-all duration-200 shadow-sm hover:shadow-md">
-                                    <Edit className="h-3 w-3" />
+                                    <span className="sr-only">Ver/Editar pedido</span>
                                   </Button>
 
                                   {/* Botão Excluir - Destrutivo */}
@@ -775,11 +765,8 @@ export default function Pedidos() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setViewDialogOpen(true); }}>
-                            <Eye className="h-4 w-4 mr-2" />Ver Detalhes
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setEditDialogOpen(true); }}>
-                            <Edit className="h-4 w-4 mr-2" />Editar
+                          <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setPedidoDialogOpen(true); }}>
+                            <Eye className="h-4 w-4 mr-2" />Ver/Editar Detalhes
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setDeleteDialogOpen(true); }} className="text-destructive">
                             <Trash2 className="h-4 w-4 mr-2" />Excluir
@@ -839,11 +826,14 @@ export default function Pedidos() {
       <AddPedidoDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={handleAddPedido} />
       
       {selectedPedido && <>
-          <EditPedidoDialog open={editDialogOpen} onOpenChange={setEditDialogOpen} pedido={selectedPedido} onEdit={handleEditPedido} />
+          <PedidoDialog 
+            open={pedidoDialogOpen} 
+            onOpenChange={setPedidoDialogOpen} 
+            pedido={selectedPedido} 
+            onEdit={handleEditPedido} 
+          />
           
           <DeletePedidoDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} pedido={selectedPedido} onDelete={handleDeletePedido} />
-          
-          <ViewPedidoDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} pedido={selectedPedido} />
         </>}
       </div>
     </PageWrapper>;
