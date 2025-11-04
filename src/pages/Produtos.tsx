@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, Clock, ClipboardList, Tags, DollarSign, CircleDot, Barcode } from "lucide-react";
+import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, Clock, ClipboardList, Tags, DollarSign, CircleDot, Barcode, ChevronLeft, ChevronRight } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
@@ -51,6 +51,7 @@ export default function Produtos() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
   const addDialogTriggerRef = useRef<HTMLDivElement>(null);
   const importDialogTriggerRef = useRef<HTMLDivElement>(null);
   const triggerAddDialog = () => {
@@ -61,6 +62,17 @@ export default function Produtos() {
     const button = importDialogTriggerRef.current?.querySelector('button');
     button?.click();
   };
+
+  // Callbacks memoizados para navegação do carousel
+  const handlePrevCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
+  }, []);
+
+  const handleNextCard = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
+  }, []);
 
   // OPTIMIZED: Use React Query for data fetching with caching
   const {
@@ -206,6 +218,178 @@ export default function Produtos() {
         {config.label}
       </Badge>;
   }, []);
+
+  // Helper functions para renderizar Cards (memoizadas inline)
+  const renderCard1 = useMemo(() => (
+    <Card className="bg-orange-600 dark:bg-[#1C1F26] border border-orange-500/30 dark:border-gray-800 rounded-lg hover:border-orange-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-orange-700/50 dark:bg-gray-800">
+            <Package className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Produtos
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.totalProducts}
+          </span>
+          <Badge className="bg-orange-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            <TrendingUp className="w-3 h-3" />
+            +{Math.floor(stats.totalProducts * 0.1)}
+          </Badge>
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>No Catálogo:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.totalProducts}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Com cotação:</span>
+            <span className="font-medium">{stats.percentualComCotacao}%</span>
+          </div>
+          <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
+            <span>{stats.produtosPorStatus.ativos} ativos</span>
+            <span>•</span>
+            <span>{stats.produtosPorStatus.cotados} cotados</span>
+            <span>•</span>
+            <span>{stats.produtosPorStatus.semCotacao} sem cotação</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
+  const renderCard2 = useMemo(() => (
+    <Card className="bg-blue-600 dark:bg-[#1C1F26] border border-blue-500/30 dark:border-gray-800 rounded-lg hover:border-blue-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-blue-700/50 dark:bg-gray-800">
+            <Filter className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Categorias
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.totalCategories}
+          </span>
+          <Badge className="bg-blue-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            <TrendingUp className="w-3 h-3" />
+            +2
+          </Badge>
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Disponíveis:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.totalCategories}
+            </span>
+          </div>
+          {stats.topCategoria && (
+            <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+              <span>Top categoria:</span>
+              <span className="font-medium">{stats.topCategoria.nome} • {stats.topCategoria.count} produtos</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
+  const renderCard3 = useMemo(() => (
+    <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
+            <FileText className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Cotações
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.activeQuotes}
+          </span>
+          <Badge className="bg-emerald-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            <TrendingUp className="w-3 h-3" />
+            15%
+          </Badge>
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Total de cotações:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.activeQuotes}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+            <span>Média por produto:</span>
+            <span className="font-medium">{stats.mediaCotacoesPorProduto}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
+  const renderCard4 = useMemo(() => (
+    <Card className="bg-purple-600 dark:bg-[#1C1F26] border border-purple-500/30 dark:border-gray-800 rounded-lg hover:border-purple-400 dark:hover:border-gray-700 transition-colors duration-200">
+      <CardHeader className="pb-3 border-0">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-purple-700/50 dark:bg-gray-800">
+            <Scale className="h-4 w-4 text-white dark:text-gray-400" />
+          </div>
+          <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
+            Valor Médio
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2.5 pt-0">
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-xl font-bold tracking-tight text-white dark:text-white">
+            {stats.averageValue}
+          </span>
+          {stats.percentualEconomiaMedia > 0 && (
+            <Badge className="bg-purple-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+              <TrendingUp className="w-3 h-3" />
+              {stats.percentualEconomiaMedia}%
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span>Valor médio:</span>
+            <span className="font-medium text-white dark:text-gray-300">
+              {stats.averageValue}
+            </span>
+          </div>
+          {stats.percentualEconomiaMedia > 0 ? (
+            <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+              <span>Economia média:</span>
+              <span className="font-medium">R$ {stats.economiaMediaPorProduto}/produto</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+              <span>Produtos com preço:</span>
+              <span className="font-medium">{stats.productsWithPrices}</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  ), [stats]);
+
   if (loading || productsLoading) {
     return <div className="flex items-center justify-center h-screen">
         <div className="text-center">Carregando...</div>
@@ -216,233 +400,68 @@ export default function Produtos() {
       <PageWrapper>
         <div className="page-container">
           {/* Stats Cards - Inspiração Dashboard Statistics Card 2 */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
-            {/* Card 1: Produtos */}
-            <Card className="group relative overflow-hidden bg-orange-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
-              {/* Decoração SVG sutil */}
-              <svg
-                className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5"
-                viewBox="0 0 300 200"
-                fill="none"
-                style={{ zIndex: 0 }}
-              >
-                <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
-                <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
-                <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
-                <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
-              </svg>
-
-              <CardHeader className="border-0 z-10 relative pb-3">
-                <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Produtos
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2.5 z-10 relative">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                    {stats.totalProducts}
-                  </span>
-                  <Badge className="bg-white/20 text-white font-semibold border-0">
-                    <TrendingUp className="w-3 h-3" />
-                    +{Math.floor(stats.totalProducts * 0.1)}
-                  </Badge>
-                    </div>
-                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                  <div className="flex items-center justify-between">
-                    <span>No Catálogo:</span>
-                    <span className="font-medium text-white dark:text-gray-300">
-                      {stats.totalProducts}
+          {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
+          {isMobile ? (
+            <div className="mb-8">
+              {/* Card wrapper com navegação integrada no topo */}
+              <div className="relative">
+                {/* Navegação integrada no topo do card (parece ser parte do card) */}
+                <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handlePrevCard}
+                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
+                    <span className="text-xs font-semibold text-white dark:text-gray-200">
+                      {activeCardIndex + 1} / 4
                     </span>
                   </div>
-                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>Com cotação:</span>
-                    <span className="font-medium">{stats.percentualComCotacao}%</span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>{stats.produtosPorStatus.ativos} ativos</span>
-                    <span>•</span>
-                    <span>{stats.produtosPorStatus.cotados} cotados</span>
-                    <span>•</span>
-                    <span>{stats.produtosPorStatus.semCotacao} sem cotação</span>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleNextCard}
+                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Card 2: Categorias */}
-            <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
-              {/* Decoração SVG sutil */}
-              <svg
-                className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
-                viewBox="0 0 200 200"
-                fill="none"
-                style={{ zIndex: 0 }}
-              >
-                <defs>
-                  <filter id="blur-categorias" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="10" />
-                  </filter>
-                </defs>
-                <ellipse cx="170" cy="60" rx="40" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-categorias)" />
-                <rect x="120" y="20" width="60" height="20" rx="8" fill="#fff" fillOpacity="0.10" />
-                <polygon points="150,0 200,0 200,50" fill="#fff" fillOpacity="0.07" />
-                <circle cx="180" cy="100" r="14" fill="#fff" fillOpacity="0.16" />
-              </svg>
-
-              <CardHeader className="border-0 z-10 relative pb-3">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Categorias
-                  </CardTitle>
+                {/* Container do carousel */}
+                <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
+                  <div 
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{ 
+                      transform: `translateX(-${activeCardIndex * 100}%)`,
+                    }}
+                  >
+                    <div className="w-full flex-shrink-0">
+                      {renderCard1}
                     </div>
-              </CardHeader>
-              <CardContent className="space-y-2.5 z-10 relative">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                    {stats.totalCategories}
-                  </span>
-                  <Badge className="bg-white/20 text-white font-semibold border-0">
-                    <TrendingUp className="w-3 h-3" />
-                    +2
-                  </Badge>
-                  </div>
-                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                  <div className="flex items-center justify-between">
-                    <span>Disponíveis:</span>
-                    <span className="font-medium text-white dark:text-gray-300">
-                      {stats.totalCategories}
-                    </span>
-                  </div>
-                  {stats.topCategoria && (
-                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                      <span>Top categoria:</span>
-                      <span className="font-medium">{stats.topCategoria.nome} • {stats.topCategoria.count} produtos</span>
-                </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Card 3: Cotações */}
-            <Card className="group relative overflow-hidden bg-emerald-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
-              {/* Decoração SVG sutil */}
-              <svg
-                className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
-                viewBox="0 0 200 200"
-                fill="none"
-                style={{ zIndex: 0 }}
-              >
-                <defs>
-                  <filter id="blur-cotacoes" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="12" />
-                  </filter>
-                </defs>
-                <rect x="120" y="0" width="70" height="70" rx="35" fill="#fff" fillOpacity="0.09" filter="url(#blur-cotacoes)" />
-                <ellipse cx="170" cy="80" rx="28" ry="12" fill="#fff" fillOpacity="0.12" />
-                <polygon points="200,0 200,60 140,0" fill="#fff" fillOpacity="0.07" />
-                <circle cx="150" cy="30" r="10" fill="#fff" fillOpacity="0.15" />
-              </svg>
-
-              <CardHeader className="border-0 z-10 relative pb-3">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Cotações
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2.5 z-10 relative">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                    {stats.activeQuotes}
-                  </span>
-                  <Badge className="bg-white/20 text-white font-semibold border-0">
-                    <TrendingUp className="w-3 h-3" />
-                    15%
-                  </Badge>
+                    <div className="w-full flex-shrink-0">
+                      {renderCard2}
                     </div>
-                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                  <div className="flex items-center justify-between">
-                    <span>Total de cotações:</span>
-                    <span className="font-medium text-white dark:text-gray-300">
-                      {stats.activeQuotes}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                    <span>Média por produto:</span>
-                    <span className="font-medium">{stats.mediaCotacoesPorProduto}</span>
+                    <div className="w-full flex-shrink-0">
+                      {renderCard3}
+                    </div>
+                    <div className="w-full flex-shrink-0">
+                      {renderCard4}
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Card 4: Valor Médio */}
-            <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-xl dark:hover:shadow-2xl rounded-xl transition-all duration-300">
-              {/* Decoração SVG sutil */}
-              <svg
-                className="absolute right-0 top-0 w-48 h-48 pointer-events-none opacity-10 dark:opacity-5"
-                viewBox="0 0 200 200"
-                fill="none"
-                style={{ zIndex: 0 }}
-              >
-                <defs>
-                  <filter id="blur-valor" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="16" />
-                  </filter>
-                </defs>
-                <polygon points="200,0 200,100 100,0" fill="#fff" fillOpacity="0.09" />
-                <ellipse cx="170" cy="40" rx="30" ry="18" fill="#fff" fillOpacity="0.13" filter="url(#blur-valor)" />
-                <rect x="140" y="60" width="40" height="18" rx="8" fill="#fff" fillOpacity="0.10" />
-                <circle cx="150" cy="30" r="14" fill="#fff" fillOpacity="0.18" />
-                <line x1="120" y1="0" x2="200" y2="80" stroke="#fff" strokeOpacity="0.08" strokeWidth="6" />
-              </svg>
-
-              <CardHeader className="border-0 z-10 relative pb-3">
-                <div className="flex items-center gap-2">
-                  <Scale className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                  <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                    Valor Médio
-                  </CardTitle>
-                    </div>
-              </CardHeader>
-              <CardContent className="space-y-2.5 z-10 relative">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xl font-semibold tracking-tight text-white dark:text-white">
-                    {stats.averageValue}
-                  </span>
-                  {stats.percentualEconomiaMedia > 0 && (
-                    <Badge className="bg-white/20 text-white font-semibold border-0">
-                      <TrendingUp className="w-3 h-3" />
-                      {stats.percentualEconomiaMedia}%
-                    </Badge>
-                  )}
-                </div>
-                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                  <div className="flex items-center justify-between">
-                    <span>Valor médio:</span>
-                    <span className="font-medium text-white dark:text-gray-300">
-                      {stats.averageValue}
-                    </span>
-                  </div>
-                  {stats.percentualEconomiaMedia > 0 ? (
-                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                      <span>Economia média:</span>
-                      <span className="font-medium">R$ {stats.economiaMediaPorProduto}/produto</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                      <span>Produtos com preço:</span>
-                      <span className="font-medium">{stats.productsWithPrices}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+              {renderCard1}
+              {renderCard2}
+              {renderCard3}
+              {renderCard4}
+            </div>
+          )}
 
           {/* Filters - Between stats cards and products table */}
           <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
