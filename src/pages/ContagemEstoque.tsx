@@ -217,7 +217,26 @@ export default function ContagemEstoque() {
     const pendentes = stockCounts.filter(c => c.status === 'pendente').length;
     const emAndamento = stockCounts.filter(c => c.status === 'em_andamento').length;
     const finalizadas = stockCounts.filter(c => c.status === 'finalizada').length;
-    return { total, pendentes, emAndamento, finalizadas };
+    const canceladas = stockCounts.filter(c => c.status === 'cancelada').length;
+    
+    // Calcular percentuais
+    const percentualFinalizadas = total > 0 
+      ? Math.round((finalizadas / total) * 100)
+      : 0;
+    
+    const taxaConclusao = total > 0
+      ? Math.round((finalizadas / total) * 100)
+      : 0;
+    
+    return { 
+      total, 
+      pendentes, 
+      emAndamento, 
+      finalizadas,
+      canceladas,
+      percentualFinalizadas,
+      taxaConclusao
+    };
   }, [stockCounts]);
 
   return (
@@ -251,14 +270,15 @@ export default function ContagemEstoque() {
                 <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
                   {stats.total}
                 </span>
-                <Badge className="bg-white/20 text-white font-semibold border-0">
-                  <TrendingUp className="w-3 h-3" />
-                  +{stats.pendentes}
-                </Badge>
+                {stats.total > 0 && (
+                  <Badge className="bg-white/20 text-white font-semibold border-0">
+                    {stats.taxaConclusao}% concluídas
+                  </Badge>
+                )}
               </div>
               <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                 <div className="flex items-center justify-between">
-                  <span>Contagens:</span>
+                  <span>Total de contagens:</span>
                   <span className="font-medium text-white dark:text-gray-300">
                     {stats.total}
                   </span>

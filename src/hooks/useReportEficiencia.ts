@@ -120,9 +120,11 @@ export const useReportEficiencia = () => {
       });
 
       setData(reportData);
+      return reportData;
     } catch (error) {
       console.error('Erro ao gerar relatório de eficiência:', error);
       setData([]);
+      return [];
     } finally {
       setLoading(false);
     }

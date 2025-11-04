@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { DataPagination } from "@/components/ui/data-pagination";
-import { TrendingUp, TrendingDown, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock, MoreVertical, History, Activity, ShoppingCart, X, Search, Users } from "lucide-react";
+import { TrendingUp, TrendingDown, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock, MoreVertical, History, Activity, ShoppingCart, X, Search, Users, Timer, Target, ArrowUpDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import { ReportFilters } from "@/components/reports/ReportFilters";
@@ -25,6 +25,10 @@ import { useReportEconomia } from "@/hooks/useReportEconomia";
 import { useReportFornecedores } from "@/hooks/useReportFornecedores";
 import { useReportComparativo } from "@/hooks/useReportComparativo";
 import { useReportEficiencia } from "@/hooks/useReportEficiencia";
+import { useReportPedidos } from "@/hooks/useReportPedidos";
+import { useReportProdutos } from "@/hooks/useReportProdutos";
+import { useReportTempoResposta } from "@/hooks/useReportTempoResposta";
+import { useReportConversao } from "@/hooks/useReportConversao";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useInsights } from "@/hooks/useInsights";
 import { InsightsPanel } from "@/components/analytics/InsightsPanel";
@@ -74,6 +78,10 @@ export default function Relatorios() {
   const reportFornecedores = useReportFornecedores();
   const reportComparativo = useReportComparativo();
   const reportEficiencia = useReportEficiencia();
+  const reportPedidos = useReportPedidos();
+  const reportProdutos = useReportProdutos();
+  const reportTempoResposta = useReportTempoResposta();
+  const reportConversao = useReportConversao();
 
   // Estados otimizados
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
@@ -203,6 +211,50 @@ export default function Relatorios() {
     categoria: 'estrategico',
     prioridade: 'alta',
     tempoEstimado: '1-2 min'
+  }, {
+    titulo: "Análise de Pedidos",
+    descricao: "Volume de pedidos, valores, status e taxa de entrega por período para gestão operacional",
+    tipo: "pedidos",
+    icone: ShoppingCart,
+    formato: ["PDF", "Excel"],
+    periodo: "Mensal",
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
+    categoria: 'operacional',
+    prioridade: 'alta',
+    tempoEstimado: '1-2 min'
+  }, {
+    titulo: "Análise de Produtos",
+    descricao: "Produtos mais cotados, variação de preços, tendências e economia potencial por produto",
+    tipo: "produtos",
+    icone: Package,
+    formato: ["PDF", "Excel"],
+    periodo: "Mensal",
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
+    categoria: 'operacional',
+    prioridade: 'media',
+    tempoEstimado: '1-2 min'
+  }, {
+    titulo: "Tempo de Resposta",
+    descricao: "Performance dos fornecedores em tempo de resposta às cotações para otimização do processo",
+    tipo: "tempo-resposta",
+    icone: Timer,
+    formato: ["PDF", "Excel"],
+    periodo: "Mensal",
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
+    categoria: 'operacional',
+    prioridade: 'media',
+    tempoEstimado: '1-2 min'
+  }, {
+    titulo: "Taxa de Conversão",
+    descricao: "Análise da conversão de cotações em pedidos, ROI e eficácia do processo de compras",
+    tipo: "conversao",
+    icone: Target,
+    formato: ["PDF", "Excel"],
+    periodo: "Mensal",
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
+    categoria: 'estrategico',
+    prioridade: 'alta',
+    tempoEstimado: '1-2 min'
   }], []);
 
   // Função otimizada para carregar estatísticas
@@ -217,7 +269,18 @@ export default function Relatorios() {
       const endDateStr = endDate?.toISOString().split('T')[0];
 
       // Carregar dados em paralelo para melhor performance
-      const [quotesResult, ordersResult, suppliersResult, productsResult] = await Promise.all([supabase.from("quotes").select("id, status, data_inicio, data_fim, quote_suppliers(valor_oferecido)").gte("data_inicio", startDateStr).lte("data_fim", endDateStr), supabase.from("orders").select("id, order_date, total_value, status").gte("order_date", startDateStr).lte("order_date", endDateStr), supabase.from("suppliers").select("id, name"), supabase.from("products").select("id, name, category")]);
+      const [quotesResult, ordersResult, suppliersResult, productsResult] = await Promise.all([
+        supabase.from("quotes")
+          .select("id, status, data_inicio, data_fim, quote_suppliers(valor_oferecido, supplier_id), quote_items(product_id)")
+          .gte("data_inicio", startDateStr)
+          .lte("data_fim", endDateStr),
+        supabase.from("orders")
+          .select("id, order_date, total_value, status")
+          .gte("order_date", startDateStr)
+          .lte("order_date", endDateStr),
+        supabase.from("suppliers").select("id, name"),
+        supabase.from("products").select("id, name, category")
+      ]);
       if (quotesResult.error) throw quotesResult.error;
       if (ordersResult.error) throw ordersResult.error;
       if (suppliersResult.error) throw suppliersResult.error;
@@ -261,14 +324,54 @@ export default function Relatorios() {
         economiaTotal: 0,
         cotacoesComEconomia: 0
       });
+      
+      // Calcular valores totais e médios
       const totalPedidos = orders.reduce((acc, order) => acc + Number(order.total_value || 0), 0);
+      const valorMedioPedido = orders.length > 0 ? totalPedidos / orders.length : 0;
       const economiaPercentual = totalPedidos > 0 ? metricsData.economiaTotal / totalPedidos * 100 : 0;
+      
+      // Filtrar fornecedores que participaram de cotações no período
+      const fornecedoresIdsNasQuotes = new Set<string>();
+      quotes.forEach((q: any) => {
+        if (q.quote_suppliers) {
+          q.quote_suppliers.forEach((qs: any) => {
+            if (qs.supplier_id) {
+              fornecedoresIdsNasQuotes.add(qs.supplier_id);
+            }
+          });
+        }
+      });
+      const fornecedoresAtivosNoPeriodo = Array.from(fornecedoresIdsNasQuotes).length;
+      
+      // Filtrar produtos que foram cotados no período
+      const produtosIdsNasQuotes = new Set<string>();
+      quotes.forEach((q: any) => {
+        if (q.quote_items) {
+          q.quote_items.forEach((qi: any) => {
+            if (qi.product_id) {
+              produtosIdsNasQuotes.add(qi.product_id);
+            }
+          });
+        }
+      });
+      const produtosCotadosNoPeriodo = Array.from(produtosIdsNasQuotes).length;
+      
+      // Formatar valores com moeda brasileira
+      const economiaTotalFormatada = metricsData.economiaTotal > 0
+        ? metricsData.economiaTotal.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })
+        : 'R$ 0,00';
+      
       setEstatisticasGerais({
-        economiaTotal: `R$ ${metricsData.economiaTotal.toFixed(2).replace('.', ',')}`,
+        economiaTotal: economiaTotalFormatada,
         economiaPercentual: `${economiaPercentual.toFixed(1)}%`,
         cotacoesRealizadas: quotes.length,
-        fornecedoresAtivos: suppliers.length,
-        produtosCotados: products.length,
+        fornecedoresAtivos: fornecedoresAtivosNoPeriodo,
+        produtosCotados: produtosCotadosNoPeriodo,
         pedidosGerados: orders.length
       });
       if (isRefresh) {
@@ -289,11 +392,26 @@ export default function Relatorios() {
       setRefreshing(false);
     }
   }, [startDate, endDate, toast]);
+  
+  // Carregar estatísticas apenas na primeira montagem ou quando as datas mudarem
+  const hasLoadedStatistics = useRef(false);
+  const lastStartDate = useRef<Date | undefined>();
+  const lastEndDate = useRef<Date | undefined>();
   useEffect(() => {
     if (user) {
-      loadStatistics();
+      // Verificar se as datas mudaram
+      const datesChanged = 
+        lastStartDate.current?.getTime() !== startDate?.getTime() ||
+        lastEndDate.current?.getTime() !== endDate?.getTime();
+      
+      if (!hasLoadedStatistics.current || datesChanged) {
+        loadStatistics();
+        hasLoadedStatistics.current = true;
+        lastStartDate.current = startDate;
+        lastEndDate.current = endDate;
+      }
     }
-  }, [user, loadStatistics]);
+  }, [user, startDate, endDate]); // Removido loadStatistics das dependências para evitar re-execuções
 
   // Funções otimizadas com useCallback
   const currentFilters = useMemo(() => ({
@@ -319,20 +437,28 @@ export default function Relatorios() {
       // Gerar dados usando hooks específicos (mesmo método da visualização)
       switch (reportType) {
         case 'economia':
-          await reportEconomia.generateReport(startDate, endDate);
-          dataToExport = reportEconomia.data;
+          dataToExport = await reportEconomia.generateReport(startDate, endDate);
           break;
         case 'fornecedores':
-          await reportFornecedores.generateReport(startDate, endDate);
-          dataToExport = reportFornecedores.data;
+          dataToExport = await reportFornecedores.generateReport(startDate, endDate);
           break;
         case 'comparativo':
-          await reportComparativo.generateReport(startDate, endDate);
-          dataToExport = reportComparativo.data;
+          dataToExport = await reportComparativo.generateReport(startDate, endDate);
           break;
         case 'eficiencia':
-          await reportEficiencia.generateReport(startDate, endDate);
-          dataToExport = reportEficiencia.data;
+          dataToExport = await reportEficiencia.generateReport(startDate, endDate);
+          break;
+        case 'pedidos':
+          dataToExport = await reportPedidos.generateReport(startDate, endDate);
+          break;
+        case 'produtos':
+          dataToExport = await reportProdutos.generateReport(startDate, endDate);
+          break;
+        case 'tempo-resposta':
+          dataToExport = await reportTempoResposta.generateReport(startDate, endDate);
+          break;
+        case 'conversao':
+          dataToExport = await reportConversao.generateReport(startDate, endDate);
           break;
         default:
           toast({
@@ -386,7 +512,31 @@ export default function Relatorios() {
           tempoMedioCotacao: 'Tempo Médio (dias)',
           fornecedoresPorCotacao: 'Fornecedores/Cotação',
           economiaTotal: 'Economia Total',
-          roi: 'ROI (%)'
+          roi: 'ROI (%)',
+          // Novos campos para relatório de pedidos
+          totalPedidos: 'Total de Pedidos',
+          pedidosEntregues: 'Pedidos Entregues',
+          pedidosPendentes: 'Pedidos Pendentes',
+          pedidosCancelados: 'Pedidos Cancelados',
+          taxaEntrega: 'Taxa de Entrega (%)',
+          fornecedorFrequente: 'Fornecedor Mais Frequente',
+          // Novos campos para relatório de produtos
+          valorMinimo: 'Valor Mínimo',
+          valorMaximo: 'Valor Máximo',
+          variacaoPreco: 'Variação de Preço (%)',
+          economiaPotencial: 'Economia Potencial',
+          tendencia: 'Tendência',
+          // Novos campos para relatório de tempo de resposta
+          fornecedor: 'Fornecedor',
+          respostasRecebidas: 'Respostas Recebidas',
+          tempoMinimo: 'Tempo Mínimo (dias)',
+          tempoMaximo: 'Tempo Máximo (dias)',
+          taxaResposta: 'Taxa de Resposta (%)',
+          status: 'Status',
+          // Novos campos para relatório de conversão
+          pedidosGerados: 'Pedidos Gerados',
+          valorCotacoes: 'Valor das Cotações',
+          valorPedidos: 'Valor dos Pedidos'
         };
         return columnMap[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
       };
@@ -491,7 +641,7 @@ export default function Relatorios() {
         variant: "destructive"
       });
     }
-  }, [startDate, endDate, selectedReportType, reportEconomia, reportFornecedores, reportComparativo, reportEficiencia, relatoriosDisponiveis, toast]);
+  }, [startDate, endDate, selectedReportType, reportEconomia, reportFornecedores, reportComparativo, reportEficiencia, reportPedidos, reportProdutos, reportTempoResposta, reportConversao, relatoriosDisponiveis, toast]);
   const handleExportAll = useCallback(async () => {
     if (!startDate || !endDate) {
       toast({
@@ -562,20 +712,36 @@ export default function Relatorios() {
       // Usar hook apropriado baseado no tipo de relatório
       switch (selectedReportType) {
         case 'economia':
-          await reportEconomia.generateReport(startDate, endDate);
-          setReportData(reportEconomia.data);
+          const economiaData = await reportEconomia.generateReport(startDate, endDate);
+          setReportData(economiaData);
           break;
         case 'fornecedores':
-          await reportFornecedores.generateReport(startDate, endDate);
-          setReportData(reportFornecedores.data);
+          const fornecedoresData = await reportFornecedores.generateReport(startDate, endDate);
+          setReportData(fornecedoresData);
           break;
         case 'comparativo':
-          await reportComparativo.generateReport(startDate, endDate);
-          setReportData(reportComparativo.data);
+          const comparativoData = await reportComparativo.generateReport(startDate, endDate);
+          setReportData(comparativoData);
           break;
         case 'eficiencia':
-          await reportEficiencia.generateReport(startDate, endDate);
-          setReportData(reportEficiencia.data);
+          const eficienciaData = await reportEficiencia.generateReport(startDate, endDate);
+          setReportData(eficienciaData);
+          break;
+        case 'pedidos':
+          const pedidosData = await reportPedidos.generateReport(startDate, endDate);
+          setReportData(pedidosData);
+          break;
+        case 'produtos':
+          const produtosData = await reportProdutos.generateReport(startDate, endDate);
+          setReportData(produtosData);
+          break;
+        case 'tempo-resposta':
+          const tempoRespostaData = await reportTempoResposta.generateReport(startDate, endDate);
+          setReportData(tempoRespostaData);
+          break;
+        case 'conversao':
+          const conversaoData = await reportConversao.generateReport(startDate, endDate);
+          setReportData(conversaoData);
           break;
         default:
           setReportData(null);
@@ -593,7 +759,7 @@ export default function Relatorios() {
         variant: "destructive"
       });
     }
-  }, [startDate, endDate, selectedReportType, toast, reportEconomia, reportFornecedores, reportComparativo, reportEficiencia]);
+  }, [startDate, endDate, selectedReportType, toast, reportEconomia, reportFornecedores, reportComparativo, reportEficiencia, reportPedidos, reportProdutos, reportTempoResposta, reportConversao]);
 
   const applyDatePreset = useCallback((days: number) => {
     const end = new Date();
@@ -650,7 +816,33 @@ export default function Relatorios() {
       tempoMedioCotacao: 'Tempo Médio (dias)',
       fornecedoresPorCotacao: 'Fornecedores/Cotação',
       economiaTotal: 'Economia Total',
-      roi: 'ROI (%)'
+      roi: 'ROI (%)',
+      // Novos campos para relatório de pedidos
+      totalPedidos: 'Total de Pedidos',
+      valorTotal: 'Valor Total',
+      valorMedio: 'Valor Médio',
+      pedidosEntregues: 'Pedidos Entregues',
+      pedidosPendentes: 'Pedidos Pendentes',
+      pedidosCancelados: 'Pedidos Cancelados',
+      taxaEntrega: 'Taxa de Entrega (%)',
+      fornecedorFrequente: 'Fornecedor Mais Frequente',
+      // Novos campos para relatório de produtos
+      valorMinimo: 'Valor Mínimo',
+      valorMaximo: 'Valor Máximo',
+      variacaoPreco: 'Variação de Preço (%)',
+      economiaPotencial: 'Economia Potencial',
+      tendencia: 'Tendência',
+      // Novos campos para relatório de tempo de resposta
+      fornecedor: 'Fornecedor',
+      respostasRecebidas: 'Respostas Recebidas',
+      tempoMinimo: 'Tempo Mínimo (dias)',
+      tempoMaximo: 'Tempo Máximo (dias)',
+      taxaResposta: 'Taxa de Resposta (%)',
+      status: 'Status',
+      // Novos campos para relatório de conversão
+      pedidosGerados: 'Pedidos Gerados',
+      valorCotacoes: 'Valor das Cotações',
+      valorPedidos: 'Valor dos Pedidos'
     };
     return columnMap[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
   }, []);
@@ -699,6 +891,27 @@ export default function Relatorios() {
       if (typeof value === 'number') {
         return value.toFixed(1);
       }
+    }
+
+    // Formatação para tendência
+    if (key === 'tendencia') {
+      const tendenciaLabels: Record<string, string> = {
+        'alta': '⬆️ Alta',
+        'baixa': '⬇️ Baixa',
+        'estavel': '➡️ Estável'
+      };
+      return tendenciaLabels[value] || value;
+    }
+
+    // Formatação para status
+    if (key === 'status') {
+      const statusLabels: Record<string, string> = {
+        'excelente': '✅ Excelente',
+        'bom': '👍 Bom',
+        'regular': '⚡ Regular',
+        'ruim': '❌ Ruim'
+      };
+      return statusLabels[value] || value;
     }
 
     // Retornar string formatada
@@ -887,11 +1100,23 @@ export default function Relatorios() {
     }
   }, [user, toast]);
 
+  // Carregar histórico apenas quando a aba de histórico for ativada pela primeira vez
+  const hasLoadedHistorico = useRef(false);
+  const lastHistoricoTab = useRef<string | null>(null);
   useEffect(() => {
     if (user && activeUnifiedTab === "historico") {
-      loadHistorico();
+      // Só carregar se ainda não carregou ou se mudou de aba
+      if (!hasLoadedHistorico.current || lastHistoricoTab.current !== activeUnifiedTab) {
+        loadHistorico();
+        hasLoadedHistorico.current = true;
+        lastHistoricoTab.current = activeUnifiedTab;
+      }
+    } else {
+      // Resetar quando sair da aba de histórico
+      lastHistoricoTab.current = null;
     }
-  }, [user, activeUnifiedTab, loadHistorico]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, activeUnifiedTab]); // Removido loadHistorico das dependências para evitar re-execuções
 
   // Componente de loading otimizado
   const LoadingSkeleton = () => <div className="p-6 space-y-6">
@@ -1363,15 +1588,29 @@ export default function Relatorios() {
                   <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
                     {estatisticasGerais.economiaTotal}
                   </span>
-                  <Badge className="bg-white/20 text-white font-semibold border-0">
-                    <TrendingUp className="w-3 h-3" />
-                    +{estatisticasGerais.economiaPercentual}
-                  </Badge>
+                  {estatisticasGerais.economiaPercentual !== "0%" && (
+                    <Badge className="bg-white/20 text-white font-semibold border-0">
+                      <TrendingUp className="w-3 h-3" />
+                      {estatisticasGerais.economiaPercentual}
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Total economizado:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
+                      {estatisticasGerais.economiaTotal}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Percentual:</span>
+                    <span className="font-medium">{estatisticasGerais.economiaPercentual}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Cards similares para Cotações, Fornecedores e Produtos */}
+            {/* Card 2: Cotações */}
             <Card className="group relative overflow-hidden bg-purple-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
               <CardHeader className="border-0 z-10 relative pb-3">
                 <div className="flex items-center gap-2">
@@ -1382,12 +1621,27 @@ export default function Relatorios() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2.5 z-10 relative">
-                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {estatisticasGerais.cotacoesRealizadas}
-                </span>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                    {estatisticasGerais.cotacoesRealizadas}
+                  </span>
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Total de cotações:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
+                      {estatisticasGerais.cotacoesRealizadas}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Pedidos gerados:</span>
+                    <span className="font-medium">{estatisticasGerais.pedidosGerados}</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
+            {/* Card 3: Fornecedores */}
             <Card className="group relative overflow-hidden bg-blue-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
               <CardHeader className="border-0 z-10 relative pb-3">
                 <div className="flex items-center gap-2">
@@ -1398,12 +1652,26 @@ export default function Relatorios() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2.5 z-10 relative">
-                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {estatisticasGerais.fornecedoresAtivos}
-                </span>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                    {estatisticasGerais.fornecedoresAtivos}
+                  </span>
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Ativos no período:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
+                      {estatisticasGerais.fornecedoresAtivos}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Participaram de cotações</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
+            {/* Card 4: Produtos */}
             <Card className="group relative overflow-hidden bg-orange-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
               <CardHeader className="border-0 z-10 relative pb-3">
                 <div className="flex items-center gap-2">
@@ -1414,9 +1682,22 @@ export default function Relatorios() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2.5 z-10 relative">
-                <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {estatisticasGerais.produtosCotados}
-                </span>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
+                    {estatisticasGerais.produtosCotados}
+                  </span>
+                </div>
+                <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
+                  <div className="flex items-center justify-between">
+                    <span>Cotados no período:</span>
+                    <span className="font-medium text-white dark:text-gray-300">
+                      {estatisticasGerais.produtosCotados}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
+                    <span>Produtos únicos</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

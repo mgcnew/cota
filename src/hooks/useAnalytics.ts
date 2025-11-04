@@ -15,6 +15,10 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
   // Fetch all data in parallel
   const { data: quotes, isLoading: loadingQuotes } = useQuery({
     queryKey: ['analytics-quotes', startDate, endDate],
+    staleTime: 5 * 60 * 1000, // 5 minutos - dados considerados frescos
+    gcTime: 10 * 60 * 1000, // 10 minutos - tempo de cache
+    refetchOnWindowFocus: false, // Não refazer fetch ao focar na janela
+    refetchOnMount: false, // Não refazer fetch ao montar componente se dados estão frescos
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
@@ -77,6 +81,10 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
 
   const { data: orders, isLoading: loadingOrders } = useQuery({
     queryKey: ['analytics-orders', startDate, endDate],
+    staleTime: 5 * 60 * 1000, // 5 minutos - dados considerados frescos
+    gcTime: 10 * 60 * 1000, // 10 minutos - tempo de cache
+    refetchOnWindowFocus: false, // Não refazer fetch ao focar na janela
+    refetchOnMount: false, // Não refazer fetch ao montar componente se dados estão frescos
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
@@ -215,13 +223,32 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
       ? valorTotalPedidos / orders.length 
       : 0;
 
+    // Formatar valores monetários com moeda brasileira
+    const totalEconomiaFormatado = totalEconomia > 0
+      ? totalEconomia.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })
+      : 'R$ 0,00';
+    
+    const valorMedioPedidoFormatado = valorMedioPedido > 0
+      ? valorMedioPedido.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })
+      : 'R$ 0,00';
+
     return [
       {
         titulo: "Taxa de Economia",
         valor: `${taxaEconomia.toFixed(1)}%`,
         variacao: cotacoesComEconomia > 0 ? `${cotacoesComEconomia} cotações` : "0 cotações",
         tipo: taxaEconomia > 10 ? "positivo" as const : taxaEconomia > 5 ? "neutro" as const : "negativo" as const,
-        descricao: `R$ ${totalEconomia.toFixed(2)} economizados`
+        descricao: `${totalEconomiaFormatado} economizados`
       },
       {
         titulo: "Tempo Médio de Cotação",
@@ -239,7 +266,7 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
       },
       {
         titulo: "Valor Médio por Pedido",
-        valor: `R$ ${valorMedioPedido.toFixed(2)}`,
+        valor: valorMedioPedidoFormatado,
         variacao: `${orders?.length || 0} pedidos`,
         tipo: "neutro" as const,
         descricao: "no período"
@@ -422,12 +449,22 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
           (tempoMedio > 0 ? Math.max(0, 20 - tempoMedio) : 0)
         );
 
+        // Formatar economia com moeda brasileira
+        const economiaFormatada = economiaGerada > 0
+          ? economiaGerada.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })
+          : 'R$ 0,00';
+
         return {
           fornecedor: f.fornecedor,
           score,
           cotacoes: f.cotacoes,
           taxaResposta: `${taxaResposta.toFixed(0)}%`,
-          economia: economiaGerada > 0 ? `R$ ${economiaGerada.toFixed(2)}` : 'R$ 0,00',
+          economia: economiaFormatada,
           tempo: tempoMedio > 0 ? `${tempoMedio.toFixed(1)} dias` : "N/A"
         };
       })

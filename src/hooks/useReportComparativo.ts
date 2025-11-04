@@ -89,9 +89,11 @@ export const useReportComparativo = () => {
         .sort((a: any, b: any) => b.economiaMedia - a.economiaMedia) || [];
 
       setData(reportData);
+      return reportData;
     } catch (error) {
       console.error('Erro ao gerar relatório comparativo:', error);
       setData([]);
+      return [];
     } finally {
       setLoading(false);
     }

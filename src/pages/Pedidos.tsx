@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
@@ -18,15 +18,10 @@ import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
 import { usePedidos } from "@/hooks/usePedidos";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 export default function Pedidos() {
-  const {
-    user
-  } = useAuth();
   const {
     toast
   } = useToast();
@@ -40,14 +35,33 @@ export default function Pedidos() {
     initialItemsPerPage: 10
   });
   
-  // Usar React Query para cachear dados e evitar recarregamento desnecessário
-  const { pedidos: pedidosData, isLoading, isFetching, refetch } = usePedidos();
+  // Usar o hook usePedidos com React Query
+  const { pedidos: pedidosData, isLoading, refetch } = usePedidos();
   
-  // Só mostrar loading no carregamento inicial - se houver dados em cache (mesmo que vazio), não mostrar loading
-  // Isso evita o "piscar" da tabela quando o usuário volta à página
-  const showLoading = isLoading && !pedidosData.length;
+  // Controlar exibição de loading apenas na primeira carga
+  const hasLoadedOnce = useRef(false);
+  const [showLoading, setShowLoading] = useState(true);
   
-  // Formatar dados para o formato esperado pela página
+  useEffect(() => {
+    if (!isLoading) {
+      hasLoadedOnce.current = true;
+      setShowLoading(false);
+    }
+  }, [isLoading]);
+  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [fornecedorFilter, setFornecedorFilter] = useState("all");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
+  const [valorMin, setValorMin] = useState("");
+  const [valorMax, setValorMax] = useState("");
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedPedido, setSelectedPedido] = useState<any>(null);
+  
+  // Formatar os pedidos para o formato esperado pela página
   const pedidos = useMemo(() => {
     return pedidosData.map(order => ({
       id: order.id,
@@ -66,26 +80,11 @@ export default function Pedidos() {
         quantidade: item.quantity,
         valorUnitario: Number(item.unit_price)
       })) || [],
-      supplier_id: order.supplier_id || "",
+      supplier_id: order.supplier_id || null,
       delivery_date: order.delivery_date
     }));
   }, [pedidosData]);
   
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [fornecedorFilter, setFornecedorFilter] = useState("all");
-  const [dataInicio, setDataInicio] = useState("");
-  const [dataFim, setDataFim] = useState("");
-  const [valorMin, setValorMin] = useState("");
-  const [valorMax, setValorMax] = useState("");
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedPedido, setSelectedPedido] = useState<any>(null);
-  
-  const loadOrders = () => {
-    refetch();
-  };
   // Função para abreviar nomes longos de fornecedores
   const abbreviateSupplierName = (name: string, maxLength: number = 20) => {
     if (name.length <= maxLength) return name;
@@ -107,14 +106,15 @@ export default function Pedidos() {
     // Se ainda for muito longo, trunca simples
     return name.substring(0, maxLength - 3) + '...';
   };
+  
   const handleAddPedido = () => {
-    loadOrders();
+    refetch();
   };
   const handleEditPedido = () => {
-    loadOrders();
+    refetch();
   };
   const handleDeletePedido = () => {
-    loadOrders();
+    refetch();
   };
   const fornecedores = [...new Set(pedidos.map(p => p.fornecedor))];
   const handleClearFilters = () => {
@@ -199,7 +199,82 @@ export default function Pedidos() {
     return matchesSearch && matchesStatus && matchesFornecedor && matchesValorMin && matchesValorMax && matchesDataInicio && matchesDataFim;
   });
   const paginatedData = paginate(filteredPedidos);
-  const totalValue = pedidos.filter(p => p.status !== "cancelado").reduce((acc, p) => acc + parseFloat(p.total.replace("R$ ", "").replace(".", "").replace(",", ".")), 0);
+
+  // Calculate real stats
+  const stats = useMemo(() => {
+    const pedidosAtivos = pedidos.filter(p => p.status === "pendente" || p.status === "processando");
+    const pedidosEntregues = pedidos.filter(p => p.status === "entregue");
+    const pedidosCancelados = pedidos.filter(p => p.status === "cancelado");
+    
+    // Total de pedidos não cancelados
+    const pedidosValidos = pedidos.filter(p => p.status !== "cancelado");
+    
+    // Calcular valor total (somar valores numéricos dos pedidos)
+    const totalValue = pedidosValidos.reduce((acc, p) => {
+      // Extrair valor numérico do formato "R$ X.XXX,XX"
+      const cleanValue = p.total.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
+      return acc + (parseFloat(cleanValue) || 0);
+    }, 0);
+    
+    // Calcular valor médio por pedido
+    const valorMedioPorPedido = pedidosValidos.length > 0 
+      ? (totalValue / pedidosValidos.length)
+      : 0;
+    
+    // Calcular total de itens
+    const totalItens = pedidos.reduce((acc, p) => acc + (p.itens || 0), 0);
+    
+    // Calcular média de itens por pedido
+    const mediaItensPorPedido = pedidos.length > 0
+      ? Math.round(totalItens / pedidos.length)
+      : 0;
+    
+    // Percentual de pedidos ativos
+    const percentualAtivos = pedidos.length > 0
+      ? Math.round((pedidosAtivos.length / pedidos.length) * 100)
+      : 0;
+    
+    // Taxa de entrega (percentual de entregues)
+    const taxaEntrega = pedidos.length > 0
+      ? Math.round((pedidosEntregues.length / pedidos.length) * 100)
+      : 0;
+    
+    // Formatar valores com moeda brasileira
+    const totalValueFormatado = totalValue > 0
+      ? totalValue.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })
+      : 'R$ 0,00';
+    
+    const valorMedioFormatado = valorMedioPorPedido > 0
+      ? valorMedioPorPedido.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })
+      : 'R$ 0,00';
+
+    return {
+      pedidosAtivos: pedidosAtivos.length,
+      pedidosEntregues: pedidosEntregues.length,
+      pedidosCancelados: pedidosCancelados.length,
+      totalValue,
+      totalValueFormatado,
+      valorMedioPorPedido,
+      valorMedioFormatado,
+      totalItens,
+      mediaItensPorPedido,
+      percentualAtivos,
+      taxaEntrega,
+      totalPedidos: pedidos.length,
+      pedidosPendentes: pedidos.filter(p => p.status === "pendente").length,
+      pedidosProcessando: pedidos.filter(p => p.status === "processando").length
+    };
+  }, [pedidos]);
   return <PageWrapper>
       <div className="page-container">
         {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
@@ -230,27 +305,29 @@ export default function Pedidos() {
             <CardContent className="space-y-2.5 z-10 relative">
               <div className="flex items-center gap-2.5">
                 <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
+                  {stats.pedidosAtivos}
                 </span>
-                <Badge className="bg-white/20 text-white font-semibold border-0">
-                  65%
-                </Badge>
+                {stats.percentualAtivos > 0 && (
+                  <Badge className="bg-white/20 text-white font-semibold border-0">
+                    {stats.percentualAtivos}%
+                  </Badge>
+                )}
               </div>
               <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                 <div className="flex items-center justify-between">
                   <span>Em andamento:</span>
                   <span className="font-medium text-white dark:text-gray-300">
-                    {pedidos.filter(p => p.status === "pendente" || p.status === "processando").length}
+                    {stats.pedidosAtivos}
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
                   <span>Percentual:</span>
-                  <span className="font-medium">65%</span>
+                  <span className="font-medium">{stats.percentualAtivos}%</span>
                 </div>
                 <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
-                  <span>{pedidos.filter(p => p.status === "pendente").length} pendentes</span>
+                  <span>{stats.pedidosPendentes} pendentes</span>
                   <span>•</span>
-                  <span>{pedidos.filter(p => p.status === "processando").length} processando</span>
+                  <span>{stats.pedidosProcessando} processando</span>
                 </div>
               </div>
             </CardContent>
@@ -287,11 +364,11 @@ export default function Pedidos() {
             <CardContent className="space-y-2.5 z-10 relative">
               <div className="flex items-center gap-2.5">
                 <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {pedidos.filter(p => p.status === "entregue").length}
+                  {stats.pedidosEntregues}
                 </span>
-                {pedidos.length > 0 && (
+                {stats.taxaEntrega > 0 && (
                   <Badge className="bg-white/20 text-white font-semibold border-0">
-                    {Math.floor((pedidos.filter(p => p.status === "entregue").length / pedidos.length) * 100)}%
+                    {stats.taxaEntrega}%
                   </Badge>
                 )}
               </div>
@@ -299,14 +376,12 @@ export default function Pedidos() {
                 <div className="flex items-center justify-between">
                   <span>Concluídos:</span>
                   <span className="font-medium text-white dark:text-gray-300">
-                    {pedidos.filter(p => p.status === "entregue").length}
+                    {stats.pedidosEntregues}
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
                   <span>Taxa de entrega:</span>
-                  <span className="font-medium">
-                    {pedidos.length > 0 ? Math.floor((pedidos.filter(p => p.status === "entregue").length / pedidos.length) * 100) : 0}%
-                  </span>
+                  <span className="font-medium">{stats.taxaEntrega}%</span>
                 </div>
               </div>
             </CardContent>
@@ -343,25 +418,19 @@ export default function Pedidos() {
             <CardContent className="space-y-2.5 z-10 relative">
               <div className="flex items-center gap-2.5">
                 <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
-                  R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {stats.totalValueFormatado}
                 </span>
-                <Badge className="bg-white/20 text-white font-semibold border-0">
-                  <TrendingUp className="w-3 h-3" />
-                  +15%
-                </Badge>
               </div>
               <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
                 <div className="flex items-center justify-between">
                   <span>Em pedidos:</span>
                   <span className="font-medium text-white dark:text-gray-300">
-                    R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    {stats.totalValueFormatado}
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
                   <span>Média por pedido:</span>
-                  <span className="font-medium">
-                    R$ {pedidos.length > 0 ? (totalValue / pedidos.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
-                  </span>
+                  <span className="font-medium">{stats.valorMedioFormatado}</span>
                 </div>
               </div>
             </CardContent>
@@ -399,7 +468,7 @@ export default function Pedidos() {
             <CardContent className="space-y-2.5 z-10 relative">
               <div className="flex items-center gap-2.5">
                 <span className="text-2xl font-semibold tracking-tight text-white dark:text-white">
-                  {pedidos.length > 0 ? Math.round(pedidos.reduce((acc, p) => acc + p.itens, 0) / pedidos.length) : 0}
+                  {stats.mediaItensPorPedido}
                 </span>
                 <Badge className="bg-white/20 text-white font-semibold border-0">
                   Média
@@ -409,15 +478,15 @@ export default function Pedidos() {
                 <div className="flex items-center justify-between">
                   <span>Média por pedido:</span>
                   <span className="font-medium text-white dark:text-gray-300">
-                    {pedidos.length > 0 ? Math.round(pedidos.reduce((acc, p) => acc + p.itens, 0) / pedidos.length) : 0}
+                    {stats.mediaItensPorPedido}
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
                   <span>Total de itens:</span>
-                  <span className="font-medium">{pedidos.reduce((acc, p) => acc + p.itens, 0)}</span>
+                  <span className="font-medium">{stats.totalItens}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-1.5 text-white/70 dark:text-gray-500">
-                  <span>{pedidos.length} pedidos</span>
+                  <span>{stats.totalPedidos} pedidos</span>
                 </div>
               </div>
             </CardContent>

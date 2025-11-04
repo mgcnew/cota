@@ -89,10 +89,13 @@ export const useReportEconomia = () => {
         }
       });
 
-      setData(Array.from(reportData.values()));
+      const finalData = Array.from(reportData.values());
+      setData(finalData);
+      return finalData;
     } catch (error) {
       console.error('Erro ao gerar relatório de economia:', error);
       setData([]);
+      return [];
     } finally {
       setLoading(false);
     }

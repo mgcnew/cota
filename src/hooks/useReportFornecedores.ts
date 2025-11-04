@@ -92,9 +92,11 @@ export const useReportFornecedores = () => {
       }).sort((a, b) => b.score - a.score) || [];
 
       setData(reportData);
+      return reportData;
     } catch (error) {
       console.error('Erro ao gerar relatório de fornecedores:', error);
       setData([]);
+      return [];
     } finally {
       setLoading(false);
     }
