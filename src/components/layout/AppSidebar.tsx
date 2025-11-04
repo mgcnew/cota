@@ -195,9 +195,9 @@ function MobileMoreButtonContent({
             </h3>
             <div className="grid grid-cols-2 gap-2">
               {remainingItems.map((item, index) => {
-              const isItemActive = location.pathname === item.url || item.url === "/" && location.pathname === "/";
+              const isItemActive = location.pathname === item.url || item.url === "/dashboard" && location.pathname === "/dashboard";
               const itemColor = colors[(index + 4) % colors.length];
-              return <NavLink key={item.title} to={item.url} end={item.url === "/"} onClick={() => setOpen(false)} className={cn("flex flex-col items-center gap-2 p-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-[1.02] active:scale-95", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-md text-white ring-2 ring-white/20 dark:ring-white/10` : "bg-white/85 dark:bg-gray-800/85 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-blue-300 dark:hover:border-blue-500")}>
+              return <NavLink key={item.title} to={item.url} end={item.url === "/dashboard"} onClick={() => setOpen(false)} className={cn("flex flex-col items-center gap-2 p-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-[1.02] active:scale-95", isItemActive ? `bg-gradient-to-br ${itemColor.bg} shadow-md text-white ring-2 ring-white/20 dark:ring-white/10` : "bg-white/85 dark:bg-gray-800/85 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-gray-700/60 hover:border-blue-300 dark:hover:border-blue-500")}>
                     <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200", isItemActive ? "bg-white/20 backdrop-blur-sm" : `bg-gradient-to-br ${itemColor.bg} group-hover:scale-105`)}>
                       <item.icon className="w-[18px] h-[18px] transition-all duration-200 text-white" />
                     </div>
@@ -259,7 +259,7 @@ export function AppSidebar() {
   const { user } = useAuth();
   const { profile } = useUserProfile();
   const isDark = theme === 'dark';
-  const mobilePrimaryOrder = ["/pedidos", "/cotacoes", "/", "/produtos"];
+  const mobilePrimaryOrder = ["/dashboard/pedidos", "/dashboard/cotacoes", "/dashboard", "/dashboard/produtos"];
   const primaryMobileItems = mobilePrimaryOrder
     .map(path => menuItems.find(item => item.url === path))
     .filter((item): item is typeof menuItems[number] => Boolean(item));
@@ -316,7 +316,7 @@ export function AppSidebar() {
                     <TooltipTrigger asChild>
                       <NavLink 
                         to={item.url} 
-                        end={item.url === "/"}
+                        end={item.url === "/dashboard"}
                         className={cn(
                           "relative flex items-center justify-center h-12 rounded-xl transition-[background-color,box-shadow] duration-300 group",
                           isItemActive 
@@ -366,14 +366,14 @@ export function AppSidebar() {
           {primaryMobileItems.map((item, index) => {
           const isItemActive = isActive(item.url);
           const itemColor = colors[index % colors.length];
-          const isDashboard = item.url === "/";
+          const isDashboard = item.url === "/dashboard";
           const background = isItemActive ? `linear-gradient(135deg, ${itemColor.from}, ${itemColor.to})` : 'transparent';
           const boxShadow = isItemActive ? `0 8px 25px -5px ${itemColor.shadow}, 0 4px 10px -3px ${itemColor.shadow}` : 'none';
           const transform = isItemActive
             ? (isDashboard ? 'translateY(-4px) scale(1.07)' : 'translateY(-2px) scale(1.05)')
             : (isDashboard ? 'translateY(-4px)' : 'none');
           const iconSizeClass = isDashboard ? "w-8 h-8" : "w-7 h-7";
-          return <NavLink key={item.title} to={item.url} end={item.url === "/"} className="mobile-nav-button flex flex-col items-center justify-center transition-all duration-200 rounded-2xl group relative overflow-hidden backdrop-blur-sm h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] touch-manipulation active:bg-gray-200" style={{
+          return <NavLink key={item.title} to={item.url} end={item.url === "/dashboard"} className="mobile-nav-button flex flex-col items-center justify-center transition-all duration-200 rounded-2xl group relative overflow-hidden backdrop-blur-sm h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] touch-manipulation active:bg-gray-200" style={{
             background,
             boxShadow,
             transform
