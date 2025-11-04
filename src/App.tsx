@@ -9,6 +9,7 @@ import { AppLayout } from "./components/layout/AppLayout";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { CompanyAutoSetup } from "./components/auth/CompanyAutoSetup";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { MobileProvider } from "./contexts/MobileProvider";
 import Dashboard from "./pages/Dashboard";
 import Produtos from "./pages/Produtos";
 import Fornecedores from "./pages/Fornecedores";
@@ -44,8 +45,9 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              <CompanyAutoSetup />
-              <Routes>
+              <MobileProvider>
+                <CompanyAutoSetup />
+                <Routes>
                 {/* Rotas públicas */}
                 <Route path="/" element={<Landing />} />
                 <Route path="/pricing" element={<Pricing />} />
@@ -78,6 +80,7 @@ const App = () => {
                 {/* Rota 404 */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </MobileProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

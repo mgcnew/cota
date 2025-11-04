@@ -35,7 +35,7 @@ export function useTrialNotifications() {
         description: "Assine um plano para continuar usando todas as funcionalidades.",
         duration: 8000,
         action: (
-          <ToastAction altText="Ver planos" onClick={() => navigate("/pricing")}>
+          <ToastAction onClick={() => navigate("/pricing")}>
             Ver Planos
           </ToastAction>
         ),
@@ -52,7 +52,7 @@ export function useTrialNotifications() {
         duration: 10000,
         variant: "destructive",
         action: (
-          <ToastAction altText="Assinar agora" onClick={() => navigate("/pricing")}>
+          <ToastAction onClick={() => navigate("/pricing")}>
             Assinar Agora
           </ToastAction>
         ),
@@ -69,7 +69,7 @@ export function useTrialNotifications() {
         duration: 15000,
         variant: "destructive",
         action: (
-          <ToastAction altText="Assinar agora" onClick={() => navigate("/pricing")}>
+          <ToastAction onClick={() => navigate("/pricing")}>
             Assinar Agora
           </ToastAction>
         ),
