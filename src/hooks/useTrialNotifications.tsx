@@ -35,9 +35,9 @@ export function useTrialNotifications() {
         description: "Assine um plano para continuar usando todas as funcionalidades.",
         duration: 8000,
         action: (
-          <ToastAction onClick={() => navigate("/pricing")}>
-            Ver Planos
-          </ToastAction>
+            <ToastAction altText="Ver planos disponíveis" onClick={() => navigate("/pricing")}>
+              Ver Planos
+            </ToastAction>
         ),
       });
       return;
@@ -52,9 +52,9 @@ export function useTrialNotifications() {
         duration: 10000,
         variant: "destructive",
         action: (
-          <ToastAction onClick={() => navigate("/pricing")}>
-            Assinar Agora
-          </ToastAction>
+            <ToastAction altText="Assinar plano agora" onClick={() => navigate("/pricing")}>
+              Assinar Agora
+            </ToastAction>
         ),
       });
       return;
@@ -69,9 +69,9 @@ export function useTrialNotifications() {
         duration: 15000,
         variant: "destructive",
         action: (
-          <ToastAction onClick={() => navigate("/pricing")}>
-            Assinar Agora
-          </ToastAction>
+            <ToastAction altText="Assinar plano urgente" onClick={() => navigate("/pricing")}>
+              Assinar Agora
+            </ToastAction>
         ),
       });
     }

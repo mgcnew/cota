@@ -611,6 +611,172 @@ export type Database = {
           },
         ]
       }
+      stock_count_items: {
+        Row: {
+          id: string
+          notes: string | null
+          order_item_id: string | null
+          photo_url: string | null
+          product_id: string | null
+          product_name: string
+          quantity_counted: number | null
+          quantity_existing: number | null
+          quantity_ordered: number | null
+          sector_id: string
+          stock_count_id: string
+        }
+        Insert: {
+          id?: string
+          notes?: string | null
+          order_item_id?: string | null
+          photo_url?: string | null
+          product_id?: string | null
+          product_name: string
+          quantity_counted?: number | null
+          quantity_existing?: number | null
+          quantity_ordered?: number | null
+          sector_id: string
+          stock_count_id: string
+        }
+        Update: {
+          id?: string
+          notes?: string | null
+          order_item_id?: string | null
+          photo_url?: string | null
+          product_id?: string | null
+          product_name?: string
+          quantity_counted?: number | null
+          quantity_existing?: number | null
+          quantity_ordered?: number | null
+          sector_id?: string
+          stock_count_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_count_items_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_count_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_count_items_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "stock_sectors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_count_items_stock_count_id_fkey"
+            columns: ["stock_count_id"]
+            isOneToOne: false
+            referencedRelation: "stock_counts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_counts: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          completed_by: string | null
+          count_date: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          order_id: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          count_date?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          count_date?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_counts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_counts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_sectors: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_sectors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -722,6 +888,18 @@ export type Database = {
           max_suppliers: number
           max_users: number
           priority_support: boolean
+        }[]
+      }
+      get_stock_count_sector_summary: {
+        Args: { p_stock_count_id: string }
+        Returns: {
+          discrepancies: number
+          sector_id: string
+          sector_name: string
+          total_counted: number
+          total_existing: number
+          total_items: number
+          total_ordered: number
         }[]
       }
       get_system_stats: {
