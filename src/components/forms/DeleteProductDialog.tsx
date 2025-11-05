@@ -50,23 +50,28 @@ export function DeleteProductDialog({
     onOpenChange(false);
   };
 
-  if (!product) return null;
-
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir Produto</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir o produto <strong>{product.name}</strong>?
-            <br />
-            Esta ação não pode ser desfeita e irá remover todas as cotações associadas.
+            {product ? (
+              <>
+                Tem certeza que deseja excluir o produto <strong>{product.name}</strong>?
+                <br />
+                Esta ação não pode ser desfeita e irá remover todas as cotações associadas.
+              </>
+            ) : (
+              "Produto não encontrado."
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleDelete}
+            disabled={!product}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             Excluir

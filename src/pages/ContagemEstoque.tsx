@@ -182,7 +182,7 @@ export default function ContagemEstoque() {
       return;
     }
 
-    await createStockCount.mutateAsync({
+    const newCount = await createStockCount.mutateAsync({
       order_id: countType === "from_order" ? selectedOrderId : undefined,
       notes: countNotes || undefined,
     });
@@ -191,6 +191,12 @@ export default function ContagemEstoque() {
     setSelectedOrderId("");
     setCountNotes("");
     setCountType("from_order");
+
+    // Abrir o modal de visualização automaticamente após criar
+    if (newCount) {
+      setSelectedCount(newCount.id);
+      setViewDialogOpen(true);
+    }
   };
 
   const handleViewCount = (countId: string) => {
