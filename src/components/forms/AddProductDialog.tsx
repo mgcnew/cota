@@ -258,14 +258,20 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
       }
 
       // Get company_id
-      const { data: companyData } = await supabase
+      const { data: companyData, error: companyError } = await supabase
         .from("company_users")
         .select("company_id")
         .eq("user_id", user.id)
         .single();
 
-      if (!companyData) {
-        throw new Error("Empresa não encontrada");
+      if (companyError) {
+        console.error("Erro ao buscar company_id:", companyError);
+        throw new Error(`Erro ao buscar empresa: ${companyError.message}`);
+      }
+
+      if (!companyData || !companyData.company_id) {
+        console.error("Company data não encontrada:", { user_id: user.id, companyData });
+        throw new Error("Empresa não encontrada. Verifique se você está associado a uma empresa.");
       }
 
       // Verificar limite antes de inserir (validação adicional no frontend)
@@ -334,19 +340,51 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
         return;
       }
 
-      const { error } = await supabase
-        .from('products')
-        .insert({
-          company_id: companyData.company_id,
-          name: data.name,
-          category: finalCategory,
-          unit: data.unit,
-          barcode: data.barcode || null,
-          weight: data.weight || null,
-          image_url: productImage || null,
-        });
+      // Preparar dados garantindo que strings vazias sejam null
+      const productData = {
+        company_id: companyData.company_id,
+        name: data.name.trim(),
+        category: finalCategory.trim(),
+        unit: data.unit || 'un', // Garantir que unit sempre tenha um valor
+        barcode: data.barcode && data.barcode.trim() ? data.barcode.trim() : null,
+        weight: data.weight && data.weight.trim() ? data.weight.trim() : null,
+        image_url: productImage && productImage.trim() ? productImage.trim() : null,
+      };
 
-      if (error) throw error;
+      // Validações finais
+      if (!productData.name || productData.name.length === 0) {
+        throw new Error("Nome do produto é obrigatório");
+      }
+      if (!productData.category || productData.category.length === 0) {
+        throw new Error("Categoria do produto é obrigatória");
+      }
+      if (!productData.unit || productData.unit.length === 0) {
+        throw new Error("Unidade de medida é obrigatória");
+      }
+      if (!productData.company_id) {
+        throw new Error("Erro ao identificar a empresa");
+      }
+
+      console.log("Tentando inserir produto:", { 
+        ...productData, 
+        image_url: productData.image_url ? "URL presente" : null,
+        barcode: productData.barcode ? `${productData.barcode.length} caracteres` : null,
+        weight: productData.weight ? `${productData.weight.length} caracteres` : null
+      });
+
+      const { data: insertedProduct, error: insertError } = await supabase
+        .from('products')
+        .insert(productData)
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error("Erro na inserção do produto:", insertError);
+        console.error("Dados tentados:", productData);
+        throw insertError;
+      }
+
+      console.log("Produto inserido com sucesso:", insertedProduct);
 
       // Log activity
       await logActivity({
@@ -392,11 +430,48 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
           document.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
         }, 100);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao adicionar produto:", error);
+      console.error("Erro completo (JSON):", JSON.stringify(error, null, 2));
+      console.error("Erro details:", error?.details);
+      console.error("Erro hint:", error?.hint);
+      console.error("Erro code:", error?.code);
+      
+      // Extrair mensagem de erro mais específica
+      let errorMessage = "Não foi possível adicionar o produto. Tente novamente.";
+      
+      // Tentar diferentes formas de extrair a mensagem de erro
+      if (error?.details) {
+        errorMessage = error.details;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.hint) {
+        errorMessage = error.hint;
+      } else if (error?.error_description) {
+        errorMessage = error.error_description;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.error) {
+        errorMessage = error.error;
+      }
+      
+      // Mensagens mais amigáveis para erros comuns
+      if (errorMessage.includes('Limite de produtos atingido') || errorMessage.includes('limite')) {
+        // Manter a mensagem original do banco que já é clara
+        errorMessage = errorMessage;
+      } else if (errorMessage.includes('duplicate') || errorMessage.includes('unique')) {
+        errorMessage = "Já existe um produto com este nome e categoria.";
+      } else if (errorMessage.includes('permission') || errorMessage.includes('policy') || errorMessage.includes('RLS')) {
+        errorMessage = "Você não tem permissão para adicionar produtos. Verifique sua conta.";
+      } else if (errorMessage.includes('company_id') || errorMessage.includes('company')) {
+        errorMessage = "Erro ao identificar a empresa. Faça login novamente.";
+      } else if (errorMessage.includes('constraint') || errorMessage.includes('check')) {
+        errorMessage = "Dados inválidos. Verifique os campos obrigatórios.";
+      }
+      
       toast({
-        title: "Erro",
-        description: "Não foi possível adicionar o produto. Tente novamente.",
+        title: "Erro ao adicionar produto",
+        description: errorMessage,
         variant: "destructive",
       });
     }
