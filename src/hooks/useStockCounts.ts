@@ -130,46 +130,80 @@ export function useStockCounts() {
 
       // Se tiver order_id, criar itens da contagem para cada item do pedido
       if (data.order_id) {
-        const { data: order } = await supabase
+        const { data: order, error: orderError } = await supabase
           .from('orders')
-          .select('*, order_items(*)')
+          .select(`
+            id,
+            order_items (
+              id,
+              product_id,
+              product_name,
+              quantity
+            )
+          `)
           .eq('id', data.order_id)
           .single();
 
-        if (order && order.order_items) {
+        if (orderError) {
+          console.error('Erro ao buscar pedido:', orderError);
+          throw new Error('Não foi possível buscar os itens do pedido');
+        }
+
+        if (order && order.order_items && Array.isArray(order.order_items) && order.order_items.length > 0) {
           // Obter setores ativos da empresa
-          const { data: sectors } = await supabase
+          const { data: sectors, error: sectorsError } = await supabase
             .from('stock_sectors')
-            .select('id')
+            .select('id, name')
             .eq('company_id', companyUser.company_id)
             .eq('is_active', true);
 
-          if (sectors && sectors.length > 0) {
-            const itemsToInsert = [];
-            
-            for (const orderItem of order.order_items) {
-              for (const sector of sectors) {
-                itemsToInsert.push({
-                  stock_count_id: stockCount.id,
-                  order_item_id: orderItem.id,
-                  product_id: orderItem.product_id,
-                  product_name: orderItem.product_name,
-                  sector_id: sector.id,
-                  quantity_ordered: orderItem.quantity,
-                  quantity_existing: 0,
-                  quantity_counted: 0,
-                });
-              }
-            }
+          if (sectorsError) {
+            console.error('Erro ao buscar setores:', sectorsError);
+            throw new Error('Não foi possível buscar os setores');
+          }
 
-            if (itemsToInsert.length > 0) {
-              const { error: itemsError } = await supabase
-                .from('stock_count_items')
-                .insert(itemsToInsert);
+          if (!sectors || sectors.length === 0) {
+            throw new Error('Nenhum setor ativo encontrado. Crie pelo menos um setor antes de criar a contagem.');
+          }
 
-              if (itemsError) throw itemsError;
+          console.log('Criando itens para contagem:', {
+            stockCountId: stockCount.id,
+            orderItems: order.order_items.length,
+            sectors: sectors.length,
+          });
+
+          const itemsToInsert = [];
+          
+          for (const orderItem of order.order_items) {
+            for (const sector of sectors) {
+              itemsToInsert.push({
+                stock_count_id: stockCount.id,
+                order_item_id: orderItem.id,
+                product_id: orderItem.product_id,
+                product_name: orderItem.product_name,
+                sector_id: sector.id,
+                quantity_ordered: Number(orderItem.quantity) || 0,
+                quantity_existing: 0,
+                quantity_counted: 0,
+              });
             }
           }
+
+          if (itemsToInsert.length > 0) {
+            console.log('Inserindo itens:', itemsToInsert.length);
+            const { error: itemsError } = await supabase
+              .from('stock_count_items')
+              .insert(itemsToInsert);
+
+            if (itemsError) {
+              console.error('Erro ao inserir itens:', itemsError);
+              throw new Error(`Erro ao criar itens da contagem: ${itemsError.message}`);
+            }
+            console.log('Itens inseridos com sucesso');
+          }
+        } else {
+          console.warn('Pedido sem itens:', order);
+          throw new Error('O pedido selecionado não possui itens');
         }
       }
       // Se não tiver order_id (criar do zero), não criar itens agora
