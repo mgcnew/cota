@@ -486,3 +486,4 @@ const { createCheckoutSession, isLoading } = useStripeCheckout();
 **Pronto! Agora você pode receber pagamentos!** 🎉
 
 
+

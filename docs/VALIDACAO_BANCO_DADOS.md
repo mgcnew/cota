@@ -281,3 +281,4 @@ Após verificar tudo:
 2. ❌ Se houver erros → Me informe qual query falhou e qual erro apareceu
 
 
+

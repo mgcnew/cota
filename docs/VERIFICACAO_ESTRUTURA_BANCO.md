@@ -196,3 +196,4 @@ A estrutura está:
 **Execute as queries de validação acima e me diga o resultado!**
 
 
+

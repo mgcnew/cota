@@ -97,3 +97,4 @@ Após aplicar a migração com sucesso:
 4. ✅ Integrar Stripe para pagamentos
 
 
+

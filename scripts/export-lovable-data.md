@@ -60,3 +60,4 @@ Depois de exportar, use o guia de importação em:
 `docs/PLANO_MIGRACAO_LOVABLE_PARA_SUPABASE.md`
 
 
+

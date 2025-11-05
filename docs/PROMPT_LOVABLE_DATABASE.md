@@ -224,3 +224,4 @@ Depois que o Lovable criar tudo, você pode testar:
 **Copie o prompt completo acima e cole no chat do Lovable!**
 
 
+

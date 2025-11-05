@@ -220,3 +220,4 @@ COMMENT ON FUNCTION is_subscription_active(UUID) IS 'Verifica se assinatura da e
 COMMENT ON FUNCTION get_plan_features(TEXT) IS 'Retorna features do plano especificado';
 
 
+
