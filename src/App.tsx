@@ -23,6 +23,7 @@ import Extra from "./pages/Extra";
 import WhatsAppMensagens from "./pages/WhatsAppMensagens";
 import Configuracoes from "./pages/Configuracoes";
 import ContagemEstoque from "./pages/ContagemEstoque";
+import Anotacoes from "./pages/Anotacoes";
 import Auth from "./pages/Auth";
 import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
@@ -76,6 +77,7 @@ const App = () => {
                   <Route path="extra" element={<Extra />} />
                   <Route path="whatsapp-mensagens" element={<WhatsAppMensagens />} />
                   <Route path="contagem-estoque" element={<ContagemEstoque />} />
+                  <Route path="anotacoes" element={<Anotacoes />} />
                   <Route path="configuracoes" element={<Configuracoes />} />
                 </Route>
 

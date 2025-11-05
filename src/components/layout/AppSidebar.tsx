@@ -19,7 +19,8 @@ import {
   MoreHorizontal,
   Settings,
   User,
-  ClipboardList
+  ClipboardList,
+  StickyNote
 } from 'lucide-react';
 
 
@@ -48,6 +49,10 @@ const menuItems = [{
   title: "Contagem de Estoque",
   url: "/dashboard/contagem-estoque",
   icon: ClipboardList
+}, {
+  title: "Anotações",
+  url: "/dashboard/anotacoes",
+  icon: StickyNote
 }, {
   title: "Relatórios",
   url: "/dashboard/relatorios",
