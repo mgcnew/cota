@@ -8,6 +8,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { UserProfileDialog } from "@/components/profile/UserProfileDialog";
+import { useMobile } from "@/contexts/MobileProvider";
 import { 
   LayoutDashboard,
   Package, 
@@ -263,12 +264,22 @@ export function AppSidebar() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const { profile } = useUserProfile();
+  const isMobile = useMobile();
   const isDark = theme === 'dark';
   const mobilePrimaryOrder = ["/dashboard/pedidos", "/dashboard/cotacoes", "/dashboard", "/dashboard/produtos"];
+  
+  // Itens ocultos no mobile (foco nas funções principais)
+  const hiddenOnMobile = ["/dashboard/relatorios", "/dashboard/extra"];
+  
+  // Filtrar menu items baseado na plataforma
+  const visibleMenuItems = isMobile 
+    ? menuItems.filter(item => !hiddenOnMobile.includes(item.url))
+    : menuItems;
+  
   const primaryMobileItems = mobilePrimaryOrder
-    .map(path => menuItems.find(item => item.url === path))
+    .map(path => visibleMenuItems.find(item => item.url === path))
     .filter((item): item is typeof menuItems[number] => Boolean(item));
-  const remainingMobileItems = menuItems.filter(item => !mobilePrimaryOrder.includes(item.url));
+  const remainingMobileItems = visibleMenuItems.filter(item => !mobilePrimaryOrder.includes(item.url));
 
   // Hook para detectar scroll e aplicar animaÃ§Ãµes no sidebar
   useEffect(() => {
@@ -312,7 +323,7 @@ export function AppSidebar() {
           {/* Menu Items - Nível 2 com Hierarquia */}
           <div className="flex-1 flex flex-col justify-start py-4 px-3 space-y-2 overflow-y-auto scrollbar-hide">
             <TooltipProvider delayDuration={200}>
-              {menuItems.map((item, index) => {
+              {visibleMenuItems.map((item, index) => {
                 const isItemActive = isActive(item.url);
                 const itemColor = colors[index] || colors[0];
                 
