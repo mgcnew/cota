@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
 import { 
   Plus, 
   StickyNote, 
@@ -18,23 +17,12 @@ import {
   AlertCircle,
   Info,
   AlertTriangle,
-  Flame
+  Flame,
+  Loader2
 } from "lucide-react";
 import { useMobile } from "@/contexts/MobileProvider";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-
-type Importance = "low" | "medium" | "high" | "urgent";
-
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  importance: Importance;
-  observation?: string;
-  resolved: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { useNotes, type Importance, type Note } from "@/hooks/useNotes";
 
 const importanceConfig = {
   low: {
@@ -69,9 +57,8 @@ const importanceConfig = {
 
 export default function Anotacoes() {
   const isMobile = useMobile();
-  const { toast } = useToast();
+  const { notes, isLoading, createNote, updateNote, toggleResolve, deleteNote } = useNotes();
   
-  const [notes, setNotes] = useState<Note[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   
@@ -90,35 +77,18 @@ export default function Anotacoes() {
     return notes.filter(note => note.resolved);
   }, [notes]);
 
-  const handleCreateNote = () => {
-    if (!formData.title.trim() || !formData.content.trim()) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha o título e o conteúdo da anotação.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleCreateNote = async () => {
+    if (!formData.title.trim() || !formData.content.trim()) return;
 
-    const newNote: Note = {
-      id: `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    await createNote.mutateAsync({
       title: formData.title.trim(),
       content: formData.content.trim(),
       importance: formData.importance,
       observation: formData.observation?.trim() || undefined,
-      resolved: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+    });
 
-    setNotes([...notes, newNote]);
     setFormData({ title: "", content: "", importance: "medium", observation: "" });
     setShowCreateDialog(false);
-
-    toast({
-      title: "Anotação criada",
-      description: "Sua anotação foi criada com sucesso.",
-    });
   };
 
   const handleEditNote = (note: Note) => {
@@ -131,57 +101,28 @@ export default function Anotacoes() {
     });
   };
 
-  const handleUpdateNote = () => {
+  const handleUpdateNote = async () => {
     if (!editingNote || !formData.title.trim() || !formData.content.trim()) return;
 
-    setNotes(notes.map(note => 
-      note.id === editingNote.id
-        ? {
-            ...note,
-            title: formData.title.trim(),
-            content: formData.content.trim(),
-            importance: formData.importance,
-            observation: formData.observation?.trim() || undefined,
-            updated_at: new Date().toISOString(),
-          }
-        : note
-    ));
+    await updateNote.mutateAsync({
+      id: editingNote.id,
+      title: formData.title.trim(),
+      content: formData.content.trim(),
+      importance: formData.importance,
+      observation: formData.observation?.trim() || undefined,
+    });
 
     setEditingNote(null);
     setFormData({ title: "", content: "", importance: "medium", observation: "" });
-
-    toast({
-      title: "Anotação atualizada",
-      description: "Sua anotação foi atualizada com sucesso.",
-    });
   };
 
-  const handleResolveNote = (noteId: string) => {
-    setNotes(notes.map(note =>
-      note.id === noteId
-        ? { ...note, resolved: !note.resolved, updated_at: new Date().toISOString() }
-        : note
-    ));
-
-    const note = notes.find(n => n.id === noteId);
-    toast({
-      title: note?.resolved ? "Anotação reaberta" : "Anotação resolvida",
-      description: note?.resolved 
-        ? "A anotação foi marcada como não resolvida."
-        : "A anotação foi marcada como resolvida.",
-    });
+  const handleResolveNote = async (noteId: string) => {
+    await toggleResolve.mutateAsync(noteId);
   };
 
-  const handleDeleteNote = (noteId: string) => {
+  const handleDeleteNote = async (noteId: string) => {
     if (!confirm("Tem certeza que deseja excluir esta anotação?")) return;
-
-    setNotes(notes.filter(note => note.id !== noteId));
-
-    toast({
-      title: "Anotação excluída",
-      description: "A anotação foi excluída com sucesso.",
-      variant: "destructive",
-    });
+    await deleteNote.mutateAsync(noteId);
   };
 
   const resetForm = () => {
@@ -478,8 +419,16 @@ export default function Anotacoes() {
           </div>
         )}
 
+        {/* Loading */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-16">
+            <Loader2 className="h-12 w-12 animate-spin text-yellow-600 dark:text-yellow-400 mb-4" />
+            <p className="text-muted-foreground">Carregando anotações...</p>
+          </div>
+        )}
+
         {/* Estado vazio */}
-        {notes.length === 0 && (
+        {!isLoading && notes.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="p-6 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 mb-4">
               <StickyNote className="h-12 w-12 text-yellow-600 dark:text-yellow-400" />

@@ -265,13 +265,10 @@ export function ViewStockCountDialog({
 
     setIsCreatingSector(true);
     try {
-      const newSector = await createSector.mutateAsync({
+      await createSector.mutateAsync({
         name: newSectorName.trim(),
         description: newSectorDescription.trim() || undefined,
       });
-
-      // Adicionar o novo setor à lista
-      setSelectedSectors([...selectedSectors, { sectorId: newSector.id, quantity: 0, selectedProducts: [] }]);
       
       setNewSectorName("");
       setNewSectorDescription("");

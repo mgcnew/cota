@@ -214,6 +214,53 @@ export type Database = {
         }
         Relationships: []
       }
+      notes: {
+        Row: {
+          company_id: string
+          content: string
+          created_at: string
+          id: string
+          importance: string
+          observation: string | null
+          resolved: boolean
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          content: string
+          created_at?: string
+          id?: string
+          importance?: string
+          observation?: string | null
+          resolved?: boolean
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          importance?: string
+          observation?: string | null
+          resolved?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
