@@ -12,16 +12,21 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { ViewMode } from "@/types/pagination";
-import { ShoppingCart, Plus, Search, Filter, Eye, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp, MoreVertical, CircleDot, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingCart, Plus, Search, Filter, Eye, Truck, Download, CheckCircle, Clock, XCircle, Trash2, X, Loader2, DollarSign, Package, Building2, Calendar, TrendingUp, MoreVertical, CircleDot } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
 import { usePedidos } from "@/hooks/usePedidos";
+import { usePedidosMobile } from "@/hooks/mobile/usePedidosMobile";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useMobile } from "@/contexts/MobileProvider";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
+import { MobileFAB } from "@/components/mobile/MobileFAB";
+import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
 export default function Pedidos() {
   const {
     toast
@@ -36,8 +41,38 @@ export default function Pedidos() {
     initialItemsPerPage: 10
   });
   
-  // Usar o hook usePedidos com React Query
-  const { pedidos: pedidosData, isLoading, refetch } = usePedidos();
+  // Declarar isMobile primeiro, antes de usar
+  const isMobile = useMobile();
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [statusFilter, setStatusFilter] = useState<"all" | "pendente" | "processando" | "confirmado" | "entregue" | "cancelado">("all");
+  
+  // MOBILE OPTIMIZATION: Usar hook mobile ou desktop baseado no dispositivo
+  const desktopPedidos = usePedidos();
+  // Mobile: passar searchQuery e statusFilter para busca server-side
+  const mobilePedidos = usePedidosMobile(
+    isMobile ? debouncedSearchTerm : undefined,
+    isMobile ? statusFilter : undefined,
+    isMobile // enabled apenas se for mobile
+  );
+  
+  // Selecionar hook baseado no dispositivo
+  const isMobileDevice = isMobile;
+  const pedidosData = isMobileDevice ? {
+    pedidos: mobilePedidos.pedidos || [],
+    isLoading: mobilePedidos.isLoading,
+    error: mobilePedidos.error,
+    refetch: mobilePedidos.refetch,
+    deletePedido: mobilePedidos.deletePedido,
+  } : {
+    pedidos: desktopPedidos.pedidos,
+    isLoading: desktopPedidos.isLoading,
+    error: desktopPedidos.error,
+    refetch: desktopPedidos.refetch,
+    deletePedido: desktopPedidos.deletePedido,
+  };
+
+  const { pedidos: pedidosDataArray, isLoading, refetch, deletePedido } = pedidosData;
   
   // Controlar exibição de loading apenas na primeira carga
   const hasLoadedOnce = useRef(false);
@@ -50,54 +85,58 @@ export default function Pedidos() {
     }
   }, [isLoading]);
   
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [fornecedorFilter, setFornecedorFilter] = useState("all");
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [valorMin, setValorMin] = useState("");
   const [valorMax, setValorMax] = useState("");
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const isMobile = useMobile();
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState<any>(null);
 
-  // Callbacks memoizados para navegação do carousel
-  const handlePrevCard = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
-  }, []);
-
-  const handleNextCard = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
-  }, []);
   
   // Formatar os pedidos para o formato esperado pela página
   const pedidos = useMemo(() => {
-    return pedidosData.map(order => ({
-      id: order.id,
-      fornecedor: order.supplier_name,
-      total: `R$ ${Number(order.total_value).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2
-      })}`,
-      status: order.status,
-      dataPedido: new Date(order.order_date).toLocaleDateString('pt-BR'),
-      dataEntrega: new Date(order.delivery_date).toLocaleDateString('pt-BR'),
-      itens: order.items?.length || 0,
-      produtos: order.items?.map((item: any) => item.product_name) || [],
-      observacoes: order.observations || "",
-      detalhesItens: order.items?.map((item: any) => ({
-        produto: item.product_name,
-        quantidade: item.quantity,
-        valorUnitario: Number(item.unit_price)
-      })) || [],
-      supplier_id: order.supplier_id || null,
-      delivery_date: order.delivery_date
-    }));
-  }, [pedidosData]);
+    return pedidosDataArray.map(order => {
+      // Mobile pode ter estrutura diferente, normalizar
+      const orderData = isMobileDevice && 'items_count' in order 
+        ? {
+            id: order.id,
+            supplier_name: order.supplier_name,
+            supplier_id: order.supplier_id || null,
+            order_date: order.order_date,
+            delivery_date: order.delivery_date,
+            status: order.status,
+            total_value: order.total_value,
+            observations: order.observations,
+            items: [], // Mobile não carrega items detalhados
+          }
+        : order;
+      
+      return {
+        id: orderData.id,
+        fornecedor: orderData.supplier_name,
+        total: `R$ ${Number(orderData.total_value).toLocaleString('pt-BR', {
+          minimumFractionDigits: 2
+        })}`,
+        status: orderData.status,
+        dataPedido: new Date(orderData.order_date).toLocaleDateString('pt-BR'),
+        dataEntrega: orderData.delivery_date ? new Date(orderData.delivery_date).toLocaleDateString('pt-BR') : '',
+        itens: isMobileDevice && 'items_count' in order ? (order.items_count || 0) : (orderData.items?.length || 0),
+        produtos: orderData.items?.map((item: any) => item.product_name) || [],
+        observacoes: orderData.observations || "",
+        detalhesItens: orderData.items?.map((item: any) => ({
+          produto: item.product_name,
+          quantidade: item.quantity,
+          valorUnitario: Number(item.unit_price)
+        })) || [],
+        supplier_id: orderData.supplier_id || null,
+        delivery_date: orderData.delivery_date
+      };
+    });
+  }, [pedidosDataArray, isMobileDevice]);
   
   // Função para abreviar nomes longos de fornecedores
   const abbreviateSupplierName = (name: string, maxLength: number = 20) => {
@@ -200,19 +239,46 @@ export default function Pedidos() {
     const Icon = icons[status as keyof typeof icons];
     return <Icon className="h-4 w-4" />;
   };
-  const filteredPedidos = pedidos.filter(pedido => {
-    const matchesSearch = pedido.fornecedor.toLowerCase().includes(searchTerm.toLowerCase()) || pedido.id.toLowerCase().includes(searchTerm.toLowerCase()) || pedido.produtos.some(p => p.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = statusFilter === "all" || pedido.status === statusFilter;
-    const matchesFornecedor = fornecedorFilter === "all" || pedido.fornecedor === fornecedorFilter;
-    const pedidoValor = parseFloat(pedido.total.replace("R$ ", "").replace(".", "").replace(",", "."));
-    const matchesValorMin = !valorMin || pedidoValor >= parseFloat(valorMin);
-    const matchesValorMax = !valorMax || pedidoValor <= parseFloat(valorMax);
-    const pedidoData = pedido.dataPedido.split('/').reverse().join('-');
-    const matchesDataInicio = !dataInicio || pedidoData >= dataInicio;
-    const matchesDataFim = !dataFim || pedidoData <= dataFim;
-    return matchesSearch && matchesStatus && matchesFornecedor && matchesValorMin && matchesValorMax && matchesDataInicio && matchesDataFim;
-  });
-  const paginatedData = paginate(filteredPedidos);
+  // Mobile: dados já vêm filtrados e paginados do servidor
+  // Desktop: filtrar e paginar no cliente
+  const filteredPedidos = useMemo(() => {
+    if (isMobileDevice) {
+      // Mobile: dados já filtrados pelo hook, apenas aplicar filtros adicionais se necessário
+      return pedidos.filter(pedido => {
+        const matchesFornecedor = fornecedorFilter === "all" || pedido.fornecedor === fornecedorFilter;
+        const pedidoValor = parseFloat(pedido.total.replace("R$ ", "").replace(/\./g, "").replace(",", "."));
+        const matchesValorMin = !valorMin || pedidoValor >= parseFloat(valorMin);
+        const matchesValorMax = !valorMax || pedidoValor <= parseFloat(valorMax);
+        const pedidoData = pedido.dataPedido.split('/').reverse().join('-');
+        const matchesDataInicio = !dataInicio || pedidoData >= dataInicio;
+        const matchesDataFim = !dataFim || pedidoData <= dataFim;
+        return matchesFornecedor && matchesValorMin && matchesValorMax && matchesDataInicio && matchesDataFim;
+      });
+    } else {
+      // Desktop: filtrar tudo no cliente
+      return pedidos.filter(pedido => {
+        const matchesSearch = pedido.fornecedor.toLowerCase().includes(searchTerm.toLowerCase()) || pedido.id.toLowerCase().includes(searchTerm.toLowerCase()) || pedido.produtos.some(p => p.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesStatus = statusFilter === "all" || pedido.status === statusFilter;
+        const matchesFornecedor = fornecedorFilter === "all" || pedido.fornecedor === fornecedorFilter;
+        const pedidoValor = parseFloat(pedido.total.replace("R$ ", "").replace(/\./g, "").replace(",", "."));
+        const matchesValorMin = !valorMin || pedidoValor >= parseFloat(valorMin);
+        const matchesValorMax = !valorMax || pedidoValor <= parseFloat(valorMax);
+        const pedidoData = pedido.dataPedido.split('/').reverse().join('-');
+        const matchesDataInicio = !dataInicio || pedidoData >= dataInicio;
+        const matchesDataFim = !dataFim || pedidoData <= dataFim;
+        return matchesSearch && matchesStatus && matchesFornecedor && matchesValorMin && matchesValorMax && matchesDataInicio && matchesDataFim;
+      });
+    }
+  }, [pedidos, searchTerm, statusFilter, fornecedorFilter, valorMin, valorMax, dataInicio, dataFim, isMobileDevice]);
+
+  // Mobile: usar paginação do hook mobile
+  // Desktop: usar paginação client-side
+  const paginatedData = isMobileDevice 
+    ? {
+        items: filteredPedidos, // Já vem paginado do servidor, mas aplicamos filtros adicionais
+        pagination: mobilePedidos.pagination,
+      }
+    : paginate(filteredPedidos);
 
   // Calculate real stats
   const stats = useMemo(() => {
@@ -450,62 +516,8 @@ export default function Pedidos() {
 
   return <PageWrapper>
       <div className="page-container">
-        {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
-        {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
-        {isMobile ? (
-          <div className="mb-8">
-            {/* Card wrapper com navegação integrada no topo */}
-            <div className="relative">
-              {/* Navegação integrada no topo do card (parece ser parte do card) */}
-              <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handlePrevCard}
-                  className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
-                  <span className="text-xs font-semibold text-white dark:text-gray-200">
-                    {activeCardIndex + 1} / 4
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleNextCard}
-                  className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Container do carousel */}
-              <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
-                <div 
-                  className="flex transition-transform duration-300 ease-in-out"
-                  style={{ 
-                    transform: `translateX(-${activeCardIndex * 100}%)`,
-                  }}
-                >
-                  <div className="w-full flex-shrink-0">
-                    {renderCard1}
-                  </div>
-                  <div className="w-full flex-shrink-0">
-                    {renderCard2}
-                  </div>
-                  <div className="w-full flex-shrink-0">
-                    {renderCard3}
-                  </div>
-                  <div className="w-full flex-shrink-0">
-                    {renderCard4}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
+        {/* Statistics Cards - Apenas desktop */}
+        {!isMobile && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
           {/* Card 1: Pedidos Ativos */}
           <Card className="group relative overflow-hidden bg-amber-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
@@ -723,109 +735,183 @@ export default function Pedidos() {
         )}
 
         {/* Filters */}
-        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-          <CardContent className="p-3 md:p-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
-            {/* ViewToggle - Esconder no mobile */}
-            <div className="hidden lg:block">
-              <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end flex-1 lg:flex-initial">
-              {/* Barra de busca + Botão Criar (lado a lado no mobile) */}
-              <div className="flex gap-2 flex-1 sm:flex-initial">
-                <div className="relative flex-1 sm:flex-initial">
-                  <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                  <Input placeholder="Buscar por fornecedor, produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 sm:pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+        {isMobile ? (
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+            <CardContent className="p-3">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                  <Input 
+                    placeholder="Buscar pedidos..." 
+                    value={searchTerm} 
+                    onChange={e => setSearchTerm(e.target.value)} 
+                    className="pl-10 pr-4 w-full h-11 text-base bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" 
+                  />
                 </div>
-                
-                {/* Botão Mobile - Apenas criar (ao lado da busca) */}
-                <Button 
-                  onClick={() => setAddDialogOpen(true)}
-                  className="sm:hidden bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl flex-shrink-0 px-4"
+                <Button
+                  variant="outline"
+                  onClick={() => setFiltersOpen(true)}
+                  className="h-11 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 rounded-xl"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Filter className="h-4 w-4" />
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+            <CardContent className="p-3 md:p-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+                {/* ViewToggle - Esconder no mobile */}
+                <div className="hidden lg:block">
+                  <ViewToggle view={viewMode} onViewChange={setViewMode} />
+                </div>
 
-              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="w-full sm:w-[180px] h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-orange-300/70 dark:hover:border-orange-500/70 focus:border-orange-400 dark:focus:border-orange-400 focus:ring-2 focus:ring-orange-200/40 dark:focus:ring-orange-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 px-3 text-gray-900 dark:text-gray-100 hidden sm:block">
-                <option value="all">Todos os Status</option>
-                <option value="pendente">Pendentes</option>
-                <option value="processando">Processando</option>
-                <option value="confirmado">Confirmados</option>
-                <option value="entregue">Entregues</option>
-                <option value="cancelado">Cancelados</option>
-              </select>
-
-              {/* Remover Filtros Avançados e Exportar CSV */}
-              {/* <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-pink-300/70 dark:hover:border-pink-600/70 focus:border-pink-400 dark:focus:border-pink-500 focus:ring-2 focus:ring-pink-200/50 dark:focus:ring-pink-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filtros Avançados
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-96" align="end">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold">Filtros Avançados</h4>
-                      <Button variant="ghost" size="sm" onClick={handleClearFilters}>
-                        <X className="h-4 w-4 mr-1" />
-                        Limpar
-                      </Button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Fornecedor</Label>
-                      <select value={fornecedorFilter} onChange={e => setFornecedorFilter(e.target.value)} className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground">
-                        <option value="all">Todos os Fornecedores</option>
-                        {fornecedores.map(f => <option key={f} value={f}>{f}</option>)}
-                      </select>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-2">
-                        <Label>Data Início</Label>
-                        <Input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Data Fim</Label>
-                        <Input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)} />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-2">
-                        <Label>Valor Mínimo</Label>
-                        <Input type="number" placeholder="R$ 0,00" value={valorMin} onChange={e => setValorMin(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Valor Máximo</Label>
-                        <Input type="number" placeholder="R$ 0,00" value={valorMax} onChange={e => setValorMax(e.target.value)} />
-                      </div>
-                    </div>
+                <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end flex-1 lg:flex-initial">
+                  {/* Barra de busca */}
+                  <div className="relative flex-1 sm:flex-initial">
+                    <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                    <Input placeholder="Buscar por fornecedor, produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 sm:pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
                   </div>
-                </PopoverContent>
-              </Popover> */}
 
-              {/* Botão Desktop */}
-              <Button 
-                onClick={() => setAddDialogOpen(true)}
-                className="hidden sm:flex bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Pedido
-              </Button>
+                  <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="w-full sm:w-[180px] h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-orange-300/70 dark:hover:border-orange-500/70 focus:border-orange-400 dark:focus:border-orange-400 focus:ring-2 focus:ring-orange-200/40 dark:focus:ring-orange-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 px-3 text-gray-900 dark:text-gray-100">
+                    <option value="all">Todos os Status</option>
+                    <option value="pendente">Pendentes</option>
+                    <option value="processando">Processando</option>
+                    <option value="confirmado">Confirmados</option>
+                    <option value="entregue">Entregues</option>
+                    <option value="cancelado">Cancelados</option>
+                  </select>
+
+                  {/* Botão Desktop */}
+                  <Button 
+                    onClick={() => setAddDialogOpen(true)}
+                    className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Pedido
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Mobile Action Sheet para Filtros */}
+        {isMobile && (
+          <MobileActionSheet open={filtersOpen} onOpenChange={setFiltersOpen} title="Filtros">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <select 
+                  value={statusFilter} 
+                  onChange={e => setStatusFilter(e.target.value as any)} 
+                  className="w-full h-11 text-base bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4"
+                >
+                  <option value="all">Todos os Status</option>
+                  <option value="pendente">Pendentes</option>
+                  <option value="processando">Processando</option>
+                  <option value="confirmado">Confirmados</option>
+                  <option value="entregue">Entregues</option>
+                  <option value="cancelado">Cancelados</option>
+                </select>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </MobileActionSheet>
+        )}
 
       {showLoading ? <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div> : <>
           {/* Pedidos View */}
-          {viewMode === "table" ? <Card className="border-0 bg-transparent">
+          {isMobile ? (
+            <PullToRefresh onRefresh={refetch} disabled={!isMobile}>
+              <div className="grid gap-3 grid-cols-1">
+                {paginatedData.items.map((pedido, index) => {
+                  const getStatusColors = (status: string) => {
+                    switch (status) {
+                      case "entregue":
+                        return {
+                          border: "border-green-300/60",
+                          bg: "from-white to-green-50/30",
+                          iconBg: "from-green-500/10 to-emerald-500/10",
+                          iconColor: "text-green-600"
+                        };
+                      case "confirmado":
+                        return {
+                          border: "border-blue-300/60",
+                          bg: "from-white to-blue-50/30",
+                          iconBg: "from-blue-500/10 to-cyan-500/10",
+                          iconColor: "text-blue-600"
+                        };
+                      case "processando":
+                        return {
+                          border: "border-amber-300/60",
+                          bg: "from-white to-amber-50/30",
+                          iconBg: "from-amber-500/10 to-yellow-500/10",
+                          iconColor: "text-amber-600"
+                        };
+                      case "cancelado":
+                        return {
+                          border: "border-red-300/60",
+                          bg: "from-white to-red-50/30",
+                          iconBg: "from-red-500/10 to-pink-500/10",
+                          iconColor: "text-red-600"
+                        };
+                      default:
+                        return {
+                          border: "border-gray-300/60",
+                          bg: "from-white to-gray-50/30",
+                          iconBg: "from-gray-500/10 to-slate-500/10",
+                          iconColor: "text-gray-600"
+                        };
+                    }
+                  };
+                  const colors = getStatusColors(pedido.status);
+                  return (
+                    <Card 
+                      key={pedido.id} 
+                      className={cn("border border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26]", "backdrop-blur-sm")}
+                      onClick={() => {
+                        setSelectedPedido(pedido);
+                        setPedidoDialogOpen(true);
+                      }}
+                    >
+                      <CardHeader className="pb-3 p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3 flex-1">
+                            <div className={cn("p-2 rounded-lg", colors.iconBg)}>
+                              <div className={cn("h-5 w-5", colors.iconColor)}>
+                                {getStatusIcon(pedido.status)}
+                              </div>
+                            </div>
+                            <div className="space-y-1 flex-1 min-w-0">
+                              <CardTitle className="text-base font-bold text-gray-900 dark:text-white truncate" title={pedido.fornecedor}>
+                                {capitalize(abbreviateSupplierName(pedido.fornecedor, 25))}
+                              </CardTitle>
+                              <div className="flex items-center gap-2">
+                                {getStatusBadge(pedido.status)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent className="space-y-3 p-4 pt-0">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4 text-orange-600" />
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{pedido.itens} itens</span>
+                          </div>
+                          <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{pedido.total}</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </PullToRefresh>
+          ) : viewMode === "table" ? <Card className="border-0 bg-transparent">
               <CardContent className="p-0">
                 <div className="overflow-hidden">
                   <Table>
@@ -975,7 +1061,9 @@ export default function Pedidos() {
                   <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
                 </div>
               </CardContent>
-            </Card> : <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            </Card> : (
+            <PullToRefresh onRefresh={refetch} disabled={true}>
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {paginatedData.items.map((pedido, index) => {
             const getStatusColors = (status: string) => {
               switch (status) {
@@ -1097,8 +1185,18 @@ export default function Pedidos() {
                   </CardContent>
                 </Card>;
           })}
-            </div>}
+              </div>
+            </PullToRefresh>
+          )}
         </>}
+
+      {/* Mobile FAB */}
+      {isMobile && (
+        <MobileFAB
+          onClick={() => setAddDialogOpen(true)}
+          label="Novo Pedido"
+        />
+      )}
 
       {/* Dialogs */}
       <AddPedidoDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={handleAddPedido} />
