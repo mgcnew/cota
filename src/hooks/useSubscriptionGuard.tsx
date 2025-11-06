@@ -17,6 +17,7 @@ export function useSubscriptionGuard(): SubscriptionStatus {
   return useMemo(() => {
     // Se ainda está carregando ou não tem empresa
     if (isLoading || !company) {
+      console.log('🔒 SubscriptionGuard: Carregando ou sem empresa', { isLoading, hasCompany: !!company });
       return {
         canAccess: false,
         isTrial: false,
@@ -27,6 +28,12 @@ export function useSubscriptionGuard(): SubscriptionStatus {
         reason: "Carregando informações da assinatura...",
       };
     }
+
+    console.log('🔒 SubscriptionGuard: Verificando assinatura', { 
+      status: company.subscription_status, 
+      expiresAt: company.subscription_expires_at,
+      companyId: company.id 
+    });
 
     const status = company.subscription_status;
     const expiresAt = company.subscription_expires_at 

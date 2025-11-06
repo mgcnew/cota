@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,6 +10,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useMobile } from "@/contexts/MobileProvider";
 import {
   Form,
   FormControl,
@@ -66,6 +73,8 @@ export default function EditSupplierDialog({
   onOpenChange,
   onEdit,
 }: EditSupplierDialogProps) {
+  const isMobile = useMobile();
+  const scrollPositionRef = useRef<number>(0);
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
     defaultValues: {
@@ -104,8 +113,217 @@ export default function EditSupplierDialog({
     }
   };
 
+  // Função para gerenciar abertura/fechamento e manter scroll
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      scrollPositionRef.current = window.scrollY;
+    } else {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPositionRef.current);
+      }, 100);
+    }
+    onOpenChange(newOpen);
+  };
+
+  // Conteúdo do formulário (reutilizado em mobile e desktop)
+  const formContent = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={`flex flex-col h-full ${isMobile ? 'space-y-3' : 'space-y-4'}`}>
+        <div className={`flex-1 overflow-y-auto ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-4 sm:py-5'}`}>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Nome do Fornecedor*</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Ex: Holambra" 
+                    className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="contact"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Nome do Contato*</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Ex: João Silva" 
+                    className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-4'}`}>
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Telefone</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="(11) 99999-9999" 
+                      className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Email</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="contato@empresa.com" 
+                      type="email" 
+                      className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Endereço</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Rua, número, bairro, cidade" 
+                    className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-4'}`}>
+            <FormField
+              control={form.control}
+              name="limit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Limite de Crédito*</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="R$ 25.000" 
+                      className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Status*</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}>
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="pending">Pendente</SelectItem>
+                      <SelectItem value="inactive">Inativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4 flex flex-col gap-2' : 'flex justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200/60 dark:border-gray-700/40'}`}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => handleOpenChange(false)}
+            className={isMobile ? 'h-11 w-full text-base' : 'h-9 rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm dark:text-white px-4'}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            type="submit"
+            className={isMobile ? 'h-11 w-full text-base' : 'h-9 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm px-6'}
+          >
+            Salvar Alterações
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+
+  // Mobile: Usar Sheet (bottom sheet)
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={handleOpenChange}>
+        <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
+          <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                  <Building2 className="h-5 w-5" />
+                </div>
+                <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                  Editar Fornecedor
+                </SheetTitle>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => handleOpenChange(false)}
+                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </SheetHeader>
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {formContent}
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: Usar Dialog
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
         <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between gap-3">
@@ -121,146 +339,15 @@ export default function EditSupplierDialog({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
         </DialogHeader>
-        
-        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 sm:py-5 bg-white dark:bg-gray-900">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome do Fornecedor*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: Holambra" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="contact"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome do Contato*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: João Silva" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="(11) 99999-9999" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="contato@empresa.com" type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Endereço</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Rua, número, bairro, cidade" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="limit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Limite de Crédito*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="R$ 25.000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status*</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="active">Ativo</SelectItem>
-                        <SelectItem value="pending">Pendente</SelectItem>
-                        <SelectItem value="inactive">Inativo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200/60 dark:border-gray-700/40">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => onOpenChange(false)}
-                className="h-9 rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm dark:text-white px-4"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                type="submit"
-                className="h-9 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm px-6"
-              >
-                Salvar Alterações
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <div className="flex flex-col flex-1 overflow-hidden">
+          {formContent}
         </div>
       </DialogContent>
     </Dialog>

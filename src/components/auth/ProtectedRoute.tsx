@@ -39,8 +39,22 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   // Bloquear acesso se assinatura não está ativa
-  if (!subscriptionStatus.canAccess) {
+  // Mas permitir acesso enquanto está carregando (para evitar bloqueio prematuro)
+  if (!subscriptionStatus.canAccess && !subscriptionStatus.reason?.includes("Carregando")) {
+    console.log('🔒 ProtectedRoute: Bloqueando acesso', subscriptionStatus);
     return <SubscriptionBlocked status={subscriptionStatus} />;
+  }
+
+  // Se ainda está carregando, mostrar loading
+  if (subscriptionStatus.reason?.includes("Carregando")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Verificando assinatura...</p>
+        </div>
+      </div>
+    );
   }
 
   // Renderizar conteúdo protegido se autenticado e com assinatura ativa

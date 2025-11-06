@@ -2,13 +2,15 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
+import { useSuppliersMobile } from "@/hooks/mobile/useSuppliersMobile";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useDebounce } from "@/hooks/useDebounce";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, ChevronDown, History, MessageCircle, Award, Star, Clock, CircleDot, CreditCard, ShoppingCart, ClipboardList, ChevronLeft, ChevronRight } from "lucide-react";
+import { Building2, Search, Plus, Phone, Mail, MapPin, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, ChevronDown, History, MessageCircle, Award, Star, Clock, CircleDot, CreditCard, ShoppingCart, ClipboardList, Filter } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,6 +32,9 @@ import { ViewMode } from "@/types/pagination";
 import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
 import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMobile } from "@/contexts/MobileProvider";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
+import { MobileFAB } from "@/components/mobile/MobileFAB";
+import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
 interface Supplier {
   id: string;
   name: string;
@@ -61,13 +66,6 @@ export default function Fornecedores() {
     loading
   } = useAuth();
   const { canViewSensitiveData } = useUserRole();
-  const {
-    suppliers,
-    isLoading: suppliersLoading,
-    deleteSupplier,
-    updateSupplier,
-    refetch
-  } = useSuppliers();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const {
     viewMode,
@@ -80,30 +78,101 @@ export default function Fornecedores() {
     initialItemsPerPage: 10
   });
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const addSupplierRef = useRef<HTMLButtonElement>(null);
   const importSuppliersRef = useRef<HTMLButtonElement>(null);
 
-  // Callbacks memoizados para navegação do carousel
-  const handlePrevCard = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
-  }, []);
+  // Trigger para abrir dialog de adicionar fornecedor
+  const triggerAddDialog = () => {
+    const button = addSupplierRef.current;
+    button?.click();
+  };
 
-  const handleNextCard = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
-  }, []);
+  // MOBILE OPTIMIZATION: Usar hook mobile ou desktop baseado no dispositivo
+  const desktopSuppliers = useSuppliers();
+  // Mobile: passar searchQuery e statusFilter para busca server-side
+  const mobileSuppliers = useSuppliersMobile(
+    isMobile ? debouncedSearchQuery : undefined, 
+    isMobile ? statusFilter : undefined,
+    isMobile // enabled apenas se for mobile
+  );
+  
+  // Selecionar hook baseado no dispositivo
+  const isMobileDevice = isMobile;
+  const suppliersData = isMobileDevice ? {
+    suppliers: mobileSuppliers.suppliers || [],
+    isLoading: mobileSuppliers.isLoading,
+    error: mobileSuppliers.error,
+    deleteSupplier: mobileSuppliers.deleteSupplier,
+    updateSupplier: mobileSuppliers.updateSupplier,
+    invalidateCache: mobileSuppliers.refetch,
+  } : {
+    suppliers: desktopSuppliers.suppliers,
+    isLoading: desktopSuppliers.isLoading,
+    error: desktopSuppliers.error,
+    deleteSupplier: desktopSuppliers.deleteSupplier,
+    updateSupplier: desktopSuppliers.updateSupplier,
+    invalidateCache: desktopSuppliers.refetch,
+  };
+
+  const { suppliers, isLoading: suppliersLoading, error: suppliersError, deleteSupplier, updateSupplier, invalidateCache } = suppliersData;
+
+  // Debug: Log dos dados recebidos
+  useEffect(() => {
+    console.log('📦 Fornecedores: Estado atual', {
+      isMobileDevice,
+      suppliersCount: suppliers.length,
+      isLoading: suppliersLoading,
+      error: suppliersError,
+      suppliersSample: suppliers.slice(0, 2),
+    });
+  }, [suppliers, suppliersLoading, suppliersError, isMobileDevice]);
+
+  // Mapear dados mobile para formato compatível com a interface Supplier
+  const mappedSuppliers = useMemo(() => {
+    console.log('📦 Fornecedores: Mapeando dados', { 
+      isMobileDevice, 
+      suppliersCount: suppliers.length,
+      suppliers: suppliers.slice(0, 3) // Primeiros 3 para debug
+    });
+    
+    if (!isMobileDevice) {
+      console.log('📦 Fornecedores: Desktop - usando suppliers direto', suppliers.length);
+      return suppliers;
+    }
+    
+    // Mobile: mapear SupplierMobile para Supplier
+    const mapped = suppliers.map(s => ({
+      id: s.id,
+      name: s.name,
+      contact: s.contact || "",
+      limit: "R$ 0",
+      activeQuotes: 0,
+      totalQuotes: 0,
+      avgPrice: "R$ 0,00",
+      lastOrder: "",
+      rating: 0,
+      status: s.status,
+      phone: s.phone,
+      email: s.email,
+      address: undefined,
+    }));
+    
+    console.log('📦 Fornecedores: Mobile - mapeados', mapped.length, 'fornecedores');
+    return mapped;
+  }, [suppliers, isMobileDevice]);
+
   useEffect(() => {
     if (!loading && !user) {
       setAuthDialogOpen(true);
     }
   }, [loading, user]);
   const handleAddSupplier = () => {
-    refetch();
+    invalidateCache();
   };
   const handleEditSupplier = (id: string, data: SupplierFormData) => {
     updateSupplier({
@@ -115,7 +184,7 @@ export default function Fornecedores() {
     deleteSupplier(id);
   };
   const handleSuppliersImported = (importedSuppliers: Supplier[]) => {
-    refetch();
+    invalidateCache();
   };
 
   // Função para gerar mensagem personalizada do WhatsApp (memoizada)
@@ -183,12 +252,49 @@ export default function Fornecedores() {
       description: "A cotação foi criada e enviada aos fornecedores."
     });
   };
-  const filteredSuppliers = useMemo(() => suppliers.filter(supplier => {
-    const matchesSearch = supplier.name.toLowerCase().includes(searchQuery.toLowerCase()) || supplier.contact.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || supplier.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  }), [suppliers, searchQuery, statusFilter]);
-  const paginatedData = paginate(filteredSuppliers);
+  // MOBILE: Filtragem já feita no servidor, usar dados diretos
+  // DESKTOP: Fazer filtragem client-side
+  const filteredSuppliers = useMemo(() => {
+    if (isMobileDevice) {
+      // Mobile: dados já filtrados pelo hook
+      return mappedSuppliers;
+    }
+    // Desktop: filtrar client-side
+    return mappedSuppliers.filter(supplier => {
+      const matchesSearch = supplier.name.toLowerCase().includes(searchQuery.toLowerCase()) || supplier.contact?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || supplier.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [mappedSuppliers, searchQuery, statusFilter, isMobileDevice]);
+
+  // MOBILE: Usar paginação do hook mobile (server-side)
+  // DESKTOP: Usar paginação client-side
+  const paginatedData = isMobileDevice
+    ? {
+        items: filteredSuppliers,
+        pagination: mobileSuppliers.pagination ? {
+          ...mobileSuppliers.pagination,
+          itemsPerPage: mobileSuppliers.pagination.pageSize,
+          setItemsPerPage: (size: number) => {
+            mobileSuppliers.pagination.setItemsPerPage(size);
+          },
+        } : {
+          currentPage: 1,
+          pageSize: 20,
+          itemsPerPage: 20,
+          totalItems: 0,
+          totalPages: 0,
+          startIndex: 0,
+          endIndex: 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+          goToPage: () => {},
+          nextPage: () => {},
+          prevPage: () => {},
+          setItemsPerPage: () => {},
+        },
+      }
+    : paginate(filteredSuppliers);
   const getStatusBadge = useCallback((status: string) => {
     const statusConfig = {
       active: {
@@ -228,22 +334,38 @@ export default function Fornecedores() {
 
   // Calculate real stats
   const stats = useMemo(() => {
-    const totalLimit = suppliers.reduce((sum, s) => {
+    // Mobile: SupplierMobile não tem todos os campos, usar valores simplificados
+    if (isMobileDevice) {
+      return {
+        total: suppliers.length,
+        active: suppliers.filter(s => s.status === "active").length,
+        inactive: suppliers.filter(s => s.status === "inactive").length,
+        pending: suppliers.filter(s => s.status === "pending").length,
+        percentualAtivos: 0,
+        totalLimit: "R$ 0",
+        limiteMedioPorAtivo: "0.0",
+        activeQuotes: 0,
+        mediaCotacoesPorFornecedor: "0.0",
+        distribuicaoCotacoes: [0, 0, 0, 0, 0, 0, 0]
+      };
+    }
+
+    const totalLimit = mappedSuppliers.reduce((sum, s) => {
       const limitValue = parseFloat(s.limit.replace(/[^\d,]/g, '').replace(',', '.'));
       return sum + (isNaN(limitValue) ? 0 : limitValue);
     }, 0);
-    const activeQuotesTotal = suppliers.reduce((sum, s) => sum + s.activeQuotes, 0);
+    const activeQuotesTotal = mappedSuppliers.reduce((sum, s) => sum + s.activeQuotes, 0);
     
     // Distribuição por status
     const porStatus = {
-      active: suppliers.filter(s => s.status === "active").length,
-      inactive: suppliers.filter(s => s.status === "inactive").length,
-      pending: suppliers.filter(s => s.status === "pending").length
+      active: mappedSuppliers.filter(s => s.status === "active").length,
+      inactive: mappedSuppliers.filter(s => s.status === "inactive").length,
+      pending: mappedSuppliers.filter(s => s.status === "pending").length
     };
     
     // Percentual de fornecedores ativos
-    const percentualAtivos = suppliers.length > 0 
-      ? Math.round((porStatus.active / suppliers.length) * 100)
+    const percentualAtivos = mappedSuppliers.length > 0 
+      ? Math.round((porStatus.active / mappedSuppliers.length) * 100)
       : 0;
     
     // Limite médio por fornecedor ativo
@@ -252,8 +374,8 @@ export default function Fornecedores() {
       : "0.0";
     
     // Média de cotações por fornecedor
-    const fornecedoresComCotacoes = suppliers.filter(s => s.activeQuotes > 0 || s.totalQuotes > 0);
-    const totalQuotes = suppliers.reduce((sum, s) => sum + s.totalQuotes, 0);
+    const fornecedoresComCotacoes = mappedSuppliers.filter(s => s.activeQuotes > 0 || s.totalQuotes > 0);
+    const totalQuotes = mappedSuppliers.reduce((sum, s) => sum + s.totalQuotes, 0);
     const mediaCotacoesPorFornecedor = fornecedoresComCotacoes.length > 0
       ? (totalQuotes / fornecedoresComCotacoes.length).toFixed(1)
       : "0.0";
@@ -261,7 +383,7 @@ export default function Fornecedores() {
     // Distribuição de cotações por fornecedor (para o mini gráfico)
     // Agrupa fornecedores por faixas de cotações ativas
     const distribuicaoCotacoes = [0, 0, 0, 0, 0, 0, 0]; // 7 barras
-    suppliers.forEach(s => {
+    mappedSuppliers.forEach(s => {
       const quotes = s.activeQuotes;
       if (quotes === 0) distribuicaoCotacoes[0]++;
       else if (quotes <= 2) distribuicaoCotacoes[1]++;
@@ -273,7 +395,7 @@ export default function Fornecedores() {
     });
     
     return {
-      total: suppliers.length,
+      total: mappedSuppliers.length,
       active: porStatus.active,
       inactive: porStatus.inactive,
       pending: porStatus.pending,
@@ -284,7 +406,7 @@ export default function Fornecedores() {
       mediaCotacoesPorFornecedor,
       distribuicaoCotacoes
     };
-  }, [suppliers]);
+  }, [mappedSuppliers, isMobileDevice]);
 
   // Helper functions para renderizar Cards (memoizadas inline)
   const renderCard1 = useMemo(() => (
@@ -463,62 +585,9 @@ export default function Fornecedores() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Stats Cards - Inspiração Dashboard Statistics Card 2 */}
-          {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
-          {isMobile ? (
-            <div className="mb-8">
-              {/* Card wrapper com navegação integrada no topo */}
-              <div className="relative">
-                {/* Navegação integrada no topo do card (parece ser parte do card) */}
-                <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handlePrevCard}
-                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
-                    <span className="text-xs font-semibold text-white dark:text-gray-200">
-                      {activeCardIndex + 1} / 4
-                    </span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleNextCard}
-                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Container do carousel */}
-                <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
-                  <div 
-                    className="flex transition-transform duration-300 ease-in-out"
-                    style={{ 
-                      transform: `translateX(-${activeCardIndex * 100}%)`,
-                    }}
-                  >
-                    <div className="w-full flex-shrink-0">
-                      {renderCard1}
-                    </div>
-                    <div className="w-full flex-shrink-0">
-                      {renderCard2}
-                    </div>
-                    <div className="w-full flex-shrink-0">
-                      {renderCard3}
-                    </div>
-                    <div className="w-full flex-shrink-0">
-                      {renderCard4}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
+          {/* Stats Cards - Ocultar no mobile para economizar espaço */}
+          {/* Desktop: Grid 2x2 ou 4 colunas */}
+          {!isMobile && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
               {renderCard1}
               {renderCard2}
@@ -553,7 +622,7 @@ export default function Fornecedores() {
                 </Button>
               </div>
 
-              {/* Select Status - Escondido no mobile */}
+              {/* Select Status - Desktop */}
               <div className="hidden sm:block">
                 <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
                   <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-indigo-300/70 dark:hover:border-indigo-600/70 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/50 dark:focus:ring-indigo-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
@@ -567,6 +636,52 @@ export default function Fornecedores() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Mobile: Action Sheet para filtros */}
+              {isMobile && (
+                <MobileActionSheet
+                  trigger={
+                    <Button variant="outline" className="h-10 px-4 border-gray-200 dark:border-gray-700">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filtros
+                    </Button>
+                  }
+                  title="Filtrar por Status"
+                  open={filtersOpen}
+                  onOpenChange={setFiltersOpen}
+                >
+                  <div className="space-y-2">
+                    <Button
+                      variant={statusFilter === "all" ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => { setStatusFilter("all"); setFiltersOpen(false); }}
+                    >
+                      Todos
+                    </Button>
+                    <Button
+                      variant={statusFilter === "active" ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => { setStatusFilter("active"); setFiltersOpen(false); }}
+                    >
+                      Ativos
+                    </Button>
+                    <Button
+                      variant={statusFilter === "inactive" ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => { setStatusFilter("inactive"); setFiltersOpen(false); }}
+                    >
+                      Inativos
+                    </Button>
+                    <Button
+                      variant={statusFilter === "pending" ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => { setStatusFilter("pending"); setFiltersOpen(false); }}
+                    >
+                      Pendentes
+                    </Button>
+                  </div>
+                </MobileActionSheet>
+              )}
 
               {/* Dropdown Ações - Escondido no mobile */}
               <DropdownMenu>
@@ -595,7 +710,9 @@ export default function Fornecedores() {
       </Card>
 
       {/* Suppliers View */}
-      {viewMode === "grid" ? <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {viewMode === "grid" ? (
+        <PullToRefresh onRefresh={async () => { await invalidateCache(); }} disabled={!isMobile}>
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedData.items.map(supplier => <Card key={supplier.id} className="group border border-gray-200/60 dark:border-gray-700/30 bg-white dark:bg-[#1C1F26] sm:bg-gradient-to-br sm:from-white sm:to-indigo-50/30 sm:dark:from-[#1C1F26] sm:dark:to-[#1C1F26] sm:backdrop-blur-sm sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 sm:hover:border-indigo-300/60 sm:dark:hover:border-indigo-600/50 sm:transition-shadow sm:duration-200">
               <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
                 <div className="flex items-start justify-between">
@@ -641,51 +758,97 @@ export default function Fornecedores() {
               </CardHeader>
 
               <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4">
-                {/* Mobile: Layout Profissional Equilibrado */}
-                <div className="sm:hidden space-y-2.5">
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Limite</span>
+                {/* Mobile: Cards simplificados - foco em ações rápidas */}
+                {isMobile ? (
+                  <div className="space-y-3">
+                    {/* Informações essenciais compactas */}
+                    <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Contato:</span>
+                      <span className="font-semibold text-gray-800 dark:text-gray-200">{capitalize(supplier.contact)}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.limit}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Preço Médio</span>
-                    </div>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.avgPrice}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Cotações Ativas</span>
-                    </div>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.activeQuotes}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
-                    <div className="flex items-center gap-2">
-                      <Star className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Total</span>
-                    </div>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.totalQuotes}</span>
-                  </div>
-                  
-                  {/* Botão Nova Cotação - Mobile */}
-                  <div className="pt-2.5">
-                    <AddQuoteDialog onAdd={handleAddQuote} trigger={
-                      <Button 
-                        size="sm" 
+                    
+                    {/* Botões de ação rápida mobile */}
+                    <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <SupplierQuoteHistoryDialog 
+                        supplierName={supplier.name} 
+                        supplierId={supplier.id} 
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 h-9 text-xs"
+                          >
+                            <History className="h-3.5 w-3.5 mr-1.5" />
+                            Histórico
+                          </Button>
+                        } 
+                      />
+                      <Button
                         variant="outline"
-                        className="w-full border-2 border-indigo-500/60 dark:border-indigo-400/60 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-all duration-200 text-xs h-9 shadow-sm"
+                        size="sm"
+                        className="flex-1 h-9 text-xs"
+                        onClick={() => setEditingSupplier(supplier)}
                       >
-                        <Plus className="h-3.5 w-3.5 mr-1.5" />
-                        Nova Cotação
+                        <Edit className="h-3.5 w-3.5 mr-1.5" />
+                        Editar
                       </Button>
-                    } />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 h-9 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        onClick={() => setDeletingSupplier(supplier)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                        Excluir
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                        <span className="text-xs text-gray-600 dark:text-gray-400">Limite</span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.limit}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                        <span className="text-xs text-gray-600 dark:text-gray-400">Preço Médio</span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.avgPrice}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                        <span className="text-xs text-gray-600 dark:text-gray-400">Cotações Ativas</span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.activeQuotes}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800/50">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+                        <span className="text-xs text-gray-600 dark:text-gray-400">Total</span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.totalQuotes}</span>
+                    </div>
+                    
+                    {/* Botão Nova Cotação - Mobile */}
+                    <div className="pt-2.5">
+                      <AddQuoteDialog onAdd={handleAddQuote} trigger={
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="w-full border-2 border-indigo-500/60 dark:border-indigo-400/60 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-all duration-200 text-xs h-9 shadow-sm"
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1.5" />
+                          Nova Cotação
+                        </Button>
+                      } />
+                    </div>
+                  </div>
+                )}
 
                 {/* Desktop: Layout Original Decorativo */}
                 <div className="hidden sm:block space-y-4">
@@ -772,7 +935,10 @@ export default function Fornecedores() {
                 </div>
               </CardContent>
             </Card>)}
-        </div> : <Card className="border-0 bg-transparent">
+        </div>
+        </PullToRefresh>
+      ) : (
+        <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
@@ -910,9 +1076,11 @@ export default function Fornecedores() {
               <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>
-        </Card>}
+        </Card>
+      )}
 
-      {filteredSuppliers.length === 0 && <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
+      {filteredSuppliers.length === 0 && (
+        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
           <CardContent className="p-12 text-center">
             <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhum fornecedor encontrado</h3>
@@ -924,7 +1092,8 @@ export default function Fornecedores() {
                 Adicionar Fornecedor
               </Button>} />
           </CardContent>
-        </Card>}
+        </Card>
+      )}
 
       <EditSupplierDialog supplier={editingSupplier} open={!!editingSupplier} onOpenChange={open => !open && setEditingSupplier(null)} onEdit={handleEditSupplier} />
 
@@ -935,6 +1104,14 @@ export default function Fornecedores() {
         <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
         <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
       </div>
+
+      {/* Mobile FAB */}
+      {isMobile && (
+        <MobileFAB
+          onClick={triggerAddDialog}
+          label="Novo Fornecedor"
+        />
+      )}
         </div>
       </PageWrapper>
     </>;

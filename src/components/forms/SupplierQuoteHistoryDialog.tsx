@@ -1,12 +1,15 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Package, Award, Search, DollarSign, ClipboardList } from "lucide-react";
+import { Calendar, Package, Award, Search, DollarSign, ClipboardList, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSupplierQuoteHistory } from "@/hooks/useSupplierQuoteHistory";
 import { useSupplierOrderHistory } from "@/hooks/useSupplierOrderHistory";
+import { useMobile } from "@/contexts/MobileProvider";
 
 interface SupplierQuoteHistoryDialogProps {
   supplierName: string;
@@ -15,12 +18,26 @@ interface SupplierQuoteHistoryDialogProps {
 }
 
 export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }: SupplierQuoteHistoryDialogProps) {
+  const isMobile = useMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("quotes");
   const [searchTerm, setSearchTerm] = useState("");
+  const scrollPositionRef = useRef<number>(0);
   
   const { data: quoteHistory = [], isLoading: quotesLoading, error: quotesError } = useSupplierQuoteHistory(supplierId);
   const { data: orderHistory = [], isLoading: ordersLoading, error: ordersError } = useSupplierOrderHistory(isOpen && activeTab === "orders" ? supplierId : "");
+
+  // Função para gerenciar abertura/fechamento e manter scroll
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      scrollPositionRef.current = window.scrollY;
+    } else {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPositionRef.current);
+      }, 100);
+    }
+    setIsOpen(newOpen);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
@@ -98,44 +115,26 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
 
   const uniqueProducts = filteredAndSortedProducts;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-            Ver Histórico
-          </button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0 border-b border-gray-100 pb-4">
-          <DialogTitle className="flex items-center justify-between gap-3 text-xl font-bold text-gray-900">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
-                <Package className="h-5 w-5 text-white" />
-              </div>
-              <span>Histórico do Fornecedor - {supplierName}</span>
-            </div>
-          </DialogTitle>
-        </DialogHeader>
+  // Conteúdo do modal (reutilizado em mobile e desktop)
+  const modalContent = (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
+      <div className={`${isMobile ? 'px-4 pt-4' : 'px-6 pt-4'} border-b border-gray-200 dark:border-gray-700`}>
+        <TabsList className={`grid grid-cols-2 ${isMobile ? 'w-full' : 'w-full sm:w-auto'}`}>
+          <TabsTrigger value="quotes" className="flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            Cotações
+          </TabsTrigger>
+          <TabsTrigger value="orders" className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4" />
+            Pedidos
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden">
-          <div className="px-6 pt-4 border-b border-gray-200 dark:border-gray-700">
-            <TabsList className="grid grid-cols-2 w-full sm:w-auto">
-              <TabsTrigger value="quotes" className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                Cotações
-              </TabsTrigger>
-              <TabsTrigger value="orders" className="flex items-center gap-2">
-                <ClipboardList className="h-4 w-4" />
-                Pedidos
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="quotes" className="flex-1 overflow-auto p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-              <div className="lg:w-72 flex-shrink-0 space-y-4">
+      <TabsContent value="quotes" className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+        <div className={`flex flex-col gap-4 ${isMobile ? '' : 'lg:flex-row lg:items-stretch'}`}>
+          {!isMobile && (
+            <div className="lg:w-72 flex-shrink-0 space-y-4">
                 <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/60 dark:border-blue-900/40 dark:bg-blue-900/20">
                   <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3">Resumo de Cotações</h4>
                   <div className="space-y-2 text-xs text-blue-900/80 dark:text-blue-100/80">
@@ -174,9 +173,50 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                     />
                   </div>
                 </div>
-              </div>
+            </div>
+          )}
 
-              <div className="flex-1 space-y-4">
+          {/* Mobile: Resumo no topo */}
+          {isMobile && (
+            <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/60 dark:border-blue-900/40 dark:bg-blue-900/20 mb-4">
+              <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3">Resumo de Cotações</h4>
+              <div className="grid grid-cols-2 gap-3 text-xs text-blue-900/80 dark:text-blue-100/80">
+                <div>
+                  <span className="block mb-1">Total</span>
+                  <span className="font-semibold text-base">{quoteStats.totalQuotes}</span>
+                </div>
+                <div>
+                  <span className="block mb-1">Vitórias</span>
+                  <span className="font-semibold text-base">{quoteStats.wonQuotes}</span>
+                </div>
+                <div>
+                  <span className="block mb-1">Taxa de vitória</span>
+                  <span className="font-semibold text-base">{quoteStats.totalQuotes ? `${quoteStats.winRate.toFixed(1)}%` : "-"}</span>
+                </div>
+                <div>
+                  <span className="block mb-1">Preço médio</span>
+                  <span className="font-semibold text-base">{quoteStats.totalQuotes ? `R$ ${quoteStats.avgPrice.toFixed(2)}` : '-'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile: Busca no topo */}
+          {isMobile && (
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Buscar produtos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-11 text-base"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className={`${isMobile ? 'space-y-3' : 'flex-1 space-y-4'}`}>
                 {quotesLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -202,6 +242,37 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                         Limpar filtros
                       </button>
                     )}
+                  </div>
+                ) : isMobile ? (
+                  // Mobile: Cards em vez de tabela
+                  <div className="space-y-3">
+                    {filteredAndSortedProducts.map((product) => {
+                      const productQuotes = quoteHistory.filter(q => q.product === product.name);
+                      return productQuotes.map((quote, quoteIndex) => (
+                        <div key={`${product.name}-${quoteIndex}`} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800/60">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-gray-900 dark:text-white text-base">{quote.product}</span>
+                              <Badge 
+                                variant={quote.isWinner ? "default" : "secondary"}
+                                className={cn(
+                                  "font-medium text-xs",
+                                  quote.isWinner 
+                                    ? "bg-green-100 text-green-700 border-green-200" 
+                                    : "bg-gray-100 text-gray-700 border-gray-200"
+                                )}
+                              >
+                                {quote.isWinner ? "Ganha" : "Não ganha"}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                              <span>{formatDate(String(quote.date))}</span>
+                              <span className="font-semibold text-gray-900 dark:text-white">R$ {quote.price.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ));
+                    })}
                   </div>
                 ) : (
                   <div className="overflow-hidden rounded-lg border border-gray-200">
@@ -281,13 +352,14 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
-          </TabsContent>
+          </div>
+        </div>
+      </TabsContent>
 
-          <TabsContent value="orders" className="flex-1 overflow-auto p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-              <div className="lg:w-72 flex-shrink-0 space-y-4">
+      <TabsContent value="orders" className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+        <div className={`flex flex-col gap-4 ${isMobile ? '' : 'lg:flex-row lg:items-stretch'}`}>
+          {!isMobile && (
+            <div className="lg:w-72 flex-shrink-0 space-y-4">
                 <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/60 dark:border-emerald-900/40 dark:bg-emerald-900/20">
                   <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-3">Resumo de Pedidos</h4>
                   <div className="space-y-2 text-xs text-emerald-900/80 dark:text-emerald-100/80">
@@ -313,9 +385,35 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                     </div>
                   </div>
                 </div>
-              </div>
+            </div>
+          )}
 
-              <div className="flex-1">
+          {/* Mobile: Resumo no topo */}
+          {isMobile && (
+            <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/60 dark:border-emerald-900/40 dark:bg-emerald-900/20 mb-4">
+              <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-3">Resumo de Pedidos</h4>
+              <div className="grid grid-cols-2 gap-3 text-xs text-emerald-900/80 dark:text-emerald-100/80">
+                <div>
+                  <span className="block mb-1">Total</span>
+                  <span className="font-semibold text-base">{orderStats.totalOrders}</span>
+                </div>
+                <div>
+                  <span className="block mb-1">Entregues</span>
+                  <span className="font-semibold text-base">{orderStats.deliveredOrders}</span>
+                </div>
+                <div>
+                  <span className="block mb-1">Valor total</span>
+                  <span className="font-semibold text-base">{orderStats.totalOrders ? `R$ ${orderStats.totalValue.toFixed(2)}` : '-'}</span>
+                </div>
+                <div>
+                  <span className="block mb-1">Ticket médio</span>
+                  <span className="font-semibold text-base">{orderStats.totalOrders ? `R$ ${orderStats.avgValue.toFixed(2)}` : '-'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className={isMobile ? 'space-y-3' : 'flex-1'}>
                 {ordersLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
@@ -331,16 +429,16 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                     <div className="text-emerald-700 dark:text-emerald-200">Nenhum pedido registrado com este fornecedor</div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className={isMobile ? 'space-y-3' : 'space-y-4'}>
                     {orderHistory.map((order) => (
-                      <div key={order.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/60 hover:shadow-md transition-shadow">
-                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                      <div key={order.id} className={`border border-gray-200 dark:border-gray-700 rounded-xl ${isMobile ? 'p-3' : 'p-4'} bg-white dark:bg-gray-800/60 ${isMobile ? '' : 'hover:shadow-md transition-shadow'}`}>
+                        <div className={`flex flex-col ${isMobile ? '' : 'md:flex-row md:justify-between md:items-start'} gap-4`}>
                           <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
-                              <span className="uppercase text-xs tracking-wide text-gray-500 dark:text-gray-400">Pedido</span>
+                            <div className={`flex items-center gap-2 ${isMobile ? 'text-base' : 'text-sm'} font-semibold text-gray-900 dark:text-white`}>
+                              <span className={`uppercase ${isMobile ? 'text-xs' : 'text-xs'} tracking-wide text-gray-500 dark:text-gray-400`}>Pedido</span>
                               <span>#{order.id.substring(0, 8)}</span>
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-gray-600 dark:text-gray-300">
+                            <div className={`grid ${isMobile ? 'grid-cols-2 gap-2' : 'grid-cols-2 md:grid-cols-4 gap-3'} ${isMobile ? 'text-xs' : 'text-xs'} text-gray-600 dark:text-gray-300`}>
                               <div>
                                 <p className="font-semibold text-gray-800 dark:text-white">Data do pedido</p>
                                 <p>{formatDate(order.orderDate)}</p>
@@ -406,10 +504,82 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                     ))}
                   </div>
                 )}
+          </div>
+        </div>
+      </TabsContent>
+    </Tabs>
+  );
+
+  // Mobile: Usar Sheet (bottom sheet)
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+        <SheetTrigger asChild>
+          {trigger || (
+            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              Ver Histórico
+            </button>
+          )}
+        </SheetTrigger>
+        <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
+          <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                  <Package className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                    Histórico do Fornecedor
+                  </SheetTitle>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                    {supplierName}
+                  </p>
+                </div>
               </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => handleOpenChange(false)}
+                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </Button>
             </div>
-          </TabsContent>
-        </Tabs>
+          </SheetHeader>
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {modalContent}
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: Usar Dialog
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        {trigger || (
+          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            Ver Histórico
+          </button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 border-b border-gray-100 pb-4">
+          <DialogTitle className="flex items-center justify-between gap-3 text-xl font-bold text-gray-900">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
+                <Package className="h-5 w-5 text-white" />
+              </div>
+              <span>Histórico do Fornecedor - {supplierName}</span>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col flex-1 overflow-hidden">
+          {modalContent}
+        </div>
       </DialogContent>
     </Dialog>
   );

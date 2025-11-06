@@ -75,6 +75,13 @@ export function useCompany() {
         .eq("id", companyId)
         .single();
 
+      console.log('🏢 useCompany: Dados da empresa', { 
+        companyId, 
+        hasData: !!companyData, 
+        error: companyError?.message,
+        subscriptionStatus: companyData?.subscription_status 
+      });
+
       if (companyError || !companyData) {
         console.error("Error fetching company:", companyError);
         return null;
