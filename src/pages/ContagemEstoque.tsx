@@ -23,7 +23,8 @@ import {
   Loader2,
   Activity,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  CircleDot
 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useStockCounts } from "@/hooks/useStockCounts";
@@ -39,10 +40,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { cn } from "@/lib/utils";
+import { useMobile } from "@/contexts/MobileProvider";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreVertical } from "lucide-react";
 
 export default function ContagemEstoque() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const isMobile = useMobile();
   const { stockCounts, isLoading, createStockCount, updateStockCount, deleteStockCount } = useStockCounts();
   const { sectors } = useStockSectors();
   
@@ -491,100 +496,240 @@ export default function ContagemEstoque() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {filteredCounts.map((count) => {
-              const colors = getStatusColors(count.status);
-              return (
-                <Card key={count.id} className={cn("group border border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26]", `sm:hover:${colors.border}`, "sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 sm:transition-shadow sm:duration-200", "backdrop-blur-sm")}>
-                  <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2 sm:gap-3 flex-1">
-                        <div className={cn("p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl", colors.iconBg, "sm:transition-all sm:duration-200")}>
-                          <ClipboardList className={cn("h-4 w-4 sm:h-5 sm:w-5", colors.iconColor, "sm:group-hover:scale-110 sm:transition-transform sm:duration-200")} />
-                        </div>
-                        <div className="space-y-1.5 sm:space-y-2 flex-1 min-w-0">
-                          <CardTitle className={cn("text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate", "sm:group-hover:text-orange-700 sm:dark:group-hover:text-orange-400 sm:transition-colors sm:duration-200")}>
-                            {count.order?.supplier_name || "Contagem Livre"}
-                          </CardTitle>
-                          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                            {getStatusBadge(count.status)}
+          <>
+            {/* Mobile: Cards */}
+            {isMobile ? (
+              <div className="grid gap-3 sm:gap-4 grid-cols-1">
+                {filteredCounts.map((count) => {
+                  const colors = getStatusColors(count.status);
+                  return (
+                    <Card key={count.id} className={cn("group border border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26]", "backdrop-blur-sm")}>
+                      <CardHeader className="pb-3 p-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2 flex-1">
+                            <div className={cn("p-1.5 rounded-lg", colors.iconBg)}>
+                              <ClipboardList className={cn("h-4 w-4", colors.iconColor)} />
+                            </div>
+                            <div className="space-y-1.5 flex-1 min-w-0">
+                              <CardTitle className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                {count.order?.supplier_name || "Contagem Livre"}
+                              </CardTitle>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {getStatusBadge(count.status)}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
-                    <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
-                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div>
-                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
-                            <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Data</span>
+                      </CardHeader>
+                      
+                      <CardContent className="space-y-3 p-3">
+                        <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <Calendar className="h-3 w-3 text-gray-500" />
+                                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Data</span>
+                              </div>
+                              <p className="text-base font-bold text-gray-800 dark:text-gray-200">
+                                {format(new Date(count.count_date), "dd/MM/yyyy", { locale: ptBR })}
+                              </p>
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                <Package className="h-3 w-3 text-orange-600" />
+                                <span className="text-xs font-medium text-orange-700 dark:text-orange-400">Pedido</span>
+                              </div>
+                              <p className="text-base font-bold text-orange-800 dark:text-orange-300">
+                                {count.order ? "Sim" : "Não"}
+                              </p>
+                            </div>
                           </div>
-                          <p className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-200">
-                            {format(new Date(count.count_date), "dd/MM/yyyy", { locale: ptBR })}
-                          </p>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                            <Package className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
-                            <span className="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-400">Pedido</span>
-                          </div>
-                          <p className="text-base sm:text-lg font-bold text-orange-800 dark:text-orange-300">
-                            {count.order ? "Sim" : "Não"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
 
-                    {count.notes && (
-                      <div className="p-2.5 sm:p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30">
-                        <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                          <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                          <span className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-400">Observações</span>
-                        </div>
-                        <p className="text-[10px] sm:text-xs font-semibold text-blue-800 dark:text-blue-300 line-clamp-2">
-                          {count.notes}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewCount(count.id)}
-                          className="h-8 w-8 p-0 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-200 shadow-sm hover:shadow-md"
-                        >
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                        {count.status !== "finalizada" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleFinalizeCount(count.id)}
-                            className="h-8 w-8 p-0 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-600 hover:text-emerald-700 dark:hover:text-emerald-300 transition-all duration-200 shadow-sm hover:shadow-md"
-                          >
-                            <CheckCircle className="h-3 w-3" />
-                          </Button>
+                        {count.notes && (
+                          <div className="p-2.5 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <FileText className="h-3 w-3 text-blue-600" />
+                              <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Observações</span>
+                            </div>
+                            <p className="text-[10px] font-semibold text-blue-800 dark:text-blue-300 line-clamp-2">
+                              {count.notes}
+                            </p>
+                          </div>
                         )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteCount(count.id)}
-                          className="h-8 w-8 p-0 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 hover:border-red-300 dark:hover:border-red-600 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 shadow-sm hover:shadow-md"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+
+                        <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewCount(count.id)}
+                              className="h-8 w-8 p-0 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-200 shadow-sm hover:shadow-md"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            {count.status !== "finalizada" && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleFinalizeCount(count.id)}
+                                className="h-8 w-8 p-0 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-600 hover:text-emerald-700 dark:hover:text-emerald-300 transition-all duration-200 shadow-sm hover:shadow-md"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteCount(count.id)}
+                              className="h-8 w-8 p-0 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 hover:border-red-300 dark:hover:border-red-600 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 shadow-sm hover:shadow-md"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Desktop: Tabela */
+              <Card className="border-0 bg-transparent">
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto w-full">
+                    <Table className="w-full">
+                      <TableHeader>
+                        <TableRow>
+                          <TableCell colSpan={6} className="px-1 pb-3 pt-0 border-none">
+                            <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-orange-200/60 dark:border-orange-900/40 rounded-lg shadow-sm px-4 py-3">
+                              <div className="w-[25%] flex items-center gap-2 pr-4 min-w-0">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/15 to-amber-500/15 flex items-center justify-center text-orange-600 dark:text-orange-300">
+                                  <ClipboardList className="h-4 w-4" />
+                                </div>
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Fornecedor</span>
+                              </div>
+                              <div className="hidden md:flex w-[15%] pl-2 justify-center items-center gap-1.5">
+                                <Calendar className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Data</span>
+                              </div>
+                              <div className="hidden lg:flex w-[15%] pl-2 justify-center items-center gap-1.5">
+                                <Package className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Pedido</span>
+                              </div>
+                              <div className="hidden md:flex w-[15%] pl-2 justify-center items-center gap-1.5">
+                                <CircleDot className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Status</span>
+                              </div>
+                              <div className="hidden lg:flex w-[20%] pl-2 justify-center items-center gap-1.5">
+                                <FileText className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Observações</span>
+                              </div>
+                              <div className="w-[10%] pl-4 flex justify-end items-center gap-1.5">
+                                <MoreVertical className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Ações</span>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredCounts.map((count) => (
+                          <TableRow key={count.id} className="group border-none">
+                            <TableCell colSpan={6} className="px-1 py-3">
+                              <div className="flex items-center px-1.5 py-2 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 transition-all duration-200 group-hover:bg-white dark:group-hover:bg-gray-800/70 group-hover:shadow-md dark:group-hover:shadow-lg dark:group-hover:shadow-black/20 group-hover:border-orange-300/60 dark:group-hover:border-orange-700/50 [&_*]:!transition-none">
+                                {/* Fornecedor - Largura fixa */}
+                                <div className="w-[25%] flex items-center gap-3 px-2">
+                                  <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20">
+                                    <ClipboardList className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                                  </div>
+                                  <div className="min-w-0 flex-1 max-w-[200px]">
+                                    <div className="table-cell-primary truncate" title={count.order?.supplier_name || "Contagem Livre"}>
+                                      {count.order?.supplier_name || "Contagem Livre"}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Data - Largura fixa, hidden on mobile */}
+                                <div className="hidden md:block w-[15%] px-2">
+                                  <div className="text-center pointer-events-none">
+                                    <span className="table-cell-primary text-sm">
+                                      {format(new Date(count.count_date), "dd/MM/yyyy", { locale: ptBR })}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Pedido - Largura fixa, hidden on small screens */}
+                                <div className="hidden lg:block w-[15%] px-2">
+                                  <div className="flex justify-center pointer-events-none">
+                                    <Badge variant="outline" className="bg-orange-50/80 dark:bg-orange-900/30 border-orange-200/60 dark:border-orange-700/60 text-orange-700 dark:text-orange-400 font-medium text-xs">
+                                      {count.order ? "Sim" : "Não"}
+                                    </Badge>
+                                  </div>
+                                </div>
+
+                                {/* Status - Largura fixa, hidden on mobile */}
+                                <div className="hidden md:block w-[15%] px-2">
+                                  <div className="flex justify-center pointer-events-none">
+                                    {getStatusBadge(count.status)}
+                                  </div>
+                                </div>
+
+                                {/* Observações - Largura fixa, hidden on small screens */}
+                                <div className="hidden lg:block w-[20%] px-2">
+                                  <div className="text-center pointer-events-none">
+                                    <span className="table-cell-primary truncate block text-xs">
+                                      {count.notes ? count.notes.substring(0, 50) + (count.notes.length > 50 ? "..." : "") : "—"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Ações - Largura fixa */}
+                                <div className="w-[10%] pl-4">
+                                  <div className="flex items-center justify-end gap-2 pointer-events-auto">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleViewCount(count.id)}
+                                      className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 p-0 h-8 w-8 rounded-lg border border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all"
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 h-8 w-8 p-0 rounded-full !transition-colors">
+                                          <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                                        <DropdownMenuLabel className="text-gray-600 font-medium">Mais Ações</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        {count.status !== "finalizada" && (
+                                          <DropdownMenuItem onClick={() => handleFinalizeCount(count.id)} className="hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer transition-colors">
+                                            <CheckCircle className="h-4 w-4 mr-2 text-emerald-600" />
+                                            Finalizar
+                                          </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteCount(count.id)}>
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Excluir
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
 
         {/* Dialog: Criar Contagem */}
