@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProducts } from "@/hooks/useProducts";
+import { useProductsMobile } from "@/hooks/mobile/useProductsMobile";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,9 @@ import { ViewMode } from "@/types/pagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
 import { useMobile } from "@/contexts/MobileProvider";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
+import { MobileFAB } from "@/components/mobile/MobileFAB";
+import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
 export default function Produtos() {
   const navigate = useNavigate();
   const {
@@ -52,6 +56,7 @@ export default function Produtos() {
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const addDialogTriggerRef = useRef<HTMLDivElement>(null);
   const importDialogTriggerRef = useRef<HTMLDivElement>(null);
   const triggerAddDialog = () => {
@@ -74,50 +79,134 @@ export default function Produtos() {
     setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
   }, []);
 
-  // OPTIMIZED: Use React Query for data fetching with caching
-  const {
-    products,
-    categories,
-    isLoading: productsLoading,
-    deleteProduct,
-    updateProduct,
-    invalidateCache
-  } = useProducts();
+  // MOBILE OPTIMIZATION: Usar hook mobile ou desktop baseado no dispositivo
+  const desktopProducts = useProducts();
+  // Mobile: passar searchQuery para busca server-side
+  const mobileProducts = useProductsMobile(isMobile ? debouncedSearchQuery : undefined);
+  
+  // Selecionar hook baseado no dispositivo
+  const isMobileDevice = isMobile;
+  const productsData = isMobileDevice ? {
+    products: mobileProducts.products,
+    isLoading: mobileProducts.isLoading,
+    error: mobileProducts.error,
+    deleteProduct: mobileProducts.deleteProduct,
+    updateProduct: mobileProducts.updateProduct,
+    invalidateCache: mobileProducts.refetch,
+    // Para mobile, não temos categories ainda - usar vazio ou buscar separadamente
+    categories: [] as string[],
+  } : {
+    products: desktopProducts.products,
+    isLoading: desktopProducts.isLoading,
+    error: desktopProducts.error,
+    deleteProduct: desktopProducts.deleteProduct,
+    updateProduct: desktopProducts.updateProduct,
+    invalidateCache: desktopProducts.invalidateCache,
+    categories: desktopProducts.categories,
+  };
+
+  const { products, categories, isLoading: productsLoading, deleteProduct, updateProduct, invalidateCache } = productsData;
+
   useEffect(() => {
     if (!loading && !user) {
       setAuthDialogOpen(true);
     }
   }, [loading, user]);
 
-  // OPTIMIZED: Memoize filtered products to avoid unnecessary recalculations
+  // MOBILE: Busca server-side via hook mobile
+  // DESKTOP: Busca client-side via filtro
   const filteredProducts = useMemo(() => {
-    if (!debouncedSearchQuery.trim() && selectedCategory === 'all') {
-      return products; // Retorna todos se não há filtros
+    if (isMobileDevice) {
+      // Mobile: busca já é server-side, apenas filtrar por categoria se necessário
+      if (selectedCategory === 'all') {
+        return products;
+      }
+      return products.filter(product => {
+        const productCategory = (product.category || '').trim().toLowerCase();
+        const categoryNormalized = (selectedCategory || '').trim().toLowerCase();
+        return productCategory === categoryNormalized;
+      });
+    } else {
+      // Desktop: filtro client-side completo
+      if (!debouncedSearchQuery.trim() && selectedCategory === 'all') {
+        return products;
+      }
+      
+      const searchLower = debouncedSearchQuery.toLowerCase();
+      const categoryNormalized = (selectedCategory || '').trim().toLowerCase();
+      
+      return products.filter(product => {
+        const matchesSearch = !searchLower || product.name.toLowerCase().includes(searchLower);
+        const productCategory = (product.category || '').trim().toLowerCase();
+        const matchesCategory = categoryNormalized === "all" || productCategory === categoryNormalized;
+        return matchesSearch && matchesCategory;
+      });
     }
-    
-    const searchLower = debouncedSearchQuery.toLowerCase();
-    const categoryNormalized = (selectedCategory || '').trim().toLowerCase();
-    
-    return products.filter(product => {
-      const matchesSearch = !searchLower || product.name.toLowerCase().includes(searchLower);
-      const productCategory = (product.category || '').trim().toLowerCase();
-      const matchesCategory = categoryNormalized === "all" || productCategory === categoryNormalized;
-      return matchesSearch && matchesCategory;
-    });
-  }, [products, debouncedSearchQuery, selectedCategory]);
-  const paginatedData = paginate(filteredProducts);
+  }, [products, debouncedSearchQuery, selectedCategory, isMobileDevice]);
+
+  // MOBILE: Usar paginação do hook mobile (server-side)
+  // DESKTOP: Usar paginação client-side
+  const paginatedData = isMobileDevice 
+    ? {
+        items: filteredProducts,
+        pagination: mobileProducts.pagination ? {
+          ...mobileProducts.pagination,
+          itemsPerPage: mobileProducts.pagination.pageSize, // Mapear pageSize para itemsPerPage
+          setItemsPerPage: (size: number) => {
+            // Chamar setItemsPerPage do hook que internamente atualiza pageSize
+            mobileProducts.pagination.setItemsPerPage(size);
+          },
+        } : {
+          currentPage: 1,
+          pageSize: 20,
+          itemsPerPage: 20, // Adicionar itemsPerPage para compatibilidade
+          totalItems: 0,
+          totalPages: 0,
+          startIndex: 0,
+          endIndex: 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+          goToPage: () => {},
+          nextPage: () => {},
+          prevPage: () => {},
+          setItemsPerPage: () => {},
+        },
+      }
+    : paginate(filteredProducts);
 
   // Cálculos de métricas reais e dinâmicas
   const stats = useMemo(() => {
     const totalCategories = categories.length - 1; // -1 para remover "all"
-    const activeQuotes = products.reduce((sum, p) => sum + p.quotesCount, 0);
+    
+    // Mobile: ProductMobile não tem quotesCount, usar valores simplificados
+    if (isMobileDevice) {
+      return {
+        total: products.length,
+        totalCategories,
+        activeQuotes: 0,
+        produtosPorStatus: {
+          ativos: 0,
+          cotados: 0,
+          pendentes: 0,
+          semCotacao: 0,
+        },
+        percentualComCotacao: 0,
+        topCategoria: ["N/A", 0],
+        mediaCotacoesPorProduto: "0.0",
+        averageValue: "R$ 0,00",
+        economiaMediaPorProduto: "0",
+        percentualEconomiaMedia: 0,
+      };
+    }
+    
+    const activeQuotes = products.reduce((sum, p: any) => sum + (p.quotesCount || 0), 0);
     
     // Calcular produtos por status
     const produtosPorStatus = {
-      ativos: products.filter(p => p.quotesCount >= 3).length,
-      cotados: products.filter(p => p.quotesCount > 0 && p.quotesCount < 3).length,
-      pendentes: products.filter(p => p.quotesCount === 0 && p.lastQuotePrice !== "R$ 0,00").length,
-      semCotacao: products.filter(p => p.quotesCount === 0 && p.lastQuotePrice === "R$ 0,00").length
+      ativos: products.filter((p: any) => (p.quotesCount || 0) >= 3).length,
+      cotados: products.filter((p: any) => (p.quotesCount || 0) > 0 && (p.quotesCount || 0) < 3).length,
+      pendentes: products.filter((p: any) => (p.quotesCount || 0) === 0 && p.lastQuotePrice !== "R$ 0,00").length,
+      semCotacao: products.filter((p: any) => (p.quotesCount || 0) === 0 && p.lastQuotePrice === "R$ 0,00").length
     };
     
     // Percentual de produtos com pelo menos 1 cotação (engajamento geral)
@@ -136,19 +225,19 @@ export default function Produtos() {
       .sort((a, b) => b[1] - a[1])[0];
     
     // Média de cotações por produto (apenas produtos com cotação)
-    const produtosComCotacaoParaMedia = products.filter(p => p.quotesCount > 0);
+    const produtosComCotacaoParaMedia = products.filter((p: any) => (p.quotesCount || 0) > 0);
     const mediaCotacoesPorProduto = produtosComCotacaoParaMedia.length > 0
       ? (activeQuotes / produtosComCotacaoParaMedia.length).toFixed(1)
       : "0.0";
     
     // Valor médio e economia potencial
-    const productsWithPrices = products.filter(p => p.lastQuotePrice !== "R$ 0,00");
+    const productsWithPrices = products.filter((p: any) => p.lastQuotePrice !== "R$ 0,00");
     let averageValue = "R$ 0,00";
     let economiaMediaPorProduto = "0";
     let percentualEconomiaMedia = 0;
     
     if (productsWithPrices.length > 0) {
-      const total = productsWithPrices.reduce((sum, p) => {
+      const total = productsWithPrices.reduce((sum, p: any) => {
         const price = parseFloat(p.lastQuotePrice.replace(/[^\d,]/g, '').replace(',', '.'));
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
@@ -156,7 +245,7 @@ export default function Produtos() {
       
       // Calcular economia média (assumindo economia de 10-15% em cotações bem feitas)
       // Baseado nos produtos que têm cotação
-      const produtosComMultiplasCotacoes = products.filter(p => p.quotesCount >= 2);
+      const produtosComMultiplasCotacoes = products.filter((p: any) => (p.quotesCount || 0) >= 2);
       if (produtosComMultiplasCotacoes.length > 0) {
         // Estimativa conservadora: produtos com múltiplas cotações geram economia média
         percentualEconomiaMedia = Math.round((produtosComMultiplasCotacoes.length / productsWithPrices.length) * 12);
@@ -178,7 +267,7 @@ export default function Produtos() {
       economiaMediaPorProduto,
       percentualEconomiaMedia
     };
-  }, [products, categories]);
+  }, [products, categories, isMobileDevice]);
   const getTrendIcon = useCallback((trend: "up" | "down" | "stable") => {
     if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
     if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
@@ -187,11 +276,15 @@ export default function Produtos() {
 
   // Função para determinar status do produto baseado em dados (memoizada)
   const getProductStatus = useCallback((product: any) => {
+    // Mobile: ProductMobile não tem esses campos, retornar status padrão
+    if (isMobileDevice && !('quotesCount' in product)) {
+      return "cotado"; // Status padrão para mobile
+    }
     if (product.quotesCount === 0) return "sem_cotacao";
     if (product.lastQuotePrice === "R$ 0,00") return "pendente";
     if (product.quotesCount >= 3) return "ativo";
     return "cotado";
-  }, []);
+  }, [isMobileDevice]);
 
   // Função para renderizar badge de status com cores diferenciadas (memoizada)
   const getStatusBadge = useCallback((status: string) => {
@@ -399,62 +492,8 @@ export default function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Stats Cards - Inspiração Dashboard Statistics Card 2 */}
-          {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
-          {isMobile ? (
-            <div className="mb-8">
-              {/* Card wrapper com navegação integrada no topo */}
-              <div className="relative">
-                {/* Navegação integrada no topo do card (parece ser parte do card) */}
-                <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handlePrevCard}
-                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
-                    <span className="text-xs font-semibold text-white dark:text-gray-200">
-                      {activeCardIndex + 1} / 4
-                    </span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleNextCard}
-                    className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Container do carousel */}
-                <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
-                  <div 
-                    className="flex transition-transform duration-300 ease-in-out"
-                    style={{ 
-                      transform: `translateX(-${activeCardIndex * 100}%)`,
-                    }}
-                  >
-                    <div className="w-full flex-shrink-0">
-                      {renderCard1}
-                    </div>
-                    <div className="w-full flex-shrink-0">
-                      {renderCard2}
-                    </div>
-                    <div className="w-full flex-shrink-0">
-                      {renderCard3}
-                    </div>
-                    <div className="w-full flex-shrink-0">
-                      {renderCard4}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
+          {/* Stats Cards - Desktop apenas (mobile removido para performance) */}
+          {!isMobile && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
               {renderCard1}
               {renderCard2}
@@ -463,85 +502,103 @@ export default function Produtos() {
             </div>
           )}
 
-          {/* Filters - Between stats cards and products table */}
-          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-        <CardContent className="p-3 md:p-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
-            {!isMobile && (
-              <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            )}
-
-            <div className="flex flex-wrap items-center gap-3 sm:justify-end w-full">
-              {/* Barra de busca + Botão Criar (lado a lado no mobile) */}
-              <div className="flex gap-2 w-full sm:w-auto">
-                <div className="relative flex-1 sm:w-64">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                  <Input
-                    placeholder="Buscar produtos..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 w-full h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-lg shadow-sm transition-all duration-200 text-sm text-gray-900 dark:text-white"
-                  />
-                </div>
-
-                {/* Botão Mobile - Apenas criar (ao lado da busca) */}
-                {isMobile && (
-                  <Button
-                    onClick={triggerAddDialog}
-                    className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl flex-shrink-0 px-4"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                )}
+          {/* Filters - Mobile: Simplificado | Desktop: Completo */}
+          {isMobile ? (
+            <div className="mb-4 space-y-3">
+              {/* Barra de busca mobile */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                <Input
+                  placeholder="Buscar produtos..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 w-full h-11 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-lg shadow-sm transition-all duration-200 text-sm text-gray-900 dark:text-white"
+                />
               </div>
 
-              {!isMobile && (
-                <CategorySelect
-                  categories={categories}
-                  products={products}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                  className="w-full sm:w-auto h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
-                />
-              )}
-
-              {!isMobile && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Criar
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
-                    <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={triggerAddDialog}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Novo Produto
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={triggerImportDialog}>
-                      <FileUp className="h-4 w-4 mr-2" />
-                      Importar Produtos
-                    </DropdownMenuItem>
-                    {/* TEMPORÁRIO: Função de excluir duplicatas (comentada) */}
-                    {/* <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <DeleteDuplicateProductsDialog onDuplicatesDeleted={invalidateCache} />
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator /> */}
-                    {/* TEMPORÁRIO: Função de limpar cache (comentada) */}
-                    {/* <DropdownMenuItem onClick={invalidateCache}>
-                      <TrendingUp className="h-4 w-4 mr-2" />
-                      Atualizar Cache
-                    </DropdownMenuItem> */}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+              {/* Botão de filtros mobile */}
+              <MobileActionSheet
+                trigger={
+                  <Button
+                    variant="outline"
+                    className="w-full h-11 justify-start bg-white/80 dark:bg-gray-800/80 border-gray-200/60 dark:border-gray-700/60"
+                  >
+                    <Filter className="h-4 w-4 mr-2" />
+                    {selectedCategory !== "all" ? `Categoria: ${selectedCategory}` : "Filtros"}
+                  </Button>
+                }
+                title="Filtros"
+                description="Filtre produtos por categoria"
+                open={filtersOpen}
+                onOpenChange={setFiltersOpen}
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Categoria</label>
+                    <CategorySelect
+                      categories={categories}
+                      products={products}
+                      selectedCategory={selectedCategory}
+                      onCategoryChange={(cat) => {
+                        setSelectedCategory(cat);
+                        setFiltersOpen(false);
+                      }}
+                      className="w-full h-11 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60"
+                    />
+                  </div>
+                </div>
+              </MobileActionSheet>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          ) : (
+            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+              <CardContent className="p-3 md:p-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+                  <ViewToggle view={viewMode} onViewChange={setViewMode} />
+
+                  <div className="flex flex-wrap items-center gap-3 sm:justify-end w-full">
+                    <div className="relative flex-1 sm:w-64">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                      <Input
+                        placeholder="Buscar produtos..."
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        className="pl-10 pr-4 w-full h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-lg shadow-sm transition-all duration-200 text-sm text-gray-900 dark:text-white"
+                      />
+                    </div>
+
+                    <CategorySelect
+                      categories={categories}
+                      products={products}
+                      selectedCategory={selectedCategory}
+                      onCategoryChange={setSelectedCategory}
+                      className="w-full sm:w-auto h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
+                    />
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Criar
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
+                        <DropdownMenuLabel>Gerenciar Produtos</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={triggerAddDialog}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Novo Produto
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={triggerImportDialog}>
+                          <FileUp className="h-4 w-4 mr-2" />
+                          Importar Produtos
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
 
 
@@ -559,7 +616,15 @@ export default function Produtos() {
         </div>}
 
       {/* Products View */}
-      {viewMode === "grid" ? <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {viewMode === "grid" ? (
+        <PullToRefresh
+          onRefresh={async () => {
+            await invalidateCache();
+          }}
+          disabled={!isMobile}
+          className={isMobile ? "min-h-[400px]" : ""}
+        >
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedData.items.map(product => <Card key={product.id} className={`group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none ${isMobile ? '' : 'md:hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-shadow duration-200'}`}>
               <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
                 <div className="flex items-start justify-between">
@@ -586,82 +651,138 @@ export default function Produtos() {
                       {getStatusBadge(getProductStatus(product))}
                     </div>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full h-8 w-8 sm:h-9 sm:w-9">
-                        <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
-                      <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
-                            <History className="h-4 w-4 mr-2 text-blue-600" />
-                            Ver Histórico de Preços
-                          </DropdownMenuItem>} />
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
-                        <Edit className="h-4 w-4 mr-2 text-amber-600" />
-                        Editar Produto
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" onClick={() => setDeletingProduct(product)}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Excluir Produto
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {/* Desktop: Dropdown menu de ações */}
+                  {!isMobileDevice && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full h-8 w-8 sm:h-9 sm:w-9">
+                          <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
+                        <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
+                              <History className="h-4 w-4 mr-2 text-blue-600" />
+                              Ver Histórico de Preços
+                            </DropdownMenuItem>} />
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
+                          <Edit className="h-4 w-4 mr-2 text-amber-600" />
+                          Editar Produto
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" onClick={() => setDeletingProduct(product)}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir Produto
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
 
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
-                <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/60 dark:border-green-700/30">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400 mb-1">Melhor Preço</p>
-                      <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-300">{product.lastQuotePrice}</p>
+                {/* Mobile: Cards simplificados - foco em ações rápidas */}
+                {isMobileDevice ? (
+                  <div className="space-y-3">
+                    {/* Informações essenciais compactas */}
+                    <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Categoria:</span>
+                      <span className="font-semibold text-gray-800 dark:text-gray-200">{capitalize(product.category)}</span>
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-1 mb-1">
-                        {getTrendIcon(product.trend)}
-                        <span className="text-xs sm:text-sm font-medium text-green-600 hidden sm:inline">Tendência</span>
+                    {product.barcode && (
+                      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                        <span className="font-medium">Código:</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">{product.barcode}</span>
                       </div>
-                      <div className="text-[10px] sm:text-xs text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-                        Atualizado
-                      </div>
+                    )}
+                    
+                    {/* Botões de ação rápida mobile */}
+                    <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <ProductPriceHistoryDialog 
+                        productName={product.name} 
+                        productId={product.id} 
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 h-9 text-xs"
+                          >
+                            <History className="h-3.5 w-3.5 mr-1.5" />
+                            Histórico
+                          </Button>
+                        } 
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingProduct(product)}
+                        className="flex-1 h-9 text-xs"
+                      >
+                        <Edit className="h-3.5 w-3.5 mr-1.5" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeletingProduct(product)}
+                        className="flex-1 h-9 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                        Excluir
+                      </Button>
                     </div>
                   </div>
-                </div>
-
-                <div className="space-y-2 sm:space-y-3">
-                  {!isMobile && (
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fornecedor</span>
+                ) : (
+                  <>
+                    <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/60 dark:border-green-700/30">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400 mb-1">Melhor Preço</p>
+                          <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-300">{(product as any).lastQuotePrice || "R$ 0,00"}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-1 mb-1">
+                            {getTrendIcon((product as any).trend || "stable")}
+                            <span className="text-xs sm:text-sm font-medium text-green-600 hidden sm:inline">Tendência</span>
+                          </div>
+                          <div className="text-[10px] sm:text-xs text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                            Atualizado
+                          </div>
+                        </div>
                       </div>
-                      <span className="table-cell-primary truncate max-w-[120px]">{capitalize(product.bestSupplier)}</span>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div className="p-2 sm:p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                        <span className="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
-                      </div>
-                      <span className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-300">{product.quotesCount}</span>
                     </div>
 
-                    <div className="p-2 sm:p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
-                        <span className="text-[10px] sm:text-xs font-medium text-purple-600 dark:text-purple-400">Atualizado</span>
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fornecedor</span>
+                        </div>
+                        <span className="table-cell-primary truncate max-w-[120px]">{capitalize((product as any).bestSupplier || "N/A")}</span>
                       </div>
-                      <span className="text-[10px] sm:text-xs font-semibold text-purple-800 dark:text-purple-300">{product.lastUpdate}</span>
+
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                        <div className="p-2 sm:p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
+                          <div className="flex items-center justify-center gap-1 mb-1">
+                            <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                            <span className="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
+                          </div>
+                          <span className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-300">{(product as any).quotesCount || 0}</span>
+                        </div>
+
+                        <div className="p-2 sm:p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
+                          <div className="flex items-center justify-center gap-1 mb-1">
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
+                            <span className="text-[10px] sm:text-xs font-medium text-purple-600 dark:text-purple-400">Atualizado</span>
+                          </div>
+                          <span className="text-[10px] sm:text-xs font-semibold text-purple-800 dark:text-purple-300">{(product as any).lastUpdate || "N/A"}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
 
                 <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="outline" className={`w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 text-orange-700 ${isMobile ? '' : 'hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 hover:text-orange-800 transition-all duration-200'}`}>
                       <History className="h-4 w-4 mr-2" />
@@ -672,7 +793,26 @@ export default function Produtos() {
               {/* Elemento decorativo */}
               <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-200 dark:bg-orange-900/20 rounded-full opacity-20"></div>
             </Card>)}
-        </div> : <Card className="border-0 bg-transparent">
+          </div>
+          
+          {/* Paginação Mobile */}
+          {isMobile && (
+            <div className="mt-4 px-4 pb-4">
+              <DataPagination
+                currentPage={paginatedData.pagination.currentPage}
+                totalPages={paginatedData.pagination.totalPages}
+                itemsPerPage={paginatedData.pagination.itemsPerPage}
+                totalItems={paginatedData.pagination.totalItems}
+                onPageChange={paginatedData.pagination.goToPage}
+                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                startIndex={paginatedData.pagination.startIndex}
+                endIndex={paginatedData.pagination.endIndex}
+              />
+            </div>
+          )}
+        </PullToRefresh>
+      ) : (
+        <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
@@ -768,15 +908,15 @@ export default function Produtos() {
                           {/* Melhor Preço - Largura fixa */}
                           <div className="w-[12%] px-2">
                             <div className="flex items-center justify-center gap-2 pointer-events-none">
-                              <span className="font-bold text-green-700 dark:text-green-400 text-sm">{product.lastQuotePrice}</span>
-                              {getTrendIcon(product.trend)}
+                              <span className="font-bold text-green-700 dark:text-green-400 text-sm">{(product as any).lastQuotePrice || "R$ 0,00"}</span>
+                              {getTrendIcon((product as any).trend || "stable")}
                             </div>
                           </div>
 
                           {/* Fornecedor - Largura fixa, hidden on mobile */}
                           <div className="hidden lg:block w-[15%] px-2">
                             <div className="text-center pointer-events-none">
-                              <span className="table-cell-primary truncate block">{capitalize(product.bestSupplier)}</span>
+                              <span className="table-cell-primary truncate block">{capitalize((product as any).bestSupplier || "N/A")}</span>
                             </div>
                           </div>
 
@@ -786,7 +926,7 @@ export default function Produtos() {
                               <div className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30 border border-blue-200/50 dark:border-blue-800/40">
                                 <ClipboardList className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                               </div>
-                              <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount}</span>
+                              <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{(product as any).quotesCount || 0}</span>
                             </div>
                           </div>
 
@@ -828,7 +968,8 @@ export default function Produtos() {
               <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>
-        </Card>}
+        </Card>
+      )}
 
       {filteredProducts.length === 0 && <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30">
           <CardContent className="p-12 text-center">
@@ -891,6 +1032,14 @@ export default function Produtos() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* FAB Mobile - Floating Action Button para criar produto */}
+      {isMobile && (
+        <MobileFAB
+          onClick={triggerAddDialog}
+          label="Novo Produto"
+        />
+      )}
         </div>
       </PageWrapper>
     </>;

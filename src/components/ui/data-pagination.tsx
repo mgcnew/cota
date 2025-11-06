@@ -38,38 +38,48 @@ export function DataPagination({
 }: DataPaginationProps) {
   const getPageNumbers = () => {
     const pages: (number | "ellipsis")[] = [];
-    const showEllipsis = totalPages > 7;
+    const safeTotalPages = totalPages || 0;
+    const safeCurrentPage = currentPage || 1;
+    const showEllipsis = safeTotalPages > 7;
 
     if (!showEllipsis) {
-      for (let i = 1; i <= totalPages; i++) {
+      for (let i = 1; i <= safeTotalPages; i++) {
         pages.push(i);
       }
     } else {
-      if (currentPage <= 3) {
+      if (safeCurrentPage <= 3) {
         for (let i = 1; i <= 4; i++) pages.push(i);
         pages.push("ellipsis");
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
+        pages.push(safeTotalPages);
+      } else if (safeCurrentPage >= safeTotalPages - 2) {
         pages.push(1);
         pages.push("ellipsis");
-        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+        for (let i = safeTotalPages - 3; i <= safeTotalPages; i++) pages.push(i);
       } else {
         pages.push(1);
         pages.push("ellipsis");
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+        for (let i = safeCurrentPage - 1; i <= safeCurrentPage + 1; i++) pages.push(i);
         pages.push("ellipsis");
-        pages.push(totalPages);
+        pages.push(safeTotalPages);
       }
     }
 
     return pages;
   };
 
+  // Valores padrão para evitar erros durante carregamento
+  const safeItemsPerPage = itemsPerPage || 10;
+  const safeTotalItems = totalItems || 0;
+  const safeTotalPages = totalPages || 0;
+  const safeCurrentPage = currentPage || 1;
+  const safeStartIndex = startIndex ?? 0;
+  const safeEndIndex = endIndex ?? 0;
+
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-4">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <span>
-          Mostrando {startIndex + 1} a {endIndex} de {totalItems} resultados
+          Mostrando {safeStartIndex + 1} a {safeEndIndex} de {safeTotalItems} resultados
         </span>
       </div>
 
@@ -77,7 +87,7 @@ export function DataPagination({
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Itens por página:</span>
           <Select
-            value={itemsPerPage.toString()}
+            value={safeItemsPerPage.toString()}
             onValueChange={(value) => onItemsPerPageChange(Number(value))}
           >
             <SelectTrigger className="h-8 w-[70px]">
@@ -92,13 +102,13 @@ export function DataPagination({
           </Select>
         </div>
 
-        {totalPages > 1 && (
+        {safeTotalPages > 1 && (
           <Pagination>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  onClick={() => safeCurrentPage > 1 && onPageChange(safeCurrentPage - 1)}
+                  className={safeCurrentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
 
@@ -111,7 +121,7 @@ export function DataPagination({
                   <PaginationItem key={page}>
                     <PaginationLink
                       onClick={() => onPageChange(page)}
-                      isActive={currentPage === page}
+                      isActive={safeCurrentPage === page}
                       className="cursor-pointer"
                     >
                       {page}
@@ -122,8 +132,8 @@ export function DataPagination({
 
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  onClick={() => safeCurrentPage < safeTotalPages && onPageChange(safeCurrentPage + 1)}
+                  className={safeCurrentPage === safeTotalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
             </PaginationContent>

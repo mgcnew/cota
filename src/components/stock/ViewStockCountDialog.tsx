@@ -111,16 +111,24 @@ export function ViewStockCountDialog({
       return;
     }
 
-    // Identificar quais produtos já foram contados
-    const counted = new Set<string>();
-    items.forEach(item => {
-      const productId = item.order_item_id || item.product_id || '';
-      if (productId && item.quantity_counted && item.quantity_counted > 0) {
-        counted.add(productId);
-      }
-    });
-    setCountedProducts(counted);
-  }, [open, stockCountId, items]);
+    // Se status for pendente ou em_andamento, não bloquear produtos para permitir edição
+    const canEdit = count?.status === 'pendente' || count?.status === 'em_andamento';
+    
+    if (canEdit) {
+      // Não bloquear produtos quando pode editar
+      setCountedProducts(new Set());
+    } else {
+      // Identificar quais produtos já foram contados (apenas quando não pode editar)
+      const counted = new Set<string>();
+      items.forEach(item => {
+        const productId = item.order_item_id || item.product_id || '';
+        if (productId && item.quantity_counted && item.quantity_counted > 0) {
+          counted.add(productId);
+        }
+      });
+      setCountedProducts(counted);
+    }
+  }, [open, stockCountId, items, count?.status]);
 
   // Quando selecionar um produto, carregar quantidades já contadas por setor
   useEffect(() => {
@@ -232,10 +240,16 @@ export function ViewStockCountDialog({
 
   // Confirmar contagem do produto atual
   const handleConfirmProductCount = () => {
-    if (!selectedProduct || !stockCountId) return;
+    if (!selectedProduct || !stockCountId || !count) return;
 
-    // Marcar produto como contado
-    setCountedProducts(new Set([...countedProducts, selectedProduct.id]));
+    // Se status for pendente ou em_andamento, não marcar como definitivamente contado
+    // para permitir edição posterior
+    const canEdit = count.status === 'pendente' || count.status === 'em_andamento';
+    
+    if (!canEdit) {
+      // Apenas marcar como contado se não puder editar (status finalizada)
+      setCountedProducts(new Set([...countedProducts, selectedProduct.id]));
+    }
 
     // Invalidar queries para atualizar a lista de itens
     queryClient.invalidateQueries({ queryKey: ['stock-count-items', stockCountId] });
@@ -248,7 +262,9 @@ export function ViewStockCountDialog({
 
     toast({
       title: "Contagem confirmada",
-      description: `${selectedProduct.product_name} foi confirmado.`,
+      description: canEdit 
+        ? `${selectedProduct.product_name} foi salvo. Você pode editar novamente se necessário.`
+        : `${selectedProduct.product_name} foi confirmado.`,
     });
   };
 
@@ -298,7 +314,6 @@ export function ViewStockCountDialog({
   const summaryData = useMemo(() => {
     const productMap = new Map<string, {
       product_name: string;
-      quantity_ordered: number;
       sectors: Array<{ sectorName: string; quantity: number }>;
       total: number;
       items: Array<{ id: string; sector_id: string; quantity_counted: number }>;
@@ -312,7 +327,6 @@ export function ViewStockCountDialog({
         if (!productMap.has(productId)) {
           productMap.set(productId, {
             product_name: productName,
-            quantity_ordered: item.quantity_ordered || 0,
             sectors: [],
             total: 0,
             items: [],
@@ -640,27 +654,32 @@ export function ViewStockCountDialog({
                         orderProducts.map((product) => {
                           const isSelected = selectedProduct?.id === product.id;
                           const isCounted = countedProducts.has(product.id);
+                          // Permitir edição se status for pendente ou em_andamento
+                          const canEdit = count?.status === 'pendente' || count?.status === 'em_andamento';
+                          const canSelect = canEdit || !isCounted;
                           return (
                             <div
                               key={product.id}
-                              onClick={() => !isCounted && handleSelectProduct(product)}
-                              className={`p-2 border rounded text-sm transition-colors cursor-pointer ${
+                              onClick={() => canSelect && handleSelectProduct(product)}
+                              className={`p-2 border rounded text-sm transition-colors ${
                                 isSelected 
                                   ? 'bg-primary/10 border-primary' 
-                                  : isCounted
+                                  : isCounted && !canEdit
                                     ? 'bg-muted/30 border-muted cursor-not-allowed opacity-60'
-                                    : 'hover:bg-muted/50 cursor-pointer'
+                                    : canSelect
+                                      ? 'hover:bg-muted/50 cursor-pointer'
+                                      : 'bg-muted/30 border-muted cursor-not-allowed opacity-60'
                               }`}
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex-1">
                                   <p className="font-medium text-xs">{product.product_name}</p>
                                   <p className="text-xs text-muted-foreground mt-0.5">
-                                    Qtd: {product.quantity} {product.unit || 'un'}
+                                    Quantidade pedida: {product.quantity} {product.unit || 'un'}
                                   </p>
                                 </div>
                                 {isCounted && (
-                                  <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                                  <CheckCircle2 className={`h-4 w-4 flex-shrink-0 ${canEdit ? 'text-blue-600' : 'text-green-600'}`} />
                                 )}
                               </div>
                             </div>
@@ -694,9 +713,6 @@ export function ViewStockCountDialog({
                       <div className="p-3 border-b bg-muted/30">
                         <div className="space-y-1">
                           <p className="font-semibold text-sm">{selectedProduct.product_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Quantidade pedida: {selectedProduct.quantity} {selectedProduct.unit || 'un'}
-                          </p>
                           <p className="text-xs text-muted-foreground">
                             Total contado: <span className="font-semibold text-primary">{totalProductQuantity}</span> unidades
                           </p>
@@ -841,7 +857,7 @@ export function ViewStockCountDialog({
                         <div>
                           <h3 className="font-semibold text-base">{product.product_name}</h3>
                           <p className="text-sm text-muted-foreground">
-                            Pedido: {product.quantity_ordered} unidades | Contado: {product.total} unidades
+                            Total contado: {product.total} unidades
                           </p>
                         </div>
                         <div className="text-right">

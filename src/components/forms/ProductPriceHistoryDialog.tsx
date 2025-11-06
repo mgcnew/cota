@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Package, TrendingUp, TrendingDown, Calendar, Building2, DollarSign, Minus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProductPriceHistory } from "@/hooks/useProductPriceHistory";
+import { useMobile } from "@/contexts/MobileProvider";
 
 interface ProductPriceHistoryDialogProps {
   productName: string;
@@ -14,6 +16,7 @@ interface ProductPriceHistoryDialogProps {
 
 export function ProductPriceHistoryDialog({ productName, productId, trigger }: ProductPriceHistoryDialogProps) {
   const [open, setOpen] = useState(false);
+  const isMobile = useMobile();
   
   // Buscar dados reais do histórico de preços
   const { data: priceHistory = [], isLoading, error } = useProductPriceHistory(productId);
@@ -80,6 +83,149 @@ export function ProductPriceHistoryDialog({ productName, productId, trigger }: P
     );
   };
 
+  // Mobile: Usar Sheet (bottom sheet)
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          {trigger}
+        </SheetTrigger>
+        <SheetContent side="bottom" className="h-[90vh] rounded-t-2xl pb-8">
+          <SheetHeader className="pb-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                <Package className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <SheetTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  Histórico de Preços
+                </SheetTitle>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                  {productName}
+                </p>
+              </div>
+            </div>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto space-y-3 py-4 mt-4">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-8 w-8 text-blue-500 mx-auto mb-3 animate-spin" />
+              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Carregando histórico...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-red-300 dark:text-red-500 mx-auto mb-3" />
+              <p className="text-red-500 dark:text-red-400 text-sm font-medium">Erro ao carregar histórico</p>
+              <p className="text-xs text-red-400 dark:text-red-500 mt-1">Tente novamente mais tarde</p>
+            </div>
+          ) : sortedHistory.length === 0 ? (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-gray-300 dark:text-gray-500 mx-auto mb-3" />
+              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium">Nenhum histórico encontrado</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Este produto ainda não possui cotações finalizadas</p>
+            </div>
+          ) : (
+            <>
+              {/* Resumo estatístico mobile - no topo */}
+              <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-700/60">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="text-center">
+                    <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-1 font-medium">Menor</div>
+                    <div className="font-bold text-green-600 dark:text-green-400 text-sm">
+                      R$ {Math.min(...sortedHistory.map(h => h.price)).toFixed(2)}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-1 font-medium">Maior</div>
+                    <div className="font-bold text-red-600 dark:text-red-400 text-sm">
+                      R$ {Math.max(...sortedHistory.map(h => h.price)).toFixed(2)}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[10px] text-gray-600 dark:text-gray-400 mb-1 font-medium">Médio</div>
+                    <div className="font-bold text-blue-600 dark:text-blue-400 text-sm">
+                      R$ {(sortedHistory.reduce((sum, h) => sum + h.price, 0) / sortedHistory.length).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lista de histórico mobile - layout vertical otimizado */}
+              {sortedHistory.map((entry, index) => {
+                const previousEntry = sortedHistory[index + 1];
+                const variation = calculatePriceVariation(entry.price, previousEntry?.price || null);
+                
+                return (
+                  <Card key={entry.id} className="border border-gray-200/60 dark:border-gray-700/60 bg-white dark:bg-gray-900/50 shadow-sm">
+                    <CardContent className="p-4">
+                      {/* Header do card mobile */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                            <Building2 className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate mb-1">
+                              {entry.supplier}
+                            </p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                <Calendar className="h-3 w-3" />
+                                <span>{formatDate(entry.date)}</span>
+                              </div>
+                              {getStatusBadge(entry.status)}
+                            </div>
+                          </div>
+                        </div>
+                        {index === 0 && (
+                          <Badge className="bg-blue-500 text-white text-[10px] px-2 py-0.5 ml-2 flex-shrink-0">
+                            Recente
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Preço e variação mobile - destaque */}
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-2">
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Preço:</div>
+                          <div className="flex items-baseline gap-1">
+                            <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                              R$ {entry.price.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Variação mobile - mais visível */}
+                        {index < sortedHistory.length - 1 && (
+                          <div className={cn(
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold",
+                            getVariationColor(variation.type)
+                          )}>
+                            {getVariationIcon(variation.type, variation.percentage)}
+                            <span>
+                              {variation.type === "stable" 
+                                ? "Sem mudança" 
+                                : `${variation.percentage > 0 ? '+' : ''}${variation.percentage.toFixed(1)}%`
+                              }
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </>
+          )}
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: Usar Dialog (mantém layout original)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
