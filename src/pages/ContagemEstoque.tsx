@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { 
   ClipboardList, 
   Plus, 
@@ -28,6 +29,7 @@ import {
 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useStockCounts } from "@/hooks/useStockCounts";
+import { useStockCountsMobile } from "@/hooks/mobile/useStockCountsMobile";
 import { useStockSectors } from "@/hooks/useStockSectors";
 import { useToast } from "@/hooks/use-toast";
 import { ViewStockCountDialog } from "@/components/stock/ViewStockCountDialog";
@@ -42,17 +44,40 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { cn } from "@/lib/utils";
 import { useMobile } from "@/contexts/MobileProvider";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Filter } from "lucide-react";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
+import { MobileFAB } from "@/components/mobile/MobileFAB";
+import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function ContagemEstoque() {
   const { user } = useAuth();
   const { toast } = useToast();
   const isMobile = useMobile();
-  const { stockCounts, isLoading, createStockCount, updateStockCount, deleteStockCount } = useStockCounts();
-  const { sectors } = useStockSectors();
   
+  // Estados devem ser declarados antes de serem usados nos hooks
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  
+  // Hooks condicionais: mobile vs desktop
+  const desktopData = useStockCounts();
+  const debouncedSearch = useDebounce(searchTerm, 300);
+  const mobileData = useStockCountsMobile(
+    debouncedSearch,
+    statusFilter as "all" | "pendente" | "em_andamento" | "finalizada" | "cancelada",
+    isMobile
+  );
+  
+  // Usar dados mobile ou desktop baseado na plataforma
+  const stockCounts = isMobile ? (mobileData.stockCounts || []) : desktopData.stockCounts;
+  const isLoading = isMobile ? mobileData.isLoading : desktopData.isLoading;
+  const createStockCount = isMobile ? mobileData.createStockCount : desktopData.createStockCount;
+  const updateStockCount = isMobile ? mobileData.updateStockCount : desktopData.updateStockCount;
+  const deleteStockCount = isMobile ? mobileData.deleteStockCount : desktopData.deleteStockCount;
+  
+  const { sectors } = useStockSectors();
   const [selectedCount, setSelectedCount] = useState<string | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -61,6 +86,34 @@ export default function ContagemEstoque() {
   const [countType, setCountType] = useState<"from_order" | "from_scratch">("from_order");
   const [countNotes, setCountNotes] = useState<string>("");
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [isCreatingCount, setIsCreatingCount] = useState(false);
+  
+  // Ref para trigger do dialog de criação (usado pelo MobileFAB)
+  const createDialogRef = useRef<HTMLButtonElement>(null);
+  
+  // Ref para preservar posição de scroll ao abrir/fechar modal
+  const scrollPositionRef = useRef<number>(0);
+  
+  // Handler para abrir/fechar modal com preservação de scroll
+  const handleCreateDialogOpenChange = (open: boolean) => {
+    if (open) {
+      // Salvar posição de scroll atual
+      scrollPositionRef.current = window.scrollY;
+    } else {
+      // Resetar campos
+      setSelectedOrderId("");
+      setCountNotes("");
+      setCountType("from_order");
+    }
+    setCreateDialogOpen(open);
+    
+    // Restaurar scroll após fechar (apenas no mobile)
+    if (!open && isMobile) {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPositionRef.current);
+      }, 100);
+    }
+  };
 
   // Carregar pedidos disponíveis para criar contagem (apenas quando dialog está aberto)
   useEffect(() => {
@@ -99,7 +152,14 @@ export default function ContagemEstoque() {
     loadOrders();
   }, [createDialogOpen, user, toast]);
 
+  // Filtros: mobile usa server-side, desktop usa client-side
+  // Otimização: mobile não precisa filtrar novamente, já vem do servidor
   const filteredCounts = useMemo(() => {
+    if (isMobile) {
+      // Mobile já vem filtrado do servidor - retornar direto
+      return stockCounts;
+    }
+    // Desktop: filtrar client-side
     return stockCounts.filter(count => {
       const matchesSearch = 
         count.order?.supplier_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,9 +169,25 @@ export default function ContagemEstoque() {
       
       return matchesSearch && matchesStatus;
     });
-  }, [stockCounts, searchTerm, statusFilter]);
+  }, [stockCounts, searchTerm, statusFilter, isMobile]);
+  
+  // Função para invalidar cache (usado pelo PullToRefresh) - memoizada
+  const invalidateCache = useCallback(async () => {
+    if (isMobile) {
+      await mobileData.refetch();
+    } else {
+      // Desktop não tem refetch direto, mas podemos invalidar queries
+      // Por enquanto, apenas recarregar a página ou fazer refetch manual
+    }
+  }, [isMobile, mobileData]);
+  
+  // Função para trigger do dialog de criação (usado pelo MobileFAB)
+  const triggerCreateDialog = () => {
+    setCreateDialogOpen(true);
+  };
 
-  const getStatusBadge = (status: string) => {
+  // Memoizar getStatusBadge para evitar recriação
+  const getStatusBadge = useCallback((status: string) => {
     const statusConfig = {
       pendente: {
         variant: "outline" as const,
@@ -138,7 +214,7 @@ export default function ContagemEstoque() {
     return <Badge variant={config.variant} className={cn("transition-all duration-200", config.className)}>
       {config.label}
     </Badge>;
-  };
+  }, []);
 
   // Função memoizada para cores de status
   const getStatusColors = useMemo(() => {
@@ -187,40 +263,73 @@ export default function ContagemEstoque() {
       return;
     }
 
-    const newCount = await createStockCount.mutateAsync({
-      order_id: countType === "from_order" ? selectedOrderId : undefined,
-      notes: countNotes || undefined,
-    });
+    setIsCreatingCount(true);
+    try {
+      const newCount = isMobile
+        ? await createStockCount({
+            order_id: countType === "from_order" ? selectedOrderId : undefined,
+            notes: countNotes || undefined,
+          })
+        : await createStockCount.mutateAsync({
+            order_id: countType === "from_order" ? selectedOrderId : undefined,
+            notes: countNotes || undefined,
+          });
 
-    setCreateDialogOpen(false);
-    setSelectedOrderId("");
-    setCountNotes("");
-    setCountType("from_order");
+      setCreateDialogOpen(false);
+      setSelectedOrderId("");
+      setCountNotes("");
+      setCountType("from_order");
 
-    // Abrir o modal de visualização automaticamente após criar
-    if (newCount) {
-      setSelectedCount(newCount.id);
-      setViewDialogOpen(true);
+      // Abrir o modal de visualização automaticamente após criar
+      if (newCount) {
+        setSelectedCount(newCount.id);
+        setViewDialogOpen(true);
+      }
+    } catch (error) {
+      // Erro já é tratado pelo hook
+      console.error('Erro ao criar contagem:', error);
+    } finally {
+      setIsCreatingCount(false);
     }
   };
 
-  const handleViewCount = (countId: string) => {
+  // Memoizar handlers para evitar recriação
+  const handleViewCount = useCallback((countId: string) => {
     setSelectedCount(countId);
     setViewDialogOpen(true);
-  };
+  }, []);
 
-  const handleFinalizeCount = async (countId: string) => {
-    await updateStockCount.mutateAsync({
-      id: countId,
-      status: "finalizada",
-    });
-  };
-
-  const handleDeleteCount = async (countId: string) => {
-    if (confirm("Tem certeza que deseja excluir esta contagem?")) {
-      await deleteStockCount.mutateAsync(countId);
+  const handleFinalizeCount = useCallback(async (countId: string) => {
+    try {
+      if (isMobile) {
+        await updateStockCount({
+          id: countId,
+          status: "finalizada",
+        });
+      } else {
+        await updateStockCount.mutateAsync({
+          id: countId,
+          status: "finalizada",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao finalizar contagem:', error);
     }
-  };
+  }, [isMobile, updateStockCount]);
+
+  const handleDeleteCount = useCallback(async (countId: string) => {
+    if (confirm("Tem certeza que deseja excluir esta contagem?")) {
+      try {
+        if (isMobile) {
+          await deleteStockCount(countId);
+        } else {
+          await deleteStockCount.mutateAsync(countId);
+        }
+      } catch (error) {
+        console.error('Erro ao excluir contagem:', error);
+      }
+    }
+  }, [isMobile, deleteStockCount]);
 
   // Calcular estatísticas
   const stats = useMemo(() => {
@@ -253,7 +362,8 @@ export default function ContagemEstoque() {
   return (
     <PageWrapper>
       <div className="page-container">
-        {/* Statistics Cards */}
+        {/* Statistics Cards - Oculto no mobile */}
+        {!isMobile && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
           {/* Card 1: Total */}
           <Card className="group relative overflow-hidden bg-indigo-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
@@ -429,45 +539,96 @@ export default function ContagemEstoque() {
             </CardContent>
           </Card>
         </div>
+        )}
 
         {/* Filtros */}
-        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-          <CardContent className="p-3 md:p-4">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
-              <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end flex-1">
-                <div className="relative flex-1 sm:flex-initial">
-                  <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+        {isMobile ? (
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none mb-4">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
                   <Input 
-                    placeholder="Buscar por fornecedor ou observações..." 
+                    placeholder="Buscar..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 sm:pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
+                    className="pl-10 pr-4 w-full h-11 text-base bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
                   />
                 </div>
-                
-                <select 
-                  value={statusFilter} 
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full sm:w-[180px] h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-orange-300/70 dark:hover:border-orange-500/70 focus:border-orange-400 dark:focus:border-orange-400 focus:ring-2 focus:ring-orange-200/40 dark:focus:ring-orange-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 px-3 text-gray-900 dark:text-gray-100"
+                <MobileActionSheet
+                  trigger={
+                    <Button
+                      variant="outline"
+                      className="h-11 px-4 border-2 border-gray-200/60 dark:border-gray-700/60"
+                    >
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filtros
+                    </Button>
+                  }
+                  open={filtersOpen}
+                  onOpenChange={setFiltersOpen}
                 >
-                  <option value="all">Todos os Status</option>
-                  <option value="pendente">Pendente</option>
-                  <option value="em_andamento">Em Andamento</option>
-                  <option value="finalizada">Finalizada</option>
-                  <option value="cancelada">Cancelada</option>
-                </select>
-
-                <Button 
-                  onClick={() => setCreateDialogOpen(true)}
-                  className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Contagem
-                </Button>
+                  <div className="p-4 space-y-4">
+                    <h3 className="font-semibold text-lg mb-4">Filtros</h3>
+                    <div>
+                      <Label className="mb-2 block">Status</Label>
+                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="h-11 text-base">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os Status</SelectItem>
+                          <SelectItem value="pendente">Pendente</SelectItem>
+                          <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                          <SelectItem value="finalizada">Finalizada</SelectItem>
+                          <SelectItem value="cancelada">Cancelada</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </MobileActionSheet>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+            <CardContent className="p-3 md:p-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+                <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end flex-1">
+                  <div className="relative flex-1 sm:flex-initial">
+                    <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                    <Input 
+                      placeholder="Buscar por fornecedor ou observações..." 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 sm:pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  
+                  <select 
+                    value={statusFilter} 
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full sm:w-[180px] h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-orange-300/70 dark:hover:border-orange-500/70 focus:border-orange-400 dark:focus:border-orange-400 focus:ring-2 focus:ring-orange-200/40 dark:focus:ring-orange-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 px-3 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value="all">Todos os Status</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="em_andamento">Em Andamento</option>
+                    <option value="finalizada">Finalizada</option>
+                    <option value="cancelada">Cancelada</option>
+                  </select>
+
+                  <Button 
+                    onClick={() => setCreateDialogOpen(true)}
+                    className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nova Contagem
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Lista de Contagens */}
         {isLoading && stockCounts.length === 0 ? (
@@ -499,10 +660,17 @@ export default function ContagemEstoque() {
           <>
             {/* Mobile: Cards */}
             {isMobile ? (
-              <div className="grid gap-3 sm:gap-4 grid-cols-1">
-                {filteredCounts.map((count) => {
-                  const colors = getStatusColors(count.status);
-                  return (
+              <>
+                <PullToRefresh
+                  onRefresh={async () => {
+                    await invalidateCache();
+                  }}
+                  disabled={!isMobile}
+                >
+                  <div className="grid gap-3 sm:gap-4 grid-cols-1">
+                    {filteredCounts.map((count) => {
+                    const colors = getStatusColors(count.status);
+                    return (
                     <Card key={count.id} className={cn("group border border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26]", "backdrop-blur-sm")}>
                       <CardHeader className="pb-3 p-3">
                         <div className="flex items-start justify-between">
@@ -512,7 +680,10 @@ export default function ContagemEstoque() {
                             </div>
                             <div className="space-y-1.5 flex-1 min-w-0">
                               <CardTitle className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                {count.order?.supplier_name || "Contagem Livre"}
+                                {isMobile 
+                                  ? (count.supplier_name || "Contagem Livre")
+                                  : (count.order?.supplier_name || "Contagem Livre")
+                                }
                               </CardTitle>
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 {getStatusBadge(count.status)}
@@ -540,7 +711,7 @@ export default function ContagemEstoque() {
                                 <span className="text-xs font-medium text-orange-700 dark:text-orange-400">Pedido</span>
                               </div>
                               <p className="text-base font-bold text-orange-800 dark:text-orange-300">
-                                {count.order ? "Sim" : "Não"}
+                                {isMobile ? (count.order_id ? "Sim" : "Não") : (count.order ? "Sim" : "Não")}
                               </p>
                             </div>
                           </div>
@@ -592,7 +763,30 @@ export default function ContagemEstoque() {
                     </Card>
                   );
                 })}
-              </div>
+                </div>
+                
+                {/* Paginação Mobile */}
+                {mobileData.pagination && (
+                  <div className="mt-4">
+                    <DataPagination
+                      currentPage={mobileData.pagination.currentPage ?? 1}
+                      totalPages={mobileData.pagination.totalPages ?? 1}
+                      itemsPerPage={mobileData.pagination.itemsPerPage ?? 20}
+                      totalItems={mobileData.pagination.totalItems ?? 0}
+                      onPageChange={mobileData.pagination.goToPage}
+                      startIndex={mobileData.pagination.startIndex ?? 0}
+                      endIndex={mobileData.pagination.endIndex ?? 0}
+                    />
+                  </div>
+                  )}
+                </PullToRefresh>
+                
+                {/* Mobile FAB */}
+                <MobileFAB
+                  onClick={triggerCreateDialog}
+                  label="Nova Contagem"
+                />
+              </>
             ) : (
               /* Desktop: Tabela */
               <Card className="border-0 bg-transparent">
@@ -732,110 +926,221 @@ export default function ContagemEstoque() {
           </>
         )}
 
-        {/* Dialog: Criar Contagem */}
-        <Dialog open={createDialogOpen} onOpenChange={(open) => {
-          setCreateDialogOpen(open);
-          if (!open) {
-            setSelectedOrderId("");
-            setCountNotes("");
-            setCountType("from_order");
-          }
-        }}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nova Contagem de Estoque</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label className="mb-3 block">Tipo de Contagem</Label>
-                <RadioGroup value={countType} onValueChange={(value) => setCountType(value as "from_order" | "from_scratch")}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="from_order" id="from_order" />
-                    <Label htmlFor="from_order" className="font-normal cursor-pointer">
-                      A partir de um pedido
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="from_scratch" id="from_scratch" />
-                    <Label htmlFor="from_scratch" className="font-normal cursor-pointer">
-                      Criar do zero (sem pedido)
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {countType === "from_order" && (
-                <div>
-                  <Label>Selecionar Pedido</Label>
-                  {loadingOrders ? (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />
-                      <span className="text-sm text-muted-foreground">Carregando pedidos...</span>
+        {/* Modal: Criar Contagem */}
+        {isMobile ? (
+          <Sheet open={createDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
+            <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
+              <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                      <Plus className="h-5 w-5" />
                     </div>
-                  ) : (
-                    <Select value={selectedOrderId} onValueChange={setSelectedOrderId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um pedido" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableOrders.length === 0 ? (
-                          <SelectItem value="none" disabled>
-                            Nenhum pedido disponível
-                          </SelectItem>
-                        ) : (
-                          availableOrders.map((order) => (
-                            <SelectItem key={order.id} value={order.id}>
-                              {order.supplier_name} - {format(new Date(order.order_date), "dd/MM/yyyy")} ({order.status})
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  {!loadingOrders && availableOrders.length === 0 && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Não há pedidos disponíveis. Você pode criar uma contagem do zero.
-                    </p>
-                  )}
+                    <div className="flex-1 min-w-0">
+                      <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white">
+                        Nova Contagem
+                      </SheetTitle>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Crie uma nova contagem de estoque
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleCreateDialogOpenChange(false)}
+                    className="h-9 w-9 rounded-lg flex-shrink-0"
+                  >
+                    <XCircle className="h-5 w-5" />
+                  </Button>
                 </div>
-              )}
+              </SheetHeader>
+              
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+                <div>
+                  <Label className="mb-3 block text-base font-semibold">Tipo de Contagem</Label>
+                  <RadioGroup value={countType} onValueChange={(value) => setCountType(value as "from_order" | "from_scratch")}>
+                    <div className="flex items-center space-x-3 mb-3">
+                      <RadioGroupItem value="from_order" id="from_order" className="h-5 w-5" />
+                      <Label htmlFor="from_order" className="font-normal cursor-pointer text-base">
+                        A partir de um pedido
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <RadioGroupItem value="from_scratch" id="from_scratch" className="h-5 w-5" />
+                      <Label htmlFor="from_scratch" className="font-normal cursor-pointer text-base">
+                        Criar do zero (sem pedido)
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
 
-              <div>
-                <Label>Observações (opcional)</Label>
-                <Textarea
-                  placeholder="Adicione observações sobre esta contagem..."
-                  value={countNotes}
-                  onChange={(e) => setCountNotes(e.target.value)}
-                  rows={3}
-                />
+                {countType === "from_order" && (
+                  <div>
+                    <Label className="mb-2 block text-base font-semibold">Selecionar Pedido</Label>
+                    {loadingOrders ? (
+                      <div className="flex items-center justify-center py-6">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
+                        <span className="text-base text-muted-foreground">Carregando pedidos...</span>
+                      </div>
+                    ) : (
+                      <Select value={selectedOrderId} onValueChange={setSelectedOrderId}>
+                        <SelectTrigger className="h-11 text-base">
+                          <SelectValue placeholder="Selecione um pedido" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableOrders.length === 0 ? (
+                            <SelectItem value="none" disabled>
+                              Nenhum pedido disponível
+                            </SelectItem>
+                          ) : (
+                            availableOrders.map((order) => (
+                              <SelectItem key={order.id} value={order.id}>
+                                {order.supplier_name} - {format(new Date(order.order_date), "dd/MM/yyyy")} ({order.status})
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {!loadingOrders && availableOrders.length === 0 && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Não há pedidos disponíveis. Você pode criar uma contagem do zero.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <Label className="mb-2 block text-base font-semibold">Observações (opcional)</Label>
+                  <Textarea
+                    placeholder="Adicione observações sobre esta contagem..."
+                    value={countNotes}
+                    onChange={(e) => setCountNotes(e.target.value)}
+                    rows={4}
+                    className="text-base resize-none"
+                  />
+                </div>
               </div>
 
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => {
-                  setCreateDialogOpen(false);
-                  setSelectedOrderId("");
-                  setCountNotes("");
-                  setCountType("from_order");
-                }}>
-                  Cancelar
-                </Button>
+              <div className="flex-shrink-0 px-4 py-4 border-t border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900 space-y-2">
                 <Button 
                   onClick={handleCreateCount} 
-                  disabled={createStockCount.isPending || (countType === "from_order" && !selectedOrderId)}
+                  disabled={(isMobile ? isCreatingCount : createStockCount.isPending) || (countType === "from_order" && !selectedOrderId)}
+                  className="w-full h-11 text-base bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white"
                 >
-                  {createStockCount.isPending ? (
+                  {(isMobile ? isCreatingCount : createStockCount.isPending) ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                       Criando...
                     </>
                   ) : (
                     "Criar Contagem"
                   )}
                 </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleCreateDialogOpenChange(false)}
+                  className="w-full h-11 text-base"
+                >
+                  Cancelar
+                </Button>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </SheetContent>
+          </Sheet>
+        ) : (
+          <Dialog open={createDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Nova Contagem de Estoque</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label className="mb-3 block">Tipo de Contagem</Label>
+                  <RadioGroup value={countType} onValueChange={(value) => setCountType(value as "from_order" | "from_scratch")}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="from_order" id="from_order" />
+                      <Label htmlFor="from_order" className="font-normal cursor-pointer">
+                        A partir de um pedido
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="from_scratch" id="from_scratch" />
+                      <Label htmlFor="from_scratch" className="font-normal cursor-pointer">
+                        Criar do zero (sem pedido)
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {countType === "from_order" && (
+                  <div>
+                    <Label>Selecionar Pedido</Label>
+                    {loadingOrders ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />
+                        <span className="text-sm text-muted-foreground">Carregando pedidos...</span>
+                      </div>
+                    ) : (
+                      <Select value={selectedOrderId} onValueChange={setSelectedOrderId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um pedido" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableOrders.length === 0 ? (
+                            <SelectItem value="none" disabled>
+                              Nenhum pedido disponível
+                            </SelectItem>
+                          ) : (
+                            availableOrders.map((order) => (
+                              <SelectItem key={order.id} value={order.id}>
+                                {order.supplier_name} - {format(new Date(order.order_date), "dd/MM/yyyy")} ({order.status})
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {!loadingOrders && availableOrders.length === 0 && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Não há pedidos disponíveis. Você pode criar uma contagem do zero.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <Label>Observações (opcional)</Label>
+                  <Textarea
+                    placeholder="Adicione observações sobre esta contagem..."
+                    value={countNotes}
+                    onChange={(e) => setCountNotes(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => handleCreateDialogOpenChange(false)}>
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={handleCreateCount} 
+                    disabled={(isMobile ? isCreatingCount : createStockCount.isPending) || (countType === "from_order" && !selectedOrderId)}
+                  >
+                    {(isMobile ? isCreatingCount : createStockCount.isPending) ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Criando...
+                      </>
+                    ) : (
+                      "Criar Contagem"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* Dialog: Visualizar Contagem */}
         <ViewStockCountDialog

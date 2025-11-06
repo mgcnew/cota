@@ -70,6 +70,8 @@ export function useServerPagination<T>({
     queryFn: () => queryFn({ page: currentPage, pageSize, search, filters: {} }),
     enabled,
     ...mobileConfig,
+    // Placeholder data para melhor UX durante loading
+    placeholderData: (previousData) => previousData,
   });
 
   // Resetar para primeira página quando search mudar
