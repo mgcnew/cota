@@ -4,7 +4,7 @@ import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
 import { MobilePageTransition } from "./MobilePageTransition";
 import { useMobile } from "@/contexts/MobileProvider";
-import { Settings, LogOut } from "lucide-react";
+import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,6 +30,20 @@ const pageTitles: Record<string, string> = {
   "/dashboard/configuracoes": "Configurações"
 };
 
+const pageIcons: Record<string, (props: { className?: string }) => JSX.Element> = {
+  "/dashboard": BarChart3,
+  "/dashboard/produtos": Package,
+  "/dashboard/fornecedores": Building2,
+  "/dashboard/cotacoes": FileText,
+  "/dashboard/pedidos": ShoppingCart,
+  "/dashboard/contagem-estoque": ClipboardList,
+  "/dashboard/anotacoes": BookOpen,
+  "/dashboard/historico": History,
+  "/dashboard/analytics": TrendingUp,
+  "/dashboard/relatorios": BarChart3,
+  "/dashboard/configuracoes": Settings,
+};
+
 export function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,6 +52,7 @@ export function AppLayout() {
   const [searchOpen, setSearchOpen] = useState(false);
   const isMobile = useMobile();
   const pageTitle = pageTitles[location.pathname] || "";
+  const PageIcon = pageIcons[location.pathname] || Package;
 
   const handleLogout = async () => {
     try {
@@ -74,17 +89,8 @@ export function AppLayout() {
           </>
 
           <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-6 w-full max-w-full gap-3 md:gap-4 transition-opacity duration-150 md:transition-all md:duration-150">
-            {/* Título da Página - Lado Esquerdo */}
-            {pageTitle && (
-              <div className="hidden md:flex items-center gap-3 min-w-0">
-                <h1 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white tracking-tight leading-tight truncate">
-                  {pageTitle}
-                </h1>
-              </div>
-            )}
-            
-            {/* Global Search - Centralizada com bom espaçamento */}
-            <div className={`flex-1 flex items-center ${pageTitle ? 'justify-end md:justify-center' : 'justify-center'} max-w-2xl ${pageTitle ? 'md:mx-0' : 'mx-auto'} min-w-0`}>
+            {/* Global Search - Centralizada */}
+            <div className="flex-1 flex items-center justify-center max-w-2xl mx-auto min-w-0">
               <div className="w-full max-w-xl">
                 <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
               </div>

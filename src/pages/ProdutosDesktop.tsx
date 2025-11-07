@@ -208,11 +208,11 @@ export default function ProdutosDesktop() {
     <Card className="bg-gradient-to-br from-orange-600 to-orange-700 dark:from-[#1C1F26] dark:to-[#252932] border border-orange-500/40 dark:border-gray-800/80 rounded-xl hover:border-orange-400/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-orange-500/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
       {/* Efeito de brilho sutil */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <CardHeader className="pb-4 border-0 relative z-10">
+      <CardHeader className="pb-2.5 border-0 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm group-hover:bg-white/25 transition-colors duration-300">
-              <Package className="h-5 w-5 text-white dark:text-gray-300" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm group-hover:bg-white/25 transition-colors duration-300">
+              <Package className="h-4 w-4 text-white dark:text-gray-300" />
             </div>
             <CardTitle className="text-sm font-semibold text-white dark:text-gray-200 tracking-wide">
               Total de Produtos
@@ -220,31 +220,28 @@ export default function ProdutosDesktop() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pt-0 relative z-10">
-        <div className="flex items-end gap-3">
-          <span className="text-3xl font-bold tracking-tight text-white dark:text-white leading-none">
+      <CardContent className="space-y-2.5 pt-0 relative z-10">
+        <div className="flex items-end gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white leading-none">
             {stats.totalProducts.toLocaleString('pt-BR')}
           </span>
-          <Badge className="bg-white/25 dark:bg-gray-800/60 backdrop-blur-sm text-white font-semibold border-0 px-3 py-1 text-xs shadow-sm">
-            {stats.percentualComCotacao}% com cotação
+          <Badge className="bg-white/25 dark:bg-gray-800/60 backdrop-blur-sm text-white font-semibold border-0 px-2.5 py-0.5 text-xs shadow-sm">
+            {stats.percentualComCotacao}%
           </Badge>
         </div>
-        <div className="space-y-2 pt-3 border-t border-white/15 dark:border-gray-700/40">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-white/90 dark:text-gray-400">Status dos produtos</span>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/15 dark:bg-gray-800/50 backdrop-blur-sm">
-              <div className="w-2 h-2 rounded-full bg-green-400 shadow-sm" />
-              <span className="text-xs font-medium text-white dark:text-gray-300">{stats.produtosPorStatus.ativos} ativos</span>
+        <div className="pt-2 border-t border-white/15 dark:border-gray-700/40">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/15 dark:bg-gray-800/50 backdrop-blur-sm">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+              <span className="text-xs font-medium text-white dark:text-gray-300">{stats.produtosPorStatus.ativos}</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/15 dark:bg-gray-800/50 backdrop-blur-sm">
-              <div className="w-2 h-2 rounded-full bg-blue-400 shadow-sm" />
-              <span className="text-xs font-medium text-white dark:text-gray-300">{stats.produtosPorStatus.cotados} cotados</span>
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/15 dark:bg-gray-800/50 backdrop-blur-sm">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+              <span className="text-xs font-medium text-white dark:text-gray-300">{stats.produtosPorStatus.cotados}</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/15 dark:bg-gray-800/50 backdrop-blur-sm">
-              <div className="w-2 h-2 rounded-full bg-gray-400 shadow-sm" />
-              <span className="text-xs font-medium text-white dark:text-gray-300">{stats.produtosPorStatus.semCotacao} sem cotação</span>
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/15 dark:bg-gray-800/50 backdrop-blur-sm">
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+              <span className="text-xs font-medium text-white dark:text-gray-300">{stats.produtosPorStatus.semCotacao}</span>
             </div>
           </div>
         </div>
@@ -256,11 +253,11 @@ export default function ProdutosDesktop() {
     <Card className="bg-gradient-to-br from-blue-600 to-blue-700 dark:from-[#1C1F26] dark:to-[#252932] border border-blue-500/40 dark:border-gray-800/80 rounded-xl hover:border-blue-400/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-blue-500/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
       {/* Efeito de brilho sutil */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <CardHeader className="pb-4 border-0 relative z-10">
+      <CardHeader className="pb-2.5 border-0 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm group-hover:bg-white/25 transition-colors duration-300">
-              <Filter className="h-5 w-5 text-white dark:text-gray-300" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm group-hover:bg-white/25 transition-colors duration-300">
+              <Filter className="h-4 w-4 text-white dark:text-gray-300" />
             </div>
             <CardTitle className="text-sm font-semibold text-white dark:text-gray-200 tracking-wide">
               Categorias Ativas
@@ -268,35 +265,32 @@ export default function ProdutosDesktop() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pt-0 relative z-10">
-        <div className="flex items-end gap-3">
-          <span className="text-3xl font-bold tracking-tight text-white dark:text-white leading-none">
+      <CardContent className="space-y-2.5 pt-0 relative z-10">
+        <div className="flex items-end gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white leading-none">
             {stats.totalCategories}
           </span>
           {stats.topCategoria && (
-            <Badge className="bg-white/25 dark:bg-gray-800/60 backdrop-blur-sm text-white font-semibold border-0 px-3 py-1 text-xs shadow-sm">
-              {stats.topCategoria?.count || 0} em {stats.topCategoria?.nome || 'N/A'}
+            <Badge className="bg-white/25 dark:bg-gray-800/60 backdrop-blur-sm text-white font-semibold border-0 px-2.5 py-0.5 text-xs shadow-sm">
+              {stats.topCategoria?.count || 0}
             </Badge>
           )}
         </div>
-        <div className="space-y-2 pt-3 border-t border-white/15 dark:border-gray-700/40">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-white/90 dark:text-gray-400">Distribuição</span>
-          </div>
+        <div className="pt-2 border-t border-white/15 dark:border-gray-700/40">
           {stats.topCategoria ? (
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-2 bg-white/15 dark:bg-gray-800/50 rounded-full overflow-hidden">
+              <div className="flex-1 h-1.5 bg-white/15 dark:bg-gray-800/50 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-white/40 dark:bg-blue-400/40 rounded-full transition-all duration-500"
                   style={{ width: `${Math.min((stats.topCategoria.count / stats.totalProducts) * 100, 100)}%` }}
                 />
               </div>
-              <span className="text-xs font-medium text-white dark:text-gray-300 whitespace-nowrap">
+              <span className="text-xs font-medium text-white dark:text-gray-300 truncate max-w-[80px]">
                 {capitalize(stats.topCategoria.nome || 'N/A')}
               </span>
             </div>
           ) : (
-            <span className="text-xs text-white/70 dark:text-gray-500">Sem categorias cadastradas</span>
+            <span className="text-xs text-white/70 dark:text-gray-500">Sem categorias</span>
           )}
         </div>
       </CardContent>
@@ -307,11 +301,11 @@ export default function ProdutosDesktop() {
     <Card className="bg-gradient-to-br from-purple-600 to-purple-700 dark:from-[#1C1F26] dark:to-[#252932] border border-purple-500/40 dark:border-gray-800/80 rounded-xl hover:border-purple-400/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-purple-500/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
       {/* Efeito de brilho sutil */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <CardHeader className="pb-4 border-0 relative z-10">
+      <CardHeader className="pb-2.5 border-0 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm group-hover:bg-white/25 transition-colors duration-300">
-              <FileText className="h-5 w-5 text-white dark:text-gray-300" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm group-hover:bg-white/25 transition-colors duration-300">
+              <FileText className="h-4 w-4 text-white dark:text-gray-300" />
             </div>
             <CardTitle className="text-sm font-semibold text-white dark:text-gray-200 tracking-wide">
               Cotações Ativas
@@ -319,28 +313,22 @@ export default function ProdutosDesktop() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pt-0 relative z-10">
-        <div className="flex items-end gap-3">
-          <span className="text-3xl font-bold tracking-tight text-white dark:text-white leading-none">
+      <CardContent className="space-y-2.5 pt-0 relative z-10">
+        <div className="flex items-end gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white leading-none">
             {typeof stats.activeQuotes === 'number' ? stats.activeQuotes.toLocaleString('pt-BR') : 0}
           </span>
-          <Badge className="bg-white/25 dark:bg-gray-800/60 backdrop-blur-sm text-white font-semibold border-0 px-3 py-1 text-xs shadow-sm flex items-center gap-1">
+          <Badge className="bg-white/25 dark:bg-gray-800/60 backdrop-blur-sm text-white font-semibold border-0 px-2.5 py-0.5 text-xs shadow-sm flex items-center gap-1">
             <TrendingUp className="h-3 w-3" />
-            {stats.mediaCotacoesPorProduto} média
+            {stats.mediaCotacoesPorProduto}
           </Badge>
         </div>
-        <div className="space-y-2 pt-3 border-t border-white/15 dark:border-gray-700/40">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-white/90 dark:text-gray-400">Estatísticas</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-white/80 dark:text-gray-400" />
-              <div>
-                <div className="text-xs text-white/70 dark:text-gray-500">Média por produto</div>
-                <div className="text-sm font-semibold text-white dark:text-gray-300">{stats.mediaCotacoesPorProduto}</div>
-              </div>
-            </div>
+        <div className="pt-2 border-t border-white/15 dark:border-gray-700/40">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="h-3.5 w-3.5 text-white/80 dark:text-gray-400" />
+            <span className="text-xs text-white/80 dark:text-gray-400">
+              Média: <span className="font-semibold text-white dark:text-gray-300">{stats.mediaCotacoesPorProduto}</span> por produto
+            </span>
           </div>
         </div>
       </CardContent>
@@ -351,11 +339,11 @@ export default function ProdutosDesktop() {
     <Card className="bg-gradient-to-br from-emerald-600 to-emerald-700 dark:from-[#1C1F26] dark:to-[#252932] border border-emerald-500/40 dark:border-gray-800/80 rounded-xl hover:border-emerald-400/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-emerald-500/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
       {/* Efeito de brilho sutil */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <CardHeader className="pb-4 border-0 relative z-10">
+      <CardHeader className="pb-2.5 border-0 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm group-hover:bg-white/25 transition-colors duration-300">
-              <Scale className="h-5 w-5 text-white dark:text-gray-300" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-white/20 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm group-hover:bg-white/25 transition-colors duration-300">
+              <Scale className="h-4 w-4 text-white dark:text-gray-300" />
             </div>
             <CardTitle className="text-sm font-semibold text-white dark:text-gray-200 tracking-wide">
               Valor Médio
@@ -363,40 +351,31 @@ export default function ProdutosDesktop() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pt-0 relative z-10">
-        <div className="flex items-end gap-3">
-          <span className="text-3xl font-bold tracking-tight text-white dark:text-white leading-none">
+      <CardContent className="space-y-2.5 pt-0 relative z-10">
+        <div className="flex items-end gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white leading-none">
             {stats.averageValue}
           </span>
           {stats.percentualEconomiaMedia > 0 && (
-            <Badge className="bg-green-500/30 dark:bg-green-500/20 backdrop-blur-sm text-white font-semibold border border-green-400/30 px-3 py-1 text-xs shadow-sm flex items-center gap-1">
+            <Badge className="bg-green-500/30 dark:bg-green-500/20 backdrop-blur-sm text-white font-semibold border border-green-400/30 px-2.5 py-0.5 text-xs shadow-sm flex items-center gap-1">
               <TrendingDown className="h-3 w-3" />
               Economia
             </Badge>
           )}
         </div>
-        <div className="space-y-2 pt-3 border-t border-white/15 dark:border-gray-700/40">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-white/90 dark:text-gray-400">Análise de preços</span>
+        <div className="pt-2 border-t border-white/15 dark:border-gray-700/40">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-white/80 dark:text-gray-400">Com preço:</span>
+            <span className="font-semibold text-white dark:text-gray-300">{stats.productsWithPrices}</span>
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-white/80 dark:text-gray-400">Produtos com preço:</span>
-              <span className="text-sm font-semibold text-white dark:text-gray-300">{stats.productsWithPrices}</span>
+          {stats.percentualEconomiaMedia > 0 && (
+            <div className="flex items-center justify-between mt-1.5 px-2 py-1 rounded-md bg-white/10 dark:bg-gray-800/40 backdrop-blur-sm">
+              <span className="text-xs text-white/80 dark:text-gray-400">Economia média:</span>
+              <span className="text-xs font-bold text-green-300 dark:text-green-400">
+                R$ {stats.economiaMediaPorProduto}
+              </span>
             </div>
-            {stats.percentualEconomiaMedia > 0 ? (
-              <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/10 dark:bg-gray-800/40 backdrop-blur-sm">
-                <span className="text-xs text-white/80 dark:text-gray-400">Economia média:</span>
-                <span className="text-sm font-bold text-green-300 dark:text-green-400">
-                  R$ {stats.economiaMediaPorProduto}/produto
-                </span>
-              </div>
-            ) : (
-              <div className="text-xs text-white/70 dark:text-gray-500 italic">
-                Insira mais cotações para calcular economia
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -423,64 +402,77 @@ export default function ProdutosDesktop() {
             {renderCard4}
           </div>
 
-          {/* Card de Filtros e Busca */}
-          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none mb-6">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Package className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                Produtos
-              </CardTitle>
-              <div className="flex items-center space-x-2">
-                <Input
-                  placeholder="Buscar produtos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="max-w-xs h-9"
-                />
-                <CategorySelect
-                  categories={safeCategories}
-                  products={safeProducts}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 px-3">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[180px]">
-                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={triggerAddDialog}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Produto
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={triggerImportDialog}>
-                      <FileUp className="h-4 w-4 mr-2" />
-                      Importar Produtos
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/contagem-estoque")}>
-                      <ClipboardList className="h-4 w-4 mr-2" />
-                      Contagem de Estoque
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/relatorios?tab=produtos")}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Relatórios de Produtos
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/analytics")}>
-                      <TrendingUp className="h-4 w-4 mr-2" />
-                      Análise de Produtos
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setAuthDialogOpen(true)}>
-                      <Building2 className="h-4 w-4 mr-2" />
-                      Gerenciar Empresas
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+          {/* Card de Filtros com Título ao lado da Busca */}
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                {/* Título + Busca lado a lado */}
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700 shadow-md shadow-orange-500/20 dark:shadow-orange-900/30">
+                      <Package className="h-4 w-4 text-white" />
+                    </div>
+                    <h1 className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight whitespace-nowrap">
+                      Produtos
+                    </h1>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <Input
+                      placeholder="Buscar produtos..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full h-10 max-w-xs"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 sm:flex-initial">
+                    <CategorySelect
+                      categories={safeCategories}
+                      products={safeProducts}
+                      selectedCategory={selectedCategory}
+                      onCategoryChange={setSelectedCategory}
+                    />
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-10 px-4">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[180px]">
+                      <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={triggerAddDialog}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Produto
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={triggerImportDialog}>
+                        <FileUp className="h-4 w-4 mr-2" />
+                        Importar Produtos
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/dashboard/contagem-estoque")}>
+                        <ClipboardList className="h-4 w-4 mr-2" />
+                        Contagem de Estoque
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/dashboard/relatorios?tab=produtos")}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Relatórios de Produtos
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/dashboard/analytics")}>
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Análise de Produtos
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setAuthDialogOpen(true)}>
+                        <Building2 className="h-4 w-4 mr-2" />
+                        Gerenciar Empresas
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
-            </CardHeader>
+            </CardContent>
           </Card>
 
           {/* Card da Tabela - Transparente para efeito flutuante */}
@@ -629,46 +621,25 @@ export default function ProdutosDesktop() {
                       </TableBody>
                     </Table>
                   </div>
-                  {/* Área de Paginação Melhorada */}
-                  <div className="border-t border-orange-100/80 dark:border-gray-700/30 bg-gradient-to-r from-orange-50/30 via-amber-50/30 to-orange-50/30 dark:from-gray-800/30 dark:via-gray-800/20 dark:to-gray-800/30">
-                    <div className="px-6 py-4">
-                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        {/* Informações de Resultados */}
-                        <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-orange-200/50 dark:border-gray-700/50 backdrop-blur-sm">
-                            <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                            <span className="font-medium text-gray-700 dark:text-gray-300">
-                              {paginatedData.items.length > 0 
-                                ? `${((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}-${Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}`
-                                : '0'
-                              } de {safeFilteredProducts.length}
-                            </span>
-                            <span className="text-gray-500 dark:text-gray-500">produtos</span>
-                          </div>
-                          {safeFilteredProducts.length > 0 && (
-                            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-orange-200/50 dark:border-gray-700/50 backdrop-blur-sm">
-                              <ClipboardList className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                              <span className="text-gray-700 dark:text-gray-300">
-                                Página <span className="font-semibold text-orange-600 dark:text-orange-400">{paginatedData.pagination.currentPage}</span> de <span className="font-semibold">{paginatedData.pagination.totalPages}</span>
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Controles de Paginação */}
-                        <div className="flex items-center gap-2">
-                          <DataPagination
-                            currentPage={paginatedData.pagination.currentPage}
-                            totalPages={paginatedData.pagination.totalPages}
-                            itemsPerPage={paginatedData.pagination.itemsPerPage}
-                            totalItems={safeFilteredProducts.length}
-                            onPageChange={paginatedData.pagination.goToPage}
-                            onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                            startIndex={((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}
-                            endIndex={Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}
-                          />
-                        </div>
-                      </div>
+                  {/* Paginação Minimalista */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                      <span className="text-xs">
+                        {paginatedData.items.length > 0 
+                          ? `${((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}-${Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}`
+                          : '0'
+                        } de {safeFilteredProducts.length}
+                      </span>
+                      <DataPagination
+                        currentPage={paginatedData.pagination.currentPage}
+                        totalPages={paginatedData.pagination.totalPages}
+                        itemsPerPage={paginatedData.pagination.itemsPerPage}
+                        totalItems={safeFilteredProducts.length}
+                        onPageChange={paginatedData.pagination.goToPage}
+                        onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                        startIndex={((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}
+                        endIndex={Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}
+                      />
                     </div>
                   </div>
                 </>
