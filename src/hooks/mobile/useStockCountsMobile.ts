@@ -35,11 +35,6 @@ export function useStockCountsMobile(
   const pagination = useServerPagination<StockCountMobile>({
     queryKey: ['stock-counts-mobile', searchQuery, statusFilter],
     enabled: enabled && !!user,
-    staleTime: mobileConfig.staleTime,
-    gcTime: mobileConfig.gcTime,
-    refetchOnWindowFocus: mobileConfig.refetchOnWindowFocus,
-    refetchOnMount: mobileConfig.refetchOnMount,
-    retry: mobileConfig.retry,
     queryFn: async (params: ServerPaginationParams) => {
       const { page, pageSize } = params;
 

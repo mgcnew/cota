@@ -44,7 +44,7 @@ export function useNotesMobile() {
     isLoading,
     error,
     refetch,
-  } = useQuery({
+  } = useQuery<{ notes: NoteMobile[]; total: number }>({
     queryKey: ["notes-mobile", currentCompany?.id, currentPage, pageSize, debouncedSearch],
     queryFn: async () => {
       if (!currentCompany?.id) return { notes: [], total: 0 };

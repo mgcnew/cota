@@ -98,7 +98,7 @@ export function useSuppliersMobile(searchQuery?: string, statusFilter?: "all" | 
 
   const createSupplier = useMutation({
     mutationFn: async (newSupplier: Omit<SupplierMobile, 'id'>) => {
-      const { data, error } = await supabase.from('suppliers').insert(newSupplier).select().single();
+      const { data, error } = await supabase.from('suppliers').insert([newSupplier]).select().single();
       if (error) throw error;
       return data;
     },

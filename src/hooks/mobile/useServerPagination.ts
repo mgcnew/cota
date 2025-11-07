@@ -65,7 +65,7 @@ export function useServerPagination<T>({
   const searchFromKey = queryKey[queryKey.length - 1] as string | undefined;
   const search = searchFromKey || "";
 
-  const { data, isLoading, error, refetch: queryRefetch } = useQuery({
+  const { data, isLoading, error, refetch: queryRefetch } = useQuery<{ data: T[]; total: number }>({
     queryKey: [...queryKey, currentPage, pageSize],
     queryFn: () => queryFn({ page: currentPage, pageSize, search, filters: {} }),
     enabled,
@@ -112,9 +112,13 @@ export function useServerPagination<T>({
             setCurrentPage((prev) => prev - 1);
           }
         },
-        setItemsPerPage: (size: number) => {
+        setPageSize: (size: number) => {
           setPageSize(size);
           setCurrentPage(1); // Reset para primeira página
+        },
+        setItemsPerPage: (size: number) => {
+          setPageSize(size);
+          setCurrentPage(1); // Alias para compatibilidade
         },
       };
     },
