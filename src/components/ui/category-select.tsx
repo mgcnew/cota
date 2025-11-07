@@ -14,7 +14,7 @@ import {
 
 interface CategorySelectProps {
   categories: string[];
-  products?: Array<{ category?: string }>; // ✅ Opcional com valor padrão
+  products: Array<{ category?: string }>;
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
   className?: string;
@@ -31,11 +31,8 @@ export function CategorySelect({
   const categoryStats = useMemo(() => {
     const stats = new Map<string, number>();
 
-    // ✅ Verificação de segurança: garantir que products seja um array
-    const safeProducts = Array.isArray(products) ? products : [];
-
     // Contar produtos por categoria
-    safeProducts.forEach(product => {
+    products.forEach(product => {
       const category = (product.category || '').trim();
       if (category) {
         stats.set(category, (stats.get(category) || 0) + 1);
@@ -43,7 +40,7 @@ export function CategorySelect({
     });
 
     // Adicionar "all" com total de produtos
-    stats.set("all", safeProducts.length);
+    stats.set("all", products.length);
 
     return stats;
   }, [products]);
@@ -70,7 +67,7 @@ export function CategorySelect({
           </div>
         </SelectTrigger>
         <SelectContent>
-          {Array.isArray(categories) && categories.map((category) => (
+          {categories.map((category) => (
             <SelectItem key={category} value={category}>
               <div className="flex items-center justify-between w-full gap-4">
                 <span>{getCategoryLabel(category)}</span>

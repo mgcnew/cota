@@ -1,39 +1,30 @@
 import { lazy, Suspense } from "react";
 import { useMobile } from "@/contexts/MobileProvider";
+import ProdutosDesktop from "./ProdutosDesktop";
 
-// ✅ CODE SPLITTING: Lazy load do componente mobile apenas quando necessário
-// Desktop não carrega código mobile, reduzindo bundle size
+// Lazy load mobile version
 const ProdutosMobile = lazy(() => import("./ProdutosMobile"));
-const ProdutosDesktop = lazy(() => import("./ProdutosDesktop"));
 
-// Loading fallback simples
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-screen">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-2"></div>
-      <p className="text-sm text-gray-600 dark:text-gray-400">Carregando...</p>
-    </div>
+    <div className="text-sm text-gray-500">Carregando...</div>
   </div>
 );
 
 /**
- * Router simples para página de Produtos
+ * Router para página de Produtos
  * 
  * Separação completa:
- * - Mobile: ProdutosMobile.tsx (otimizado, do zero)
- * - Desktop: ProdutosDesktop.tsx (código atual, limpo)
+ * - Mobile: ProdutosMobile (componentes leves e específicos para mobile)
+ * - Desktop: ProdutosDesktop (versão completa do desktop)
  * 
- * Benefícios:
- * - Zero dependências cruzadas
- * - Code splitting automático
- * - Bundle size otimizado
- * - Manutenção independente
+ * ⚠️ NOTA: ProdutosDesktop.tsx precisa ser restaurado com o código desktop completo.
+ * A estrutura do router já está correta e não precisa ser alterada.
  */
 export default function Produtos() {
-  // ✅ Hook sempre chamado na mesma ordem
   const isMobile = useMobile();
 
-  // ✅ Renderização condicional DEPOIS de todos os hooks
+  // Mobile: lazy load para reduzir bundle
   if (isMobile) {
     return (
       <Suspense fallback={<LoadingFallback />}>
@@ -42,9 +33,6 @@ export default function Produtos() {
     );
   }
 
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <ProdutosDesktop />
-    </Suspense>
-  );
+  // Desktop: import direto (sem lazy load necessário)
+  return <ProdutosDesktop />;
 }

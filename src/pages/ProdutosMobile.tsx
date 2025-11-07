@@ -4,28 +4,27 @@ import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProductsMobile } from "@/hooks/mobile/useProductsMobile";
 import { useDebounce } from "@/hooks/useDebounce";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { MobileProductsHeader } from "@/components/mobile/products/MobileProductsHeader";
-import { MobileProductsList } from "@/components/mobile/products/MobileProductsList";
-import { MobileFiltersSheet } from "@/components/mobile/products/MobileFiltersSheet";
-import { MobileFAB } from "@/components/mobile/MobileFAB";
+import { MobileProductsSearch } from "@/components/mobile/products/MobileProductsSearch";
+import { MobileProductsVirtualList } from "@/components/mobile/products/MobileProductsVirtualList";
+import { MobileProductsFilters } from "@/components/mobile/products/MobileProductsFilters";
+import { MobileProductsFAB } from "@/components/mobile/products/MobileProductsFAB";
 import type { ProductMobile } from "@/hooks/mobile/useProductsMobile";
 
-// ✅ Lazy load dos dialogs para reduzir bundle inicial
+// Lazy load dialogs
 const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
 const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
 const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
 
 /**
- * Página de Produtos Mobile - Refatorada do Zero
+ * Página de Produtos Mobile - Zero Dependências Desktop
  * 
- * Princípios:
- * - Performance first: Virtualização, lazy loading, code splitting
- * - UX mobile-first: Gestos, bottom sheets, swipe actions
- * - Separação total: Zero dependências do desktop
- * - Bundle size: < 150KB gzip
+ * Performance:
+ * - Virtualização nativa
+ * - Busca server-side
+ * - Cache agressivo
+ * - Componentes leves e específicos
  */
 export default function ProdutosMobile() {
-  // ✅ TODOS OS HOOKS DEVEM SER CHAMADOS SEMPRE, NA MESMA ORDEM
   const { user, loading } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,11 +34,8 @@ export default function ProdutosMobile() {
   const [deletingProduct, setDeletingProduct] = useState<ProductMobile | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
-  // ✅ Debounce aumentado para reduzir requisições (500ms em vez de 300ms)
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-
-  // Hook mobile otimizado com paginação server-side
-  // ✅ IMPORTANTE: Sempre chamado, mesmo se user não estiver autenticado
+  const debouncedSearchQuery = useDebounce(searchQuery, 400);
+  
   const {
     products,
     isLoading,
@@ -50,9 +46,8 @@ export default function ProdutosMobile() {
     refetch,
   } = useProductsMobile(debouncedSearchQuery);
 
-  // ✅ Extrair categorias apenas quando necessário (lazy evaluation)
+  // Extrair categorias únicas
   const categories = useMemo(() => {
-    if (!products || products.length === 0) return ["all"];
     const cats = new Set<string>(["all"]);
     for (let i = 0; i < products.length; i++) {
       const cat = products[i]?.category;
@@ -61,59 +56,44 @@ export default function ProdutosMobile() {
     return Array.from(cats);
   }, [products]);
 
-  // Filtrar produtos por categoria (client-side, já que busca é server-side)
+  // Filtrar por categoria
   const filteredProducts = useMemo(() => {
     if (selectedCategory === "all") return products;
-    return products.filter((p) => p.category === selectedCategory);
+    return products.filter(p => p.category === selectedCategory);
   }, [products, selectedCategory]);
 
-  // Handlers
-  const handleAddProduct = useCallback(() => {
-    setAddDialogOpen(true);
+  // Handlers memoizados
+  const handleAdd = useCallback(() => setAddDialogOpen(true), []);
+  const handleEdit = useCallback((product: ProductMobile) => setEditingProduct(product), []);
+  const handleDelete = useCallback((product: ProductMobile) => setDeletingProduct(product), []);
+  const handleFiltersToggle = useCallback(() => setFiltersOpen(v => !v), []);
+  const handleCategorySelect = useCallback((cat: string) => {
+    setSelectedCategory(cat);
+    setFiltersOpen(false);
   }, []);
 
-  const handleEditProduct = useCallback((product: ProductMobile) => {
-    setEditingProduct(product);
-  }, []);
+  const handleProductUpdated = useCallback((updated: any) => {
+    if (updateProduct?.mutate) {
+      updateProduct.mutate({
+        productId: updated.id,
+        data: {
+          name: updated.name,
+          category: updated.category,
+          unit: updated.unit,
+          barcode: updated.barcode,
+        },
+      });
+    }
+    setEditingProduct(null);
+  }, [updateProduct]);
 
-  const handleDeleteProduct = useCallback((product: ProductMobile) => {
-    setDeletingProduct(product);
-  }, []);
+  const handleProductDeleted = useCallback((id: string) => {
+    if (deleteProduct?.mutate) {
+      deleteProduct.mutate(id);
+    }
+    setDeletingProduct(null);
+  }, [deleteProduct]);
 
-  // ✅ Callbacks memoizados para evitar re-renders
-  const handleFiltersOpen = useCallback(() => setFiltersOpen(true), []);
-  const handleCategoryRemove = useCallback(() => setSelectedCategory("all"), []);
-
-  const handleProductUpdated = useCallback(
-    (updatedProduct: any) => {
-      if (updateProduct && typeof (updateProduct as any).mutate === "function") {
-        (updateProduct as any).mutate({
-          productId: updatedProduct.id,
-          data: {
-            name: updatedProduct.name,
-            category: updatedProduct.category,
-            unit: updatedProduct.unit,
-            barcode: updatedProduct.barcode,
-          },
-        });
-      }
-      setEditingProduct(null);
-    },
-    [updateProduct]
-  );
-
-  const handleProductDeleted = useCallback(
-    (id: string) => {
-      if (deleteProduct && typeof (deleteProduct as any).mutate === "function") {
-        (deleteProduct as any).mutate(id);
-      }
-      setDeletingProduct(null);
-    },
-    [deleteProduct]
-  );
-
-  // ✅ IMPORTANTE: Auth check DEPOIS de todos os hooks
-  // React exige que todos os hooks sejam chamados na mesma ordem sempre
   if (!loading && !user) {
     return <AuthDialog open={true} onOpenChange={setAuthDialogOpen} />;
   }
@@ -121,44 +101,38 @@ export default function ProdutosMobile() {
   return (
     <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
-      
       <PageWrapper>
         <div className="flex flex-col h-full" style={{ overflow: 'hidden' }}>
-          {/* Header com busca */}
-          <MobileProductsHeader
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onFiltersOpen={handleFiltersOpen}
-            selectedCategory={selectedCategory}
-            onCategoryRemove={handleCategoryRemove}
+          <MobileProductsSearch
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onFiltersClick={handleFiltersToggle}
+            activeCategory={selectedCategory !== "all" ? selectedCategory : null}
+            onClearCategory={() => setSelectedCategory("all")}
           />
-
-          {/* Lista virtualizada de produtos */}
-          <MobileProductsList
+          
+          <MobileProductsVirtualList
             products={filteredProducts}
             isLoading={isLoading}
             error={error}
-            onEdit={handleEditProduct}
-            onDelete={handleDeleteProduct}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
             onRefresh={refetch}
             pagination={pagination}
           />
 
-          {/* Bottom Sheet de Filtros */}
-          <MobileFiltersSheet
+          <MobileProductsFilters
             open={filtersOpen}
-            onOpenChange={setFiltersOpen}
+            onClose={() => setFiltersOpen(false)}
             categories={categories}
-            selectedCategory={selectedCategory}
-            onCategorySelect={setSelectedCategory}
+            selected={selectedCategory}
+            onSelect={handleCategorySelect}
           />
 
-          {/* FAB para adicionar produto */}
-          <MobileFAB onClick={handleAddProduct} label="Novo Produto" />
+          <MobileProductsFAB onClick={handleAdd} />
         </div>
       </PageWrapper>
 
-      {/* Dialogs - Lazy loaded apenas quando necessário */}
       {addDialogOpen && (
         <Suspense fallback={null}>
           <AddProductDialog

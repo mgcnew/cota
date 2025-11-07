@@ -68,7 +68,7 @@ export function useProductsMobile(searchQuery?: string) {
         total: count || 0,
       };
     },
-    initialPageSize: 15, // ✅ Mobile: 15 itens por página (reduzido para melhor performance)
+    initialPageSize: 20, // Mobile: 20 itens por página
   });
 
   // Mutation para criar produto

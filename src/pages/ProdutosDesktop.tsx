@@ -19,17 +19,16 @@ import { EditProductDialog } from "@/components/forms/EditProductDialog";
 import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
 import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
-import { DeleteDuplicateProductsDialog } from "@/components/forms/DeleteDuplicateProductsDialog";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 
 /**
- * ProdutosDesktop.tsx
+ * ProdutosDesktop - Versão Desktop Completa
  * 
- * Versão desktop completa da página de produtos
- * - Cards de estatísticas
+ * Funcionalidades:
+ * - Cards de estatísticas (4 cards)
  * - Tabela completa com todas as colunas
  * - Filtros e busca client-side
  * - Paginação client-side
@@ -60,7 +59,7 @@ export default function ProdutosDesktop() {
 
   const { products, categories, isLoading: productsLoading, deleteProduct, updateProduct, invalidateCache } = useProducts();
 
-  // ✅ Valores padrão para evitar erros de undefined
+  // Valores padrão para evitar erros de undefined
   const safeProducts = products || [];
   const safeCategories = categories || [];
 
@@ -90,12 +89,10 @@ export default function ProdutosDesktop() {
     });
   }, [safeProducts, debouncedSearchQuery, selectedCategory]);
 
-  // ✅ Garantir que filteredProducts seja sempre um array
   const safeFilteredProducts = Array.isArray(filteredProducts) ? filteredProducts : [];
   const paginatedData = paginate(safeFilteredProducts);
 
   const stats = useMemo(() => {
-    // ✅ Verificações de segurança
     if (!Array.isArray(safeProducts) || !Array.isArray(safeCategories)) {
       return {
         totalProducts: 0,
