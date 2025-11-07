@@ -1,6 +1,0 @@
-Execute estes comandos no terminal na pasta cotaja:
-
-git add -A
-git commit -m "fix: corrige ordem dos hooks no MobileProductsList para resolver erro 'Rendered more hooks than during the previous render'"
-git push
-
