@@ -514,7 +514,8 @@ export default function Produtos() {
         <div className="text-center">Carregando...</div>
       </div>;
   }
-  return <>
+  return (
+    <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
@@ -650,16 +651,103 @@ export default function Produtos() {
           disabled={!isMobile}
           className={isMobile ? "min-h-[400px]" : ""}
         >
-          {/* OTIMIZAÇÃO: Usar lista virtualizada para melhor performance */}
-          <ProductsVirtualList
-            products={paginatedData.items}
-            isMobile={isMobileDevice}
-            onEdit={handleEditProduct}
-            onDelete={handleDeleteProduct}
-            onImageClick={handleImageClick}
-            getTrendIcon={getTrendIcon}
-            getStatusBadge={(quotesCount: number) => getStatusBadge(getProductStatus({ quotesCount }))}
-          />
+          {/* Grid de produtos */}
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedData.items.map((product) => (
+              <Card 
+                key={product.id} 
+                className={`group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none ${!isMobile ? 'md:hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-shadow duration-200' : ''}`}
+              >
+                <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2 sm:space-y-3 flex-1">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className={`p-1.5 sm:p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg sm:rounded-xl shadow-lg ${!isMobile ? 'group-hover:scale-105 transition-transform duration-200' : ''}`}>
+                          <Package className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className={`text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate ${!isMobile ? 'group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-200' : ''}`}>
+                            {capitalize(product.name)}
+                          </CardTitle>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        {getStatusBadge(getProductStatus(product))}
+                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400">
+                          {capitalize(product.category)}
+                        </Badge>
+                      </div>
+                    </div>
+                    {!isMobileDevice && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full h-8 w-8 sm:h-9 sm:w-9">
+                            <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
+                          <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <ProductPriceHistoryDialog 
+                            productName={product.name} 
+                            productId={product.id} 
+                            trigger={
+                              <DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
+                                <History className="h-4 w-4 mr-2 text-blue-600" />
+                                Ver Histórico de Preços
+                              </DropdownMenuItem>
+                            } 
+                          />
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleEditProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
+                            <Edit className="h-4 w-4 mr-2 text-amber-600" />
+                            Editar Produto
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteProduct(product)} className="hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer">
+                            <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                            Excluir Produto
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Preço:</span>
+                      <span className="font-bold text-green-700 dark:text-green-400">
+                        {(product as any).lastQuotePrice || "R$ 0,00"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Fornecedor:</span>
+                      <span className="font-medium text-gray-800 dark:text-gray-200 truncate max-w-[120px]">
+                        {capitalize((product as any).bestSupplier || "N/A")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <ProductPriceHistoryDialog 
+                      productName={product.name} 
+                      productId={product.id} 
+                      trigger={
+                        <Button 
+                          variant="outline" 
+                          className={`w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 text-orange-700 ${!isMobile ? 'hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 hover:text-orange-800 transition-all duration-200' : ''}`}
+                        >
+                          <History className="h-4 w-4 mr-2" />
+                          Ver Histórico de Preços
+                        </Button>
+                      } 
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
           
           {/* Paginação Mobile */}
           {isMobile && (
@@ -850,6 +938,7 @@ export default function Produtos() {
             </Button>
           </CardContent>
         </Card>}
+        </div>
 
       {/* Dialogs - Hidden triggers for dropdown actions */}
       <div className="sr-only">
@@ -898,16 +987,13 @@ export default function Produtos() {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* FAB Mobile - Floating Action Button para criar produto */}
+      </PageWrapper>
       {isMobile && (
         <MobileFAB
           onClick={triggerAddDialog}
           label="Novo Produto"
         />
       )}
-        </div>
-      </PageWrapper>
     </>
   );
 }
