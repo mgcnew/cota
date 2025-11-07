@@ -16,14 +16,19 @@ export interface ServerPaginationResult<T> {
   pagination: {
     currentPage: number;
     pageSize: number;
+    itemsPerPage: number;
     totalItems: number;
     totalPages: number;
+    startIndex: number;
+    endIndex: number;
     hasNextPage: boolean;
     hasPrevPage: boolean;
     goToPage: (page: number) => void;
     nextPage: () => void;
     prevPage: () => void;
     setPageSize: (size: number) => void;
+    setItemsPerPage: (size: number) => void;
+    onItemsPerPageChange: (size: number) => void;
   };
   refetch: () => void;
 }
@@ -94,7 +99,7 @@ export function useServerPagination<T>({
       return {
         currentPage,
         pageSize,
-        itemsPerPage: pageSize, // Adicionar alias para compatibilidade
+        itemsPerPage: pageSize,
         totalItems,
         totalPages,
         startIndex,
@@ -120,6 +125,10 @@ export function useServerPagination<T>({
           setCurrentPage(1);
         },
         setItemsPerPage: (size: number) => {
+          setPageSize(size);
+          setCurrentPage(1);
+        },
+        onItemsPerPageChange: (size: number) => {
           setPageSize(size);
           setCurrentPage(1);
         },

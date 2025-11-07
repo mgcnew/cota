@@ -162,7 +162,7 @@ export default function ContagemEstoque() {
     // Desktop: filtrar client-side
     return stockCounts.filter(count => {
       const matchesSearch = 
-        count.order?.supplier_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (count as any).order?.supplier_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         count.notes?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesStatus = statusFilter === "all" || count.status === statusFilter;
@@ -556,6 +556,7 @@ export default function ContagemEstoque() {
                   />
                 </div>
                 <MobileActionSheet
+                  title="Filtros"
                   trigger={
                     <Button
                       variant="outline"
@@ -681,8 +682,8 @@ export default function ContagemEstoque() {
                             <div className="space-y-1.5 flex-1 min-w-0">
                               <CardTitle className="text-sm font-bold text-gray-900 dark:text-white truncate">
                                 {isMobile 
-                                  ? (count.supplier_name || "Contagem Livre")
-                                  : (count.order?.supplier_name || "Contagem Livre")
+                                  ? ((count as any).supplier_name || "Contagem Livre")
+                                  : ((count as any).order?.supplier_name || "Contagem Livre")
                                 }
                               </CardTitle>
                               <div className="flex items-center gap-1.5 flex-wrap">
@@ -711,7 +712,7 @@ export default function ContagemEstoque() {
                                 <span className="text-xs font-medium text-orange-700 dark:text-orange-400">Pedido</span>
                               </div>
                               <p className="text-base font-bold text-orange-800 dark:text-orange-300">
-                                {isMobile ? (count.order_id ? "Sim" : "Não") : (count.order ? "Sim" : "Não")}
+                                {isMobile ? (count.order_id ? "Sim" : "Não") : ((count as any).order ? "Sim" : "Não")}
                               </p>
                             </div>
                           </div>
@@ -771,11 +772,12 @@ export default function ContagemEstoque() {
                     <DataPagination
                       currentPage={mobileData.pagination.currentPage ?? 1}
                       totalPages={mobileData.pagination.totalPages ?? 1}
-                      itemsPerPage={mobileData.pagination.itemsPerPage ?? 20}
+                      itemsPerPage={(mobileData.pagination as any).itemsPerPage ?? 20}
                       totalItems={mobileData.pagination.totalItems ?? 0}
                       onPageChange={mobileData.pagination.goToPage}
-                      startIndex={mobileData.pagination.startIndex ?? 0}
-                      endIndex={mobileData.pagination.endIndex ?? 0}
+                      onItemsPerPageChange={(mobileData.pagination as any).onItemsPerPageChange || (() => {})}
+                      startIndex={(mobileData.pagination as any).startIndex ?? 0}
+                      endIndex={(mobileData.pagination as any).endIndex ?? 0}
                     />
                   </div>
                   )}
@@ -838,8 +840,8 @@ export default function ContagemEstoque() {
                                     <ClipboardList className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                                   </div>
                                   <div className="min-w-0 flex-1 max-w-[200px]">
-                                    <div className="table-cell-primary truncate" title={count.order?.supplier_name || "Contagem Livre"}>
-                                      {count.order?.supplier_name || "Contagem Livre"}
+                                    <div className="table-cell-primary truncate" title={(count as any).order?.supplier_name || "Contagem Livre"}>
+                                      {(count as any).order?.supplier_name || "Contagem Livre"}
                                     </div>
                                   </div>
                                 </div>
@@ -857,7 +859,7 @@ export default function ContagemEstoque() {
                                 <div className="hidden lg:block w-[15%] px-2">
                                   <div className="flex justify-center pointer-events-none">
                                     <Badge variant="outline" className="bg-orange-50/80 dark:bg-orange-900/30 border-orange-200/60 dark:border-orange-700/60 text-orange-700 dark:text-orange-400 font-medium text-xs">
-                                      {count.order ? "Sim" : "Não"}
+                                      {(count as any).order ? "Sim" : "Não"}
                                     </Badge>
                                   </div>
                                 </div>

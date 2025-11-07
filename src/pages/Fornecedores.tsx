@@ -274,10 +274,6 @@ export default function Fornecedores() {
         items: filteredSuppliers,
         pagination: mobileSuppliers.pagination ? {
           ...mobileSuppliers.pagination,
-          itemsPerPage: mobileSuppliers.pagination.pageSize,
-          setItemsPerPage: (size: number) => {
-            mobileSuppliers.pagination.setItemsPerPage(size);
-          },
         } : {
           currentPage: 1,
           pageSize: 20,
@@ -294,7 +290,7 @@ export default function Fornecedores() {
           setItemsPerPage: () => {},
         },
       }
-    : paginate(filteredSuppliers);
+    : paginate(filteredSuppliers as any);
   const getStatusBadge = useCallback((status: string) => {
     const statusConfig = {
       active: {
@@ -351,10 +347,10 @@ export default function Fornecedores() {
     }
 
     const totalLimit = mappedSuppliers.reduce((sum, s) => {
-      const limitValue = parseFloat(s.limit.replace(/[^\d,]/g, '').replace(',', '.'));
+      const limitValue = parseFloat((s as any).limit?.replace(/[^\d,]/g, '').replace(',', '.') || '0');
       return sum + (isNaN(limitValue) ? 0 : limitValue);
     }, 0);
-    const activeQuotesTotal = mappedSuppliers.reduce((sum, s) => sum + s.activeQuotes, 0);
+    const activeQuotesTotal = mappedSuppliers.reduce((sum, s) => sum + ((s as any).activeQuotes || 0), 0);
     
     // Distribuição por status
     const porStatus = {
@@ -374,8 +370,8 @@ export default function Fornecedores() {
       : "0.0";
     
     // Média de cotações por fornecedor
-    const fornecedoresComCotacoes = mappedSuppliers.filter(s => s.activeQuotes > 0 || s.totalQuotes > 0);
-    const totalQuotes = mappedSuppliers.reduce((sum, s) => sum + s.totalQuotes, 0);
+    const fornecedoresComCotacoes = mappedSuppliers.filter(s => ((s as any).activeQuotes || 0) > 0 || ((s as any).totalQuotes || 0) > 0);
+    const totalQuotes = mappedSuppliers.reduce((sum, s) => sum + ((s as any).totalQuotes || 0), 0);
     const mediaCotacoesPorFornecedor = fornecedoresComCotacoes.length > 0
       ? (totalQuotes / fornecedoresComCotacoes.length).toFixed(1)
       : "0.0";

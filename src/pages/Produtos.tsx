@@ -151,11 +151,6 @@ export default function Produtos() {
         items: filteredProducts,
         pagination: mobileProducts.pagination ? {
           ...mobileProducts.pagination,
-          itemsPerPage: mobileProducts.pagination.pageSize, // Mapear pageSize para itemsPerPage
-          setItemsPerPage: (size: number) => {
-            // Chamar setItemsPerPage do hook que internamente atualiza pageSize
-            mobileProducts.pagination.setItemsPerPage(size);
-          },
         } : {
           currentPage: 1,
           pageSize: 20,
@@ -172,7 +167,7 @@ export default function Produtos() {
           setItemsPerPage: () => {},
         },
       }
-    : paginate(filteredProducts);
+    : paginate(filteredProducts as any);
 
   // Cálculos de métricas reais e dinâmicas
   const stats = useMemo(() => {
@@ -191,7 +186,7 @@ export default function Produtos() {
           semCotacao: 0,
         },
         percentualComCotacao: 0,
-        topCategoria: ["N/A", 0],
+        topCategoria: { nome: "N/A", count: 0 } as any,
         mediaCotacoesPorProduto: "0.0",
         averageValue: "R$ 0,00",
         economiaMediaPorProduto: "0",
@@ -199,7 +194,7 @@ export default function Produtos() {
       };
     }
     
-    const activeQuotes = products.reduce((sum, p: any) => sum + (p.quotesCount || 0), 0);
+    const activeQuotes = (products as any[]).reduce((sum: number, p: any) => sum + (p.quotesCount || 0), 0 as number);
     
     // Calcular produtos por status
     const produtosPorStatus = {
@@ -216,18 +211,22 @@ export default function Produtos() {
       : 0;
     
     // Top categorias por número de produtos
-    const categoriaCount = new Map();
-    products.forEach(p => {
+    const categoriaCount = new Map<string, number>();
+    products.forEach((p: any) => {
       const cat = p.category || 'Sem Categoria';
       categoriaCount.set(cat, (categoriaCount.get(cat) || 0) + 1);
     });
-    const topCategoria = Array.from(categoriaCount.entries())
-      .sort((a, b) => b[1] - a[1])[0];
+    const topCategoriaArray = Array.from(categoriaCount.entries())
+      .sort((a, b) => (b[1] as number) - (a[1] as number))[0];
+    const topCategoria = topCategoriaArray 
+      ? { nome: topCategoriaArray[0], count: topCategoriaArray[1] }
+      : { nome: "N/A", count: 0 };
     
     // Média de cotações por produto (apenas produtos com cotação)
     const produtosComCotacaoParaMedia = products.filter((p: any) => (p.quotesCount || 0) > 0);
+    const activeQuotesNum = activeQuotes as unknown as number;
     const mediaCotacoesPorProduto = produtosComCotacaoParaMedia.length > 0
-      ? (activeQuotes / produtosComCotacaoParaMedia.length).toFixed(1)
+      ? (activeQuotesNum / produtosComCotacaoParaMedia.length).toFixed(1)
       : "0.0";
     
     // Valor médio e economia potencial
@@ -413,7 +412,7 @@ export default function Produtos() {
       <CardContent className="space-y-2.5 pt-0">
         <div className="flex items-baseline gap-2.5">
           <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
-            {stats.activeQuotes}
+            {typeof stats.activeQuotes === 'number' ? stats.activeQuotes : 0}
           </span>
           <Badge className="bg-emerald-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
             <TrendingUp className="w-3 h-3" />
@@ -424,7 +423,7 @@ export default function Produtos() {
           <div className="flex items-center justify-between">
             <span>Total de cotações:</span>
             <span className="font-medium text-white dark:text-gray-300">
-              {stats.activeQuotes}
+              {typeof stats.activeQuotes === 'number' ? stats.activeQuotes : 0}
             </span>
           </div>
           <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
@@ -995,8 +994,8 @@ export default function Produtos() {
         </div>
       </div>
 
-      <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={updatedProduct => {
-          updateProduct({
+      <EditProductDialog product={editingProduct as any} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={(updatedProduct: any) => {
+          (updateProduct as any)({
             productId: updatedProduct.id,
             data: {
               name: updatedProduct.name,
@@ -1007,7 +1006,7 @@ export default function Produtos() {
           });
         }} onCategoryAdded={() => {}} categories={categories} />
 
-      <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={id => deleteProduct(id)} />
+      <DeleteProductDialog product={deletingProduct as any} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={(id: string) => (deleteProduct as any)(id)} />
 
       {/* Image Preview Dialog */}
       <Dialog open={!!imagePreviewUrl} onOpenChange={() => setImagePreviewUrl(null)}>

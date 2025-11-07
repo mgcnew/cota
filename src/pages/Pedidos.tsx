@@ -799,7 +799,7 @@ export default function Pedidos() {
 
         {/* Mobile Action Sheet para Filtros */}
         {isMobile && (
-          <MobileActionSheet open={filtersOpen} onOpenChange={setFiltersOpen} title="Filtros">
+          <MobileActionSheet trigger={<div />} open={filtersOpen} onOpenChange={setFiltersOpen} title="Filtros">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Status</Label>
@@ -1058,7 +1058,16 @@ export default function Pedidos() {
                 
                 {/* Paginação com melhor espaçamento */}
                 <div className="border-t border-orange-100/80 dark:border-gray-700/30 bg-gradient-to-r from-orange-50/30 to-amber-50/30 dark:from-gray-800/30 dark:to-gray-800/20 px-6 py-4">
-                  <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
+                  <DataPagination 
+                    currentPage={paginatedData.pagination.currentPage} 
+                    totalPages={paginatedData.pagination.totalPages} 
+                    itemsPerPage={(paginatedData.pagination as any).itemsPerPage || (paginatedData.pagination as any).pageSize || 20} 
+                    totalItems={paginatedData.pagination.totalItems} 
+                    onPageChange={paginatedData.pagination.goToPage} 
+                    onItemsPerPageChange={(paginatedData.pagination as any).onItemsPerPageChange || (paginatedData.pagination as any).setItemsPerPage || (paginatedData.pagination as any).setPageSize || (() => {})} 
+                    startIndex={(paginatedData.pagination as any).startIndex || 0} 
+                    endIndex={(paginatedData.pagination as any).endIndex || 0} 
+                  />
                 </div>
               </CardContent>
             </Card> : (
@@ -1105,7 +1114,7 @@ export default function Pedidos() {
               }
             };
             const colors = getStatusColors(pedido.status);
-            const pedidoNumero = paginatedData.pagination.startIndex + index + 1;
+            const pedidoNumero = ((paginatedData.pagination as any).startIndex || 0) + index + 1;
             return <Card key={pedido.id} className={cn("group border border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26]", `sm:hover:${colors.border}`, "sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 sm:transition-shadow sm:duration-200", "backdrop-blur-sm")}>
                   <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
                     <div className="flex items-start justify-between">
