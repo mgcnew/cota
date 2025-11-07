@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -132,6 +133,45 @@ export default function Fornecedores() {
     });
   }, [suppliers, suppliersLoading, suppliersError, isMobileDevice]);
 
+  // Estado para armazenar contagem de pedidos por fornecedor (mobile)
+  const [supplierOrdersCount, setSupplierOrdersCount] = useState<Record<string, number>>({});
+
+  // Buscar contagem de pedidos para fornecedores mobile
+  useEffect(() => {
+    if (!isMobileDevice || suppliers.length === 0) {
+      setSupplierOrdersCount({});
+      return;
+    }
+
+    const fetchOrdersCount = async () => {
+      try {
+        const { data: orders, error } = await supabase
+          .from('orders')
+          .select('supplier_id')
+          .in('supplier_id', suppliers.map(s => s.id));
+
+        if (error) {
+          console.error('Erro ao buscar pedidos:', error);
+          return;
+        }
+
+        // Contar pedidos por fornecedor
+        const counts: Record<string, number> = {};
+        orders?.forEach(order => {
+          if (order.supplier_id) {
+            counts[order.supplier_id] = (counts[order.supplier_id] || 0) + 1;
+          }
+        });
+
+        setSupplierOrdersCount(counts);
+      } catch (error) {
+        console.error('Erro ao buscar contagem de pedidos:', error);
+      }
+    };
+
+    fetchOrdersCount();
+  }, [suppliers, isMobileDevice]);
+
   // Mapear dados mobile para formato compatível com a interface Supplier
   const mappedSuppliers = useMemo(() => {
     console.log('📦 Fornecedores: Mapeando dados', { 
@@ -146,25 +186,30 @@ export default function Fornecedores() {
     }
     
     // Mobile: mapear SupplierMobile para Supplier
-    const mapped = suppliers.map(s => ({
-      id: s.id,
-      name: s.name,
-      contact: s.contact || "",
-      limit: "R$ 0",
-      activeQuotes: 0,
-      totalQuotes: 0,
-      avgPrice: "R$ 0,00",
-      lastOrder: "",
-      rating: 0,
-      status: s.status,
-      phone: s.phone,
-      email: s.email,
-      address: undefined,
-    }));
+    const mapped = suppliers.map(s => {
+      // Buscar total de pedidos para este fornecedor
+      const totalOrders = supplierOrdersCount[s.id] || 0;
+      
+      return {
+        id: s.id,
+        name: s.name,
+        contact: s.contact || "",
+        limit: "R$ 0",
+        activeQuotes: 0,
+        totalQuotes: totalOrders, // Usar total de pedidos
+        avgPrice: "R$ 0,00",
+        lastOrder: "",
+        rating: 0,
+        status: s.status,
+        phone: s.phone,
+        email: s.email,
+        address: undefined,
+      };
+    });
     
     console.log('📦 Fornecedores: Mobile - mapeados', mapped.length, 'fornecedores');
     return mapped;
-  }, [suppliers, isMobileDevice]);
+  }, [suppliers, isMobileDevice, supplierOrdersCount]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -406,10 +451,10 @@ export default function Fornecedores() {
 
   // Helper functions para renderizar Cards (memoizadas inline)
   const renderCard1 = useMemo(() => (
-    <Card className="bg-indigo-600 dark:bg-[#1C1F26] border border-indigo-500/30 dark:border-gray-800 rounded-lg hover:border-indigo-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-primary dark:bg-[#1C1F26] border border-primary/30 dark:border-gray-800 rounded-lg hover:border-primary/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-indigo-700/50 dark:bg-gray-800">
+          <div className="p-2 rounded-lg bg-primary/50 dark:bg-gray-800">
             <Building2 className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -422,7 +467,7 @@ export default function Fornecedores() {
           <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
             {stats.total}
           </span>
-          <Badge className="bg-indigo-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+          <Badge className="bg-primary/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
             <TrendingUp className="w-3 h-3" />
             +{Math.floor(stats.total * 0.15)}
           </Badge>
@@ -451,10 +496,10 @@ export default function Fornecedores() {
   ), [stats]);
 
   const renderCard2 = useMemo(() => (
-    <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-success dark:bg-[#1C1F26] border border-success/30 dark:border-gray-800 rounded-lg hover:border-success/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
+          <div className="p-2 rounded-lg bg-success/50 dark:bg-gray-800">
             <TrendingUp className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -468,7 +513,7 @@ export default function Fornecedores() {
             {stats.active}
           </span>
           {stats.percentualAtivos > 0 && (
-            <Badge className="bg-emerald-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            <Badge className="bg-success/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
               {stats.percentualAtivos}%
             </Badge>
           )}
@@ -495,10 +540,10 @@ export default function Fornecedores() {
   ), [stats]);
 
   const renderCard3 = useMemo(() => (
-    <Card className="bg-blue-600 dark:bg-[#1C1F26] border border-blue-500/30 dark:border-gray-800 rounded-lg hover:border-blue-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-info dark:bg-[#1C1F26] border border-info/30 dark:border-gray-800 rounded-lg hover:border-info/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-blue-700/50 dark:bg-gray-800">
+          <div className="p-2 rounded-lg bg-info/50 dark:bg-gray-800">
             <DollarSign className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -512,7 +557,7 @@ export default function Fornecedores() {
             {stats.totalLimit}
           </span>
           {stats.active > 0 && (
-            <Badge className="bg-blue-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            <Badge className="bg-info/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
               {stats.active} ativos
             </Badge>
           )}
@@ -534,10 +579,10 @@ export default function Fornecedores() {
   ), [stats]);
 
   const renderCard4 = useMemo(() => (
-    <Card className="bg-orange-600 dark:bg-[#1C1F26] border border-orange-500/30 dark:border-gray-800 rounded-lg hover:border-orange-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-warning dark:bg-[#1C1F26] border border-warning/30 dark:border-gray-800 rounded-lg hover:border-warning/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-orange-700/50 dark:bg-gray-800">
+          <div className="p-2 rounded-lg bg-warning/50 dark:bg-gray-800">
             <FileText className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -551,7 +596,7 @@ export default function Fornecedores() {
             {stats.activeQuotes}
           </span>
           {stats.mediaCotacoesPorFornecedor !== "0.0" && (
-            <Badge className="bg-orange-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            <Badge className="bg-warning/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
               {stats.mediaCotacoesPorFornecedor}
             </Badge>
           )}
@@ -836,7 +881,7 @@ export default function Fornecedores() {
                         <Button 
                           size="sm" 
                           variant="outline"
-                          className="w-full border-2 border-indigo-500/60 dark:border-indigo-400/60 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-indigo-200 font-medium transition-all duration-200 text-xs h-9 shadow-sm"
+                          className="w-full border-2 border-primary/60 dark:border-primary/60 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-primary hover:text-primary/80 dark:hover:text-primary font-medium transition-all duration-200 text-xs h-9 shadow-sm"
                         >
                           <Plus className="h-3.5 w-3.5 mr-1.5" />
                           Nova Cotação
@@ -868,7 +913,7 @@ export default function Fornecedores() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-200/60 dark:border-indigo-700/30 text-center">
+                    <div className="p-3 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 text-center">
                       <div className="flex items-center justify-center gap-1 mb-1">
                         <FileText className="h-4 w-4 text-indigo-600" />
                         <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">Cotações Ativas</span>
@@ -1016,7 +1061,7 @@ export default function Fornecedores() {
                           <div className="hidden sm:block w-[10%] px-2">
                             <div className="text-center">
                               <div className="flex items-center justify-center gap-1.5 mb-1">
-                                <div className="flex items-center justify-center w-5 h-5 rounded-md bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-200/50 dark:border-indigo-800/40">
+                                <div className="flex items-center justify-center w-5 h-5 rounded-md bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30">
                                   <ClipboardList className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
                                 </div>
                                 <span className="font-semibold text-indigo-700 dark:text-indigo-400 text-xs">{supplier.activeQuotes}</span>
@@ -1035,7 +1080,7 @@ export default function Fornecedores() {
                           {/* Ações - Largura fixa */}
                           <div className="w-[10%] pl-4">
                             <div className="flex items-center justify-end gap-2">
-                              <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<Button variant="ghost" size="sm" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 p-0 h-8 w-8 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:border-indigo-300 dark:hover:border-indigo-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                              <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 p-0 h-8 w-8 rounded-lg border border-primary/20 dark:border-primary/30 hover:border-primary/40 dark:hover:border-primary/50 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
                                     <History className="h-4 w-4" />
                                   </Button>} />
 

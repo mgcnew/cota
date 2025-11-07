@@ -205,7 +205,7 @@ export default function ProdutosDesktop() {
   }, []);
 
   const renderCard1 = useMemo(() => (
-    <Card className="bg-gradient-to-br from-orange-600 to-orange-700 dark:from-[#1C1F26] dark:to-[#252932] border border-orange-500/40 dark:border-gray-800/80 rounded-xl hover:border-orange-400/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-orange-500/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
+      <Card className="bg-gradient-to-br from-primary to-primary-light dark:from-[#1C1F26] dark:to-[#252932] border border-primary/40 dark:border-gray-800/80 rounded-xl hover:border-primary/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-primary/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
       {/* Efeito de brilho sutil */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <CardHeader className="pb-2.5 border-0 relative z-10">
@@ -250,7 +250,7 @@ export default function ProdutosDesktop() {
   ), [stats]);
 
   const renderCard2 = useMemo(() => (
-    <Card className="bg-gradient-to-br from-blue-600 to-blue-700 dark:from-[#1C1F26] dark:to-[#252932] border border-blue-500/40 dark:border-gray-800/80 rounded-xl hover:border-blue-400/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-blue-500/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
+    <Card className="bg-gradient-to-br from-primary to-primary-light dark:from-[#1C1F26] dark:to-[#252932] border border-primary/40 dark:border-gray-800/80 rounded-xl hover:border-primary/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-primary/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
       {/* Efeito de brilho sutil */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <CardHeader className="pb-2.5 border-0 relative z-10">
@@ -298,7 +298,7 @@ export default function ProdutosDesktop() {
   ), [stats]);
 
   const renderCard3 = useMemo(() => (
-    <Card className="bg-gradient-to-br from-purple-600 to-purple-700 dark:from-[#1C1F26] dark:to-[#252932] border border-purple-500/40 dark:border-gray-800/80 rounded-xl hover:border-purple-400/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-purple-500/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
+    <Card className="bg-gradient-to-br from-primary to-primary-light dark:from-[#1C1F26] dark:to-[#252932] border border-primary/40 dark:border-gray-800/80 rounded-xl hover:border-primary/60 dark:hover:border-gray-700/60 hover:shadow-lg hover:shadow-primary/10 dark:hover:shadow-gray-900/50 transition-all duration-300 overflow-hidden group relative">
       {/* Efeito de brilho sutil */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <CardHeader className="pb-2.5 border-0 relative z-10">
@@ -409,7 +409,7 @@ export default function ProdutosDesktop() {
                 {/* Título + Busca lado a lado */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="hidden sm:flex items-center gap-2.5 shrink-0">
-                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700 shadow-md shadow-orange-500/20 dark:shadow-orange-900/30">
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary to-primary-light shadow-md shadow-primary/20 dark:shadow-primary/30">
                       <Package className="h-4 w-4 text-white" />
                     </div>
                     <h1 className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight whitespace-nowrap">
@@ -483,7 +483,7 @@ export default function ProdutosDesktop() {
                   <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
                   <p className="text-lg font-semibold text-gray-900 dark:text-white">Nenhum produto encontrado.</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Tente ajustar sua busca ou filtros.</p>
-                  <Button onClick={triggerAddDialog} className="mt-4 bg-orange-600 hover:bg-orange-700 text-white">
+                  <Button onClick={triggerAddDialog} className="mt-4 bg-primary hover:bg-primary/90 text-white">
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar Produto
                   </Button>
@@ -497,7 +497,7 @@ export default function ProdutosDesktop() {
                           <TableCell colSpan={8} className="px-1 pb-3 pt-0 border-none">
                             <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-orange-200/60 dark:border-orange-900/40 rounded-lg shadow-sm px-4 py-3">
                               <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/15 to-amber-500/15 flex items-center justify-center text-orange-600 dark:text-orange-300 flex-shrink-0">
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
                                   <Package className="h-4 w-4" />
                                 </div>
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Produto</span>
@@ -541,7 +541,7 @@ export default function ProdutosDesktop() {
                               <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-orange-300/60 dark:hover:border-orange-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                                 {/* Produto - Largura fixa - Alinhado com header */}
                                 <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                  <div className="w-8 h-8 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 shadow-sm">
                                     {product.image_url ? (
                                       <img src={product.image_url} alt={product.name} className="w-8 h-8 rounded-lg object-cover" />
                                     ) : (
@@ -555,7 +555,7 @@ export default function ProdutosDesktop() {
 
                                 {/* Categoria - Largura fixa, hidden on mobile - Alinhado com header */}
                                 <div className="hidden md:flex w-[15%] px-2 justify-center items-center">
-                                  <Badge variant="secondary" className="bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
+                                  <Badge variant="secondary" className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary">
                                     {capitalize(product.category)}
                                   </Badge>
                                 </div>
@@ -593,7 +593,7 @@ export default function ProdutosDesktop() {
 
                                 {/* Ações - Largura fixa - Alinhado com header */}
                                 <div className="w-[10%] flex justify-end items-center gap-1.5 px-2">
-                                  <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 p-0 h-8 w-8 rounded-lg border border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                                  <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 p-0 h-8 w-8 rounded-lg border border-primary/20 dark:border-primary/30 hover:border-primary/40 dark:hover:border-primary/50 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
                                     <History className="h-4 w-4" />
                                   </Button>} />
                                   <DropdownMenu>
@@ -693,7 +693,7 @@ export default function ProdutosDesktop() {
                     />
                   </div>
                 ) : (
-                  <div className="w-full aspect-square bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 rounded-xl flex items-center justify-center border-2 border-orange-200 dark:border-orange-800">
+                  <div className="w-full aspect-square bg-primary/10 dark:bg-primary/20 rounded-xl flex items-center justify-center border-2 border-primary/20 dark:border-primary/30">
                     <Package className="h-24 w-24 text-orange-600 dark:text-orange-400" />
                   </div>
                 )}

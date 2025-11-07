@@ -10,18 +10,29 @@ const funcionalidades = [
     titulo: 'Locuções AI',
     descricao: 'Gere locuções profissionais com inteligência artificial',
     icon: Mic,
-    rota: '/locucoes',
-    gradient: 'from-purple-500 to-pink-500',
-    bgGradient: 'from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20',
+    rota: '/dashboard/locucoes',
+    gradient: 'from-primary to-primary-light',
+    bgGradient: 'from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10',
     borderColor: 'border-purple-200 dark:border-purple-800',
     textColor: 'text-purple-700 dark:text-purple-300'
+  },
+  {
+    id: 'copywriting-produtos',
+    titulo: 'Agente de Copywriting',
+    descricao: 'Crie copywriting profissional de locuções para seus produtos',
+    icon: Sparkles,
+    rota: '/dashboard/agente-copywriting',
+    gradient: 'from-primary to-primary-light',
+    bgGradient: 'from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10',
+    borderColor: 'border-orange-200 dark:border-orange-800',
+    textColor: 'text-orange-700 dark:text-orange-300'
   },
   {
     id: 'whatsapp',
     titulo: 'WhatsApp em Massa',
     descricao: 'Envie mensagens e imagens para múltiplos contatos',
     icon: MessageSquare,
-    rota: '/whatsapp-mensagens',
+    rota: '/dashboard/whatsapp-mensagens',
     gradient: 'from-green-500 to-emerald-500',
     bgGradient: 'from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20',
     borderColor: 'border-green-200 dark:border-green-800',
@@ -37,7 +48,7 @@ export default function Extra() {
       <div className="page-container">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6 sm:mb-8">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg flex-shrink-0">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center shadow-lg flex-shrink-0">
             <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           </div>
           <div className="min-w-0">

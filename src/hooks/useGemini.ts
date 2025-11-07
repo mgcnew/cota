@@ -42,7 +42,7 @@ export const useGemini = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
@@ -82,10 +82,22 @@ export const useGemini = () => {
         }
       );
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Erro ao parsear resposta JSON:', jsonError);
+        const errorMsg = `Erro ao processar resposta da API (Status: ${response.status})`;
+        toast({
+          title: "Erro ao gerar locução",
+          description: errorMsg,
+          variant: "destructive"
+        });
+        return { text: '', error: errorMsg };
+      }
       
       if (!response.ok) {
-        const errorMsg = data.error?.message || 'Erro desconhecido';
+        const errorMsg = data?.error?.message || data?.error || `Erro ${response.status}: ${response.statusText}` || 'Erro desconhecido';
         console.error('Erro da API:', data);
         toast({
           title: "Erro ao gerar locução",
@@ -95,15 +107,18 @@ export const useGemini = () => {
         return { text: '', error: errorMsg };
       }
 
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-      if (!text) {
+      if (!text || !text.trim()) {
+        const errorMsg = data?.candidates?.[0]?.finishReason 
+          ? `Geração bloqueada: ${data.candidates[0].finishReason}` 
+          : 'A API não retornou texto válido';
         toast({
           title: "Resposta vazia",
-          description: "A API não retornou texto. Tente novamente.",
+          description: errorMsg,
           variant: "destructive"
         });
-        return { text: '', error: 'Resposta vazia' };
+        return { text: '', error: errorMsg };
       }
 
       // Adicionar ao histórico

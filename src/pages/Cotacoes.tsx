@@ -266,10 +266,10 @@ export default function Cotacoes() {
   ), [stats]);
 
   const renderCard2 = useMemo(() => (
-    <Card className="bg-amber-600 dark:bg-[#1C1F26] border border-amber-500/30 dark:border-gray-800 rounded-lg hover:border-amber-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-primary dark:bg-[#1C1F26] border border-primary/30 dark:border-gray-800 rounded-lg hover:border-primary/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-amber-700/50 dark:bg-gray-800">
+          <div className="p-2 rounded-lg bg-primary/50 dark:bg-gray-800">
             <Calendar className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -283,7 +283,7 @@ export default function Cotacoes() {
             {stats.porStatus.pendentes}
           </span>
           {stats.pendentesMais24h > 0 && (
-            <Badge className="bg-amber-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            <Badge className="bg-primary/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
               ⚠ {stats.pendentesMais24h}
             </Badge>
           )}
@@ -312,10 +312,10 @@ export default function Cotacoes() {
   ), [stats]);
 
   const renderCard3 = useMemo(() => (
-    <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-success dark:bg-[#1C1F26] border border-success/30 dark:border-gray-800 rounded-lg hover:border-success/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
+          <div className="p-2 rounded-lg bg-success/50 dark:bg-gray-800">
             <DollarSign className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -329,7 +329,7 @@ export default function Cotacoes() {
             {stats.economiaFormatada}
           </span>
           {stats.economiaTotal > 0 && (
-            <Badge className="bg-emerald-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            <Badge className="bg-success/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
               Total
             </Badge>
           )}
@@ -361,10 +361,10 @@ export default function Cotacoes() {
   ), [stats]);
 
   const renderCard4 = useMemo(() => (
-    <Card className="bg-blue-600 dark:bg-[#1C1F26] border border-blue-500/30 dark:border-gray-800 rounded-lg hover:border-blue-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-primary dark:bg-[#1C1F26] border border-primary/30 dark:border-gray-800 rounded-lg hover:border-primary/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-blue-700/50 dark:bg-gray-800">
+          <div className="p-2 rounded-lg bg-primary/50 dark:bg-gray-800">
             <Building2 className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -378,7 +378,7 @@ export default function Cotacoes() {
             {stats.mediaFornecedores}
           </span>
           {stats.totalFornecedoresUnicos > 0 && (
-            <Badge className="bg-blue-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            <Badge className="bg-primary/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
               {stats.totalFornecedoresUnicos} únicos
             </Badge>
           )}
@@ -685,7 +685,7 @@ export default function Cotacoes() {
                 </div>
 
                 <div className="space-y-2 sm:space-y-3">
-                  <div className="p-2.5 sm:p-3 rounded-lg bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-200/60 dark:border-indigo-700/30">
+                  <div className="p-2.5 sm:p-3 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30">
                     <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                       <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-indigo-600" />
                       <span className="text-xs sm:text-sm font-medium text-indigo-700 dark:text-indigo-400">Período</span>
@@ -921,7 +921,7 @@ export default function Cotacoes() {
                             <div className="flex flex-col gap-1 items-center">
                               {getStatusBadge(cotacao.statusReal)}
                               {cotacao.statusReal === 'planejada' && cotacao.dataPlanejada && (
-                                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 text-xs">
+                                <Badge variant="outline" className="bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary border-primary/20 dark:border-primary/30 text-xs">
                                   <Clock className="h-3 w-3 mr-1" />
                                   {new Date(cotacao.dataPlanejada).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
                                 </Badge>
@@ -954,7 +954,7 @@ export default function Cotacoes() {
                           {/* Fornecedores - Largura fixa, hidden on small screens */}
                           <div className="hidden sm:block w-[10%] px-2">
                             <div className="flex justify-center">
-                              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 font-medium">
+                              <Badge variant="outline" className="bg-primary/10 dark:bg-primary/20 border-primary/20 dark:border-primary/30 text-primary dark:text-primary font-medium">
                                 <Building2 className="h-3 w-3 mr-1" />
                                 {cotacao.fornecedores}
                               </Badge>

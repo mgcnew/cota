@@ -120,6 +120,91 @@ export default function Dashboard() {
     fill: ['#10b981', '#34d399', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'][index % 6]
   })), [filterDataByPeriod, economyPeriod]);
 
+  // Cálculos estatísticos para gráfico de evolução
+  const evolutionStats = useMemo(() => {
+    if (!evolutionData || evolutionData.length === 0) {
+      return { 
+        avgCotacoes: 0, 
+        avgFornecedores: 0, 
+        trendCotacoes: 0, 
+        trendFornecedores: 0,
+        maxCotacoes: 0,
+        maxFornecedores: 0,
+        minCotacoes: 0,
+        minFornecedores: 0
+      };
+    }
+    
+    const cotacoes = evolutionData.map(d => d.cotacoes || 0);
+    const fornecedores = evolutionData.map(d => d.fornecedores || 0);
+    
+    const avgCotacoes = cotacoes.reduce((a, b) => a + b, 0) / cotacoes.length;
+    const avgFornecedores = fornecedores.reduce((a, b) => a + b, 0) / fornecedores.length;
+    
+    // Calcular tendência (últimos 30% vs primeiros 30%)
+    const sliceSize = Math.max(1, Math.floor(evolutionData.length * 0.3));
+    const firstSlice = cotacoes.slice(0, sliceSize);
+    const lastSlice = cotacoes.slice(-sliceSize);
+    const firstAvg = firstSlice.reduce((a, b) => a + b, 0) / firstSlice.length;
+    const lastAvg = lastSlice.reduce((a, b) => a + b, 0) / lastSlice.length;
+    const trendCotacoes = firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg) * 100 : 0;
+    
+    const firstSliceFornecedores = fornecedores.slice(0, sliceSize);
+    const lastSliceFornecedores = fornecedores.slice(-sliceSize);
+    const firstAvgFornecedores = firstSliceFornecedores.reduce((a, b) => a + b, 0) / firstSliceFornecedores.length;
+    const lastAvgFornecedores = lastSliceFornecedores.reduce((a, b) => a + b, 0) / lastSliceFornecedores.length;
+    const trendFornecedores = firstAvgFornecedores > 0 ? ((lastAvgFornecedores - firstAvgFornecedores) / firstAvgFornecedores) * 100 : 0;
+    
+    return {
+      avgCotacoes,
+      avgFornecedores,
+      trendCotacoes,
+      trendFornecedores,
+      maxCotacoes: Math.max(...cotacoes),
+      maxFornecedores: Math.max(...fornecedores),
+      minCotacoes: Math.min(...cotacoes),
+      minFornecedores: Math.min(...fornecedores)
+    };
+  }, [evolutionData]);
+
+  // Cálculos estatísticos para gráfico de economia
+  const economyStats = useMemo(() => {
+    if (!economyData || economyData.length === 0) {
+      return { 
+        avgEconomia: 0, 
+        trendEconomia: 0,
+        maxEconomia: 0,
+        minEconomia: 0,
+        totalEconomia: 0,
+        avgCotacoes: 0
+      };
+    }
+    
+    const economias = economyData.map(d => d.economia || 0);
+    const cotacoes = economyData.map(d => d.cotacoes || 0);
+    
+    const avgEconomia = economias.reduce((a, b) => a + b, 0) / economias.length;
+    const avgCotacoes = cotacoes.reduce((a, b) => a + b, 0) / cotacoes.length;
+    const totalEconomia = economias.reduce((a, b) => a + b, 0);
+    
+    // Calcular tendência
+    const sliceSize = Math.max(1, Math.floor(economyData.length * 0.3));
+    const firstSlice = economias.slice(0, sliceSize);
+    const lastSlice = economias.slice(-sliceSize);
+    const firstAvg = firstSlice.reduce((a, b) => a + b, 0) / firstSlice.length;
+    const lastAvg = lastSlice.reduce((a, b) => a + b, 0) / lastSlice.length;
+    const trendEconomia = firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg) * 100 : 0;
+    
+    return {
+      avgEconomia,
+      trendEconomia,
+      maxEconomia: Math.max(...economias),
+      minEconomia: Math.min(...economias),
+      totalEconomia,
+      avgCotacoes
+    };
+  }, [economyData]);
+
   const economyBreakdowns = useMemo(() => {
     if (metrics.economiaPorPeriodo && metrics.economiaPorPeriodo.length > 0) {
       return metrics.economiaPorPeriodo;
@@ -239,11 +324,11 @@ export default function Dashboard() {
 
   // Helper function para renderizar Card 1 - Cotações Ativas (memoizada inline)
   const renderCard1 = useMemo(() => (
-    <Card className="bg-purple-600 dark:bg-[#1C1F26] border border-purple-500/30 dark:border-gray-800 rounded-lg hover:border-purple-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-primary dark:bg-[#1C1F26] border border-primary/30 dark:border-gray-800 rounded-lg hover:border-primary/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-purple-700/50 dark:bg-gray-800">
+            <div className="p-2 rounded-lg bg-primary/50 dark:bg-gray-800">
               <BarChart3 className="h-4 w-4 text-white dark:text-gray-400" />
             </div>
             <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -273,7 +358,7 @@ export default function Dashboard() {
                     <TooltipProvider>
                       <UiTooltip>
                         <TooltipTrigger asChild>
-                  <Badge className="bg-purple-700/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
+                  <Badge className="bg-primary/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
                     {metrics.crescimentoCotacoes > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {Math.abs(metrics.crescimentoCotacoes)}%
                   </Badge>
@@ -305,11 +390,11 @@ export default function Dashboard() {
 
   // Helper function para renderizar Card 2 - Economia Gerada (memoizada inline)
   const renderCard2 = useMemo(() => (
-    <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-success dark:bg-[#1C1F26] border border-success/30 dark:border-gray-800 rounded-lg hover:border-success/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
+            <div className="p-2 rounded-lg bg-success/50 dark:bg-gray-800">
               <DollarSign className="h-4 w-4 text-white dark:text-gray-400" />
             </div>
             <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -339,7 +424,7 @@ export default function Dashboard() {
                     <TooltipProvider>
                       <UiTooltip>
                         <TooltipTrigger asChild>
-                  <Badge className="bg-emerald-700/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
+                  <Badge className="bg-success/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
                     {metrics.crescimentoEconomia > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {Math.abs(metrics.crescimentoEconomia)}%
                   </Badge>
@@ -371,10 +456,10 @@ export default function Dashboard() {
 
   // Helper function para renderizar Card 3 - Fornecedores (memoizada inline)
   const renderCard3 = useMemo(() => (
-    <Card className="bg-indigo-600 dark:bg-[#1C1F26] border border-indigo-500/30 dark:border-gray-800 rounded-lg hover:border-indigo-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-info dark:bg-[#1C1F26] border border-info/30 dark:border-gray-800 rounded-lg hover:border-info/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-indigo-700/50 dark:bg-gray-800">
+          <div className="p-2 rounded-lg bg-info/50 dark:bg-gray-800">
             <Users className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -390,7 +475,7 @@ export default function Dashboard() {
                   <TooltipProvider>
                     <UiTooltip>
                       <TooltipTrigger asChild>
-                <Badge className="bg-indigo-700/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
+                <Badge className="bg-info/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
                   <ArrowUp className="w-3 h-3" />
                   +{isLoading ? '-' : metrics.taxaAtividade}%
                 </Badge>
@@ -421,12 +506,12 @@ export default function Dashboard() {
 
   // Helper function para renderizar Card 4 - Taxa de Aprovação (memoizada inline)
   const renderCard4 = useMemo(() => (
-    <Card className="bg-amber-600 dark:bg-[#1C1F26] border border-amber-500/30 dark:border-gray-800 rounded-lg hover:border-amber-400 dark:hover:border-gray-700 transition-colors duration-200">
+    <Card className="bg-info dark:bg-[#1C1F26] border border-info/30 dark:border-gray-800 rounded-lg hover:border-info/50 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-amber-700/50 dark:bg-gray-800">
-              <Target className="h-4 w-4 text-white dark:text-gray-400" />
+          <div className="p-2 rounded-lg bg-info/50 dark:bg-gray-800">
+            <Target className="h-4 w-4 text-white dark:text-gray-400" />
             </div>
             <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
               Taxa de Aprovação
@@ -455,7 +540,7 @@ export default function Dashboard() {
                   <TooltipProvider>
                     <UiTooltip>
                       <TooltipTrigger asChild>
-                  <Badge className="bg-amber-700/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
+                  <Badge className="bg-info/60 text-white font-medium border-0 cursor-help px-2 py-0.5 text-xs">
                     {metrics.variacaoTaxaAprovacao > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {metrics.variacaoTaxaAprovacao > 0 ? '+' : ''}{Math.abs(metrics.variacaoTaxaAprovacao || 0)}%
                   </Badge>
@@ -572,27 +657,64 @@ export default function Dashboard() {
           {/* Gráfico de Evolução - 2 colunas */}
           <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/30 shadow-sm dark:shadow-lg hover:shadow-md dark:hover:shadow-xl rounded-xl hover:border-gray-300 dark:hover:border-gray-600/50 transition-all duration-300">
             <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700/30">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-3 text-base">
-                  <div className="p-2 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg shadow-sm">
-                    <BarChart3 className="h-4 w-4 text-white" />
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-3 text-base">
+                    <div className="p-2 bg-gradient-to-br from-primary to-primary-light rounded-lg shadow-sm">
+                      <BarChart3 className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      Evolução das Cotações
+                    </span>
+                  </CardTitle>
+                  <Select value={evolutionPeriod} onValueChange={setEvolutionPeriod}>
+                    <SelectTrigger className="w-[140px] h-9 text-xs border-gray-200 dark:border-gray-700/60 hover:border-purple-400 dark:hover:border-purple-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7d">Últimos 7 dias</SelectItem>
+                      <SelectItem value="1m">Último mês</SelectItem>
+                      <SelectItem value="3m">3 meses</SelectItem>
+                      <SelectItem value="6m">6 meses</SelectItem>
+                      <SelectItem value="1y">1 ano</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* Indicadores de tendência */}
+                {evolutionData && evolutionData.length > 0 && (
+                  <div className="flex items-center gap-4 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                      <span className="text-gray-600 dark:text-gray-400">Cotações:</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        Média: {Math.round(evolutionStats.avgCotacoes)}
+                      </span>
+                      <span className={`flex items-center gap-1 ${evolutionStats.trendCotacoes >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {evolutionStats.trendCotacoes >= 0 ? (
+                          <ArrowUp className="w-3 h-3" />
+                        ) : (
+                          <ArrowDown className="w-3 h-3" />
+                        )}
+                        {Math.abs(evolutionStats.trendCotacoes).toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span className="text-gray-600 dark:text-gray-400">Fornecedores:</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        Média: {Math.round(evolutionStats.avgFornecedores)}
+                      </span>
+                      <span className={`flex items-center gap-1 ${evolutionStats.trendFornecedores >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {evolutionStats.trendFornecedores >= 0 ? (
+                          <ArrowUp className="w-3 h-3" />
+                        ) : (
+                          <ArrowDown className="w-3 h-3" />
+                        )}
+                        {Math.abs(evolutionStats.trendFornecedores).toFixed(1)}%
+                      </span>
+                    </div>
                   </div>
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    Evolução das Cotações
-                  </span>
-                </CardTitle>
-                <Select value={evolutionPeriod} onValueChange={setEvolutionPeriod}>
-                  <SelectTrigger className="w-[140px] h-9 text-xs border-gray-200 dark:border-gray-700/60 hover:border-purple-400 dark:hover:border-purple-500">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7d">Últimos 7 dias</SelectItem>
-                    <SelectItem value="1m">Último mês</SelectItem>
-                    <SelectItem value="3m">3 meses</SelectItem>
-                    <SelectItem value="6m">6 meses</SelectItem>
-                    <SelectItem value="1y">1 ano</SelectItem>
-                  </SelectContent>
-                </Select>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -656,36 +778,77 @@ export default function Dashboard() {
                       tickLine={false}
                       axisLine={false}
                     />
+                    {/* Linhas de média de referência */}
+                    <ReferenceLine 
+                      yAxisId="left"
+                      y={evolutionStats.avgCotacoes} 
+                      stroke="#7C3AED" 
+                      strokeDasharray="4 4" 
+                      strokeWidth={1.5}
+                      strokeOpacity={0.6}
+                      label={{ value: `Média: ${Math.round(evolutionStats.avgCotacoes)}`, position: 'right', fill: '#7C3AED', fontSize: 10 }}
+                    />
+                    <ReferenceLine 
+                      yAxisId="right"
+                      y={evolutionStats.avgFornecedores} 
+                      stroke="#22C55E" 
+                      strokeDasharray="4 4" 
+                      strokeWidth={1.5}
+                      strokeOpacity={0.6}
+                      label={{ value: `Média: ${Math.round(evolutionStats.avgFornecedores)}`, position: 'left', fill: '#22C55E', fontSize: 10 }}
+                    />
                     <RechartsTooltip 
                       content={({ active, payload, label }) => {
                         if (active && payload && payload.length) {
                           const cotacoesItem = payload.find(p => p.dataKey === 'cotacoes');
                           const fornecedoresItem = payload.find(p => p.dataKey === 'fornecedores');
                           
+                          const cotacoesValue = cotacoesItem?.value as number || 0;
+                          const fornecedoresValue = fornecedoresItem?.value as number || 0;
+                          
+                          const cotacoesDiff = cotacoesValue - evolutionStats.avgCotacoes;
+                          const fornecedoresDiff = fornecedoresValue - evolutionStats.avgFornecedores;
+                          const cotacoesPercent = evolutionStats.avgCotacoes > 0 ? (cotacoesDiff / evolutionStats.avgCotacoes) * 100 : 0;
+                          const fornecedoresPercent = evolutionStats.avgFornecedores > 0 ? (fornecedoresDiff / evolutionStats.avgFornecedores) * 100 : 0;
+                          
                           return (
                             <div className="bg-white dark:bg-[#1C1F26] p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700/30 backdrop-blur-sm">
                               <p className="font-semibold text-gray-900 dark:text-white mb-2.5 text-sm">{label}</p>
-                              <div className="space-y-1.5">
+                              <div className="space-y-2">
                                 {cotacoesItem && (
-                                  <div className="flex items-center justify-between gap-4">
-                                    <span className="text-sm text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
-                                      <div className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-sm"></div>
-                                      Cotações
-                                    </span>
-                                    <span className="font-bold text-purple-600 dark:text-purple-400">
-                                      {cotacoesItem.value || 0}
-                                    </span>
+                                  <div className="space-y-1">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <span className="text-sm text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-sm"></div>
+                                        Cotações
+                                      </span>
+                                      <span className="font-bold text-purple-600 dark:text-purple-400">
+                                        {cotacoesValue}
+                                      </span>
+                                    </div>
+                                    {Math.abs(cotacoesPercent) > 1 && (
+                                      <div className={`text-xs ${cotacoesPercent > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                        {cotacoesPercent > 0 ? '+' : ''}{cotacoesPercent.toFixed(1)}% vs média ({evolutionStats.avgCotacoes.toFixed(0)})
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                                 {fornecedoresItem && (
-                                  <div className="flex items-center justify-between gap-4">
-                                    <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1.5">
-                                      <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
-                                      Fornecedores
-                                    </span>
-                                    <span className="font-bold text-green-600 dark:text-green-400">
-                                      {fornecedoresItem.value || 0}
-                                    </span>
+                                  <div className="space-y-1">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1.5">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
+                                        Fornecedores
+                                      </span>
+                                      <span className="font-bold text-green-600 dark:text-green-400">
+                                        {fornecedoresValue}
+                                      </span>
+                                    </div>
+                                    {Math.abs(fornecedoresPercent) > 1 && (
+                                      <div className={`text-xs ${fornecedoresPercent > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                        {fornecedoresPercent > 0 ? '+' : ''}{fornecedoresPercent.toFixed(1)}% vs média ({evolutionStats.avgFornecedores.toFixed(0)})
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -788,7 +951,7 @@ export default function Dashboard() {
           <Card className="lg:col-span-1 bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/30 shadow-sm dark:shadow-lg hover:shadow-md dark:hover:shadow-xl rounded-xl hover:border-gray-300 dark:hover:border-gray-600/50 transition-all duration-300">
             <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-700/30">
               <CardTitle className="flex items-center gap-3 text-base">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center shadow-sm">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-light rounded-lg flex items-center justify-center shadow-sm">
                   <Award className="h-4 w-4 text-white" />
                 </div>
                 <span className="font-semibold text-gray-900 dark:text-white">Top Fornecedores</span>
@@ -826,27 +989,58 @@ export default function Dashboard() {
           {/* Gráfico de Economia - 2 colunas */}
           <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/30 shadow-sm dark:shadow-lg hover:shadow-md dark:hover:shadow-xl rounded-xl hover:border-gray-300 dark:hover:border-gray-600/50 transition-all duration-300">
             <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700/30">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-3 text-base">
-                  <div className="p-2 bg-gradient-to-br from-green-600 to-green-500 rounded-lg shadow-sm">
-                    <DollarSign className="h-4 w-4 text-white" />
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-3 text-base">
+                    <div className="p-2 bg-gradient-to-br from-green-600 to-green-500 rounded-lg shadow-sm">
+                      <DollarSign className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      Economia Mensal
+                    </span>
+                  </CardTitle>
+                  <Select value={economyPeriod} onValueChange={setEconomyPeriod}>
+                    <SelectTrigger className="w-[140px] h-9 text-xs border-gray-200 dark:border-gray-700/60 hover:border-green-400 dark:hover:border-green-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7d">Últimos 7 dias</SelectItem>
+                      <SelectItem value="1m">Último mês</SelectItem>
+                      <SelectItem value="3m">3 meses</SelectItem>
+                      <SelectItem value="6m">6 meses</SelectItem>
+                      <SelectItem value="1y">1 ano</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* Indicadores de economia */}
+                {economyData && economyData.length > 0 && (
+                  <div className="flex items-center gap-4 text-xs flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span className="text-gray-600 dark:text-gray-400">Total:</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {formatCurrency(economyStats.totalEconomia)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600 dark:text-gray-400">Média:</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {formatCurrency(economyStats.avgEconomia)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600 dark:text-gray-400">Tendência:</span>
+                      <span className={`flex items-center gap-1 font-semibold ${economyStats.trendEconomia >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {economyStats.trendEconomia >= 0 ? (
+                          <ArrowUp className="w-3 h-3" />
+                        ) : (
+                          <ArrowDown className="w-3 h-3" />
+                        )}
+                        {Math.abs(economyStats.trendEconomia).toFixed(1)}%
+                      </span>
+                    </div>
                   </div>
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    Economia Mensal
-                  </span>
-                </CardTitle>
-                <Select value={economyPeriod} onValueChange={setEconomyPeriod}>
-                  <SelectTrigger className="w-[140px] h-9 text-xs border-gray-200 dark:border-gray-700/60 hover:border-green-400 dark:hover:border-green-500">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7d">Últimos 7 dias</SelectItem>
-                    <SelectItem value="1m">Último mês</SelectItem>
-                    <SelectItem value="3m">3 meses</SelectItem>
-                    <SelectItem value="6m">6 meses</SelectItem>
-                    <SelectItem value="1y">1 ano</SelectItem>
-                  </SelectContent>
-                </Select>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -894,6 +1088,15 @@ export default function Dashboard() {
                       axisLine={false}
                       tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
                     />
+                    {/* Linha de média de referência */}
+                    <ReferenceLine 
+                      y={economyStats.avgEconomia} 
+                      stroke="#22C55E" 
+                      strokeDasharray="4 4" 
+                      strokeWidth={1.5}
+                      strokeOpacity={0.6}
+                      label={{ value: `Média: ${formatCurrency(economyStats.avgEconomia)}`, position: 'right', fill: '#22C55E', fontSize: 10 }}
+                    />
                     <RechartsTooltip 
                       content={({ active, payload, label }) => {
                         if (active && payload && payload.length) {
@@ -901,19 +1104,32 @@ export default function Dashboard() {
                           const economiaItem = payload.find(p => p.dataKey === 'economia');
                           const cotacoesItem = payload.find(p => p.dataKey === 'cotacoes');
                           
+                          const economiaValue = economiaItem?.value as number || 0;
+                          const cotacoesValue = cotacoesItem?.value as number || 0;
+                          
+                          const economiaDiff = economiaValue - economyStats.avgEconomia;
+                          const economiaPercent = economyStats.avgEconomia > 0 ? (economiaDiff / economyStats.avgEconomia) * 100 : 0;
+                          
                           return (
                             <div className="bg-white dark:bg-[#1e293b] p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800">
                               <p className="font-semibold text-gray-900 dark:text-white mb-2">{label}</p>
-                              <div className="space-y-1">
+                              <div className="space-y-2">
                                 {economiaItem && (
-                                  <div className="flex items-center justify-between gap-4">
-                                    <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
-                                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                      Economia
-                                    </span>
-                                    <span className="font-bold text-green-600 dark:text-green-400">
-                                      R$ {economiaItem.value?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0,00'}
-                                    </span>
+                                  <div className="space-y-1">
+                                    <div className="flex items-center justify-between gap-4">
+                                      <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                        Economia
+                                      </span>
+                                      <span className="font-bold text-green-600 dark:text-green-400">
+                                        {formatCurrency(economiaValue)}
+                                      </span>
+                                    </div>
+                                    {Math.abs(economiaPercent) > 1 && (
+                                      <div className={`text-xs ${economiaPercent > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                        {economiaPercent > 0 ? '+' : ''}{economiaPercent.toFixed(1)}% vs média ({formatCurrency(economyStats.avgEconomia)})
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                                 {cotacoesItem && (
@@ -923,7 +1139,7 @@ export default function Dashboard() {
                                       Cotações finalizadas
                                     </span>
                                     <span className="font-semibold text-purple-600 dark:text-purple-400">
-                                      {cotacoesItem.value || 0}
+                                      {cotacoesValue || 0}
                                     </span>
                                   </div>
                                 )}
@@ -939,20 +1155,6 @@ export default function Dashboard() {
                         paddingTop: '15px'
                       }}
                       iconType="circle"
-                    />
-                    {/* Linha de meta (opcional) */}
-                    <ReferenceLine 
-                      y={5000} 
-                      stroke="#FACC15" 
-                      strokeDasharray="5 5" 
-                      strokeWidth={2}
-                      label={{ 
-                        value: 'Meta: R$ 5k', 
-                        position: 'right',
-                        fill: '#FACC15',
-                        fontSize: 11,
-                        fontWeight: 600
-                      }}
                     />
                     {/* Área com gradiente */}
                     <Area 
@@ -1022,7 +1224,7 @@ export default function Dashboard() {
           <Card className="lg:col-span-1 bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/30 shadow-sm dark:shadow-lg hover:shadow-md dark:hover:shadow-xl rounded-xl hover:border-gray-300 dark:hover:border-gray-600/50 transition-all duration-300">
             <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-700/30">
               <CardTitle className="flex items-center gap-3 text-base">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center shadow-sm">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-light rounded-lg flex items-center justify-center shadow-sm">
                   <Clock className="h-4 w-4 text-white" />
                 </div>
                 <span className="font-semibold text-gray-900 dark:text-white">Cotações Recentes</span>

@@ -10,8 +10,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Calendar, Package, Users, TrendingDown, Edit2, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus, Edit, Plus, Trash2, Check, ChevronsUpDown, Loader2, Calendar as CalendarIcon, BarChart3, AlertCircle, Eye, Info } from "lucide-react";
+import { Calendar, Package, Users, TrendingDown, Edit2, Edit3, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus, Edit, Plus, Trash2, Check, ChevronsUpDown, Loader2, Calendar as CalendarIcon, BarChart3, AlertCircle, Eye, Info } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useMobile } from "@/contexts/MobileProvider";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -45,6 +46,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import ConvertToOrderDialog from "./ConvertToOrderDialog";
 import ConvertToMultipleOrdersDialog, { SupplierOrder } from "./ConvertToMultipleOrdersDialog";
+import { PriceConverter } from "./PriceConverter";
 import { SelectSupplierPerProductDialog } from "./SelectSupplierPerProductDialog";
 
 // Schemas de validação para edição
@@ -111,11 +113,18 @@ interface ViewQuoteDialogProps {
   readOnly?: boolean;
 }
 
+type EditSection = "detalhes" | "fornecedores" | "observacoes";
+
 export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab, readOnly = false }: ViewQuoteDialogProps) {
   const [open, setOpen] = useState(false);
-  // Se não foi especificado um defaultTab, prioriza "edicao" se disponível, senão "detalhes"
-  const initialTab = defaultTab || (onEdit && quote.status !== "concluida" && !readOnly ? "edicao" : "detalhes");
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const isMobile = useMobile();
+  
+  // Estados do modo (similar ao PedidoDialog)
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [activeSection, setActiveSection] = useState<EditSection>("detalhes");
+  
+  // Mantém compatibilidade com tabs antigas temporariamente
+  const [activeTab, setActiveTab] = useState(defaultTab || "detalhes");
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, number>>({});
@@ -241,16 +250,29 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   };
 
   // Get best supplier based on total value
-  // Carregar dados para edição quando tab for acessada
+  // Resetar estados quando modal abre/fecha
   useEffect(() => {
-    if (open && activeTab === "edicao" && onEdit) {
+    if (open) {
+      setIsEditMode(false);
+      setActiveSection("detalhes");
+      // Carregar dados para edição se necessário
+      if (onEdit && editProducts.length === 0 && !editLoading) {
+        loadEditData();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Carregar dados para edição quando entrar em modo de edição
+  useEffect(() => {
+    if (open && isEditMode && onEdit) {
       const shouldLoad = editProducts.length === 0 && !editLoading;
       if (shouldLoad) {
         loadEditData();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, activeTab]);
+  }, [open, isEditMode]);
 
   const loadEditData = async () => {
     setEditLoading(true);
@@ -346,6 +368,13 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
      (supplier.contact && supplier.contact.toLowerCase().includes(editSupplierSearch.toLowerCase())))
   );
 
+  // Menu items para modo de edição (similar ao PedidoDialog)
+  const menuItems = [
+    { id: "detalhes" as EditSection, label: "Detalhes da Cotação", icon: FileText },
+    { id: "fornecedores" as EditSection, label: "Fornecedores", icon: Building2 },
+    { id: "observacoes" as EditSection, label: "Observações", icon: FileText },
+  ];
+
   const handleEditSubmit = async (data: QuoteFormData) => {
     if (!onEdit) return;
     
@@ -356,8 +385,9 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         title: "✅ Cotação atualizada",
         description: "As alterações foram salvas com sucesso.",
       });
-      // Opcional: voltar para tab de detalhes após salvar
-      setActiveTab("detalhes");
+      // Voltar para modo de visualização após salvar
+      setIsEditMode(false);
+      setActiveSection("detalhes");
     } catch (error) {
       console.error("Erro ao salvar:", error);
       toast({
@@ -594,15 +624,15 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         {trigger}
       </DialogTrigger>
       <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 space-y-0 border-b border-gray-200/60 dark:border-gray-700/40 bg-gradient-to-r from-gray-50/50 to-slate-50/50 dark:from-gray-800/50 dark:to-gray-900/50">
+        <DialogHeader className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-                <Package className="h-4 w-4" />
+              <div className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} rounded-lg bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0`}>
+                {isEditMode ? <Edit3 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} /> : <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />}
               </div>
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <DialogTitle className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                  Gerenciar Cotação
+                <DialogTitle className={`${isMobile ? 'text-lg' : 'text-base sm:text-lg'} font-semibold text-gray-900 dark:text-white truncate`}>
+                  {isEditMode ? `Editar Cotação #${quote?.id?.substring(0, 8)}` : `Cotação #${quote?.id?.substring(0, 8)}`}
                 </DialogTitle>
                 <div className="hidden sm:block">
                   {getStatusBadge(quote.status)}
@@ -610,175 +640,120 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </div>
             </div>
             
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              onClick={() => setOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Fechar</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <div className="flex items-center gap-2">
+              {!isEditMode && onEdit && quote.status !== "concluida" && !readOnly && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditMode(true)}
+                  className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'}`}
+                >
+                  <Edit3 className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5`} />
+                  Editar
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsEditMode(false);
+                  setOpen(false);
+                }}
+                className={`${isMobile ? 'h-9 w-9' : 'h-8 w-8'} p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700`}
+              >
+                <X className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 
-        <div className="flex flex-col flex-1 min-h-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-1 min-h-0">
-            <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-gray-200/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm flex-shrink-0">
-              <TabsList className={`grid w-full ${onEdit && quote.status !== "concluida" && !readOnly ? "grid-cols-4" : "grid-cols-3"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
-                {onEdit && quote.status !== "concluida" && !readOnly && (
-                  <TabsTrigger
-                    value="edicao"
-                    className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-orange-600 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-orange-700 dark:data-[state=active]:hover:bg-orange-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                  >
-                    <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="hidden xs:inline">Edição</span>
-                    {editForm.formState.isDirty && (
-                      <AlertCircle className="h-3 w-3 text-orange-500 data-[state=active]:text-orange-100 animate-pulse flex-shrink-0" />
-                    )}
-                  </TabsTrigger>
-                )}
-                <TabsTrigger
-                  value="detalhes"
-                  className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-blue-600 dark:data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-blue-700 dark:data-[state=active]:hover:bg-blue-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                >
-                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span className="hidden xs:inline">Detalhes</span>
-                  {quote.fornecedoresParticipantes.length > 0 && (
-                    <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 data-[state=active]:bg-blue-500/20 dark:data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-100 dark:data-[state=active]:text-blue-100">
-                      {quote.fornecedoresParticipantes.length}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger
-                  value="comparativo"
-                  className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-purple-600 dark:data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-purple-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-purple-700 dark:data-[state=active]:hover:bg-purple-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                >
-                  <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span className="hidden xs:inline">Comparativo</span>
-                </TabsTrigger>
-                {!readOnly && (
-                <TabsTrigger
-                  value="atualizacao"
-                    className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-emerald-600 dark:data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-emerald-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-emerald-700 dark:data-[state=active]:hover:bg-emerald-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                >
-                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span className="hidden xs:inline">Valores</span>
-                  {products.length > 0 && (
-                      <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 data-[state=active]:bg-emerald-500/20 dark:data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-100 dark:data-[state=active]:text-emerald-100">
-                      {products.length}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-                )}
-              </TabsList>
-            </div>
+        <div className="flex flex-col flex-1 overflow-hidden min-h-0">
+          {isEditMode ? (
+            // Modo de Edição (similar ao PedidoDialog)
+            <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 overflow-hidden`}>
+              {/* Menu Lateral Esquerdo - Desktop | Tabs - Mobile */}
+              {isMobile ? (
+                <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <div className="flex overflow-x-auto">
+                    {menuItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setActiveSection(item.id)}
+                          className={cn(
+                            "flex-shrink-0 px-4 py-3 flex items-center gap-2 border-b-2 transition-colors",
+                            activeSection === item.id
+                              ? "border-primary dark:border-primary text-primary dark:text-primary bg-white dark:bg-gray-900"
+                              : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                          )}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="w-56 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col shadow-sm">
+                  <ScrollArea className="flex-1">
+                    <div className="p-2 space-y-1">
+                      {menuItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveSection(item.id)}
+                            className={cn(
+                              "w-full px-3 py-2.5 flex items-center gap-3 rounded-lg text-sm font-medium transition-colors",
+                              activeSection === item.id
+                                ? "bg-primary dark:bg-primary text-white shadow-sm"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                            )}
+                          >
+                            <Icon className="h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
 
-            {/* Tab de Edição - Primeira Tab */}
-            {onEdit && quote.status !== "concluida" && !readOnly && (
-              <TabsContent value="edicao" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0">
-                {editLoading ? (
-                  <ScrollArea className="h-full">
-                    <div className="flex items-center justify-center h-full min-h-[400px] p-6">
-                      <div className="text-center space-y-4 w-full max-w-md">
-                        <Loader2 className="h-8 w-8 animate-spin text-orange-500 mx-auto" />
+              {/* Conteúdo Principal de Edição */}
+              <ScrollArea className="flex-1 bg-gray-50 dark:bg-gray-900 min-h-0 h-full">
+                <div className={`${isMobile ? 'p-4' : 'p-4 sm:p-6'} pb-8`}>
+                  {editLoading ? (
+                    <div className="flex items-center justify-center h-full min-h-[400px]">
+                      <div className="text-center space-y-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto" />
                         <div className="space-y-2">
                           <Skeleton className="h-4 w-3/4 mx-auto" />
                           <Skeleton className="h-4 w-1/2 mx-auto" />
                         </div>
                       </div>
                     </div>
-                  </ScrollArea>
-                ) : (
-                  <Form {...editForm}>
-                    <form onSubmit={editForm.handleSubmit(handleEditSubmit)} className="flex flex-col h-full">
-                      {/* Barra de Ações Fixa no Topo */}
-                      <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-2.5 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Edit className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Editar Cotação</h3>
-                          {editForm.formState.isDirty && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Badge variant="outline" className="text-[10px] border-orange-300 dark:border-orange-700 text-orange-600 dark:text-orange-400 animate-pulse">
-                                    Alterações não salvas
-                                  </Badge>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Você tem alterações não salvas</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  type="button" 
-                                  variant="outline" 
-                                  onClick={() => setActiveTab("detalhes")}
-                                  disabled={isSavingEdit}
-                                  size="sm"
-                                  className="h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-                                >
-                                  Cancelar
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Cancelar edição e voltar aos detalhes</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  type="submit"
-                                  disabled={isSavingEdit || !editForm.formState.isDirty}
-                                  size="sm"
-                                  className="h-8 text-xs bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white disabled:opacity-50"
-                                >
-                                  {isSavingEdit ? (
-                                    <>
-                                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                                      Salvando...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Save className="h-3.5 w-3.5 mr-1.5" />
-                                      Salvar
-                                    </>
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{editForm.formState.isDirty ? "Salvar alterações" : "Nenhuma alteração para salvar"}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </div>
-
-                      <ScrollArea className="flex-1">
-                        <div className="space-y-3 p-2.5 sm:p-3">
+                  ) : (
+                    <>
+                      {activeSection === "detalhes" && (
+                        <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
+                          <div className={`bg-white dark:bg-gray-800 rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-gray-200 dark:border-gray-700`}>
+                            <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-200 dark:border-gray-700`}>
+                              Detalhes da Cotação
+                            </h3>
+                            <Form {...editForm}>
+                              <form onSubmit={editForm.handleSubmit(handleEditSubmit)} className="space-y-4">
                         {/* Seção 1: Campos Essenciais - Grid Compacto */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                           {/* Período */}
                           <Card className="border border-blue-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
                             <div className="p-2.5 border-b border-blue-200/60 dark:border-gray-700/40 bg-blue-50/50 dark:bg-gray-800">
                               <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                <Calendar className="h-4 w-4 text-primary dark:text-primary" />
                                 <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Período*</h4>
                               </div>
                             </div>
@@ -921,7 +896,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           <Card className="border border-indigo-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
                             <div className="p-2.5 border-b border-indigo-200/60 dark:border-gray-700/40 bg-indigo-50/50 dark:bg-gray-800">
                               <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                                <FileText className="h-4 w-4 text-primary dark:text-primary" />
                                 <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Status*</h4>
                               </div>
                             </div>
@@ -1115,7 +1090,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           <Card className="border border-teal-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
                             <div className="p-2.5 border-b border-teal-200/60 dark:border-gray-700/40 bg-teal-50/50 dark:bg-gray-800">
                               <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                                <Users className="h-4 w-4 text-primary dark:text-primary" />
                                 <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Fornecedores (Opcional)</h4>
                               </div>
                             </div>
@@ -1214,25 +1189,127 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                             </div>
                           </Card>
                         </div>
+                        
+                        {/* Botões de ação */}
+                        <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => {
+                              setIsEditMode(false);
+                              editForm.reset();
+                            }}
+                            disabled={isSavingEdit}
+                            size="sm"
+                            className={`${isMobile ? 'h-10 px-4' : 'h-9 px-3'} text-sm`}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button 
+                            type="submit"
+                            disabled={isSavingEdit || !editForm.formState.isDirty}
+                            size="sm"
+                            className={`${isMobile ? 'h-10 px-4' : 'h-9 px-3'} text-sm bg-primary hover:bg-primary/90 text-white`}
+                          >
+                            {isSavingEdit ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Salvando...
+                              </>
+                            ) : (
+                              <>
+                                <Save className="h-4 w-4 mr-2" />
+                                Salvar
+                              </>
+                            )}
+                          </Button>
                         </div>
-                      </ScrollArea>
-                    </form>
-                  </Form>
-                )}
-              </TabsContent>
-            )}
+                      </form>
+                    </Form>
+                          </div>
+                        </div>
+                      )}
 
-            <TabsContent value="detalhes" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0">
-              <ScrollArea className="h-full">
-                <div className="p-2.5 sm:p-3 md:p-4">
+                      {activeSection === "fornecedores" && (
+                        <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
+                          <div className={`bg-white dark:bg-gray-800 rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-gray-200 dark:border-gray-700`}>
+                            <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-200 dark:border-gray-700`}>
+                              Fornecedores
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Seção de fornecedores em construção</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeSection === "observacoes" && (
+                        <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
+                          <div className={`bg-white dark:bg-gray-800 rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-gray-200 dark:border-gray-700`}>
+                            <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-200 dark:border-gray-700`}>
+                              Observações
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Seção de observações em construção</p>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+          ) : (
+            // Modo de Visualização
+            <ScrollArea className="flex-1 bg-gray-50 dark:bg-gray-900 min-h-0 h-full">
+              <div className={`${isMobile ? 'p-4 space-y-4' : 'p-4 sm:p-6 space-y-6'} pb-8`}>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-gray-200/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm flex-shrink-0">
+                    <TabsList className={`grid w-full ${!readOnly ? "grid-cols-3" : "grid-cols-2"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
+                      <TabsTrigger
+                        value="detalhes"
+                        className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-primary/10 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-primary/90 dark:data-[state=active]:hover:bg-primary/90 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
+                      >
+                        <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                        <span className="hidden xs:inline">Detalhes</span>
+                        {quote.fornecedoresParticipantes.length > 0 && (
+                          <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary data-[state=active]:bg-primary/20 dark:data-[state=active]:bg-primary/20 data-[state=active]:text-white dark:data-[state=active]:text-white">
+                            {quote.fornecedoresParticipantes.length}
+                          </Badge>
+                        )}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="comparativo"
+                        className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-purple-600 dark:data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-purple-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-purple-700 dark:data-[state=active]:hover:bg-purple-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
+                      >
+                        <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                        <span className="hidden xs:inline">Comparativo</span>
+                      </TabsTrigger>
+                      {!readOnly && (
+                      <TabsTrigger
+                        value="atualizacao"
+                          className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-success dark:data-[state=active]:bg-success data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-success/10 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-success/90 dark:data-[state=active]:hover:bg-success/90 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
+                      >
+                        <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                        <span className="hidden xs:inline">Valores</span>
+                        {products.length > 0 && (
+                            <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-success/20 dark:bg-success/20 text-success dark:text-success data-[state=active]:bg-success/30 dark:data-[state=active]:bg-success/30 data-[state=active]:text-white dark:data-[state=active]:text-white">
+                              {products.length}
+                            </Badge>
+                          )}
+                      </TabsTrigger>
+                      )}
+                    </TabsList>
+                  </div>
+
+                  <TabsContent value="detalhes" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0 mt-0">
+                    <ScrollArea className="h-full">
+                      <div className="p-2.5 sm:p-3 md:p-4">
                   {/* Layout otimizado e compacto */}
                   <div className="max-w-5xl mx-auto space-y-3">
                 
                 {/* Seção 1: Resumo Executivo - Grid Compacto */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
-                  <Card className="p-2 sm:p-2.5 border border-blue-200/80 dark:border-blue-800/30 bg-gradient-to-br from-blue-50/90 to-blue-100/60 dark:from-blue-500/10 dark:to-transparent hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200 rounded-lg shadow-sm dark:shadow-none">
+                  <Card className="p-2 sm:p-2.5 border border-primary/20 dark:border-primary/30 bg-primary/5 dark:bg-primary/10 hover:border-primary/40 dark:hover:border-primary/50 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200 rounded-lg shadow-sm dark:shadow-none">
                     <div className="flex items-center gap-1.5">
-                      <div className="p-1.5 rounded-lg bg-blue-600 dark:bg-blue-600 text-white flex-shrink-0">
+                      <div className="p-1.5 rounded-lg bg-primary text-white flex-shrink-0">
                         <Package className="h-3.5 w-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -1242,9 +1319,9 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     </div>
                   </Card>
 
-                  <Card className="p-2 sm:p-2.5 border border-purple-200 dark:border-purple-800/30 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-500/10 dark:to-transparent hover:border-purple-300 dark:hover:border-purple-700 transition-all rounded-lg shadow-sm dark:shadow-none">
+                  <Card className="p-2 sm:p-2.5 border border-primary/20 dark:border-primary/30 bg-primary/5 dark:bg-primary/10 hover:border-primary/40 dark:hover:border-primary/50 transition-all rounded-lg shadow-sm dark:shadow-none">
                     <div className="flex items-center gap-1.5">
-                      <div className="p-1.5 rounded-lg bg-purple-600 dark:bg-purple-600 text-white flex-shrink-0">
+                      <div className="p-1.5 rounded-lg bg-primary text-white flex-shrink-0">
                         <Users className="h-3.5 w-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -1254,9 +1331,9 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     </div>
                   </Card>
 
-                  <Card className="p-2 sm:p-2.5 border border-amber-200 dark:border-amber-800/30 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-500/10 dark:to-transparent hover:border-amber-300 dark:hover:border-amber-700 transition-all rounded-lg shadow-sm dark:shadow-none">
+                  <Card className="p-2 sm:p-2.5 border border-primary/20 dark:border-primary/30 bg-primary/5 dark:bg-primary/10 hover:border-primary/40 dark:hover:border-primary/50 transition-all rounded-lg shadow-sm dark:shadow-none">
                     <div className="flex items-center gap-1.5">
-                      <div className="p-1.5 rounded-lg bg-amber-600 dark:bg-amber-600 text-white flex-shrink-0">
+                      <div className="p-1.5 rounded-lg bg-primary text-white flex-shrink-0">
                         <Clock className="h-3.5 w-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -1271,9 +1348,9 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     </div>
                   </Card>
 
-                  <Card className="p-2 sm:p-2.5 border border-emerald-200 dark:border-emerald-800/30 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-500/10 dark:to-transparent hover:border-emerald-300 dark:hover:border-emerald-700 transition-all rounded-lg shadow-sm dark:shadow-none">
+                  <Card className="p-2 sm:p-2.5 border border-success/20 dark:border-success/30 bg-success/5 dark:bg-success/10 hover:border-success/40 dark:hover:border-success/50 transition-all rounded-lg shadow-sm dark:shadow-none">
                     <div className="flex items-center gap-1.5">
-                      <div className="p-1.5 rounded-lg bg-emerald-600 dark:bg-emerald-600 text-white flex-shrink-0">
+                      <div className="p-1.5 rounded-lg bg-success text-white flex-shrink-0">
                         <TrendingDown className="h-3.5 w-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -1286,10 +1363,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                 {/* Seção 2: Melhor Oferta Destaque */}
                 {bestSupplier && (
-                  <Card className="p-3 sm:p-4 border-2 border-emerald-300/70 dark:border-emerald-800/30 bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100/50 dark:from-emerald-500/10 dark:to-transparent rounded-lg shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
+                  <Card className="p-3 sm:p-4 border-2 border-success/30 dark:border-success/30 bg-success/5 dark:bg-success/10 rounded-lg shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                        <div className="p-2 rounded-lg bg-emerald-600 dark:bg-emerald-600 text-white flex-shrink-0">
+                        <div className="p-2 rounded-lg bg-success text-white flex-shrink-0">
                           <Star className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -1300,7 +1377,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </div>
                       <div className="flex-shrink-0 text-right">
                         <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mb-0.5">Economia</p>
-                        <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{quote.economia}</p>
+                        <p className="text-base font-bold text-success dark:text-success">{quote.economia}</p>
                       </div>
                     </div>
                   </Card>
@@ -1345,12 +1422,12 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                   <div className="flex items-center gap-1.5">
                                     <div className={cn(
                                       "w-1.5 h-1.5 rounded-full flex-shrink-0",
-                                      fornecedor.status === 'respondido' ? "bg-emerald-500 dark:bg-gray-600" : "bg-amber-500 dark:bg-gray-500"
+                                      fornecedor.status === 'respondido' ? "bg-success dark:bg-gray-600" : "bg-warning dark:bg-gray-500"
                                     )}></div>
                                     <div className="flex-1 min-w-0">
                                       <p className="font-semibold text-xs text-slate-900 dark:text-white truncate">
                                         {fornecedor.nome}
-                                        {isBest && <Star className="inline-block h-2.5 w-2.5 ml-0.5 text-emerald-600 dark:text-gray-400" />}
+                                        {isBest && <Star className="inline-block h-2.5 w-2.5 ml-0.5 text-success dark:text-gray-400" />}
                                       </p>
                                       {fornecedor.dataResposta && (
                                         <p className="text-[10px] text-slate-500 dark:text-gray-400 truncate">{fornecedor.dataResposta}</p>
@@ -1364,8 +1441,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                     className={cn(
                                       "text-[10px] h-4 px-1.5",
                                       fornecedor.status === 'respondido' 
-                                        ? "bg-emerald-100 dark:bg-gray-700/50 text-emerald-700 dark:text-gray-300 border-emerald-200 dark:border-gray-600" 
-                                        : "border-amber-300 dark:border-gray-600 text-amber-700 dark:text-gray-400 bg-amber-50 dark:bg-gray-800/50"
+                                        ? "bg-success/20 dark:bg-gray-700/50 text-success dark:text-gray-300 border-success/30 dark:border-gray-600" 
+                                        : "border-warning/30 dark:border-gray-600 text-warning dark:text-gray-400 bg-warning/10 dark:bg-gray-800/50"
                                     )}
                                   >
                                     {fornecedor.status === 'respondido' ? 'OK' : 'Pend.'}
@@ -1375,7 +1452,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                   {totalValue > 0 ? (
                                     <p className={cn(
                                       "font-bold text-xs",
-                                      isBest ? "text-emerald-600 dark:text-gray-300" : "text-slate-900 dark:text-white"
+                                      isBest ? "text-success dark:text-gray-300" : "text-slate-900 dark:text-white"
                                     )}>
                                       R$ {totalValue.toFixed(2)}
                                     </p>
@@ -1419,7 +1496,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     <div className="p-2.5 sm:p-3">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-gray-700/50">
-                          <Building2 className="h-3.5 w-3.5 text-emerald-600 dark:text-gray-300" />
+                          <Building2 className="h-3.5 w-3.5 text-primary dark:text-gray-300" />
                         </div>
                         <div>
                           <h3 className="text-xs font-semibold text-gray-900 dark:text-white">
@@ -1429,7 +1506,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                         </div>
                       </div>
                       <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
-                        <SelectTrigger className="w-full h-9 text-xs border-emerald-200 dark:border-gray-700/50 hover:border-emerald-300 dark:hover:border-gray-600 focus:ring-emerald-500 dark:focus:ring-gray-600 focus:ring-2 transition-all">
+                        <SelectTrigger className="w-full h-9 text-xs border-primary/20 dark:border-gray-700/50 hover:border-primary/40 dark:hover:border-gray-600 focus:ring-primary dark:focus:ring-primary focus:ring-2 transition-all">
                           <SelectValue placeholder="Escolha um fornecedor..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -1449,7 +1526,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                     <span className="font-medium">{fornecedor.nome}</span>
                                   </div>
                                   {totalValue > 0 && (
-                                    <span className="text-xs font-semibold text-emerald-600 dark:text-gray-300">
+                                    <span className="text-xs font-semibold text-primary dark:text-gray-300">
                                       R$ {totalValue.toFixed(2)}
                                     </span>
                                   )}
@@ -1466,7 +1543,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   <Card className="border border-gray-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm flex flex-col overflow-hidden flex-1 min-h-0">
                     <div className="p-2 border-b border-gray-200/60 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/50 flex-shrink-0">
                       <h4 className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                        <Users className="h-3 w-3 text-emerald-600 dark:text-gray-400" />
+                        <Users className="h-3 w-3 text-primary dark:text-gray-400" />
                         Todos os Fornecedores
                       </h4>
                     </div>
@@ -1485,7 +1562,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                             className={cn(
                               "w-full text-left p-2 rounded-md transition-all duration-200 border",
                               isSelected 
-                                ? "bg-emerald-50 dark:bg-gray-700/50 border-emerald-300 dark:border-gray-600 shadow-sm" 
+                                ? "bg-primary/10 dark:bg-gray-700/50 border-primary/30 dark:border-gray-600 shadow-sm" 
                                 : "hover:bg-gray-50 dark:hover:bg-gray-700/50 border-transparent hover:border-gray-200 dark:hover:border-gray-600"
                             )}
                           >
@@ -1560,7 +1637,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                     </Card>
                   ) : (
                     <Card className="h-full border-2 border-emerald-200/80 dark:border-emerald-800/60 bg-white dark:bg-gray-800 rounded-lg overflow-hidden flex flex-col shadow-md">
-                      <div className="p-2.5 border-b border-gray-200/60 dark:border-gray-700/50 bg-gradient-to-r from-emerald-50/50 to-green-50/30 dark:bg-[#1C1F26] flex items-center justify-between flex-shrink-0">
+                      <div className="p-2.5 border-b border-gray-200/60 dark:border-gray-700/50 bg-success/5 dark:bg-[#1C1F26] flex items-center justify-between flex-shrink-0">
                         <div className="flex items-center gap-2">
                           <div className="p-1.5 rounded-lg bg-emerald-600 dark:bg-gray-700 text-white">
                             <DollarSign className="h-3.5 w-3.5" />
@@ -1650,6 +1727,22 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                       min="0"
                                       placeholder="0.00"
                                     />
+                                    <PriceConverter
+                                      currentValue={editedValues[product.product_id] || currentValue}
+                                      productQuantity={product.quantidade}
+                                      productUnit={product.unidade}
+                                      onConvert={(convertedValue) => {
+                                        setEditedValues(prev => ({
+                                          ...prev,
+                                          [product.product_id]: convertedValue
+                                        }));
+                                        // Focar no input após converter
+                                        setTimeout(() => {
+                                          editInputRef.current?.focus();
+                                          editInputRef.current?.select();
+                                        }, 100);
+                                      }}
+                                    />
                                       <div className="flex gap-0.5">
                                       <Button
                                         size="sm"
@@ -1664,10 +1757,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                         onClick={handleCancelEdit}
                                           className="border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 h-8 w-8 p-0"
                                       >
-                                          <X className="h-3.5 w-3.5" />
+                                        <X className="h-3.5 w-3.5" />
                                       </Button>
-                                      </div>
                                     </div>
+                                  </div>
                                   ) : (
                                     <div className="flex items-center gap-1.5">
                                       <span className={cn(
@@ -1727,7 +1820,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                 {/* Resumo Comparativo Superior */}
                 {bestSupplier && (
-                  <Card className="mb-2.5 border-2 border-purple-200/80 dark:border-purple-800/30 bg-gradient-to-br from-purple-50 via-indigo-50 to-purple-100/50 dark:from-purple-500/10 dark:to-transparent rounded-lg shadow-md dark:shadow-none">
+                  <Card className="mb-2.5 border-2 border-primary/20 dark:border-primary/30 bg-primary/5 dark:bg-primary/10 rounded-lg shadow-md dark:shadow-none">
                     <div className="p-2.5 sm:p-3">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                         <div className="flex items-center gap-2">
@@ -1886,7 +1979,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
                 {/* Rodapé com Ação de Converter */}
                 {bestSupplier && quote.status !== 'finalizada' && !readOnly && (
-                  <div className="flex-shrink-0 p-2.5 sm:p-3 border-t-2 border-purple-200/80 dark:border-gray-700/30 bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-100/50 dark:from-purple-500/10 dark:to-transparent">
+                  <div className="flex-shrink-0 p-2.5 sm:p-3 border-t-2 border-primary/20 dark:border-gray-700/30 bg-primary/5 dark:bg-primary/10">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                       <div className="flex items-center gap-2">
                         <div className="p-2 rounded-lg bg-purple-600 dark:bg-purple-600 text-white shadow-sm">
@@ -1908,7 +2001,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                               onClick={handleConvertToOrder}
                               disabled={isUpdating}
                               size="sm"
-                              className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-600 dark:to-indigo-600 hover:from-purple-700 hover:to-indigo-700 dark:hover:from-purple-700 dark:hover:to-indigo-700 text-white font-semibold text-xs shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all h-8"
+                              className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white font-semibold text-xs shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all h-8"
                             >
                               <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
                               Converter
@@ -1927,7 +2020,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </ScrollArea>
             </TabsContent>
 
-          </Tabs>
+                  </Tabs>
+                </div>
+              </ScrollArea>
+          )}
         </div>
 
         {/* Select Supplier Per Product Dialog */}

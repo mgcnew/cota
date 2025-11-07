@@ -4,7 +4,7 @@ import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
 import { MobilePageTransition } from "./MobilePageTransition";
 import { useMobile } from "@/contexts/MobileProvider";
-import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3 } from "lucide-react";
+import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3, Sparkles, Mic, MessageSquare } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,7 +27,11 @@ const pageTitles: Record<string, string> = {
   "/dashboard/historico": "Histórico",
   "/dashboard/analytics": "Analytics",
   "/dashboard/relatorios": "Relatórios",
-  "/dashboard/configuracoes": "Configurações"
+  "/dashboard/configuracoes": "Configurações",
+  "/dashboard/agente-copywriting": "Agente de Copywriting",
+  "/dashboard/locucoes": "Locuções AI",
+  "/dashboard/whatsapp-mensagens": "WhatsApp em Massa",
+  "/dashboard/extra": "Funcionalidades Extra"
 };
 
 const pageIcons: Record<string, (props: { className?: string }) => JSX.Element> = {
@@ -42,6 +46,10 @@ const pageIcons: Record<string, (props: { className?: string }) => JSX.Element> 
   "/dashboard/analytics": TrendingUp,
   "/dashboard/relatorios": BarChart3,
   "/dashboard/configuracoes": Settings,
+  "/dashboard/agente-copywriting": Sparkles,
+  "/dashboard/locucoes": Mic,
+  "/dashboard/whatsapp-mensagens": MessageSquare,
+  "/dashboard/extra": Sparkles,
 };
 
 export function AppLayout() {

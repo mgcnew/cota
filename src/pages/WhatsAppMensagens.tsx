@@ -690,7 +690,7 @@ export default function WhatsAppMensagens() {
                       <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       Lista de Contatos
                       {contatos.length > 0 && (
-                        <Badge className="ml-2 bg-blue-600 dark:bg-blue-500">
+                        <Badge className="ml-2 bg-primary dark:bg-primary">
                           {contatos.length}
                         </Badge>
                       )}
@@ -709,7 +709,7 @@ export default function WhatsAppMensagens() {
                       />
                       <Button
                         onClick={handleAddContato}
-                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                        className="bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
                       >
                         Adicionar
                       </Button>
@@ -791,7 +791,7 @@ export default function WhatsAppMensagens() {
                       </div>
                     )}
 
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/30">
+                    <div className="p-3 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20 dark:border-primary/30">
                       <p className="text-xs text-blue-900 dark:text-blue-300 flex items-start gap-2">
                         <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                         <span>
@@ -815,7 +815,7 @@ export default function WhatsAppMensagens() {
                       <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       Lista de Contatos
                       {contatos.length > 0 && (
-                        <Badge className="ml-2 bg-blue-600 dark:bg-blue-500">
+                        <Badge className="ml-2 bg-primary dark:bg-primary">
                           {contatos.length}
                         </Badge>
                       )}
@@ -834,7 +834,7 @@ export default function WhatsAppMensagens() {
                       />
                       <Button
                         onClick={handleAddContato}
-                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                        className="bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
                       >
                         Adicionar
                       </Button>
@@ -918,7 +918,7 @@ export default function WhatsAppMensagens() {
                       </div>
                     )}
 
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/30">
+                    <div className="p-3 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20 dark:border-primary/30">
                       <p className="text-xs text-blue-900 dark:text-blue-300 flex items-start gap-2">
                         <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                         <span>
@@ -1097,7 +1097,7 @@ export default function WhatsAppMensagens() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700/30">
+            <Card className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-purple-600 dark:text-purple-400" />
@@ -1112,7 +1112,7 @@ export default function WhatsAppMensagens() {
                     Atualmente, os envios são apenas simulações.
                   </p>
                 </div>
-                  <Separator className="bg-purple-200 dark:bg-purple-700/30" />
+                  <Separator className="bg-primary/20 dark:bg-primary/30" />
                   <div className="space-y-2">
                   <p className="font-semibold">📱 Limitações do WhatsApp</p>
                   <ul className="text-xs space-y-1 list-disc list-inside">
@@ -1122,7 +1122,7 @@ export default function WhatsAppMensagens() {
                     <li>Evite enviar para números que não autorizaram</li>
                   </ul>
                 </div>
-                  <Separator className="bg-purple-200 dark:bg-purple-700/30" />
+                  <Separator className="bg-primary/20 dark:bg-primary/30" />
                   <div className="space-y-2">
                   <p className="font-semibold">🔒 Boas Práticas</p>
                   <ul className="text-xs space-y-1 list-disc list-inside">

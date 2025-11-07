@@ -20,6 +20,7 @@ import Relatorios from "./pages/Relatorios";
 import Analytics from "./pages/Analytics";
 import Locucoes from "./pages/Locucoes";
 import Extra from "./pages/Extra";
+import AgenteCopywriting from "./pages/AgenteCopywriting";
 import WhatsAppMensagens from "./pages/WhatsAppMensagens";
 import Configuracoes from "./pages/Configuracoes";
 import ContagemEstoque from "./pages/ContagemEstoque";
@@ -75,6 +76,7 @@ const App = () => {
                   <Route path="analytics" element={<Navigate to="/dashboard/relatorios?tab=analytics" replace />} />
                   <Route path="locucoes" element={<Locucoes />} />
                   <Route path="extra" element={<Extra />} />
+                  <Route path="agente-copywriting" element={<AgenteCopywriting />} />
                   <Route path="whatsapp-mensagens" element={<WhatsAppMensagens />} />
                   <Route path="contagem-estoque" element={<ContagemEstoque />} />
                   <Route path="anotacoes" element={<Anotacoes />} />

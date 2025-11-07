@@ -65,7 +65,11 @@ export function useSuppliers() {
           qs.quotes?.status === 'ativa' || qs.quotes?.status === 'pendente'
         ).length;
         
-        const totalQuotes = supplierQuotes.length;
+        // Total: mostra total de pedidos quando houver, senão mostra total de cotações
+        const totalOrders = supplierOrders.length;
+        const totalQuotesCount = supplierQuotes.length;
+        // Se houver pedidos, mostra apenas pedidos (mais relevante), senão mostra cotações
+        const totalQuotes = totalOrders > 0 ? totalOrders : totalQuotesCount;
         
         // Calculate average price
         const respondedQuotes = supplierQuotes.filter(qs => 

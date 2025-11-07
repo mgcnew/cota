@@ -348,7 +348,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white flex-shrink-0`}>
+            <div className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} rounded-lg bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0`}>
               {isEditMode ? <Edit3 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} /> : <ShoppingCart className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />}
             </div>
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -391,7 +391,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         </div>
       </div>
 
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden min-h-0">
         {isEditMode ? (
           // Modo de Edição
           <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 overflow-hidden`}>
@@ -458,8 +458,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             )}
 
             {/* Conteúdo Principal */}
-            <ScrollArea className="flex-1 bg-gray-50 dark:bg-gray-900">
-              <div className={`${isMobile ? 'p-4' : 'p-4 sm:p-6'}`}>
+            <ScrollArea className="flex-1 bg-gray-50 dark:bg-gray-900 min-h-0 h-full">
+              <div className={`${isMobile ? 'p-4' : 'p-4 sm:p-6'} pb-8`}>
                 {activeSection === "dados" && (
                   <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
                     <div className={`bg-white dark:bg-gray-800 rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-gray-200 dark:border-gray-700`}>
@@ -683,8 +683,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           </div>
         ) : (
           // Modo de Visualização
-          <ScrollArea className="flex-1 bg-gray-50 dark:bg-gray-900">
-            <div className={`${isMobile ? 'p-4 space-y-4' : 'p-4 sm:p-6 space-y-6'}`}>
+          <ScrollArea className="flex-1 bg-gray-50 dark:bg-gray-900 min-h-0 h-full">
+            <div className={`${isMobile ? 'p-4 space-y-4' : 'p-4 sm:p-6 space-y-6'} pb-8`}>
               {/* Detalhes Principais */}
               <div className={`bg-white dark:bg-gray-800 rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-gray-200 dark:border-gray-700`}>
                 <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-5'} font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-200 dark:border-gray-700`}>
@@ -897,7 +897,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-6xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-6xl h-[90vh] sm:h-[85vh] max-h-[90vh] sm:max-h-[85vh] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
         {modalContent}
       </DialogContent>
     </Dialog>
