@@ -115,7 +115,7 @@ export default function ProdutosMobile() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       
       <PageWrapper>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full" style={{ overflow: 'hidden' }}>
           {/* Header com busca */}
           <MobileProductsHeader
             searchQuery={searchQuery}

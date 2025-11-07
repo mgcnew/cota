@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { MobileProductCard } from "./MobileProductCard";
-import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { Package } from "lucide-react";
 import type { ProductMobile } from "@/hooks/mobile/useProductsMobile";
@@ -73,9 +72,12 @@ export function MobileProductsList({
     return { startIndex, endIndex };
   }, [scrollTop, containerHeight, products.length]);
 
-  // Handler de scroll
+  // Handler de scroll otimizado com throttling
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(e.currentTarget.scrollTop);
+    // Usar requestAnimationFrame para suavizar atualizações
+    requestAnimationFrame(() => {
+      setScrollTop(e.currentTarget.scrollTop);
+    });
   }, []);
 
   // ✅ Renderizar apenas itens visíveis - DEVE SER CHAMADO ANTES DE QUALQUER RETURN
@@ -95,6 +97,8 @@ export function MobileProductsList({
               left: 0,
               width: "100%",
               height: ITEM_HEIGHT,
+              willChange: 'transform',
+              transform: 'translateZ(0)'
             }}
           >
             <div className="px-4 py-2 h-full">
@@ -116,10 +120,10 @@ export function MobileProductsList({
   if (isLoading && products.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Carregando produtos...</p>
-        </div>
+      <div className="text-center space-y-4">
+        <div className="rounded-full h-12 w-12 border-b-2 border-gray-300 dark:border-gray-600 mx-auto"></div>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Carregando produtos...</p>
+      </div>
       </div>
     );
   }
@@ -154,18 +158,30 @@ export function MobileProductsList({
   }
 
   return (
-    <PullToRefresh onRefresh={onRefresh}>
+    <>
       <div
         className="flex-1 overflow-auto"
         ref={containerRef}
         onScroll={handleScroll}
-        style={{ height: containerHeight }}
+        style={{ 
+          height: containerHeight,
+          WebkitOverflowScrolling: 'touch',
+          willChange: 'scroll-position',
+          transform: 'translateZ(0)',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          overscrollBehavior: 'contain',
+          WebkitTransform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          perspective: '1000px'
+        }}
       >
         <div
           style={{
             position: "relative",
             height: products.length * ITEM_HEIGHT,
             width: "100%",
+            willChange: 'auto'
           }}
         >
           {visibleItems}
@@ -185,7 +201,7 @@ export function MobileProductsList({
           />
         </div>
       )}
-    </PullToRefresh>
+    </>
   );
 }
 

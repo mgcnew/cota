@@ -30,8 +30,8 @@ export function MobileProductCard({ product, onEdit, onDelete }: MobileProductCa
   const [imageError, setImageError] = useState(false);
 
   return (
-    <Card className="bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm">
-      <CardContent className="p-4">
+    <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800" style={{ willChange: 'auto', contain: 'layout style paint' }}>
+      <CardContent className="p-4" style={{ willChange: 'auto' }}>
         <div className="flex items-start gap-4">
           {/* Imagem do produto */}
           <div className="flex-shrink-0">
@@ -39,13 +39,14 @@ export function MobileProductCard({ product, onEdit, onDelete }: MobileProductCa
               <img
                 src={product.image_url}
                 alt={product.name}
-                className="w-16 h-16 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
+                className="w-16 h-16 rounded object-cover"
                 onError={() => setImageError(true)}
                 loading="lazy"
+                style={{ willChange: 'auto' }}
               />
             ) : (
-              <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center border border-gray-200 dark:border-gray-700">
-                <span className="text-white font-bold text-lg">
+              <div className="w-16 h-16 rounded bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
+                <span className="text-gray-600 dark:text-gray-300 font-bold text-lg">
                   {product.name.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -62,7 +63,7 @@ export function MobileProductCard({ product, onEdit, onDelete }: MobileProductCa
                 {product.category && (
                   <Badge
                     variant="outline"
-                    className="mt-1 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800"
+                    className="mt-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700"
                   >
                     {capitalize(product.category)}
                   </Badge>
@@ -80,7 +81,7 @@ export function MobileProductCard({ product, onEdit, onDelete }: MobileProductCa
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full flex-shrink-0"
+                    className="h-8 w-8 flex-shrink-0"
                   >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
