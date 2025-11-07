@@ -65,13 +65,15 @@ export function useServerPagination<T>({
   const searchFromKey = queryKey[queryKey.length - 1] as string | undefined;
   const search = searchFromKey || "";
 
-  const { data, isLoading, error, refetch: queryRefetch } = useQuery<{ data: T[]; total: number }>({
+  const { data, isLoading, error, refetch: queryRefetch } = useQuery({
     queryKey: [...queryKey, currentPage, pageSize],
-    queryFn: () => queryFn({ page: currentPage, pageSize, search, filters: {} }),
+    queryFn: async () => {
+      const result = await queryFn({ page: currentPage, pageSize, search, filters: {} });
+      return result as { data: T[]; total: number };
+    },
     enabled,
     ...mobileConfig,
-    // Placeholder data para melhor UX durante loading
-    placeholderData: (previousData) => previousData,
+    placeholderData: (previousData: any) => previousData,
   });
 
   // Resetar para primeira página quando search mudar
@@ -81,7 +83,7 @@ export function useServerPagination<T>({
     }
   }, [searchFromKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const totalItems = data?.total || 0;
+  const totalItems = (data as any)?.total || 0;
   const totalPages = Math.ceil(totalItems / pageSize);
 
   const pagination = useMemo(
@@ -92,6 +94,7 @@ export function useServerPagination<T>({
       return {
         currentPage,
         pageSize,
+        itemsPerPage: pageSize, // Adicionar alias para compatibilidade
         totalItems,
         totalPages,
         startIndex,
@@ -114,11 +117,11 @@ export function useServerPagination<T>({
         },
         setPageSize: (size: number) => {
           setPageSize(size);
-          setCurrentPage(1); // Reset para primeira página
+          setCurrentPage(1);
         },
         setItemsPerPage: (size: number) => {
           setPageSize(size);
-          setCurrentPage(1); // Alias para compatibilidade
+          setCurrentPage(1);
         },
       };
     },
@@ -130,7 +133,7 @@ export function useServerPagination<T>({
   }, [queryRefetch]);
 
   return {
-    data: data?.data || [],
+    data: (data as any)?.data || [],
     isLoading,
     error: error as Error | null,
     pagination,

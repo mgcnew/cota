@@ -321,9 +321,9 @@ export function useStockCountsMobile(
     error: pagination.error,
     pagination: pagination.pagination,
     refetch: pagination.refetch,
-    createStockCount: createStockCount.mutateAsync,
-    updateStockCount: updateStockCount.mutateAsync,
-    deleteStockCount: deleteStockCount.mutateAsync,
+    createStockCount: createStockCount,
+    updateStockCount: updateStockCount,
+    deleteStockCount: deleteStockCount,
   };
 }
 

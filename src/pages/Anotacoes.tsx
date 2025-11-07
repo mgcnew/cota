@@ -598,7 +598,7 @@ export default function Anotacoes() {
 
         {/* Notas Ativas */}
         {filteredNotes && Array.isArray(filteredNotes) && filteredNotes.length > 0 && (
-          <PullToRefresh onRefresh={isMobile ? mobileRefetch : undefined} disabled={!isMobile}>
+          <PullToRefresh onRefresh={isMobile ? async () => { await mobileRefetch(); } : undefined} disabled={!isMobile}>
             <div className={isMobile ? 'mb-6' : 'mb-8'}>
               <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-4 flex items-center gap-2`}>
                 <StickyNote className="h-5 w-5" />
@@ -633,7 +633,7 @@ export default function Anotacoes() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEditNote(note)}
+                              onClick={() => handleEditNote(note as any)}
                               className={isMobile ? 'h-8 w-8 p-0' : 'h-7 w-7 p-0'}
                             >
                               <Edit className={isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
@@ -712,7 +712,6 @@ export default function Anotacoes() {
         {isMobile && (
           <MobileFAB
             onClick={() => setShowCreateDialog(true)}
-            icon={Plus}
             label="Nova Anotação"
           />
         )}

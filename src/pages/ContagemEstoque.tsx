@@ -266,7 +266,7 @@ export default function ContagemEstoque() {
     setIsCreatingCount(true);
     try {
       const newCount = isMobile
-        ? await createStockCount({
+        ? await createStockCount.mutateAsync({
             order_id: countType === "from_order" ? selectedOrderId : undefined,
             notes: countNotes || undefined,
           })
@@ -302,7 +302,7 @@ export default function ContagemEstoque() {
   const handleFinalizeCount = useCallback(async (countId: string) => {
     try {
       if (isMobile) {
-        await updateStockCount({
+        await updateStockCount.mutateAsync({
           id: countId,
           status: "finalizada",
         });
@@ -321,7 +321,7 @@ export default function ContagemEstoque() {
     if (confirm("Tem certeza que deseja excluir esta contagem?")) {
       try {
         if (isMobile) {
-          await deleteStockCount(countId);
+          await deleteStockCount.mutateAsync(countId);
         } else {
           await deleteStockCount.mutateAsync(countId);
         }

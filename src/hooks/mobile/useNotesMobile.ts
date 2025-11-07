@@ -44,9 +44,9 @@ export function useNotesMobile() {
     isLoading,
     error,
     refetch,
-  } = useQuery<{ notes: NoteMobile[]; total: number }>({
+  } = useQuery({
     queryKey: ["notes-mobile", currentCompany?.id, currentPage, pageSize, debouncedSearch],
-    queryFn: async () => {
+    queryFn: async (): Promise<{ notes: NoteMobile[]; total: number }> => {
       if (!currentCompany?.id) return { notes: [], total: 0 };
 
       let query = supabase
@@ -79,8 +79,8 @@ export function useNotesMobile() {
     ...queryConfig,
   });
 
-  const notes: NoteMobile[] = Array.isArray(notesData?.notes) ? notesData.notes : [];
-  const total = notesData?.total || 0;
+  const notes: NoteMobile[] = Array.isArray((notesData as any)?.notes) ? (notesData as any).notes : [];
+  const total = (notesData as any)?.total || 0;
   const totalPages = Math.ceil(total / pageSize);
 
   // Objeto de paginação
