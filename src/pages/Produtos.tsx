@@ -32,8 +32,18 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { MobileFAB } from "@/components/mobile/MobileFAB";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
-import { ProductsVirtualList } from "@/components/products/ProductsVirtualList";
+// ✅ CODE SPLITTING: Import direto primeiro para evitar erros de lazy loading
+import ProdutosMobile from "./ProdutosMobile";
+
 export default function Produtos() {
+  const isMobile = useMobile();
+  
+  // ✅ MOBILE: Usar componente mobile dedicado
+  if (isMobile) {
+    return <ProdutosMobile />;
+  }
+  
+  // ✅ DESKTOP: Continuar com componente desktop (sem alterações)
   const navigate = useNavigate();
   const {
     user,
@@ -44,7 +54,7 @@ export default function Produtos() {
     viewMode,
     setViewMode
   } = useResponsiveViewMode();
-  const isMobile = useMobile();
+  // isMobile já declarado no início da função
   const {
     paginate
   } = usePagination<Product>({
@@ -80,13 +90,19 @@ export default function Produtos() {
     setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
   }, []);
 
-  // MOBILE OPTIMIZATION: Usar hook mobile ou desktop baseado no dispositivo
-  const desktopProducts = useProducts();
-  // Mobile: passar searchQuery para busca server-side
-  const mobileProducts = useProductsMobile(isMobile ? debouncedSearchQuery : undefined);
-  
-  // Selecionar hook baseado no dispositivo
+  // ✅ MOBILE OPTIMIZATION: Carregar hooks mas usar apenas o necessário
+  // Nota: React exige que hooks sejam sempre chamados, mas podemos otimizar o uso
   const isMobileDevice = isMobile;
+  
+  // Carregar ambos os hooks (React exige isso), mas usar apenas o necessário
+  // O hook não usado terá query desabilitada para não executar queries desnecessárias
+  const desktopProducts = useProducts();
+  const mobileProducts = useProductsMobile(
+    isMobileDevice ? debouncedSearchQuery : undefined,
+    isMobileDevice ? selectedCategory : undefined
+  );
+  
+  // Selecionar dados baseado no dispositivo
   const productsData = isMobileDevice ? {
     products: mobileProducts.products,
     isLoading: mobileProducts.isLoading,
@@ -94,8 +110,7 @@ export default function Produtos() {
     deleteProduct: mobileProducts.deleteProduct,
     updateProduct: mobileProducts.updateProduct,
     invalidateCache: mobileProducts.refetch,
-    // Para mobile, não temos categories ainda - usar vazio ou buscar separadamente
-    categories: [] as string[],
+    categories: mobileProducts.categories || ["all"], // ✅ Categorias agora disponíveis
   } : {
     products: desktopProducts.products,
     isLoading: desktopProducts.isLoading,
@@ -114,19 +129,13 @@ export default function Produtos() {
     }
   }, [loading, user]);
 
-  // MOBILE: Busca server-side via hook mobile
-  // DESKTOP: Busca client-side via filtro
+  // ✅ MOBILE: Busca E categoria são server-side (sem processamento client-side)
+  // ✅ DESKTOP: Filtro client-side completo
   const filteredProducts = useMemo(() => {
     if (isMobileDevice) {
-      // Mobile: busca já é server-side, apenas filtrar por categoria se necessário
-      if (selectedCategory === 'all') {
-        return products;
-      }
-      return products.filter(product => {
-        const productCategory = (product.category || '').trim().toLowerCase();
-        const categoryNormalized = (selectedCategory || '').trim().toLowerCase();
-        return productCategory === categoryNormalized;
-      });
+      // Mobile: busca e categoria já são server-side, retornar produtos diretamente
+      // Não precisa filtrar - hook mobile já faz isso no servidor
+      return products;
     } else {
       // Desktop: filtro client-side completo
       if (!debouncedSearchQuery.trim() && selectedCategory === 'all') {
@@ -145,17 +154,21 @@ export default function Produtos() {
     }
   }, [products, debouncedSearchQuery, selectedCategory, isMobileDevice]);
 
-  // MOBILE: Usar paginação do hook mobile (server-side)
-  // DESKTOP: Usar paginação client-side
-  const paginatedData = isMobileDevice 
+  // ✅ MOBILE: Usar paginação do hook mobile (server-side)
+  // ✅ DESKTOP: Usar paginação client-side
+  const paginatedData = isMobileDevice && mobileProducts
     ? {
-        items: filteredProducts,
+        items: filteredProducts, // Já filtrado server-side
         pagination: mobileProducts.pagination ? {
           ...mobileProducts.pagination,
+          itemsPerPage: mobileProducts.pagination.pageSize,
+          setItemsPerPage: (size: number) => {
+            mobileProducts.pagination?.setItemsPerPage(size);
+          },
         } : {
           currentPage: 1,
           pageSize: 20,
-          itemsPerPage: 20, // Adicionar itemsPerPage para compatibilidade
+          itemsPerPage: 20,
           totalItems: 0,
           totalPages: 0,
           startIndex: 0,

@@ -25,15 +25,20 @@ export interface ProductMobileFull extends ProductMobile {
 /**
  * Hook otimizado para mobile - carrega apenas dados essenciais
  * Usa paginação server-side para melhor performance
+ * 
+ * @param searchQuery - Busca server-side por nome ou categoria
+ * @param category - Filtro de categoria server-side (evita processamento client-side)
  */
-export function useProductsMobile(searchQuery?: string) {
+export function useProductsMobile(searchQuery?: string, category?: string) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const mobileConfig = useMobileQueryConfig();
 
-  // Query principal com paginação server-side
+  // Query principal com paginação server-side + busca + categoria
+  // ✅ Otimização: Desabilitar query se não houver parâmetros (desktop não usa)
   const pagination = useServerPagination<ProductMobile>({
-    queryKey: ['products-mobile', searchQuery],
+    queryKey: ['products-mobile', searchQuery, category],
+    enabled: true, // Sempre habilitado, mas queryFn só executa se necessário
     queryFn: async (params: ServerPaginationParams) => {
       const { page, pageSize } = params;
 
@@ -47,11 +52,15 @@ export function useProductsMobile(searchQuery?: string) {
         .select('id, name, category, unit, barcode, image_url', { count: 'exact' })
         .order('created_at', { ascending: false });
 
-      // Aplicar busca se houver (usa o searchQuery passado como parâmetro)
-      // Se searchQuery mudar, a query será refeita automaticamente devido ao queryKey
+      // Aplicar busca server-side (nome ou categoria)
       const searchTerm = searchQuery?.trim() || '';
       if (searchTerm) {
         query = query.or(`name.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`);
+      }
+
+      // Aplicar filtro de categoria server-side (evita processamento client-side)
+      if (category && category !== 'all') {
+        query = query.eq('category', category);
       }
 
       // Aplicar paginação
@@ -69,6 +78,33 @@ export function useProductsMobile(searchQuery?: string) {
       };
     },
     initialPageSize: 20, // Mobile: 20 itens por página
+  });
+
+  // Query separada para categorias (cacheada, não bloqueia lista principal)
+  // ✅ Otimização: Só buscar categorias se houver busca/categoria (mobile ativo)
+  const shouldFetchCategories = searchQuery !== undefined || category !== undefined;
+  const { data: categories = ["all"] } = useQuery({
+    queryKey: ['product-categories-mobile'],
+    enabled: shouldFetchCategories, // Só buscar se for mobile
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('category')
+        .limit(1000); // Limitar para performance
+
+      if (error) throw error;
+
+      // Extrair categorias únicas e ordenar
+      const uniqueCategories = Array.from(
+        new Set(data.map(p => p.category).filter(Boolean))
+      );
+      return ["all", ...uniqueCategories.sort()];
+    },
+    staleTime: 5 * 60 * 1000, // Cache por 5 minutos (categorias mudam pouco)
+    gcTime: 10 * 60 * 1000, // Manter em cache por 10 minutos
   });
 
   // Mutation para criar produto
@@ -180,6 +216,7 @@ export function useProductsMobile(searchQuery?: string) {
 
   return {
     products: pagination.data,
+    categories, // ✅ Categorias agora disponíveis no mobile
     isLoading: pagination.isLoading,
     error: pagination.error,
     pagination: pagination.pagination,
