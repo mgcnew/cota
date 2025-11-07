@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Search, Filter, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,8 +14,9 @@ interface MobileProductsHeaderProps {
 
 /**
  * Header mobile otimizado com busca e filtros
+ * Memoizado para evitar re-renders desnecessários
  */
-export function MobileProductsHeader({
+export const MobileProductsHeader = memo(function MobileProductsHeader({
   searchQuery,
   onSearchChange,
   onFiltersOpen,
@@ -71,5 +73,5 @@ export function MobileProductsHeader({
       </div>
     </div>
   );
-}
+});
 

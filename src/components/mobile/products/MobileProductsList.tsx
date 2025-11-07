@@ -23,8 +23,8 @@ interface MobileProductsListProps {
   };
 }
 
-const ITEM_HEIGHT = 160; // Altura estimada de cada card (com padding)
-const OVERSCAN = 3; // Itens extras para scroll suave
+const ITEM_HEIGHT = 120; // ✅ Altura reduzida para melhor performance
+const OVERSCAN = 2; // ✅ Reduzido para menos itens renderizados
 
 /**
  * Lista virtualizada de produtos mobile (implementação manual)
@@ -48,7 +48,7 @@ export function MobileProductsList({
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(600);
 
-  // Calcular altura dinâmica do container
+  // ✅ Calcular altura dinâmica do container (otimizado)
   useEffect(() => {
     const updateHeight = () => {
       if (containerRef.current) {
@@ -58,8 +58,17 @@ export function MobileProductsList({
     };
 
     updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
+    // ✅ Throttle do resize para melhor performance
+    let resizeTimeout: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateHeight, 150);
+    };
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimeout);
+    };
   }, []);
 
   // Calcular itens visíveis (virtualização manual)
@@ -72,11 +81,18 @@ export function MobileProductsList({
     return { startIndex, endIndex };
   }, [scrollTop, containerHeight, products.length]);
 
-  // Handler de scroll otimizado com throttling
+  // ✅ Handler de scroll otimizado com throttling mais agressivo
+  const scrollTimeoutRef = useRef<number | null>(null);
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    // Usar requestAnimationFrame para suavizar atualizações
-    requestAnimationFrame(() => {
+    // Cancelar timeout anterior
+    if (scrollTimeoutRef.current !== null) {
+      cancelAnimationFrame(scrollTimeoutRef.current);
+    }
+    
+    // Usar requestAnimationFrame com throttling
+    scrollTimeoutRef.current = requestAnimationFrame(() => {
       setScrollTop(e.currentTarget.scrollTop);
+      scrollTimeoutRef.current = null;
     });
   }, []);
 
@@ -101,7 +117,7 @@ export function MobileProductsList({
               transform: 'translateZ(0)'
             }}
           >
-            <div className="px-4 py-2 h-full">
+            <div className="px-4 py-2 h-full" style={{ contain: 'layout style paint' }}>
               <MobileProductCard
                 product={products[i]}
                 onEdit={() => onEdit(products[i])}

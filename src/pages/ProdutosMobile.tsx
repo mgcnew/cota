@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProductsMobile } from "@/hooks/mobile/useProductsMobile";
@@ -8,10 +8,12 @@ import { MobileProductsHeader } from "@/components/mobile/products/MobileProduct
 import { MobileProductsList } from "@/components/mobile/products/MobileProductsList";
 import { MobileFiltersSheet } from "@/components/mobile/products/MobileFiltersSheet";
 import { MobileFAB } from "@/components/mobile/MobileFAB";
-import { AddProductDialog } from "@/components/forms/AddProductDialog";
-import { EditProductDialog } from "@/components/forms/EditProductDialog";
-import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
 import type { ProductMobile } from "@/hooks/mobile/useProductsMobile";
+
+// ✅ Lazy load dos dialogs para reduzir bundle inicial
+const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
+const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
+const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
 
 /**
  * Página de Produtos Mobile - Refatorada do Zero
@@ -33,8 +35,8 @@ export default function ProdutosMobile() {
   const [deletingProduct, setDeletingProduct] = useState<ProductMobile | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
-  // Debounce de busca para reduzir requisições
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  // ✅ Debounce aumentado para reduzir requisições (500ms em vez de 300ms)
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Hook mobile otimizado com paginação server-side
   // ✅ IMPORTANTE: Sempre chamado, mesmo se user não estiver autenticado
@@ -48,12 +50,14 @@ export default function ProdutosMobile() {
     refetch,
   } = useProductsMobile(debouncedSearchQuery);
 
-  // Extrair categorias dos produtos
+  // ✅ Extrair categorias apenas quando necessário (lazy evaluation)
   const categories = useMemo(() => {
+    if (!products || products.length === 0) return ["all"];
     const cats = new Set<string>(["all"]);
-    products.forEach((p) => {
-      if (p.category) cats.add(p.category);
-    });
+    for (let i = 0; i < products.length; i++) {
+      const cat = products[i]?.category;
+      if (cat) cats.add(cat);
+    }
     return Array.from(cats);
   }, [products]);
 
@@ -75,6 +79,10 @@ export default function ProdutosMobile() {
   const handleDeleteProduct = useCallback((product: ProductMobile) => {
     setDeletingProduct(product);
   }, []);
+
+  // ✅ Callbacks memoizados para evitar re-renders
+  const handleFiltersOpen = useCallback(() => setFiltersOpen(true), []);
+  const handleCategoryRemove = useCallback(() => setSelectedCategory("all"), []);
 
   const handleProductUpdated = useCallback(
     (updatedProduct: any) => {
@@ -120,9 +128,9 @@ export default function ProdutosMobile() {
           <MobileProductsHeader
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            onFiltersOpen={() => setFiltersOpen(true)}
+            onFiltersOpen={handleFiltersOpen}
             selectedCategory={selectedCategory}
-            onCategoryRemove={() => setSelectedCategory("all")}
+            onCategoryRemove={handleCategoryRemove}
           />
 
           {/* Lista virtualizada de produtos */}
@@ -150,32 +158,44 @@ export default function ProdutosMobile() {
         </div>
       </PageWrapper>
 
-      {/* Dialogs */}
-      <AddProductDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
-        onProductAdded={() => {
-          setAddDialogOpen(false);
-          refetch();
-        }}
-        onCategoryAdded={() => {}}
-      />
+      {/* Dialogs - Lazy loaded apenas quando necessário */}
+      {addDialogOpen && (
+        <Suspense fallback={null}>
+          <AddProductDialog
+            open={addDialogOpen}
+            onOpenChange={setAddDialogOpen}
+            onProductAdded={() => {
+              setAddDialogOpen(false);
+              refetch();
+            }}
+            onCategoryAdded={() => {}}
+          />
+        </Suspense>
+      )}
 
-      <EditProductDialog
-        product={editingProduct as any}
-        open={!!editingProduct}
-        onOpenChange={(open) => !open && setEditingProduct(null)}
-        onProductUpdated={handleProductUpdated}
-        onCategoryAdded={() => {}}
-        categories={categories}
-      />
+      {editingProduct && (
+        <Suspense fallback={null}>
+          <EditProductDialog
+            product={editingProduct as any}
+            open={!!editingProduct}
+            onOpenChange={(open) => !open && setEditingProduct(null)}
+            onProductUpdated={handleProductUpdated}
+            onCategoryAdded={() => {}}
+            categories={categories}
+          />
+        </Suspense>
+      )}
 
-      <DeleteProductDialog
-        product={deletingProduct as any}
-        open={!!deletingProduct}
-        onOpenChange={(open) => !open && setDeletingProduct(null)}
-        onProductDeleted={handleProductDeleted}
-      />
+      {deletingProduct && (
+        <Suspense fallback={null}>
+          <DeleteProductDialog
+            product={deletingProduct as any}
+            open={!!deletingProduct}
+            onOpenChange={(open) => !open && setDeletingProduct(null)}
+            onProductDeleted={handleProductDeleted}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

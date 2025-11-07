@@ -19,13 +19,14 @@ export function useMobileQueryConfig<TData = unknown, TError = Error>() {
 
   const config: Partial<UseQueryOptions<TData, TError>> = isMobile
     ? {
-        // Mobile: Cache agressivo, menos requisições
-        staleTime: 5 * 60 * 1000, // 5 minutos
-        gcTime: 10 * 60 * 1000, // 10 minutos (antigo cacheTime)
+        // ✅ Mobile: Cache mais agressivo, menos requisições
+        staleTime: 10 * 60 * 1000, // 10 minutos (aumentado)
+        gcTime: 15 * 60 * 1000, // 15 minutos (aumentado)
         refetchOnWindowFocus: false,
         refetchOnMount: false, // Usa cache se disponível
         refetchOnReconnect: false,
         retry: 1, // Menos tentativas no mobile
+        placeholderData: (previousData) => previousData, // ✅ Mantém dados anteriores durante loading
       }
     : {
         // Desktop: Cache menor, dados mais atualizados

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,8 +25,9 @@ interface MobileProductCardProps {
  * - Design limpo e moderno
  * - Ações rápidas (swipe ou menu)
  * - Lazy loading de imagens
+ * - Memoizado para evitar re-renders desnecessários
  */
-export function MobileProductCard({ product, onEdit, onDelete }: MobileProductCardProps) {
+export const MobileProductCard = memo(function MobileProductCard({ product, onEdit, onDelete }: MobileProductCardProps) {
   const [imageError, setImageError] = useState(false);
 
   return (
@@ -42,7 +43,8 @@ export function MobileProductCard({ product, onEdit, onDelete }: MobileProductCa
                 className="w-16 h-16 rounded object-cover"
                 onError={() => setImageError(true)}
                 loading="lazy"
-                style={{ willChange: 'auto' }}
+                decoding="async"
+                style={{ willChange: 'auto', contentVisibility: 'auto' }}
               />
             ) : (
               <div className="w-16 h-16 rounded bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
@@ -103,5 +105,5 @@ export function MobileProductCard({ product, onEdit, onDelete }: MobileProductCa
       </CardContent>
     </Card>
   );
-}
+});
 
