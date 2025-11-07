@@ -205,10 +205,10 @@ export default function ProdutosDesktop() {
   }, []);
 
   const renderCard1 = useMemo(() => (
-    <Card className="bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg overflow-hidden relative">
+    <Card className="bg-orange-600 dark:bg-[#1C1F26] border border-orange-500/30 dark:border-gray-800 rounded-lg hover:border-orange-400 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
-        <div className="flex items-center justify-between">
-          <div className="p-2 bg-white/20 rounded-md">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-orange-700/50 dark:bg-gray-800">
             <Package className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -217,13 +217,18 @@ export default function ProdutosDesktop() {
         </div>
       </CardHeader>
       <CardContent className="space-y-2.5 pt-0">
-        <div className="text-3xl font-bold text-white dark:text-gray-50">
-          {stats.totalProducts}
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.totalProducts}
+          </span>
+          <Badge className="bg-orange-700/60 text-white font-medium border-0 px-2 py-0.5 text-xs">
+            {stats.percentualComCotacao}%
+          </Badge>
         </div>
         <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
           <div className="flex items-center justify-between">
             <span>Com cotação:</span>
-            <span className="font-medium">{stats.percentualComCotacao}%</span>
+            <span className="font-medium text-white dark:text-gray-300">{stats.percentualComCotacao}%</span>
           </div>
           <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
             <span>{stats.produtosPorStatus.ativos} ativos</span>
@@ -233,15 +238,15 @@ export default function ProdutosDesktop() {
             <span>{stats.produtosPorStatus.semCotacao} sem cotação</span>
           </div>
         </div>
-    </CardContent>
+      </CardContent>
     </Card>
   ), [stats]);
 
   const renderCard2 = useMemo(() => (
-    <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-lg overflow-hidden relative">
+    <Card className="bg-blue-600 dark:bg-[#1C1F26] border border-blue-500/30 dark:border-gray-800 rounded-lg hover:border-blue-400 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
-        <div className="flex items-center justify-between">
-          <div className="p-2 bg-white/20 rounded-md">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-blue-700/50 dark:bg-gray-800">
             <Filter className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -250,18 +255,20 @@ export default function ProdutosDesktop() {
         </div>
       </CardHeader>
       <CardContent className="space-y-2.5 pt-0">
-        <div className="text-3xl font-bold text-white dark:text-gray-50">
-          {stats.totalCategories}
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.totalCategories}
+          </span>
         </div>
         <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
           <div className="flex items-center justify-between">
             <span>Total de categorias:</span>
-            <span className="font-medium">{stats.totalCategories}</span>
+            <span className="font-medium text-white dark:text-gray-300">{stats.totalCategories}</span>
           </div>
           {stats.topCategoria && (
             <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
               <span>Top categoria:</span>
-              <span className="font-medium">
+              <span className="font-medium text-white dark:text-gray-300">
                 {stats.topCategoria?.nome || 'N/A'} • {stats.topCategoria?.count || 0} produtos
               </span>
             </div>
@@ -272,10 +279,10 @@ export default function ProdutosDesktop() {
   ), [stats]);
 
   const renderCard3 = useMemo(() => (
-    <Card className="bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg overflow-hidden relative">
+    <Card className="bg-purple-600 dark:bg-[#1C1F26] border border-purple-500/30 dark:border-gray-800 rounded-lg hover:border-purple-400 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
-        <div className="flex items-center justify-between">
-          <div className="p-2 bg-white/20 rounded-md">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-purple-700/50 dark:bg-gray-800">
             <FileText className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -284,13 +291,15 @@ export default function ProdutosDesktop() {
         </div>
       </CardHeader>
       <CardContent className="space-y-2.5 pt-0">
-        <div className="text-3xl font-bold text-white dark:text-gray-50">
-          {typeof stats.activeQuotes === 'number' ? stats.activeQuotes : 0}
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {typeof stats.activeQuotes === 'number' ? stats.activeQuotes : 0}
+          </span>
         </div>
         <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
           <div className="flex items-center justify-between">
             <span>Média por produto:</span>
-            <span className="font-medium">{stats.mediaCotacoesPorProduto}</span>
+            <span className="font-medium text-white dark:text-gray-300">{stats.mediaCotacoesPorProduto}</span>
           </div>
         </div>
       </CardContent>
@@ -298,10 +307,10 @@ export default function ProdutosDesktop() {
   ), [stats]);
 
   const renderCard4 = useMemo(() => (
-    <Card className="bg-gradient-to-br from-green-500 to-teal-600 text-white shadow-lg overflow-hidden relative">
+    <Card className="bg-emerald-600 dark:bg-[#1C1F26] border border-emerald-500/30 dark:border-gray-800 rounded-lg hover:border-emerald-400 dark:hover:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-3 border-0">
-        <div className="flex items-center justify-between">
-          <div className="p-2 bg-white/20 rounded-md">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-emerald-700/50 dark:bg-gray-800">
             <Scale className="h-4 w-4 text-white dark:text-gray-400" />
           </div>
           <CardTitle className="text-sm font-medium text-white dark:text-gray-300">
@@ -310,18 +319,20 @@ export default function ProdutosDesktop() {
         </div>
       </CardHeader>
       <CardContent className="space-y-2.5 pt-0">
-        <div className="text-3xl font-bold text-white dark:text-gray-50">
-          {stats.averageValue}
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-2xl font-bold tracking-tight text-white dark:text-white">
+            {stats.averageValue}
+          </span>
         </div>
         <div className="text-xs text-white/80 dark:text-gray-400 mt-2.5 pt-2.5 border-t border-white/10 dark:border-gray-700/30">
           <div className="flex items-center justify-between">
             <span>Produtos com preço:</span>
-            <span className="font-medium">{stats.productsWithPrices}</span>
+            <span className="font-medium text-white dark:text-gray-300">{stats.productsWithPrices}</span>
           </div>
           {stats.percentualEconomiaMedia > 0 ? (
             <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
               <span>Economia média:</span>
-              <span className="font-medium">R$ {stats.economiaMediaPorProduto}/produto</span>
+              <span className="font-medium text-white dark:text-gray-300">R$ {stats.economiaMediaPorProduto}/produto</span>
             </div>
           ) : (
             <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
@@ -354,7 +365,7 @@ export default function ProdutosDesktop() {
             {renderCard4}
           </div>
 
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Package className="h-6 w-6 text-orange-600 dark:text-orange-400" />
@@ -411,12 +422,12 @@ export default function ProdutosDesktop() {
                 </DropdownMenu>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               {paginatedData.items.length === 0 && !productsLoading ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Package className="h-16 w-16 mx-auto mb-4" />
-                  <p className="text-lg font-semibold">Nenhum produto encontrado.</p>
-                  <p className="text-sm">Tente ajustar sua busca ou filtros.</p>
+                <div className="p-12 text-center">
+                  <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">Nenhum produto encontrado.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Tente ajustar sua busca ou filtros.</p>
                   <Button onClick={triggerAddDialog} className="mt-4 bg-orange-600 hover:bg-orange-700 text-white">
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar Produto
@@ -424,138 +435,142 @@ export default function ProdutosDesktop() {
                 </div>
               ) : (
                 <>
-                  <div className="overflow-x-auto">
-                    <Table>
+                  <div className="overflow-x-auto w-full">
+                    <Table className="w-full">
                       <TableHeader>
-                        <TableRow className="bg-gray-50 dark:bg-gray-800/50">
-                          <TableHead className="w-[35%] min-w-[200px] py-3 px-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider rounded-tl-lg">
-                            <div className="flex items-center gap-1.5">
-                              <Package className="h-4 w-4" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Produto</span>
+                        <TableRow>
+                          <TableCell colSpan={8} className="px-1 pb-3 pt-0 border-none">
+                            <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-orange-200/60 dark:border-orange-900/40 rounded-lg shadow-sm px-4 py-3">
+                              <div className="w-[30%] flex items-center gap-2 pr-4 min-w-0">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/15 to-amber-500/15 flex items-center justify-center text-orange-600 dark:text-orange-300">
+                                  <Package className="h-4 w-4" />
+                                </div>
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Produto</span>
+                              </div>
+                              <div className="hidden md:flex w-[15%] pl-2 justify-center items-center gap-1.5">
+                                <Tags className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Categoria</span>
+                              </div>
+                              <div className="hidden md:flex w-[12%] pl-2 justify-center items-center gap-1.5">
+                                <Barcode className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Código</span>
+                              </div>
+                              <div className="hidden sm:flex w-[13%] pl-2 justify-center items-center gap-1.5">
+                                <CircleDot className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Status</span>
+                              </div>
+                              <div className="hidden sm:flex w-[12%] pl-2 justify-center items-center gap-1.5">
+                                <DollarSign className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Preço</span>
+                              </div>
+                              <div className="hidden lg:flex w-[15%] pl-2 justify-center items-center gap-1.5">
+                                <Building2 className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Fornecedor</span>
+                              </div>
+                              <div className="hidden sm:flex w-[8%] pl-2 justify-center items-center gap-1.5">
+                                <ClipboardList className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Cotações</span>
+                              </div>
+                              <div className="w-[10%] flex justify-end items-center gap-1.5">
+                                <MoreVertical className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
+                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Ações</span>
+                              </div>
                             </div>
-                          </TableHead>
-                          <TableHead className="w-[15%] min-w-[100px] py-3 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">
-                            <div className="flex w-full justify-center items-center gap-1.5">
-                              <Tags className="h-4 w-4" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-220">Categoria</span>
-                            </div>
-                          </TableHead>
-                          <TableHead className="w-[12%] min-w-[80px] py-3 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">
-                            <div className="flex w-full justify-center items-center gap-1.5">
-                              <Barcode className="h-4 w-4" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Código</span>
-                            </div>
-                          </TableHead>
-                          <TableHead className="w-[13%] min-w-[90px] py-3 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
-                            <div className="flex w-full justify-center items-center gap-1.5">
-                              <CircleDot className="h-4 w-4" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Status</span>
-                            </div>
-                          </TableHead>
-                          <TableHead className="w-[12%] min-w-[90px] py-3 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
-                            <div className="flex w-full justify-center items-center gap-1.5">
-                              <DollarSign className="h-4 w-4" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Melhor Preço</span>
-                            </div>
-                          </TableHead>
-                          <TableHead className="w-[15%] min-w-[120px] py-3 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
-                            <div className="flex w-full justify-center items-center gap-1.5">
-                              <Building2 className="h-4 w-4" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Fornecedor</span>
-                            </div>
-                          </TableHead>
-                          <TableHead className="w-[8%] min-w-[60px] py-3 px-4 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
-                            <div className="flex w-full justify-center items-center gap-1.5">
-                              <ClipboardList className="h-4 w-4" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Cotações</span>
-                            </div>
-                          </TableHead>
-                          <TableHead className="w-[10%] min-w-[80px] py-3 px-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider rounded-tr-lg">
-                            <div className="flex w-full justify-end items-center gap-1.5">
-                              <MoreVertical className="h-4 w-4" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-800 dark:text-amber-200">Ações</span>
-                            </div>
-                          </TableHead>
+                          </TableCell>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {paginatedData.items.map((product) => (
-                          <TableRow key={product.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors duration-150">
-                            <TableCell className="py-3 px-4">
-                              <div className="flex items-center gap-3">
-                                <div className="flex-shrink-0 p-1.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-md shadow-sm">
-                                  {product.image_url ? (
-                                    <img src={product.image_url} alt={product.name} className="h-8 w-8 object-cover rounded-sm" />
-                                  ) : (
-                                    <Package className="h-8 w-8 text-white" />
-                                  )}
+                          <TableRow key={product.id} className="group border-none">
+                            <TableCell colSpan={8} className="px-1 py-3">
+                              <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-orange-300/60 dark:hover:border-orange-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
+                                {/* Produto - Largura fixa */}
+                                <div className="w-[30%] flex items-center gap-3 pr-4">
+                                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    {product.image_url ? (
+                                      <img src={product.image_url} alt={product.name} className="w-8 h-8 rounded-lg object-cover" />
+                                    ) : (
+                                      <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                                    )}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-medium text-sm text-gray-900 dark:text-white truncate">{capitalize(product.name)}</div>
+                                  </div>
                                 </div>
-                                <div className="min-w-0 flex-1 max-w-[200px]">
-                                  <div className="table-cell-primary truncate" title={product.name}>{capitalize(product.name)}</div>
-                                  <div className="table-cell-secondary md:hidden mt-1 truncate">{capitalize(product.category)}</div>
+
+                                {/* Categoria - Largura fixa, hidden on mobile */}
+                                <div className="hidden md:block w-[15%] px-2">
+                                  <div className="flex justify-center">
+                                    <Badge variant="secondary" className="bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
+                                      {capitalize(product.category)}
+                                    </Badge>
+                                  </div>
                                 </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-3 px-4 hidden md:table-cell text-center">
-                              <div className="flex items-center justify-center">
-                                <Badge variant="secondary" className="bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
-                                  {capitalize(product.category)}
-                                </Badge>
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-3 px-4 hidden md:table-cell text-center">
-                              <div className="flex items-center justify-center">
-                                <Badge variant="outline" className="text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600">
-                                  {product.barcode || "N/A"}
-                                </Badge>
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-3 px-4 hidden sm:table-cell text-center">
-                              <div className="flex items-center justify-center">
-                                {getStatusBadge(getProductStatus(product))}
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-3 px-4 hidden sm:table-cell text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                <span className="font-semibold text-green-700 dark:text-green-400 text-sm">{product.lastQuotePrice}</span>
-                                {getTrendIcon(product.trend)}
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-3 px-4 hidden lg:table-cell text-center">
-                              <div className="flex items-center justify-center">
-                                <span className="table-cell-primary truncate block">{capitalize(product.bestSupplier || "N/A")}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-3 px-4 hidden sm:table-cell text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                <div className="p-1 bg-blue-100 dark:bg-blue-900/20 rounded-full">
-                                  <ClipboardList className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+
+                                {/* Código - Largura fixa, hidden on mobile */}
+                                <div className="hidden md:block w-[12%] px-2">
+                                  <div className="flex justify-center">
+                                    <Badge variant="outline" className="text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600">
+                                      {product.barcode || "N/A"}
+                                    </Badge>
+                                  </div>
                                 </div>
-                                <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount || 0}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-3 px-4 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 p-0 h-8 w-8 rounded-lg border border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
-                                  <History className="h-4 w-4" />
-                                </Button>} />
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-[160px]">
-                                    <DropdownMenuItem onClick={() => setEditingProduct(product)}>
-                                      <Edit className="h-4 w-4 mr-2" />
-                                      Editar
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setDeletingProduct(product)}>
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Excluir
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+
+                                {/* Status - Largura fixa, hidden on small */}
+                                <div className="hidden sm:block w-[13%] px-2">
+                                  <div className="flex justify-center">
+                                    {getStatusBadge(getProductStatus(product))}
+                                  </div>
+                                </div>
+
+                                {/* Preço - Largura fixa, hidden on small */}
+                                <div className="hidden sm:block w-[12%] px-2">
+                                  <div className="flex justify-center items-center gap-1">
+                                    <span className="font-semibold text-green-700 dark:text-green-400 text-sm">{product.lastQuotePrice}</span>
+                                    {getTrendIcon(product.trend)}
+                                  </div>
+                                </div>
+
+                                {/* Fornecedor - Largura fixa, hidden on large */}
+                                <div className="hidden lg:block w-[15%] px-2">
+                                  <div className="flex justify-center">
+                                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{capitalize(product.bestSupplier || "N/A")}</span>
+                                  </div>
+                                </div>
+
+                                {/* Cotações - Largura fixa, hidden on small */}
+                                <div className="hidden sm:block w-[8%] px-2">
+                                  <div className="flex justify-center items-center gap-1">
+                                    <div className="p-1 bg-blue-100 dark:bg-blue-900/20 rounded-full">
+                                      <ClipboardList className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount || 0}</span>
+                                  </div>
+                                </div>
+
+                                {/* Ações - Largura fixa */}
+                                <div className="w-[10%] flex justify-end items-center gap-2">
+                                  <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 p-0 h-8 w-8 rounded-lg border border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
+                                    <History className="h-4 w-4" />
+                                  </Button>} />
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 h-8 w-8 p-0 rounded-full !transition-colors">
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                                      <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors py-2">
+                                        <Edit className="h-4 w-4 mr-2 text-green-600" />
+                                        <span className="font-medium">Editar Produto</span>
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors py-2" onClick={() => setDeletingProduct(product)}>
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        <span className="font-medium">Excluir Produto</span>
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -563,16 +578,47 @@ export default function ProdutosDesktop() {
                       </TableBody>
                     </Table>
                   </div>
-                  <div className="mt-4">
-                    <DataPagination
-                      currentPage={paginatedData.pagination.currentPage}
-                      totalPages={paginatedData.pagination.totalPages}
-                      itemsPerPage={paginatedData.pagination.itemsPerPage}
-                      onPageChange={paginatedData.pagination.goToPage}
-                      onNextPage={paginatedData.pagination.nextPage}
-                      onPrevPage={paginatedData.pagination.prevPage}
-                      onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                    />
+                  {/* Área de Paginação Melhorada */}
+                  <div className="border-t border-orange-100/80 dark:border-gray-700/30 bg-gradient-to-r from-orange-50/30 via-amber-50/30 to-orange-50/30 dark:from-gray-800/30 dark:via-gray-800/20 dark:to-gray-800/30">
+                    <div className="px-6 py-4">
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        {/* Informações de Resultados */}
+                        <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-orange-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+                            <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                            <span className="font-medium text-gray-700 dark:text-gray-300">
+                              {paginatedData.items.length > 0 
+                                ? `${((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}-${Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}`
+                                : '0'
+                              } de {safeFilteredProducts.length}
+                            </span>
+                            <span className="text-gray-500 dark:text-gray-500">produtos</span>
+                          </div>
+                          {safeFilteredProducts.length > 0 && (
+                            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-orange-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+                              <ClipboardList className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              <span className="text-gray-700 dark:text-gray-300">
+                                Página <span className="font-semibold text-orange-600 dark:text-orange-400">{paginatedData.pagination.currentPage}</span> de <span className="font-semibold">{paginatedData.pagination.totalPages}</span>
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Controles de Paginação */}
+                        <div className="flex items-center gap-2">
+                          <DataPagination
+                            currentPage={paginatedData.pagination.currentPage}
+                            totalPages={paginatedData.pagination.totalPages}
+                            itemsPerPage={paginatedData.pagination.itemsPerPage}
+                            totalItems={safeFilteredProducts.length}
+                            onPageChange={paginatedData.pagination.goToPage}
+                            onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                            startIndex={((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}
+                            endIndex={Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
