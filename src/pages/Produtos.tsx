@@ -32,18 +32,7 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { MobileFAB } from "@/components/mobile/MobileFAB";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
-// ✅ CODE SPLITTING: Import direto primeiro para evitar erros de lazy loading
-import ProdutosMobile from "./ProdutosMobile";
-
 export default function Produtos() {
-  const isMobile = useMobile();
-  
-  // ✅ MOBILE: Usar componente mobile dedicado
-  if (isMobile) {
-    return <ProdutosMobile />;
-  }
-  
-  // ✅ DESKTOP: Continuar com componente desktop (sem alterações)
   const navigate = useNavigate();
   const {
     user,
@@ -54,7 +43,7 @@ export default function Produtos() {
     viewMode,
     setViewMode
   } = useResponsiveViewMode();
-  // isMobile já declarado no início da função
+  const isMobile = useMobile();
   const {
     paginate
   } = usePagination<Product>({
@@ -90,19 +79,13 @@ export default function Produtos() {
     setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
   }, []);
 
-  // ✅ MOBILE OPTIMIZATION: Carregar hooks mas usar apenas o necessário
-  // Nota: React exige que hooks sejam sempre chamados, mas podemos otimizar o uso
-  const isMobileDevice = isMobile;
-  
-  // Carregar ambos os hooks (React exige isso), mas usar apenas o necessário
-  // O hook não usado terá query desabilitada para não executar queries desnecessárias
+  // MOBILE OPTIMIZATION: Usar hook mobile ou desktop baseado no dispositivo
   const desktopProducts = useProducts();
-  const mobileProducts = useProductsMobile(
-    isMobileDevice ? debouncedSearchQuery : undefined,
-    isMobileDevice ? selectedCategory : undefined
-  );
+  // Mobile: passar searchQuery para busca server-side
+  const mobileProducts = useProductsMobile(isMobile ? debouncedSearchQuery : undefined);
   
-  // Selecionar dados baseado no dispositivo
+  // Selecionar hook baseado no dispositivo
+  const isMobileDevice = isMobile;
   const productsData = isMobileDevice ? {
     products: mobileProducts.products,
     isLoading: mobileProducts.isLoading,
@@ -110,7 +93,8 @@ export default function Produtos() {
     deleteProduct: mobileProducts.deleteProduct,
     updateProduct: mobileProducts.updateProduct,
     invalidateCache: mobileProducts.refetch,
-    categories: mobileProducts.categories || ["all"], // ✅ Categorias agora disponíveis
+    // Para mobile, não temos categories ainda - usar vazio ou buscar separadamente
+    categories: [] as string[],
   } : {
     products: desktopProducts.products,
     isLoading: desktopProducts.isLoading,
@@ -129,13 +113,19 @@ export default function Produtos() {
     }
   }, [loading, user]);
 
-  // ✅ MOBILE: Busca E categoria são server-side (sem processamento client-side)
-  // ✅ DESKTOP: Filtro client-side completo
+  // MOBILE: Busca server-side via hook mobile
+  // DESKTOP: Busca client-side via filtro
   const filteredProducts = useMemo(() => {
     if (isMobileDevice) {
-      // Mobile: busca e categoria já são server-side, retornar produtos diretamente
-      // Não precisa filtrar - hook mobile já faz isso no servidor
-      return products;
+      // Mobile: busca já é server-side, apenas filtrar por categoria se necessário
+      if (selectedCategory === 'all') {
+        return products;
+      }
+      return products.filter(product => {
+        const productCategory = (product.category || '').trim().toLowerCase();
+        const categoryNormalized = (selectedCategory || '').trim().toLowerCase();
+        return productCategory === categoryNormalized;
+      });
     } else {
       // Desktop: filtro client-side completo
       if (!debouncedSearchQuery.trim() && selectedCategory === 'all') {
@@ -154,21 +144,22 @@ export default function Produtos() {
     }
   }, [products, debouncedSearchQuery, selectedCategory, isMobileDevice]);
 
-  // ✅ MOBILE: Usar paginação do hook mobile (server-side)
-  // ✅ DESKTOP: Usar paginação client-side
-  const paginatedData = isMobileDevice && mobileProducts
+  // MOBILE: Usar paginação do hook mobile (server-side)
+  // DESKTOP: Usar paginação client-side
+  const paginatedData = isMobileDevice 
     ? {
-        items: filteredProducts, // Já filtrado server-side
+        items: filteredProducts,
         pagination: mobileProducts.pagination ? {
           ...mobileProducts.pagination,
-          itemsPerPage: mobileProducts.pagination.pageSize,
+          itemsPerPage: mobileProducts.pagination.pageSize, // Mapear pageSize para itemsPerPage
           setItemsPerPage: (size: number) => {
-            mobileProducts.pagination?.setItemsPerPage(size);
+            // Chamar setItemsPerPage do hook que internamente atualiza pageSize
+            mobileProducts.pagination.setItemsPerPage(size);
           },
         } : {
           currentPage: 1,
           pageSize: 20,
-          itemsPerPage: 20,
+          itemsPerPage: 20, // Adicionar itemsPerPage para compatibilidade
           totalItems: 0,
           totalPages: 0,
           startIndex: 0,
@@ -181,7 +172,7 @@ export default function Produtos() {
           setItemsPerPage: () => {},
         },
       }
-    : paginate(filteredProducts as any);
+    : paginate(filteredProducts as Product[]);
 
   // Cálculos de métricas reais e dinâmicas
   const stats = useMemo(() => {
@@ -200,7 +191,7 @@ export default function Produtos() {
           semCotacao: 0,
         },
         percentualComCotacao: 0,
-        topCategoria: { nome: "N/A", count: 0 } as any,
+        topCategoria: ["N/A", 0],
         mediaCotacoesPorProduto: "0.0",
         averageValue: "R$ 0,00",
         economiaMediaPorProduto: "0",
@@ -208,14 +199,14 @@ export default function Produtos() {
       };
     }
     
-    const activeQuotes = (products as any[]).reduce((sum: number, p: any) => sum + (p.quotesCount || 0), 0 as number);
+    const activeQuotes = (products as Product[]).reduce((sum, p) => sum + (p.quotesCount || 0), 0);
     
     // Calcular produtos por status
     const produtosPorStatus = {
-      ativos: products.filter((p: any) => (p.quotesCount || 0) >= 3).length,
-      cotados: products.filter((p: any) => (p.quotesCount || 0) > 0 && (p.quotesCount || 0) < 3).length,
-      pendentes: products.filter((p: any) => (p.quotesCount || 0) === 0 && p.lastQuotePrice !== "R$ 0,00").length,
-      semCotacao: products.filter((p: any) => (p.quotesCount || 0) === 0 && p.lastQuotePrice === "R$ 0,00").length
+      ativos: (products as Product[]).filter((p) => (p.quotesCount || 0) >= 3).length,
+      cotados: (products as Product[]).filter((p) => (p.quotesCount || 0) > 0 && (p.quotesCount || 0) < 3).length,
+      pendentes: (products as Product[]).filter((p) => (p.quotesCount || 0) === 0 && p.lastQuotePrice !== "R$ 0,00").length,
+      semCotacao: (products as Product[]).filter((p) => (p.quotesCount || 0) === 0 && p.lastQuotePrice === "R$ 0,00").length
     };
     
     // Percentual de produtos com pelo menos 1 cotação (engajamento geral)
@@ -225,26 +216,22 @@ export default function Produtos() {
       : 0;
     
     // Top categorias por número de produtos
-    const categoriaCount = new Map<string, number>();
-    products.forEach((p: any) => {
+    const categoriaCount = new Map();
+    (products as Product[]).forEach(p => {
       const cat = p.category || 'Sem Categoria';
       categoriaCount.set(cat, (categoriaCount.get(cat) || 0) + 1);
     });
-    const topCategoriaArray = Array.from(categoriaCount.entries())
-      .sort((a, b) => (b[1] as number) - (a[1] as number))[0];
-    const topCategoria = topCategoriaArray 
-      ? { nome: topCategoriaArray[0], count: topCategoriaArray[1] }
-      : { nome: "N/A", count: 0 };
+    const topCategoria = Array.from(categoriaCount.entries())
+      .sort((a, b) => b[1] - a[1])[0];
     
     // Média de cotações por produto (apenas produtos com cotação)
-    const produtosComCotacaoParaMedia = products.filter((p: any) => (p.quotesCount || 0) > 0);
-    const activeQuotesNum = activeQuotes as unknown as number;
+    const produtosComCotacaoParaMedia = (products as Product[]).filter((p) => (p.quotesCount || 0) > 0);
     const mediaCotacoesPorProduto = produtosComCotacaoParaMedia.length > 0
-      ? (activeQuotesNum / produtosComCotacaoParaMedia.length).toFixed(1)
+      ? (activeQuotes / produtosComCotacaoParaMedia.length).toFixed(1)
       : "0.0";
     
     // Valor médio e economia potencial
-    const productsWithPrices = products.filter((p: any) => p.lastQuotePrice !== "R$ 0,00");
+    const productsWithPrices = (products as Product[]).filter((p) => p.lastQuotePrice !== "R$ 0,00");
     let averageValue = "R$ 0,00";
     let economiaMediaPorProduto = "0";
     let percentualEconomiaMedia = 0;
@@ -258,7 +245,7 @@ export default function Produtos() {
       
       // Calcular economia média (assumindo economia de 10-15% em cotações bem feitas)
       // Baseado nos produtos que têm cotação
-      const produtosComMultiplasCotacoes = products.filter((p: any) => (p.quotesCount || 0) >= 2);
+      const produtosComMultiplasCotacoes = (products as Product[]).filter((p) => (p.quotesCount || 0) >= 2);
       if (produtosComMultiplasCotacoes.length > 0) {
         // Estimativa conservadora: produtos com múltiplas cotações geram economia média
         percentualEconomiaMedia = Math.round((produtosComMultiplasCotacoes.length / productsWithPrices.length) * 12);
@@ -322,20 +309,7 @@ export default function Produtos() {
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.sem_cotacao;
     return <Badge variant="outline" className={`text-xs font-medium ${config.className}`}>
         {config.label}
-    </Badge>;
-  }, []);
-
-  // Callbacks para ações de produto
-  const handleEditProduct = useCallback((product: any) => {
-    setEditingProduct(product);
-  }, []);
-
-  const handleDeleteProduct = useCallback((product: any) => {
-    setDeletingProduct(product);
-  }, []);
-
-  const handleImageClick = useCallback((url: string) => {
-    setImagePreviewUrl(url);
+      </Badge>;
   }, []);
 
   // Helper functions para renderizar Cards (memoizadas inline)
@@ -416,7 +390,11 @@ export default function Produtos() {
           {stats.topCategoria && (
             <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
               <span>Top categoria:</span>
-              <span className="font-medium">{stats.topCategoria.nome} • {stats.topCategoria.count} produtos</span>
+              <span className="font-medium">
+                {Array.isArray(stats.topCategoria) 
+                  ? `${stats.topCategoria[0]} • ${stats.topCategoria[1]} produtos`
+                  : `${stats.topCategoria?.nome || 'N/A'} • ${stats.topCategoria?.count || 0} produtos`}
+              </span>
             </div>
           )}
         </div>
@@ -514,8 +492,7 @@ export default function Produtos() {
         <div className="text-center">Carregando...</div>
       </div>;
   }
-  return (
-    <>
+  return <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
@@ -651,102 +628,175 @@ export default function Produtos() {
           disabled={!isMobile}
           className={isMobile ? "min-h-[400px]" : ""}
         >
-          {/* Grid de produtos */}
           <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {paginatedData.items.map((product) => (
-              <Card 
-                key={product.id} 
-                className={`group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none ${!isMobile ? 'md:hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-shadow duration-200' : ''}`}
-              >
-                <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-2 sm:space-y-3 flex-1">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className={`p-1.5 sm:p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg sm:rounded-xl shadow-lg ${!isMobile ? 'group-hover:scale-105 transition-transform duration-200' : ''}`}>
-                          <Package className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className={`text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate ${!isMobile ? 'group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-200' : ''}`}>
-                            {capitalize(product.name)}
-                          </CardTitle>
-                        </div>
+          {paginatedData.items.map(product => <Card key={product.id} className={`group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none ${isMobile ? '' : 'md:hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-shadow duration-200'}`}>
+              <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2 sm:space-y-3 flex-1">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className={`p-1.5 sm:p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg sm:rounded-xl shadow-lg ${isMobile ? '' : 'group-hover:scale-105 transition-transform duration-200'}`}>
+                        <Package className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                       </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                        {getStatusBadge(getProductStatus(product))}
-                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400">
-                          {capitalize(product.category)}
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className={`text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate ${isMobile ? '' : 'group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-200'}`}>
+                          {capitalize(product.name)}
+                        </CardTitle>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                      <Badge variant="outline" className="bg-orange-100/80 border-orange-300/60 text-orange-700 font-medium text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
+                        {capitalize(product.category)}
+                      </Badge>
+                      {product.barcode && (
+                        <Badge variant="secondary" className="bg-gray-100/80 text-gray-700 font-medium text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
+                          {product.barcode}
                         </Badge>
+                      )}
+                      {getStatusBadge(getProductStatus(product))}
+                    </div>
+                  </div>
+                  {/* Desktop: Dropdown menu de ações */}
+                  {!isMobileDevice && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full h-8 w-8 sm:h-9 sm:w-9">
+                          <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
+                        <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
+                              <History className="h-4 w-4 mr-2 text-blue-600" />
+                              Ver Histórico de Preços
+                            </DropdownMenuItem>} />
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
+                          <Edit className="h-4 w-4 mr-2 text-amber-600" />
+                          Editar Produto
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" onClick={() => setDeletingProduct(product)}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir Produto
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
+                {/* Mobile: Cards simplificados - foco em ações rápidas */}
+                {isMobileDevice ? (
+                  <div className="space-y-3">
+                    {/* Informações essenciais compactas */}
+                    <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      <span className="font-medium">Categoria:</span>
+                      <span className="font-semibold text-gray-800 dark:text-gray-200">{capitalize(product.category)}</span>
+                    </div>
+                    {product.barcode && (
+                      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                        <span className="font-medium">Código:</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">{product.barcode}</span>
+                      </div>
+                    )}
+                    
+                    {/* Botões de ação rápida mobile */}
+                    <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <ProductPriceHistoryDialog 
+                        productName={product.name} 
+                        productId={product.id} 
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 h-9 text-xs"
+                          >
+                            <History className="h-3.5 w-3.5 mr-1.5" />
+                            Histórico
+                          </Button>
+                        } 
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingProduct(product)}
+                        className="flex-1 h-9 text-xs"
+                      >
+                        <Edit className="h-3.5 w-3.5 mr-1.5" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeletingProduct(product)}
+                        className="flex-1 h-9 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                        Excluir
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/60 dark:border-green-700/30">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400 mb-1">Melhor Preço</p>
+                          <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-300">{(product as any).lastQuotePrice || "R$ 0,00"}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-1 mb-1">
+                            {getTrendIcon((product as any).trend || "stable")}
+                            <span className="text-xs sm:text-sm font-medium text-green-600 hidden sm:inline">Tendência</span>
+                          </div>
+                          <div className="text-[10px] sm:text-xs text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                            Atualizado
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    {!isMobileDevice && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full h-8 w-8 sm:h-9 sm:w-9">
-                            <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
-                          <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <ProductPriceHistoryDialog 
-                            productName={product.name} 
-                            productId={product.id} 
-                            trigger={
-                              <DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
-                                <History className="h-4 w-4 mr-2 text-blue-600" />
-                                Ver Histórico de Preços
-                              </DropdownMenuItem>
-                            } 
-                          />
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleEditProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
-                            <Edit className="h-4 w-4 mr-2 text-amber-600" />
-                            Editar Produto
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteProduct(product)} className="hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer">
-                            <Trash2 className="h-4 w-4 mr-2 text-red-600" />
-                            Excluir Produto
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </div>
-                </CardHeader>
 
-                <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Preço:</span>
-                      <span className="font-bold text-green-700 dark:text-green-400">
-                        {(product as any).lastQuotePrice || "R$ 0,00"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Fornecedor:</span>
-                      <span className="font-medium text-gray-800 dark:text-gray-200 truncate max-w-[120px]">
-                        {capitalize((product as any).bestSupplier || "N/A")}
-                      </span>
-                    </div>
-                  </div>
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fornecedor</span>
+                        </div>
+                        <span className="table-cell-primary truncate max-w-[120px]">{capitalize((product as any).bestSupplier || "N/A")}</span>
+                      </div>
 
-                  <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                    <ProductPriceHistoryDialog 
-                      productName={product.name} 
-                      productId={product.id} 
-                      trigger={
-                        <Button 
-                          variant="outline" 
-                          className={`w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 text-orange-700 ${!isMobile ? 'hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 hover:text-orange-800 transition-all duration-200' : ''}`}
-                        >
-                          <History className="h-4 w-4 mr-2" />
-                          Ver Histórico de Preços
-                        </Button>
-                      } 
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                        <div className="p-2 sm:p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
+                          <div className="flex items-center justify-center gap-1 mb-1">
+                            <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                            <span className="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
+                          </div>
+                          <span className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-300">{(product as any).quotesCount || 0}</span>
+                        </div>
+
+                        <div className="p-2 sm:p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
+                          <div className="flex items-center justify-center gap-1 mb-1">
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
+                            <span className="text-[10px] sm:text-xs font-medium text-purple-600 dark:text-purple-400">Atualizado</span>
+                          </div>
+                          <span className="text-[10px] sm:text-xs font-semibold text-purple-800 dark:text-purple-300">{(product as any).lastUpdate || "N/A"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="outline" className={`w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 text-orange-700 ${isMobile ? '' : 'hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 hover:text-orange-800 transition-all duration-200'}`}>
+                      <History className="h-4 w-4 mr-2" />
+                      Ver Histórico de Preços
+                    </Button>} />
+              </CardContent>
+
+              {/* Elemento decorativo */}
+              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-200 dark:bg-orange-900/20 rounded-full opacity-20"></div>
+            </Card>)}
           </div>
           
           {/* Paginação Mobile */}
@@ -938,7 +988,6 @@ export default function Produtos() {
             </Button>
           </CardContent>
         </Card>}
-        </div>
 
       {/* Dialogs - Hidden triggers for dropdown actions */}
       <div className="sr-only">
@@ -950,8 +999,8 @@ export default function Produtos() {
         </div>
       </div>
 
-      <EditProductDialog product={editingProduct as any} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={(updatedProduct: any) => {
-          (updateProduct as any)({
+      <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={updatedProduct => {
+          const updateData = {
             productId: updatedProduct.id,
             data: {
               name: updatedProduct.name,
@@ -959,10 +1008,21 @@ export default function Produtos() {
               unit: updatedProduct.unit,
               barcode: updatedProduct.barcode
             }
-          });
+          };
+          if (typeof updateProduct === 'function') {
+            updateProduct(updateData);
+          } else if (updateProduct && typeof (updateProduct as any).mutate === 'function') {
+            (updateProduct as any).mutate(updateData);
+          }
         }} onCategoryAdded={() => {}} categories={categories} />
 
-      <DeleteProductDialog product={deletingProduct as any} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={(id: string) => (deleteProduct as any)(id)} />
+      <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={id => {
+          if (typeof deleteProduct === 'function') {
+            deleteProduct(id);
+          } else if (deleteProduct && typeof (deleteProduct as any).mutate === 'function') {
+            (deleteProduct as any).mutate(id);
+          }
+        }} />
 
       {/* Image Preview Dialog */}
       <Dialog open={!!imagePreviewUrl} onOpenChange={() => setImagePreviewUrl(null)}>
@@ -987,13 +1047,15 @@ export default function Produtos() {
           </div>
         </DialogContent>
       </Dialog>
-      </PageWrapper>
+
+      {/* FAB Mobile - Floating Action Button para criar produto */}
       {isMobile && (
         <MobileFAB
           onClick={triggerAddDialog}
           label="Novo Produto"
         />
       )}
-    </>
-  );
+        </div>
+      </PageWrapper>
+    </>;
 }
