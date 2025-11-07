@@ -32,6 +32,7 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { MobileFAB } from "@/components/mobile/MobileFAB";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
+import { ProductsVirtualList } from "@/components/products/ProductsVirtualList";
 export default function Produtos() {
   const navigate = useNavigate();
   const {
@@ -308,7 +309,20 @@ export default function Produtos() {
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.sem_cotacao;
     return <Badge variant="outline" className={`text-xs font-medium ${config.className}`}>
         {config.label}
-      </Badge>;
+    </Badge>;
+  }, []);
+
+  // Callbacks para ações de produto
+  const handleEditProduct = useCallback((product: any) => {
+    setEditingProduct(product);
+  }, []);
+
+  const handleDeleteProduct = useCallback((product: any) => {
+    setDeletingProduct(product);
+  }, []);
+
+  const handleImageClick = useCallback((url: string) => {
+    setImagePreviewUrl(url);
   }, []);
 
   // Helper functions para renderizar Cards (memoizadas inline)
@@ -623,176 +637,16 @@ export default function Produtos() {
           disabled={!isMobile}
           className={isMobile ? "min-h-[400px]" : ""}
         >
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {paginatedData.items.map(product => <Card key={product.id} className={`group relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-[#1C1F26] dark:via-[#1C1F26] dark:to-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none ${isMobile ? '' : 'md:hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-shadow duration-200'}`}>
-              <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2 sm:space-y-3 flex-1">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className={`p-1.5 sm:p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg sm:rounded-xl shadow-lg ${isMobile ? '' : 'group-hover:scale-105 transition-transform duration-200'}`}>
-                        <Package className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className={`text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate ${isMobile ? '' : 'group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors duration-200'}`}>
-                          {capitalize(product.name)}
-                        </CardTitle>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                      <Badge variant="outline" className="bg-orange-100/80 border-orange-300/60 text-orange-700 font-medium text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
-                        {capitalize(product.category)}
-                      </Badge>
-                      {product.barcode && (
-                        <Badge variant="secondary" className="bg-gray-100/80 text-gray-700 font-medium text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
-                          {product.barcode}
-                        </Badge>
-                      )}
-                      {getStatusBadge(getProductStatus(product))}
-                    </div>
-                  </div>
-                  {/* Desktop: Dropdown menu de ações */}
-                  {!isMobileDevice && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 border border-transparent hover:border-orange-200 shadow-sm hover:shadow-md rounded-full h-8 w-8 sm:h-9 sm:w-9">
-                          <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-background border z-50 w-56 shadow-lg">
-                        <DropdownMenuLabel className="text-gray-600 font-medium">Ações do Produto</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer">
-                              <History className="h-4 w-4 mr-2 text-blue-600" />
-                              Ver Histórico de Preços
-                            </DropdownMenuItem>} />
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-amber-50 hover:text-amber-700 transition-colors cursor-pointer">
-                          <Edit className="h-4 w-4 mr-2 text-amber-600" />
-                          Editar Produto
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer" onClick={() => setDeletingProduct(product)}>
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Excluir Produto
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
-                {/* Mobile: Cards simplificados - foco em ações rápidas */}
-                {isMobileDevice ? (
-                  <div className="space-y-3">
-                    {/* Informações essenciais compactas */}
-                    <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                      <span className="font-medium">Categoria:</span>
-                      <span className="font-semibold text-gray-800 dark:text-gray-200">{capitalize(product.category)}</span>
-                    </div>
-                    {product.barcode && (
-                      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                        <span className="font-medium">Código:</span>
-                        <span className="font-semibold text-gray-800 dark:text-gray-200">{product.barcode}</span>
-                      </div>
-                    )}
-                    
-                    {/* Botões de ação rápida mobile */}
-                    <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <ProductPriceHistoryDialog 
-                        productName={product.name} 
-                        productId={product.id} 
-                        trigger={
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 h-9 text-xs"
-                          >
-                            <History className="h-3.5 w-3.5 mr-1.5" />
-                            Histórico
-                          </Button>
-                        } 
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditingProduct(product)}
-                        className="flex-1 h-9 text-xs"
-                      >
-                        <Edit className="h-3.5 w-3.5 mr-1.5" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeletingProduct(product)}
-                        className="flex-1 h-9 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      >
-                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                        Excluir
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/60 dark:border-green-700/30">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400 mb-1">Melhor Preço</p>
-                          <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-300">{(product as any).lastQuotePrice || "R$ 0,00"}</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-1 mb-1">
-                            {getTrendIcon((product as any).trend || "stable")}
-                            <span className="text-xs sm:text-sm font-medium text-green-600 hidden sm:inline">Tendência</span>
-                          </div>
-                          <div className="text-[10px] sm:text-xs text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-                            Atualizado
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 sm:space-y-3">
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fornecedor</span>
-                        </div>
-                        <span className="table-cell-primary truncate max-w-[120px]">{capitalize((product as any).bestSupplier || "N/A")}</span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                        <div className="p-2 sm:p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
-                          <div className="flex items-center justify-center gap-1 mb-1">
-                            <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                            <span className="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
-                          </div>
-                          <span className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-300">{(product as any).quotesCount || 0}</span>
-                        </div>
-
-                        <div className="p-2 sm:p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
-                          <div className="flex items-center justify-center gap-1 mb-1">
-                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
-                            <span className="text-[10px] sm:text-xs font-medium text-purple-600 dark:text-purple-400">Atualizado</span>
-                          </div>
-                          <span className="text-[10px] sm:text-xs font-semibold text-purple-800 dark:text-purple-300">{(product as any).lastUpdate || "N/A"}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="outline" className={`w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 text-orange-700 ${isMobile ? '' : 'hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 hover:text-orange-800 transition-all duration-200'}`}>
-                      <History className="h-4 w-4 mr-2" />
-                      Ver Histórico de Preços
-                    </Button>} />
-              </CardContent>
-
-              {/* Elemento decorativo */}
-              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-orange-200 dark:bg-orange-900/20 rounded-full opacity-20"></div>
-            </Card>)}
-          </div>
+          {/* OTIMIZAÇÃO: Usar lista virtualizada para melhor performance */}
+          <ProductsVirtualList
+            products={paginatedData.items}
+            isMobile={isMobileDevice}
+            onEdit={handleEditProduct}
+            onDelete={handleDeleteProduct}
+            onImageClick={handleImageClick}
+            getTrendIcon={getTrendIcon}
+            getStatusBadge={(quotesCount: number) => getStatusBadge(getProductStatus({ quotesCount }))}
+          />
           
           {/* Paginação Mobile */}
           {isMobile && (
@@ -1041,5 +895,6 @@ export default function Produtos() {
       )}
         </div>
       </PageWrapper>
-    </>;
+    </>
+  );
 }
