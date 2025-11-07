@@ -57,7 +57,10 @@ export function useServerPagination<T>({
   initialPageSize,
   enabled = true,
 }: UseServerPaginationOptions<T>): ServerPaginationResult<T> {
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  // ✅ Usar useState para isMobile para garantir consistência entre renders
+  const [isMobile] = useState(() => 
+    typeof window !== "undefined" && window.innerWidth < 768
+  );
   const defaultPageSize = initialPageSize || (isMobile ? 20 : 50);
   
   const [currentPage, setCurrentPage] = useState(initialPage);
