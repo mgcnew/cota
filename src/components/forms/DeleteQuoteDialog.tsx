@@ -23,14 +23,20 @@ interface DeleteQuoteDialogProps {
   quote: Quote;
   onDelete: (id: string) => void;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export default function DeleteQuoteDialog({
   quote,
   onDelete,
   trigger,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: DeleteQuoteDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = externalOnOpenChange || setInternalOpen;
 
   const handleDelete = () => {
     onDelete(quote.id);
@@ -38,18 +44,18 @@ export default function DeleteQuoteDialog({
       title: "Cotação excluída",
       description: `A cotação ${quote.id} foi excluída com sucesso.`,
     });
-    setOpen(false);
+    if (setOpen) {
+      setOpen(false);
+    }
   };
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        {trigger || (
-          <Button variant="ghost" size="sm">
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
-      </AlertDialogTrigger>
+      {trigger && (
+        <AlertDialogTrigger asChild>
+          {trigger}
+        </AlertDialogTrigger>
+      )}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>

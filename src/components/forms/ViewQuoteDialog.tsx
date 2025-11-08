@@ -48,6 +48,7 @@ import ConvertToOrderDialog from "./ConvertToOrderDialog";
 import ConvertToMultipleOrdersDialog, { SupplierOrder } from "./ConvertToMultipleOrdersDialog";
 import { PriceConverter } from "./PriceConverter";
 import { SelectSupplierPerProductDialog } from "./SelectSupplierPerProductDialog";
+import { useCotacaoDetails } from "@/hooks/mobile/useCotacoesMobile";
 
 // Schemas de validação para edição
 const productLineSchema = z.object({
@@ -98,7 +99,8 @@ interface Quote {
 }
 
 interface ViewQuoteDialogProps {
-  quote: Quote;
+  quote?: Quote; // Opcional para mobile (usar quoteId)
+  quoteId?: string; // Para mobile: carregar dados com hook
   onUpdateSupplierProductValue?: (quoteId: string, supplierId: string, productId: string, newValue: number) => void;
   onConvertToOrder?: (quoteId: string, orders: Array<{
     supplierId: string;
@@ -111,13 +113,124 @@ interface ViewQuoteDialogProps {
   isUpdating?: boolean;
   defaultTab?: string;
   readOnly?: boolean;
+  open?: boolean; // Controle externo do modal
+  onOpenChange?: (open: boolean) => void; // Callback para mudanças no estado
 }
 
 type EditSection = "detalhes" | "fornecedores" | "observacoes";
 
-export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab, readOnly = false }: ViewQuoteDialogProps) {
-  const [open, setOpen] = useState(false);
+// Função helper para converter dados do hook para formato Quote
+function convertQuoteDetailsToQuote(detailsData: any): Quote {
+  const quoteItems = detailsData.quote_items || [];
+  const quoteSuppliers = detailsData.quote_suppliers || [];
+  const supplierItems = detailsData.supplier_items || [];
+
+  // Calcular valores oferecidos por fornecedor
+  const fornecedoresParticipantes: FornecedorParticipante[] = quoteSuppliers.map((supplier: any) => {
+    const items = supplierItems.filter((item: any) => 
+      item.quote_id === detailsData.id && item.supplier_id === supplier.supplier_id
+    );
+    const totalValue = items.reduce((sum: number, item: any) => sum + (item.valor_oferecido || 0), 0);
+
+    return {
+      id: supplier.supplier_id,
+      nome: supplier.supplier_name || 'Desconhecido',
+      valorOferecido: totalValue,
+      dataResposta: supplier.data_resposta ? new Date(supplier.data_resposta).toLocaleDateString("pt-BR") : null,
+      observacoes: supplier.observacoes || "",
+      status: supplier.status as "pendente" | "respondido"
+    };
+  });
+
+  // Calcular melhor preço
+  const valoresRespondidos = fornecedoresParticipantes
+    .filter(f => f.valorOferecido > 0)
+    .map(f => f.valorOferecido);
+  
+  const melhorValor = valoresRespondidos.length > 0 ? Math.min(...valoresRespondidos) : 0;
+  const fornecedorMelhorPreco = fornecedoresParticipantes.find(f => f.valorOferecido === melhorValor);
+
+  // Calcular economia
+  const calcularEconomia = () => {
+    if (valoresRespondidos.length < 2) return "0%";
+    const maxValor = Math.max(...valoresRespondidos);
+    const minValor = Math.min(...valoresRespondidos);
+    const economia = maxValor - minValor;
+    return maxValor > 0 ? `${((economia / maxValor) * 100).toFixed(1)}%` : "0%";
+  };
+
+  const produtosLista = quoteItems.map((item: any) => item.product_name || "Produto");
+  const produtosTexto = quoteItems
+    .map((item: any) => `${item.product_name} (${item.quantidade}${item.unidade})`)
+    .join(", ");
+
+  let produtoResumo = produtosLista[0] || "Sem produtos";
+  if (produtosLista.length > 1) {
+    produtoResumo = produtoResumo + "...";
+  }
+
+  // Calcular status real
+  let statusReal = detailsData.status;
+  if (detailsData.data_planejada) {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const planejada = new Date(detailsData.data_planejada);
+    planejada.setHours(0, 0, 0, 0);
+    
+    if (planejada > hoje && detailsData.status === 'planejada') {
+      statusReal = 'planejada';
+    } else if (planejada <= hoje && detailsData.status === 'planejada') {
+      statusReal = 'ativa';
+    }
+  }
+
+  return {
+    id: detailsData.id,
+    produto: produtosTexto || "Sem produtos",
+    produtoResumo,
+    quantidade: `${quoteItems.length} produto(s)`,
+    status: detailsData.status,
+    statusReal,
+    dataInicio: new Date(detailsData.data_inicio).toLocaleDateString("pt-BR"),
+    dataFim: new Date(detailsData.data_fim).toLocaleDateString("pt-BR"),
+    dataPlanejada: detailsData.data_planejada,
+    fornecedores: fornecedoresParticipantes.length,
+    melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
+    melhorFornecedor: fornecedorMelhorPreco?.nome || "Aguardando",
+    economia: calcularEconomia(),
+    fornecedoresParticipantes,
+    _raw: detailsData,
+    _supplierItems: supplierItems,
+  };
+}
+
+export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab, readOnly = false, open: externalOpen, onOpenChange: externalOnOpenChange }: ViewQuoteDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const isMobile = useMobile();
+  
+  // Usar controle externo se fornecido, senão usar interno
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = externalOnOpenChange || setInternalOpen;
+  
+  // Para mobile: usar hook para carregar dados apenas quando modal abre
+  const { data: quoteDetailsData, isLoading: isLoadingDetails } = useCotacaoDetails(
+    quoteId || null,
+    open && !!quoteId && !quote // Só carrega se modal está aberto, tem quoteId e não tem quote
+  );
+  
+  // Determinar qual quote usar: dados carregados do hook ou quote passado como prop
+  const currentQuote: Quote | null = quote || (quoteDetailsData ? convertQuoteDetailsToQuote(quoteDetailsData) : null);
+  
+  // Estado de loading: quando está carregando dados do hook
+  const isLoadingQuote = !currentQuote && (isLoadingDetails || (quoteId && !quoteDetailsData && open));
+  
+  // Se não há quote e modal não está aberto, apenas renderizar trigger
+  if (!open && !currentQuote) {
+    if (trigger) {
+      return <>{trigger}</>;
+    }
+    return null;
+  }
   
   // Estados do modo (similar ao PedidoDialog)
   const [isEditMode, setIsEditMode] = useState(false);
@@ -176,8 +289,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   }, [editingProductId]);
 
   const handleSaveEdit = (productId: string) => {
-    if (selectedSupplier && onUpdateSupplierProductValue && editedValues[productId] !== undefined) {
-      onUpdateSupplierProductValue(quote.id, selectedSupplier, productId, editedValues[productId]);
+    if (selectedSupplier && onUpdateSupplierProductValue && editedValues[productId] !== undefined && currentQuote) {
+      onUpdateSupplierProductValue(currentQuote.id, selectedSupplier, productId, editedValues[productId]);
       setEditingProductId(null);
     }
   };
@@ -187,12 +300,13 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
     setEditedValues({});
   };
 
-  // Get products from the quote
-  const products = quote._raw?.quote_items || [];
+  // Get products from the quote (com verificação de null)
+  const products = currentQuote?._raw?.quote_items || [];
 
   // Get supplier items for selected supplier
   const getSupplierProductValue = (supplierId: string, productId: string): number => {
-    const supplierItems = quote._supplierItems || quote._raw?.quote_supplier_items || [];
+    if (!currentQuote) return 0;
+    const supplierItems = currentQuote._supplierItems || currentQuote._raw?.quote_supplier_items || [];
     const item = supplierItems.find(
       (item: any) => item.supplier_id === supplierId && item.product_id === productId
     );
@@ -201,10 +315,12 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
   // Calculate best price for each product and return the supplier ID
   const getBestPriceInfoForProduct = (productId: string): { bestPrice: number; bestSupplierId: string | null } => {
+    if (!currentQuote) return { bestPrice: 0, bestSupplierId: null };
+    
     let bestPrice = Infinity;
     let bestSupplierId: string | null = null;
 
-    quote.fornecedoresParticipantes.forEach(f => {
+    currentQuote.fornecedoresParticipantes.forEach(f => {
       const value = getSupplierProductValue(f.id, productId);
       if (value > 0 && value < bestPrice) {
         bestPrice = value;
@@ -219,7 +335,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   };
 
   const getMelhorValor = () => {
-    const valores = quote.fornecedoresParticipantes
+    if (!currentQuote) return 0;
+    const valores = currentQuote.fornecedoresParticipantes
       .filter(f => f.valorOferecido > 0)
       .map(f => f.valorOferecido);
     return valores.length > 0 ? Math.min(...valores) : 0;
@@ -252,7 +369,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   // Get best supplier based on total value
   // Resetar estados quando modal abre/fecha
   useEffect(() => {
-    if (open) {
+    if (open && currentQuote) {
       setIsEditMode(false);
       setActiveSection("detalhes");
       // Carregar dados para edição se necessário
@@ -261,7 +378,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, currentQuote]);
 
   // Carregar dados para edição quando entrar em modo de edição
   useEffect(() => {
@@ -275,6 +392,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   }, [open, isEditMode]);
 
   const loadEditData = async () => {
+    if (!currentQuote) return;
+    
     setEditLoading(true);
     try {
       // Load products and suppliers
@@ -286,16 +405,25 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       if (productsRes.data) setEditProducts(productsRes.data);
       if (suppliersRes.data) setEditSuppliers(suppliersRes.data);
 
-      // Load quote details
-      const { data: quoteData } = await supabase
-        .from("quotes")
-        .select(`
-          *,
-          quote_items(*),
-          quote_suppliers(*)
-        `)
-        .eq("id", quote.id)
-        .single();
+      // Load quote details (se não vier do hook)
+      let quoteData = null;
+      if (quoteId && quoteDetailsData) {
+        // Dados já vêm do hook, usar diretamente
+        quoteData = quoteDetailsData;
+      } else if (!quoteId || quote) {
+        // Carregar dados manualmente apenas se necessário
+        const { data: loadedQuoteData } = await supabase
+          .from("quotes")
+          .select(`
+            *,
+            quote_items(*),
+            quote_suppliers(*)
+          `)
+          .eq("id", currentQuote.id)
+          .single();
+
+        quoteData = loadedQuoteData;
+      }
 
       if (quoteData) {
         // Set products
@@ -376,11 +504,11 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   ];
 
   const handleEditSubmit = async (data: QuoteFormData) => {
-    if (!onEdit) return;
+    if (!onEdit || !currentQuote) return;
     
     setIsSavingEdit(true);
     try {
-      await onEdit(quote.id, data);
+      await onEdit(currentQuote.id, data);
       toast({
         title: "✅ Cotação atualizada",
         description: "As alterações foram salvas com sucesso.",
@@ -401,12 +529,12 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   };
 
   const getBestSupplier = () => {
-    if (quote.fornecedoresParticipantes.length === 0) return null;
+    if (!currentQuote || currentQuote.fornecedoresParticipantes.length === 0) return null;
 
     let bestSupplier = null;
     let lowestTotal = Infinity;
 
-    quote.fornecedoresParticipantes.forEach(fornecedor => {
+    currentQuote.fornecedoresParticipantes.forEach(fornecedor => {
       let total = 0;
       products.forEach((product: any) => {
         const value = getSupplierProductValue(fornecedor.id, product.product_id);
@@ -425,14 +553,14 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   };
 
   const buildProductSelections = () => {
-    if (!products || products.length === 0) {
+    if (!products || products.length === 0 || !currentQuote) {
       return [];
     }
 
     return products.map((item: any) => {
-      const supplierOptions = quote.fornecedoresParticipantes
+      const supplierOptions = currentQuote.fornecedoresParticipantes
         .map(fornecedor => {
-          const supplierItem = (quote._supplierItems || quote._raw?.quote_supplier_items || []).find(
+          const supplierItem = (currentQuote!._supplierItems || currentQuote!._raw?.quote_supplier_items || []).find(
             (si: any) => si.supplier_id === fornecedor.id && si.product_id === item.product_id
           );
 
@@ -538,34 +666,44 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
       }
     } else {
       // Múltiplos fornecedores - preparar dados para múltiplos pedidos
-      const supplierOrders: SupplierOrder[] = Array.from(supplierGroups.entries()).map(([supplierId, productIds]) => {
-        const selection = selections.get(productIds[0]);
-        const supplierName = selection!.supplierName;
-        
-        // Buscar produtos e valores
-        const productsData = productIds.map(productId => {
-          const product = quote._raw.quote_items.find((item: any) => item.product_id === productId);
-          const value = getSupplierProductValue(supplierId, productId);
+      if (!currentQuote || !currentQuote._raw) {
+        return;
+      }
+      
+      const supplierOrders: SupplierOrder[] = Array.from(supplierGroups.entries())
+        .map(([supplierId, productIds]) => {
+          const selection = selections.get(productIds[0]);
+          if (!selection) return null;
+          const supplierName = selection.supplierName;
+          
+          // Buscar produtos e valores
+          const productsData = productIds.map(productId => {
+            const product = currentQuote._raw.quote_items.find((item: any) => item.product_id === productId);
+            if (!product) return null;
+            const value = getSupplierProductValue(supplierId, productId);
+            
+            return {
+              productId,
+              productName: product.product_name,
+              quantity: product.quantidade,
+              value
+            };
+          }).filter(Boolean) as Array<{ productId: string; productName: string; quantity: string; value: number }>;
+          
+          if (productsData.length === 0) return null;
+          
+          const totalValue = productsData.reduce((sum, p) => sum + p.value, 0);
           
           return {
-            productId,
-            productName: product.product_name,
-            quantity: product.quantidade,
-            value
+            supplierId,
+            supplierName,
+            products: productsData,
+            totalValue,
+            deliveryDate: '',
+            observations: ''
           };
-        });
-        
-        const totalValue = productsData.reduce((sum, p) => sum + p.value, 0);
-        
-        return {
-          supplierId,
-          supplierName,
-          products: productsData,
-          totalValue,
-          deliveryDate: '',
-          observations: ''
-        };
-      });
+        })
+        .filter(Boolean) as SupplierOrder[];
 
       setSupplierOrdersForConversion(supplierOrders);
       setShowMultipleOrdersDialog(true);
@@ -575,8 +713,9 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
   const handleConfirmConversion = (deliveryDate: string, observations?: string) => {
     if (selectedSupplierForConversion && onConvertToOrder) {
       // Fluxo simples: 1 fornecedor com todos os produtos
+      if (!currentQuote) return;
       const allProductIds = products.map((p: any) => p.product_id);
-      onConvertToOrder(quote.id, [{
+      onConvertToOrder(currentQuote.id, [{
         supplierId: selectedSupplierForConversion.id,
         productIds: allProductIds,
         deliveryDate,
@@ -596,7 +735,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         observations: order.observations
       }));
       
-      onConvertToOrder(quote.id, orders);
+      if (!currentQuote) return;
+      onConvertToOrder(currentQuote.id, orders);
       setShowMultipleOrdersDialog(false);
       setOpen(false);
     }
@@ -620,11 +760,27 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+      {trigger && (
+        <DialogTrigger asChild onClick={() => setOpen(true)}>
+          {trigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        <DialogHeader className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
+        {isLoadingQuote ? (
+          <div className="flex flex-col items-center justify-center h-full min-h-[400px] space-y-4">
+            <Loader2 className="h-10 w-10 animate-spin text-teal-600 dark:text-teal-400" />
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Carregando detalhes da cotação...</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Aguarde um momento</p>
+          </div>
+        ) : !currentQuote ? (
+          <div className="flex flex-col items-center justify-center h-full min-h-[400px] space-y-4">
+            <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-400" />
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Erro ao carregar cotação</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Não foi possível carregar os detalhes</p>
+          </div>
+        ) : (
+          <>
+            <DialogHeader className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} rounded-lg bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0`}>
@@ -632,16 +788,16 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
               </div>
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <DialogTitle className={`${isMobile ? 'text-lg' : 'text-base sm:text-lg'} font-semibold text-gray-900 dark:text-white truncate`}>
-                  {isEditMode ? `Editar Cotação #${quote?.id?.substring(0, 8)}` : `Cotação #${quote?.id?.substring(0, 8)}`}
+                  {isEditMode ? `Editar Cotação #${currentQuote?.id?.substring(0, 8) || '...'}` : `Cotação #${currentQuote?.id?.substring(0, 8) || '...'}`}
                 </DialogTitle>
                 <div className="hidden sm:block">
-                  {getStatusBadge(quote.status)}
+                  {currentQuote && getStatusBadge(currentQuote.status)}
                 </div>
               </div>
             </div>
             
             <div className="flex items-center gap-2">
-              {!isEditMode && onEdit && quote.status !== "concluida" && !readOnly && (
+              {!isEditMode && onEdit && currentQuote && currentQuote.status !== "concluida" && !readOnly && (
                 <Button
                   type="button"
                   variant="outline"
@@ -670,7 +826,11 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         </DialogHeader>
 
         <div className="flex flex-col flex-1 overflow-hidden min-h-0">
-          {isEditMode ? (
+          {!currentQuote ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="h-8 w-8 animate-spin text-teal-600 dark:text-teal-400" />
+            </div>
+          ) : isEditMode ? (
             // Modo de Edição (similar ao PedidoDialog)
             <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 overflow-hidden`}>
               {/* Menu Lateral Esquerdo - Desktop | Tabs - Mobile */}
@@ -1269,9 +1429,9 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       >
                         <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                         <span className="hidden xs:inline">Detalhes</span>
-                        {quote.fornecedoresParticipantes.length > 0 && (
+                        {currentQuote && currentQuote.fornecedoresParticipantes.length > 0 && (
                           <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary data-[state=active]:bg-primary/20 dark:data-[state=active]:bg-primary/20 data-[state=active]:text-white dark:data-[state=active]:text-white">
-                            {quote.fornecedoresParticipantes.length}
+                            {currentQuote.fornecedoresParticipantes.length}
                           </Badge>
                         )}
                       </TabsTrigger>
@@ -1326,7 +1486,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-medium text-purple-700 dark:text-purple-400 mb-0.5">Fornecedores</p>
-                        <p className="font-bold text-sm text-purple-900 dark:text-white">{quote.fornecedores}</p>
+                        <p className="font-bold text-sm text-purple-900 dark:text-white">{currentQuote?.fornecedores || 0}</p>
                       </div>
                     </div>
                   </Card>
@@ -1338,10 +1498,10 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-medium text-amber-700 dark:text-amber-400 mb-0.5">Prazo</p>
-                        <p className="font-semibold text-xs text-amber-900 dark:text-white truncate">{quote.dataFim}</p>
-                        {quote._raw?.data_planejada && (
+                        <p className="font-semibold text-xs text-amber-900 dark:text-white truncate">{currentQuote?.dataFim || 'N/A'}</p>
+                        {currentQuote?._raw?.data_planejada && (
                           <p className="text-[9px] text-amber-600 dark:text-amber-500 mt-0.5 truncate">
-                            {new Date(quote._raw.data_planejada).toLocaleDateString("pt-BR")}
+                            {new Date(currentQuote._raw.data_planejada).toLocaleDateString("pt-BR")}
                           </p>
                         )}
                       </div>
@@ -1355,7 +1515,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 mb-0.5">Economia</p>
-                        <p className="font-bold text-xs text-emerald-900 dark:text-white truncate">{quote.economia}</p>
+                        <p className="font-bold text-xs text-emerald-900 dark:text-white truncate">{currentQuote?.economia || 'N/A'}</p>
                       </div>
                     </div>
                   </Card>
@@ -1377,7 +1537,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </div>
                       <div className="flex-shrink-0 text-right">
                         <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mb-0.5">Economia</p>
-                        <p className="text-base font-bold text-success dark:text-success">{quote.economia}</p>
+                        <p className="text-base font-bold text-success dark:text-success">{currentQuote?.economia || 'N/A'}</p>
                       </div>
                     </div>
                   </Card>
@@ -1391,7 +1551,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       Fornecedores Participantes
                     </h3>
                     <Badge variant="secondary" className="text-[10px] dark:bg-gray-700 dark:text-gray-200">
-                      {quote.fornecedoresParticipantes.length}
+                      {currentQuote.fornecedoresParticipantes.length}
                     </Badge>
                   </div>
                   
@@ -1406,7 +1566,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
-                          {quote.fornecedoresParticipantes.map((fornecedor, index) => {
+                          {currentQuote.fornecedoresParticipantes.map((fornecedor, index) => {
                             const totalValue = products.reduce((sum: number, product: any) => {
                               const value = getSupplierProductValue(fornecedor.id, product.product_id);
                               return sum + (value || 0);
@@ -1510,7 +1670,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           <SelectValue placeholder="Escolha um fornecedor..." />
                         </SelectTrigger>
                         <SelectContent>
-                          {quote.fornecedoresParticipantes.map(fornecedor => {
+                          {currentQuote.fornecedoresParticipantes.map(fornecedor => {
                             const totalValue = products.reduce((sum: number, product: any) => {
                               const value = getSupplierProductValue(fornecedor.id, product.product_id);
                               return sum + (value || 0);
@@ -1548,7 +1708,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                       </h4>
                     </div>
                     <div className="flex-1 overflow-y-auto p-1.5 space-y-1 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-                      {quote.fornecedoresParticipantes.map(fornecedor => {
+                      {currentQuote?.fornecedoresParticipantes.map(fornecedor => {
                         const isSelected = selectedSupplier === fornecedor.id;
                         const totalValue = products.reduce((sum: number, product: any) => {
                           const value = getSupplierProductValue(fornecedor.id, product.product_id);
@@ -1606,7 +1766,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   </Card>
 
                   {/* Alerta de Cotação Finalizada */}
-                  {quote.status === "concluida" && (
+                  {currentQuote.status === "concluida" && (
                     <Alert className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40">
                       <ShoppingCart className="h-4 w-4 text-amber-800 dark:text-amber-300" />
                       <AlertTitle className="text-xs font-medium text-amber-800 dark:text-amber-300">
@@ -1644,7 +1804,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                           </div>
                           <div>
                             <h3 className="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[180px]">
-                              {quote.fornecedoresParticipantes.find(f => f.id === selectedSupplier)?.nome}
+                              {currentQuote.fornecedoresParticipantes.find(f => f.id === selectedSupplier)?.nome}
                         </h3>
                             <p className="text-[10px] text-gray-600 dark:text-gray-400">Valores dos produtos</p>
                           </div>
@@ -1786,14 +1946,14 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                       size="sm"
                                       variant="ghost"
                                       onClick={() => handleStartEdit(product.product_id, currentValue)}
-                                      disabled={quote.status === "concluida"}
+                                      disabled={currentQuote.status === "concluida"}
                                       className={cn(
                                         "h-9 w-9 p-0 rounded-lg transition-all",
-                                        quote.status === "concluida"
+                                        currentQuote.status === "concluida"
                                           ? "text-gray-400 dark:text-gray-600 cursor-not-allowed"
                                           : "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:scale-110"
                                       )}
-                                      title={quote.status === "concluida" ? "Cotação finalizada" : "Editar valor"}
+                                      title={currentQuote.status === "concluida" ? "Cotação finalizada" : "Editar valor"}
                                     >
                                       <Edit2 className="h-4 w-4" />
                                     </Button>
@@ -1835,7 +1995,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                               {bestSupplier.nome}
                             </p>
                             <p className="text-[10px] text-purple-700 dark:text-purple-400 mt-0.5">
-                              Economia: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{quote.economia}</span>
+                              Economia: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{currentQuote?.economia || 'N/A'}</span>
                             </p>
                           </div>
                         </div>
@@ -1862,7 +2022,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                               <span className="font-bold text-xs text-purple-900 dark:text-white">Produto</span>
                           </div>
                         </th>
-                        {quote.fornecedoresParticipantes.map(fornecedor => {
+                        {currentQuote?.fornecedoresParticipantes.map(fornecedor => {
                           const totalValue = products.reduce((sum: number, product: any) => {
                             const value = getSupplierProductValue(fornecedor.id, product.product_id);
                             return sum + (value || 0);
@@ -1874,7 +2034,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                               key={fornecedor.id} 
                               className={cn(
                                 "px-2 py-2 text-center group relative",
-                                quote.fornecedoresParticipantes.length > 5 ? "min-w-[100px] max-w-[120px]" : "min-w-[120px]",
+                                currentQuote.fornecedoresParticipantes.length > 5 ? "min-w-[100px] max-w-[120px]" : "min-w-[120px]",
                                 isWinning 
                                     ? "bg-emerald-100/90 dark:bg-emerald-900/40 border-l-2 border-r-2 border-emerald-300 dark:border-emerald-700" 
                                     : "bg-purple-50/80 dark:bg-gray-900"
@@ -1890,7 +2050,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                               </div>
                               <p className={cn(
                                   "font-bold truncate",
-                                quote.fornecedoresParticipantes.length > 5 ? "text-[10px]" : "text-xs",
+                                currentQuote.fornecedoresParticipantes.length > 5 ? "text-[10px]" : "text-xs",
                                   isWinning ? "text-emerald-700 dark:text-emerald-300" : "text-purple-900 dark:text-white"
                               )} title={fornecedor.nome}>
                                 {fornecedor.nome}
@@ -1923,13 +2083,13 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                 {product.quantidade} {product.unidade}
                               </p>
                             </td>
-                            {quote.fornecedoresParticipantes.map(fornecedor => {
+                            {currentQuote.fornecedoresParticipantes.map(fornecedor => {
                               const value = getSupplierProductValue(fornecedor.id, product.product_id);
                               const isBestPrice = fornecedor.id === bestSupplierId;
                               const isWinning = bestSupplier?.id === fornecedor.id;
 
                               // Calcular economia se houver outros valores
-                              const allValues = quote.fornecedoresParticipantes
+                              const allValues = currentQuote.fornecedoresParticipantes
                                 .map(f => getSupplierProductValue(f.id, product.product_id))
                                 .filter(v => v > 0);
                               const maxValue = allValues.length > 0 ? Math.max(...allValues) : 0;
@@ -1938,7 +2098,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                               return (
                                 <td key={fornecedor.id} className={cn(
                                   "py-2 text-center",
-                                  quote.fornecedoresParticipantes.length > 5 ? "px-1.5" : "px-2",
+                                  (currentQuote?.fornecedoresParticipantes.length ?? 0) > 5 ? "px-1.5" : "px-2",
                                   isBestPrice && "bg-emerald-50/80 dark:bg-emerald-900/30",
                                   isWinning && "border-l-2 border-r-2 border-emerald-300/60 dark:border-emerald-700/60"
                                 )}>
@@ -1946,7 +2106,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                                     <div className="flex flex-col items-center gap-0.5">
                                     <div className={cn(
                                         "rounded-md font-bold inline-flex items-center justify-center gap-0.5 px-2 py-1 shadow-sm transition-all",
-                                      quote.fornecedoresParticipantes.length > 5 
+                                      (currentQuote?.fornecedoresParticipantes.length ?? 0) > 5 
                                           ? "text-[10px] min-w-[75px]" 
                                           : "text-xs min-w-[85px]",
                                       isBestPrice
@@ -1978,7 +2138,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                   </ScrollArea>
 
                 {/* Rodapé com Ação de Converter */}
-                {bestSupplier && quote.status !== 'finalizada' && !readOnly && (
+                {bestSupplier && currentQuote.status !== 'finalizada' && !readOnly && (
                   <div className="flex-shrink-0 p-2.5 sm:p-3 border-t-2 border-primary/20 dark:border-gray-700/30 bg-primary/5 dark:bg-primary/10">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                       <div className="flex items-center gap-2">
@@ -1990,7 +2150,7 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
                             Melhor: <span className="text-emerald-600 dark:text-emerald-400">{bestSupplier.nome}</span>
                           </p>
                           <p className="text-[10px] text-purple-700 dark:text-purple-400 mt-0.5">
-                            R$ {bestSupplier.totalValue.toFixed(2)} • Eco: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{quote.economia}</span>
+                            R$ {bestSupplier.totalValue.toFixed(2)} • Eco: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{currentQuote?.economia || 'N/A'}</span>
                           </p>
                         </div>
                       </div>
@@ -2027,14 +2187,14 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         </div>
 
         {/* Select Supplier Per Product Dialog */}
-        {products && products.length > 1 && (
+        {products && products.length > 1 && currentQuote && (
           <SelectSupplierPerProductDialog
             open={showSelectSupplierDialog}
             onOpenChange={setShowSelectSupplierDialog}
             products={products.map((item: any) => {
-              const supplierOptions = quote.fornecedoresParticipantes
+              const supplierOptions = currentQuote.fornecedoresParticipantes
                 .map(fornecedor => {
-                  const supplierItem = (quote._supplierItems || quote._raw?.quote_supplier_items || []).find(
+                  const supplierItem = (currentQuote._supplierItems || currentQuote._raw?.quote_supplier_items || []).find(
                     (si: any) => si.supplier_id === fornecedor.id && si.product_id === item.product_id
                   );
 
@@ -2074,11 +2234,11 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
         )}
 
         {/* Convert to Order Dialog */}
-        {selectedSupplierForConversion && (
+        {selectedSupplierForConversion && currentQuote && (
           <ConvertToOrderDialog
             open={convertDialogOpen}
             onOpenChange={setConvertDialogOpen}
-            quote={quote}
+            quote={currentQuote}
             supplier={selectedSupplierForConversion}
             products={getConversionProducts()}
             totalValue={bestSupplier?.totalValue || 0}
@@ -2095,6 +2255,8 @@ export default function ViewQuoteDialog({ quote, onUpdateSupplierProductValue, o
           onConfirm={handleConfirmMultipleOrders}
           isLoading={isUpdating}
         />
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

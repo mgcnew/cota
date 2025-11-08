@@ -1,10 +1,13 @@
-import { useState, useMemo, useRef, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback, lazy, Suspense, startTransition } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Quote, FornecedorParticipante } from "@/hooks/useCotacoes";
+import { useCotacoesMobile } from "@/hooks/mobile/useCotacoesMobile";
+import type { CotacaoMobile } from "@/hooks/mobile/useCotacoesMobile";
+import { CotacoesMobileList } from "@/components/cotacoes/CotacoesMobileList";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package, Clock, CircleDot, ClipboardList, ChevronLeft, ChevronRight } from "lucide-react";
@@ -25,6 +28,7 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { useOptimizedScroll } from "@/hooks/mobile/useOptimizedScroll";
 import { CotacoesStatsMemoized } from "@/components/cotacoes/CotacoesStatsMemoized";
 import { CotacoesVirtualList } from "@/components/cotacoes/CotacoesVirtualList";
+import { useToast } from "@/hooks/use-toast";
 
 // Lazy load dialogs - apenas carregados quando necessários
 const AddQuoteDialog = lazy(() => import("@/components/forms/AddQuoteDialog"));
@@ -52,6 +56,7 @@ export default function Cotacoes() {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const isMobile = useMobile();
   const addQuoteRef = useRef<HTMLButtonElement>(null);
+  const { toast } = useToast();
   
   // Estados para modais (lazy loading)
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -82,33 +87,106 @@ export default function Cotacoes() {
     }
   }, [searchParams]);
 
-  // OPTIMIZED: Use React Query with single optimized query (no N+1)
-  const {
-    cotacoes,
-    isLoading,
-    refetch,
-    updateSupplierProductValue,
-    deleteQuote,
-    updateQuote,
-    convertToOrder,
-    isUpdating
-  } = useCotacoes();
+  // Desktop: Use React Query with single optimized query (no N+1)
+  const desktopData = useCotacoes();
   
-  // Callbacks memoizados para ações
+  // Mobile: Use infinite scroll hook
+  const mobileData = useCotacoesMobile({
+    searchTerm: debouncedSearchTerm,
+    statusFilter,
+    supplierFilter,
+  });
+
+  // Selecionar dados baseado no dispositivo
+  const cotacoes = isMobile ? (mobileData.cotacoes as unknown as Quote[]) : desktopData.cotacoes;
+  const isLoading = isMobile ? mobileData.isLoading : desktopData.isLoading;
+  const refetch = isMobile ? mobileData.refetch : desktopData.refetch;
+  const updateSupplierProductValue = isMobile ? mobileData.updateSupplierProductValue : desktopData.updateSupplierProductValue;
+  const deleteQuote = isMobile ? mobileData.deleteQuote : desktopData.deleteQuote;
+  const updateQuote = isMobile ? mobileData.updateQuote : desktopData.updateQuote;
+  const convertToOrder = isMobile ? mobileData.convertToOrder : desktopData.convertToOrder;
+  const isUpdating = isMobile ? mobileData.isUpdating : desktopData.isUpdating;
+  
+  // Callbacks memoizados para ações (desktop)
   const handleViewQuote = useCallback((quote: Quote) => {
-    setSelectedQuote(quote);
-    setViewDialogOpen(true);
+    startTransition(() => {
+      setSelectedQuote(quote);
+      setViewDialogOpen(true);
+    });
   }, []);
 
   const handleEditQuote = useCallback((quote: Quote) => {
-    setSelectedQuote(quote);
-    // TODO: Implementar dialog de edição se necessário
+    startTransition(() => {
+      setSelectedQuote(quote);
+      setDesktopEditMode(true);
+      setViewDialogOpen(true);
+    });
   }, []);
 
   const handleDeleteQuote = useCallback((quote: Quote) => {
-    setSelectedQuote(quote);
-    setDeleteDialogOpen(true);
+    startTransition(() => {
+      setSelectedQuote(quote);
+      setDeleteDialogOpen(true);
+    });
   }, []);
+
+  // Callbacks para mobile (compatibilidade com CotacaoMobile)
+  // Helper para converter CotacaoMobile para Quote
+  const convertMobileToQuote = useCallback((quote: CotacaoMobile): Quote => {
+    return {
+      id: quote.id,
+      produto: quote.produto,
+      produtoResumo: quote.produtoResumo,
+      produtosLista: quote.produtosLista,
+      quantidade: quote.quantidade,
+      status: quote.status,
+      statusReal: quote.statusReal,
+      dataInicio: quote.dataInicio,
+      dataFim: quote.dataFim,
+      dataPlanejada: quote.dataPlanejada,
+      fornecedores: quote.fornecedores,
+      melhorPreco: quote.melhorPreco,
+      melhorFornecedor: quote.melhorFornecedor,
+      economia: quote.economia,
+      fornecedoresParticipantes: quote.fornecedoresParticipantes.map(f => ({
+        id: f.id,
+        nome: f.nome,
+        valorOferecido: f.valorOferecido,
+        dataResposta: f.dataResposta,
+        observacoes: f.observacoes,
+        status: f.status,
+      })) as FornecedorParticipante[],
+    };
+  }, []);
+
+  // Estados para mobile: usar apenas quoteId para lazy loading
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Estado para desktop também (usado no ViewQuoteDialog)
+  const [desktopEditMode, setDesktopEditMode] = useState(false);
+
+  const handleViewQuoteMobile = useCallback((quote: CotacaoMobile) => {
+    startTransition(() => {
+      setSelectedQuoteId(quote.id);
+      setIsEditMode(false);
+      setViewDialogOpen(true);
+    });
+  }, []);
+
+  const handleEditQuoteMobile = useCallback((quote: CotacaoMobile) => {
+    startTransition(() => {
+      setSelectedQuoteId(quote.id);
+      setIsEditMode(true);
+      setViewDialogOpen(true);
+    });
+  }, []);
+
+  const handleDeleteQuoteMobile = useCallback((quote: CotacaoMobile) => {
+    if (mobileData.deleteQuote) {
+      mobileData.deleteQuote(quote.id);
+    }
+  }, [mobileData]);
 
   const getStatusBadge = useCallback((status: string) => {
     const variants = {
@@ -168,6 +246,78 @@ export default function Cotacoes() {
       return matchesSearch && matchesStatus && matchesSupplier;
     });
   }, [cotacoes, debouncedSearchTerm, statusFilter, supplierFilter]);
+
+  // Handler para exportar cotações (definido após filteredCotacoes)
+  const handleExportQuotes = useCallback(() => {
+    try {
+      if (filteredCotacoes.length === 0) {
+        toast({
+          title: "Nenhuma cotação para exportar",
+          description: "Não há cotações filtradas para exportar.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Preparar dados para exportação
+      const exportData = filteredCotacoes.map((cotacao) => ({
+        'ID': cotacao.id.substring(0, 8),
+        'Produto': cotacao.produto,
+        'Quantidade': cotacao.quantidade,
+        'Status': cotacao.statusReal,
+        'Data Início': cotacao.dataInicio,
+        'Data Fim': cotacao.dataFim,
+        'Fornecedores': cotacao.fornecedores,
+        'Melhor Preço': cotacao.melhorPreco,
+        'Melhor Fornecedor': cotacao.melhorFornecedor,
+        'Economia': cotacao.economia,
+      }));
+
+      // Criar CSV
+      const headers = Object.keys(exportData[0] || {});
+      const csvContent = [
+        headers.join(','),
+        ...exportData.map(row => 
+          headers.map(header => {
+            const value = row[header as keyof typeof row];
+            // Escapar vírgulas e aspas
+            if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+              return `"${value.replace(/"/g, '""')}"`;
+            }
+            return value || '';
+          }).join(',')
+        )
+      ].join('\n');
+
+      // Adicionar BOM para Excel
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+      
+      // Criar link de download
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `cotacoes_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Mostrar toast de sucesso
+      toast({
+        title: "Exportação realizada",
+        description: `${exportData.length} cotações exportadas com sucesso.`,
+      });
+    } catch (error) {
+      console.error('Erro ao exportar cotações:', error);
+      toast({
+        title: "Erro ao exportar",
+        description: "Não foi possível exportar as cotações. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  }, [filteredCotacoes, toast]);
 
   // Calcular estatísticas dinâmicas
   const stats = useMemo(() => {
@@ -497,8 +647,6 @@ export default function Cotacoes() {
           <CotacoesStatsMemoized stats={stats} />
         </div>
       )}
-        </div>
-      )}
 
       {/* Filters */}
       <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
@@ -565,11 +713,23 @@ export default function Cotacoes() {
                   <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
                     <DropdownMenuLabel className="text-gray-600 font-medium">Gerenciar Cotações</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => addQuoteRef.current?.click()}>
+                    <DropdownMenuItem 
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        startTransition(() => {
+                          setAddDialogOpen(true);
+                        });
+                      }}
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       Nova Cotação
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        handleExportQuotes();
+                      }}
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Exportar
                     </DropdownMenuItem>
@@ -590,7 +750,23 @@ export default function Cotacoes() {
       </Card>
 
       {/* Cotações View */}
-      {viewMode === "grid" ? <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {isMobile ? (
+        // Mobile: Infinite scroll list
+        <CotacoesMobileList
+          cotacoes={mobileData.cotacoes}
+          isLoading={mobileData.isLoading}
+          isFetchingNextPage={mobileData.isFetchingNextPage}
+          hasNextPage={mobileData.hasNextPage}
+          fetchNextPage={mobileData.fetchNextPage}
+          onView={handleViewQuoteMobile}
+          onEdit={handleEditQuoteMobile}
+          onDelete={handleDeleteQuoteMobile}
+          getStatusBadge={getStatusBadge}
+        />
+      ) : (
+        <>
+          {viewMode === "grid" ? (
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {paginatedData.items.map((cotacao, index) => {
         const getStatusColors = (status: string) => {
           switch (status) {
@@ -811,48 +987,48 @@ export default function Cotacoes() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {/* Opção de editar - abre diretamente na tab de edição */}
-                      {cotacao.status !== "concluida" && <ViewQuoteDialog 
-                        quote={cotacao} 
-                        onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                          quoteId,
-                          supplierId,
-                          productId,
-                          newValue
-                        })} 
-                        onConvertToOrder={(quoteId, orders) => convertToOrder({
-                          quoteId,
-                          orders
-                        })}
-                        onEdit={(quoteId, data) => updateQuote({
-                          quoteId,
-                          data
-                        })}
-                        defaultTab="edicao"
-                        isUpdating={isUpdating} 
-                        trigger={<DropdownMenuItem onSelect={e => e.preventDefault()}>
+                      {cotacao.status !== "concluida" && (
+                        <DropdownMenuItem 
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            handleEditQuote(cotacao);
+                          }}
+                        >
                           <Edit className="h-4 w-4 mr-2" />
                           Editar
-                        </DropdownMenuItem>} 
-                      />}
+                        </DropdownMenuItem>
+                      )}
                       
                       {/* Só permite excluir se não estiver concluída */}
-                      {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="text-destructive">
+                      {cotacao.status !== "concluida" && (
+                        <DropdownMenuItem 
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            handleDeleteQuote(cotacao);
+                          }} 
+                          className="text-destructive"
+                        >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Excluir
-                        </DropdownMenuItem>} />}
+                        </DropdownMenuItem>
+                      )}
                       
                       {/* Mostra mensagem informativa para cotações concluídas */}
-                      {cotacao.status === "concluida" && <DropdownMenuItem disabled className="text-muted-foreground">
+                      {cotacao.status === "concluida" && (
+                        <DropdownMenuItem disabled className="text-muted-foreground">
                           <FileText className="h-4 w-4 mr-2" />
                           Cotação finalizada
-                        </DropdownMenuItem>}
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </CardContent>
             </Card>;
       })}
-        </div> : <Card className="border-0 bg-transparent">
+        </div>
+          ) : (
+            <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
               <Table className="w-full">
@@ -996,47 +1172,40 @@ export default function Cotacoes() {
                             <div className="flex items-center justify-end gap-2">
                               {/* Botão Editar ou Ver Detalhes baseado no status */}
                               {cotacao.status !== "concluida" ? (
-                                <ViewQuoteDialog 
-                                  quote={cotacao} 
-                                  onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
-                                    quoteId,
-                                    supplierId,
-                                    productId,
-                                    newValue
-                                  })} 
-                                  onConvertToOrder={(quoteId, orders) => convertToOrder({
-                                    quoteId,
-                                    orders
-                                  })}
-                                  onEdit={(quoteId, data) => updateQuote({
-                                    quoteId,
-                                    data
-                                  })}
-                                  defaultTab="edicao"
-                                  isUpdating={isUpdating} 
-                                  trigger={<Button variant="ghost" size="sm" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 p-0 h-8 w-8 rounded-lg border border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
-                                    <Edit className="h-4 w-4" />
-                                    <span className="sr-only">Editar cotação</span>
-                                  </Button>} 
-                                />
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 p-0 h-8 w-8 rounded-lg border border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all"
+                                  onClick={() => handleEditQuote(cotacao)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                  <span className="sr-only">Editar cotação</span>
+                                </Button>
                               ) : (
-                                <ViewQuoteDialog 
-                                  quote={cotacao}
-                                  readOnly={true}
-                                  isUpdating={isUpdating} 
-                                  trigger={<Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 p-0 h-8 w-8 rounded-lg border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
-                                    <Eye className="h-4 w-4" />
-                                    <span className="sr-only">Gerenciar cotação</span>
-                                  </Button>} 
-                                />
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 p-0 h-8 w-8 rounded-lg border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all"
+                                  onClick={() => handleViewQuote(cotacao)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  <span className="sr-only">Gerenciar cotação</span>
+                                </Button>
                               )}
 
 
                               {/* Botão Excluir - Só aparece se não estiver concluída */}
-                              {cotacao.status !== "concluida" && <DeleteQuoteDialog quote={cotacao} onDelete={id => deleteQuote(id)} trigger={<Button variant="ghost" size="sm" className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 p-0 h-8 w-8 rounded-lg border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
-                                      <Trash2 className="h-4 w-4" />
-                                      <span className="sr-only">Excluir cotação</span>
-                                    </Button>} />}
+                              {cotacao.status !== "concluida" && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 p-0 h-8 w-8 rounded-lg border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all"
+                                  onClick={() => handleDeleteQuote(cotacao)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  <span className="sr-only">Excluir cotação</span>
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1052,9 +1221,13 @@ export default function Cotacoes() {
               <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
             </div>
           </CardContent>
-        </Card>}
+        </Card>
+            )}
+        </>
+      )}
 
-      {filteredCotacoes.length === 0 && !isLoading && <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
+      {!isMobile && filteredCotacoes.length === 0 && !isLoading && (
+        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
           <CardContent className="p-12 text-center">
             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhuma cotação encontrada</h3>
@@ -1062,33 +1235,91 @@ export default function Cotacoes() {
               Tente ajustar os filtros ou crie uma nova cotação
             </p>
           </CardContent>
-        </Card>}
+        </Card>
+      )}
 
       {/* Dialogs com lazy loading */}
       {addDialogOpen && (
-        <Suspense fallback={<div />}>
-          <AddQuoteDialog onAdd={() => { refetch(); setAddDialogOpen(false); }} trigger={<button ref={addQuoteRef} onClick={() => setAddDialogOpen(true)} className="hidden" />} />
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+            <div className="w-8 h-8 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
+          </div>
+        </div>}>
+          <AddQuoteDialog 
+            onAdd={() => { 
+              refetch(); 
+              startTransition(() => {
+                setAddDialogOpen(false);
+              });
+            }} 
+            open={addDialogOpen}
+            onOpenChange={(open) => {
+              if (!open) {
+                startTransition(() => {
+                  setAddDialogOpen(false);
+                });
+              }
+            }}
+            trigger={<div />}
+          />
         </Suspense>
       )}
       
-      {viewDialogOpen && selectedQuote && (
-        <Suspense fallback={<div />}>
+      {viewDialogOpen && (
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+            <div className="w-8 h-8 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
+          </div>
+        </div>}>
           <ViewQuoteDialog 
-            quote={selectedQuote}
-            onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({ quoteId, supplierId, productId, newValue })}
-            onConvertToOrder={(quoteId, orders) => convertToOrder({ quoteId, orders })}
-            onEdit={(quoteId, data) => updateQuote({ quoteId, data })}
+            quote={!isMobile ? selectedQuote || undefined : undefined} // Desktop: passa quote completo
+            quoteId={isMobile ? selectedQuoteId || undefined : undefined} // Mobile: passa apenas ID
+            onUpdateSupplierProductValue={updateSupplierProductValue ? (quoteId, supplierId, productId, newValue) => updateSupplierProductValue({ quoteId, supplierId, productId, newValue }) : undefined}
+            onConvertToOrder={convertToOrder ? (quoteId, orders) => convertToOrder({ quoteId, orders }) : undefined}
+            onEdit={updateQuote ? (quoteId, data) => updateQuote({ quoteId, data }) : undefined}
             isUpdating={isUpdating}
+            defaultTab={(isMobile ? isEditMode : desktopEditMode) ? "edicao" : "detalhes"}
+            open={viewDialogOpen}
+            onOpenChange={(open) => {
+              if (!open) {
+                startTransition(() => {
+                  setViewDialogOpen(false);
+                  setSelectedQuoteId(null);
+                  setIsEditMode(false);
+                  setDesktopEditMode(false);
+                  setSelectedQuote(null);
+                });
+              }
+            }}
             trigger={<div />}
           />
         </Suspense>
       )}
       
       {deleteDialogOpen && selectedQuote && (
-        <Suspense fallback={<div />}>
-          <DeleteQuoteDialog 
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+            <div className="w-8 h-8 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" />
+          </div>
+        </div>}>
+          <DeleteQuoteDialog
             quote={selectedQuote}
-            onDelete={(id) => { deleteQuote(id); setDeleteDialogOpen(false); }}
+            onDelete={(id) => { 
+              deleteQuote(id);
+              startTransition(() => {
+                setDeleteDialogOpen(false);
+                setSelectedQuote(null);
+              });
+            }}
+            open={deleteDialogOpen}
+            onOpenChange={(open) => {
+              if (!open) {
+                startTransition(() => {
+                  setDeleteDialogOpen(false);
+                  setSelectedQuote(null);
+                });
+              }
+            }}
             trigger={<div />}
           />
         </Suspense>
