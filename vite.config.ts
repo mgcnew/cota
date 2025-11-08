@@ -8,13 +8,10 @@ export default defineConfig(({ mode }) => ({
   // Base path para GitHub Pages (se necessário)
   // base: process.env.NODE_ENV === 'production' ? '/cotaja/' : '/',
   server: {
-    host: "0.0.0.0",
+    host: "localhost", // Mudado para localhost para melhor compatibilidade
     port: 8080,
-    strictPort: true, // Força usar a porta 8080, mostra erro se estiver ocupada
+    strictPort: false, // Permite usar outra porta se 8080 estiver ocupada
     open: true, // Abre automaticamente no navegador
-    hmr: {
-      port: 8080, // Hot Module Replacement também na porta 8080
-    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

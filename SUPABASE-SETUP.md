@@ -127,3 +127,4 @@ Se você já tinha dados no Supabase do Lovable, você pode:
 
 
 
+

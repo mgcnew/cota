@@ -41,6 +41,9 @@ interface Product {
 interface ImportProductsDialogProps {
   onProductsImported: (products: Product[]) => void;
   onCategoryAdded: (category: string) => void;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 interface ParsedProduct {
@@ -53,8 +56,10 @@ interface ParsedProduct {
   lastUpdate?: string;
 }
 
-export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: ImportProductsDialogProps) {
-  const [open, setOpen] = useState(false);
+export function ImportProductsDialog({ onProductsImported, onCategoryAdded, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: ImportProductsDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const handleSetOpen = externalOnOpenChange || ((newOpen: boolean) => setInternalOpen(newOpen));
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedProduct[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -340,13 +345,12 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded }: Im
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Upload className="h-4 w-4 mr-2" />
-          Importar
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleSetOpen}>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-xl">
         <DialogHeader>
           <DialogTitle>Importar Produtos em Massa</DialogTitle>

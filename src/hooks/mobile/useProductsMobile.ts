@@ -1,8 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useMobileQueryConfig } from './useMobileQueryConfig';
-import { useServerPagination, ServerPaginationParams } from './useServerPagination';
+import { useSupabaseSmart } from './useSupabaseSmart';
 
 export interface ProductMobile {
   id: string;
@@ -22,20 +21,49 @@ export interface ProductMobileFull extends ProductMobile {
   trend: "up" | "down" | "stable";
 }
 
+export interface UseProductsMobileOptions {
+  searchQuery?: string;
+  categoryFilter?: string;
+}
+
 /**
- * Hook otimizado para mobile - carrega apenas dados essenciais
- * Usa paginação server-side para melhor performance
+ * Hook ultra-otimizado para produtos no mobile com infinite scroll
+ * 
+ * Características:
+ * - Infinite scroll com useInfiniteQuery
+ * - Paginação server-side (limit 10)
+ * - Filtros server-side (search, category)
+ * - Campos essenciais apenas (sem JOINs pesados)
+ * - Cache agressivo (5 minutos)
+ * - Mutations (create, update, delete)
+ * - Zero carregamentos desnecessários
  */
-export function useProductsMobile(searchQuery?: string) {
+export function useProductsMobile(options: UseProductsMobileOptions = {}) {
+  const { searchQuery = '', categoryFilter = 'all' } = options;
+  const { getLimit, queryConfig } = useSupabaseSmart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const mobileConfig = useMobileQueryConfig();
+  const limit = getLimit();
 
-  // Query principal com paginação server-side
-  const pagination = useServerPagination<ProductMobile>({
-    queryKey: ['products-mobile', searchQuery],
-    queryFn: async (params: ServerPaginationParams) => {
-      const { page, pageSize } = params;
+  // Infinite query para carregar páginas progressivamente
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+    refetch,
+  } = useInfiniteQuery<{
+    data: ProductMobile[];
+    nextPage: number | undefined;
+    total: number;
+  }, Error>({
+    queryKey: ['products-mobile', searchQuery, categoryFilter],
+    queryFn: async ({ pageParam = 0 }) => {
+      const page = typeof pageParam === 'number' ? pageParam : 0;
+      const from = page * limit;
+      const to = from + limit - 1;
 
       // Verificar autenticação
       const { data: { user } } = await supabase.auth.getUser();
@@ -47,29 +75,64 @@ export function useProductsMobile(searchQuery?: string) {
         .select('id, name, category, unit, barcode, image_url', { count: 'exact' })
         .order('created_at', { ascending: false });
 
-      // Aplicar busca se houver (usa o searchQuery passado como parâmetro)
-      // Se searchQuery mudar, a query será refeita automaticamente devido ao queryKey
+      // Aplicar busca server-side
       const searchTerm = searchQuery?.trim() || '';
       if (searchTerm) {
-        query = query.or(`name.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`);
+        query = query.or(`name.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%,barcode.ilike.%${searchTerm}%`);
       }
 
-      // Aplicar paginação
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
+      // Aplicar filtro de categoria server-side
+      if (categoryFilter !== 'all') {
+        query = query.eq('category', categoryFilter);
+      }
+
+      // Aplicar range para paginação
       query = query.range(from, to);
 
-      const { data, error, count } = await query;
+      const { data: productsData, error: productsError, count } = await query;
 
-      if (error) throw error;
+      if (productsError) throw productsError;
+
+      if (!productsData || productsData.length === 0) {
+        return {
+          data: [],
+          nextPage: undefined,
+          total: count || 0,
+        };
+      }
+
+      // Retornar produtos formatados
+      const products: ProductMobile[] = productsData.map(product => ({
+        id: product.id,
+        name: product.name,
+        category: product.category || 'Sem Categoria',
+        unit: product.unit || 'un',
+        barcode: product.barcode || undefined,
+        image_url: product.image_url || undefined,
+      }));
+
+      // Calcular próxima página
+      const hasMore = to < (count || 0) - 1;
+      const nextPage = hasMore ? page + 1 : undefined;
 
       return {
-        data: (data || []) as ProductMobile[],
+        data: products,
+        nextPage,
         total: count || 0,
       };
     },
-    initialPageSize: 20, // Mobile: 20 itens por página
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 10 * 60 * 1000, // 10 minutos
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    placeholderData: (previousData) => previousData,
   });
+
+  // Flatten products de todas as páginas
+  const products = data?.pages.flatMap((page) => page.data) || [];
 
   // Mutation para criar produto
   const createProduct = useMutation({
@@ -106,8 +169,9 @@ export function useProductsMobile(searchQuery?: string) {
       return data;
     },
     onSuccess: () => {
+      // Invalidação seletiva - apenas queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['products-mobile'] });
-      queryClient.invalidateQueries({ queryKey: ['products'] }); // Invalida também a versão desktop
+      queryClient.invalidateQueries({ queryKey: ['products'] });
       toast({
         title: "Produto criado",
         description: "O produto foi criado com sucesso.",
@@ -134,6 +198,7 @@ export function useProductsMobile(searchQuery?: string) {
       return { id: productId, ...data };
     },
     onSuccess: () => {
+      // Invalidação seletiva
       queryClient.invalidateQueries({ queryKey: ['products-mobile'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
       toast({
@@ -161,6 +226,7 @@ export function useProductsMobile(searchQuery?: string) {
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidação seletiva
       queryClient.invalidateQueries({ queryKey: ['products-mobile'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
       toast({
@@ -179,14 +245,15 @@ export function useProductsMobile(searchQuery?: string) {
   });
 
   return {
-    products: pagination.data,
-    isLoading: pagination.isLoading,
-    error: pagination.error,
-    pagination: pagination.pagination,
-    refetch: pagination.refetch,
+    products,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+    refetch,
     createProduct,
     updateProduct,
     deleteProduct,
   };
 }
-

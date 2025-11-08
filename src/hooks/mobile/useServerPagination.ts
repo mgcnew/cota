@@ -91,12 +91,6 @@ export function useServerPagination<T>({
   const totalItems = (data as any)?.total || 0;
   const totalPages = Math.ceil(totalItems / pageSize);
 
-  // Callbacks para mudanças de página
-  const handlePageSizeChange = useCallback((size: number) => {
-    setPageSize(size);
-    setCurrentPage(1);
-  }, []);
-
   const pagination = useMemo(
     () => {
       const startIndex = (currentPage - 1) * pageSize;
@@ -126,12 +120,21 @@ export function useServerPagination<T>({
             setCurrentPage((prev) => prev - 1);
           }
         },
-        setPageSize: handlePageSizeChange,
-        setItemsPerPage: handlePageSizeChange,
-        onItemsPerPageChange: handlePageSizeChange,
+        setPageSize: (size: number) => {
+          setPageSize(size);
+          setCurrentPage(1);
+        },
+        setItemsPerPage: (size: number) => {
+          setPageSize(size);
+          setCurrentPage(1);
+        },
+        onItemsPerPageChange: (size: number) => {
+          setPageSize(size);
+          setCurrentPage(1);
+        },
       };
     },
-    [currentPage, pageSize, totalItems, totalPages, handlePageSizeChange]
+    [currentPage, pageSize, totalItems, totalPages]
   );
 
   const refetch = useCallback(() => {

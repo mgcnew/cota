@@ -2,15 +2,12 @@ import { lazy, Suspense } from "react";
 import { useMobile } from "@/contexts/MobileProvider";
 import ProdutosDesktop from "./ProdutosDesktop";
 
-// Lazy load mobile version otimizada
-const ProdutosMobileOptimized = lazy(() => import("./ProdutosMobileOptimized"));
+// Lazy load mobile version
+const ProdutosMobile = lazy(() => import("./ProdutosMobile"));
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-screen">
-    <div className="flex flex-col items-center gap-2">
-      <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin" />
-      <div className="text-sm text-gray-500">Carregando produtos...</div>
-    </div>
+    <div className="text-sm text-gray-500">Carregando...</div>
   </div>
 );
 
@@ -18,24 +15,20 @@ const LoadingFallback = () => (
  * Router para página de Produtos
  * 
  * Separação completa:
- * - Mobile: ProdutosMobileOptimized (hooks otimizados, lazy loading, virtualização)
+ * - Mobile: ProdutosMobile (componentes leves e específicos para mobile)
  * - Desktop: ProdutosDesktop (versão completa do desktop)
  * 
- * Mobile usa:
- * - Hooks específicos para mobile (useDebounceMobile, useProductsMobileOptimized)
- * - Lazy loading de imagens (IntersectionObserver)
- * - Filtros server-side
- * - Virtualização com throttling
- * - Zero efeitos pesados
+ * ⚠️ NOTA: ProdutosDesktop.tsx precisa ser restaurado com o código desktop completo.
+ * A estrutura do router já está correta e não precisa ser alterada.
  */
 export default function Produtos() {
   const isMobile = useMobile();
 
-  // Mobile: lazy load versão otimizada
+  // Mobile: lazy load para reduzir bundle
   if (isMobile) {
     return (
       <Suspense fallback={<LoadingFallback />}>
-        <ProdutosMobileOptimized />
+        <ProdutosMobile />
       </Suspense>
     );
   }

@@ -75,11 +75,16 @@ type ProductFormData = z.infer<typeof productSchema>;
 interface AddProductDialogProps {
   onProductAdded: (product: any) => void;
   onCategoryAdded?: (category: string) => void;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProductDialogProps) {
+export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddProductDialogProps) {
   const isMobile = useMobile();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const handleSetOpen = externalOnOpenChange || ((newOpen: boolean) => setInternalOpen(newOpen));
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -805,6 +810,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
 
   // Handler para controlar a abertura/fechamento do modal
   const handleOpenChange = (newOpen: boolean) => {
+    handleSetOpen(newOpen);
     if (!newOpen) {
       // Ao fechar, restaurar scroll imediatamente
       setTimeout(() => {
@@ -813,20 +819,21 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
           behavior: 'instant' as ScrollBehavior
         });
       }, 0);
+      form.reset();
+      setShowNewCategory(false);
+      setProductImage(null);
     }
-    setOpen(newOpen);
   };
 
   // Mobile: Usar Sheet (bottom sheet)
   if (isMobile) {
     return (
       <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetTrigger asChild>
-          <Button className="gradient-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Produto
-          </Button>
-        </SheetTrigger>
+        {trigger && (
+          <SheetTrigger asChild>
+            {trigger}
+          </SheetTrigger>
+        )}
         <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
           <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
@@ -859,13 +866,12 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded }: AddProduct
 
   // Desktop: Usar Dialog
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button className="gradient-primary">
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Produto
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
         <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between gap-3">

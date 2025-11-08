@@ -105,3 +105,4 @@ Se você usa variáveis de ambiente (Supabase, APIs, etc.), adicione-as nas conf
 
 
 
+

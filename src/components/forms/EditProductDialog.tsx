@@ -1,5 +1,5 @@
 // EditProductDialog - Formulário de edição de produtos com upload de imagem e código de barras
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,6 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useProductDetails } from "@/hooks/mobile/useProductDetails";
 import {
   Form,
   FormControl,
@@ -73,21 +81,44 @@ interface EditProductDialogProps {
   onProductUpdated: (product: Product) => void;
   onCategoryAdded?: (category: string) => void;
   categories: string[];
+  productId?: string | null; // Para lazy loading no mobile
 }
 
-export function EditProductDialog({ 
+function EditProductDialogInternal({ 
   product, 
   open, 
   onOpenChange, 
   onProductUpdated, 
   onCategoryAdded,
-  categories 
+  categories,
+  productId 
 }: EditProductDialogProps) {
+  const isMobile = useIsMobile();
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const { toast } = useToast();
+  
+  // Lazy loading de detalhes no mobile (apenas se productId fornecido e product não)
+  const { productDetails, isLoading: isLoadingDetails } = useProductDetails(
+    isMobile && !product && productId ? productId : null
+  );
+  
+  // Usar productDetails se disponível (mobile lazy loading), senão usar product prop
+  const currentProduct: Product | null = product || (productDetails && typeof productDetails === 'object' && 'id' in productDetails ? {
+    id: (productDetails as any).id,
+    name: (productDetails as any).name,
+    category: (productDetails as any).category,
+    unit: (productDetails as any).unit,
+    barcode: (productDetails as any).barcode,
+    image_url: (productDetails as any).image_url,
+    lastQuotePrice: (productDetails as any).lastQuotePrice,
+    bestSupplier: (productDetails as any).bestSupplier,
+    quotesCount: (productDetails as any).quotesCount,
+    lastUpdate: (productDetails as any).lastUpdate,
+    trend: (productDetails as any).trend,
+  } as Product : null);
   
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -102,23 +133,66 @@ export function EditProductDialog({
 
   const availableCategories = categories.filter(cat => cat !== "all");
 
+  // Atualizar form quando currentProduct mudar
   useEffect(() => {
-    if (product && open) {
+    if (currentProduct && open) {
       form.reset({
-        name: product.name,
-        category: product.category,
-        unit: product.unit || "un",
-        barcode: product.barcode || "",
+        name: currentProduct.name,
+        category: currentProduct.category,
+        unit: currentProduct.unit || "un",
+        barcode: currentProduct.barcode || "",
         newCategory: "",
       });
       setShowNewCategory(false);
-      setNewImageUrl(null);
+      if (currentProduct.image_url) {
+        setNewImageUrl(currentProduct.image_url);
+      } else {
+        setNewImageUrl(null);
+      }
     }
-  }, [product, open, form]);
+  }, [currentProduct, open, form]);
+  
+  // Não renderizar nada se não estiver aberto
+  if (!open) return null;
+  
+  // Mostrar loading enquanto carrega detalhes no mobile (apenas se estiver aberto e não tiver produto ainda)
+  const isLoading = isMobile && !currentProduct && isLoadingDetails;
+  
+  // Se estiver carregando, mostrar apenas o Sheet de loading (evitar renderização dupla)
+  if (isLoading) {
+    return (
+      <Sheet key="loading" open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
+          <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+            <div className="flex items-center justify-between gap-3">
+              <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white">
+                Carregando...
+              </SheetTitle>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </SheetHeader>
+          <div className="flex items-center justify-center py-12 flex-1">
+            <Loader2 className="h-8 w-8 animate-spin text-orange-600 dark:text-orange-400" />
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+  
+  // Se não tiver produto e não estiver carregando, não renderizar
+  if (!currentProduct) return null;
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !product) return;
+    if (!file || !currentProduct) return;
 
     // Validar tipo de arquivo
     if (!file.type.startsWith('image/')) {
@@ -144,7 +218,7 @@ export function EditProductDialog({
     try {
       // Upload para o Supabase Storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${product.id}-${Date.now()}.${fileExt}`;
+      const fileName = `${currentProduct.id}-${Date.now()}.${fileExt}`;
       const filePath = `product-images/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -186,7 +260,7 @@ export function EditProductDialog({
   };
 
   const onSubmit = (data: ProductFormData) => {
-    if (!product) return;
+    if (!currentProduct) return;
 
     // Determinar a categoria final
     const finalCategory = data.category === "nova" ? data.newCategory! : data.category;
@@ -197,13 +271,13 @@ export function EditProductDialog({
     }
 
     const updatedProduct: Product = {
-      ...product,
+      ...currentProduct,
       name: data.name,
       category: finalCategory,
       unit: data.unit,
       barcode: data.barcode || undefined,
       lastUpdate: new Date().toLocaleDateString('pt-BR'),
-      image_url: newImageUrl || product.image_url,
+      image_url: newImageUrl || currentProduct.image_url,
     };
 
     onProductUpdated(updatedProduct);
@@ -221,34 +295,11 @@ export function EditProductDialog({
     onOpenChange(false);
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0">
-                <Package className="h-4 w-4" />
-              </div>
-              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-                Editar Produto
-              </DialogTitle>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
-        
-        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-gray-900">
-          {/* Product Image Preview */}
-          {(product?.image_url || newImageUrl) && (
+  // Conteúdo do formulário (compartilhado entre mobile e desktop)
+  const formContent = (
+    <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-gray-900">
+      {/* Product Image Preview */}
+      {(currentProduct?.image_url || newImageUrl) && (
             <div className="flex flex-col items-center gap-3 pb-2">
               <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-md relative group">
                 {isUploadingImage ? (
@@ -258,8 +309,8 @@ export function EditProductDialog({
                 ) : (
                   <>
                     <img 
-                      src={newImageUrl || product.image_url} 
-                      alt={product.name}
+                      src={newImageUrl || currentProduct.image_url} 
+                      alt={currentProduct.name}
                       className="w-full h-full object-cover"
                     />
                     {newImageUrl && (
@@ -459,8 +510,83 @@ export function EditProductDialog({
             </div>
             </form>
           </Form>
-        </div>
+    </div>
+  );
+
+  // Mobile: Usar Sheet (bottom sheet) - apenas um Sheet deve ser renderizado
+  if (isMobile) {
+    // Se estiver carregando, já retornou o Sheet de loading acima
+    // Se chegou aqui, tem produto carregado, então renderizar Sheet completo
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
+          <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                  <Package className="h-5 w-5" />
+                </div>
+                <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                  Editar Produto
+                </SheetTitle>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </SheetHeader>
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {formContent}
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: Usar Dialog
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0">
+                <Package className="h-4 w-4" />
+              </div>
+              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+                Editar Produto
+              </DialogTitle>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogHeader>
+        {formContent}
       </DialogContent>
     </Dialog>
   );
 }
+
+// Memoizar componente para evitar re-renders desnecessários
+export const EditProductDialog = memo(EditProductDialogInternal, (prevProps, nextProps) => {
+  // Re-renderizar apenas se props relevantes mudarem
+  return (
+    prevProps.open === nextProps.open &&
+    prevProps.product?.id === nextProps.product?.id &&
+    prevProps.productId === nextProps.productId &&
+    prevProps.categories?.length === nextProps.categories?.length
+  );
+});

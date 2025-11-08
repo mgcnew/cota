@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -9,20 +9,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, Clock, ClipboardList, Tags, DollarSign, CircleDot, Barcode } from "lucide-react";
+import { Package, Search, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, Clock, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AddProductDialog } from "@/components/forms/AddProductDialog";
-import { EditProductDialog } from "@/components/forms/EditProductDialog";
-import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
-import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper } from "@/components/layout/PageWrapper";
+import { useToast } from "@/hooks/use-toast";
+
+// Lazy load dialogs - apenas carregados quando necessários
+const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
+const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
+const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
+const ImportProductsDialog = lazy(() => import("@/components/forms/ImportProductsDialog").then(m => ({ default: m.ImportProductsDialog })));
 
 /**
  * ProdutosDesktop - Versão Desktop Completa
@@ -45,17 +48,9 @@ export default function ProdutosDesktop() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const addDialogTriggerRef = useRef<HTMLDivElement>(null);
-  const importDialogTriggerRef = useRef<HTMLDivElement>(null);
-
-  const triggerAddDialog = () => {
-    const button = addDialogTriggerRef.current?.querySelector('button');
-    button?.click();
-  };
-  const triggerImportDialog = () => {
-    const button = importDialogTriggerRef.current?.querySelector('button');
-    button?.click();
-  };
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const { products, categories, isLoading: productsLoading, deleteProduct, updateProduct, invalidateCache } = useProducts();
 
@@ -202,6 +197,101 @@ export default function ProdutosDesktop() {
     return <Badge variant="outline" className={`text-xs font-medium ${config.className}`}>
         {config.label}
     </Badge>;
+  }, []);
+
+  // Handler para exportar produtos (definido após getProductStatus)
+  const handleExportProducts = useCallback(() => {
+    try {
+      if (safeFilteredProducts.length === 0) {
+        toast({
+          title: "Nenhum produto para exportar",
+          description: "Não há produtos filtrados para exportar.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Preparar dados para exportação
+      const exportData = safeFilteredProducts.map((product) => ({
+        'Nome': product.name,
+        'Categoria': product.category || 'Sem Categoria',
+        'Código de Barras': product.barcode || 'N/A',
+        'Unidade': product.unit || 'un',
+        'Status': getProductStatus(product),
+        'Preço': product.lastQuotePrice || 'R$ 0,00',
+        'Melhor Fornecedor': product.bestSupplier || 'N/A',
+        'Cotações': product.quotesCount || 0,
+      }));
+
+      // Criar CSV
+      const headers = Object.keys(exportData[0] || {});
+      const csvContent = [
+        headers.join(','),
+        ...exportData.map(row => 
+          headers.map(header => {
+            const value = row[header as keyof typeof row];
+            // Escapar vírgulas e aspas
+            if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+              return `"${value.replace(/"/g, '""')}"`;
+            }
+            return value || '';
+          }).join(',')
+        )
+      ].join('\n');
+
+      // Adicionar BOM para Excel
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+      
+      // Criar link de download
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `produtos_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Mostrar toast de sucesso
+      toast({
+        title: "Exportação realizada",
+        description: `${exportData.length} produtos exportados com sucesso.`,
+      });
+    } catch (error) {
+      console.error('Erro ao exportar produtos:', error);
+      toast({
+        title: "Erro ao exportar",
+        description: "Não foi possível exportar os produtos. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  }, [safeFilteredProducts, toast, getProductStatus]);
+
+  // Handlers com startTransition para evitar erros de Suspense
+  const handleAddProduct = useCallback(() => {
+    startTransition(() => {
+      setAddDialogOpen(true);
+    });
+  }, []);
+
+  const handleImportProducts = useCallback(() => {
+    startTransition(() => {
+      setImportDialogOpen(true);
+    });
+  }, []);
+
+  const handleEditProduct = useCallback((product: Product) => {
+    startTransition(() => {
+      setEditingProduct(product);
+    });
+  }, []);
+
+  const handleDeleteProduct = useCallback((product: Product) => {
+    startTransition(() => {
+      setDeletingProduct(product);
+    });
   }, []);
 
   const renderCard1 = useMemo(() => (
@@ -444,13 +534,32 @@ export default function ProdutosDesktop() {
                     <DropdownMenuContent align="end" className="w-[180px]">
                       <DropdownMenuLabel>Ações</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={triggerAddDialog}>
+                      <DropdownMenuItem 
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          handleAddProduct();
+                        }}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Adicionar Produto
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={triggerImportDialog}>
+                      <DropdownMenuItem 
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          handleImportProducts();
+                        }}
+                      >
                         <FileUp className="h-4 w-4 mr-2" />
                         Importar Produtos
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          handleExportProducts();
+                        }}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Exportar Produtos
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/dashboard/contagem-estoque")}>
                         <ClipboardList className="h-4 w-4 mr-2" />
@@ -483,7 +592,7 @@ export default function ProdutosDesktop() {
                   <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
                   <p className="text-lg font-semibold text-gray-900 dark:text-white">Nenhum produto encontrado.</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Tente ajustar sua busca ou filtros.</p>
-                  <Button onClick={triggerAddDialog} className="mt-4 bg-primary hover:bg-primary/90 text-white">
+                  <Button onClick={handleAddProduct} className="mt-4 bg-primary hover:bg-primary/90 text-white">
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar Produto
                   </Button>
@@ -603,11 +712,23 @@ export default function ProdutosDesktop() {
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
-                                      <DropdownMenuItem onClick={() => setEditingProduct(product)} className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors py-2">
+                                      <DropdownMenuItem 
+                                        onSelect={(e) => {
+                                          e.preventDefault();
+                                          handleEditProduct(product);
+                                        }} 
+                                        className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors py-2"
+                                      >
                                         <Edit className="h-4 w-4 mr-2 text-green-600" />
                                         <span className="font-medium">Editar Produto</span>
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors py-2" onClick={() => setDeletingProduct(product)}>
+                                      <DropdownMenuItem 
+                                        onSelect={(e) => {
+                                          e.preventDefault();
+                                          handleDeleteProduct(product);
+                                        }} 
+                                        className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors py-2"
+                                      >
                                         <Trash2 className="h-4 w-4 mr-2" />
                                         <span className="font-medium">Excluir Produto</span>
                                       </DropdownMenuItem>
@@ -647,35 +768,124 @@ export default function ProdutosDesktop() {
             </CardContent>
           </Card>
 
-          {/* Dialogs - Hidden triggers for dropdown actions */}
-          <div className="sr-only">
-            <div ref={addDialogTriggerRef}>
-              <AddProductDialog onProductAdded={invalidateCache} onCategoryAdded={invalidateCache} />
-            </div>
-            <div ref={importDialogTriggerRef}>
-              <ImportProductsDialog onProductsImported={invalidateCache} onCategoryAdded={invalidateCache} />
-            </div>
-          </div>
-
-          <EditProductDialog product={editingProduct} open={!!editingProduct} onOpenChange={open => !open && setEditingProduct(null)} onProductUpdated={updatedProduct => {
-              if (typeof updateProduct === 'function') {
-                updateProduct({
-                  productId: updatedProduct.id,
-                  data: {
-                    name: updatedProduct.name,
-                    category: updatedProduct.category,
-                    unit: updatedProduct.unit,
-                    barcode: updatedProduct.barcode
+          {/* Dialogs com lazy loading */}
+          {addDialogOpen && (
+            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+                <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin" />
+              </div>
+            </div>}>
+              <AddProductDialog 
+                onProductAdded={() => {
+                  invalidateCache();
+                  startTransition(() => {
+                    setAddDialogOpen(false);
+                  });
+                }} 
+                onCategoryAdded={invalidateCache}
+                open={addDialogOpen}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    startTransition(() => {
+                      setAddDialogOpen(false);
+                    });
                   }
-                });
-              }
-            }} onCategoryAdded={invalidateCache} categories={safeCategories} />
+                }}
+              />
+            </Suspense>
+          )}
 
-          <DeleteProductDialog product={deletingProduct} open={!!deletingProduct} onOpenChange={open => !open && setDeletingProduct(null)} onProductDeleted={id => {
-              if (typeof deleteProduct === 'function') {
-                deleteProduct(id);
-              }
-            }} />
+          {importDialogOpen && (
+            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+                <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+              </div>
+            </div>}>
+              <ImportProductsDialog 
+                onProductsImported={() => {
+                  invalidateCache();
+                  startTransition(() => {
+                    setImportDialogOpen(false);
+                  });
+                }} 
+                onCategoryAdded={invalidateCache}
+                open={importDialogOpen}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    startTransition(() => {
+                      setImportDialogOpen(false);
+                    });
+                  }
+                }}
+              />
+            </Suspense>
+          )}
+
+          {editingProduct && (
+            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+                <div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin" />
+              </div>
+            </div>}>
+              <EditProductDialog 
+                product={editingProduct} 
+                open={!!editingProduct} 
+                onOpenChange={(open) => {
+                  if (!open) {
+                    startTransition(() => {
+                      setEditingProduct(null);
+                    });
+                  }
+                }} 
+                onProductUpdated={(updatedProduct) => {
+                  if (typeof updateProduct === 'function') {
+                    updateProduct({
+                      productId: updatedProduct.id,
+                      data: {
+                        name: updatedProduct.name,
+                        category: updatedProduct.category,
+                        unit: updatedProduct.unit,
+                        barcode: updatedProduct.barcode
+                      }
+                    });
+                  }
+                  startTransition(() => {
+                    setEditingProduct(null);
+                  });
+                }} 
+                onCategoryAdded={invalidateCache} 
+                categories={safeCategories} 
+              />
+            </Suspense>
+          )}
+
+          {deletingProduct && (
+            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+                <div className="w-8 h-8 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" />
+              </div>
+            </div>}>
+              <DeleteProductDialog 
+                product={deletingProduct} 
+                open={!!deletingProduct} 
+                onOpenChange={(open) => {
+                  if (!open) {
+                    startTransition(() => {
+                      setDeletingProduct(null);
+                    });
+                  }
+                }} 
+                onProductDeleted={(id) => {
+                  if (typeof deleteProduct === 'function') {
+                    deleteProduct(id);
+                  }
+                  startTransition(() => {
+                    setDeletingProduct(null);
+                  });
+                }} 
+              />
+            </Suspense>
+          )}
 
           {/* Image Preview Dialog */}
           <Dialog open={!!imagePreviewUrl} onOpenChange={() => setImagePreviewUrl(null)}>
