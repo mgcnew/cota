@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback, lazy, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,6 @@ import { capitalize } from "@/lib/text-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
-import DeleteQuoteDialog from "@/components/forms/DeleteQuoteDialog";
-import ViewQuoteDialog from "@/components/forms/ViewQuoteDialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ViewToggle } from "@/components/ui/view-toggle";
@@ -25,8 +22,19 @@ import { ViewMode } from "@/types/pagination";
 import { cn } from "@/lib/utils";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { useMobile } from "@/contexts/MobileProvider";
+import { useOptimizedScroll } from "@/hooks/mobile/useOptimizedScroll";
+import { CotacoesStatsMemoized } from "@/components/cotacoes/CotacoesStatsMemoized";
+import { CotacoesVirtualList } from "@/components/cotacoes/CotacoesVirtualList";
+
+// Lazy load dialogs - apenas carregados quando necessários
+const AddQuoteDialog = lazy(() => import("@/components/forms/AddQuoteDialog"));
+const DeleteQuoteDialog = lazy(() => import("@/components/forms/DeleteQuoteDialog"));
+const ViewQuoteDialog = lazy(() => import("@/components/forms/ViewQuoteDialog"));
 
 export default function Cotacoes() {
+  // Aplicar scroll otimizado para mobile
+  useOptimizedScroll();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const {
     viewMode,
@@ -44,6 +52,12 @@ export default function Cotacoes() {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const isMobile = useMobile();
   const addQuoteRef = useRef<HTMLButtonElement>(null);
+  
+  // Estados para modais (lazy loading)
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
 
   // Callbacks memoizados para navegação do carousel
   const handlePrevCard = useCallback((e: React.MouseEvent) => {
@@ -79,7 +93,24 @@ export default function Cotacoes() {
     convertToOrder,
     isUpdating
   } = useCotacoes();
-  const getStatusBadge = (status: string) => {
+  
+  // Callbacks memoizados para ações
+  const handleViewQuote = useCallback((quote: Quote) => {
+    setSelectedQuote(quote);
+    setViewDialogOpen(true);
+  }, []);
+
+  const handleEditQuote = useCallback((quote: Quote) => {
+    setSelectedQuote(quote);
+    // TODO: Implementar dialog de edição se necessário
+  }, []);
+
+  const handleDeleteQuote = useCallback((quote: Quote) => {
+    setSelectedQuote(quote);
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const getStatusBadge = useCallback((status: string) => {
     const variants = {
       ativa: "default",
       concluida: "secondary",
@@ -99,7 +130,7 @@ export default function Cotacoes() {
     return <Badge variant={variants[status as keyof typeof variants] as any}>
         {labels[status as keyof typeof labels]}
       </Badge>;
-  };
+  }, []);
 
   // Calcular economia de uma cotação específica
   const calcularEconomiaCotacao = (cotacao: Quote): { economia: number; percentual: number } => {
@@ -406,13 +437,12 @@ export default function Cotacoes() {
   }
   const paginatedData = paginate(filteredCotacoes);
   return <div className="page-container">
-      {/* Statistics Cards - Inspiração Dashboard Statistics Card 2 */}
-      {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
+      {/* Statistics Cards - Componente Memoizado */}
       {isMobile ? (
         <div className="mb-8">
           {/* Card wrapper com navegação integrada no topo */}
           <div className="relative">
-            {/* Navegação integrada no topo do card (parece ser parte do card) */}
+            {/* Navegação integrada no topo do card */}
             <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
               <Button
                 variant="ghost"
@@ -437,12 +467,13 @@ export default function Cotacoes() {
               </Button>
             </div>
 
-            {/* Container do carousel */}
+            {/* Container do carousel - Sem animações pesadas */}
             <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
               <div 
-                className="flex transition-transform duration-300 ease-in-out"
+                className="flex"
                 style={{ 
                   transform: `translateX(-${activeCardIndex * 100}%)`,
+                  transition: 'none', // Remover transição para mobile
                 }}
               >
                 <div className="w-full flex-shrink-0">
@@ -462,11 +493,10 @@ export default function Cotacoes() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
-          {renderCard1}
-          {renderCard2}
-          {renderCard3}
-          {renderCard4}
+        <div className="mb-6">
+          <CotacoesStatsMemoized stats={stats} />
+        </div>
+      )}
         </div>
       )}
 
@@ -1034,9 +1064,34 @@ export default function Cotacoes() {
           </CardContent>
         </Card>}
 
-      {/* Hidden trigger for dialog */}
-      <div className="hidden">
-        <AddQuoteDialog onAdd={refetch} trigger={<button ref={addQuoteRef} />} />
-      </div>
+      {/* Dialogs com lazy loading */}
+      {addDialogOpen && (
+        <Suspense fallback={<div />}>
+          <AddQuoteDialog onAdd={() => { refetch(); setAddDialogOpen(false); }} trigger={<button ref={addQuoteRef} onClick={() => setAddDialogOpen(true)} className="hidden" />} />
+        </Suspense>
+      )}
+      
+      {viewDialogOpen && selectedQuote && (
+        <Suspense fallback={<div />}>
+          <ViewQuoteDialog 
+            quote={selectedQuote}
+            onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({ quoteId, supplierId, productId, newValue })}
+            onConvertToOrder={(quoteId, orders) => convertToOrder({ quoteId, orders })}
+            onEdit={(quoteId, data) => updateQuote({ quoteId, data })}
+            isUpdating={isUpdating}
+            trigger={<div />}
+          />
+        </Suspense>
+      )}
+      
+      {deleteDialogOpen && selectedQuote && (
+        <Suspense fallback={<div />}>
+          <DeleteQuoteDialog 
+            quote={selectedQuote}
+            onDelete={(id) => { deleteQuote(id); setDeleteDialogOpen(false); }}
+            trigger={<div />}
+          />
+        </Suspense>
+      )}
     </div>;
 }
