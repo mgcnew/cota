@@ -164,9 +164,11 @@ export const MobileProductsVirtualList = memo(function MobileProductsVirtualList
             currentPage={pagination.currentPage}
             totalPages={pagination.totalPages}
             itemsPerPage={pagination.itemsPerPage}
+            totalItems={pagination.itemsPerPage * pagination.totalPages}
             onPageChange={pagination.goToPage}
-            onNextPage={pagination.nextPage}
-            onPrevPage={pagination.prevPage}
+            onItemsPerPageChange={() => {}}
+            startIndex={(pagination.currentPage - 1) * pagination.itemsPerPage}
+            endIndex={Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.itemsPerPage * pagination.totalPages)}
           />
         </div>
       )}

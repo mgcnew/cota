@@ -163,8 +163,6 @@ export default function ProdutosMobileOptimized() {
           }
         >
           <AddProductDialog
-            open={addDialogOpen}
-            onOpenChange={setAddDialogOpen}
             onProductAdded={handleProductAdded}
             onCategoryAdded={() => {}}
           />

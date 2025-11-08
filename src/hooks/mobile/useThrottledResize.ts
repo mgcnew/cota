@@ -15,7 +15,7 @@ export function useThrottledResize({
 }: UseThrottledResizeOptions = {}) {
   const [height, setHeight] = useState(() => {
     if (typeof window !== 'undefined') {
-      return window.innerHeight - 200; // Aproximação para header e outros elementos
+      return window.innerHeight - 200;
     }
     return initialHeight;
   });
@@ -25,16 +25,16 @@ export function useThrottledResize({
   const lastUpdateTime = useRef<number>(0);
 
   const updateHeight = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
     const now = Date.now();
     const timeSinceLastUpdate = now - lastUpdateTime.current;
 
     if (timeSinceLastUpdate >= throttleMs) {
-      // Atualizar imediatamente se passou tempo suficiente
       const newHeight = window.innerHeight - 200;
       setHeight(newHeight);
       lastUpdateTime.current = now;
     } else {
-      // Agendar atualização para depois
       const remainingTime = throttleMs - timeSinceLastUpdate;
       
       if (timeoutRef.current) {
@@ -47,22 +47,25 @@ export function useThrottledResize({
         }
 
         rafRef.current = requestAnimationFrame(() => {
-          const newHeight = window.innerHeight - 200;
-          setHeight(newHeight);
-          lastUpdateTime.current = Date.now();
+          if (typeof window !== 'undefined') {
+            const newHeight = window.innerHeight - 200;
+            setHeight(newHeight);
+            lastUpdateTime.current = Date.now();
+          }
         });
       }, remainingTime);
     }
   }, [throttleMs]);
 
   useEffect(() => {
-    // Inicializar altura
+    if (typeof window === 'undefined') return;
+
+    // Initial update
     updateHeight();
 
     // Usar ResizeObserver se disponível (mais performático)
-    if ('ResizeObserver' in window && typeof window !== 'undefined') {
+    if (typeof ResizeObserver !== 'undefined') {
       const resizeObserver = new ResizeObserver(() => {
-        // Throttle usando requestAnimationFrame
         if (rafRef.current) {
           cancelAnimationFrame(rafRef.current);
         }
@@ -76,29 +79,22 @@ export function useThrottledResize({
 
       return () => {
         resizeObserver.disconnect();
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-        if (rafRef.current) {
-          cancelAnimationFrame(rafRef.current);
-        }
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
       };
     }
 
-    // Fallback para addEventListener
-    window.addEventListener('resize', updateHeight, { passive: true });
+    // Fallback para resize listener
+    const handleResize = () => updateHeight();
+    const win = window as Window & typeof globalThis;
+    win.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
-      window.removeEventListener('resize', updateHeight);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      win.removeEventListener('resize', handleResize);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [updateHeight]);
 
   return height;
 }
-

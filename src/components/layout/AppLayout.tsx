@@ -34,7 +34,7 @@ const pageTitles: Record<string, string> = {
   "/dashboard/extra": "Funcionalidades Extra"
 };
 
-const pageIcons: Record<string, (props: { className?: string }) => JSX.Element> = {
+const pageIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "/dashboard": BarChart3,
   "/dashboard/produtos": Package,
   "/dashboard/fornecedores": Building2,
