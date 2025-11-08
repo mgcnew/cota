@@ -1,4 +1,4 @@
-import { useState, useCallback, lazy, Suspense, useMemo } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProductsMobileOptimized } from "@/hooks/mobile/useProductsMobileOptimized";
