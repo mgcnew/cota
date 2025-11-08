@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, lazy, Suspense, startTransition } from "react";
+import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProductsMobile } from "@/hooks/mobile/useProductsMobile";
@@ -66,28 +66,20 @@ export default function ProdutosMobile() {
     return Array.from(cats);
   }, [products]);
 
-  // Handlers memoizados com startTransition para evitar erros de Suspense
+  // Handlers memoizados
   const handleAdd = useCallback(() => {
-    startTransition(() => {
-      setAddDialogOpen(true);
-    });
+    setAddDialogOpen(true);
   }, []);
 
   const handleEdit = useCallback((product: ProductMobile) => {
-    startTransition(() => {
-      // No mobile, usar apenas o ID para lazy loading
-      // Limpar primeiro para evitar renderização dupla
-      setEditingProduct(null);
-      setEditingProductId(null);
-      // Depois definir apenas o ID (lazy loading)
-      setEditingProductId(product.id);
-    });
+    // Passar o produto diretamente para evitar estado de loading
+    // O produto já está disponível na lista, não precisa de lazy loading
+    setEditingProduct(product as any);
+    setEditingProductId(product.id);
   }, []);
 
   const handleDelete = useCallback((product: ProductMobile) => {
-    startTransition(() => {
-      setDeletingProduct(product);
-    });
+    setDeletingProduct(product);
   }, []);
 
   const handleFiltersToggle = useCallback(() => setFiltersOpen(v => !v), []);
@@ -98,6 +90,7 @@ export default function ProdutosMobile() {
   }, []);
 
   const handleProductUpdated = useCallback((updated: any) => {
+    // Atualizar produto no cache
     if (updateProduct?.mutate) {
       updateProduct.mutate({
         productId: updated.id,
@@ -109,19 +102,16 @@ export default function ProdutosMobile() {
         },
       });
     }
-    startTransition(() => {
-      setEditingProduct(null);
-      setEditingProductId(null);
-    });
+    // O modal será fechado pelo próprio EditProductDialog após salvar
+    // Não fechar aqui para evitar conflitos
   }, [updateProduct]);
 
   const handleProductDeleted = useCallback((id: string) => {
     if (deleteProduct?.mutate) {
       deleteProduct.mutate(id);
     }
-    startTransition(() => {
-      setDeletingProduct(null);
-    });
+    // Modal será fechado pelo próprio DeleteProductDialog
+    setDeletingProduct(null);
   }, [deleteProduct]);
 
   if (!loading && !user) {
@@ -173,15 +163,11 @@ export default function ProdutosMobile() {
             open={addDialogOpen}
             onOpenChange={(open) => {
               if (!open) {
-                startTransition(() => {
-                  setAddDialogOpen(false);
-                });
+                setAddDialogOpen(false);
               }
             }}
             onProductAdded={() => {
-              startTransition(() => {
-                setAddDialogOpen(false);
-              });
+              setAddDialogOpen(false);
               refetch();
             }}
             onCategoryAdded={() => {}}
@@ -189,18 +175,17 @@ export default function ProdutosMobile() {
         </Suspense>
       )}
 
-      {editingProductId && (
+      {(editingProductId || editingProduct) && (
         <Suspense fallback={null}>
           <EditProductDialog
             product={editingProduct as any}
             productId={editingProductId}
-            open={!!editingProductId}
+            open={!!(editingProductId || editingProduct)}
             onOpenChange={(open) => {
               if (!open) {
-                startTransition(() => {
-                  setEditingProduct(null);
-                  setEditingProductId(null);
-                });
+                // Fechar modal de forma síncrona (sem startTransition)
+                setEditingProduct(null);
+                setEditingProductId(null);
               }
             }}
             onProductUpdated={handleProductUpdated}
@@ -217,9 +202,7 @@ export default function ProdutosMobile() {
             open={!!deletingProduct}
             onOpenChange={(open) => {
               if (!open) {
-                startTransition(() => {
-                  setDeletingProduct(null);
-                });
+                setDeletingProduct(null);
               }
             }}
             onProductDeleted={handleProductDeleted}

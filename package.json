@@ -9,7 +9,10 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "cleanup-duplicates": "node scripts/cleanup-duplicates.js"
+    "cleanup-duplicates": "node scripts/cleanup-duplicates.js",
+    "analyze-bundle": "node scripts/analyze-bundle-mobile.js",
+    "check-mobile-imports": "node scripts/check-mobile-imports.js",
+    "analyze-mobile": "npm run analyze-bundle && npm run check-mobile-imports"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

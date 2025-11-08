@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { useMobile } from "@/contexts/MobileProvider";
 import ProdutosDesktop from "./ProdutosDesktop";
 
@@ -18,21 +18,26 @@ const LoadingFallback = () => (
  * - Mobile: ProdutosMobile (componentes leves e específicos para mobile)
  * - Desktop: ProdutosDesktop (versão completa do desktop)
  * 
- * ⚠️ NOTA: ProdutosDesktop.tsx precisa ser restaurado com o código desktop completo.
- * A estrutura do router já está correta e não precisa ser alterada.
+ * Estabilizado para evitar mudanças durante interações (modais, etc)
  */
 export default function Produtos() {
   const isMobile = useMobile();
+  
+  // Memorizar a escolha de layout para evitar mudanças durante interações
+  // Uma vez determinado mobile ou desktop, mantém até o próximo mount completo
+  const layoutKey = useMemo(() => {
+    return isMobile ? 'mobile' : 'desktop';
+  }, [isMobile]);
 
   // Mobile: lazy load para reduzir bundle
   if (isMobile) {
     return (
-      <Suspense fallback={<LoadingFallback />}>
+      <Suspense fallback={<LoadingFallback />} key={layoutKey}>
         <ProdutosMobile />
       </Suspense>
     );
   }
 
   // Desktop: import direto (sem lazy load necessário)
-  return <ProdutosDesktop />;
+  return <ProdutosDesktop key={layoutKey} />;
 }

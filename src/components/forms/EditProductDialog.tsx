@@ -101,11 +101,13 @@ function EditProductDialogInternal({
   const { toast } = useToast();
   
   // Lazy loading de detalhes no mobile (apenas se productId fornecido e product não)
+  // Se o product já foi fornecido, não precisa fazer query
+  const shouldLoadDetails = isMobile && !product && productId;
   const { productDetails, isLoading: isLoadingDetails } = useProductDetails(
-    isMobile && !product && productId ? productId : null
+    shouldLoadDetails ? productId : null
   );
   
-  // Usar productDetails se disponível (mobile lazy loading), senão usar product prop
+  // Usar product prop primeiro (já disponível), senão usar productDetails do lazy loading
   const currentProduct: Product | null = product || (productDetails && typeof productDetails === 'object' && 'id' in productDetails ? {
     id: (productDetails as any).id,
     name: (productDetails as any).name,
@@ -113,11 +115,11 @@ function EditProductDialogInternal({
     unit: (productDetails as any).unit,
     barcode: (productDetails as any).barcode,
     image_url: (productDetails as any).image_url,
-    lastQuotePrice: (productDetails as any).lastQuotePrice,
-    bestSupplier: (productDetails as any).bestSupplier,
-    quotesCount: (productDetails as any).quotesCount,
-    lastUpdate: (productDetails as any).lastUpdate,
-    trend: (productDetails as any).trend,
+    lastQuotePrice: (productDetails as any).lastQuotePrice || 'R$ 0,00',
+    bestSupplier: (productDetails as any).bestSupplier || 'N/A',
+    quotesCount: (productDetails as any).quotesCount || 0,
+    lastUpdate: (productDetails as any).lastUpdate || new Date().toLocaleDateString('pt-BR'),
+    trend: (productDetails as any).trend || 'stable',
   } as Product : null);
   
   const form = useForm<ProductFormData>({
@@ -151,44 +153,27 @@ function EditProductDialogInternal({
       }
     }
   }, [currentProduct, open, form]);
+
+  // Cleanup quando o modal fecha
+  useEffect(() => {
+    if (!open) {
+      // Limpar estados quando o modal fecha
+      setShowNewCategory(false);
+      setImageFile(null);
+      // Não resetar newImageUrl aqui para manter a imagem caso o usuário reabra
+    }
+  }, [open]);
   
   // Não renderizar nada se não estiver aberto
   if (!open) return null;
   
-  // Mostrar loading enquanto carrega detalhes no mobile (apenas se estiver aberto e não tiver produto ainda)
-  const isLoading = isMobile && !currentProduct && isLoadingDetails;
-  
-  // Se estiver carregando, mostrar apenas o Sheet de loading (evitar renderização dupla)
-  if (isLoading) {
-    return (
-      <Sheet key="loading" open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
-          <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
-            <div className="flex items-center justify-between gap-3">
-              <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white">
-                Carregando...
-              </SheetTitle>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => onOpenChange(false)}
-                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </SheetHeader>
-          <div className="flex items-center justify-center py-12 flex-1">
-            <Loader2 className="h-8 w-8 animate-spin text-orange-600 dark:text-orange-400" />
-          </div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
+  // Se estiver no mobile e não tiver produto ainda, mostrar loading dentro do Sheet
+  // Mas só se realmente estiver carregando (não mostrar se o produto já foi fornecido)
+  const isLoading = isMobile && !currentProduct && isLoadingDetails && shouldLoadDetails;
   
   // Se não tiver produto e não estiver carregando, não renderizar
-  if (!currentProduct) return null;
+  // (Isso evita renderizar o modal vazio)
+  if (!currentProduct && !isLoading) return null;
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -280,19 +265,25 @@ function EditProductDialogInternal({
       image_url: newImageUrl || currentProduct.image_url,
     };
 
+    // Chamar callback de atualização primeiro
     onProductUpdated(updatedProduct);
     
     // Adicionar nova categoria à lista se necessário
     if (data.category === "nova" && data.newCategory && onCategoryAdded) {
       onCategoryAdded(data.newCategory);
     }
-    
+
+    // Mostrar toast
     toast({
       title: "Produto atualizado",
       description: `${data.name} foi atualizado com sucesso.`,
     });
 
-    onOpenChange(false);
+    // Fechar modal de forma síncrona após pequeno delay para garantir que o toast apareça
+    // Usar setTimeout com delay mínimo para garantir que o estado seja atualizado
+    setTimeout(() => {
+      onOpenChange(false);
+    }, 50);
   };
 
   // Conteúdo do formulário (compartilhado entre mobile e desktop)
@@ -513,10 +504,8 @@ function EditProductDialogInternal({
     </div>
   );
 
-  // Mobile: Usar Sheet (bottom sheet) - apenas um Sheet deve ser renderizado
+  // Mobile: Usar Sheet (bottom sheet)
   if (isMobile) {
-    // Se estiver carregando, já retornou o Sheet de loading acima
-    // Se chegou aqui, tem produto carregado, então renderizar Sheet completo
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
@@ -527,7 +516,7 @@ function EditProductDialogInternal({
                   <Package className="h-5 w-5" />
                 </div>
                 <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                  Editar Produto
+                  {isLoading ? 'Carregando...' : 'Editar Produto'}
                 </SheetTitle>
               </div>
               <Button
@@ -542,7 +531,13 @@ function EditProductDialogInternal({
             </div>
           </SheetHeader>
           <div className="flex flex-col flex-1 overflow-hidden">
-            {formContent}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12 flex-1">
+                <Loader2 className="h-8 w-8 animate-spin text-orange-600 dark:text-orange-400" />
+              </div>
+            ) : (
+              formContent
+            )}
           </div>
         </SheetContent>
       </Sheet>

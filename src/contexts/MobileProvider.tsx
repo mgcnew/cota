@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 const MOBILE_BREAKPOINT = 768;
+const DEBOUNCE_DELAY = 150; // Delay para evitar mudanças rápidas durante interações
 
 interface MobileContextType {
   isMobile: boolean;
@@ -11,12 +12,21 @@ const MobileContext = createContext<MobileContextType>({ isMobile: false });
 let globalIsMobile = typeof window !== 'undefined' ? window.innerWidth < MOBILE_BREAKPOINT : false;
 let listeners: Set<() => void> = new Set();
 let mediaQueryList: MediaQueryList | null = null;
+let debounceTimer: number | null = null;
 
 function updateIsMobile(newValue: boolean) {
-  if (globalIsMobile !== newValue) {
-    globalIsMobile = newValue;
-    listeners.forEach(listener => listener());
+  // Debounce para evitar mudanças rápidas durante interações (ex: abrir modal)
+  if (debounceTimer !== null) {
+    clearTimeout(debounceTimer);
   }
+  
+  debounceTimer = window.setTimeout(() => {
+    if (globalIsMobile !== newValue) {
+      globalIsMobile = newValue;
+      listeners.forEach(listener => listener());
+    }
+    debounceTimer = null;
+  }, DEBOUNCE_DELAY);
 }
 
 function initMediaQuery() {
