@@ -65,8 +65,10 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
     refetch,
   } = useInfiniteQuery({
     queryKey: ['cotacoes-mobile', searchTerm, statusFilter, supplierFilter],
-    queryFn: async ({ pageParam = 0 }) => {
-      const from = pageParam * limit;
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      const page = Number(pageParam) || 0;
+      const from = page * limit;
       const to = from + limit - 1;
 
       // Construir query base
@@ -260,10 +262,10 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
             fornecedoresParticipantes,
           };
         })
-        .filter((cotacao): cotacao is CotacaoMobile => cotacao !== null);
+        .filter((cotacao) => cotacao !== null);
 
       // Determinar próxima página
-      const nextPage = (count || 0) > to + 1 ? pageParam + 1 : undefined;
+      const nextPage = (count || 0) > to + 1 ? page + 1 : undefined;
 
       return {
         data: cotacoes,
@@ -271,8 +273,7 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
         total: count || 0,
       };
     },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    initialPageParam: 0,
+    getNextPageParam: (lastPage: any) => lastPage?.nextPage,
     enabled: isMobile,
     ...queryConfig,
   });
@@ -342,8 +343,12 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
         .eq("supplier_id", supplierId);
 
       if (statusError) throw statusError;
+
+      // CRITICAL: REFETCH imediato para atualizar modal em tempo real
+      await queryClient.refetchQueries({ queryKey: ['cotacao-details', quoteId] });
     },
     onSuccess: () => {
+      // Invalidar outras queries após sucesso
       queryClient.invalidateQueries({ queryKey: ['cotacoes-mobile'] });
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
       toast({
@@ -624,16 +629,16 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
     if (!data?.pages) return [];
     
     // Usar Map para garantir unicidade por ID
-    const uniqueCotacoes = new Map<string, CotacaoMobile>();
+    const uniqueCotacoes = new Map<string, any>();
     
-    data.pages.forEach((page) => {
-      page.data.forEach((cotacao) => {
+    data.pages.forEach((page: any) => {
+      page.data.forEach((cotacao: any) => {
         uniqueCotacoes.set(cotacao.id, cotacao);
       });
     });
     
     return Array.from(uniqueCotacoes.values());
-  }, [data?.pages]);
+  }, [data]);
 
   return {
     cotacoes,

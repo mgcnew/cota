@@ -315,7 +315,7 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded, trig
 
     // Reset e fechar com delay maior para garantir UI atualizada
     setTimeout(() => {
-      setOpen(false);
+      handleSetOpen(false);
       setFile(null);
       setParsedData([]);
       setValidationErrors([]);
@@ -544,7 +544,7 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded, trig
           )}
           
           <div className="flex gap-2 w-full sm:w-auto">
-            <Button variant="outline" onClick={() => setOpen(false)} disabled={isProcessing}>
+            <Button variant="outline" onClick={() => handleSetOpen(false)} disabled={isProcessing}>
               Cancelar
             </Button>
             <Button 

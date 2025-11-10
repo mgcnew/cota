@@ -1,13 +1,13 @@
 import { useRef, useState, useMemo, useCallback, memo } from "react";
-import { MobileProductItemOptimized } from "./MobileProductItemOptimized";
+import { MobileProductItem } from "./MobileProductItem";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { useThrottledResize } from "@/hooks/mobile/useThrottledResize";
-import type { ProductMobile } from "@/hooks/mobile/useProductsMobileOptimized";
+import type { ProductMobile } from "@/hooks/mobile/useProductsMobile";
 
 interface MobileProductsVirtualListOptimizedProps {
   products: ProductMobile[];
   isLoading: boolean;
-  error: Error | null;
+  error?: Error | null;
   onEdit: (product: ProductMobile) => void;
   onDelete: (product: ProductMobile) => void;
   onRefresh: () => void;
@@ -22,14 +22,8 @@ interface MobileProductsVirtualListOptimizedProps {
 }
 
 const ITEM_HEIGHT = 100;
-const OVERSCAN = 3; // Aumentado para mobile - melhor UX durante scroll
+const OVERSCAN = 3;
 
-/**
- * Lista virtualizada ultra-otimizada para mobile
- * - Usa ResizeObserver com throttling
- * - RequestAnimationFrame para scroll
- * - Renderização apenas de itens visíveis
- */
 export const MobileProductsVirtualListOptimized = memo(function MobileProductsVirtualListOptimized({
   products,
   isLoading,
@@ -43,13 +37,11 @@ export const MobileProductsVirtualListOptimized = memo(function MobileProductsVi
   const [scrollTop, setScrollTop] = useState(0);
   const rafRef = useRef<number | null>(null);
   
-  // Usar hook otimizado para resize
   const containerHeight = useThrottledResize({
     throttleMs: 150,
     initialHeight: typeof window !== 'undefined' ? window.innerHeight - 200 : 600,
   });
 
-  // Calcular range visível
   const visibleRange = useMemo(() => {
     const start = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - OVERSCAN);
     const end = Math.min(
@@ -59,7 +51,6 @@ export const MobileProductsVirtualListOptimized = memo(function MobileProductsVi
     return { start, end };
   }, [scrollTop, containerHeight, products.length]);
 
-  // Handler de scroll otimizado com RAF
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
@@ -70,7 +61,6 @@ export const MobileProductsVirtualListOptimized = memo(function MobileProductsVi
     });
   }, []);
 
-  // Itens visíveis memoizados
   const visibleItems = useMemo(() => {
     const items = [];
     for (let i = visibleRange.start; i <= visibleRange.end; i++) {
@@ -86,7 +76,7 @@ export const MobileProductsVirtualListOptimized = memo(function MobileProductsVi
               height: ITEM_HEIGHT,
             }}
           >
-            <MobileProductItemOptimized
+            <MobileProductItem
               product={products[i]}
               onEdit={() => onEdit(products[i])}
               onDelete={() => onDelete(products[i])}
@@ -177,4 +167,3 @@ export const MobileProductsVirtualListOptimized = memo(function MobileProductsVi
     </>
   );
 });
-
