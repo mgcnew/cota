@@ -54,19 +54,19 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
   const queryClient = useQueryClient();
   const limit = getLimit();
 
+  type PageData = {
+    data: CotacaoMobile[];
+    nextPage: number | undefined;
+    total: number;
+  };
+
   // Infinite query para carregar páginas progressivamente
-  const {
-    data,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    error,
-    refetch,
-  } = useInfiniteQuery({
-    queryKey: ['cotacoes-mobile', searchTerm, statusFilter, supplierFilter],
-    queryFn: async ({ pageParam = 0 }) => {
-      const from = pageParam * limit;
+  const infiniteQueryResult = useInfiniteQuery<PageData, Error>({
+    queryKey: ['cotacoes-mobile', searchTerm, statusFilter, supplierFilter] as const,
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }): Promise<PageData> => {
+      const page = pageParam as number;
+      const from = page * limit;
       const to = from + limit - 1;
 
       // Construir query base
@@ -260,10 +260,10 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
             fornecedoresParticipantes,
           };
         })
-        .filter((cotacao): cotacao is CotacaoMobile => cotacao !== null);
+        .filter((cotacao) => cotacao !== null);
 
       // Determinar próxima página
-      const nextPage = (count || 0) > to + 1 ? pageParam + 1 : undefined;
+      const nextPage = (count || 0) > to + 1 ? page + 1 : undefined;
 
       return {
         data: cotacoes,
@@ -272,10 +272,21 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
       };
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
-    initialPageParam: 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
     enabled: isMobile,
-    ...queryConfig,
   });
+
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+    refetch,
+  } = infiniteQueryResult;
 
   // Mutation to update supplier value for a specific product
   const updateSupplierProductValue = useMutation({
@@ -342,8 +353,12 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
         .eq("supplier_id", supplierId);
 
       if (statusError) throw statusError;
+
+      // CRITICAL: Refetch imediato da cotação atual para atualizar no modal
+      await queryClient.refetchQueries({ queryKey: ['cotacao-details', quoteId], exact: true });
     },
     onSuccess: () => {
+      // Invalidar outras queries após sucesso
       queryClient.invalidateQueries({ queryKey: ['cotacoes-mobile'] });
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
       toast({
@@ -633,7 +648,7 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
     });
     
     return Array.from(uniqueCotacoes.values());
-  }, [data?.pages]);
+  }, [data]);
 
   return {
     cotacoes,

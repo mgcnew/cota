@@ -610,7 +610,7 @@ export default function Dashboard() {
         {isMobile ? (
           <>
             <MobileDashboardMetrics 
-              metrics={metrics} 
+              metrics={dashboardMobileData.metrics} 
               isLoading={isLoading} 
             />
             <MobileDashboardQuickActions />

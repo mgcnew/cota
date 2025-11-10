@@ -866,7 +866,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
   // Desktop: Usar Dialog
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleSetOpen}>
       {trigger && (
         <DialogTrigger asChild>
           {trigger}

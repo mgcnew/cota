@@ -7,6 +7,7 @@ export const queryClient = new QueryClient({
       gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
       refetchOnWindowFocus: false,
       retry: 1,
+      refetchOnMount: true, // IMPORTANTE: permitir refetch quando o componente monta
     },
   },
 });

@@ -85,10 +85,14 @@ interface FornecedorParticipante {
 interface Quote {
   id: string;
   produto: string;
+  produtoResumo: string;
+  produtosLista: string[];
   quantidade: string;
   status: string;
+  statusReal?: string;
   dataInicio: string;
   dataFim: string;
+  dataPlanejada?: string;
   fornecedores: number;
   melhorPreco: string;
   melhorFornecedor: string;
@@ -188,6 +192,7 @@ function convertQuoteDetailsToQuote(detailsData: any): Quote {
     id: detailsData.id,
     produto: produtosTexto || "Sem produtos",
     produtoResumo,
+    produtosLista,
     quantidade: `${quoteItems.length} produto(s)`,
     status: detailsData.status,
     statusReal,
@@ -288,9 +293,10 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     }
   }, [editingProductId]);
 
-  const handleSaveEdit = (productId: string) => {
+  const handleSaveEdit = async (productId: string) => {
     if (selectedSupplier && onUpdateSupplierProductValue && editedValues[productId] !== undefined && currentQuote) {
-      onUpdateSupplierProductValue(currentQuote.id, selectedSupplier, productId, editedValues[productId]);
+      // Salvar no banco
+      await onUpdateSupplierProductValue(currentQuote.id, selectedSupplier, productId, editedValues[productId]);
       setEditingProductId(null);
     }
   };
