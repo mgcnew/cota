@@ -99,43 +99,53 @@ export function ViewStockCountDialog({
     loadOrderProducts();
   }, [count?.order_id, open, toast]);
 
-  // Carregar produtos já contados quando abrir
+  // Resetar estado quando fechar o dialog
   useEffect(() => {
-    if (!open || !stockCountId) {
+    if (!open) {
       setCountedProducts(new Set());
       setOrderProducts([]);
       setSelectedProduct(null);
       setSectorQuantities([]);
       setSelectedSector("");
       setQuantity(0);
-      return;
     }
+  }, [open]);
 
-    // Se status for pendente ou em_andamento, não bloquear produtos para permitir edição
-    const canEdit = count?.status === 'pendente' || count?.status === 'em_andamento';
+  // Criar chave estável para items baseada apenas em IDs e quantidades contadas
+  const itemsKey = useMemo(() => {
+    if (!items || items.length === 0) return '';
+    return items
+      .map(item => `${item.id}-${item.quantity_counted || 0}`)
+      .sort()
+      .join('|');
+  }, [items]);
+
+  // Calcular produtos contados de forma memoizada
+  const countedProductsSet = useMemo(() => {
+    if (!open || !stockCountId) return new Set<string>();
     
-    if (canEdit) {
-      // Não bloquear produtos quando pode editar
-      setCountedProducts(new Set());
-    } else {
-      // Identificar quais produtos já foram contados (apenas quando não pode editar)
-      const counted = new Set<string>();
-      items.forEach(item => {
-        const productId = item.order_item_id || item.product_id || '';
-        if (productId && item.quantity_counted && item.quantity_counted > 0) {
-          counted.add(productId);
-        }
-      });
-      setCountedProducts(counted);
-    }
-  }, [open, stockCountId, items, count?.status]);
+    const canEdit = count?.status === 'pendente' || count?.status === 'em_andamento';
+    if (canEdit) return new Set<string>();
+    
+    const counted = new Set<string>();
+    items.forEach(item => {
+      const productId = item.order_item_id || item.product_id || '';
+      if (productId && item.quantity_counted && item.quantity_counted > 0) {
+        counted.add(productId);
+      }
+    });
+    return counted;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, stockCountId, itemsKey, count?.status]);
 
-  // Quando selecionar um produto, carregar quantidades já contadas por setor
+  // Atualizar countedProducts apenas quando o Set calculado mudar
   useEffect(() => {
-    if (!selectedProduct || !stockCountId) {
-      setSectorQuantities([]);
-      return;
-    }
+    setCountedProducts(countedProductsSet);
+  }, [countedProductsSet]);
+
+  // Calcular quantidades por setor de forma memoizada
+  const calculatedSectorQuantities = useMemo(() => {
+    if (!selectedProduct || !stockCountId) return [];
 
     const productId = selectedProduct.id;
     const productItems = items.filter(item => 
@@ -153,11 +163,17 @@ export function ViewStockCountDialog({
       }
     });
 
-    setSectorQuantities(Array.from(quantitiesMap.entries()).map(([sectorId, quantity]) => ({
+    return Array.from(quantitiesMap.entries()).map(([sectorId, quantity]) => ({
       sectorId,
       quantity,
-    })));
-  }, [selectedProduct, items, stockCountId]);
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProduct?.id, itemsKey, stockCountId]);
+
+  // Atualizar sectorQuantities apenas quando o cálculo mudar
+  useEffect(() => {
+    setSectorQuantities(calculatedSectorQuantities);
+  }, [calculatedSectorQuantities]);
 
   // Selecionar produto para contagem
   const handleSelectProduct = (product: OrderProduct) => {
