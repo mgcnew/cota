@@ -319,6 +319,16 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     return item?.valor_oferecido || 0;
   };
 
+  // Get supplier product value considering edited values (for real-time updates)
+  const getCurrentProductValue = (supplierId: string, productId: string): number => {
+    // Se estiver editando este produto para este fornecedor, usar valor editado
+    if (selectedSupplier === supplierId && editedValues[productId] !== undefined) {
+      return editedValues[productId];
+    }
+    // Senão, usar valor da base de dados
+    return getSupplierProductValue(supplierId, productId);
+  };
+
   // Calculate best price for each product and return the supplier ID
   const getBestPriceInfoForProduct = (productId: string): { bestPrice: number; bestSupplierId: string | null } => {
     if (!currentQuote) return { bestPrice: 0, bestSupplierId: null };
@@ -1678,7 +1688,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                         <SelectContent>
                           {currentQuote.fornecedoresParticipantes.map(fornecedor => {
                             const totalValue = products.reduce((sum: number, product: any) => {
-                              const value = getSupplierProductValue(fornecedor.id, product.product_id);
+                              const value = getCurrentProductValue(fornecedor.id, product.product_id);
                               return sum + (value || 0);
                             }, 0);
                             return (
@@ -1717,7 +1727,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                       {currentQuote?.fornecedoresParticipantes.map(fornecedor => {
                         const isSelected = selectedSupplier === fornecedor.id;
                         const totalValue = products.reduce((sum: number, product: any) => {
-                          const value = getSupplierProductValue(fornecedor.id, product.product_id);
+                          const value = getCurrentProductValue(fornecedor.id, product.product_id);
                           return sum + (value || 0);
                         }, 0);
                         
@@ -1849,7 +1859,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
                           {products.map((product: any) => {
-                            const currentValue = getSupplierProductValue(selectedSupplier, product.product_id);
+                            const currentValue = getCurrentProductValue(selectedSupplier, product.product_id);
                             const isEditing = editingProductId === product.product_id;
                             const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
                             const isBestPrice = currentValue > 0 && selectedSupplier === bestSupplierId;
