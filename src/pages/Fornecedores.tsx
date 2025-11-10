@@ -122,16 +122,16 @@ export default function Fornecedores() {
 
   const { suppliers, isLoading: suppliersLoading, error: suppliersError, deleteSupplier, updateSupplier, invalidateCache } = suppliersData;
 
-  // Debug: Log dos dados recebidos
-  useEffect(() => {
-    console.log('📦 Fornecedores: Estado atual', {
-      isMobileDevice,
-      suppliersCount: suppliers.length,
-      isLoading: suppliersLoading,
-      error: suppliersError,
-      suppliersSample: suppliers.slice(0, 2),
-    });
-  }, [suppliers, suppliersLoading, suppliersError, isMobileDevice]);
+  // Debug desabilitado para performance
+  // useEffect(() => {
+  //   console.log('📦 Fornecedores: Estado atual', {
+  //     isMobileDevice,
+  //     suppliersCount: suppliers.length,
+  //     isLoading: suppliersLoading,
+  //     error: suppliersError,
+  //     suppliersSample: suppliers.slice(0, 2),
+  //   });
+  // }, [suppliers, suppliersLoading, suppliersError, isMobileDevice]);
 
   // Estado para armazenar contagem de pedidos por fornecedor (mobile)
   const [supplierOrdersCount, setSupplierOrdersCount] = useState<Record<string, number>>({});
@@ -139,8 +139,7 @@ export default function Fornecedores() {
   // Buscar contagem de pedidos para fornecedores mobile
   useEffect(() => {
     if (!isMobileDevice || suppliers.length === 0) {
-      setSupplierOrdersCount({});
-      return;
+      return; // Não fazer nada se não houver fornecedores
     }
 
     const fetchOrdersCount = async () => {
@@ -170,18 +169,11 @@ export default function Fornecedores() {
     };
 
     fetchOrdersCount();
-  }, [suppliers, isMobileDevice]);
+  }, [suppliers.length, isMobileDevice]); // Usar apenas length para evitar loop
 
   // Mapear dados mobile para formato compatível com a interface Supplier
   const mappedSuppliers = useMemo(() => {
-    console.log('📦 Fornecedores: Mapeando dados', { 
-      isMobileDevice, 
-      suppliersCount: suppliers.length,
-      suppliers: suppliers.slice(0, 3) // Primeiros 3 para debug
-    });
-    
     if (!isMobileDevice) {
-      console.log('📦 Fornecedores: Desktop - usando suppliers direto', suppliers.length);
       return suppliers;
     }
     

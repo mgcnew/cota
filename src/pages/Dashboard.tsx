@@ -12,6 +12,10 @@ import { TrendingUp, DollarSign, ShoppingCart, Users, BarChart3, Download, Loade
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell, ComposedChart, Area, ReferenceLine } from 'recharts';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
+import { useDashboardMobile } from '@/hooks/mobile/useDashboardMobile';
+import { MobileDashboardMetrics } from '@/components/mobile/dashboard/MobileDashboardMetrics';
+import { MobileDashboardQuickActions } from '@/components/mobile/dashboard/MobileDashboardQuickActions';
+import { MobileDashboardRecentQuotes } from '@/components/mobile/dashboard/MobileDashboardRecentQuotes';
 import { capitalize } from '@/lib/text-utils';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
 import { useMobile } from '@/contexts/MobileProvider';
@@ -72,13 +76,27 @@ export default function Dashboard() {
     setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
   }, []);
 
+  // DESKTOP: usar hook completo com todos os dados
   const dashboardData = useDashboard();
-  const metrics = dashboardData?.metrics ?? DEFAULT_METRICS;
-  const recentQuotes = dashboardData?.recentQuotes ?? [];
-  const topSuppliers = dashboardData?.topSuppliers ?? [];
-  const monthlyData = dashboardData?.monthlyData ?? [];
-  const dailyData = dashboardData?.dailyData ?? [];
-  const isLoading = dashboardData?.isLoading ?? false;
+  
+  // MOBILE: usar hook otimizado com dados essenciais apenas
+  const dashboardMobileData = useDashboardMobile();
+  
+  // Selecionar dados baseado no dispositivo
+  const metrics = isMobile 
+    ? dashboardMobileData.metrics 
+    : (dashboardData?.metrics ?? DEFAULT_METRICS);
+  const recentQuotes = isMobile 
+    ? dashboardMobileData.recentQuotes 
+    : (dashboardData?.recentQuotes ?? []);
+  const topSuppliers = isMobile 
+    ? dashboardMobileData.topSuppliers 
+    : (dashboardData?.topSuppliers ?? []);
+  const monthlyData = isMobile ? [] : (dashboardData?.monthlyData ?? []);
+  const dailyData = isMobile ? [] : (dashboardData?.dailyData ?? []);
+  const isLoading = isMobile 
+    ? dashboardMobileData.isLoading 
+    : (dashboardData?.isLoading ?? false);
 
   // Função para filtrar dados por período (memoizada)
   const filterDataByPeriod = useCallback((period: string) => {
@@ -588,61 +606,20 @@ export default function Dashboard() {
 
   return <PageWrapper>
       <div className="page-container">
-        {/* Métricas Principais - Inspiração 21st.dev Statistics Card 2 */}
-        {/* Desktop: Grid 2x2 ou 4 colunas | Mobile: Carousel com navegação integrada */}
+        {/* MOBILE: Componentes otimizados com hook dedicado */}
         {isMobile ? (
-          <div className="mb-8">
-            {/* Card wrapper com navegação integrada no topo */}
-            <div className="relative">
-              {/* Navegação integrada no topo do card (parece ser parte do card) */}
-              <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
-                      <Button
-                        variant="ghost"
-                  size="sm"
-                  onClick={handlePrevCard}
-                  className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
-                  <span className="text-xs font-semibold text-white dark:text-gray-200">
-                    {activeCardIndex + 1} / 4
-                  </span>
-              </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleNextCard}
-                  className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Container do carousel */}
-              <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
-                <div 
-                  className="flex transition-transform duration-300 ease-in-out"
-                  style={{ 
-                    transform: `translateX(-${activeCardIndex * 100}%)`,
-                  }}
-                >
-                  <div className="w-full flex-shrink-0">
-                    {renderCard1}
-                        </div>
-                  <div className="w-full flex-shrink-0">
-                    {renderCard2}
-                      </div>
-                  <div className="w-full flex-shrink-0">
-                    {renderCard3}
-                        </div>
-                  <div className="w-full flex-shrink-0">
-                    {renderCard4}
-                          </div>
-                        </div>
-                      </div>
-              </div>
-        </div>
+          <>
+            <MobileDashboardMetrics 
+              metrics={metrics} 
+              isLoading={isLoading} 
+            />
+            <MobileDashboardQuickActions />
+            <MobileDashboardRecentQuotes 
+              quotes={dashboardMobileData.recentQuotes}
+              isLoading={isLoading}
+              onLoadQuotes={dashboardMobileData.loadRecentQuotes}
+            />
+          </>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-8 overflow-visible">
             {renderCard1}
@@ -652,7 +629,9 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Gráficos lado a lado - Gráfico maior, Card menor */}
+        {/* Gráficos lado a lado - DESKTOP APENAS (pesado para mobile) */}
+        {!isMobile && (
+        <>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Gráfico de Evolução - 2 colunas */}
           <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/30 shadow-sm dark:shadow-lg hover:shadow-md dark:hover:shadow-xl rounded-xl hover:border-gray-300 dark:hover:border-gray-600/50 transition-all duration-300">
@@ -984,7 +963,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Economia Mensal e Cotações Recentes - Gráfico maior, Card menor */}
+        {/* Economia Mensal e Cotações Recentes - Gráfico maior, Card menor - DESKTOP APENAS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Gráfico de Economia - 2 colunas */}
           <Card className="lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/30 shadow-sm dark:shadow-lg hover:shadow-md dark:hover:shadow-xl rounded-xl hover:border-gray-300 dark:hover:border-gray-600/50 transition-all duration-300">
@@ -1266,6 +1245,8 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+        </>
+        )}
 
         {/* Modal de Detalhes da Economia */}
         <Dialog open={showEconomyModal} onOpenChange={setShowEconomyModal}>
@@ -1403,7 +1384,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <Button variant="outline" size="sm" className="text-xs" onClick={() => navigate('/quotes/pending')}>
+                      <Button variant="outline" size="sm" className="text-xs" onClick={() => navigate('/dashboard/cotacoes')}>
                         Ver cotações pendentes
                       </Button>
                       <div className="flex items-center gap-2">
