@@ -128,8 +128,21 @@ export default function Anotacoes() {
   const filteredNotes = useMemo(() => {
     if (!notes || !Array.isArray(notes)) return [];
     if (isMobile) return notes; // Mobile já filtra no servidor
-    return notes.filter(note => !note.resolved);
-  }, [notes, isMobile]);
+    
+    // Desktop: filtrar por resolved e busca
+    let filtered = notes.filter(note => !note.resolved);
+    
+    if (debouncedSearch.trim()) {
+      const searchLower = debouncedSearch.toLowerCase();
+      filtered = filtered.filter(note => 
+        note.title.toLowerCase().includes(searchLower) ||
+        note.content.toLowerCase().includes(searchLower) ||
+        (note.observation && note.observation.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    return filtered;
+  }, [notes, isMobile, debouncedSearch]);
 
   const resolvedNotes = useMemo(() => {
     if (!notes || !Array.isArray(notes)) return [];
@@ -266,111 +279,119 @@ export default function Anotacoes() {
             </div>
 
             {!isMobile && (
-              <Dialog open={showCreateDialog || editingNote !== null} onOpenChange={(open) => {
-                if (!open) {
-                  setShowCreateDialog(false);
-                  setEditingNote(null);
-                  resetForm();
-                }
-              }}>
-                <DialogTrigger asChild>
-                  <Button 
-                    ref={dialogTriggerRef}
-                    onClick={() => setShowCreateDialog(true)}
-                    className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Anotação
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 flex flex-col">
-                  <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-6 py-4'} border-b border-gray-200 dark:border-gray-700`}>
-                    <div className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold`}>
-                      {editingNote ? "Editar Anotação" : "Nova Anotação"}
-                    </div>
-                  </div>
-                  <div className={`flex-1 overflow-y-auto ${isMobile ? 'p-4' : 'p-6'}`}>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="title">Título *</Label>
-                        <Input
-                          id="title"
-                          value={formData.title}
-                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                          placeholder="Digite o título da anotação"
-                          maxLength={100}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="content">Conteúdo *</Label>
-                        <Textarea
-                          id="content"
-                          value={formData.content}
-                          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                          placeholder="Digite o conteúdo da anotação"
-                          rows={6}
-                          maxLength={1000}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          {(formData.content || '').length}/1000 caracteres
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="importance">Importância</Label>
-                        <Select
-                          value={formData.importance}
-                          onValueChange={(value) => setFormData({ ...formData, importance: value as Importance })}
-                        >
-                          <SelectTrigger id="importance">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="low">Baixa</SelectItem>
-                            <SelectItem value="medium">Média</SelectItem>
-                            <SelectItem value="high">Alta</SelectItem>
-                            <SelectItem value="urgent">Urgente</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="observation">Observação (opcional)</Label>
-                        <Textarea
-                          id="observation"
-                          value={formData.observation}
-                          onChange={(e) => setFormData({ ...formData, observation: e.target.value })}
-                          placeholder="Adicione uma observação adicional"
-                          rows={3}
-                          maxLength={500}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          {(formData.observation || '').length}/500 caracteres
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3 flex-col gap-3' : 'px-6 py-4 flex-row justify-end'} border-t border-gray-200 dark:border-gray-700 flex gap-2`}>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setShowCreateDialog(false);
-                        setEditingNote(null);
-                        resetForm();
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={editingNote ? handleUpdateNote : handleCreateNote}
+              <div className="flex items-center gap-3">
+                <Input
+                  placeholder="Buscar por título, conteúdo ou observação..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-64 lg:w-80"
+                />
+                <Dialog open={showCreateDialog || editingNote !== null} onOpenChange={(open) => {
+                  if (!open) {
+                    setShowCreateDialog(false);
+                    setEditingNote(null);
+                    resetForm();
+                  }
+                }}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      ref={dialogTriggerRef}
+                      onClick={() => setShowCreateDialog(true)}
                       className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700"
                     >
-                      {editingNote ? "Atualizar" : "Criar"} Anotação
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nova Anotação
                     </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 flex flex-col">
+                    <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-6 py-4'} border-b border-gray-200 dark:border-gray-700`}>
+                      <div className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold`}>
+                        {editingNote ? "Editar Anotação" : "Nova Anotação"}
+                      </div>
+                    </div>
+                    <div className={`flex-1 overflow-y-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="title">Título *</Label>
+                          <Input
+                            id="title"
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            placeholder="Digite o título da anotação"
+                            maxLength={100}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="content">Conteúdo *</Label>
+                          <Textarea
+                            id="content"
+                            value={formData.content}
+                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                            placeholder="Digite o conteúdo da anotação"
+                            rows={6}
+                            maxLength={1000}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            {(formData.content || '').length}/1000 caracteres
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="importance">Importância</Label>
+                          <Select
+                            value={formData.importance}
+                            onValueChange={(value) => setFormData({ ...formData, importance: value as Importance })}
+                          >
+                            <SelectTrigger id="importance">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Baixa</SelectItem>
+                              <SelectItem value="medium">Média</SelectItem>
+                              <SelectItem value="high">Alta</SelectItem>
+                              <SelectItem value="urgent">Urgente</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="observation">Observação (opcional)</Label>
+                          <Textarea
+                            id="observation"
+                            value={formData.observation}
+                            onChange={(e) => setFormData({ ...formData, observation: e.target.value })}
+                            placeholder="Adicione uma observação adicional"
+                            rows={3}
+                            maxLength={500}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            {(formData.observation || '').length}/500 caracteres
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3 flex-col gap-3' : 'px-6 py-4 flex-row justify-end'} border-t border-gray-200 dark:border-gray-700 flex gap-2`}>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowCreateDialog(false);
+                          setEditingNote(null);
+                          resetForm();
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={editingNote ? handleUpdateNote : handleCreateNote}
+                        className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700"
+                      >
+                        {editingNote ? "Atualizar" : "Criar"} Anotação
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             )}
             
             {isMobile && (
