@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseSmart } from './useSupabaseSmart';
@@ -271,6 +272,7 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
       };
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
     enabled: isMobile,
     ...queryConfig,
   });
@@ -617,8 +619,21 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
     }
   });
 
-  // Acumular todas as cotações de todas as páginas
-  const cotacoes = data?.pages.flatMap(page => page.data) || [];
+  // Acumular todas as cotações de todas as páginas com deduplicação
+  const cotacoes = useMemo(() => {
+    if (!data?.pages) return [];
+    
+    // Usar Map para garantir unicidade por ID
+    const uniqueCotacoes = new Map<string, CotacaoMobile>();
+    
+    data.pages.forEach((page) => {
+      page.data.forEach((cotacao) => {
+        uniqueCotacoes.set(cotacao.id, cotacao);
+      });
+    });
+    
+    return Array.from(uniqueCotacoes.values());
+  }, [data?.pages]);
 
   return {
     cotacoes,

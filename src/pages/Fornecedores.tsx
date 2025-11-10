@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
-import { useSuppliersMobile } from "@/hooks/mobile/useSuppliersMobile";
+import { useSuppliersMobileInfinite } from "@/hooks/mobile/useSuppliersMobileInfinite";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useDebounce } from "@/hooks/useDebounce";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -36,6 +36,9 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { MobileFAB } from "@/components/mobile/MobileFAB";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
+import { SuppliersMobileList } from "@/components/mobile/suppliers/SuppliersMobileList";
+import { AddSupplierMobile } from "@/components/mobile/suppliers/AddSupplierMobile";
+import { EditSupplierMobile } from "@/components/mobile/suppliers/EditSupplierMobile";
 interface Supplier {
   id: string;
   name: string;
@@ -95,12 +98,11 @@ export default function Fornecedores() {
 
   // MOBILE OPTIMIZATION: Usar hook mobile ou desktop baseado no dispositivo
   const desktopSuppliers = useSuppliers();
-  // Mobile: passar searchQuery e statusFilter para busca server-side
-  const mobileSuppliers = useSuppliersMobile(
-    isMobile ? debouncedSearchQuery : undefined, 
-    isMobile ? statusFilter : undefined,
-    isMobile // enabled apenas se for mobile
-  );
+  // Mobile: usar infinite scroll
+  const mobileSuppliers = useSuppliersMobileInfinite({
+    searchQuery: isMobile ? debouncedSearchQuery : undefined,
+    statusFilter: isMobile ? statusFilter : undefined,
+  });
   
   // Selecionar hook baseado no dispositivo
   const isMobileDevice = isMobile;
@@ -178,28 +180,28 @@ export default function Fornecedores() {
     }
     
     // Mobile: mapear SupplierMobile para Supplier
+    // Garantir que todos os campos estejam presentes
     const mapped = suppliers.map(s => {
       // Buscar total de pedidos para este fornecedor
-      const totalOrders = supplierOrdersCount[s.id] || 0;
+      const orderCount = supplierOrdersCount[s.id] || 0;
       
       return {
         id: s.id,
         name: s.name,
         contact: s.contact || "",
-        limit: "R$ 0",
-        activeQuotes: 0,
-        totalQuotes: totalOrders, // Usar total de pedidos
-        avgPrice: "R$ 0,00",
-        lastOrder: "",
-        rating: 0,
+        limit: s.limit || "R$ 0,00",
+        activeQuotes: s.activeQuotes ?? orderCount,
+        totalQuotes: s.totalQuotes ?? orderCount,
+        avgPrice: s.avgPrice || "R$ 0,00",
+        lastOrder: s.lastOrder || "",
+        rating: s.rating ?? 0,
         status: s.status,
         phone: s.phone,
         email: s.email,
-        address: undefined,
+        address: s.address,
       };
     });
     
-    console.log('📦 Fornecedores: Mobile - mapeados', mapped.length, 'fornecedores');
     return mapped;
   }, [suppliers, isMobileDevice, supplierOrdersCount]);
 
@@ -304,26 +306,23 @@ export default function Fornecedores() {
     });
   }, [mappedSuppliers, searchQuery, statusFilter, isMobileDevice]);
 
-  // MOBILE: Usar paginação do hook mobile (server-side)
+  // MOBILE: Não precisa paginação (usa infinite scroll)
   // DESKTOP: Usar paginação client-side
   const paginatedData = isMobileDevice
     ? {
         items: filteredSuppliers,
-        pagination: mobileSuppliers.pagination ? {
-          ...mobileSuppliers.pagination,
-        } : {
+        pagination: {
           currentPage: 1,
-          pageSize: 20,
-          itemsPerPage: 20,
-          totalItems: 0,
-          totalPages: 0,
+          totalPages: 1,
+          itemsPerPage: filteredSuppliers.length,
+          totalItems: filteredSuppliers.length,
           startIndex: 0,
-          endIndex: 0,
-          hasNextPage: false,
-          hasPrevPage: false,
+          endIndex: filteredSuppliers.length,
+          canGoNext: false,
+          canGoPrev: false,
+          goNext: () => {},
+          goPrev: () => {},
           goToPage: () => {},
-          nextPage: () => {},
-          prevPage: () => {},
           setItemsPerPage: () => {},
         },
       }
@@ -743,9 +742,21 @@ export default function Fornecedores() {
       </Card>
 
       {/* Suppliers View */}
-      {viewMode === "grid" ? (
-        <PullToRefresh onRefresh={async () => { await invalidateCache(); }} disabled={!isMobile}>
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {isMobile ? (
+        /* Mobile: Lista otimizada com infinite scroll */
+        <PullToRefresh onRefresh={async () => { await mobileSuppliers.refetch(); }}>
+          <SuppliersMobileList
+            suppliers={mobileSuppliers.suppliers || []}
+            isLoading={mobileSuppliers.isLoading}
+            isFetchingNextPage={mobileSuppliers.isFetchingNextPage}
+            hasNextPage={mobileSuppliers.hasNextPage}
+            fetchNextPage={mobileSuppliers.fetchNextPage}
+            onEdit={(supplier) => setEditingSupplier(supplier as any)}
+            onDelete={(supplier) => setDeletingSupplier(supplier as any)}
+          />
+        </PullToRefresh>
+      ) : viewMode === "grid" ? (
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedData.items.map(supplier => <Card key={supplier.id} className="group border border-gray-200/60 dark:border-gray-700/30 bg-white dark:bg-[#1C1F26] sm:bg-gradient-to-br sm:from-white sm:to-indigo-50/30 sm:dark:from-[#1C1F26] sm:dark:to-[#1C1F26] sm:backdrop-blur-sm sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 sm:hover:border-indigo-300/60 sm:dark:hover:border-indigo-600/50 sm:transition-shadow sm:duration-200">
               <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
                 <div className="flex items-start justify-between">
@@ -969,8 +980,8 @@ export default function Fornecedores() {
               </CardContent>
             </Card>)}
         </div>
-        </PullToRefresh>
       ) : (
+        /* Desktop: Tabela */
         <Card className="border-0 bg-transparent">
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
@@ -1138,12 +1149,25 @@ export default function Fornecedores() {
         <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
       </div>
 
-      {/* Mobile FAB */}
+      {/* Mobile: Modais otimizados e FAB */}
       {isMobile && (
-        <MobileFAB
-          onClick={triggerAddDialog}
-          label="Novo Fornecedor"
-        />
+        <>
+          <AddSupplierMobile
+            trigger={
+              <MobileFAB
+                onClick={() => {}}
+                label="Novo Fornecedor"
+              />
+            }
+            onSuccess={() => mobileSuppliers.refetch()}
+          />
+          <EditSupplierMobile
+            supplier={editingSupplier as any}
+            open={!!editingSupplier}
+            onOpenChange={(open) => !open && setEditingSupplier(null)}
+            onSuccess={() => mobileSuppliers.refetch()}
+          />
+        </>
       )}
         </div>
       </PageWrapper>

@@ -8,6 +8,8 @@ import { MobileProductsSearch } from "@/components/mobile/products/MobileProduct
 import { ProductsMobileList } from "@/components/mobile/products/ProductsMobileList";
 import { MobileProductsFilters } from "@/components/mobile/products/MobileProductsFilters";
 import { MobileProductsFAB } from "@/components/mobile/products/MobileProductsFAB";
+import { ProductsEmptyState } from "@/components/mobile/products/ProductsEmptyState";
+import { ProductsLoadingSkeleton } from "@/components/mobile/products/ProductsLoadingSkeleton";
 import type { ProductMobile } from "@/hooks/mobile/useProductsMobile";
 
 // Lazy load dialogs
@@ -16,16 +18,23 @@ const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialo
 const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
 
 /**
- * Página de Produtos Mobile - Ultra Otimizada
+ * Página de Produtos Mobile v2 - Ultra Otimizada
  * 
  * Performance:
  * - Infinite scroll estilo Facebook
  * - Hooks ultra-otimizados (useInfiniteQuery)
  * - Busca e filtros server-side
  * - Cache agressivo (5min)
- * - Lazy loading de imagens
+ * - Lazy loading de imagens e dialogs
  * - Zero carregamentos desnecessários
  * - Scroll fluido mesmo com 100+ itens
+ * 
+ * UX Melhorada:
+ * - Empty states elegantes
+ * - Skeleton loading
+ * - Contador de resultados
+ * - FAB com pulsação quando vazio
+ * - Cards coloridos por categoria
  */
 export default function ProdutosMobile() {
   const { user, loading } = useAuth();
@@ -129,19 +138,38 @@ export default function ProdutosMobile() {
             onFiltersClick={handleFiltersToggle}
             activeCategory={selectedCategory !== "all" ? selectedCategory : null}
             onClearCategory={() => setSelectedCategory("all")}
+            resultsCount={products.length}
+            isSearching={isLoading}
           />
           
-          {/* Lista com infinite scroll - container com scroll para IntersectionObserver */}
-          <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <ProductsMobileList
-              products={products}
-              isLoading={isLoading}
-              isFetchingNextPage={isFetchingNextPage}
-              hasNextPage={hasNextPage || false}
-              fetchNextPage={fetchNextPage}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+          {/* Lista de produtos com infinite scroll */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Loading inicial */}
+            {isLoading && products.length === 0 && (
+              <ProductsLoadingSkeleton count={8} />
+            )}
+
+            {/* Empty states */}
+            {!isLoading && products.length === 0 && (
+              <ProductsEmptyState
+                type={searchQuery || selectedCategory !== "all" ? "no-results" : "no-products"}
+                searchQuery={searchQuery}
+                onAddProduct={handleAdd}
+              />
+            )}
+
+            {/* Lista de produtos */}
+            {products.length > 0 && (
+              <ProductsMobileList
+                products={products}
+                isLoading={isLoading}
+                isFetchingNextPage={isFetchingNextPage || false}
+                hasNextPage={hasNextPage || false}
+                fetchNextPage={fetchNextPage}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            )}
           </div>
 
           <MobileProductsFilters
@@ -152,7 +180,11 @@ export default function ProdutosMobile() {
             onSelect={handleCategorySelect}
           />
 
-          <MobileProductsFAB onClick={handleAdd} />
+          <MobileProductsFAB 
+            onClick={handleAdd} 
+            isEmpty={products.length === 0 && !isLoading}
+            tooltip="Adicionar primeiro produto"
+          />
         </div>
       </PageWrapper>
 

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useDeviceType } from './useDeviceType';
 import { useMobileQueryConfig } from './useMobileQueryConfig';
 
@@ -20,7 +21,7 @@ export function useSupabaseSmart() {
   const { isMobile } = useDeviceType();
   const queryConfig = useMobileQueryConfig();
 
-  return {
+  return useMemo(() => ({
     // Configuração de paginação
     getLimit: () => (isMobile ? 10 : 50),
     
@@ -51,5 +52,5 @@ export function useSupabaseSmart() {
       }
       return '*';
     },
-  };
+  }), [isMobile, queryConfig]);
 }

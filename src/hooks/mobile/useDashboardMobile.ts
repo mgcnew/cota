@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -167,52 +168,55 @@ export function useDashboardMobile() {
       if (!companyUser?.company_id) return [];
 
       // Top 5 fornecedores - apenas essencial
-      const { data: suppliers } = await supabase
+      const result = await supabase
         .from('suppliers')
         .select('id, name, status')
         .eq('company_id', companyUser.company_id)
         .eq('status', 'active')
         .limit(5);
 
-      return suppliers || [];
+      return result.data || [];
     },
     staleTime: 5 * 60 * 1000,
     enabled: false, // Lazy
   });
 
+  // Métricas default como constante
+  const defaultMetrics = {
+    cotacoesAtivas: 0,
+    fornecedores: 0,
+    produtosCadastrados: 0,
+    pedidosMes: 0,
+    totalPedidosMes: 0,
+    economiaGerada: 0,
+    economiaPotencial: 0,
+    // Propriedades adicionais para compatibilidade com Desktop
+    economiaPorPeriodo: [],
+    eficienciaEconomia: 0,
+    taxaAprovacaoMeta: 80,
+    taxaAprovacao: 0,
+    aprovacoesTotal: 0,
+    pendenciasTotal: 0,
+    rejeicoesTotal: 0,
+    approvalHistory: [],
+    ultimos7DiasCotacoes: [],
+    crescimentoCotacoes: 0,
+    produtosCotados: 0,
+    crescimentoEconomia: 0,
+    taxaAtividade: 0,
+    mediaFornecedoresParticipantes: 0,
+    variacaoTaxaAprovacao: 0,
+    taxaAprovacaoAnterior: 0,
+    aprovacoesMesAtual: 0,
+    aprovacoesMesAnterior: 0,
+    competitividadeMedia: 0,
+    economiaPotencialCrescimento: 0,
+    pendenciasAtrasadas: 0,
+    ultimasRejeicoes: [],
+  };
+
   return {
-    metrics: metrics || {
-      cotacoesAtivas: 0,
-      fornecedores: 0,
-      produtosCadastrados: 0,
-      pedidosMes: 0,
-      totalPedidosMes: 0,
-      economiaGerada: 0,
-      economiaPotencial: 0,
-      // Propriedades adicionais para compatibilidade com Desktop
-      economiaPorPeriodo: [],
-      eficienciaEconomia: 0,
-      taxaAprovacaoMeta: 80,
-      taxaAprovacao: 0,
-      aprovacoesTotal: 0,
-      pendenciasTotal: 0,
-      rejeicoesTotal: 0,
-      approvalHistory: [],
-      ultimos7DiasCotacoes: [],
-      crescimentoCotacoes: 0,
-      produtosCotados: 0,
-      crescimentoEconomia: 0,
-      taxaAtividade: 0,
-      mediaFornecedoresParticipantes: 0,
-      variacaoTaxaAprovacao: 0,
-      taxaAprovacaoAnterior: 0,
-      aprovacoesMesAtual: 0,
-      aprovacoesMesAnterior: 0,
-      competitividadeMedia: 0,
-      economiaPotencialCrescimento: 0,
-      pendenciasAtrasadas: 0,
-      ultimasRejeicoes: [],
-    },
+    metrics: metrics || defaultMetrics,
     recentQuotes: recentQuotes || [],
     topSuppliers: topSuppliers || [],
     isLoading,

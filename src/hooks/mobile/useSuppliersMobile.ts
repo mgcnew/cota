@@ -31,15 +31,11 @@ export function useSuppliersMobile(searchQuery?: string, statusFilter?: "all" | 
       // Verificar autenticação
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
-        console.error('❌ useSuppliersMobile: Erro de autenticação', authError);
         throw new Error('Usuário não autenticado');
       }
-      
-      console.log('✅ useSuppliersMobile: Usuário autenticado', user.id);
 
       // Query otimizada - apenas campos essenciais
       // NOTA: A tabela suppliers NÃO tem campo 'status' no banco, ele é calculado no código
-      console.log('📦 useSuppliersMobile: Buscando fornecedores', { page, pageSize, searchQuery, statusFilter });
       let query = supabase
         .from('suppliers')
         .select('id, name, contact, phone, email', { count: 'exact' })
@@ -62,16 +58,7 @@ export function useSuppliersMobile(searchQuery?: string, statusFilter?: "all" | 
 
       const { data, error, count } = await query;
 
-      if (error) {
-        console.error('Erro ao buscar fornecedores mobile:', error);
-        throw error;
-      }
-
-      console.log('📦 useSuppliersMobile: Resultados recebidos', { 
-        dataCount: data?.length || 0, 
-        totalCount: count || 0,
-        sample: data?.slice(0, 2)
-      });
+      if (error) throw error;
 
       // Mapear dados e adicionar status padrão (sempre "active" como no useSuppliers)
       const suppliersWithStatus = (data || []).map(s => ({
@@ -84,12 +71,6 @@ export function useSuppliersMobile(searchQuery?: string, statusFilter?: "all" | 
       if (statusFilter && statusFilter !== 'all') {
         filteredData = suppliersWithStatus.filter(s => s.status === statusFilter);
       }
-
-      console.log('📦 useSuppliersMobile: Dados processados', { 
-        originalCount: data?.length || 0,
-        filteredCount: filteredData.length,
-        statusFilter 
-      });
 
       return { data: filteredData as SupplierMobile[], total: count || 0 };
     },

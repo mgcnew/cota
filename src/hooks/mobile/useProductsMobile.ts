@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -40,10 +41,12 @@ export interface UseProductsMobileOptions {
  */
 export function useProductsMobile(options: UseProductsMobileOptions = {}) {
   const { searchQuery = '', categoryFilter = 'all' } = options;
-  const { getLimit, queryConfig } = useSupabaseSmart();
+  const supabaseSmart = useSupabaseSmart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const limit = getLimit();
+  
+  // Memoizar limit para evitar recalculos
+  const limit = useMemo(() => supabaseSmart.getLimit(), [supabaseSmart]);
 
   // Infinite query para carregar páginas progressivamente
   const {
@@ -59,7 +62,7 @@ export function useProductsMobile(options: UseProductsMobileOptions = {}) {
     nextPage: number | undefined;
     total: number;
   }, Error>({
-    queryKey: ['products-mobile', searchQuery, categoryFilter],
+    queryKey: ['products-mobile', searchQuery, categoryFilter, limit],
     queryFn: async ({ pageParam = 0 }) => {
       const page = typeof pageParam === 'number' ? pageParam : 0;
       const from = page * limit;
@@ -131,8 +134,21 @@ export function useProductsMobile(options: UseProductsMobileOptions = {}) {
     placeholderData: (previousData) => previousData,
   });
 
-  // Flatten products de todas as páginas
-  const products = data?.pages.flatMap((page) => page.data) || [];
+  // Flatten products de todas as páginas com deduplicação
+  const products = useMemo(() => {
+    if (!data?.pages) return [];
+    
+    // Usar Map para garantir unicidade por ID
+    const uniqueProducts = new Map<string, ProductMobile>();
+    
+    data.pages.forEach((page) => {
+      page.data.forEach((product) => {
+        uniqueProducts.set(product.id, product);
+      });
+    });
+    
+    return Array.from(uniqueProducts.values());
+  }, [data?.pages]);
 
   // Mutation para criar produto
   const createProduct = useMutation({
