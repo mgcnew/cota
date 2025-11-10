@@ -20,7 +20,7 @@ export function useProductDetails(productId: string | null | undefined) {
     data: productDetails,
     isLoading,
     error,
-  } = useQuery<ProductMobileFull | null>({
+  } = useQuery({
     queryKey: ['product-details', productId],
     queryFn: async (): Promise<ProductMobileFull | null> => {
       if (!productId) return null;

@@ -54,20 +54,18 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
   const queryClient = useQueryClient();
   const limit = getLimit();
 
+  type PageData = {
+    data: CotacaoMobile[];
+    nextPage: number | undefined;
+    total: number;
+  };
+
   // Infinite query para carregar páginas progressivamente
-  const {
-    data,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    error,
-    refetch,
-  } = useInfiniteQuery({
-    queryKey: ['cotacoes-mobile', searchTerm, statusFilter, supplierFilter],
+  const infiniteQueryResult = useInfiniteQuery<PageData, Error>({
+    queryKey: ['cotacoes-mobile', searchTerm, statusFilter, supplierFilter] as const,
     initialPageParam: 0,
-    queryFn: async ({ pageParam }) => {
-      const page = Number(pageParam) || 0;
+    queryFn: async ({ pageParam }): Promise<PageData> => {
+      const page = pageParam as number;
       const from = page * limit;
       const to = from + limit - 1;
 
@@ -273,10 +271,22 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
         total: count || 0,
       };
     },
-    getNextPageParam: (lastPage: any) => lastPage?.nextPage,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
     enabled: isMobile,
-    ...queryConfig,
   });
+
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+    refetch,
+  } = infiniteQueryResult;
 
   // Mutation to update supplier value for a specific product
   const updateSupplierProductValue = useMutation({
@@ -344,8 +354,8 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
 
       if (statusError) throw statusError;
 
-      // CRITICAL: REFETCH imediato para atualizar modal em tempo real
-      await queryClient.refetchQueries({ queryKey: ['cotacao-details', quoteId] });
+      // CRITICAL: Refetch imediato da cotação atual para atualizar no modal
+      await queryClient.refetchQueries({ queryKey: ['cotacao-details', quoteId], exact: true });
     },
     onSuccess: () => {
       // Invalidar outras queries após sucesso
@@ -629,10 +639,10 @@ export function useCotacoesMobile(options: UseCotacoesMobileOptions = {}) {
     if (!data?.pages) return [];
     
     // Usar Map para garantir unicidade por ID
-    const uniqueCotacoes = new Map<string, any>();
+    const uniqueCotacoes = new Map<string, CotacaoMobile>();
     
-    data.pages.forEach((page: any) => {
-      page.data.forEach((cotacao: any) => {
+    data.pages.forEach((page) => {
+      page.data.forEach((cotacao) => {
         uniqueCotacoes.set(cotacao.id, cotacao);
       });
     });

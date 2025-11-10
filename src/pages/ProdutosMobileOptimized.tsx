@@ -38,7 +38,7 @@ export default function ProdutosMobileOptimized() {
     products,
     isLoading,
     refetch,
-  } = useProductsMobile(debouncedSearchQuery);
+  } = useProductsMobile({ searchQuery: debouncedSearchQuery });
 
   const handleAdd = useCallback(() => {
     setAddDialogOpen(true);

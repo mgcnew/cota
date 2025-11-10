@@ -56,8 +56,7 @@ export function useDashboardMobile() {
         supabase
           .from('suppliers')
           .select('id', { count: 'exact', head: true })
-          .eq('company_id', companyId)
-          .eq('status', 'active'),
+          .eq('company_id', companyId),
 
         // Produtos cadastrados
         supabase
@@ -170,9 +169,8 @@ export function useDashboardMobile() {
       // Top 5 fornecedores - apenas essencial
       const result = await supabase
         .from('suppliers')
-        .select('id, name, status')
+        .select('id, name')
         .eq('company_id', companyUser.company_id)
-        .eq('status', 'active')
         .limit(5);
 
       return result.data || [];

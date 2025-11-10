@@ -293,9 +293,10 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     }
   }, [editingProductId]);
 
-  const handleSaveEdit = (productId: string) => {
+  const handleSaveEdit = async (productId: string) => {
     if (selectedSupplier && onUpdateSupplierProductValue && editedValues[productId] !== undefined && currentQuote) {
-      onUpdateSupplierProductValue(currentQuote.id, selectedSupplier, productId, editedValues[productId]);
+      // Salvar no banco
+      await onUpdateSupplierProductValue(currentQuote.id, selectedSupplier, productId, editedValues[productId]);
       setEditingProductId(null);
     }
   };
