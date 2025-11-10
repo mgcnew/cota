@@ -18,7 +18,7 @@ import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
 import { usePedidos } from "@/hooks/usePedidos";
-import { usePedidosMobile } from "@/hooks/mobile/usePedidosMobile";
+import { usePedidosMobileInfinite } from "@/hooks/mobile/usePedidosMobileInfinite";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,7 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { MobileFAB } from "@/components/mobile/MobileFAB";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
+import { OrdersMobileList } from "@/components/mobile/orders/OrdersMobileList";
 export default function Pedidos() {
   const {
     toast
@@ -49,12 +50,11 @@ export default function Pedidos() {
   
   // MOBILE OPTIMIZATION: Usar hook mobile ou desktop baseado no dispositivo
   const desktopPedidos = usePedidos();
-  // Mobile: passar searchQuery e statusFilter para busca server-side
-  const mobilePedidos = usePedidosMobile(
-    isMobile ? debouncedSearchTerm : undefined,
-    isMobile ? statusFilter : undefined,
-    isMobile // enabled apenas se for mobile
-  );
+  // Mobile: usar hook com infinite scroll e filtros server-side
+  const mobilePedidos = usePedidosMobileInfinite({
+    searchQuery: isMobile ? debouncedSearchTerm : "",
+    statusFilter: isMobile ? statusFilter : "all",
+  });
   
   // Selecionar hook baseado no dispositivo
   const isMobileDevice = isMobile;
@@ -271,12 +271,25 @@ export default function Pedidos() {
     }
   }, [pedidos, searchTerm, statusFilter, fornecedorFilter, valorMin, valorMax, dataInicio, dataFim, isMobileDevice]);
 
-  // Mobile: usar paginação do hook mobile
+  // Mobile: não usa paginação tradicional (usa infinite scroll), porém criamos mock para compatibilidade
   // Desktop: usar paginação client-side
   const paginatedData = isMobileDevice 
     ? {
-        items: filteredPedidos, // Já vem paginado do servidor, mas aplicamos filtros adicionais
-        pagination: mobilePedidos.pagination,
+        items: filteredPedidos,
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          itemsPerPage: filteredPedidos.length,
+          totalItems: filteredPedidos.length,
+          startIndex: 0,
+          endIndex: filteredPedidos.length,
+          canGoNext: false,
+          canGoPrev: false,
+          goNext: () => {},
+          goPrev: () => {},
+          goToPage: () => {},
+          setItemsPerPage: () => {},
+        },
       }
     : paginate(filteredPedidos);
 
@@ -825,91 +838,26 @@ export default function Pedidos() {
         </div> : <>
           {/* Pedidos View */}
           {isMobile ? (
-            <PullToRefresh onRefresh={refetch} disabled={!isMobile}>
-              <div className="grid gap-3 grid-cols-1">
-                {paginatedData.items.map((pedido, index) => {
-                  const getStatusColors = (status: string) => {
-                    switch (status) {
-                      case "entregue":
-                        return {
-                          border: "border-green-300/60",
-                          bg: "from-white to-green-50/30",
-                          iconBg: "from-green-500/10 to-emerald-500/10",
-                          iconColor: "text-green-600"
-                        };
-                      case "confirmado":
-                        return {
-                          border: "border-blue-300/60",
-                          bg: "from-white to-blue-50/30",
-                          iconBg: "from-blue-500/10 to-cyan-500/10",
-                          iconColor: "text-blue-600"
-                        };
-                      case "processando":
-                        return {
-                          border: "border-amber-300/60",
-                          bg: "from-white to-amber-50/30",
-                          iconBg: "from-amber-500/10 to-yellow-500/10",
-                          iconColor: "text-amber-600"
-                        };
-                      case "cancelado":
-                        return {
-                          border: "border-red-300/60",
-                          bg: "from-white to-red-50/30",
-                          iconBg: "from-red-500/10 to-pink-500/10",
-                          iconColor: "text-red-600"
-                        };
-                      default:
-                        return {
-                          border: "border-gray-300/60",
-                          bg: "from-white to-gray-50/30",
-                          iconBg: "from-gray-500/10 to-slate-500/10",
-                          iconColor: "text-gray-600"
-                        };
-                    }
-                  };
-                  const colors = getStatusColors(pedido.status);
-                  return (
-                    <Card 
-                      key={pedido.id} 
-                      className={cn("border border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26]", "backdrop-blur-sm")}
-                      onClick={() => {
-                        setSelectedPedido(pedido);
-                        setPedidoDialogOpen(true);
-                      }}
-                    >
-                      <CardHeader className="pb-3 p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3 flex-1">
-                            <div className={cn("p-2 rounded-lg", colors.iconBg)}>
-                              <div className={cn("h-5 w-5", colors.iconColor)}>
-                                {getStatusIcon(pedido.status)}
-                              </div>
-                            </div>
-                            <div className="space-y-1 flex-1 min-w-0">
-                              <CardTitle className="text-base font-bold text-gray-900 dark:text-white truncate" title={pedido.fornecedor}>
-                                {capitalize(abbreviateSupplierName(pedido.fornecedor, 25))}
-                              </CardTitle>
-                              <div className="flex items-center gap-2">
-                                {getStatusBadge(pedido.status)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      
-                      <CardContent className="space-y-3 p-4 pt-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Package className="h-4 w-4 text-orange-600" />
-                            <span className="text-sm text-gray-600 dark:text-gray-400">{pedido.itens} itens</span>
-                          </div>
-                          <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{pedido.total}</div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+            <PullToRefresh onRefresh={() => mobilePedidos.refetch().then(() => {})} disabled={!isMobile}>
+              <OrdersMobileList
+                orders={mobilePedidos.pedidos}
+                isFetchingNextPage={mobilePedidos.isFetchingNextPage}
+                hasNextPage={mobilePedidos.hasNextPage}
+                fetchNextPage={() => mobilePedidos.fetchNextPage()}
+                onSelect={(o) => {
+                  setSelectedPedido({
+                    id: o.id,
+                    fornecedor: o.supplier_name,
+                    itens: o.items_count || 0,
+                    total: (o.total_value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                    status: o.status,
+                    dataEntrega: o.delivery_date ? new Date(o.delivery_date).toLocaleDateString('pt-BR') : '',
+                    produtos: [],
+                    observacoes: o.observations || '',
+                  });
+                  setPedidoDialogOpen(true);
+                }}
+              />
             </PullToRefresh>
           ) : viewMode === "table" ? <Card className="border-0 bg-transparent">
               <CardContent className="p-0">
@@ -1071,7 +1019,7 @@ export default function Pedidos() {
                 </div>
               </CardContent>
             </Card> : (
-            <PullToRefresh onRefresh={refetch} disabled={true}>
+            <PullToRefresh onRefresh={async () => {}} disabled={true}>
               <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {paginatedData.items.map((pedido, index) => {
             const getStatusColors = (status: string) => {
