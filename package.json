@@ -12,7 +12,10 @@
     "cleanup-duplicates": "node scripts/cleanup-duplicates.js",
     "analyze-bundle": "node scripts/analyze-bundle-mobile.js",
     "check-mobile-imports": "node scripts/check-mobile-imports.js",
-    "analyze-mobile": "npm run analyze-bundle && npm run check-mobile-imports"
+    "analyze-mobile": "npm run analyze-bundle && npm run check-mobile-imports",
+    "test:mobile": "node scripts/test-mobile-performance.js",
+    "lighthouse:pedidos": "lighthouse http://localhost:8082/dashboard/pedidos --only-categories=performance --form-factor=mobile --output=html --output-path=./lighthouse-reports/pedidos.html",
+    "lighthouse:all": "npm run test:mobile"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

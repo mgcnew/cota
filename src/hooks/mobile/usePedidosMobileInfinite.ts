@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { formatCurrency, formatDate } from '@/utils/formatters';
 
 export interface PedidoMobile {
   id: string;
@@ -13,6 +14,10 @@ export interface PedidoMobile {
   total_value: number;
   observations?: string;
   items_count?: number;
+  // Campos pré-formatados para evitar processamento no componente
+  total_value_formatted?: string;
+  order_date_formatted?: string;
+  delivery_date_formatted?: string;
 }
 
 export function usePedidosMobileInfinite(options: { searchQuery?: string; statusFilter?: string } = {}) {
@@ -66,6 +71,10 @@ export function usePedidosMobileInfinite(options: { searchQuery?: string; status
         ...p,
         total_value: Number(p.total_value),
         items_count: itemsCountMap[p.id] || 0,
+        // Pré-formatar dados para evitar processamento no render
+        total_value_formatted: formatCurrency(Number(p.total_value)),
+        order_date_formatted: formatDate(p.order_date),
+        delivery_date_formatted: p.delivery_date ? formatDate(p.delivery_date) : '',
       }));
 
       const nextPage = data && data.length === pageSize ? pageParam + 1 : undefined;
