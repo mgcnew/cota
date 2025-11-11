@@ -658,6 +658,66 @@ export type Database = {
           },
         ]
       }
+      shopping_list: {
+        Row: {
+          category: string | null
+          company_id: string
+          created_at: string
+          estimated_price: number | null
+          id: string
+          notes: string | null
+          priority: string
+          product_id: string
+          product_name: string
+          quantity: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          company_id: string
+          created_at?: string
+          estimated_price?: number | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          product_id: string
+          product_name: string
+          quantity?: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          estimated_price?: number | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopping_list_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_count_items: {
         Row: {
           id: string
