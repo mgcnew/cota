@@ -12,6 +12,8 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { MobileProvider } from "./contexts/MobileProvider";
 import { Loader2 } from "lucide-react";
 import { initScrollbarFix } from "./utils/scrollbar-fix";
+import { useScrollOptimization } from "./hooks/mobile/useScrollOptimization";
+import "./styles/mobile-scroll-optimization.css";
 
 // Páginas públicas - carregamento imediato
 import Auth from "./pages/Auth";
@@ -73,6 +75,9 @@ const App = () => {
     const cleanup = initScrollbarFix();
     return cleanup;
   }, []);
+
+  // Otimizações de scroll mobile
+  useScrollOptimization();
 
   return (
     <QueryClientProvider client={queryClient}>

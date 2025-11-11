@@ -22,8 +22,9 @@ interface Props {
 }
 
 const ITEM_HEIGHT = 140;
-const BUFFER_SIZE = 5; // Renderizar 5 itens extras acima/abaixo
+const BUFFER_SIZE = 3; // Reduzir buffer para melhor performance
 const LOAD_MORE_THRESHOLD = 5;
+const SCROLL_THROTTLE = 16; // ~60fps
 
 export function OrdersMobileListOptimized({ 
   orders, 
@@ -61,15 +62,32 @@ export function OrdersMobileListOptimized({
     }
   }, [orders.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Throttled scroll handler
+  // Optimized scroll handler com throttle
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    let rafId: number;
+    let rafId: number | null = null;
+    let lastScrollTime = 0;
+
     const handleScroll = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateVisibleRange);
+      const now = Date.now();
+      
+      // Throttle para evitar excesso de cálculos
+      if (now - lastScrollTime < SCROLL_THROTTLE) {
+        return;
+      }
+      
+      lastScrollTime = now;
+      
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      
+      rafId = requestAnimationFrame(() => {
+        updateVisibleRange();
+        rafId = null;
+      });
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
@@ -77,7 +95,9 @@ export function OrdersMobileListOptimized({
 
     return () => {
       container.removeEventListener('scroll', handleScroll);
-      if (rafId) cancelAnimationFrame(rafId);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
     };
   }, [updateVisibleRange]);
 
@@ -92,21 +112,36 @@ export function OrdersMobileListOptimized({
       style={{
         height: 'calc(100vh - 200px)',
         WebkitOverflowScrolling: 'touch',
-        willChange: 'scroll-position',
+        // Aceleração de hardware sem willChange
+        transform: 'translateZ(0)',
+        // Otimizações de rendering
+        contain: 'layout style paint',
+        // Scroll suave nativo
+        scrollBehavior: 'auto',
       }}
     >
-      <div style={{ height: totalHeight, position: 'relative' }}>
+      <div style={{ 
+        height: totalHeight, 
+        position: 'relative',
+        contain: 'layout style paint',
+      }}>
         <div
           style={{
-            transform: `translateY(${offsetY}px)`,
-            willChange: 'transform',
+            // Usar translate3d para aceleração de hardware
+            transform: `translate3d(0, ${offsetY}px, 0)`,
+            // Remover willChange que pode causar lentidão
+            backfaceVisibility: 'hidden',
+            perspective: 1000,
           }}
         >
           {visibleOrders.map((order, index) => (
             <div
               key={order.id}
               className="px-3 py-2"
-              style={{ height: ITEM_HEIGHT }}
+              style={{ 
+                height: ITEM_HEIGHT,
+                contain: 'layout style paint',
+              }}
             >
               <OrderMobileCard
                 id={order.id}
