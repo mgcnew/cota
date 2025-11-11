@@ -24,10 +24,9 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useMobile } from "@/contexts/MobileProvider";
-import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { MobileFAB } from "@/components/mobile/MobileFAB";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
-import { OrdersMobileListOptimized } from "@/components/mobile/orders/OrdersMobileListOptimized";
+import { OrdersMobileList } from "@/components/mobile/orders/OrdersMobileList";
 
 // Lazy load desktop components
 const DesktopStatsCards = lazy(() => import("@/components/pedidos/DesktopStatsCards"));
@@ -472,27 +471,26 @@ export default function Pedidos() {
         </div> : <>
           {/* Pedidos View */}
           {isMobile ? (
-            <PullToRefresh onRefresh={() => mobilePedidos.refetch().then(() => {})} disabled={!isMobile}>
-              <OrdersMobileListOptimized
-                orders={mobilePedidos.pedidos}
-                isFetchingNextPage={mobilePedidos.isFetchingNextPage}
-                hasNextPage={mobilePedidos.hasNextPage}
-                fetchNextPage={() => mobilePedidos.fetchNextPage()}
-                onSelect={(o) => {
-                  setSelectedPedido({
-                    id: o.id,
-                    fornecedor: o.supplier_name,
-                    itens: o.items_count || 0,
-                    total: (o.total_value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-                    status: o.status,
-                    dataEntrega: o.delivery_date ? new Date(o.delivery_date).toLocaleDateString('pt-BR') : '',
-                    produtos: [],
-                    observacoes: o.observations || '',
-                  });
-                  setPedidoDialogOpen(true);
-                }}
-              />
-            </PullToRefresh>
+            <OrdersMobileList
+              orders={mobilePedidos.pedidos}
+              isLoading={mobilePedidos.isLoading}
+              isFetchingNextPage={mobilePedidos.isFetchingNextPage}
+              hasNextPage={mobilePedidos.hasNextPage}
+              fetchNextPage={() => mobilePedidos.fetchNextPage()}
+              onSelect={(o) => {
+                setSelectedPedido({
+                  id: o.id,
+                  fornecedor: o.supplier_name,
+                  itens: o.items_count || 0,
+                  total: (o.total_value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                  status: o.status,
+                  dataEntrega: o.delivery_date ? new Date(o.delivery_date).toLocaleDateString('pt-BR') : '',
+                  produtos: [],
+                  observacoes: o.observations || '',
+                });
+                setPedidoDialogOpen(true);
+              }}
+            />
           ) : viewMode === "table" ? <Card className="border-0 bg-transparent">
               <CardContent className="p-0">
                 <div className="overflow-hidden">
@@ -653,7 +651,6 @@ export default function Pedidos() {
                 </div>
               </CardContent>
             </Card> : (
-            <PullToRefresh onRefresh={async () => {}} disabled={true}>
               <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {paginatedData.items.map((pedido, index) => {
             const getStatusColors = (status: string) => {
@@ -777,7 +774,6 @@ export default function Pedidos() {
                 </Card>;
           })}
               </div>
-            </PullToRefresh>
           )}
         </>}
 
