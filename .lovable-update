@@ -2,10 +2,10 @@
 
 ## ⚠️ ATENÇÃO: CÓDIGO ATUALIZADO - NECESSITA PULL
 
-**Data:** $(date)
-**Commit:** 84cc898
+**Data:** 2025-11-11 13:29
+**Commit:** 59e9f08
 **Branch:** main (e também lovable)
-**Tag:** v1.0-functional
+**Mensagem:** Otimizações críticas de performance mobile
 
 ## 📋 O QUE FAZER NO LOVABLE:
 
@@ -19,7 +19,7 @@
 Após atualizar, verifique se está no commit correto:
 ```bash
 git log -1
-# Deve mostrar: 84cc898 - chore: garantir versão funcional estável salva no repositório
+# Deve mostrar: 59e9f08 - perf: otimizações críticas de performance mobile
 ```
 
 ## 🔄 SINCRONIZAÇÃO:
