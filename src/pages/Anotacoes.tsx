@@ -35,31 +35,35 @@ import { useToast } from "@/hooks/use-toast";
 const importanceConfig = {
   low: {
     label: "Baixa",
-    color: "bg-yellow-100 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-800",
+    color: "bg-yellow-100 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700",
     textColor: "text-yellow-900 dark:text-yellow-100",
     icon: Info,
-    shadow: "shadow-yellow-200/50 dark:shadow-yellow-900/30",
+    shadow: "shadow-lg shadow-yellow-300/40 dark:shadow-yellow-900/40",
+    paperGradient: "from-yellow-50 to-yellow-100 dark:from-yellow-900/40 dark:to-yellow-800/40",
   },
   medium: {
     label: "Média",
-    color: "bg-blue-100 dark:bg-blue-900/20 border-blue-300 dark:border-blue-800",
+    color: "bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700",
     textColor: "text-blue-900 dark:text-blue-100",
     icon: AlertCircle,
-    shadow: "shadow-blue-200/50 dark:shadow-blue-900/30",
+    shadow: "shadow-lg shadow-blue-300/40 dark:shadow-blue-900/40",
+    paperGradient: "from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-800/40",
   },
   high: {
     label: "Alta",
-    color: "bg-orange-100 dark:bg-orange-900/20 border-orange-300 dark:border-orange-800",
+    color: "bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700",
     textColor: "text-orange-900 dark:text-orange-100",
     icon: AlertTriangle,
-    shadow: "shadow-orange-200/50 dark:shadow-orange-900/30",
+    shadow: "shadow-lg shadow-orange-300/40 dark:shadow-orange-900/40",
+    paperGradient: "from-orange-50 to-orange-100 dark:from-orange-900/40 dark:to-orange-800/40",
   },
   urgent: {
     label: "Urgente",
-    color: "bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-800",
+    color: "bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700",
     textColor: "text-red-900 dark:text-red-100",
     icon: Flame,
-    shadow: "shadow-red-200/50 dark:shadow-red-900/30",
+    shadow: "shadow-lg shadow-red-300/40 dark:shadow-red-900/40",
+    paperGradient: "from-red-50 to-red-100 dark:from-red-900/40 dark:to-red-800/40",
   },
 };
 
@@ -626,86 +630,114 @@ export default function Anotacoes() {
                 Anotações Ativas ({filteredNotes.length || 0})
               </h2>
               <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'}`}>
-                {filteredNotes.map((note) => {
+                {filteredNotes.map((note, index) => {
                   const config = importanceConfig[note.importance];
                   const Icon = config.icon;
+                  const rotation = !isMobile ? Math.random() * 6 - 3 : 0;
                   
                   return (
-                    <Card
+                    <motion.div
                       key={note.id}
-                      className={`${config.color} ${config.shadow} border-2 transition-all hover:scale-105 hover:shadow-lg cursor-pointer relative ${isMobile ? 'p-3' : ''}`}
-                      style={!isMobile ? {
-                        transform: `rotate(${Math.random() * 4 - 2}deg)`,
-                      } : undefined}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
                     >
-                      <CardContent className={isMobile ? 'p-0 space-y-2' : 'p-4 space-y-3'}>
-                        {/* Header */}
-                        <div className={`flex items-start justify-between gap-2 ${isMobile ? 'mb-2' : ''}`}>
-                          <div className="flex items-center gap-2 flex-1">
-                            <Icon className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} ${config.textColor} flex-shrink-0`} />
-                            <Badge 
-                              variant="outline" 
-                              className={`${config.textColor} border-current ${isMobile ? 'text-xs px-1.5 py-0.5' : 'text-xs'}`}
-                            >
-                              {config.label}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditNote(note as any)}
-                              className={isMobile ? 'h-8 w-8 p-0' : 'h-7 w-7 p-0'}
-                            >
-                              <Edit className={isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteNote(note.id)}
-                              className={`${isMobile ? 'h-8 w-8' : 'h-7 w-7'} p-0 text-destructive`}
-                            >
-                              <Trash2 className={isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
-                            </Button>
-                          </div>
+                      <Card
+                        className={`${config.color} ${config.shadow} border-2 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer relative overflow-hidden group`}
+                        style={!isMobile ? {
+                          transform: `rotate(${rotation}deg)`,
+                          background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
+                        } : undefined}
+                      >
+                        {/* Efeito de papel com textura */}
+                        <div className="absolute inset-0 opacity-30 pointer-events-none">
+                          <div className="absolute inset-0" style={{
+                            backgroundImage: `
+                              repeating-linear-gradient(
+                                90deg,
+                                transparent,
+                                transparent 2px,
+                                rgba(255, 255, 255, 0.5) 2px,
+                                rgba(255, 255, 255, 0.5) 4px
+                              )
+                            `,
+                          }} />
                         </div>
 
-                        {/* Título */}
-                        <h3 className={`font-semibold ${isMobile ? 'text-base' : 'text-sm'} ${config.textColor} line-clamp-2`}>
-                          {note.title}
-                        </h3>
-
-                        {/* Conteúdo */}
-                        <p className={`${isMobile ? 'text-sm line-clamp-3' : 'text-xs line-clamp-4'} ${config.textColor} opacity-90`}>
-                          {note.content}
-                        </p>
-
-                        {/* Observação - Ocultar no mobile */}
-                        {!isMobile && note.observation && (
-                          <div className={`pt-2 border-t ${config.textColor} opacity-50 border-current`}>
-                            <p className="text-xs italic line-clamp-2">
-                              {note.observation}
-                            </p>
-                          </div>
+                        {/* Pino no topo (visual post-it) */}
+                        {!isMobile && (
+                          <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-400 dark:bg-gray-600 rounded-full shadow-md group-hover:shadow-lg transition-shadow" />
                         )}
 
-                        {/* Footer */}
-                        <div className={`flex items-center justify-between pt-2 border-t border-current ${isMobile ? 'opacity-40' : 'opacity-30'}`}>
-                          <span className={`${isMobile ? 'text-xs' : 'text-xs'} ${config.textColor}`}>
-                            {new Date(note.created_at).toLocaleDateString('pt-BR')}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleResolveNote(note.id)}
-                            className={`${isMobile ? 'h-8 px-2 text-xs' : 'h-7 px-2'} ${config.textColor} hover:bg-current/10`}
-                          >
-                            <CheckCircle2 className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1`} />
-                            Resolver
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        <CardContent className={`relative z-10 ${isMobile ? 'p-3 space-y-2' : 'p-4 space-y-3'}`}>
+                          {/* Header */}
+                          <div className={`flex items-start justify-between gap-2 ${isMobile ? 'mb-2' : ''}`}>
+                            <div className="flex items-center gap-2 flex-1">
+                              <Icon className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} ${config.textColor} flex-shrink-0`} />
+                              <Badge 
+                                variant="outline" 
+                                className={`${config.textColor} border-current ${isMobile ? 'text-xs px-1.5 py-0.5' : 'text-xs'} bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm`}
+                              >
+                                {config.label}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditNote(note as any)}
+                                className={`${isMobile ? 'h-8 w-8 p-0' : 'h-7 w-7 p-0'} hover:bg-white/30 dark:hover:bg-gray-800/30`}
+                              >
+                                <Edit className={isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteNote(note.id)}
+                                className={`${isMobile ? 'h-8 w-8' : 'h-7 w-7'} p-0 text-destructive hover:bg-red-100/30 dark:hover:bg-red-900/30`}
+                              >
+                                <Trash2 className={isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Título */}
+                          <h3 className={`font-semibold ${isMobile ? 'text-base' : 'text-sm'} ${config.textColor} line-clamp-2 break-words`}>
+                            {note.title}
+                          </h3>
+
+                          {/* Conteúdo */}
+                          <p className={`${isMobile ? 'text-sm line-clamp-3' : 'text-xs line-clamp-4'} ${config.textColor} opacity-90 leading-relaxed`}>
+                            {note.content}
+                          </p>
+
+                          {/* Observação - Ocultar no mobile */}
+                          {!isMobile && note.observation && (
+                            <div className={`pt-2 border-t ${config.textColor} opacity-50 border-current`}>
+                              <p className="text-xs italic line-clamp-2">
+                                {note.observation}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Footer */}
+                          <div className={`flex items-center justify-between pt-2 border-t border-current ${isMobile ? 'opacity-40' : 'opacity-30'}`}>
+                            <span className={`${isMobile ? 'text-xs' : 'text-xs'} ${config.textColor}`}>
+                              {new Date(note.created_at).toLocaleDateString('pt-BR')}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleResolveNote(note.id)}
+                              className={`${isMobile ? 'h-8 px-2 text-xs' : 'h-7 px-2'} ${config.textColor} hover:bg-current/10 transition-colors`}
+                            >
+                              <CheckCircle2 className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1`} />
+                              Resolver
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   );
                 })}
               </div>
