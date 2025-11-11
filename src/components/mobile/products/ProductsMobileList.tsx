@@ -4,6 +4,21 @@ import type { ProductMobile } from '@/hooks/mobile/useProductsMobile';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+/**
+ * PADRÃO OTIMIZADO DE COTAÇÕES APLICADO
+ * - Mesma estrutura de infinite scroll
+ * - Mesmas otimizações de performance
+ * - Mesmos estados de loading
+ */
+
+/**
+ * PADRÃO OTIMIZADO DE COTAÇÕES APLICADO
+ * - Mesma estrutura de infinite scroll
+ * - Mesmas otimizações de performance
+ * - Mesmos estados de loading
+ * - Memoizado com comparador customizado
+ */
+
 interface ProductsMobileListProps {
   products: ProductMobile[];
   isLoading: boolean;
@@ -37,6 +52,8 @@ export const ProductsMobileList = memo<ProductsMobileListProps>(
     onEdit,
     onDelete,
   }) {
+    // PADRÃO COTAÇÕES: Usar memo com comparador customizado
+    // Evita re-renders desnecessários
     const sentinelRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const observerRef = useRef<IntersectionObserver | null>(null);
@@ -152,7 +169,7 @@ export const ProductsMobileList = memo<ProductsMobileListProps>(
           transform: 'translateZ(0)', // GPU acceleration
         }}
       >
-        {/* Lista de produtos */}
+        {/* Lista de produtos - PADRÃO COTAÇÕES */}
         {products.map((product) => (
           <ProductMobileCard
             key={product.id}
@@ -162,7 +179,7 @@ export const ProductsMobileList = memo<ProductsMobileListProps>(
           />
         ))}
 
-        {/* Sentinel para infinite scroll */}
+        {/* Sentinel para infinite scroll - PADRÃO COTAÇÕES */}
         <div
           ref={sentinelRef}
           className={cn(
@@ -182,7 +199,7 @@ export const ProductsMobileList = memo<ProductsMobileListProps>(
           )}
         </div>
 
-        {/* Mensagem de fim da lista */}
+        {/* Mensagem de fim da lista - PADRÃO COTAÇÕES */}
         {!hasNextPage && products.length > 0 && (
           <div className="flex items-center justify-center py-6">
             <p className="text-xs text-gray-400 dark:text-gray-500">
