@@ -4,6 +4,7 @@ import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
 import { MobilePageTransition } from "./MobilePageTransition";
 import { useMobile } from "@/contexts/MobileProvider";
+import { usePagePreload } from "@/hooks/mobile/usePagePreload";
 import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3, Sparkles, Mic, MessageSquare } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +23,7 @@ const pageTitles: Record<string, string> = {
   "/dashboard/fornecedores": "Fornecedores",
   "/dashboard/cotacoes": "Cotações",
   "/dashboard/pedidos": "Pedidos",
+  "/dashboard/lista-compras": "Lista de Compras",
   "/dashboard/contagem-estoque": "Contagem de Estoque",
   "/dashboard/anotacoes": "Anotações",
   "/dashboard/historico": "Histórico",
@@ -40,6 +42,7 @@ const pageIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "/dashboard/fornecedores": Building2,
   "/dashboard/cotacoes": FileText,
   "/dashboard/pedidos": ShoppingCart,
+  "/dashboard/lista-compras": ShoppingCart,
   "/dashboard/contagem-estoque": ClipboardList,
   "/dashboard/anotacoes": BookOpen,
   "/dashboard/historico": History,
@@ -61,6 +64,9 @@ export function AppLayout() {
   const isMobile = useMobile();
   const pageTitle = pageTitles[location.pathname] || "";
   const PageIcon = pageIcons[location.pathname] || Package;
+  
+  // Preload inteligente de páginas relacionadas
+  usePagePreload();
 
   const handleLogout = async () => {
     try {

@@ -22,7 +22,8 @@ import {
   BarChart3, 
   Star,
   ClipboardList,
-  StickyNote
+  StickyNote,
+  ShoppingBasket
 } from 'lucide-react';
 
 
@@ -47,6 +48,10 @@ const menuItems = [{
   title: "Pedidos",
   url: "/dashboard/pedidos",
   icon: ShoppingCart
+}, {
+  title: "Lista de Compras",
+  url: "/dashboard/lista-compras",
+  icon: ShoppingBasket
 }, {
   title: "Contagem de Estoque",
   url: "/dashboard/contagem-estoque",

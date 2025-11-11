@@ -4,35 +4,69 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { CompanyAutoSetup } from "./components/auth/CompanyAutoSetup";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { MobileProvider } from "./contexts/MobileProvider";
-import Dashboard from "./pages/Dashboard";
-import Produtos from "./pages/Produtos";
-import Fornecedores from "./pages/Fornecedores";
-import Cotacoes from "./pages/Cotacoes";
-import Pedidos from "./pages/Pedidos";
-import Historico from "./pages/Historico";
-import Relatorios from "./pages/Relatorios";
-import Analytics from "./pages/Analytics";
-import Locucoes from "./pages/Locucoes";
-import Extra from "./pages/Extra";
-import AgenteCopywriting from "./pages/AgenteCopywriting";
-import WhatsAppMensagens from "./pages/WhatsAppMensagens";
-import Configuracoes from "./pages/Configuracoes";
-import ContagemEstoque from "./pages/ContagemEstoque";
-import Anotacoes from "./pages/Anotacoes";
+import { Loader2 } from "lucide-react";
+import { initScrollbarFix } from "./utils/scrollbar-fix";
+
+// Páginas públicas - carregamento imediato
 import Auth from "./pages/Auth";
 import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import Pricing from "./pages/Pricing";
-import { initScrollbarFix } from "./utils/scrollbar-fix";
 
-const queryClient = new QueryClient();
+// Páginas principais - lazy load
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Produtos = lazy(() => import("./pages/Produtos"));
+const Fornecedores = lazy(() => import("./pages/Fornecedores"));
+const Cotacoes = lazy(() => import("./pages/Cotacoes"));
+const Pedidos = lazy(() => import("./pages/Pedidos"));
+const ListaCompras = lazy(() => import("./pages/ListaCompras"));
+const ContagemEstoque = lazy(() => import("./pages/ContagemEstoque"));
+const Anotacoes = lazy(() => import("./pages/Anotacoes"));
+const Relatorios = lazy(() => import("./pages/Relatorios"));
+
+// Páginas secundárias - lazy load com prioridade baixa
+const Historico = lazy(() => import("./pages/Historico"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const Locucoes = lazy(() => import("./pages/Locucoes"));
+const Extra = lazy(() => import("./pages/Extra"));
+const AgenteCopywriting = lazy(() => import("./pages/AgenteCopywriting"));
+const WhatsAppMensagens = lazy(() => import("./pages/WhatsAppMensagens"));
+const Configuracoes = lazy(() => import("./pages/Configuracoes"));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center gap-3">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">Carregando...</p>
+    </div>
+  </div>
+);
+
+// QueryClient otimizado para mobile e desktop
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Reduzir staleTime em mobile para dados mais frescos
+      staleTime: typeof window !== 'undefined' && window.innerWidth < 768 ? 30000 : 60000,
+      // Cache mais agressivo em mobile
+      gcTime: typeof window !== 'undefined' && window.innerWidth < 768 ? 300000 : 600000,
+      // Retry menos vezes em mobile para economizar dados
+      retry: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 3,
+      // Não refetch automaticamente em mobile ao focar janela
+      refetchOnWindowFocus: typeof window !== 'undefined' && window.innerWidth >= 768,
+      // Não refetch ao reconectar em mobile
+      refetchOnReconnect: typeof window !== 'undefined' && window.innerWidth >= 768,
+    },
+  },
+});
 
 const App = () => {
   useEffect(() => {
@@ -66,21 +100,22 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 >
-                  <Route index element={<Dashboard />} />
-                  <Route path="produtos" element={<Produtos />} />
-                  <Route path="fornecedores" element={<Fornecedores />} />
-                  <Route path="cotacoes" element={<Cotacoes />} />
-                  <Route path="pedidos" element={<Pedidos />} />
+                  <Route index element={<Suspense fallback={<PageLoader />}><Dashboard /></Suspense>} />
+                  <Route path="produtos" element={<Suspense fallback={<PageLoader />}><Produtos /></Suspense>} />
+                  <Route path="fornecedores" element={<Suspense fallback={<PageLoader />}><Fornecedores /></Suspense>} />
+                  <Route path="cotacoes" element={<Suspense fallback={<PageLoader />}><Cotacoes /></Suspense>} />
+                  <Route path="pedidos" element={<Suspense fallback={<PageLoader />}><Pedidos /></Suspense>} />
                   <Route path="historico" element={<Navigate to="/dashboard/relatorios?tab=historico" replace />} />
-                  <Route path="relatorios" element={<Relatorios />} />
+                  <Route path="relatorios" element={<Suspense fallback={<PageLoader />}><Relatorios /></Suspense>} />
                   <Route path="analytics" element={<Navigate to="/dashboard/relatorios?tab=analytics" replace />} />
-                  <Route path="locucoes" element={<Locucoes />} />
-                  <Route path="extra" element={<Extra />} />
-                  <Route path="agente-copywriting" element={<AgenteCopywriting />} />
-                  <Route path="whatsapp-mensagens" element={<WhatsAppMensagens />} />
-                  <Route path="contagem-estoque" element={<ContagemEstoque />} />
-                  <Route path="anotacoes" element={<Anotacoes />} />
-                  <Route path="configuracoes" element={<Configuracoes />} />
+                  <Route path="locucoes" element={<Suspense fallback={<PageLoader />}><Locucoes /></Suspense>} />
+                  <Route path="extra" element={<Suspense fallback={<PageLoader />}><Extra /></Suspense>} />
+                  <Route path="agente-copywriting" element={<Suspense fallback={<PageLoader />}><AgenteCopywriting /></Suspense>} />
+                  <Route path="whatsapp-mensagens" element={<Suspense fallback={<PageLoader />}><WhatsAppMensagens /></Suspense>} />
+                  <Route path="contagem-estoque" element={<Suspense fallback={<PageLoader />}><ContagemEstoque /></Suspense>} />
+                  <Route path="anotacoes" element={<Suspense fallback={<PageLoader />}><Anotacoes /></Suspense>} />
+                  <Route path="lista-compras" element={<Suspense fallback={<PageLoader />}><ListaCompras /></Suspense>} />
+                  <Route path="configuracoes" element={<Suspense fallback={<PageLoader />}><Configuracoes /></Suspense>} />
                 </Route>
 
                 {/* Rota 404 */}
