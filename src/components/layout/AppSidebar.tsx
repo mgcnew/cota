@@ -178,7 +178,7 @@ export function AppSidebar() {
         className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 dark:border-gray-700 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.2)]"
         style={{
           backgroundColor: isDark ? '#1C1F26' : '#ffffff',
-          opacity: 1,
+          opacity: '1 !important' as any,
         }}
       >
         <div className="flex items-center justify-around">

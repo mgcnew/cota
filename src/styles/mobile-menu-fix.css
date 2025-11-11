@@ -1,0 +1,75 @@
+/**
+ * Correções Forçadas para Menu Mobile
+ * Garante cor sólida e centralização do dialog
+ */
+
+/* ============================================
+   FORÇAR COR SÓLIDA NO MENU INFERIOR
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Menu inferior - forçar cor sólida */
+  .md\:hidden.fixed.bottom-0 {
+    background-color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  /* Dark mode */
+  .dark .md\:hidden.fixed.bottom-0 {
+    background-color: #1C1F26 !important;
+    opacity: 1 !important;
+  }
+
+  /* Garantir que nenhum elemento filho afete a opacidade */
+  .md\:hidden.fixed.bottom-0 * {
+    opacity: 1 !important;
+  }
+
+  /* Remover qualquer backdrop-filter que possa causar transparência */
+  .md\:hidden.fixed.bottom-0 {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* ============================================
+   CENTRALIZAR DIALOG EM MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Forçar centralização do dialog */
+  [role="dialog"] {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+  }
+
+  /* Garantir que o dialog não saia da tela */
+  [role="dialog"] {
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Overlay do dialog */
+  [data-radix-dialog-overlay] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 50 !important;
+  }
+}
+
+/* ============================================
+   PREVENIR SCROLL DURANTE DIALOG
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Quando dialog está aberto, prevenir scroll do body */
+  body:has([data-state="open"][role="dialog"]) {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+  }
+}
