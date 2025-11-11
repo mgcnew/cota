@@ -106,7 +106,7 @@ export default function ListaCompras() {
     const selectedProducts = filteredItems.filter(item => selectedItems.has(item.id));
     
     // Navegar para página de pedidos com produtos pré-selecionados
-    navigate("/pedidos", { 
+    navigate("/dashboard/pedidos", { 
       state: { 
         preSelectedProducts: selectedProducts.map(item => ({
           product_id: item.product_id,
