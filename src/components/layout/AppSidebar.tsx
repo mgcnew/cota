@@ -173,24 +173,20 @@ export function AppSidebar() {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation - Premium */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1C1F26] border-t border-gray-200/60 dark:border-gray-700/40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)] rounded-t-3xl">
-
-        <div className="flex items-center justify-around px-2 py-3 relative">
-          {/* Botões principais personalizados */}
+      {/* Mobile Bottom Navigation - Redesign Otimizado */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1C1F26] border-t border-gray-200 dark:border-gray-700 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.2)]">
+        <div className="flex items-center justify-around">
+          {/* Botões principais */}
           {primaryMobileItems.map((item, index) => {
             const itemActive = isActive(item.url);
             const itemColor = colors[index % colors.length];
-            const isDashboard = item.url === "/dashboard";
             
             return (
               <MobileNavButton
                 key={item.title}
                 item={item}
-                index={index}
                 isActive={itemActive}
-                color={itemColor}
-                isDashboard={isDashboard}
+                primaryColor={itemColor.from}
               />
             );
           })}

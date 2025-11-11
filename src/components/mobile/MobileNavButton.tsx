@@ -2,7 +2,6 @@ import { memo } from "react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
-import type { NavColor } from "@/hooks/mobile/useMobileNavColors";
 
 interface MobileNavButtonProps {
   item: {
@@ -10,67 +9,86 @@ interface MobileNavButtonProps {
     url: string;
     icon: LucideIcon;
   };
-  index: number;
   isActive: boolean;
-  color: NavColor;
-  isDashboard?: boolean;
+  primaryColor: string;
 }
 
 /**
- * Botão de navegação mobile
- * Componente memoizado para evitar re-renders desnecessários
+ * Botão de navegação mobile - Redesign otimizado
+ * 
+ * Princípios:
+ * - Flat design (sem gradientes)
+ * - Apenas opacity e transform (GPU accelerated)
+ * - Feedback imediato (< 50ms)
+ * - Touch optimized (44px mínimo)
+ * - Zero hover effects
  */
 export const MobileNavButton = memo<MobileNavButtonProps>(
-  function MobileNavButton({ item, index, isActive, color, isDashboard = false }) {
+  function MobileNavButton({ item, isActive, primaryColor }) {
     const ItemIcon = item.icon;
-    const background = isActive ? `linear-gradient(135deg, ${color.from}, ${color.to})` : 'transparent';
-    const boxShadow = isActive ? `0 8px 25px -5px ${color.shadow}, 0 4px 10px -3px ${color.shadow}` : 'none';
-    const transform = isActive
-      ? (isDashboard ? 'translateY(-4px)' : 'translateY(-2px)')
-      : (isDashboard ? 'translateY(-4px)' : 'none');
-    const iconSizeClass = isDashboard ? "w-8 h-8" : "w-7 h-7";
 
     return (
       <NavLink
-        key={item.title}
         to={item.url}
         end={item.url === "/dashboard"}
-        className="mobile-nav-button flex flex-col items-center justify-center transition-[transform,opacity,background-color] duration-150 rounded-2xl group relative overflow-hidden h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] touch-manipulation active:scale-95"
+        className={cn(
+          // Layout e estrutura
+          "flex flex-col items-center justify-center gap-1",
+          "relative flex-1 min-w-0 h-16 px-2",
+          
+          // Touch optimization
+          "touch-manipulation select-none",
+          
+          // Transições otimizadas (apenas opacity e transform)
+          "transition-[opacity,transform] duration-75 ease-out",
+          
+          // Active state (feedback imediato)
+          "active:scale-95 active:opacity-70",
+          
+          // Estados visuais
+          isActive
+            ? "" // Sem classes extras quando ativo
+            : "opacity-100"
+        )}
         style={{
-          background,
-          boxShadow,
-          transform,
+          // Usar CSS inline para cores dinâmicas (melhor performance que classes)
+          WebkitTapHighlightColor: 'transparent',
         }}
         aria-label={item.title}
+        aria-current={isActive ? "page" : undefined}
       >
-        {/* Shimmer effect removido para melhor performance em mobile */}
+        {/* Indicador superior quando ativo */}
+        {isActive && (
+          <div 
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full"
+            style={{ backgroundColor: primaryColor }}
+          />
+        )}
 
-        <div
-          className={cn(
-            "flex items-center justify-center mb-1 relative z-10 transition-[background-color] duration-150 rounded-xl",
-            iconSizeClass,
-            isActive
-              ? "bg-white/20 shadow-inner"
-              : ""
-          )}
-        >
+        {/* Ícone */}
+        <div className="relative">
           <ItemIcon
             className={cn(
-              "w-4 h-4 transition-colors duration-150 flex-shrink-0",
+              "w-6 h-6 transition-colors duration-75",
               isActive
-                ? "text-white drop-shadow-md"
-                : "text-gray-500"
+                ? "text-current"
+                : "text-gray-500 dark:text-gray-400"
             )}
+            style={isActive ? { color: primaryColor } : undefined}
+            strokeWidth={isActive ? 2.5 : 2}
           />
         </div>
 
+        {/* Label */}
         <span
           className={cn(
-            "text-[9px] font-bold text-center leading-tight transition-colors duration-150 truncate max-w-[65px] relative z-10 tracking-wide",
+            "text-[10px] font-semibold text-center leading-tight truncate max-w-full",
+            "transition-colors duration-75",
             isActive
-              ? "text-white drop-shadow-md"
-              : "text-gray-600"
+              ? "text-current"
+              : "text-gray-600 dark:text-gray-400"
           )}
+          style={isActive ? { color: primaryColor } : undefined}
         >
           {item.title}
         </span>
