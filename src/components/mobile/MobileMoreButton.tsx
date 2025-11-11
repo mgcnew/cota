@@ -16,8 +16,15 @@ interface MobileMoreButtonProps {
 }
 
 /**
- * Botão "Mais" do menu mobile
- * Componente memoizado para evitar re-renders desnecessários
+ * Botão "Mais" do menu mobile OTIMIZADO
+ * 
+ * Estrutura Simplificada:
+ * - Perfil (1 item)
+ * - Navegação (2 itens): Fornecedores, Lista de Compras
+ * - Sistema (1 item): Configurações
+ * 
+ * Total: 4 itens (rápido e eficiente)
+ * Componente memoizado para evitar re-renders
  */
 export const MobileMoreButton = memo<MobileMoreButtonProps>(
   function MobileMoreButton({ remainingItems, onProfileClick, onNavigate, isActive }) {
@@ -84,15 +91,12 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
             </div>
           </DialogHeader>
 
-          <div className="p-4 space-y-4 bg-white dark:bg-gray-900">
-            {/* Seção Perfil */}
-            <div className="mb-4">
-              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                Perfil
-              </h3>
+          <div className="p-4 space-y-3 bg-white dark:bg-gray-900">
+            {/* Seção Perfil - Compacta */}
+            <div>
               <button
                 onClick={handleProfileClick}
-                className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 active:opacity-70 border border-gray-200 dark:border-gray-700 transition-opacity duration-75 touch-manipulation"
+                className="w-full flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 active:opacity-70 border border-primary/20 dark:border-primary/30 transition-opacity duration-75 touch-manipulation"
               >
                 <UserAvatar user={user} profile={profile} size="md" />
                 <div className="flex-1 text-left">
@@ -104,13 +108,13 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
               </button>
             </div>
 
-            {/* Seção Principal - Navegação */}
+            {/* Seção Navegação - Grid Compacto */}
             {remainingItems.length > 0 && (
-              <div className="mb-6">
+              <div>
                 <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                Navegação
-              </h3>
-                <div className="grid grid-cols-2 gap-3">
+                  Navegação
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
                   {remainingItems.map((item, index) => {
                     const itemActive = isActive(item.url);
                     const itemColor = colors[(index + 4) % colors.length];
@@ -140,7 +144,7 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
                         </div>
                         <span
                           className={cn(
-                            "text-[11px] font-semibold text-center",
+                            "text-[11px] font-semibold text-center leading-tight",
                             itemActive
                               ? "text-white"
                               : "text-gray-900 dark:text-gray-200"
@@ -155,25 +159,23 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
               </div>
             )}
 
-            {/* Seção Configurações */}
+            {/* Seção Sistema - Compacta */}
             <div>
               <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                 Sistema
               </h3>
-              <div className="space-y-2">
-                <button
-                  onClick={() => handleItemClick('/dashboard/configuracoes')}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 active:opacity-70 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 transition-opacity duration-75 touch-manipulation"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-gray-600 dark:bg-gray-700 flex items-center justify-center">
-                    <Settings className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <div className="font-semibold text-sm text-gray-900 dark:text-white">Configurações</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Preferências do app</div>
-                  </div>
-                </button>
-              </div>
+              <button
+                onClick={() => handleItemClick('/dashboard/configuracoes')}
+                className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 active:opacity-70 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 transition-opacity duration-75 touch-manipulation"
+              >
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-600 to-gray-700 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center shadow-sm">
+                  <Settings className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-semibold text-sm text-gray-900 dark:text-white">Configurações</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Preferências</div>
+                </div>
+              </button>
             </div>
           </div>
         </DialogContent>

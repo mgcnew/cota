@@ -14,6 +14,12 @@ export interface MenuItem {
  * - Filtragem de itens baseado na plataforma
  * - Ordenação de itens principais
  * - Separação entre itens principais e secundários
+ * 
+ * Mobile Menu Structure:
+ * - Primary (4 items): Pedidos, Cotações, Dashboard, Produtos
+ * - More Button (2 items): Fornecedores, Lista de Compras
+ * - Hidden: Relatórios, Extra, Contagem, Anotações
+ * - System: Configurações (hardcoded no MobileMoreButton)
  */
 export function useMobileMenuItems(
   allItems: MenuItem[],
@@ -28,9 +34,12 @@ export function useMobileMenuItems(
   ], []);
 
   // Itens ocultos no mobile (foco nas funções principais)
+  // Mantém apenas: Dashboard, Produtos, Fornecedores, Cotações, Pedidos, Lista de Compras
   const hiddenOnMobile = useMemo(() => [
-    "/dashboard/relatorios",
-    "/dashboard/extra"
+    "/dashboard/relatorios",        // Relatórios - Desktop only
+    "/dashboard/extra",             // Extra - Desktop only
+    "/dashboard/contagem-estoque",  // Contagem - Desktop only
+    "/dashboard/anotacoes"           // Anotações - Desktop only
   ], []);
 
   // Filtrar itens visíveis baseado na plataforma
