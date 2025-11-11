@@ -1,5 +1,4 @@
-import { memo, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { memo, useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MoreHorizontal, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -27,10 +26,22 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
     const { profile } = useUserProfile();
     const colors = useMobileNavColors();
 
-    const handleItemClick = (path: string) => {
+    // Handler otimizado: fecha dialog e aguarda animação antes de navegar
+    const handleItemClick = useCallback((path: string) => {
       setOpen(false);
-      onNavigate(path);
-    };
+      // Aguardar animação do dialog (75ms) antes de navegar
+      setTimeout(() => {
+        onNavigate(path);
+      }, 100);
+    }, [onNavigate]);
+
+    // Handler para perfil
+    const handleProfileClick = useCallback(() => {
+      setOpen(false);
+      setTimeout(() => {
+        onProfileClick();
+      }, 100);
+    }, [onProfileClick]);
 
     return (
       <Dialog open={open} onOpenChange={setOpen}>
@@ -80,11 +91,8 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
                 Perfil
               </h3>
               <button
-                onClick={() => {
-                  setOpen(false);
-                  onProfileClick();
-                }}
-                className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 active:opacity-70 border border-gray-200 dark:border-gray-700 transition-opacity duration-75"
+                onClick={handleProfileClick}
+                className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 active:opacity-70 border border-gray-200 dark:border-gray-700 transition-opacity duration-75 touch-manipulation"
               >
                 <UserAvatar user={user} profile={profile} size="md" />
                 <div className="flex-1 text-left">
@@ -109,23 +117,24 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
                     const ItemIcon = item.icon;
                     
                     return (
-                      <NavLink
+                      <button
                         key={item.title}
-                        to={item.url}
-                        end={item.url === "/dashboard"}
                         onClick={() => handleItemClick(item.url)}
                         className={cn(
-                          "flex flex-col items-center gap-2 p-3 rounded-xl transition-[opacity,transform] duration-75 active:scale-95 active:opacity-70",
+                          "flex flex-col items-center gap-2 p-3 rounded-xl transition-[opacity,transform] duration-75 active:scale-95 active:opacity-70 touch-manipulation",
                           itemActive
                             ? "bg-primary text-white shadow-sm"
                             : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
                         )}
                       >
                         <div
-                          className="w-10 h-10 rounded-lg flex items-center justify-center"
+                          className={cn(
+                            "w-10 h-10 rounded-lg flex items-center justify-center",
+                            itemActive ? "bg-white/20" : ""
+                          )}
                           style={!itemActive ? {
-                            background: `linear-gradient(135deg, ${itemColor.from}, ${itemColor.to})`
-                          } : { background: 'rgba(255,255,255,0.2)' }}
+                            backgroundColor: itemColor.from
+                          } : undefined}
                         >
                           <ItemIcon className="w-5 h-5 text-white" />
                         </div>
@@ -139,7 +148,7 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
                         >
                           {item.title}
                         </span>
-                      </NavLink>
+                      </button>
                     );
                   })}
                 </div>
@@ -154,7 +163,7 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
               <div className="space-y-2">
                 <button
                   onClick={() => handleItemClick('/dashboard/configuracoes')}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 active:opacity-70 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 transition-opacity duration-75"
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 active:opacity-70 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 transition-opacity duration-75 touch-manipulation"
                 >
                   <div className="w-10 h-10 rounded-lg bg-gray-600 dark:bg-gray-700 flex items-center justify-center">
                     <Settings className="w-5 h-5 text-white" />

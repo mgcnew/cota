@@ -174,7 +174,13 @@ export function AppSidebar() {
       </div>
 
       {/* Mobile Bottom Navigation - Redesign Otimizado */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/100 dark:bg-[#1C1F26]/100 backdrop-saturate-150 border-t border-gray-200 dark:border-gray-700 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.2)] supports-[backdrop-filter]:bg-white/95 supports-[backdrop-filter]:dark:bg-[#1C1F26]/95">
+      <div 
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 dark:border-gray-700 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.2)]"
+        style={{
+          backgroundColor: isDark ? '#1C1F26' : '#ffffff',
+          opacity: 1,
+        }}
+      >
         <div className="flex items-center justify-around">
           {/* Botões principais */}
           {primaryMobileItems.map((item, index) => {
