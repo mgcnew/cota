@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCompany } from "@/hooks/useCompany";
 
 export interface ShoppingListItem {
   id: string;
@@ -38,6 +39,7 @@ export interface UpdateShoppingListItemData {
 export function useShoppingList() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: company } = useCompany();
 
   // Buscar todos os itens da lista de compras
   const { data: items = [], isLoading } = useQuery({
@@ -60,10 +62,15 @@ export function useShoppingList() {
   // Adicionar item à lista
   const addItem = useMutation({
     mutationFn: async (itemData: AddShoppingListItemData) => {
+      if (!company?.id) {
+        throw new Error("Nenhuma empresa selecionada");
+      }
+
       const { data, error } = await supabase
         .from("shopping_list")
         .insert({
           ...itemData,
+          company_id: company.id,
           priority: itemData.priority || "medium",
         })
         .select()

@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useMemo, useState } from "react";
+import { useCompany } from "@/hooks/useCompany";
 
 export interface ShoppingListItemMobile {
   id: string;
@@ -33,6 +34,7 @@ const PAGE_SIZE = 15;
 export function useShoppingListMobile() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: company } = useCompany();
   const [search, setSearch] = useState("");
 
   // Infinite query para lista de compras
@@ -93,10 +95,15 @@ export function useShoppingListMobile() {
   // Adicionar item
   const addItem = useMutation({
     mutationFn: async (itemData: AddShoppingListItemData) => {
+      if (!company?.id) {
+        throw new Error("Nenhuma empresa selecionada");
+      }
+
       const { data, error } = await supabase
         .from("shopping_list")
         .insert({
           ...itemData,
+          company_id: company.id,
           priority: itemData.priority || "medium",
         })
         .select()

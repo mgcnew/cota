@@ -216,8 +216,8 @@ export default function ListaCompras() {
               isLoading={isLoading}
               selectedItems={selectedItems}
               onToggleSelection={toggleItemSelection}
-              onDelete={deleteItem.mutateAsync}
-              onUpdate={updateItem.mutateAsync}
+              onDelete={async (id) => { await deleteItem.mutateAsync(id); }}
+              onUpdate={async (data) => { await updateItem.mutateAsync(data); }}
               fetchNextPage={fetchNextPage}
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
@@ -230,8 +230,8 @@ export default function ListaCompras() {
             selectedItems={selectedItems}
             onToggleSelection={toggleItemSelection}
             onSelectAll={selectAll}
-            onDelete={deleteItem.mutateAsync}
-            onUpdate={updateItem.mutateAsync}
+            onDelete={async (id) => { await deleteItem.mutateAsync(id); }}
+            onUpdate={async (data) => { await updateItem.mutateAsync(data); }}
           />
         )}
 
