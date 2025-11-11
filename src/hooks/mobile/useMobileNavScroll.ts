@@ -1,57 +1,35 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 /**
- * Hook para gerenciar scroll e animações do menu mobile
+ * Hook simplificado para detecção de scroll no menu mobile
  * 
- * Funcionalidades:
- * - Detecção de scroll para aplicar efeitos visuais
- * - Reset de transformações ao mudar de página
- * - Otimizado para performance
+ * IMPORTANTE: Não manipula DOM diretamente para evitar conflitos
+ * Apenas detecta estado de scroll para uso opcional
  */
 export function useMobileNavScroll() {
-  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Detectar scroll e aplicar animações
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 20);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    // Usar passive listener para melhor performance
-    window.addEventListener('scroll', handleScroll, {
-      passive: true
-    });
+    // Passive listener para não bloquear scroll
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
-  // Reset de transformações ao mudar de página
-  useEffect(() => {
-    // Usar requestAnimationFrame para evitar layout thrashing
-    const resetTransforms = () => {
-      const mobileButtons = document.querySelectorAll('.mobile-nav-button');
-      mobileButtons.forEach(button => {
-        const element = button as HTMLElement;
-        element.style.transform = '';
-        element.style.scale = '';
-      });
-    };
-
-    // Delay mínimo para garantir que a navegação foi processada
-    const timeoutId = setTimeout(resetTransforms, 50);
-    
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [location.pathname]);
-
-  return {
-    isScrolled,
-  };
+  return { isScrolled };
 }
 

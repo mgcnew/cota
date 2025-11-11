@@ -25,7 +25,6 @@ import { ViewMode } from "@/types/pagination";
 import { cn } from "@/lib/utils";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { useMobile } from "@/contexts/MobileProvider";
-import { useOptimizedScroll } from "@/hooks/mobile/useOptimizedScroll";
 import { CotacoesStatsMemoized } from "@/components/cotacoes/CotacoesStatsMemoized";
 import { CotacoesVirtualList } from "@/components/cotacoes/CotacoesVirtualList";
 import { useToast } from "@/hooks/use-toast";
@@ -36,9 +35,6 @@ const DeleteQuoteDialog = lazy(() => import("@/components/forms/DeleteQuoteDialo
 const ViewQuoteDialog = lazy(() => import("@/components/forms/ViewQuoteDialog"));
 
 export default function Cotacoes() {
-  // Aplicar scroll otimizado para mobile
-  useOptimizedScroll();
-
   const [searchParams, setSearchParams] = useSearchParams();
   const {
     viewMode,

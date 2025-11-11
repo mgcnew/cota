@@ -3,7 +3,7 @@ import { useMobile } from '@/contexts/MobileProvider';
 
 /**
  * Hook para otimizar scroll em mobile
- * Aplica otimizações globais de performance
+ * Aplica otimizações globais de performance com cleanup adequado
  */
 export function useScrollOptimization() {
   const isMobile = useMobile();
@@ -11,49 +11,69 @@ export function useScrollOptimization() {
   useEffect(() => {
     if (!isMobile) return;
 
-    // Aplicar otimizações no body
+    // AbortController para gerenciar listeners
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    // Salvar estados originais
     const body = document.body;
     const html = document.documentElement;
+    const originalBodyOverscroll = body.style.overscrollBehaviorY;
+    const originalHtmlOverscroll = html.style.overscrollBehaviorY;
+    const originalWebkitScroll = (body.style as any).webkitOverflowScrolling;
 
-    // Prevenir bounce scroll
+    // Aplicar otimizações
     body.style.overscrollBehaviorY = 'contain';
     html.style.overscrollBehaviorY = 'contain';
-
-    // Scroll suave em iOS
     (body.style as any).webkitOverflowScrolling = 'touch';
 
-    // Otimizar touch events
-    const preventDefaultTouch = (e: TouchEvent) => {
-      // Permitir scroll vertical, prevenir horizontal
+    // Otimizar touch events - apenas prevenir multi-touch
+    const preventMultiTouch = (e: TouchEvent) => {
       if (e.touches.length > 1) {
         e.preventDefault();
       }
     };
 
-    // Adicionar listener passivo
-    document.addEventListener('touchmove', preventDefaultTouch, { passive: false });
+    // Adicionar listener com AbortController
+    document.addEventListener('touchmove', preventMultiTouch, { 
+      passive: false, 
+      signal 
+    });
 
-    // Detectar quando está scrollando para desabilitar seleção de texto
-    let scrollTimeout: NodeJS.Timeout;
+    // Detectar scroll para desabilitar seleção temporariamente
+    let scrollTimeout: NodeJS.Timeout | null = null;
     const handleScrollStart = () => {
       body.classList.add('scrolling');
-      clearTimeout(scrollTimeout);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         body.classList.remove('scrolling');
+        scrollTimeout = null;
       }, 150);
     };
 
-    window.addEventListener('scroll', handleScrollStart, { passive: true });
+    window.addEventListener('scroll', handleScrollStart, { 
+      passive: true, 
+      signal 
+    });
 
-    // Cleanup
+    // Cleanup completo
     return () => {
-      body.style.overscrollBehaviorY = '';
-      html.style.overscrollBehaviorY = '';
-      (body.style as any).webkitOverflowScrolling = '';
+      // Abortar todos os event listeners
+      abortController.abort();
+      
+      // Restaurar estilos originais
+      body.style.overscrollBehaviorY = originalBodyOverscroll;
+      html.style.overscrollBehaviorY = originalHtmlOverscroll;
+      (body.style as any).webkitOverflowScrolling = originalWebkitScroll;
+      
+      // Limpar classes
       body.classList.remove('scrolling');
-      document.removeEventListener('touchmove', preventDefaultTouch);
-      window.removeEventListener('scroll', handleScrollStart);
-      clearTimeout(scrollTimeout);
+      
+      // Limpar timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = null;
+      }
     };
   }, [isMobile]);
 }
