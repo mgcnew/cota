@@ -31,11 +31,19 @@ interface AddPedidoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdd: (pedido: any) => void;
+  preSelectedProducts?: Array<{
+    product_id: string;
+    product_name: string;
+    quantity: number;
+    unit: string;
+    estimated_price?: number;
+  }>;
 }
 export default function AddPedidoDialog({
   open,
   onOpenChange,
-  onAdd
+  onAdd,
+  preSelectedProducts = []
 }: AddPedidoDialogProps) {
   const isMobile = useMobile();
   const {
@@ -78,7 +86,6 @@ export default function AddPedidoDialog({
       loadLastPrices();
       // Resetar formulário ao abrir
       setActiveTab("produtos");
-      setItens([]);
       setFornecedor("");
       setDataEntrega("");
       setObservacoes("");
@@ -89,6 +96,21 @@ export default function AddPedidoDialog({
       setProductSearch("");
       setErrors({});
       
+      // Adicionar produtos pré-selecionados se fornecidos
+      if (preSelectedProducts.length > 0) {
+        const preSelectedItems: PedidoItem[] = preSelectedProducts.map(p => ({
+          produto: p.product_name,
+          quantidade: p.quantity,
+          unidade: p.unit,
+          valorUnitario: p.estimated_price || 0,
+        }));
+        setItens(preSelectedItems);
+        // Ir direto para a aba de fornecedor se já tem produtos
+        setActiveTab("fornecedor");
+      } else {
+        setItens([]);
+      }
+      
       // Focar no campo de busca após um pequeno delay
       setTimeout(() => {
         const searchInput = document.querySelector('[placeholder*="buscar produtos"]') as HTMLInputElement;
@@ -97,7 +119,7 @@ export default function AddPedidoDialog({
         }
       }, 300);
     }
-  }, [open]);
+  }, [open, preSelectedProducts]);
 
   // Prevenir scroll flash durante mudança de tab
   useEffect(() => {

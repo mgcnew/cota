@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,13 +11,14 @@ import { MobileFAB } from "@/components/mobile/MobileFAB";
 import { AddProductToListDialog } from "@/components/shopping-list/AddProductToListDialog";
 import { ShoppingListTable } from "@/components/shopping-list/ShoppingListTable";
 import { ShoppingListMobileList } from "@/components/shopping-list/ShoppingListMobileList";
-import { useNavigate } from "react-router-dom";
+import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
+import { usePedidos } from "@/hooks/usePedidos";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ListaCompras() {
   const isMobile = useMobile();
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const { refetch: refetchPedidos } = usePedidos();
   
   // Hooks condicionais
   const desktopList = useShoppingList();
@@ -53,6 +54,7 @@ export default function ListaCompras() {
   const updateItem = isMobile ? mobileUpdate : desktopUpdate;
   
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showOrderDialog, setShowOrderDialog] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -92,6 +94,19 @@ export default function ListaCompras() {
     }
   };
 
+  // Produtos selecionados para criar pedido
+  const preSelectedProducts = useMemo(() => {
+    return filteredItems
+      .filter(item => selectedItems.has(item.id))
+      .map(item => ({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        unit: item.unit,
+        estimated_price: item.estimated_price || 0,
+      }));
+  }, [filteredItems, selectedItems]);
+
   // Criar pedido com itens selecionados
   const handleCreateOrder = () => {
     if (selectedItems.size === 0) {
@@ -103,20 +118,8 @@ export default function ListaCompras() {
       return;
     }
 
-    const selectedProducts = filteredItems.filter(item => selectedItems.has(item.id));
-    
-    // Navegar para página de pedidos com produtos pré-selecionados
-    navigate("/dashboard/pedidos", { 
-      state: { 
-        preSelectedProducts: selectedProducts.map(item => ({
-          product_id: item.product_id,
-          product_name: item.product_name,
-          quantity: item.quantity,
-          unit: item.unit,
-          estimated_price: item.estimated_price || 0,
-        }))
-      } 
-    });
+    // Abrir modal de criar pedido
+    setShowOrderDialog(true);
   };
 
   // Deletar itens selecionados
@@ -247,6 +250,22 @@ export default function ListaCompras() {
         <AddProductToListDialog
           open={showAddDialog}
           onOpenChange={setShowAddDialog}
+        />
+
+        {/* Dialog Criar Pedido */}
+        <AddPedidoDialog
+          open={showOrderDialog}
+          onOpenChange={setShowOrderDialog}
+          onAdd={async () => {
+            setShowOrderDialog(false);
+            setSelectedItems(new Set());
+            await refetchPedidos();
+            toast({
+              title: "Pedido criado com sucesso",
+              description: "Os itens da lista foram adicionados ao pedido",
+            });
+          }}
+          preSelectedProducts={preSelectedProducts}
         />
       </div>
     </PageWrapper>
