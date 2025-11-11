@@ -174,7 +174,7 @@ export function AppSidebar() {
       </div>
 
       {/* Mobile Bottom Navigation - Premium */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#1C1F26]/95 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)] rounded-t-3xl">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1C1F26] border-t border-gray-200/60 dark:border-gray-700/40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)] rounded-t-3xl">
 
         <div className="flex items-center justify-around px-2 py-3 relative">
           {/* Botões principais personalizados */}

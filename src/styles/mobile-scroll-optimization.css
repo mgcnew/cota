@@ -74,9 +74,15 @@
     animation-play-state: paused !important;
   }
 
-  /* Otimizar hover states (não necessários em mobile) */
-  *:hover {
-    transition: none !important;
+  /* Remover hover effects completamente em mobile (touch devices) */
+  @media (hover: none) and (pointer: coarse) {
+    *:hover {
+      background: inherit !important;
+      transform: none !important;
+      box-shadow: inherit !important;
+      opacity: inherit !important;
+      scale: inherit !important;
+    }
   }
 
   /* Melhorar performance de shadows */
@@ -178,9 +184,39 @@
 
 /* Otimizar performance de backdrop filters (muito pesado em mobile) */
 @media (max-width: 768px) {
-  [class*="backdrop"] {
-    /* Remover backdrop-filter em mobile */
+  [class*="backdrop"],
+  [class*="blur"] {
+    /* Remover backdrop-filter e blur em mobile */
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Otimizações de touch para melhor responsividade */
+@media (max-width: 768px) {
+  /* Touch manipulation para todos os elementos interativos */
+  button,
+  a,
+  [role="button"],
+  [class*="clickable"],
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Prevenir delay de 300ms em cliques */
+  * {
+    touch-action: manipulation;
+  }
+
+  /* Otimizar active states para feedback visual imediato */
+  button:active,
+  a:active,
+  [role="button"]:active {
+    opacity: 0.7;
+    transition: opacity 0.05s ease-out;
   }
 }

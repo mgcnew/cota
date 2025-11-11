@@ -26,7 +26,7 @@ export const MobileNavButton = memo<MobileNavButtonProps>(
     const background = isActive ? `linear-gradient(135deg, ${color.from}, ${color.to})` : 'transparent';
     const boxShadow = isActive ? `0 8px 25px -5px ${color.shadow}, 0 4px 10px -3px ${color.shadow}` : 'none';
     const transform = isActive
-      ? (isDashboard ? 'translateY(-4px) scale(1.07)' : 'translateY(-2px) scale(1.05)')
+      ? (isDashboard ? 'translateY(-4px)' : 'translateY(-2px)')
       : (isDashboard ? 'translateY(-4px)' : 'none');
     const iconSizeClass = isDashboard ? "w-8 h-8" : "w-7 h-7";
 
@@ -35,7 +35,7 @@ export const MobileNavButton = memo<MobileNavButtonProps>(
         key={item.title}
         to={item.url}
         end={item.url === "/dashboard"}
-        className="mobile-nav-button flex flex-col items-center justify-center transition-all duration-200 rounded-2xl group relative overflow-hidden backdrop-blur-sm h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] touch-manipulation active:bg-gray-200"
+        className="mobile-nav-button flex flex-col items-center justify-center transition-[transform,opacity,background-color] duration-150 rounded-2xl group relative overflow-hidden h-14 px-2 py-1.5 min-w-0 flex-1 max-w-[75px] touch-manipulation active:scale-95"
         style={{
           background,
           boxShadow,
@@ -43,33 +43,33 @@ export const MobileNavButton = memo<MobileNavButtonProps>(
         }}
         aria-label={item.title}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full opacity-0 group-hover:opacity-100" />
+        {/* Shimmer effect removido para melhor performance em mobile */}
 
         <div
           className={cn(
-            "flex items-center justify-center mb-1 relative z-10 transition-all duration-300 rounded-xl",
+            "flex items-center justify-center mb-1 relative z-10 transition-[background-color] duration-150 rounded-xl",
             iconSizeClass,
             isActive
-              ? "bg-white/20 backdrop-blur-sm shadow-inner"
-              : "group-hover:bg-white/60 group-hover:shadow-md"
+              ? "bg-white/20 shadow-inner"
+              : ""
           )}
         >
           <ItemIcon
             className={cn(
-              "w-4 h-4 transition-all duration-200 flex-shrink-0",
+              "w-4 h-4 transition-colors duration-150 flex-shrink-0",
               isActive
                 ? "text-white drop-shadow-md"
-                : "text-gray-500 group-hover:text-gray-700"
+                : "text-gray-500"
             )}
           />
         </div>
 
         <span
           className={cn(
-            "text-[9px] font-bold text-center leading-tight transition-all duration-300 truncate max-w-[65px] relative z-10 tracking-wide",
+            "text-[9px] font-bold text-center leading-tight transition-colors duration-150 truncate max-w-[65px] relative z-10 tracking-wide",
             isActive
               ? "text-white drop-shadow-md"
-              : "text-gray-600 group-hover:text-gray-800 group-hover:font-extrabold"
+              : "text-gray-600"
           )}
         >
           {item.title}
