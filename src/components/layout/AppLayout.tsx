@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
 import { CompanySelector } from "./CompanySelector";
+import { MobileSearchDialog } from "@/components/mobile/MobileSearchDialog";
 
 // Mapeamento de títulos por rota
 const pageTitles: Record<string, string> = {
@@ -102,31 +103,40 @@ export function AppLayout() {
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700/20 to-transparent pointer-events-none"></div>
           </>
 
-          <div className="relative z-10 flex items-center justify-between h-full px-4 md:px-6 w-full max-w-full gap-3 md:gap-4 transition-opacity duration-150 md:transition-all md:duration-150">
-            {/* Global Search - Centralizada */}
-            <div className="flex-1 flex items-center justify-center max-w-2xl mx-auto min-w-0">
-              <div className="w-full max-w-xl">
+          <div className="relative z-10 flex items-center h-full px-3 sm:px-4 md:px-6 w-full max-w-full gap-2 sm:gap-3 md:gap-4 transition-opacity duration-150 md:transition-all md:duration-150">
+            {/* Mobile: Espaço para menu hamburger (esquerda) */}
+            <div className="md:hidden w-10" />
+            
+            {/* Global Search - Barra centralizada no desktop */}
+            <div className="hidden md:flex flex-1 items-center justify-center max-w-2xl mx-auto min-w-0">
+              <div className="w-full max-w-2xl">
                 <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <TooltipProvider delayDuration={300}>
-              <div className="flex items-center shrink-0 gap-1.5 md:gap-2 transition-all duration-150">
-                <CompanySelector />
-                
-                <Separator orientation="vertical" className="h-6 bg-gray-200 dark:bg-gray-700/50 hidden md:flex" />
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div>
-                      <ThemeToggle />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">
-                    <p>Alternar tema</p>
-                  </TooltipContent>
-                </Tooltip>
+            {/* Action Buttons - Sempre à direita */}
+            <div className="flex-1 md:flex-none flex items-center justify-end gap-1.5 md:gap-2">
+              <TooltipProvider delayDuration={300}>
+                <div className="flex items-center gap-1.5 md:gap-2 transition-all duration-150">
+                  <CompanySelector />
+                  
+                  <Separator orientation="vertical" className="h-6 bg-gray-200 dark:bg-gray-700/50 hidden md:flex" />
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <ThemeToggle />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Alternar tema</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  
+                  {/* Lupa no mobile, ao lado direito do theme toggle */}
+                  <div className="md:hidden">
+                    <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
+                  </div>
 
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -159,8 +169,9 @@ export function AppLayout() {
                     <p>Sair</p>
                   </TooltipContent>
                 </Tooltip>
-              </div>
-            </TooltipProvider>
+                </div>
+              </TooltipProvider>
+            </div>
           </div>
         </header>
 
@@ -183,7 +194,11 @@ export function AppLayout() {
       </div>
 
       {/* Global Search Dialog */}
-      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      {isMobile ? (
+        <MobileSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      ) : (
+        <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      )}
     </div>
   );
 }

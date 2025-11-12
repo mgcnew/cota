@@ -202,49 +202,13 @@
 }
 
 /* ============================================
-   DIALOG OPTIMIZATION (Botão Mais)
+   DIALOG OPTIMIZATION - REMOVIDO
    ============================================ */
 
-@media (max-width: 768px) {
-  /* Otimizar Dialog para evitar travamentos */
-  [role="dialog"] {
-    /* Isolar rendering */
-    contain: layout style paint;
-    
-    /* GPU acceleration */
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    
-    /* Will-change apenas durante animação */
-    will-change: opacity, transform;
-  }
-  
-  /* Remover will-change após abertura */
-  [role="dialog"][data-state="open"] {
-    will-change: auto;
-  }
-  
-  /* Overlay do dialog */
-  [role="dialog"] ~ [data-radix-dialog-overlay] {
-    /* Aceleração de hardware */
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    
-    /* Transição apenas de opacity */
-    transition-property: opacity;
-    transition-duration: 75ms;
-  }
-  
-  /* Conteúdo do dialog */
-  [role="dialog"] [data-radix-dialog-content] {
-    /* Prevenir scroll durante animação */
-    overscroll-behavior: contain;
-    
-    /* Touch optimization */
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-}
+/* NOTA: Regras específicas movidas para mobile-more-button.css
+   para evitar conflitos com outros dialogs.
+   Usar classe .mobile-more-dialog para estilos específicos.
+*/
 
 /* ============================================
    PERFORMANCE MONITORING

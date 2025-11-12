@@ -11,8 +11,7 @@ import { useMobileMenu } from "@/hooks/mobile/useMobileMenu";
 import { useMobileMenuItems } from "@/hooks/mobile/useMobileMenuItems";
 import { useMobileNavScroll } from "@/hooks/mobile/useMobileNavScroll";
 import { useMobileNavColors } from "@/hooks/mobile/useMobileNavColors";
-import { MobileNavButton } from "@/components/mobile/MobileNavButton";
-import { MobileMoreButton } from "@/components/mobile/MobileMoreButton";
+import { MobileHamburgerMenu } from "@/components/mobile/MobileHamburgerMenu";
 import { 
   LayoutDashboard,
   Package, 
@@ -85,10 +84,9 @@ export function AppSidebar() {
     isActive,
     profileDialogOpen,
     handleProfileDialogOpen,
-    handleNavigateAndClose,
   } = useMobileMenu();
   
-  const { visibleMenuItems, primaryMobileItems, remainingMobileItems } = useMobileMenuItems(
+  const { visibleMenuItems } = useMobileMenuItems(
     menuItems,
     isMobile
   );
@@ -97,10 +95,6 @@ export function AppSidebar() {
   
   const colors = useMobileNavColors();
   
-  // Handler para navegação
-  const handleNavigate = (path: string) => {
-    navigate(path);
-  };
   return <>
       {/* Desktop Sidebar - Premium Final */}
       <div className="hidden md:flex fixed z-50 w-20 left-1 top-1 bottom-1">
@@ -173,39 +167,12 @@ export function AppSidebar() {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation - Redesign Otimizado */}
-      <div 
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 dark:border-gray-700 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.2)]"
-        style={{
-          backgroundColor: isDark ? '#1C1F26' : '#ffffff',
-          opacity: '1 !important' as any,
-        }}
-      >
-        <div className="flex items-center justify-around">
-          {/* Botões principais */}
-          {primaryMobileItems.map((item, index) => {
-            const itemActive = isActive(item.url);
-            const itemColor = colors[index % colors.length];
-            
-            return (
-              <MobileNavButton
-                key={item.title}
-                item={item}
-                isActive={itemActive}
-                primaryColor={itemColor.from}
-              />
-            );
-          })}
-
-          {/* Botão Mais */}
-          <MobileMoreButton
-            remainingItems={remainingMobileItems}
-            onProfileClick={() => handleProfileDialogOpen(true)}
-            onNavigate={handleNavigate}
-            isActive={isActive}
-          />
-        </div>
-      </div>
+      {/* Mobile Hamburger Menu */}
+      <MobileHamburgerMenu
+        menuItems={visibleMenuItems}
+        isActive={isActive}
+        onProfileClick={() => handleProfileDialogOpen(true)}
+      />
 
       {/* Dialog de Perfil */}
       <UserProfileDialog

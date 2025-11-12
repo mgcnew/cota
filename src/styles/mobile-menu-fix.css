@@ -33,43 +33,19 @@
 }
 
 /* ============================================
-   CENTRALIZAR DIALOG EM MOBILE
+   CENTRALIZAR DIALOG EM MOBILE - REMOVIDO
    ============================================ */
 
-@media (max-width: 768px) {
-  /* Forçar centralização do dialog */
-  [role="dialog"] {
-    position: fixed !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    margin: 0 !important;
-  }
-
-  /* Garantir que o dialog não saia da tela */
-  [role="dialog"] {
-    max-width: 90vw !important;
-    max-height: 90vh !important;
-    overflow-y: auto !important;
-  }
-
-  /* Overlay do dialog */
-  [data-radix-dialog-overlay] {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 50 !important;
-  }
-}
+/* NOTA: Regras específicas movidas para mobile-more-button.css
+   para evitar conflitos com outros dialogs.
+   Usar classe .mobile-more-dialog para estilos específicos.
+*/
 
 /* ============================================
-   PREVENIR SCROLL DURANTE DIALOG
+   PREVENIR SCROLL DURANTE DIALOG - REMOVIDO
    ============================================ */
 
-@media (max-width: 768px) {
-  /* Quando dialog está aberto, prevenir scroll do body */
-  body:has([data-state="open"][role="dialog"]) {
-    overflow: hidden !important;
-    position: fixed !important;
-    width: 100% !important;
-  }
-}
+/* NOTA: Regra específica movida para mobile-more-button.css
+   para evitar conflitos com outros dialogs.
+   Usar seletor .mobile-more-dialog para estilos específicos.
+*/

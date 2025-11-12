@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Package, Building2, FileText, ShoppingCart } from "lucide-react";
+import { Search, Package, Building2, FileText, ShoppingCart, X } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -21,6 +21,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { usePedidos } from "@/hooks/usePedidos";
+import { useMobile } from "@/contexts/MobileProvider";
 
 interface GlobalSearchProps {
   open: boolean;
@@ -29,6 +30,7 @@ interface GlobalSearchProps {
 
 export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const navigate = useNavigate();
+  const isMobile = useMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
 
@@ -38,7 +40,10 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const { cotacoes } = useCotacoes();
   const { pedidos } = usePedidos();
 
+  // Atalho de teclado apenas em desktop
   useEffect(() => {
+    if (isMobile) return;
+
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -48,7 +53,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [open, onOpenChange]);
+  }, [open, onOpenChange, isMobile]);
 
   const filteredResults = useMemo(() => {
     const query = debouncedSearch.trim();
@@ -112,30 +117,30 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
     switch (type) {
       case "produtos":
         if (id) {
-          navigate(`/produtos?id=${id}`);
+          navigate(`/dashboard/produtos?id=${id}`);
         } else {
-          navigate("/produtos");
+          navigate("/dashboard/produtos");
         }
         break;
       case "fornecedores":
         if (id) {
-          navigate(`/fornecedores?id=${id}`);
+          navigate(`/dashboard/fornecedores?id=${id}`);
         } else {
-          navigate("/fornecedores");
+          navigate("/dashboard/fornecedores");
         }
         break;
       case "cotacoes":
         if (id) {
-          navigate(`/cotacoes?id=${id}`);
+          navigate(`/dashboard/cotacoes?id=${id}`);
         } else {
-          navigate("/cotacoes");
+          navigate("/dashboard/cotacoes");
         }
         break;
       case "pedidos":
         if (id) {
-          navigate(`/pedidos?id=${id}`);
+          navigate(`/dashboard/pedidos?id=${id}`);
         } else {
-          navigate("/pedidos");
+          navigate("/dashboard/pedidos");
         }
         break;
     }
@@ -162,34 +167,49 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
       onOpenChange={onOpenChange}
     >
       <div className="relative h-full flex flex-col overflow-hidden">
-        {/* Header melhorado */}
+        {/* Header otimizado para mobile */}
         <div className="relative border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
-          <div className="relative flex items-center px-3 sm:px-4 py-3 sm:py-3.5">
-            <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20 mr-2 sm:mr-3 shrink-0">
+          <div className="relative flex items-center px-3 sm:px-4 py-3 sm:py-3.5 gap-2 sm:gap-3">
+            {/* Ícone de busca */}
+            <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20 shrink-0">
               <Search className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
+
+            {/* Input de busca */}
             <CommandInput 
-              placeholder="Buscar cotações, produtos, fornecedores..." 
+              placeholder={isMobile ? "Buscar..." : "Buscar cotações, produtos, fornecedores..."} 
               value={searchQuery}
-              onValueChange={(value) => {
-                setSearchQuery(value);
-              }}
+              onValueChange={setSearchQuery}
               className="flex-1 border-0 bg-transparent text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:ring-0 focus:outline-none h-auto"
             />
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1 ml-2 sm:ml-3 shrink-0">
-                    <kbd className="hidden sm:inline-flex h-6 px-2 select-none items-center justify-center rounded border border-input bg-muted font-mono text-[10px] font-medium text-muted-foreground shadow-sm">
-                ESC
-              </kbd>
-            </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p className="text-xs">Fechar busca</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+
+            {/* Botão de limpar (mobile) ou ESC (desktop) */}
+            {searchQuery && isMobile ? (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="p-1.5 rounded-lg hover:bg-accent transition-colors shrink-0 touch-manipulation"
+                aria-label="Limpar busca"
+              >
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
+            ) : (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <kbd className="hidden sm:inline-flex h-6 px-2 select-none items-center justify-center rounded border border-input bg-muted font-mono text-[10px] font-medium text-muted-foreground shadow-sm">
+                        ESC
+                      </kbd>
+                    </div>
+                  </TooltipTrigger>
+                  {!isMobile && (
+                    <TooltipContent side="bottom">
+                      <p className="text-xs">Fechar busca</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         </div>
         <ScrollArea className="flex-1 min-h-0">
@@ -378,29 +398,44 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 }
 
 export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
+  const isMobile = useMobile();
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-      <Button
+          <Button
             variant="outline"
-        onClick={onClick}
-            className="relative w-full justify-start text-sm h-10 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border border-input hover:bg-accent hover:text-accent-foreground transition-all duration-200"
+            onClick={onClick}
+            className={cn(
+              "relative justify-start transition-all duration-200 active:scale-95 md:active:scale-100 touch-manipulation",
+              // Mobile: apenas ícone
+              isMobile && "w-10 h-10 p-0 rounded-lg",
+              // Tablet+: barra completa
+              !isMobile && "w-full text-sm h-10 px-4 justify-start",
+              "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+              "border border-input hover:bg-accent hover:text-accent-foreground"
+            )}
           >
-            <div className="flex items-center w-full gap-3">
-              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <span className="hidden md:inline-flex text-muted-foreground font-normal flex-1 text-left">
-              Buscar cotações, produtos, fornecedores...
-            </span>
-              <span className="md:hidden text-muted-foreground font-normal flex-1 text-left">
-              Buscar...
-            </span>
-        </div>
-      </Button>
+            {isMobile ? (
+              // Mobile: apenas lupa
+              <Search className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              // Desktop: barra completa
+              <div className="flex items-center w-full gap-3">
+                <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="text-muted-foreground font-normal flex-1 text-left">
+                  Buscar cotações, produtos, fornecedores...
+                </span>
+              </div>
+            )}
+          </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom">
-          <p className="text-xs">Pressione <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">⌘</kbd> + <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">K</kbd> para abrir</p>
-        </TooltipContent>
+        {!isMobile && (
+          <TooltipContent side="bottom">
+            <p className="text-xs">Pressione <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">⌘</kbd> + <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">K</kbd> para abrir</p>
+          </TooltipContent>
+        )}
       </Tooltip>
     </TooltipProvider>
   );

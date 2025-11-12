@@ -1,4 +1,4 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useRef, useCallback, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MoreHorizontal, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,33 +25,56 @@ interface MobileMoreButtonProps {
  * 
  * Total: 4 itens (rápido e eficiente)
  * Componente memoizado para evitar re-renders
+ * 
+ * CORREÇÕES IMPLEMENTADAS:
+ * - Dialog gerencia seu próprio estado (sem useState conflitante)
+ * - useRef para gerenciar timeouts com cleanup
+ * - Sem closure incorreta em setTimeout
+ * - Classe específica para CSS (mobile-more-dialog)
  */
 export const MobileMoreButton = memo<MobileMoreButtonProps>(
   function MobileMoreButton({ remainingItems, onProfileClick, onNavigate, isActive }) {
-    const [open, setOpen] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const { user } = useAuth();
     const { profile } = useUserProfile();
     const colors = useMobileNavColors();
 
+    // Limpar timeout ao desmontar
+    useEffect(() => {
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      };
+    }, []);
+
     // Handler otimizado: fecha dialog e aguarda animação antes de navegar
     const handleItemClick = useCallback((path: string) => {
-      setOpen(false);
+      // Limpar timeout anterior se existir
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
       // Aguardar animação do dialog (75ms) antes de navegar
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         onNavigate(path);
       }, 100);
     }, [onNavigate]);
 
     // Handler para perfil
     const handleProfileClick = useCallback(() => {
-      setOpen(false);
-      setTimeout(() => {
+      // Limpar timeout anterior se existir
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(() => {
         onProfileClick();
       }, 100);
     }, [onProfileClick]);
 
     return (
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog>
         <DialogTrigger asChild>
           <button 
             className={cn(
@@ -79,7 +102,7 @@ export const MobileMoreButton = memo<MobileMoreButtonProps>(
           </button>
         </DialogTrigger>
 
-        <DialogContent className="w-[90vw] max-w-sm p-0 border shadow-lg rounded-2xl bg-white dark:bg-gray-900">
+        <DialogContent className="mobile-more-dialog w-[90vw] max-w-sm p-0 border shadow-lg rounded-2xl bg-white dark:bg-gray-900">
           <DialogHeader className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
