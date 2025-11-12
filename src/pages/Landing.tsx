@@ -2,24 +2,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Check, 
-  ArrowRight, 
-  Zap, 
-  Shield, 
-  BarChart3, 
-  Users, 
-  Package,
-  Building2,
-  TrendingUp,
-  Clock,
-  Star,
-  FileText
-} from "lucide-react";
-
+import { Check, ArrowRight, Zap, Shield, BarChart3, Users, Package, Building2, TrendingUp, Clock, Star, FileText } from "lucide-react";
 export default function Landing() {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+  return <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -46,7 +31,7 @@ export default function Landing() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 md:py-32">
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          <Badge className="mb-4">✨ Teste grátis por 14 dias</Badge>
+          
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
             Gerencie suas cotações de forma
             <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent"> inteligente</span>
@@ -317,7 +302,5 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 }
-
