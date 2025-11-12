@@ -126,12 +126,16 @@ export function useProductsMobile(options: UseProductsMobileOptions = {}) {
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 0,
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 1 * 60 * 1000, // 1 minuto (reduzido para dados mais frescos)
+    gcTime: 5 * 60 * 1000, // 5 minutos
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
     placeholderData: (previousData) => previousData,
+    // Otimizações de rede
+    networkMode: 'online',
+    retry: 1, // Apenas 1 retry para falhar rápido
+    retryDelay: 500, // 500ms entre retries
   });
 
   // Flatten products de todas as páginas com deduplicação

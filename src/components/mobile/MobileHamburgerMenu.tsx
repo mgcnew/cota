@@ -1,7 +1,7 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { UserAvatar } from "@/components/profile/UserAvatar";
@@ -16,9 +16,15 @@ interface MobileHamburgerMenuProps {
 export const MobileHamburgerMenu = memo<MobileHamburgerMenuProps>(
   function MobileHamburgerMenu({ menuItems, isActive, onProfileClick }) {
     const navigate = useNavigate();
+    const location = useLocation();
     const { user } = useAuth();
     const { profile } = useUserProfile();
     const [isOpen, setIsOpen] = useState(false);
+
+    // Fechar menu quando a rota mudar
+    useEffect(() => {
+      setIsOpen(false);
+    }, [location.pathname]);
 
     const handleNavigate = useCallback((path: string) => {
       navigate(path);

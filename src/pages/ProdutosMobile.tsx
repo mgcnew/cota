@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, lazy, Suspense } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProductsMobile } from "@/hooks/mobile/useProductsMobile";
@@ -10,12 +10,10 @@ import { MobileProductsFilters } from "@/components/mobile/products/MobileProduc
 import { MobileProductsFAB } from "@/components/mobile/products/MobileProductsFAB";
 import { ProductsEmptyState } from "@/components/mobile/products/ProductsEmptyState";
 import { ProductsLoadingSkeleton } from "@/components/mobile/products/ProductsLoadingSkeleton";
+import { AddProductDialog } from "@/components/forms/AddProductDialog";
+import { EditProductDialog } from "@/components/forms/EditProductDialog";
+import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
 import type { ProductMobile } from "@/hooks/mobile/useProductsMobile";
-
-// Lazy load dialogs
-const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
-const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
-const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
 
 /**
  * Página de Produtos Mobile v2 - Ultra Otimizada
@@ -146,7 +144,7 @@ export default function ProdutosMobile() {
           <div className="flex-1 overflow-y-auto">
             {/* Loading inicial */}
             {isLoading && products.length === 0 && (
-              <ProductsLoadingSkeleton count={8} />
+              <ProductsLoadingSkeleton count={3} />
             )}
 
             {/* Empty states */}
@@ -179,67 +177,62 @@ export default function ProdutosMobile() {
             selected={selectedCategory}
             onSelect={handleCategorySelect}
           />
-
-          <MobileProductsFAB 
-            onClick={handleAdd} 
-            isEmpty={products.length === 0 && !isLoading}
-            tooltip="Adicionar primeiro produto"
-          />
         </div>
       </PageWrapper>
 
-      {/* Dialogs com lazy loading */}
+      {/* FAB fora do PageWrapper para ficar sempre visível */}
+      <MobileProductsFAB 
+        onClick={handleAdd} 
+        isEmpty={products.length === 0 && !isLoading}
+        tooltip="Adicionar primeiro produto"
+      />
+
+      {/* Dialogs */}
       {addDialogOpen && (
-        <Suspense fallback={null}>
-          <AddProductDialog
-            open={addDialogOpen}
-            onOpenChange={(open) => {
-              if (!open) {
-                setAddDialogOpen(false);
-              }
-            }}
-            onProductAdded={() => {
+        <AddProductDialog
+          open={addDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) {
               setAddDialogOpen(false);
-              refetch();
-            }}
-            onCategoryAdded={() => {}}
-          />
-        </Suspense>
+            }
+          }}
+          onProductAdded={() => {
+            setAddDialogOpen(false);
+            refetch();
+          }}
+          onCategoryAdded={() => {}}
+        />
       )}
 
       {(editingProductId || editingProduct) && (
-        <Suspense fallback={null}>
-          <EditProductDialog
-            product={editingProduct as any}
-            productId={editingProductId}
-            open={!!(editingProductId || editingProduct)}
-            onOpenChange={(open) => {
-              if (!open) {
-                // Fechar modal de forma síncrona (sem startTransition)
-                setEditingProduct(null);
-                setEditingProductId(null);
-              }
-            }}
-            onProductUpdated={handleProductUpdated}
-            onCategoryAdded={() => {}}
-            categories={categories}
-          />
-        </Suspense>
+        <EditProductDialog
+          product={editingProduct as any}
+          productId={editingProductId}
+          open={!!(editingProductId || editingProduct)}
+          onOpenChange={(open) => {
+            if (!open) {
+              // Fechar modal de forma síncrona (sem startTransition)
+              setEditingProduct(null);
+              setEditingProductId(null);
+            }
+          }}
+          onProductUpdated={handleProductUpdated}
+          onCategoryAdded={() => {}}
+          categories={categories}
+        />
       )}
 
       {deletingProduct && (
-        <Suspense fallback={null}>
-          <DeleteProductDialog
-            product={deletingProduct as any}
-            open={!!deletingProduct}
-            onOpenChange={(open) => {
-              if (!open) {
-                setDeletingProduct(null);
-              }
-            }}
-            onProductDeleted={handleProductDeleted}
-          />
-        </Suspense>
+        <DeleteProductDialog
+          product={deletingProduct as any}
+          open={!!deletingProduct}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeletingProduct(null);
+            }
+          }}
+          onProductDeleted={handleProductDeleted}
+        />
       )}
     </>
   );

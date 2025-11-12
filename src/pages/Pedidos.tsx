@@ -27,6 +27,7 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { MobileFAB } from "@/components/mobile/MobileFAB";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
 import { OrdersMobileList } from "@/components/mobile/orders/OrdersMobileList";
+import { OrderDetailModal } from "@/components/mobile/orders/OrderDetailModal";
 
 // Lazy load desktop components
 const DesktopStatsCards = lazy(() => import("@/components/pedidos/DesktopStatsCards"));
@@ -789,12 +790,22 @@ export default function Pedidos() {
       <AddPedidoDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={handleAddPedido} />
       
       {selectedPedido && <>
-          <PedidoDialog 
-            open={pedidoDialogOpen} 
-            onOpenChange={setPedidoDialogOpen} 
-            pedido={selectedPedido} 
-            onEdit={handleEditPedido} 
-          />
+          {/* Mobile: OrderDetailModal otimizado | Desktop: PedidoDialog */}
+          {isMobile ? (
+            <OrderDetailModal
+              open={pedidoDialogOpen}
+              onOpenChange={setPedidoDialogOpen}
+              pedido={selectedPedido}
+              onEdit={handleEditPedido}
+            />
+          ) : (
+            <PedidoDialog 
+              open={pedidoDialogOpen} 
+              onOpenChange={setPedidoDialogOpen} 
+              pedido={selectedPedido} 
+              onEdit={handleEditPedido} 
+            />
+          )}
           
           <DeletePedidoDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} pedido={selectedPedido} onDelete={handleDeletePedido} />
         </>}

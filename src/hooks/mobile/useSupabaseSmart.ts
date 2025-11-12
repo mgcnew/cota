@@ -6,7 +6,7 @@ import { useMobileQueryConfig } from './useMobileQueryConfig';
  * Configurações inteligentes para queries Supabase baseadas no dispositivo
  * 
  * Mobile:
- * - Limit reduzido (10 registros)
+ * - Limit reduzido (5 registros) - Otimizado para LCP
  * - Campos essenciais apenas
  * - Cache agressivo (5min)
  * - Sem JOINs pesados
@@ -23,7 +23,7 @@ export function useSupabaseSmart() {
 
   return useMemo(() => ({
     // Configuração de paginação
-    getLimit: () => (isMobile ? 10 : 50),
+    getLimit: () => (isMobile ? 5 : 50), // Reduzido de 10 para 5 no mobile para LCP mais rápido
     
     // Se deve usar JOINs
     shouldUseJoins: () => !isMobile,
@@ -39,7 +39,7 @@ export function useSupabaseSmart() {
     
     // Range para paginação
     getRange: (page: number, pageSize?: number) => {
-      const limit = pageSize || (isMobile ? 10 : 50);
+      const limit = pageSize || (isMobile ? 5 : 50);
       const from = (page - 1) * limit;
       const to = from + limit - 1;
       return { from, to, limit };

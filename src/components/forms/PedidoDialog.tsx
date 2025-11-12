@@ -345,7 +345,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   // Conteúdo do modal (reutilizado em mobile e desktop)
   const modalContent = (
     <>
-      <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
+      <div className={`flex-shrink-0 ${isMobile ? 'px-4 pt-3 pb-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} rounded-lg bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0`}>
@@ -684,7 +684,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         ) : (
           // Modo de Visualização
           <ScrollArea className="flex-1 bg-gray-50 dark:bg-gray-900 min-h-0 h-full">
-            <div className={`${isMobile ? 'p-4 space-y-4' : 'p-4 sm:p-6 space-y-6'} pb-8`}>
+            <div className={`${isMobile ? 'px-4 pt-2 pb-6 space-y-4' : 'p-4 sm:p-6 space-y-6'} pb-8`}>
               {/* Detalhes Principais */}
               <div className={`bg-white dark:bg-gray-800 rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-gray-200 dark:border-gray-700`}>
                 <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-5'} font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-200 dark:border-gray-700`}>
@@ -834,7 +834,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         )}
       </div>
 
-      <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-3 sm:px-4 py-2'} border-t border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800`}>
+      <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4 pb-safe' : 'px-3 sm:px-4 py-2'} border-t border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800`}>
         <div className={`flex items-center ${isMobile ? 'flex-col gap-3' : 'justify-between w-full gap-2'}`}>
           <div className={`flex gap-2 ${isMobile ? 'w-full' : ''}`}>
             {isEditMode && (
@@ -885,10 +885,23 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   if (isMobile) {
     return (
       <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+        <SheetContent 
+          side="bottom" 
+          className="h-[95vh] max-h-[95vh] p-0 flex flex-col bg-white dark:bg-gray-900 rounded-t-2xl"
+          style={{
+            contain: 'layout style paint',
+            transform: 'translateZ(0)',
+          }}
+        >
           <SheetHeader className="sr-only">
             <SheetTitle>{isEditMode ? `Editar Pedido` : `Pedido`}</SheetTitle>
           </SheetHeader>
+          
+          {/* Handle visual para arrastar */}
+          <div className="flex justify-center pt-3 pb-2">
+            <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full" />
+          </div>
+          
           {modalContent}
         </SheetContent>
       </Sheet>
