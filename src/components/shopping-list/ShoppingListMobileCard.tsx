@@ -11,6 +11,7 @@ interface ShoppingListMobileCardProps {
   isSelected: boolean;
   onToggleSelection: (id: string) => void;
   onDelete: (id: string) => Promise<void>;
+  onEdit?: (item: ShoppingListItemMobile) => void;
 }
 
 const priorityConfig = {
@@ -25,6 +26,7 @@ export const ShoppingListMobileCard = memo(function ShoppingListMobileCard({
   isSelected,
   onToggleSelection,
   onDelete,
+  onEdit,
 }: ShoppingListMobileCardProps) {
   const config = priorityConfig[item.priority];
 
@@ -89,6 +91,7 @@ export const ShoppingListMobileCard = memo(function ShoppingListMobileCard({
                 size="sm"
                 variant="outline"
                 className="flex-1 h-8 text-xs"
+                onClick={() => onEdit?.(item)}
               >
                 <Edit className="h-3 w-3 mr-1" />
                 Editar

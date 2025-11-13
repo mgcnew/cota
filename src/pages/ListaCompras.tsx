@@ -9,6 +9,7 @@ import { useShoppingListMobile } from "@/hooks/mobile/useShoppingListMobile";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
 import { AddProductToListDialog } from "@/components/shopping-list/AddProductToListDialog";
+import { EditShoppingListItemDialog } from "@/components/shopping-list/EditShoppingListItemDialog";
 import { ShoppingListTable } from "@/components/shopping-list/ShoppingListTable";
 import { ShoppingListMobileList } from "@/components/shopping-list/ShoppingListMobileList";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
@@ -57,6 +58,7 @@ export default function ListaCompras() {
   const [showOrderDialog, setShowOrderDialog] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingItem, setEditingItem] = useState<any>(null);
 
   // Atualizar busca mobile
   const handleSearchChange = (value: string) => {
@@ -137,22 +139,22 @@ export default function ListaCompras() {
   return (
     <PageWrapper>
       <div className="page-container">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 flex-shrink-0">
-                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+        {/* Desktop Header */}
+        {!isMobile && (
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 flex-shrink-0">
+                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold">Lista de Compras</h1>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Organize produtos para comprar no futuro
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold">Lista de Compras</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Organize produtos para comprar no futuro
-                </p>
-              </div>
-            </div>
 
-            {!isMobile && (
               <div className="flex items-center gap-3">
                 <Input
                   placeholder="Buscar produtos..."
@@ -168,20 +170,22 @@ export default function ListaCompras() {
                   Adicionar Produto
                 </Button>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Busca Mobile */}
+        {/* Mobile: Search with integrated action button */}
         {isMobile && (
-          <div className="mb-4">
-            <Input
-              placeholder="Buscar produtos..."
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="h-11 text-base"
-            />
-          </div>
+          <MobileSearchWithAction
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onActionClick={() => setShowAddDialog(true)}
+            placeholder="Buscar produtos..."
+            actionIcon={<Plus className="h-4 w-4" />}
+            actionLabel="Adicionar"
+            resultsCount={filteredItems.length}
+            isSearching={isLoading}
+          />
         )}
 
         {/* Ações em massa */}
@@ -221,6 +225,7 @@ export default function ListaCompras() {
               onToggleSelection={toggleItemSelection}
               onDelete={async (id) => { await deleteItem.mutateAsync(id); }}
               onUpdate={async (data) => { await updateItem.mutateAsync(data); }}
+              onEdit={(item) => setEditingItem(item)}
               fetchNextPage={fetchNextPage}
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
@@ -242,6 +247,17 @@ export default function ListaCompras() {
         <AddProductToListDialog
           open={showAddDialog}
           onOpenChange={setShowAddDialog}
+        />
+
+        {/* Dialog Editar Item */}
+        <EditShoppingListItemDialog
+          item={editingItem}
+          open={!!editingItem}
+          onOpenChange={(open) => !open && setEditingItem(null)}
+          onUpdate={async (data) => {
+            await updateItem.mutateAsync(data);
+            setEditingItem(null);
+          }}
         />
 
         {/* Dialog Criar Pedido */}

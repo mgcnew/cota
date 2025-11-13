@@ -10,6 +10,7 @@ interface ShoppingListMobileListProps {
   onToggleSelection: (id: string) => void;
   onDelete: (id: string) => Promise<void>;
   onUpdate: (data: any) => Promise<void>;
+  onEdit?: (item: ShoppingListItemMobile) => void;
   fetchNextPage?: () => void;
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
@@ -22,6 +23,7 @@ export function ShoppingListMobileList({
   onToggleSelection,
   onDelete,
   onUpdate,
+  onEdit,
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
@@ -83,6 +85,7 @@ export function ShoppingListMobileList({
           isSelected={selectedItems.has(item.id)}
           onToggleSelection={onToggleSelection}
           onDelete={onDelete}
+          onEdit={onEdit}
         />
       ))}
 
