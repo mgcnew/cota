@@ -7,7 +7,7 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { useShoppingList } from "@/hooks/useShoppingList";
 import { useShoppingListMobile } from "@/hooks/mobile/useShoppingListMobile";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { MobileFAB } from "@/components/mobile/MobileFAB";
+import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
 import { AddProductToListDialog } from "@/components/shopping-list/AddProductToListDialog";
 import { ShoppingListTable } from "@/components/shopping-list/ShoppingListTable";
 import { ShoppingListMobileList } from "@/components/shopping-list/ShoppingListMobileList";
@@ -235,14 +235,6 @@ export default function ListaCompras() {
             onSelectAll={selectAll}
             onDelete={async (id) => { await deleteItem.mutateAsync(id); }}
             onUpdate={async (data) => { await updateItem.mutateAsync(data); }}
-          />
-        )}
-
-        {/* Mobile FAB */}
-        {isMobile && (
-          <MobileFAB
-            onClick={() => setShowAddDialog(true)}
-            label="Adicionar Produto"
           />
         )}
 

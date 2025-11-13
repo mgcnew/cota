@@ -46,7 +46,7 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Filter } from "lucide-react";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { MobileFAB } from "@/components/mobile/MobileFAB";
+import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -782,12 +782,6 @@ export default function ContagemEstoque() {
                   </div>
                   )}
                 </PullToRefresh>
-                
-                {/* Mobile FAB */}
-                <MobileFAB
-                  onClick={triggerCreateDialog}
-                  label="Nova Contagem"
-                />
               </>
             ) : (
               /* Desktop: Tabela */

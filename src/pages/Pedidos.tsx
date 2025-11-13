@@ -24,7 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useMobile } from "@/contexts/MobileProvider";
-import { MobileFAB } from "@/components/mobile/MobileFAB";
+import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
 import { OrdersMobileList } from "@/components/mobile/orders/OrdersMobileList";
 import { OrderDetailModal } from "@/components/mobile/orders/OrderDetailModal";
@@ -777,14 +777,6 @@ export default function Pedidos() {
               </div>
           )}
         </>}
-
-      {/* Mobile FAB */}
-      {isMobile && (
-        <MobileFAB
-          onClick={() => setAddDialogOpen(true)}
-          label="Novo Pedido"
-        />
-      )}
 
       {/* Dialogs */}
       <AddPedidoDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={handleAddPedido} />

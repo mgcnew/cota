@@ -28,6 +28,7 @@ import { useMobile } from "@/contexts/MobileProvider";
 import { CotacoesStatsMemoized } from "@/components/cotacoes/CotacoesStatsMemoized";
 import { CotacoesVirtualList } from "@/components/cotacoes/CotacoesVirtualList";
 import { useToast } from "@/hooks/use-toast";
+import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
 
 // Lazy load dialogs - apenas carregados quando necessários
 const AddQuoteDialog = lazy(() => import("@/components/forms/AddQuoteDialog"));

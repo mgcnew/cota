@@ -4,15 +4,15 @@ import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProductsMobile } from "@/hooks/mobile/useProductsMobile";
 import { useDebounce } from "@/hooks/useDebounce";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { MobileProductsSearch } from "@/components/mobile/products/MobileProductsSearch";
+import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
 import { ProductsMobileList } from "@/components/mobile/products/ProductsMobileList";
 import { MobileProductsFilters } from "@/components/mobile/products/MobileProductsFilters";
-import { MobileProductsFAB } from "@/components/mobile/products/MobileProductsFAB";
 import { ProductsEmptyState } from "@/components/mobile/products/ProductsEmptyState";
 import { ProductsLoadingSkeleton } from "@/components/mobile/products/ProductsLoadingSkeleton";
 import { AddProductDialog } from "@/components/forms/AddProductDialog";
 import { EditProductDialog } from "@/components/forms/EditProductDialog";
 import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
+import { Plus } from "lucide-react";
 import type { ProductMobile } from "@/hooks/mobile/useProductsMobile";
 
 /**
@@ -130,13 +130,18 @@ export default function ProdutosMobile() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="flex flex-col h-full" style={{ overflow: 'hidden' }}>
-          <MobileProductsSearch
+          <MobileSearchWithAction
             value={searchQuery}
             onChange={setSearchQuery}
-            onFiltersClick={handleFiltersToggle}
-            activeCategory={selectedCategory !== "all" ? selectedCategory : null}
-            onClearCategory={() => setSelectedCategory("all")}
+            onActionClick={handleAdd}
+            placeholder="Buscar produtos..."
+            actionIcon={<Plus className="h-4 w-4" />}
+            actionLabel="Criar"
             resultsCount={products.length}
+            showFilters={true}
+            onFiltersClick={handleFiltersToggle}
+            activeFilters={selectedCategory !== "all" ? [selectedCategory] : []}
+            onClearFilters={() => setSelectedCategory("all")}
             isSearching={isLoading}
           />
           
@@ -179,13 +184,6 @@ export default function ProdutosMobile() {
           />
         </div>
       </PageWrapper>
-
-      {/* FAB fora do PageWrapper para ficar sempre visível */}
-      <MobileProductsFAB 
-        onClick={handleAdd} 
-        isEmpty={products.length === 0 && !isLoading}
-        tooltip="Adicionar primeiro produto"
-      />
 
       {/* Dialogs */}
       {addDialogOpen && (

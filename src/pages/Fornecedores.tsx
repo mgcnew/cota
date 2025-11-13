@@ -34,7 +34,7 @@ import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
 import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMobile } from "@/contexts/MobileProvider";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { MobileFAB } from "@/components/mobile/MobileFAB";
+import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
 import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
 import { SuppliersMobileList } from "@/components/mobile/suppliers/SuppliersMobileList";
 import { AddSupplierMobile } from "@/components/mobile/suppliers/AddSupplierMobile";
@@ -1149,16 +1149,11 @@ export default function Fornecedores() {
         <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
       </div>
 
-      {/* Mobile: Modais otimizados e FAB */}
+      {/* Mobile: Modais otimizados */}
       {isMobile && (
         <>
           <AddSupplierMobile
-            trigger={
-              <MobileFAB
-                onClick={() => {}}
-                label="Novo Fornecedor"
-              />
-            }
+            trigger={<div />}
             onSuccess={() => mobileSuppliers.refetch()}
           />
           <EditSupplierMobile
