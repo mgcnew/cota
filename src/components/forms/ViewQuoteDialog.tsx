@@ -213,15 +213,21 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const [internalOpen, setInternalOpen] = useState(false);
   const isMobile = useMobile();
   
+  // Debug: verificar quoteId recebido
+  console.log('[ViewQuoteDialog] Props recebidas:', { quoteId, hasQuote: !!quote, open: externalOpen || internalOpen });
+  
   // Usar controle externo se fornecido, senão usar interno
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
   
   // Usar hook para carregar dados sempre que modal abre (desktop + mobile)
-  const { data: quoteDetailsData, isLoading: isLoadingDetails } = useCotacaoDetails(
+  const { data: quoteDetailsData, isLoading: isLoadingDetails, error: loadError } = useCotacaoDetails(
     quoteId || null,
     open && !!quoteId // Carrega sempre que modal abre com quoteId
   );
+  
+  // Debug: verificar dados carregados
+  console.log('[ViewQuoteDialog] Hook result:', { hasData: !!quoteDetailsData, isLoading: isLoadingDetails, hasError: !!loadError });
   
   // Usar dados do hook (recarrega automaticamente após invalidação de cache)
   const currentQuote: Quote | null = quoteDetailsData ? convertQuoteDetailsToQuote(quoteDetailsData) : null;
