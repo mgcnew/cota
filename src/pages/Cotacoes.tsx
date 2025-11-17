@@ -830,13 +830,13 @@ export default function Cotacoes() {
                     <DropdownMenuContent align="end">
                       {/* Opção de editar - abre diretamente na tab de edição */}
                       {cotacao.status !== "concluida" && <ViewQuoteDialog 
-                        quoteId={cotacao.id} 
+                        quote={cotacao} 
                         onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
                           quoteId,
                           supplierId,
                           productId,
                           newValue
-                        })}
+                        })} 
                         onConvertToOrder={(quoteId, orders) => convertToOrder({
                           quoteId,
                           orders
@@ -927,13 +927,13 @@ export default function Cotacoes() {
                     {/* Botão principal - Editar (se não estiver concluída) ou Ver Detalhes (se concluída) */}
                     {cotacao.status !== "concluida" ? (
                       <ViewQuoteDialog 
-                        quoteId={cotacao.id} 
+                        quote={cotacao} 
                         onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({
                           quoteId,
                           supplierId,
                           productId,
                           newValue
-                        })}
+                        })} 
                         onConvertToOrder={(quoteId, orders) => convertToOrder({
                           quoteId,
                           orders
@@ -1269,7 +1269,8 @@ export default function Cotacoes() {
           </div>
         </div>}>
           <ViewQuoteDialog 
-            quoteId={selectedQuoteId || undefined} // SEMPRE passa ID (desktop + mobile)
+            quote={!isMobile ? selectedQuote || undefined : undefined} // Desktop: passa quote completo
+            quoteId={isMobile ? selectedQuoteId || undefined : undefined} // Mobile: passa apenas ID
             onUpdateSupplierProductValue={updateSupplierProductValue ? (quoteId, supplierId, productId, newValue) => updateSupplierProductValue({ quoteId, supplierId, productId, newValue }) : undefined}
             onConvertToOrder={convertToOrder ? (quoteId, orders) => convertToOrder({ quoteId, orders }) : undefined}
             onEdit={updateQuote ? (quoteId, data) => updateQuote({ quoteId, data }) : undefined}

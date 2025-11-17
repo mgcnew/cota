@@ -213,24 +213,18 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const [internalOpen, setInternalOpen] = useState(false);
   const isMobile = useMobile();
   
-  // Debug: verificar quoteId recebido
-  console.log('[ViewQuoteDialog] Props recebidas:', { quoteId, hasQuote: !!quote, open: externalOpen || internalOpen });
-  
   // Usar controle externo se fornecido, senão usar interno
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
   
-  // Usar hook para carregar dados sempre que modal abre (desktop + mobile)
-  const { data: quoteDetailsData, isLoading: isLoadingDetails, error: loadError } = useCotacaoDetails(
+  // Para mobile: usar hook para carregar dados apenas quando modal abre
+  const { data: quoteDetailsData, isLoading: isLoadingDetails } = useCotacaoDetails(
     quoteId || null,
-    open && !!quoteId // Carrega sempre que modal abre com quoteId
+    open && !!quoteId && !quote // Só carrega se modal está aberto, tem quoteId e não tem quote
   );
   
-  // Debug: verificar dados carregados
-  console.log('[ViewQuoteDialog] Hook result:', { hasData: !!quoteDetailsData, isLoading: isLoadingDetails, hasError: !!loadError });
-  
-  // Usar dados do hook (recarrega automaticamente após invalidação de cache)
-  const currentQuote: Quote | null = quoteDetailsData ? convertQuoteDetailsToQuote(quoteDetailsData) : null;
+  // Determinar qual quote usar: dados carregados do hook ou quote passado como prop
+  const currentQuote: Quote | null = quote || (quoteDetailsData ? convertQuoteDetailsToQuote(quoteDetailsData) : null);
   
   // Estado de loading: quando está carregando dados do hook
   const isLoadingQuote = !currentQuote && (isLoadingDetails || (quoteId && !quoteDetailsData && open));
