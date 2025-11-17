@@ -246,6 +246,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, number>>({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [convertDialogOpen, setConvertDialogOpen] = useState(false);
   const [selectedSupplierForConversion, setSelectedSupplierForConversion] = useState<{ id: string; name: string } | null>(null);
   const [showSelectSupplierDialog, setShowSelectSupplierDialog] = useState(false);
@@ -283,6 +284,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const handleStartEdit = (productId: string, currentValue: number) => {
     setEditingProductId(productId);
     setEditedValues(prev => ({ ...prev, [productId]: currentValue }));
+    setHasUnsavedChanges(true);
   };
   
   // Auto-foco e seleção quando entra em modo de edição
@@ -293,11 +295,30 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     }
   }, [editingProductId]);
 
+  // Limpar valores editados quando trocar de fornecedor
+  useEffect(() => {
+    if (hasUnsavedChanges && editingProductId) {
+      // Mostrar aviso ao usuário
+      toast({
+        title: "Valor não salvo",
+        description: "Os valores editados não foram salvos. Salve antes de trocar de fornecedor.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Limpar valores editados quando trocar de fornecedor
+    setEditedValues({});
+    setEditingProductId(null);
+    setHasUnsavedChanges(false);
+  }, [selectedSupplier]);
+
   const handleSaveEdit = async (productId: string) => {
     if (selectedSupplier && onUpdateSupplierProductValue && editedValues[productId] !== undefined && currentQuote) {
       // Salvar no banco
       await onUpdateSupplierProductValue(currentQuote.id, selectedSupplier, productId, editedValues[productId]);
       setEditingProductId(null);
+      setHasUnsavedChanges(false);
     }
   };
 
