@@ -12,9 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Combobox } from "@/components/ui/combobox";
-import { Plus, Trash2, Loader2, ShoppingCart, Package, Building2, Calendar, DollarSign, CheckCircle, ChevronRight, ChevronLeft, Clock, FileText, ChevronDown, Copy, X } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Plus, Trash2, Loader2, ShoppingCart, Package, Building2, Calendar, DollarSign, CheckCircle, ChevronRight, ChevronLeft, Clock, FileText, ChevronDown, Copy, X, Check, ChevronsUpDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,6 +71,7 @@ export default function AddPedidoDialog({
   // Tab system states
   const [activeTab, setActiveTab] = useState("produtos");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [productPopoverOpen, setProductPopoverOpen] = useState(false);
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("");
   const [newProductPrice, setNewProductPrice] = useState("");
@@ -651,13 +653,56 @@ export default function AddPedidoDialog({
                         <div className={`${isMobile ? 'space-y-3' : 'space-y-2'} min-w-0`}>
                           <Label className={`${isMobile ? 'text-base' : 'text-sm'} font-medium text-foreground`}>Produto *</Label>
                           <div className="min-w-0">
-                            <Combobox options={filteredProducts.map(p => ({
-                        value: p.name,
-                        label: p.name
-                      }))} value={selectedProduct ? selectedProduct.name : ""} onValueChange={value => {
-                        const product = products.find(p => p.name === value);
-                        if (product) handleProductSelect(product);
-                      }} placeholder="Digite para buscar produtos..." searchPlaceholder={`Buscar entre ${products.length} produtos...`} emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."} className={`w-full min-w-0 ${isMobile ? 'h-11 text-base' : ''}`} onSearchChange={setProductSearch} />
+                            <Popover open={productPopoverOpen} onOpenChange={setProductPopoverOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={`w-full justify-between ${isMobile ? 'h-11 text-base' : ''}`}
+                                >
+                                  {selectedProduct ? selectedProduct.name : "Digite para buscar produtos..."}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0" align="start">
+                                <Command>
+                                  <CommandInput 
+                                    placeholder={`Buscar entre ${products.length.toLocaleString('pt-BR')} produtos...`}
+                                    value={productSearch}
+                                    onValueChange={setProductSearch}
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      {debouncedProductSearch 
+                                        ? "Nenhum produto encontrado." 
+                                        : `Digite para buscar entre ${products.length.toLocaleString('pt-BR')} produtos...`
+                                      }
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {filteredProducts.map((product) => (
+                                        <CommandItem
+                                          key={product.id}
+                                          value={product.name}
+                                          onSelect={() => {
+                                            handleProductSelect(product);
+                                            setProductSearch("");
+                                            setProductPopoverOpen(false);
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              selectedProduct?.id === product.id ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          {product.name}
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
                           </div>
                           {errors.product && (
                             <p className="text-xs text-red-500 dark:text-red-400">{errors.product}</p>
