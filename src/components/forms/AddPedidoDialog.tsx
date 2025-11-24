@@ -1175,13 +1175,56 @@ export default function AddPedidoDialog({
                         <div className="space-y-2 min-w-0">
                           <Label className="text-sm font-medium text-foreground">Produto *</Label>
                           <div className="min-w-0">
-                            <Combobox options={filteredProducts.map(p => ({
-                        value: p.name,
-                        label: p.name
-                      }))} value={selectedProduct ? selectedProduct.name : ""} onValueChange={value => {
-                        const product = products.find(p => p.name === value);
-                        if (product) handleProductSelect(product);
-                      }} placeholder="Digite para buscar produtos..." searchPlaceholder={`Buscar entre ${products.length} produtos...`} emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."} className="w-full min-w-0" onSearchChange={setProductSearch} />
+                            <Popover open={productPopoverOpen} onOpenChange={setProductPopoverOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className="w-full justify-between"
+                                >
+                                  {selectedProduct ? selectedProduct.name : "Digite para buscar produtos..."}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0" align="start">
+                                <Command>
+                                  <CommandInput 
+                                    placeholder={`Buscar entre ${products.length.toLocaleString('pt-BR')} produtos...`}
+                                    value={productSearch}
+                                    onValueChange={setProductSearch}
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      {debouncedProductSearch 
+                                        ? "Nenhum produto encontrado." 
+                                        : `Digite para buscar entre ${products.length.toLocaleString('pt-BR')} produtos...`
+                                      }
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {filteredProducts.map((product) => (
+                                        <CommandItem
+                                          key={product.id}
+                                          value={product.name}
+                                          onSelect={() => {
+                                            handleProductSelect(product);
+                                            setProductSearch("");
+                                            setProductPopoverOpen(false);
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              selectedProduct?.id === product.id ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          {product.name}
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
                           </div>
                           {errors.product && (
                             <p className="text-xs text-red-500 dark:text-red-400">{errors.product}</p>
