@@ -34,6 +34,7 @@ import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithActi
 const AddQuoteDialog = lazy(() => import("@/components/forms/AddQuoteDialog"));
 const DeleteQuoteDialog = lazy(() => import("@/components/forms/DeleteQuoteDialog"));
 const ViewQuoteDialog = lazy(() => import("@/components/forms/ViewQuoteDialog"));
+const QuoteEditView = lazy(() => import("@/components/cotacoes/QuoteEditView"));
 
 export default function Cotacoes() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,6 +61,7 @@ export default function Cotacoes() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [selectedQuoteForEdit, setSelectedQuoteForEdit] = useState<Quote | null>(null);
 
   // Callbacks memoizados para navegação do carousel
   const handlePrevCard = useCallback((e: React.MouseEvent) => {
@@ -113,9 +115,25 @@ export default function Cotacoes() {
   }, []);
 
   const handleEditQuote = useCallback((quote: Quote) => {
+    // Desktop: Full page replace
+    if (!isMobile) {
+      startTransition(() => {
+        setSelectedQuoteForEdit(quote);
+      });
+    } else {
+      // Mobile: Manter modal
+      startTransition(() => {
+        setSelectedQuote(quote);
+        setDesktopEditMode(true);
+        setViewDialogOpen(true);
+      });
+    }
+  }, [isMobile]);
+
+  // Novo handler para visualização rápida (sem edição)
+  const handleQuickViewQuote = useCallback((quote: Quote) => {
     startTransition(() => {
       setSelectedQuote(quote);
-      setDesktopEditMode(true);
       setViewDialogOpen(true);
     });
   }, []);
@@ -577,13 +595,47 @@ export default function Cotacoes() {
     </Card>
   ), [stats]);
 
+  // Se há cotação selecionada para edição (desktop), mostrar full page
+  if (selectedQuoteForEdit && !isMobile) {
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-4">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Carregando...</p>
+          </div>
+        </div>
+      }>
+        <QuoteEditView
+          quote={selectedQuoteForEdit}
+          onBack={() => {
+            setSelectedQuoteForEdit(null);
+            refetch();
+          }}
+          onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => 
+            updateSupplierProductValue({ quoteId, supplierId, productId, newValue })
+          }
+          onConvertToOrder={(quoteId, orders) => 
+            convertToOrder({ quoteId, orders })
+          }
+          onEdit={(quoteId, data) => 
+            updateQuote({ quoteId, data })
+          }
+          isUpdating={isUpdating}
+        />
+      </Suspense>
+    );
+  }
+
   if (isLoading) {
     return <div className="p-6 flex items-center justify-center min-h-screen">
         <p className="text-muted-foreground">Carregando cotações...</p>
       </div>;
   }
   const paginatedData = paginate(filteredCotacoes);
-  return <div className="page-container">
+  
+  return (
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-6">
       {/* Statistics Cards - Componente Memoizado */}
       {isMobile ? (
         <div className="mb-8">
@@ -1321,5 +1373,6 @@ export default function Cotacoes() {
           />
         </Suspense>
       )}
-    </div>;
+    </div>
+  );
 }
