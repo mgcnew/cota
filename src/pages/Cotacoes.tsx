@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback, lazy, Suspense, startTransition } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -595,37 +596,6 @@ export default function Cotacoes() {
     </Card>
   ), [stats]);
 
-  // Se há cotação selecionada para edição (desktop), mostrar full page
-  if (selectedQuoteForEdit && !isMobile) {
-    return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center space-y-4">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Carregando...</p>
-          </div>
-        </div>
-      }>
-        <QuoteEditView
-          quote={selectedQuoteForEdit}
-          onBack={() => {
-            setSelectedQuoteForEdit(null);
-            refetch();
-          }}
-          onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => 
-            updateSupplierProductValue({ quoteId, supplierId, productId, newValue })
-          }
-          onConvertToOrder={(quoteId, orders) => 
-            convertToOrder({ quoteId, orders })
-          }
-          onEdit={(quoteId, data) => 
-            updateQuote({ quoteId, data })
-          }
-          isUpdating={isUpdating}
-        />
-      </Suspense>
-    );
-  }
 
   if (isLoading) {
     return <div className="p-6 flex items-center justify-center min-h-screen">
@@ -799,43 +769,67 @@ export default function Cotacoes() {
       </Card>
 
       {/* Cotações View */}
-      {isMobile ? (
-        // Mobile: Infinite scroll list
-        <CotacoesMobileList
-          cotacoes={mobileData.cotacoes}
-          isLoading={mobileData.isLoading}
-          isFetchingNextPage={mobileData.isFetchingNextPage}
-          hasNextPage={mobileData.hasNextPage}
-          fetchNextPage={mobileData.fetchNextPage}
-          onView={handleViewQuoteMobile}
-          onEdit={handleEditQuoteMobile}
-          onDelete={handleDeleteQuoteMobile}
-          getStatusBadge={getStatusBadge}
-        />
-      ) : selectedQuoteForEdit ? (
-        // Desktop: Edit view SPA
-        <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
-          <QuoteEditView
-            quote={selectedQuoteForEdit}
-            onBack={() => {
-              setSelectedQuoteForEdit(null);
-              refetch();
-            }}
-            onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => 
-              updateSupplierProductValue({ quoteId, supplierId, productId, newValue })
-            }
-            onConvertToOrder={(quoteId, orders) => 
-              convertToOrder({ quoteId, orders })
-            }
-            onEdit={(quoteId, data) => 
-              updateQuote({ quoteId, data })
-            }
-            isUpdating={isUpdating}
-          />
-        </Suspense>
-      ) : (
-        // Desktop: Grid/Table view
-        <>
+      <AnimatePresence mode="wait">
+        {isMobile ? (
+          // Mobile: Infinite scroll list
+          <motion.div
+            key="mobile-list"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <CotacoesMobileList
+              cotacoes={mobileData.cotacoes}
+              isLoading={mobileData.isLoading}
+              isFetchingNextPage={mobileData.isFetchingNextPage}
+              hasNextPage={mobileData.hasNextPage}
+              fetchNextPage={mobileData.fetchNextPage}
+              onView={handleViewQuoteMobile}
+              onEdit={handleEditQuoteMobile}
+              onDelete={handleDeleteQuoteMobile}
+              getStatusBadge={getStatusBadge}
+            />
+          </motion.div>
+        ) : selectedQuoteForEdit ? (
+          // Desktop: Edit view SPA
+          <motion.div
+            key="edit-view"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+              <QuoteEditView
+                quote={selectedQuoteForEdit}
+                onBack={() => {
+                  setSelectedQuoteForEdit(null);
+                  refetch();
+                }}
+                onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => 
+                  updateSupplierProductValue({ quoteId, supplierId, productId, newValue })
+                }
+                onConvertToOrder={(quoteId, orders) => 
+                  convertToOrder({ quoteId, orders })
+                }
+                onEdit={(quoteId, data) => 
+                  updateQuote({ quoteId, data })
+                }
+                isUpdating={isUpdating}
+              />
+            </Suspense>
+          </motion.div>
+        ) : (
+          // Desktop: Grid/Table view
+          <motion.div
+            key="table-list"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <>
           {viewMode === "grid" ? (
             <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {paginatedData.items.map((cotacao, index) => {
@@ -1294,8 +1288,10 @@ export default function Cotacoes() {
           </CardContent>
         </Card>
             )}
-        </>
-      )}
+            </>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {!isMobile && filteredCotacoes.length === 0 && !isLoading && (
         <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
