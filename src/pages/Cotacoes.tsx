@@ -812,7 +812,29 @@ export default function Cotacoes() {
           onDelete={handleDeleteQuoteMobile}
           getStatusBadge={getStatusBadge}
         />
+      ) : selectedQuoteForEdit ? (
+        // Desktop: Edit view SPA
+        <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+          <QuoteEditView
+            quote={selectedQuoteForEdit}
+            onBack={() => {
+              setSelectedQuoteForEdit(null);
+              refetch();
+            }}
+            onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => 
+              updateSupplierProductValue({ quoteId, supplierId, productId, newValue })
+            }
+            onConvertToOrder={(quoteId, orders) => 
+              convertToOrder({ quoteId, orders })
+            }
+            onEdit={(quoteId, data) => 
+              updateQuote({ quoteId, data })
+            }
+            isUpdating={isUpdating}
+          />
+        </Suspense>
       ) : (
+        // Desktop: Grid/Table view
         <>
           {viewMode === "grid" ? (
             <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

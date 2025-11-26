@@ -404,41 +404,32 @@ export default function QuoteEditView({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen bg-gray-50 dark:bg-gray-950"
+      className="bg-card rounded-lg border shadow-sm"
     >
-      {/* Header Fixo */}
-      <div className="sticky top-0 z-20 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={onBack}
-              variant="ghost"
-              size="sm"
-              className="gap-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Button>
-            <div className="flex items-center gap-3 flex-1">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary/80 text-white">
-                <Package className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Cotação #{quote.id.substring(0, 8)}
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {quote.produtoResumo}
-                </p>
-              </div>
-            </div>
-            {getStatusBadge(quote.status)}
+      {/* Header com botão voltar */}
+      <div className="border-b bg-muted/50 px-6 py-4 flex items-center gap-4">
+        <Button onClick={onBack} variant="ghost" size="sm">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar
+        </Button>
+        <div className="flex items-center gap-3 flex-1">
+          <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary/80 text-white">
+            <Package className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">
+              Cotação #{quote.id.substring(0, 8)}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {quote.produtoResumo}
+            </p>
           </div>
         </div>
+        {getStatusBadge(quote.status)}
       </div>
 
-      {/* Conteúdo Principal */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Conteúdo principal */}
+      <div className="p-6 space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="detalhes" className="gap-2">
