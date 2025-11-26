@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, lazy, Suspense, startTransition } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -26,6 +27,7 @@ const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog"
 const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
 const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
 const ImportProductsDialog = lazy(() => import("@/components/forms/ImportProductsDialog").then(m => ({ default: m.ImportProductsDialog })));
+const ProductEditView = lazy(() => import("@/components/products/ProductEditView"));
 
 /**
  * ProdutosDesktop - Versão Desktop Completa
@@ -46,6 +48,7 @@ export default function ProdutosDesktop() {
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -284,7 +287,7 @@ export default function ProdutosDesktop() {
 
   const handleEditProduct = useCallback((product: Product) => {
     startTransition(() => {
-      setEditingProduct(product);
+      setSelectedProductForEdit(product);
     });
   }, []);
 
@@ -587,7 +590,43 @@ export default function ProdutosDesktop() {
           {/* Card da Tabela - Transparente para efeito flutuante */}
           <Card className="border-0 bg-transparent">
             <CardContent className="p-0">
-              {paginatedData.items.length === 0 && !productsLoading ? (
+              <AnimatePresence mode="wait">
+                {selectedProductForEdit ? (
+                  // Edit view SPA
+                  <motion.div
+                    key="edit-view"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+                      <ProductEditView
+                        product={selectedProductForEdit}
+                        onBack={() => {
+                          setSelectedProductForEdit(null);
+                          invalidateCache();
+                        }}
+                        onEdit={(productId, data) => {
+                          updateProduct({ productId, data: data as any });
+                          setSelectedProductForEdit(null);
+                          invalidateCache();
+                        }}
+                        categories={safeCategories}
+                        onCategoryAdded={invalidateCache}
+                      />
+                    </Suspense>
+                  </motion.div>
+                ) : (
+                  // Table view
+                  <motion.div
+                    key="table-view"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {paginatedData.items.length === 0 && !productsLoading ? (
                 <div className="p-12 text-center">
                   <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
                   <p className="text-lg font-semibold text-gray-900 dark:text-white">Nenhum produto encontrado.</p>
@@ -646,7 +685,7 @@ export default function ProdutosDesktop() {
                       <TableBody>
                         {paginatedData.items.map((product) => (
                           <TableRow key={product.id} className="group border-none">
-                            <TableCell colSpan={8} className="px-1 py-3">
+                            <TableCell colSpan={8} className="px-0.5 py-2">
                               <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-orange-300/60 dark:hover:border-orange-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                                 {/* Produto - Largura fixa - Alinhado com header */}
                                 <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
@@ -765,6 +804,9 @@ export default function ProdutosDesktop() {
                   </div>
                 </>
               )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </CardContent>
           </Card>
 
