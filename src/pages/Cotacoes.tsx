@@ -1139,7 +1139,7 @@ export default function Cotacoes() {
                   {paginatedData.items.map((cotacao, index) => {
                     const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
                     return <TableRow key={cotacao.id} className="group border-none">
-                      <TableCell colSpan={7} className="px-0.5 py-2">
+                      <TableCell colSpan={7} className="px-1 py-3">
                         <div className="flex items-center px-1.5 py-2 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-teal-300/60 dark:hover:border-teal-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                           {/* Cotação - Largura fixa */}
                           <div className="w-[18%] flex items-center gap-3 px-2">
