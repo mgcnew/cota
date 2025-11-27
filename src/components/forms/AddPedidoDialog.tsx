@@ -22,25 +22,10 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { parseDecimalInput, formatDecimalDisplay } from "@/lib/text-utils";
 import { ProductsTab } from "../pedidos/add-dialog/ProductsTab";
+import { PedidoItem, AddPedidoDialogProps } from "../pedidos/add-dialog/types";
+import { SupplierTab } from "../pedidos/add-dialog/SupplierTab";
+import { DetailsTab } from "../pedidos/add-dialog/DetailsTab";
 
-interface PedidoItem {
-  produto: string;
-  quantidade: number;
-  valorUnitario: number;
-  unidade: string;
-}
-interface AddPedidoDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onAdd: (pedido: any) => void;
-  preSelectedProducts?: Array<{
-    product_id: string;
-    product_name: string;
-    quantity: number;
-    unit: string;
-    estimated_price?: number;
-  }>;
-}
 export default function AddPedidoDialog({
   open,
   onOpenChange,
@@ -640,323 +625,61 @@ export default function AddPedidoDialog({
             style={{ willChange: 'opacity' }}
           >
             <div className={`${isMobile ? 'p-4' : 'p-3 sm:p-4'} pb-4 max-w-full overflow-x-hidden`}>
-              {activeTab === 'produtos' && <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'lg:grid-cols-2 gap-3 lg:gap-4'} max-w-full`}>
-                {/* Left Column - Add Product Form */}
-                <Card className={`border-gray-200 dark:border-gray-700 shadow-sm order-1 lg:order-1 h-fit dark:bg-gray-800 min-w-0 ${isMobile ? 'p-4' : 'p-2 sm:p-3'}`}>
-                  <div className={`${isMobile ? 'p-3 mb-3' : 'p-2 sm:p-3'} border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800`}>
-                    <h3 className={`${isMobile ? 'text-base' : 'text-sm'} font-semibold text-foreground flex items-center gap-2`}>
-                      <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-pink-500 dark:text-pink-400`} />
-                      Adicionar Produto
-                    </h3>
-                  </div>
-                  <div className={`${isMobile ? 'space-y-4' : 'space-y-2 sm:space-y-3'} pb-3 sm:pb-4 min-w-0`}>
-                    <div className={`${isMobile ? 'space-y-3' : 'space-y-2'} min-w-0`}>
-                      <Label className={`${isMobile ? 'text-base' : 'text-sm'} font-medium text-foreground`}>Produto *</Label>
-                      <div className="min-w-0">
-                        <Combobox options={filteredProducts.map(p => ({
-                          value: p.name,
-                          label: p.name
-                        }))} value={selectedProduct ? selectedProduct.name : ""} onValueChange={value => {
-                          const product = products.find(p => p.name === value);
-                          if (product) handleProductSelect(product);
-                        }} placeholder="Digite para buscar produtos..." searchPlaceholder={`Buscar entre ${products.length} produtos...`} emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."} className={`w-full min-w-0 ${isMobile ? 'h-11 text-base' : ''}`} onSearchChange={setProductSearch} />
-                      </div>
-                      {errors.product && (
-                        <p className="text-xs text-red-500 dark:text-red-400">{errors.product}</p>
-                      )}
-                    </div>
+              {activeTab === 'produtos' && (
+                <ProductsTab
+                  isMobile={isMobile}
+                  filteredProducts={filteredProducts}
+                  products={products}
+                  selectedProduct={selectedProduct}
+                  handleProductSelect={handleProductSelect}
+                  debouncedProductSearch={debouncedProductSearch}
+                  setProductSearch={setProductSearch}
+                  newProductQuantity={newProductQuantity}
+                  setNewProductQuantity={setNewProductQuantity}
+                  newProductUnit={newProductUnit}
+                  setNewProductUnit={setNewProductUnit}
+                  newProductPrice={newProductPrice}
+                  setNewProductPrice={setNewProductPrice}
+                  errors={errors}
+                  setErrors={setErrors}
+                  lastUsedPrices={lastUsedPrices}
+                  itens={itens}
+                  handleAddNewProduct={handleAddNewProduct}
+                  handleRemoveItem={handleRemoveItem}
+                  handleDuplicateItem={handleDuplicateItem}
+                  calculateTotal={calculateTotal}
+                />
+              )}
+              {activeTab === 'fornecedor' && (
+                <SupplierTab
+                  isMobile={isMobile}
+                  suppliers={suppliers}
+                  debouncedSupplierSearch={debouncedSupplierSearch}
+                  fornecedor={fornecedor}
+                  setFornecedor={setFornecedor}
+                  setSupplierSearch={setSupplierSearch}
+                  dataEntrega={dataEntrega}
+                  setDataEntrega={setDataEntrega}
+                />
+              )}
 
-                    <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'sm:grid-cols-2 gap-3'} min-w-0`}>
-                      <div className={`${isMobile ? 'space-y-3' : 'space-y-2'} min-w-0`}>
-                        <Label className={`${isMobile ? 'text-base' : 'text-sm'} font-medium text-foreground`}>Quantidade *</Label>
-                        <Input
-                          type="text"
-                          value={newProductQuantity}
-                          onChange={e => {
-                            const value = e.target.value;
-                            // Permitir apenas números, vírgula e ponto
-                            if (/^\d*[,.]?\d*$/.test(value) || value === '') {
-                              setNewProductQuantity(value);
-                              if (errors.quantity) setErrors({ ...errors, quantity: "" });
-                            }
-                          }}
-                          placeholder="Ex: 98,5 ou 100"
-                          className={`${isMobile ? 'h-11 text-base' : 'text-sm'} ${errors.quantity ? 'border-red-500 dark:border-red-400' : ''}`}
-                        />
-                        {errors.quantity && (
-                          <p className="text-xs text-red-500 dark:text-red-400">{errors.quantity}</p>
-                        )}
-                      </div>
-                      <div className={`${isMobile ? 'space-y-3' : 'space-y-2'} min-w-0`}>
-                        <Label className={`${isMobile ? 'text-base' : 'text-sm'} font-medium text-foreground`}>Unidade *</Label>
-                        <div className="min-w-0">
-                          <Select value={newProductUnit} onValueChange={value => {
-                            setNewProductUnit(value);
-                            if (errors.unit) setErrors({ ...errors, unit: "" });
-                          }}>
-                            <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'text-sm'} w-full min-w-0 ${errors.unit ? 'border-red-500 dark:border-red-400' : ''}`}>
-                              <SelectValue placeholder="Unidade" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="un">Unidade (un)</SelectItem>
-                              <SelectItem value="kg">Quilograma (kg)</SelectItem>
-                              <SelectItem value="pc">Peça (pc)</SelectItem>
-                              <SelectItem value="caixa">Caixa</SelectItem>
-                              <SelectItem value="litro">Litro (L)</SelectItem>
-                              <SelectItem value="metro">Metro (m)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        {errors.unit && (
-                          <p className="text-xs text-red-500 dark:text-red-400">{errors.unit}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className={`${isMobile ? 'space-y-3' : 'space-y-2'} min-w-0`}>
-                      <Label className={`${isMobile ? 'text-base' : 'text-sm'} font-medium text-foreground`}>Valor Unitário *</Label>
-                      <Input
-                        type="number"
-                        value={newProductPrice}
-                        onChange={e => {
-                          setNewProductPrice(e.target.value);
-                          if (errors.price) setErrors({ ...errors, price: "" });
-                        }}
-                        placeholder="0,00"
-                        min="0"
-                        step="0.01"
-                        className={`${isMobile ? 'h-11 text-base' : 'text-sm'} w-full min-w-0 ${errors.price ? 'border-red-500 dark:border-red-400' : ''}`}
-                      />
-                      {errors.price && (
-                        <p className="text-xs text-red-500 dark:text-red-400">{errors.price}</p>
-                      )}
-                      {selectedProduct && lastUsedPrices[selectedProduct.id] && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Último preço: R$ {lastUsedPrices[selectedProduct.id].toFixed(2)}
-                        </p>
-                      )}
-                    </div>
-
-                    <Button
-                      type="button"
-                      onClick={handleAddNewProduct}
-                      disabled={!selectedProduct || !newProductQuantity || !newProductPrice || !newProductUnit}
-                      className={`w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed ${isMobile ? 'h-11 text-base' : 'text-sm sm:text-base py-2 sm:py-2.5'} transition-all duration-200 shadow-md hover:shadow-lg`}
-                    >
-                      <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
-                      Adicionar à Lista
-                    </Button>
-                  </div>
-                </Card>
-
-                {/* Right Column - Products List */}
-                <Card className={`border-gray-200 dark:border-gray-700 shadow-sm order-2 lg:order-2 flex flex-col dark:bg-gray-800 min-w-0 ${isMobile ? 'p-4' : 'p-2 sm:p-3'}`}>
-                  <div className={`${isMobile ? 'p-3 mb-3' : 'p-2 sm:p-3'} border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 flex-shrink-0`}>
-                    <h3 className={`${isMobile ? 'text-base' : 'text-sm'} font-semibold text-foreground flex items-center gap-2`}>
-                      <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-pink-500 dark:text-pink-400`} />
-                      Produtos Adicionados ({itens.length})
-                    </h3>
-                  </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto">
-                    <div className={`${isMobile ? 'p-3 space-y-3' : 'p-2 sm:p-3 space-y-2'}`}>
-                      {itens.length === 0 ? <div className="text-center py-8 text-muted-foreground">
-                        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center">
-                          <Package className="h-8 w-8 text-pink-500 dark:text-pink-400 opacity-60" />
-                        </div>
-                        <p className={`${isMobile ? 'text-base' : 'text-sm'} font-medium mb-1`}>Nenhum produto adicionado</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Use o formulário ao lado para adicionar produtos ao pedido</p>
-                      </div> : itens.map((item, index) => <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2, delay: index * 0.05 }}
-                        className={`border border-border rounded-lg ${isMobile ? 'p-3' : 'p-2'} bg-muted/50 hover:bg-muted/70 transition-colors`}
-                      >
-                        <div className={`flex items-start justify-between ${isMobile ? 'mb-2' : 'mb-1'} gap-2 min-w-0`}>
-                          <h4 className={`font-medium text-foreground ${isMobile ? 'text-sm' : 'text-xs'} flex-1 truncate min-w-0`}>
-                            {item.produto || 'Produto não encontrado'}
-                          </h4>
-                          <div className="flex gap-1 flex-shrink-0">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDuplicateItem(index)}
-                              className={`${isMobile ? 'h-6 w-6' : 'h-5 w-5'} p-0 text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/50`}
-                              title="Duplicar produto"
-                            >
-                              <Copy className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'}`} />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemoveItem(index)}
-                              className={`${isMobile ? 'h-6 w-6' : 'h-5 w-5'} p-0 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/50`}
-                              title="Remover produto"
-                            >
-                              <Trash2 className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'}`} />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className={`grid grid-cols-3 ${isMobile ? 'gap-2 text-sm' : 'gap-1 sm:gap-2 text-xs'} text-muted-foreground min-w-0`}>
-                          <div className="min-w-0 truncate">
-                            <span className="font-medium">Qtd: </span>
-                            <span className="truncate">{formatDecimalDisplay(item.quantidade)} {item.unidade}</span>
-                          </div>
-                          <div className="min-w-0 truncate">
-                            <span className="font-medium">Unit: </span>
-                            <span className="truncate">R$ {item.valorUnitario.toFixed(2)}</span>
-                          </div>
-                          <div className="text-right min-w-0 truncate">
-                            <span className={`font-medium text-pink-600 dark:text-pink-400 truncate ${isMobile ? 'text-base' : ''}`}>
-                              R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                      </motion.div>)}
-                    </div>
-                  </div>
-                  {itens.length > 0 && <div className={`${isMobile ? 'p-3' : 'p-2 sm:p-3'} border-t-2 border-pink-200 dark:border-pink-800 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 flex-shrink-0`}>
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col">
-                        <span className={`font-semibold text-foreground ${isMobile ? 'text-base' : 'text-sm'}`}>
-                          Total do Pedido
-                        </span>
-                        <span className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-600 dark:text-gray-400`}>
-                          {itens.length} {itens.length === 1 ? 'produto' : 'produtos'}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className={`${isMobile ? 'text-xl' : 'text-lg'} font-bold text-pink-600 dark:text-pink-400`}>
-                          R$ {calculateTotal().toFixed(2)}
-                        </span>
-                        <span className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-600 dark:text-gray-400`}>
-                          Média: R$ {(calculateTotal() / itens.length).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>}
-                </Card>
-              </div>}
-
-              {activeTab === 'fornecedor' && <div className={`max-w-2xl mx-auto w-full ${isMobile ? 'space-y-4' : 'space-y-3 sm:space-y-4'}`}>
-                <Card className={`border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800 min-w-0 ${isMobile ? 'p-4' : 'p-2 sm:p-3'}`}>
-                  <div className={`${isMobile ? 'p-3 mb-3' : 'p-2 sm:p-3'} border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800`}>
-                    <h3 className={`${isMobile ? 'text-base' : 'text-sm'} font-semibold text-gray-900 dark:text-white flex items-center gap-2`}>
-                      <Building2 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-pink-500`} />
-                      Informações do Fornecedor
-                    </h3>
-                    <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600 dark:text-gray-400 mt-1`}>
-                      Selecione o fornecedor e defina a data de entrega
-                    </p>
-                  </div>
-                  <div className={`${isMobile ? 'p-4 space-y-4' : 'p-3 sm:p-4 space-y-3 sm:space-y-4'} min-w-0`}>
-                    <div className={`${isMobile ? 'space-y-3' : 'space-y-2'} min-w-0`}>
-                      <Label htmlFor="fornecedor" className={`${isMobile ? 'text-base' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>
-                        Fornecedor *
-                      </Label>
-                      <div className="min-w-0">
-                        <Combobox
-                          options={suppliers
-                            .filter(s =>
-                              !debouncedSupplierSearch ||
-                              s.name.toLowerCase().includes(debouncedSupplierSearch.toLowerCase()) ||
-                              (s.contact && s.contact.toLowerCase().includes(debouncedSupplierSearch.toLowerCase()))
-                            )
-                            .map(s => ({
-                              value: s.id,
-                              label: s.contact ? `${s.name} (${s.contact})` : s.name
-                            }))}
-                          value={fornecedor}
-                          onValueChange={setFornecedor}
-                          placeholder="Selecione um fornecedor..."
-                          searchPlaceholder="Buscar por nome ou vendedor..."
-                          emptyText="Nenhum fornecedor encontrado"
-                          className={`w-full ${isMobile ? 'h-11 text-base' : 'text-sm'} min-w-0`}
-                          onSearchChange={setSupplierSearch}
-                        />
-                      </div>
-                    </div>
-
-                    <div className={`${isMobile ? 'space-y-3' : 'space-y-2'} min-w-0`}>
-                      <Label htmlFor="dataEntrega" className={`${isMobile ? 'text-base' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>
-                        Data de Entrega *
-                      </Label>
-                      <Input id="dataEntrega" type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className={`w-full ${isMobile ? 'h-11 text-base' : 'text-sm'} min-w-0`} />
-                    </div>
-                  </div>
-                </Card>
-              </div>}
-
-              {activeTab === 'detalhes' && <div className={`max-w-4xl mx-auto w-full ${isMobile ? 'space-y-4' : 'space-y-3 sm:space-y-4'}`}>
-                <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'lg:grid-cols-2 gap-3 sm:gap-4'} w-full max-w-full`}>
-                  {/* Observações */}
-                  <Card className={`border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800 min-w-0 ${isMobile ? 'p-4' : 'p-2 sm:p-3'}`}>
-                    <div className={`${isMobile ? 'p-3 mb-3' : 'p-2 sm:p-3'} border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800`}>
-                      <h3 className={`${isMobile ? 'text-base' : 'text-sm'} font-semibold text-gray-900 dark:text-white flex items-center gap-2`}>
-                        <FileText className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-pink-500 dark:text-pink-400`} />
-                        Observações
-                      </h3>
-                    </div>
-                    <div className={`${isMobile ? 'p-3' : 'p-2 sm:p-3'} min-w-0`}>
-                      <Textarea value={observacoes} onChange={e => setObservacoes(e.target.value)} placeholder="Observações adicionais sobre o pedido..." className={`${isMobile ? 'min-h-[120px] text-base' : 'min-h-[80px] sm:min-h-[100px] text-sm'} resize-none w-full min-w-0 dark:bg-gray-900 dark:border-gray-600 dark:text-white`} />
-                    </div>
-                  </Card>
-
-                  {/* Resumo do Pedido */}
-                  <Card className={`border-gray-200 dark:border-gray-700 shadow-sm dark:bg-gray-800 min-w-0 ${isMobile ? 'p-4' : 'p-2 sm:p-3'}`}>
-                    <div className={`${isMobile ? 'p-3 mb-3' : 'p-2 sm:p-3'} border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800`}>
-                      <h3 className={`${isMobile ? 'text-base' : 'text-sm'} font-semibold text-gray-900 dark:text-white flex items-center gap-2`}>
-                        <Clock className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-pink-500 dark:text-pink-400`} />
-                        Resumo do Pedido
-                      </h3>
-                    </div>
-                    <div className={`${isMobile ? 'p-3 space-y-3' : 'p-2 sm:p-3 space-y-2 sm:space-y-3'}`}>
-                      <div className={`grid grid-cols-1 ${isMobile ? 'sm:grid-cols-2 gap-3' : 'sm:grid-cols-2 gap-2 sm:gap-3'} ${isMobile ? 'text-sm' : 'text-xs'} min-w-0`}>
-                        <div>
-                          <span className="text-gray-600 dark:text-gray-400">Produtos:</span>
-                          <div className={`font-medium dark:text-gray-200 ${isMobile ? 'text-base' : ''}`}>{itens.length} itens</div>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 dark:text-gray-400">Fornecedor:</span>
-                          <div className={`font-medium ${isMobile ? 'text-sm' : 'text-xs'} truncate dark:text-gray-200`}>
-                            {fornecedor ? suppliers.find(s => s.id === fornecedor)?.name : 'Não selecionado'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 dark:text-gray-400">Data de Entrega:</span>
-                          <div className={`font-medium dark:text-gray-200 ${isMobile ? 'text-base' : ''}`}>
-                            {dataEntrega ? new Date(dataEntrega).toLocaleDateString('pt-BR') : 'Não definida'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 dark:text-gray-400">Valor Total:</span>
-                          <div className={`font-bold text-pink-600 ${isMobile ? 'text-lg' : 'text-sm sm:text-base'}`}>
-                            R$ {calculateTotal().toFixed(2)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {itens.length > 0 && <div className={`border-t border-gray-200 dark:border-gray-700 ${isMobile ? 'pt-3' : 'pt-2 sm:pt-3'}`}>
-                        <h4 className={`font-medium text-gray-900 dark:text-white ${isMobile ? 'mb-2' : 'mb-1'} ${isMobile ? 'text-sm' : 'text-xs'}`}>Produtos Selecionados:</h4>
-                        <div className={`${isMobile ? 'h-24' : 'h-20 sm:h-24'} overflow-y-auto`}>
-                          <div className={isMobile ? 'space-y-2' : 'space-y-1'}>
-                            {itens.map((item, index) => <div key={index} className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600 dark:text-gray-400 flex justify-between gap-2`}>
-                              <span className="truncate flex-1">{item.produto}</span>
-                              <span className="flex-shrink-0">{formatDecimalDisplay(item.quantidade)} {item.unidade}</span>
-                            </div>)}
-                          </div>
-                        </div>
-                      </div>}
-                    </div>
-                  </Card>
-                </div>
-              </div>}
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
+              
+              {activeTab === 'detalhes' && (
+                <DetailsTab
+                  isMobile={isMobile}
+                  observacoes={observacoes}
+                  setObservacoes={setObservacoes}
+                  itens={itens}
+                  fornecedor={fornecedor}
+                  suppliers={suppliers}
+                  dataEntrega={dataEntrega}
+                  calculateTotal={calculateTotal}
+                />
+              )}
+            </div >
+          </motion.div >
+        </AnimatePresence >
+      </div >
 
       <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-3 sm:px-4 py-2'} border-t border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800`}>
         <div className={`flex items-center ${isMobile ? 'flex-col gap-3' : 'justify-between w-full gap-2'}`}>
