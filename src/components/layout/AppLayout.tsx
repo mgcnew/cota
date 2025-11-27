@@ -65,7 +65,7 @@ export function AppLayout() {
   const isMobile = useMobile();
   const pageTitle = pageTitles[location.pathname] || "";
   const PageIcon = pageIcons[location.pathname] || Package;
-  
+
   // Preload inteligente de páginas relacionadas
   usePagePreload();
 
@@ -94,7 +94,7 @@ export function AppLayout() {
       {/* Main Content Area */}
       <div className="flex flex-col w-full min-h-screen relative">
         {/* Header Fixo Minimalista */}
-        <header className="fixed top-1 right-1 left-1 md:right-1 md:left-24 z-40 h-16 bg-white/80 dark:bg-[#1C1F26]/95 backdrop-blur-xl border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-150 ease-out">
+        <header className="fixed top-1 right-1 left-1 md:right-1 md:left-[17rem] z-40 h-16 bg-white/80 dark:bg-[#1C1F26]/95 backdrop-blur-xl border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-150 ease-out">
           {/* Efeito de vidro minimalista */}
           <>
             {/* Gradiente sutil apenas no modo claro */}
@@ -106,7 +106,7 @@ export function AppLayout() {
           <div className="relative z-10 flex items-center h-full px-3 sm:px-4 md:px-6 w-full max-w-full gap-2 sm:gap-3 md:gap-4 transition-opacity duration-150 md:transition-all md:duration-150">
             {/* Mobile: Espaço para menu hamburger (esquerda) */}
             <div className="md:hidden w-10" />
-            
+
             {/* Global Search - Barra centralizada no desktop */}
             <div className="hidden md:flex flex-1 items-center justify-center max-w-2xl mx-auto min-w-0">
               <div className="w-full max-w-2xl">
@@ -119,9 +119,9 @@ export function AppLayout() {
               <TooltipProvider delayDuration={300}>
                 <div className="flex items-center gap-1.5 md:gap-2 transition-all duration-150">
                   <CompanySelector />
-                  
+
                   <Separator orientation="vertical" className="h-6 bg-gray-200 dark:bg-gray-700/50 hidden md:flex" />
-                  
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
@@ -132,43 +132,43 @@ export function AppLayout() {
                       <p>Alternar tema</p>
                     </TooltipContent>
                   </Tooltip>
-                  
+
                   {/* Lupa no mobile, ao lado direito do theme toggle */}
                   <div className="md:hidden">
                     <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
                   </div>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => navigate('/dashboard/configuracoes')} 
-                      className="hidden md:flex p-0 rounded-lg h-9 w-9 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                    >
-                      <Settings className="h-4 w-4 transition-all duration-150" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">
-                    <p>Configurações</p>
-                  </TooltipContent>
-                </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate('/dashboard/configuracoes')}
+                        className="hidden md:flex p-0 rounded-lg h-9 w-9 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                      >
+                        <Settings className="h-4 w-4 transition-all duration-150" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Configurações</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={handleLogout} 
-                      className="hidden md:flex p-0 rounded-lg h-9 w-9 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                    >
-                      <LogOut className="h-4 w-4 transition-all duration-150" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">
-                    <p>Sair</p>
-                  </TooltipContent>
-                </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleLogout}
+                        className="hidden md:flex p-0 rounded-lg h-9 w-9 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                      >
+                        <LogOut className="h-4 w-4 transition-all duration-150" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Sair</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </TooltipProvider>
             </div>
@@ -176,7 +176,7 @@ export function AppLayout() {
         </header>
 
         {/* Main Content */}
-        <main className={`flex-1 w-full pb-20 md:pb-0 relative pt-[4.5rem] md:pl-24 transition-none ${isMobile ? 'overflow-hidden' : ''}`}>
+        <main className={`flex-1 w-full pb-20 md:pb-0 relative pt-[4.5rem] md:pl-[17rem] transition-none ${isMobile ? 'overflow-hidden' : ''}`}>
           <div className={`min-h-full w-full max-w-full page-content-wrapper ${isMobile ? 'relative overflow-hidden' : ''}`}>
             <div className={`w-full max-w-full ${isMobile ? 'h-full' : ''}`}>
               {isMobile ? (
