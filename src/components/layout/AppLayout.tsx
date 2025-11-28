@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
-import { MobilePageTransition } from "./MobilePageTransition";
-import { useMobile } from "@/contexts/MobileProvider";
 import { usePagePreload } from "@/hooks/mobile/usePagePreload";
 import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3, Sparkles, Mic, MessageSquare } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -16,7 +14,6 @@ import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
 import { CompanySelector } from "./CompanySelector";
-import { MobileSearchDialog } from "@/components/mobile/MobileSearchDialog";
 
 // Mapeamento de títulos por rota
 const pageTitles: Record<string, string> = {
@@ -63,7 +60,6 @@ export function AppLayout() {
   const { signOut } = useAuth();
   const { toast } = useToast();
   const [searchOpen, setSearchOpen] = useState(false);
-  const isMobile = useMobile();
   const pageTitle = pageTitles[location.pathname] || "";
   const PageIcon = pageIcons[location.pathname] || Package;
 
@@ -203,32 +199,21 @@ export function AppLayout() {
         <main
           className={cn(
             "flex-1 w-full pb-20 md:pb-0 relative pt-[4.5rem] transition-all duration-300 ease-in-out",
-            isMobile ? 'overflow-hidden' : '',
             isSidebarExpanded ? "md:pl-[17rem]" : "md:pl-24"
           )}
         >
-          <div className={`min-h-full w-full max-w-full page-content-wrapper ${isMobile ? 'relative overflow-hidden' : ''}`}>
-            <div className={`w-full max-w-full ${isMobile ? 'h-full' : ''}`}>
-              {isMobile ? (
-                <MobilePageTransition>
-                  <Outlet />
-                </MobilePageTransition>
-              ) : (
-                <SmoothPageTransition>
-                  <Outlet />
-                </SmoothPageTransition>
-              )}
+          <div className="min-h-full w-full max-w-full page-content-wrapper">
+            <div className="w-full max-w-full">
+              <SmoothPageTransition>
+                <Outlet />
+              </SmoothPageTransition>
             </div>
           </div>
         </main>
       </div>
 
       {/* Global Search Dialog */}
-      {isMobile ? (
-        <MobileSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
-      ) : (
-        <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
-      )}
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }

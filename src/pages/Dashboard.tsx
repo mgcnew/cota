@@ -17,16 +17,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { useDashboard } from '@/hooks/useDashboard';
-import { useDashboardMobile } from '@/hooks/mobile/useDashboardMobile';
-import { useMobile } from '@/contexts/MobileProvider';
 
 import { EvolutionChart } from '@/components/dashboard/EvolutionChart';
 import { EconomyChart } from '@/components/dashboard/EconomyChart';
-
-// Componentes Mobile (mantidos por enquanto)
-import { MobileDashboardMetrics } from '@/components/mobile/dashboard/MobileDashboardMetrics';
-import { MobileDashboardQuickActions } from '@/components/mobile/dashboard/MobileDashboardQuickActions';
-import { MobileDashboardRecentQuotes } from '@/components/mobile/dashboard/MobileDashboardRecentQuotes';
 
 const DEFAULT_METRICS = {
     cotacoesAtivas: 0,
@@ -55,23 +48,15 @@ export default function DashboardRefactored() {
     const [evolutionPeriod, setEvolutionPeriod] = useState('7d');
     const [economyPeriod, setEconomyPeriod] = useState('7d');
     const navigate = useNavigate();
-    const isMobile = useMobile();
 
     // Data Hooks
     const dashboardData = useDashboard();
-    const dashboardMobileData = useDashboardMobile();
 
     // Data Selection
-    const metrics = isMobile
-        ? dashboardMobileData.metrics
-        : (dashboardData?.metrics ?? DEFAULT_METRICS);
-
-    const monthlyData = isMobile ? [] : (dashboardData?.monthlyData ?? []);
-    const dailyData = isMobile ? [] : (dashboardData?.dailyData ?? []);
-
-    const isLoading = isMobile
-        ? dashboardMobileData.isLoading
-        : (dashboardData?.isLoading ?? false);
+    const metrics = dashboardData?.metrics ?? DEFAULT_METRICS;
+    const monthlyData = dashboardData?.monthlyData ?? [];
+    const dailyData = dashboardData?.dailyData ?? [];
+    const isLoading = dashboardData?.isLoading ?? false;
 
     // Filter Logic
     const filterDataByPeriod = useCallback((period: string) => {
@@ -113,25 +98,6 @@ export default function DashboardRefactored() {
         setSelectedPeriod(value);
         // Implementar lógica de filtro real se necessário
     };
-
-    if (isMobile) {
-        return (
-            <PageWrapper>
-                <div className="page-container space-y-6">
-                    <MobileDashboardMetrics
-                        metrics={dashboardMobileData.metrics}
-                        isLoading={isLoading}
-                    />
-                    <MobileDashboardQuickActions />
-                    <MobileDashboardRecentQuotes
-                        quotes={dashboardMobileData.recentQuotes}
-                        isLoading={isLoading}
-                        onLoadQuotes={dashboardMobileData.loadRecentQuotes}
-                    />
-                </div>
-            </PageWrapper>
-        );
-    }
 
     return (
         <PageWrapper>
