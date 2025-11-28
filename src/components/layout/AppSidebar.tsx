@@ -148,10 +148,10 @@ export function AppSidebar() {
             isSidebarExpanded ? "opacity-100 w-auto" : "opacity-0 w-0 hidden"
           )}>
             <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-              {profile?.name || user?.email?.split('@')[0] || 'Usuário'}
+              {profile?.full_name || user?.email?.split('@')[0] || 'Usuário'}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {profile?.role || 'Membro'}
+              Membro
             </p>
           </div>
         </div>

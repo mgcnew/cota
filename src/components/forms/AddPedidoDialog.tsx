@@ -65,6 +65,7 @@ export default function AddPedidoDialog({
   const [lastUsedPrices, setLastUsedPrices] = useState<Record<string, number>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [productPopoverOpen, setProductPopoverOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -633,7 +634,10 @@ export default function AddPedidoDialog({
                   selectedProduct={selectedProduct}
                   handleProductSelect={handleProductSelect}
                   debouncedProductSearch={debouncedProductSearch}
+                  productSearch={productSearch}
                   setProductSearch={setProductSearch}
+                  productPopoverOpen={productPopoverOpen}
+                  setProductPopoverOpen={setProductPopoverOpen}
                   newProductQuantity={newProductQuantity}
                   setNewProductQuantity={setNewProductQuantity}
                   newProductUnit={newProductUnit}
