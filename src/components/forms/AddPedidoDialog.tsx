@@ -248,9 +248,9 @@ export default function AddPedidoDialog({
     }
   };
 
-  // Filter products with debounce - só mostra ao digitar
+  // Filter products - mostrar todos ou filtrados
   const filteredProducts = useMemo(() => {
-    if (!debouncedProductSearch) return []; // Não mostra nada até começar a digitar
+    if (!debouncedProductSearch) return products; // Mostra todos quando não há busca
     return products.filter(p => p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase()));
   }, [products, debouncedProductSearch]);
   const handleAddItem = () => {
