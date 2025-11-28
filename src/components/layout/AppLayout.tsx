@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
@@ -8,6 +8,7 @@ import { usePagePreload } from "@/hooks/mobile/usePagePreload";
 import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3, Sparkles, Mic, MessageSquare } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -66,6 +67,24 @@ export function AppLayout() {
   const pageTitle = pageTitles[location.pathname] || "";
   const PageIcon = pageIcons[location.pathname] || Package;
 
+  // Estado para controlar o padding baseado na sidebar
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
+    const saved = localStorage.getItem('sidebarExpanded');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  // Ouvir mudanças na sidebar
+  useEffect(() => {
+    const handleSidebarToggle = (e: CustomEvent<{ expanded: boolean }>) => {
+      setIsSidebarExpanded(e.detail.expanded);
+    };
+
+    window.addEventListener('sidebarToggle', handleSidebarToggle as EventListener);
+    return () => {
+      window.removeEventListener('sidebarToggle', handleSidebarToggle as EventListener);
+    };
+  }, []);
+
   // Preload inteligente de páginas relacionadas
   usePagePreload();
 
@@ -94,7 +113,12 @@ export function AppLayout() {
       {/* Main Content Area */}
       <div className="flex flex-col w-full min-h-screen relative">
         {/* Header Fixo Minimalista */}
-        <header className="fixed top-1 right-1 left-1 md:right-1 md:left-[17rem] z-40 h-16 bg-white/80 dark:bg-[#1C1F26]/95 backdrop-blur-xl border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-150 ease-out">
+        <header
+          className={cn(
+            "fixed top-1 right-1 left-1 md:right-1 z-40 h-16 bg-white/80 dark:bg-[#1C1F26]/95 backdrop-blur-xl border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300 ease-in-out",
+            isSidebarExpanded ? "md:left-[17rem]" : "md:left-24"
+          )}
+        >
           {/* Efeito de vidro minimalista */}
           <>
             {/* Gradiente sutil apenas no modo claro */}
@@ -176,7 +200,13 @@ export function AppLayout() {
         </header>
 
         {/* Main Content */}
-        <main className={`flex-1 w-full pb-20 md:pb-0 relative pt-[4.5rem] md:pl-[17rem] transition-none ${isMobile ? 'overflow-hidden' : ''}`}>
+        <main
+          className={cn(
+            "flex-1 w-full pb-20 md:pb-0 relative pt-[4.5rem] transition-all duration-300 ease-in-out",
+            isMobile ? 'overflow-hidden' : '',
+            isSidebarExpanded ? "md:pl-[17rem]" : "md:pl-24"
+          )}
+        >
           <div className={`min-h-full w-full max-w-full page-content-wrapper ${isMobile ? 'relative overflow-hidden' : ''}`}>
             <div className={`w-full max-w-full ${isMobile ? 'h-full' : ''}`}>
               {isMobile ? (
