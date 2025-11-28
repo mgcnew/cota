@@ -16,16 +16,43 @@ import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-limit: string;
-activeQuotes: number;
-totalQuotes: number;
-avgPrice: string;
-lastOrder: string;
-rating: number;
-status: "active" | "inactive" | "pending";
-phone ?: string;
-email ?: string;
-address ?: string;
+import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
+import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
+import DeleteSupplierDialog from "@/components/forms/DeleteSupplierDialog";
+import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
+import { ImportSuppliersDialog } from "@/components/forms/ImportSuppliersDialog";
+import { SupplierQuoteHistoryDialog } from "@/components/forms/SupplierQuoteHistoryDialog";
+import { toast } from "@/hooks/use-toast";
+import { MetricCard } from "@/components/ui/metric-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { ViewToggle } from "@/components/ui/view-toggle";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { usePagination } from "@/hooks/usePagination";
+import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
+import { ViewMode } from "@/types/pagination";
+import { PageWrapper, PageSection } from "@/components/layout/PageWrapper";
+import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useMobile } from "@/contexts/MobileProvider";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
+import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
+import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
+import { SuppliersMobileList } from "@/components/mobile/suppliers/SuppliersMobileList";
+import { AddSupplierMobile } from "@/components/mobile/suppliers/AddSupplierMobile";
+import { EditSupplierMobile } from "@/components/mobile/suppliers/EditSupplierMobile";
+interface Supplier {
+  id: string;
+  name: string;
+  contact: string;
+  limit: string;
+  activeQuotes: number;
+  totalQuotes: number;
+  avgPrice: string;
+  lastOrder: string;
+  rating: number;
+  status: "active" | "inactive" | "pending";
+  phone?: string;
+  email?: string;
+  address?: string;
 }
 type SupplierFormData = {
   name: string;
@@ -76,7 +103,7 @@ export default function Fornecedores() {
     searchQuery: isMobile ? debouncedSearchQuery : undefined,
     statusFilter: isMobile ? statusFilter : undefined,
   });
-
+  
   // Selecionar hook baseado no dispositivo
   const isMobileDevice = isMobile;
   const suppliersData = isMobileDevice ? {
@@ -151,13 +178,13 @@ export default function Fornecedores() {
     if (!isMobileDevice) {
       return suppliers;
     }
-
+    
     // Mobile: mapear SupplierMobile para Supplier
     // Garantir que todos os campos estejam presentes
     const mapped = suppliers.map(s => {
       // Buscar total de pedidos para este fornecedor
       const orderCount = supplierOrdersCount[s.id] || 0;
-
+      
       return {
         id: s.id,
         name: s.name,
@@ -174,7 +201,7 @@ export default function Fornecedores() {
         address: s.address,
       };
     });
-
+    
     return mapped;
   }, [suppliers, isMobileDevice, supplierOrdersCount]);
 
@@ -224,7 +251,7 @@ export default function Fornecedores() {
       });
       return;
     }
-
+    
     if (!supplier.phone) {
       toast({
         title: "Telefone não encontrado",
@@ -283,22 +310,22 @@ export default function Fornecedores() {
   // DESKTOP: Usar paginação client-side
   const paginatedData = isMobileDevice
     ? {
-      items: filteredSuppliers,
-      pagination: {
-        currentPage: 1,
-        totalPages: 1,
-        itemsPerPage: filteredSuppliers.length,
-        totalItems: filteredSuppliers.length,
-        startIndex: 0,
-        endIndex: filteredSuppliers.length,
-        canGoNext: false,
-        canGoPrev: false,
-        goNext: () => { },
-        goPrev: () => { },
-        goToPage: () => { },
-        setItemsPerPage: () => { },
-      },
-    }
+        items: filteredSuppliers,
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          itemsPerPage: filteredSuppliers.length,
+          totalItems: filteredSuppliers.length,
+          startIndex: 0,
+          endIndex: filteredSuppliers.length,
+          canGoNext: false,
+          canGoPrev: false,
+          goNext: () => {},
+          goPrev: () => {},
+          goToPage: () => {},
+          setItemsPerPage: () => {},
+        },
+      }
     : paginate(filteredSuppliers as any);
   const getStatusBadge = useCallback((status: string) => {
     const statusConfig = {
@@ -321,8 +348,8 @@ export default function Fornecedores() {
     const config = statusConfig[status as keyof typeof statusConfig];
     if (!config) return null;
     return <Badge variant={config.variant} className={config.className}>
-      {config.label}
-    </Badge>;
+        {config.label}
+      </Badge>;
   }, []);
   const getPerformanceBadge = useCallback((rating: number) => {
     if (rating >= 4.5) return { label: "Excelente", icon: Award, color: "bg-green-100 text-green-800 border-green-200" };
@@ -360,31 +387,31 @@ export default function Fornecedores() {
       return sum + (isNaN(limitValue) ? 0 : limitValue);
     }, 0);
     const activeQuotesTotal = mappedSuppliers.reduce((sum, s) => sum + ((s as any).activeQuotes || 0), 0);
-
+    
     // Distribuição por status
     const porStatus = {
       active: mappedSuppliers.filter(s => s.status === "active").length,
       inactive: mappedSuppliers.filter(s => s.status === "inactive").length,
       pending: mappedSuppliers.filter(s => s.status === "pending").length
     };
-
+    
     // Percentual de fornecedores ativos
-    const percentualAtivos = mappedSuppliers.length > 0
+    const percentualAtivos = mappedSuppliers.length > 0 
       ? Math.round((porStatus.active / mappedSuppliers.length) * 100)
       : 0;
-
+    
     // Limite médio por fornecedor ativo
     const limiteMedioPorAtivo = porStatus.active > 0
       ? (totalLimit / porStatus.active).toFixed(1)
       : "0.0";
-
+    
     // Média de cotações por fornecedor
     const fornecedoresComCotacoes = mappedSuppliers.filter(s => ((s as any).activeQuotes || 0) > 0 || ((s as any).totalQuotes || 0) > 0);
     const totalQuotes = mappedSuppliers.reduce((sum, s) => sum + ((s as any).totalQuotes || 0), 0);
     const mediaCotacoesPorFornecedor = fornecedoresComCotacoes.length > 0
       ? (totalQuotes / fornecedoresComCotacoes.length).toFixed(1)
       : "0.0";
-
+    
     // Distribuição de cotações por fornecedor (para o mini gráfico)
     // Agrupa fornecedores por faixas de cotações ativas
     const distribuicaoCotacoes = [0, 0, 0, 0, 0, 0, 0]; // 7 barras
@@ -398,7 +425,7 @@ export default function Fornecedores() {
       else if (quotes <= 20) distribuicaoCotacoes[5]++;
       else distribuicaoCotacoes[6]++;
     });
-
+    
     return {
       total: mappedSuppliers.length,
       active: porStatus.active,
@@ -583,154 +610,154 @@ export default function Fornecedores() {
 
   if (loading || suppliersLoading) {
     return <div className="flex items-center justify-center h-screen">
-      <div className="text-center">Carregando...</div>
-    </div>;
+        <div className="text-center">Carregando...</div>
+      </div>;
   }
   return <>
-    <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
-    <PageWrapper>
-      <div className="page-container">
-        {/* Stats Cards - Ocultar no mobile para economizar espaço */}
-        {/* Desktop: Grid 2x2 ou 4 colunas */}
-        {!isMobile && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
-            {renderCard1}
-            {renderCard2}
-            {renderCard3}
-            {renderCard4}
-          </div>
-        )}
-
-        {/* Filters */}
-        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-          <CardContent className="p-3 md:p-4">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
-              {/* ViewToggle - Escondido no mobile */}
-              <div className="hidden sm:block">
-                <ViewToggle view={viewMode} onViewChange={setViewMode} />
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
-                {/* Mobile: Busca e Botão Criar lado a lado */}
-                <div className="flex gap-2 sm:gap-3">
-                  <div className="relative flex-1 sm:flex-none">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                    <Input placeholder="Buscar fornecedores..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-indigo-300/70 dark:hover:border-indigo-600/70 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/50 dark:focus:ring-indigo-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
-                  </div>
-
-                  {/* Botão Criar - Visível apenas no mobile */}
-                  <Button
-                    onClick={() => addSupplierRef.current?.click()}
-                    className="sm:hidden bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl px-4 flex-shrink-0"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Select Status - Desktop */}
-                <div className="hidden sm:block">
-                  <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                    <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-indigo-300/70 dark:hover:border-indigo-600/70 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/50 dark:focus:ring-indigo-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="active">Ativos</SelectItem>
-                      <SelectItem value="inactive">Inativos</SelectItem>
-                      <SelectItem value="pending">Pendentes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Mobile: Action Sheet para filtros */}
-                {isMobile && (
-                  <MobileActionSheet
-                    trigger={
-                      <Button variant="outline" className="h-10 px-4 border-gray-200 dark:border-gray-700">
-                        <Filter className="h-4 w-4 mr-2" />
-                        Filtros
-                      </Button>
-                    }
-                    title="Filtrar por Status"
-                    open={filtersOpen}
-                    onOpenChange={setFiltersOpen}
-                  >
-                    <div className="space-y-2">
-                      <Button
-                        variant={statusFilter === "all" ? "default" : "outline"}
-                        className="w-full justify-start"
-                        onClick={() => { setStatusFilter("all"); setFiltersOpen(false); }}
-                      >
-                        Todos
-                      </Button>
-                      <Button
-                        variant={statusFilter === "active" ? "default" : "outline"}
-                        className="w-full justify-start"
-                        onClick={() => { setStatusFilter("active"); setFiltersOpen(false); }}
-                      >
-                        Ativos
-                      </Button>
-                      <Button
-                        variant={statusFilter === "inactive" ? "default" : "outline"}
-                        className="w-full justify-start"
-                        onClick={() => { setStatusFilter("inactive"); setFiltersOpen(false); }}
-                      >
-                        Inativos
-                      </Button>
-                      <Button
-                        variant={statusFilter === "pending" ? "default" : "outline"}
-                        className="w-full justify-start"
-                        onClick={() => { setStatusFilter("pending"); setFiltersOpen(false); }}
-                      >
-                        Pendentes
-                      </Button>
-                    </div>
-                  </MobileActionSheet>
-                )}
-
-                {/* Dropdown Ações - Escondido no mobile */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Ações
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
-                    <DropdownMenuLabel className="text-gray-600 font-medium">Gerenciar Fornecedores</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => addSupplierRef.current?.click()}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Novo Fornecedor
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => importSuppliersRef.current?.click()}>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Importar Fornecedores
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
+      <PageWrapper>
+        <div className="page-container">
+          {/* Stats Cards - Ocultar no mobile para economizar espaço */}
+          {/* Desktop: Grid 2x2 ou 4 colunas */}
+          {!isMobile && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+              {renderCard1}
+              {renderCard2}
+              {renderCard3}
+              {renderCard4}
             </div>
-          </CardContent>
-        </Card>
+          )}
 
-        {/* Suppliers View */}
-        {isMobile ? (
-          /* Mobile: Lista otimizada com infinite scroll */
-          <PullToRefresh onRefresh={async () => { await mobileSuppliers.refetch(); }}>
-            <SuppliersMobileList
-              suppliers={mobileSuppliers.suppliers || []}
-              isLoading={mobileSuppliers.isLoading}
-              isFetchingNextPage={mobileSuppliers.isFetchingNextPage}
-              hasNextPage={mobileSuppliers.hasNextPage}
-              fetchNextPage={mobileSuppliers.fetchNextPage}
-              onEdit={(supplier) => setEditingSupplier(supplier as any)}
-              onDelete={(supplier) => setDeletingSupplier(supplier as any)}
-            />
-          </PullToRefresh>
-        ) : viewMode === "grid" ? (
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {paginatedData.items.map(supplier => <Card key={supplier.id} className="group border border-gray-200/60 dark:border-gray-700/30 bg-white dark:bg-[#1C1F26] sm:bg-gradient-to-br sm:from-white sm:to-indigo-50/30 sm:dark:from-[#1C1F26] sm:dark:to-[#1C1F26] sm:backdrop-blur-sm sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 sm:hover:border-indigo-300/60 sm:dark:hover:border-indigo-600/50 sm:transition-shadow sm:duration-200">
+          {/* Filters */}
+          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+            <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+            {/* ViewToggle - Escondido no mobile */}
+            <div className="hidden sm:block">
+              <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end">
+              {/* Mobile: Busca e Botão Criar lado a lado */}
+              <div className="flex gap-2 sm:gap-3">
+                <div className="relative flex-1 sm:flex-none">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
+                  <Input placeholder="Buscar fornecedores..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-indigo-300/70 dark:hover:border-indigo-600/70 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/50 dark:focus:ring-indigo-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+                </div>
+
+                {/* Botão Criar - Visível apenas no mobile */}
+                <Button 
+                  onClick={() => addSupplierRef.current?.click()}
+                  className="sm:hidden bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl px-4 flex-shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Select Status - Desktop */}
+              <div className="hidden sm:block">
+                <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
+                  <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-indigo-300/70 dark:hover:border-indigo-600/70 focus:border-indigo-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200/50 dark:focus:ring-indigo-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="active">Ativos</SelectItem>
+                    <SelectItem value="inactive">Inativos</SelectItem>
+                    <SelectItem value="pending">Pendentes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Mobile: Action Sheet para filtros */}
+              {isMobile && (
+                <MobileActionSheet
+                  trigger={
+                    <Button variant="outline" className="h-10 px-4 border-gray-200 dark:border-gray-700">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filtros
+                    </Button>
+                  }
+                  title="Filtrar por Status"
+                  open={filtersOpen}
+                  onOpenChange={setFiltersOpen}
+                >
+                  <div className="space-y-2">
+                    <Button
+                      variant={statusFilter === "all" ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => { setStatusFilter("all"); setFiltersOpen(false); }}
+                    >
+                      Todos
+                    </Button>
+                    <Button
+                      variant={statusFilter === "active" ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => { setStatusFilter("active"); setFiltersOpen(false); }}
+                    >
+                      Ativos
+                    </Button>
+                    <Button
+                      variant={statusFilter === "inactive" ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => { setStatusFilter("inactive"); setFiltersOpen(false); }}
+                    >
+                      Inativos
+                    </Button>
+                    <Button
+                      variant={statusFilter === "pending" ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => { setStatusFilter("pending"); setFiltersOpen(false); }}
+                    >
+                      Pendentes
+                    </Button>
+                  </div>
+                </MobileActionSheet>
+              )}
+
+              {/* Dropdown Ações - Escondido no mobile */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Ações
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
+                  <DropdownMenuLabel className="text-gray-600 font-medium">Gerenciar Fornecedores</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => addSupplierRef.current?.click()}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Fornecedor
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => importSuppliersRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Importar Fornecedores
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Suppliers View */}
+      {isMobile ? (
+        /* Mobile: Lista otimizada com infinite scroll */
+        <PullToRefresh onRefresh={async () => { await mobileSuppliers.refetch(); }}>
+          <SuppliersMobileList
+            suppliers={mobileSuppliers.suppliers || []}
+            isLoading={mobileSuppliers.isLoading}
+            isFetchingNextPage={mobileSuppliers.isFetchingNextPage}
+            hasNextPage={mobileSuppliers.hasNextPage}
+            fetchNextPage={mobileSuppliers.fetchNextPage}
+            onEdit={(supplier) => setEditingSupplier(supplier as any)}
+            onDelete={(supplier) => setDeletingSupplier(supplier as any)}
+          />
+        </PullToRefresh>
+      ) : viewMode === "grid" ? (
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedData.items.map(supplier => <Card key={supplier.id} className="group border border-gray-200/60 dark:border-gray-700/30 bg-white dark:bg-[#1C1F26] sm:bg-gradient-to-br sm:from-white sm:to-indigo-50/30 sm:dark:from-[#1C1F26] sm:dark:to-[#1C1F26] sm:backdrop-blur-sm sm:hover:shadow-xl sm:dark:hover:shadow-lg sm:dark:hover:shadow-black/20 sm:hover:border-indigo-300/60 sm:dark:hover:border-indigo-600/50 sm:transition-shadow sm:duration-200">
               <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2 sm:space-y-3 flex-1">
@@ -758,9 +785,9 @@ export default function Fornecedores() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<DropdownMenuItem onSelect={e => e.preventDefault()} className="hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors">
-                        <Eye className="h-4 w-4 mr-2 text-blue-600" />
-                        Ver Histórico de Cotações
-                      </DropdownMenuItem>} />
+                            <Eye className="h-4 w-4 mr-2 text-blue-600" />
+                            Ver Histórico de Cotações
+                          </DropdownMenuItem>} />
                       <DropdownMenuItem onClick={() => setEditingSupplier(supplier)} className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors">
                         <Edit className="h-4 w-4 mr-2 text-green-600" />
                         Editar
@@ -783,12 +810,12 @@ export default function Fornecedores() {
                       <span className="font-medium">Contato:</span>
                       <span className="font-semibold text-gray-800 dark:text-gray-200">{capitalize(supplier.contact)}</span>
                     </div>
-
+                    
                     {/* Botões de ação rápida mobile */}
                     <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <SupplierQuoteHistoryDialog
-                        supplierName={supplier.name}
-                        supplierId={supplier.id}
+                      <SupplierQuoteHistoryDialog 
+                        supplierName={supplier.name} 
+                        supplierId={supplier.id} 
                         trigger={
                           <Button
                             variant="outline"
@@ -798,7 +825,7 @@ export default function Fornecedores() {
                             <History className="h-3.5 w-3.5 mr-1.5" />
                             Histórico
                           </Button>
-                        }
+                        } 
                       />
                       <Button
                         variant="outline"
@@ -850,12 +877,12 @@ export default function Fornecedores() {
                       </div>
                       <span className="text-sm font-semibold text-gray-900 dark:text-white">{supplier.totalQuotes}</span>
                     </div>
-
+                    
                     {/* Botão Nova Cotação - Mobile */}
                     <div className="pt-2.5">
                       <AddQuoteDialog onAdd={handleAddQuote} trigger={
-                        <Button
-                          size="sm"
+                        <Button 
+                          size="sm" 
                           variant="outline"
                           className="w-full border-2 border-primary/60 dark:border-primary/60 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-primary hover:text-primary/80 dark:hover:text-primary font-medium transition-all duration-200 text-xs h-9 shadow-sm"
                         >
@@ -946,59 +973,59 @@ export default function Fornecedores() {
                   </div>
 
                   <AddQuoteDialog onAdd={handleAddQuote} trigger={<Button size="sm" className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Cotação
-                  </Button>} />
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nova Cotação
+                    </Button>} />
                 </div>
               </CardContent>
             </Card>)}
-          </div>
-        ) : (
-          /* Desktop: Tabela */
-          <Card className="border-0 bg-transparent">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto w-full">
-                <Table className="w-full">
-                  <TableHeader>
-                    <TableRow>
-                      <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                        <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-blue-200/60 dark:border-blue-900/40 rounded-lg shadow-sm px-4 py-3">
-                          <div className="w-[30%] flex items-center gap-2 pr-4 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/15 to-cyan-500/15 flex items-center justify-center text-blue-600 dark:text-cyan-300">
-                              <Building2 className="h-4 w-4" />
-                            </div>
-                            <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Fornecedor</span>
+        </div>
+      ) : (
+        /* Desktop: Tabela */
+        <Card className="border-0 bg-transparent">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto w-full">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
+                      <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-blue-200/60 dark:border-blue-900/40 rounded-lg shadow-sm px-4 py-3">
+                        <div className="w-[30%] flex items-center gap-2 pr-4 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/15 to-cyan-500/15 flex items-center justify-center text-blue-600 dark:text-cyan-300">
+                            <Building2 className="h-4 w-4" />
                           </div>
-                          <div className="hidden md:flex w-[12%] pl-2 justify-center items-center gap-1.5">
-                            <CircleDot className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
-                            <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Status</span>
-                          </div>
-                          <div className="hidden lg:flex w-[14%] pl-2 justify-center items-center gap-1.5">
-                            <CreditCard className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
-                            <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Limites</span>
-                          </div>
-                          <div className="hidden lg:flex w-[12%] pl-2 justify-center items-center gap-1.5">
-                            <DollarSign className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
-                            <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Total</span>
-                          </div>
-                          <div className="hidden xl:flex w-[12%] pl-2 justify-center items-center gap-1.5">
-                            <ShoppingCart className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
-                            <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Pedidos</span>
-                          </div>
-                          <div className="hidden xl:flex w-[10%] pl-2 justify-center items-center gap-1.5">
-                            <Star className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
-                            <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Nota</span>
-                          </div>
-                          <div className="w-[10%] pl-4 flex justify-end items-center gap-1.5">
-                            <MoreVertical className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
-                            <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Ações</span>
-                          </div>
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Fornecedor</span>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="group border-none">
+                        <div className="hidden md:flex w-[12%] pl-2 justify-center items-center gap-1.5">
+                          <CircleDot className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Status</span>
+                        </div>
+                        <div className="hidden lg:flex w-[14%] pl-2 justify-center items-center gap-1.5">
+                          <CreditCard className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Limites</span>
+                        </div>
+                        <div className="hidden lg:flex w-[12%] pl-2 justify-center items-center gap-1.5">
+                          <DollarSign className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Total</span>
+                        </div>
+                        <div className="hidden xl:flex w-[12%] pl-2 justify-center items-center gap-1.5">
+                          <ShoppingCart className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Pedidos</span>
+                        </div>
+                        <div className="hidden xl:flex w-[10%] pl-2 justify-center items-center gap-1.5">
+                          <Star className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Nota</span>
+                        </div>
+                        <div className="w-[10%] pl-4 flex justify-end items-center gap-1.5">
+                          <MoreVertical className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
+                          <span className="uppercase tracking-wide text-[11px] font-semibold text-blue-900 dark:text-blue-100">Ações</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.items.map(supplier => <TableRow key={supplier.id} className="group border-none">
                       <TableCell colSpan={7} className="px-1 py-3">
                         <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-indigo-300/60 dark:hover:border-indigo-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                           {/* Fornecedor - Largura fixa */}
@@ -1057,8 +1084,8 @@ export default function Fornecedores() {
                           <div className="w-[10%] pl-4">
                             <div className="flex items-center justify-end gap-2">
                               <SupplierQuoteHistoryDialog supplierName={supplier.name} supplierId={supplier.id} trigger={<Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 p-0 h-8 w-8 rounded-lg border border-primary/20 dark:border-primary/30 hover:border-primary/40 dark:hover:border-primary/50 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
-                                <History className="h-4 w-4" />
-                              </Button>} />
+                                    <History className="h-4 w-4" />
+                                  </Button>} />
 
                               <Button variant="ghost" size="sm" onClick={() => openWhatsApp(supplier)} className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 p-0 h-8 w-8 rounded-lg border border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all" title={`Conversar com ${supplier.contact} no WhatsApp`}>
                                 <MessageCircle className="h-4 w-4" />
@@ -1086,58 +1113,58 @@ export default function Fornecedores() {
                         </div>
                       </TableCell>
                     </TableRow>)}
-                  </TableBody>
-                </Table>
-              </div>
-              <div className="border-t border-indigo-100/80 dark:border-gray-700/30 bg-gradient-to-r from-indigo-50/30 to-blue-50/30 dark:from-gray-800/30 dark:to-gray-800/20 px-6 py-4">
-                <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="border-t border-indigo-100/80 dark:border-gray-700/30 bg-gradient-to-r from-indigo-50/30 to-blue-50/30 dark:from-gray-800/30 dark:to-gray-800/20 px-6 py-4">
+              <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {filteredSuppliers.length === 0 && (
-          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
-            <CardContent className="p-12 text-center">
-              <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhum fornecedor encontrado</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Tente ajustar os filtros ou adicione novos fornecedores
-              </p>
-              <AddSupplierDialog onAdd={handleAddSupplier} trigger={<Button>
+      {filteredSuppliers.length === 0 && (
+        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
+          <CardContent className="p-12 text-center">
+            <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhum fornecedor encontrado</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Tente ajustar os filtros ou adicione novos fornecedores
+            </p>
+            <AddSupplierDialog onAdd={handleAddSupplier} trigger={<Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar Fornecedor
               </Button>} />
-            </CardContent>
-          </Card>
-        )}
+          </CardContent>
+        </Card>
+      )}
 
-        <EditSupplierDialog supplier={editingSupplier} open={!!editingSupplier} onOpenChange={open => !open && setEditingSupplier(null)} onEdit={handleEditSupplier} />
+      <EditSupplierDialog supplier={editingSupplier} open={!!editingSupplier} onOpenChange={open => !open && setEditingSupplier(null)} onEdit={handleEditSupplier} />
 
-        <DeleteSupplierDialog supplier={deletingSupplier} open={!!deletingSupplier} onOpenChange={open => !open && setDeletingSupplier(null)} onDelete={handleDeleteSupplier} />
+      <DeleteSupplierDialog supplier={deletingSupplier} open={!!deletingSupplier} onOpenChange={open => !open && setDeletingSupplier(null)} onDelete={handleDeleteSupplier} />
 
-        {/* Hidden triggers for dialogs */}
-        <div className="hidden">
-          <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
-          <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
-        </div>
-
-        {/* Mobile: Modais otimizados */}
-        {isMobile && (
-          <>
-            <AddSupplierMobile
-              trigger={<div />}
-              onSuccess={() => mobileSuppliers.refetch()}
-            />
-            <EditSupplierMobile
-              supplier={editingSupplier as any}
-              open={!!editingSupplier}
-              onOpenChange={(open) => !open && setEditingSupplier(null)}
-              onSuccess={() => mobileSuppliers.refetch()}
-            />
-          </>
-        )}
+      {/* Hidden triggers for dialogs */}
+      <div className="hidden">
+        <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
+        <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
       </div>
-    </PageWrapper>
-  </>;
+
+      {/* Mobile: Modais otimizados */}
+      {isMobile && (
+        <>
+          <AddSupplierMobile
+            trigger={<div />}
+            onSuccess={() => mobileSuppliers.refetch()}
+          />
+          <EditSupplierMobile
+            supplier={editingSupplier as any}
+            open={!!editingSupplier}
+            onOpenChange={(open) => !open && setEditingSupplier(null)}
+            onSuccess={() => mobileSuppliers.refetch()}
+          />
+        </>
+      )}
+        </div>
+      </PageWrapper>
+    </>;
 }
