@@ -4,10 +4,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Combobox } from "@/components/ui/combobox";
-import { Package, Plus, Copy, Trash2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Package, Plus, Copy, Trash2, Check, ChevronsUpDown } from "lucide-react";
 import { PedidoItem } from "./types";
 import { formatDecimalDisplay } from "@/lib/text-utils";
+import { cn } from "@/lib/utils";
 
 interface ProductsTabProps {
     isMobile: boolean;
@@ -17,7 +19,10 @@ interface ProductsTabProps {
     selectedProduct: any;
     handleProductSelect: (product: any) => void;
     debouncedProductSearch: string;
+    productSearch: string;
     setProductSearch: (search: string) => void;
+    productPopoverOpen: boolean;
+    setProductPopoverOpen: (open: boolean) => void;
 
     // Product form states
     newProductQuantity: string;
@@ -49,7 +54,10 @@ export function ProductsTab({
     selectedProduct,
     handleProductSelect,
     debouncedProductSearch,
+    productSearch,
     setProductSearch,
+    productPopoverOpen,
+    setProductPopoverOpen,
     newProductQuantity,
     setNewProductQuantity,
     newProductUnit,
@@ -79,22 +87,61 @@ export function ProductsTab({
                     <div className={`${isMobile ? 'space-y-3' : 'space-y-2'} min-w-0`}>
                         <Label className={`${isMobile ? 'text-base' : 'text-sm'} font-medium text-foreground`}>Produto *</Label>
                         <div className="min-w-0">
-                            <Combobox
-                                options={filteredProducts.map(p => ({
-                                    value: p.name,
-                                    label: p.name
-                                }))}
-                                value={selectedProduct ? selectedProduct.name : ""}
-                                onValueChange={value => {
-                                    const product = products.find(p => p.name === value);
-                                    if (product) handleProductSelect(product);
-                                }}
-                                placeholder="Digite para buscar produtos..."
-                                searchPlaceholder={`Buscar entre ${products.length} produtos...`}
-                                emptyText={debouncedProductSearch ? "Nenhum produto encontrado" : "Digite para ver produtos..."}
-                                className={`w-full min-w-0 ${isMobile ? 'h-11 text-base' : ''}`}
-                                onSearchChange={setProductSearch}
-                            />
+                            <Popover open={productPopoverOpen} onOpenChange={setProductPopoverOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        className={cn(
+                                            "w-full justify-between",
+                                            isMobile ? 'h-11 text-base' : 'h-10',
+                                            !selectedProduct && "text-muted-foreground"
+                                        )}
+                                    >
+                                        {selectedProduct ? selectedProduct.name : "Digite para buscar produtos..."}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                                    <Command>
+                                        <CommandInput 
+                                            placeholder={`Buscar entre ${products.length} produtos...`}
+                                            value={productSearch}
+                                            onValueChange={setProductSearch}
+                                            className={isMobile ? 'h-11 text-base' : ''}
+                                        />
+                                        <CommandList className="max-h-[300px]">
+                                            <CommandEmpty>
+                                                {debouncedProductSearch 
+                                                    ? "Nenhum produto encontrado" 
+                                                    : `Digite para buscar entre ${products.length} produtos...`
+                                                }
+                                            </CommandEmpty>
+                                            <CommandGroup>
+                                                {filteredProducts.map((product) => (
+                                                    <CommandItem
+                                                        key={product.id}
+                                                        value={product.name}
+                                                        onSelect={() => {
+                                                            handleProductSelect(product);
+                                                            setProductSearch("");
+                                                            setProductPopoverOpen(false);
+                                                        }}
+                                                    >
+                                                        <Check
+                                                            className={cn(
+                                                                "mr-2 h-4 w-4",
+                                                                selectedProduct?.id === product.id ? "opacity-100" : "opacity-0"
+                                                            )}
+                                                        />
+                                                        {product.name}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
                         </div>
                         {errors.product && (
                             <p className="text-xs text-red-500 dark:text-red-400">{errors.product}</p>
