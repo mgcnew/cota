@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 // Categorias com seus respectivos itens de menu
 interface MenuItem {
@@ -260,6 +260,8 @@ export function AppSidebar() {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-72 border-r border-gray-200 dark:border-gray-800">
+        <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
+        <SheetDescription className="sr-only">Menu principal da aplicação para navegação entre páginas.</SheetDescription>
         <SidebarContent expanded={true} mobile={true} />
       </SheetContent>
     </Sheet>
