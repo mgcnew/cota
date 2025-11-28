@@ -205,11 +205,11 @@ export default function AddPedidoDialog({
         return;
       }
 
-      // Get total count
+      // Get total count (RLS já filtra por company_id)
       const {
         count: totalCount,
         error: countError
-      } = await supabase.from('products').select('*', {
+      } = await supabase.from('products').select('id', {
         count: 'exact',
         head: true
       });
@@ -219,10 +219,10 @@ export default function AddPedidoDialog({
         return;
       }
 
-      // Load in batches of 1000
+      // Load in batches de 1000, apenas campos necessários
       const pageSize = 1000;
       const totalPages = Math.ceil(totalCount / pageSize);
-      const allProducts = [];
+      const allProducts: { id: string; name: string }[] = [];
       console.log(`[ADD PEDIDO] Loading ${totalCount} products in ${totalPages} pages`);
       for (let page = 0; page < totalPages; page++) {
         const from = page * pageSize;
@@ -230,7 +230,11 @@ export default function AddPedidoDialog({
         const {
           data: pageData,
           error: pageError
-        } = await supabase.from('products').select('*').order('name').range(from, to);
+        } = await supabase
+          .from('products')
+          .select('id, name')
+          .order('name')
+          .range(from, to);
         if (pageError) throw pageError;
         if (pageData && pageData.length > 0) {
           allProducts.push(...pageData);
