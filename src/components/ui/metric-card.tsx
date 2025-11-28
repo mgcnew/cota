@@ -15,94 +15,97 @@ interface MetricCardProps {
   className?: string;
 }
 
-export function MetricCard({ 
-  title, 
-  value, 
-  icon: Icon, 
-  trend, 
+export function MetricCard({
+  title,
+  value,
+  icon: Icon,
+  trend,
   variant = "default",
-  className 
+  className
 }: MetricCardProps) {
   const variantStyles = {
     default: {
-      gradient: "from-purple-500/10 via-purple-400/5 to-transparent",
-      iconBg: "bg-[#7C3AED] dark:bg-gradient-to-br dark:from-purple-600 dark:to-purple-500",
+      cardBg: "bg-purple-50 dark:bg-purple-950/30",
+      iconBg: "bg-purple-600 dark:bg-purple-500",
       iconColor: "text-white",
-      border: "border-purple-300/30",
-      glow: "shadow-[0_4px_12px_rgba(124,58,237,0.15)] dark:shadow-[0_4px_12px_rgba(124,58,237,0.25)]"
+      border: "border-purple-200 dark:border-purple-800",
+      glow: "shadow-md hover:shadow-lg shadow-purple-100 dark:shadow-purple-900/50",
+      titleColor: "text-purple-700 dark:text-purple-300"
     },
     success: {
-      gradient: "from-green-500/10 via-green-400/5 to-transparent",
-      iconBg: "bg-[#22C55E] dark:bg-gradient-to-br dark:from-green-600 dark:to-green-500",
+      cardBg: "bg-green-50 dark:bg-green-950/30",
+      iconBg: "bg-green-600 dark:bg-green-500",
       iconColor: "text-white",
-      border: "border-green-300/30",
-      glow: "shadow-[0_4px_12px_rgba(34,197,94,0.15)] dark:shadow-[0_4px_12px_rgba(34,197,94,0.25)]"
+      border: "border-green-200 dark:border-green-800",
+      glow: "shadow-md hover:shadow-lg shadow-green-100 dark:shadow-green-900/50",
+      titleColor: "text-green-700 dark:text-green-300"
     },
     warning: {
-      gradient: "from-yellow-400/10 via-yellow-300/5 to-transparent",
-      iconBg: "bg-[#FACC15] dark:bg-gradient-to-br dark:from-yellow-400 dark:to-yellow-500",
-      iconColor: "text-gray-900 dark:text-white",
-      border: "border-yellow-300/30",
-      glow: "shadow-[0_4px_12px_rgba(250,204,21,0.15)] dark:shadow-[0_4px_12px_rgba(250,204,21,0.25)]"
+      cardBg: "bg-amber-50 dark:bg-amber-950/30",
+      iconBg: "bg-amber-600 dark:bg-amber-500",
+      iconColor: "text-white",
+      border: "border-amber-200 dark:border-amber-800",
+      glow: "shadow-md hover:shadow-lg shadow-amber-100 dark:shadow-amber-900/50",
+      titleColor: "text-amber-700 dark:text-amber-300"
     },
     error: {
-      gradient: "from-error/10 via-error-light/5 to-transparent",
-      iconBg: "bg-error dark:bg-gradient-to-br dark:from-error dark:to-error-light",
+      cardBg: "bg-red-50 dark:bg-red-950/30",
+      iconBg: "bg-red-600 dark:bg-red-500",
       iconColor: "text-white",
-      border: "border-error/30",
-      glow: "shadow-[0_4px_12px_rgba(239,68,68,0.15)] dark:shadow-[0_4px_12px_rgba(239,68,68,0.25)]"
+      border: "border-red-200 dark:border-red-800",
+      glow: "shadow-md hover:shadow-lg shadow-red-100 dark:shadow-red-900/50",
+      titleColor: "text-red-700 dark:text-red-300"
     },
     info: {
-      gradient: "from-info/10 via-info-light/5 to-transparent",
-      iconBg: "bg-info dark:bg-gradient-to-br dark:from-info dark:to-info-light",
+      cardBg: "bg-blue-50 dark:bg-blue-950/30",
+      iconBg: "bg-blue-600 dark:bg-blue-500",
       iconColor: "text-white",
-      border: "border-info/30",
-      glow: "shadow-[0_4px_12px_rgba(139,92,246,0.15)] dark:shadow-[0_4px_12px_rgba(139,92,246,0.25)]"
+      border: "border-blue-200 dark:border-blue-800",
+      glow: "shadow-md hover:shadow-lg shadow-blue-100 dark:shadow-blue-900/50",
+      titleColor: "text-blue-700 dark:text-blue-300"
     }
   };
 
   const styles = variantStyles[variant];
 
-  const trendColor = trend?.type === "positive" 
-    ? "text-success" 
-    : trend?.type === "negative" 
-    ? "text-error" 
-    : "text-muted-foreground";
+  const trendColor = trend?.type === "positive"
+    ? "text-green-600 dark:text-green-400"
+    : trend?.type === "negative"
+      ? "text-red-600 dark:text-red-400"
+      : "text-gray-600 dark:text-gray-400";
 
   return (
-    <Card 
+    <Card
       className={cn(
-        "relative overflow-hidden border-2 transition-all duration-500 hover:scale-[1.03] group",
+        "relative overflow-hidden border-2 transition-all duration-200 hover:scale-[1.02] group",
         styles.border,
         styles.glow,
-        "bg-gradient-to-br",
-        styles.gradient,
+        styles.cardBg,
         className
       )}
     >
-      {/* Gradient overlay for depth */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
       <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="metric-label text-capitalize">
+        <CardTitle className={cn("text-sm font-semibold", styles.titleColor)}>
           {title}
         </CardTitle>
         <div className={cn(
-          "p-2.5 rounded-xl shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500", 
+          "p-2.5 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200",
           styles.iconBg
         )}>
           <Icon className={cn("h-4 w-4 md:h-5 md:w-5", styles.iconColor)} />
         </div>
       </CardHeader>
-      
+
       <CardContent className="relative">
-        <div className="metric-value text-xl md:text-2xl group-hover:scale-105 transition-transform duration-300">{value}</div>
+        <div className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+          {value}
+        </div>
         {trend && (
-          <div className="flex items-center gap-1 mt-1">
-            <span className={cn("text-xs font-medium", trendColor)}>
+          <div className="flex items-center gap-1 mt-2">
+            <span className={cn("text-xs font-semibold", trendColor)}>
               {trend.value}
             </span>
-            <span className="metric-description text-capitalize">
+            <span className="text-xs text-gray-600 dark:text-gray-400">
               {trend.label}
             </span>
           </div>
