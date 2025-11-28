@@ -2,81 +2,50 @@ import { useState, useMemo } from "react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, ShoppingCart, PackagePlus } from "lucide-react";
-import { useMobile } from "@/contexts/MobileProvider";
+import { Plus, ShoppingCart, PackagePlus, Search } from "lucide-react";
 import { useShoppingList } from "@/hooks/useShoppingList";
-import { useShoppingListMobile } from "@/hooks/mobile/useShoppingListMobile";
-import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
 import { AddProductToListDialog } from "@/components/shopping-list/AddProductToListDialog";
 import { EditShoppingListItemDialog } from "@/components/shopping-list/EditShoppingListItemDialog";
 import { ShoppingListTable } from "@/components/shopping-list/ShoppingListTable";
-import { ShoppingListMobileList } from "@/components/shopping-list/ShoppingListMobileList";
+import { ShoppingListCards } from "@/components/shopping-list/ShoppingListCards";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import { usePedidos } from "@/hooks/usePedidos";
 import { useToast } from "@/hooks/use-toast";
+import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
+import { ViewToggle } from "@/components/common/ViewToggle";
 
 export default function ListaCompras() {
-  const isMobile = useMobile();
+  const { viewMode, setViewMode } = useResponsiveViewMode();
   const { toast } = useToast();
   const { refetch: refetchPedidos } = usePedidos();
-  
-  // Hooks condicionais
-  const desktopList = useShoppingList();
-  const mobileList = useShoppingListMobile();
-  
+
+  // Unified hook
   const {
-    items: desktopItems,
-    isLoading: desktopLoading,
-    deleteItem: desktopDelete,
-    deleteMultipleItems: desktopDeleteMultiple,
-    updateItem: desktopUpdate,
-  } = desktopList;
-  
-  const {
-    items: mobileItems,
-    isLoading: mobileLoading,
-    search: mobileSearch,
-    setSearch: setMobileSearch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch: mobileRefetch,
-    deleteItem: mobileDelete,
-    deleteMultipleItems: mobileDeleteMultiple,
-    updateItem: mobileUpdate,
-  } = mobileList;
-  
-  // Usar dados apropriados baseado no dispositivo
-  const items = isMobile ? mobileItems : desktopItems;
-  const isLoading = isMobile ? mobileLoading : desktopLoading;
-  const deleteItem = isMobile ? mobileDelete : desktopDelete;
-  const deleteMultipleItems = isMobile ? mobileDeleteMultiple : desktopDeleteMultiple;
-  const updateItem = isMobile ? mobileUpdate : desktopUpdate;
-  
+    items,
+    isLoading,
+    deleteItem,
+    deleteMultipleItems,
+    updateItem,
+  } = useShoppingList();
+
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showOrderDialog, setShowOrderDialog] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [editingItem, setEditingItem] = useState<any>(null);
 
-  // Atualizar busca mobile
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    if (isMobile && setMobileSearch) {
-      setMobileSearch(value);
-    }
-  };
+  // Filter items based on search query
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return items;
 
-  // Filtrar itens no desktop
-  const filteredItems = isMobile 
-    ? items 
-    : items.filter(item => 
-        item.product_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.notes && item.notes.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
+    const query = searchQuery.toLowerCase();
+    return items.filter(item =>
+      item.product_name.toLowerCase().includes(query) ||
+      (item.notes && item.notes.toLowerCase().includes(query))
+    );
+  }, [items, searchQuery]);
 
-  // Toggle seleção de item
+  // Toggle item selection
   const toggleItemSelection = (id: string) => {
     const newSelected = new Set(selectedItems);
     if (newSelected.has(id)) {
@@ -87,7 +56,7 @@ export default function ListaCompras() {
     setSelectedItems(newSelected);
   };
 
-  // Selecionar todos
+  // Select all items
   const selectAll = () => {
     if (selectedItems.size === filteredItems.length) {
       setSelectedItems(new Set());
@@ -96,7 +65,7 @@ export default function ListaCompras() {
     }
   };
 
-  // Produtos selecionados para criar pedido
+  // Products selected for creating an order
   const preSelectedProducts = useMemo(() => {
     return filteredItems
       .filter(item => selectedItems.has(item.id))
@@ -109,7 +78,7 @@ export default function ListaCompras() {
       }));
   }, [filteredItems, selectedItems]);
 
-  // Criar pedido com itens selecionados
+  // Create order with selected items
   const handleCreateOrder = () => {
     if (selectedItems.size === 0) {
       toast({
@@ -120,14 +89,13 @@ export default function ListaCompras() {
       return;
     }
 
-    // Abrir modal de criar pedido
     setShowOrderDialog(true);
   };
 
-  // Deletar itens selecionados
+  // Delete selected items
   const handleDeleteSelected = async () => {
     if (selectedItems.size === 0) return;
-    
+
     if (!confirm(`Deseja remover ${selectedItems.size} ${selectedItems.size === 1 ? 'item' : 'itens'} da lista?`)) {
       return;
     }
@@ -138,59 +106,52 @@ export default function ListaCompras() {
 
   return (
     <PageWrapper>
-      <div className="page-container">
-        {/* Desktop Header */}
-        {!isMobile && (
-          <div className="mb-6 sm:mb-8">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 flex-shrink-0">
-                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold">Lista de Compras</h1>
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    Organize produtos para comprar no futuro
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Input
-                  placeholder="Buscar produtos..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-64 lg:w-80"
-                />
-                <Button
-                  onClick={() => setShowAddDialog(true)}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Produto
-                </Button>
-              </div>
+      <div className="page-container space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 flex-shrink-0">
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold">Lista de Compras</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Organize produtos para comprar no futuro
+              </p>
             </div>
           </div>
-        )}
 
-        {/* Mobile: Search with integrated action button */}
-        {isMobile && (
-          <MobileSearchWithAction
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onActionClick={() => setShowAddDialog(true)}
-            placeholder="Buscar produtos..."
-            actionIcon={<Plus className="h-4 w-4" />}
-            actionLabel="Adicionar"
-            resultsCount={filteredItems.length}
-            isSearching={isLoading}
-          />
-        )}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button
+              onClick={() => setShowAddDialog(true)}
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Produto
+            </Button>
+          </div>
+        </div>
 
-        {/* Ações em massa */}
+        {/* Controls: Search and View Toggle */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar produtos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+          </div>
+        </div>
+
+        {/* Bulk Actions */}
         {selectedItems.size > 0 && (
-          <div className="mb-4 p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between gap-3">
+          <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2">
             <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
               {selectedItems.size} {selectedItems.size === 1 ? 'item selecionado' : 'itens selecionados'}
             </span>
@@ -215,22 +176,17 @@ export default function ListaCompras() {
           </div>
         )}
 
-        {/* Lista/Tabela */}
-        {isMobile ? (
-          <PullToRefresh onRefresh={async () => { await mobileRefetch(); }}>
-            <ShoppingListMobileList
-              items={filteredItems}
-              isLoading={isLoading}
-              selectedItems={selectedItems}
-              onToggleSelection={toggleItemSelection}
-              onDelete={async (id) => { await deleteItem.mutateAsync(id); }}
-              onUpdate={async (data) => { await updateItem.mutateAsync(data); }}
-              onEdit={(item) => setEditingItem(item)}
-              fetchNextPage={fetchNextPage}
-              hasNextPage={hasNextPage}
-              isFetchingNextPage={isFetchingNextPage}
-            />
-          </PullToRefresh>
+        {/* Content */}
+        {viewMode === 'grid' ? (
+          <ShoppingListCards
+            items={filteredItems}
+            isLoading={isLoading}
+            selectedItems={selectedItems}
+            onToggleSelection={toggleItemSelection}
+            onDelete={async (id) => { await deleteItem.mutateAsync(id); }}
+            onUpdate={async (data) => { await updateItem.mutateAsync(data); }}
+            onEdit={(item) => setEditingItem(item)}
+          />
         ) : (
           <ShoppingListTable
             items={filteredItems}
@@ -243,13 +199,12 @@ export default function ListaCompras() {
           />
         )}
 
-        {/* Dialog Adicionar Produto */}
+        {/* Dialogs */}
         <AddProductToListDialog
           open={showAddDialog}
           onOpenChange={setShowAddDialog}
         />
 
-        {/* Dialog Editar Item */}
         <EditShoppingListItemDialog
           item={editingItem}
           open={!!editingItem}
@@ -260,7 +215,6 @@ export default function ListaCompras() {
           }}
         />
 
-        {/* Dialog Criar Pedido */}
         <AddPedidoDialog
           open={showOrderDialog}
           onOpenChange={setShowOrderDialog}

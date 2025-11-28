@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { useMobile } from "@/contexts/MobileProvider";
 import { useShoppingList } from "@/hooks/useShoppingList";
-import { useShoppingListMobile } from "@/hooks/mobile/useShoppingListMobile";
 import { useProducts } from "@/hooks/useProducts";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -24,11 +23,8 @@ interface AddProductToListDialogProps {
 export function AddProductToListDialog({ open, onOpenChange }: AddProductToListDialogProps) {
   const isMobile = useMobile();
   const { products } = useProducts();
-  const { addItem: desktopAdd } = useShoppingList();
-  const { addItem: mobileAdd } = useShoppingListMobile();
-  
-  const addItem = isMobile ? mobileAdd : desktopAdd;
-  
+  const { addItem } = useShoppingList();
+
   const [productSearch, setProductSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -90,7 +86,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
               <CommandList>
                 <CommandGroup>
                   {products
-                    .filter(p => 
+                    .filter(p =>
                       p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
                       (p.category && p.category.toLowerCase().includes(productSearch.toLowerCase()))
                     )
@@ -194,7 +190,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
           <SheetHeader className="sr-only">
             <SheetTitle>Adicionar Produto à Lista</SheetTitle>
           </SheetHeader>
-          
+
           <div className="flex-shrink-0 px-4 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white">
@@ -206,11 +202,11 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
               </div>
             </div>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-4">
             <FormContent />
           </div>
-          
+
           <div className="flex-shrink-0 px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex gap-3">
             <Button
               variant="outline"
