@@ -32,573 +32,573 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 
 interface Supplier {
-    id: string;
-    name: string;
-    contact: string;
-    limit: string;
-    activeQuotes: number;
-    totalQuotes: number;
-    avgPrice: string;
-    lastOrder: string;
-    rating: number;
-    status: "active" | "inactive" | "pending";
-    phone?: string;
-    email?: string;
-    address?: string;
+  id: string;
+  name: string;
+  contact: string;
+  limit: string;
+  activeQuotes: number;
+  totalQuotes: number;
+  avgPrice: string;
+  lastOrder: string;
+  rating: number;
+  status: "active" | "inactive" | "pending";
+  phone?: string;
+  email?: string;
+  address?: string;
 }
 
 type SupplierFormData = {
-    name: string;
-    contact: string;
-    phone?: string;
-    email?: string;
-    address?: string;
-    limit: string;
-    status: "active" | "inactive" | "pending";
+  name: string;
+  contact: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  limit: string;
+  status: "active" | "inactive" | "pending";
 };
 
 export default function Fornecedores() {
-    const navigate = useNavigate();
-    const { user, loading } = useAuth();
-    const { canViewSensitiveData } = useUserRole();
-    const [authDialogOpen, setAuthDialogOpen] = useState(false);
-    const { viewMode, setViewMode } = useResponsiveViewMode();
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
+  const { canViewSensitiveData } = useUserRole();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const { viewMode, setViewMode } = useResponsiveViewMode();
 
-    const { suppliers, isLoading: suppliersLoading, error: suppliersError, deleteSupplier, updateSupplier, refetch: invalidateCache } = useSuppliers();
+  const { suppliers, isLoading: suppliersLoading, error: suppliersError, deleteSupplier, updateSupplier, refetch: invalidateCache } = useSuppliers();
 
-    const { paginate } = usePagination<Supplier>({
-        initialItemsPerPage: 10
+  const { paginate } = usePagination<Supplier>({
+    initialItemsPerPage: 10
+  });
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
+  const addSupplierRef = useRef<HTMLButtonElement>(null);
+  const importSuppliersRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      setAuthDialogOpen(true);
+    }
+  }, [loading, user]);
+
+  const handleAddSupplier = () => {
+    invalidateCache();
+  };
+
+  const handleEditSupplier = (id: string, data: SupplierFormData) => {
+    updateSupplier({
+      supplierId: id,
+      data
     });
+  };
 
-    const [searchQuery, setSearchQuery] = useState("");
-    const debouncedSearchQuery = useDebounce(searchQuery, 300);
-    const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
-    const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
-    const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
-    const addSupplierRef = useRef<HTMLButtonElement>(null);
-    const importSuppliersRef = useRef<HTMLButtonElement>(null);
+  const handleDeleteSupplier = (id: string) => {
+    deleteSupplier(id);
+  };
 
-    useEffect(() => {
-        if (!loading && !user) {
-            setAuthDialogOpen(true);
-        }
-    }, [loading, user]);
+  const handleSuppliersImported = (importedSuppliers: Supplier[]) => {
+    invalidateCache();
+  };
 
-    const handleAddSupplier = () => {
-        invalidateCache();
-    };
+  // Função para gerar mensagem personalizada do WhatsApp (memoizada)
+  const generateWhatsAppMessage = useCallback((supplierName: string, contactName: string) => {
+    const currentHour = new Date().getHours();
+    let greeting = "";
+    if (currentHour >= 5 && currentHour < 12) {
+      greeting = "Bom dia";
+    } else if (currentHour >= 12 && currentHour < 18) {
+      greeting = "Boa tarde";
+    } else {
+      greeting = "Boa noite";
+    }
+    const message = `${greeting}, ${contactName}! Sou da equipe de compras da empresa. Gostaria de conversar sobre uma oportunidade de negócio com ${supplierName}. Podemos conversar?`;
+    return encodeURIComponent(message);
+  }, []);
 
-    const handleEditSupplier = (id: string, data: SupplierFormData) => {
-        updateSupplier({
-            supplierId: id,
-            data
-        });
-    };
-
-    const handleDeleteSupplier = (id: string) => {
-        deleteSupplier(id);
-    };
-
-    const handleSuppliersImported = (importedSuppliers: Supplier[]) => {
-        invalidateCache();
-    };
-
-    // Função para gerar mensagem personalizada do WhatsApp (memoizada)
-    const generateWhatsAppMessage = useCallback((supplierName: string, contactName: string) => {
-        const currentHour = new Date().getHours();
-        let greeting = "";
-        if (currentHour >= 5 && currentHour < 12) {
-            greeting = "Bom dia";
-        } else if (currentHour >= 12 && currentHour < 18) {
-            greeting = "Boa tarde";
-        } else {
-            greeting = "Boa noite";
-        }
-        const message = `${greeting}, ${contactName}! Sou da equipe de compras da empresa. Gostaria de conversar sobre uma oportunidade de negócio com ${supplierName}. Podemos conversar?`;
-        return encodeURIComponent(message);
-    }, []);
-
-    // Função para abrir WhatsApp (memoizada)
-    const openWhatsApp = useCallback((supplier: Supplier) => {
-        if (!canViewSensitiveData) {
-            toast({
-                title: "Acesso restrito",
-                description: "Apenas administradores podem visualizar e usar os contatos dos fornecedores.",
-                variant: "destructive"
-            });
-            return;
-        }
-
-        if (!supplier.phone) {
-            toast({
-                title: "Telefone não encontrado",
-                description: "Este fornecedor não possui telefone cadastrado.",
-                variant: "destructive"
-            });
-            return;
-        }
-
-        // Remove caracteres não numéricos do telefone
-        const cleanPhone = supplier.phone.replace(/\D/g, '');
-        const message = generateWhatsAppMessage(supplier.name, supplier.contact);
-        const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${message}`;
-        window.open(whatsappUrl, '_blank');
-    }, [canViewSensitiveData, generateWhatsAppMessage]);
-
-    const handleAddQuote = (data: any) => {
-        toast({
-            title: "Cotação criada",
-            description: "A cotação foi criada e enviada aos fornecedores."
-        });
-    };
-
-    const filteredSuppliers = useMemo(() => {
-        if (!suppliers) return [];
-
-        return suppliers.filter(supplier => {
-            const matchesSearch = supplier.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) || supplier.contact?.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
-            const matchesStatus = statusFilter === "all" || supplier.status === statusFilter;
-            return matchesSearch && matchesStatus;
-        });
-    }, [suppliers, debouncedSearchQuery, statusFilter]);
-
-    const paginatedData = paginate(filteredSuppliers);
-
-    const getStatusBadge = useCallback((status: string) => {
-        const statusConfig = {
-            active: {
-                variant: "default" as const,
-                label: "Ativo",
-                className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 font-semibold shadow-sm"
-            },
-            inactive: {
-                variant: "secondary" as const,
-                label: "Inativo",
-                className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200 font-semibold shadow-sm"
-            },
-            pending: {
-                variant: "outline" as const,
-                label: "Pendente",
-                className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 font-semibold shadow-sm"
-            }
-        };
-        const config = statusConfig[status as keyof typeof statusConfig];
-        if (!config) return null;
-        return <Badge variant={config.variant} className={config.className}>
-            {config.label}
-        </Badge>;
-    }, []);
-
-    const renderNumericRating = useCallback((rating: number) => (
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
-            {rating.toFixed(1)} / 10
-        </span>
-    ), []);
-
-    // Calculate real stats
-    const stats = useMemo(() => {
-        if (!suppliers) return {
-            total: 0,
-            active: 0,
-            inactive: 0,
-            pending: 0,
-            percentualAtivos: 0,
-            totalLimit: "R$ 0",
-            limiteMedioPorAtivo: "0.0",
-            activeQuotes: 0,
-            mediaCotacoesPorFornecedor: "0.0",
-            distribuicaoCotacoes: [0, 0, 0, 0, 0, 0, 0]
-        };
-
-        const totalLimit = suppliers.reduce((sum, s) => {
-            const limitValue = parseFloat((s as any).limit?.replace(/[^\d,]/g, '').replace(',', '.') || '0');
-            return sum + (isNaN(limitValue) ? 0 : limitValue);
-        }, 0);
-        const activeQuotesTotal = suppliers.reduce((sum, s) => sum + ((s as any).activeQuotes || 0), 0);
-
-        // Distribuição por status
-        const porStatus = {
-            active: suppliers.filter(s => s.status === "active").length,
-            inactive: suppliers.filter(s => s.status === "inactive").length,
-            pending: suppliers.filter(s => s.status === "pending").length
-        };
-
-        // Percentual de fornecedores ativos
-        const percentualAtivos = suppliers.length > 0
-            ? Math.round((porStatus.active / suppliers.length) * 100)
-            : 0;
-
-        // Limite médio por fornecedor ativo
-        const limiteMedioPorAtivo = porStatus.active > 0
-            ? (totalLimit / porStatus.active).toFixed(1)
-            : "0.0";
-
-        // Média de cotações por fornecedor
-        const fornecedoresComCotacoes = suppliers.filter(s => ((s as any).activeQuotes || 0) > 0 || ((s as any).totalQuotes || 0) > 0);
-        const totalQuotes = suppliers.reduce((sum, s) => sum + ((s as any).totalQuotes || 0), 0);
-        const mediaCotacoesPorFornecedor = fornecedoresComCotacoes.length > 0
-            ? (totalQuotes / fornecedoresComCotacoes.length).toFixed(1)
-            : "0.0";
-
-        // Distribuição de cotações por fornecedor (para o mini gráfico)
-        const distribuicaoCotacoes = [0, 0, 0, 0, 0, 0, 0]; // 7 barras
-        suppliers.forEach(s => {
-            const quotes = s.activeQuotes;
-            if (quotes === 0) distribuicaoCotacoes[0]++;
-            else if (quotes <= 2) distribuicaoCotacoes[1]++;
-            else if (quotes <= 5) distribuicaoCotacoes[2]++;
-            else if (quotes <= 8) distribuicaoCotacoes[3]++;
-            else if (quotes <= 12) distribuicaoCotacoes[4]++;
-            else if (quotes <= 20) distribuicaoCotacoes[5]++;
-            else distribuicaoCotacoes[6]++;
-        });
-
-        return {
-            total: suppliers.length,
-            active: porStatus.active,
-            inactive: porStatus.inactive,
-            pending: porStatus.pending,
-            percentualAtivos,
-            totalLimit: totalLimit > 0 ? `R$ ${totalLimit.toFixed(0)}k` : "R$ 0",
-            limiteMedioPorAtivo,
-            activeQuotes: activeQuotesTotal,
-            mediaCotacoesPorFornecedor,
-            distribuicaoCotacoes
-        };
-    }, [suppliers]);
-
-    if (loading || suppliersLoading) {
-        return <div className="flex items-center justify-center h-screen">
-            <div className="text-center">Carregando...</div>
-        </div>;
+  // Função para abrir WhatsApp (memoizada)
+  const openWhatsApp = useCallback((supplier: Supplier) => {
+    if (!canViewSensitiveData) {
+      toast({
+        title: "Acesso restrito",
+        description: "Apenas administradores podem visualizar e usar os contatos dos fornecedores.",
+        variant: "destructive"
+      });
+      return;
     }
 
-    return (
-        <>
-            <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
-            <PageWrapper>
-                <div className="page-container">
-                    <PageHeader
-                        title="Fornecedores"
-                        description="Gerencie seus fornecedores e cotações"
-                        icon={Building2}
-                        actions={
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => importSuppliersRef.current?.click()}
-                                    className="hidden sm:flex"
-                                >
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    Importar
-                                </Button>
-                                <Button
-                                    onClick={() => addSupplierRef.current?.click()}
-                                    className="bg-primary hover:bg-primary/90"
-                                >
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Novo Fornecedor
-                                </Button>
-                            </div>
-                        }
-                    >
-                        <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                                <Input
-                                    placeholder="Buscar fornecedores..."
-                                    value={searchQuery}
-                                    onChange={e => setSearchQuery(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                            <div className="flex gap-2">
-                                <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                                    <SelectTrigger className="w-[150px]">
-                                        <SelectValue placeholder="Status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">Todos</SelectItem>
-                                        <SelectItem value="active">Ativos</SelectItem>
-                                        <SelectItem value="inactive">Inativos</SelectItem>
-                                        <SelectItem value="pending">Pendentes</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <ViewToggle view={viewMode} onViewChange={setViewMode} />
-                            </div>
+    if (!supplier.phone) {
+      toast({
+        title: "Telefone não encontrado",
+        description: "Este fornecedor não possui telefone cadastrado.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Remove caracteres não numéricos do telefone
+    const cleanPhone = supplier.phone.replace(/\D/g, '');
+    const message = generateWhatsAppMessage(supplier.name, supplier.contact);
+    const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  }, [canViewSensitiveData, generateWhatsAppMessage]);
+
+  const handleAddQuote = (data: any) => {
+    toast({
+      title: "Cotação criada",
+      description: "A cotação foi criada e enviada aos fornecedores."
+    });
+  };
+
+  const filteredSuppliers = useMemo(() => {
+    if (!suppliers) return [];
+
+    return suppliers.filter(supplier => {
+      const matchesSearch = supplier.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) || supplier.contact?.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || supplier.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [suppliers, debouncedSearchQuery, statusFilter]);
+
+  const paginatedData = paginate(filteredSuppliers);
+
+  const getStatusBadge = useCallback((status: string) => {
+    const statusConfig = {
+      active: {
+        variant: "default" as const,
+        label: "Ativo",
+        className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 font-semibold shadow-sm"
+      },
+      inactive: {
+        variant: "secondary" as const,
+        label: "Inativo",
+        className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200 font-semibold shadow-sm"
+      },
+      pending: {
+        variant: "outline" as const,
+        label: "Pendente",
+        className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 font-semibold shadow-sm"
+      }
+    };
+    const config = statusConfig[status as keyof typeof statusConfig];
+    if (!config) return null;
+    return <Badge variant={config.variant} className={config.className}>
+      {config.label}
+    </Badge>;
+  }, []);
+
+  const renderNumericRating = useCallback((rating: number) => (
+    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+      {rating.toFixed(1)} / 10
+    </span>
+  ), []);
+
+  // Calculate real stats
+  const stats = useMemo(() => {
+    if (!suppliers) return {
+      total: 0,
+      active: 0,
+      inactive: 0,
+      pending: 0,
+      percentualAtivos: 0,
+      totalLimit: "R$ 0",
+      limiteMedioPorAtivo: "0.0",
+      activeQuotes: 0,
+      mediaCotacoesPorFornecedor: "0.0",
+      distribuicaoCotacoes: [0, 0, 0, 0, 0, 0, 0]
+    };
+
+    const totalLimit = suppliers.reduce((sum, s) => {
+      const limitValue = parseFloat((s as any).limit?.replace(/[^\d,]/g, '').replace(',', '.') || '0');
+      return sum + (isNaN(limitValue) ? 0 : limitValue);
+    }, 0);
+    const activeQuotesTotal = suppliers.reduce((sum, s) => sum + ((s as any).activeQuotes || 0), 0);
+
+    // Distribuição por status
+    const porStatus = {
+      active: suppliers.filter(s => s.status === "active").length,
+      inactive: suppliers.filter(s => s.status === "inactive").length,
+      pending: suppliers.filter(s => s.status === "pending").length
+    };
+
+    // Percentual de fornecedores ativos
+    const percentualAtivos = suppliers.length > 0
+      ? Math.round((porStatus.active / suppliers.length) * 100)
+      : 0;
+
+    // Limite médio por fornecedor ativo
+    const limiteMedioPorAtivo = porStatus.active > 0
+      ? (totalLimit / porStatus.active).toFixed(1)
+      : "0.0";
+
+    // Média de cotações por fornecedor
+    const fornecedoresComCotacoes = suppliers.filter(s => ((s as any).activeQuotes || 0) > 0 || ((s as any).totalQuotes || 0) > 0);
+    const totalQuotes = suppliers.reduce((sum, s) => sum + ((s as any).totalQuotes || 0), 0);
+    const mediaCotacoesPorFornecedor = fornecedoresComCotacoes.length > 0
+      ? (totalQuotes / fornecedoresComCotacoes.length).toFixed(1)
+      : "0.0";
+
+    // Distribuição de cotações por fornecedor (para o mini gráfico)
+    const distribuicaoCotacoes = [0, 0, 0, 0, 0, 0, 0]; // 7 barras
+    suppliers.forEach(s => {
+      const quotes = s.activeQuotes;
+      if (quotes === 0) distribuicaoCotacoes[0]++;
+      else if (quotes <= 2) distribuicaoCotacoes[1]++;
+      else if (quotes <= 5) distribuicaoCotacoes[2]++;
+      else if (quotes <= 8) distribuicaoCotacoes[3]++;
+      else if (quotes <= 12) distribuicaoCotacoes[4]++;
+      else if (quotes <= 20) distribuicaoCotacoes[5]++;
+      else distribuicaoCotacoes[6]++;
+    });
+
+    return {
+      total: suppliers.length,
+      active: porStatus.active,
+      inactive: porStatus.inactive,
+      pending: porStatus.pending,
+      percentualAtivos,
+      totalLimit: totalLimit > 0 ? `R$ ${totalLimit.toFixed(0)}k` : "R$ 0",
+      limiteMedioPorAtivo,
+      activeQuotes: activeQuotesTotal,
+      mediaCotacoesPorFornecedor,
+      distribuicaoCotacoes
+    };
+  }, [suppliers]);
+
+  if (loading || suppliersLoading) {
+    return <div className="flex items-center justify-center h-screen">
+      <div className="text-center">Carregando...</div>
+    </div>;
+  }
+
+  return (
+    <>
+      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
+      <PageWrapper>
+        <div className="page-container">
+          <PageHeader
+            title="Fornecedores"
+            description="Gerencie seus fornecedores e cotações"
+            icon={Building2}
+            actions={
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => importSuppliersRef.current?.click()}
+                  className="hidden sm:flex"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Importar
+                </Button>
+                <Button
+                  onClick={() => addSupplierRef.current?.click()}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Fornecedor
+                </Button>
+              </div>
+            }
+          >
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Buscar fornecedores..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="active">Ativos</SelectItem>
+                    <SelectItem value="inactive">Inativos</SelectItem>
+                    <SelectItem value="pending">Pendentes</SelectItem>
+                  </SelectContent>
+                </Select>
+                <ViewToggle view={viewMode} onViewChange={setViewMode} />
+              </div>
+            </div>
+          </PageHeader>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <MetricCard
+              title="Fornecedores"
+              value={stats.total}
+              icon={Building2}
+              trend={{ value: "+15", label: "novos este mês", type: "positive" }}
+              variant="info"
+            />
+            <MetricCard
+              title="Ativos"
+              value={stats.active}
+              icon={TrendingUp}
+              trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
+              variant="success"
+            />
+            <MetricCard
+              title="Limite Total"
+              value={stats.totalLimit}
+              icon={DollarSign}
+              trend={{ value: `R$ ${stats.limiteMedioPorAtivo}k`, label: "média por ativo", type: "neutral" }}
+              variant="default"
+            />
+            <MetricCard
+              title="Cotações"
+              value={stats.activeQuotes}
+              icon={FileText}
+              trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
+              variant="warning"
+            />
+          </div>
+
+          {viewMode === "grid" ? (
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {paginatedData.items.map(supplier => (
+                <Card key={supplier.id} className="group hover:shadow-lg transition-all duration-200">
+                  <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2 sm:space-y-3 flex-1">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                            <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-base font-semibold truncate">
+                              {capitalize(supplier.name)}
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground truncate mt-0.5">
+                              {capitalize(supplier.contact)}
+                            </p>
+                          </div>
                         </div>
-                    </PageHeader>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <MetricCard
-                            title="Fornecedores"
-                            value={stats.total.toString()}
-                            icon={Building2}
-                            trend={{ value: 15, label: "novos este mês", positive: true }}
-                            color="blue"
-                        />
-                        <MetricCard
-                            title="Ativos"
-                            value={stats.active.toString()}
-                            icon={TrendingUp}
-                            trend={{ value: stats.percentualAtivos, label: "% da base", positive: true }}
-                            color="green"
-                        />
-                        <MetricCard
-                            title="Limite Total"
-                            value={stats.totalLimit}
-                            icon={DollarSign}
-                            description={`Média: R$ ${stats.limiteMedioPorAtivo}k`}
-                            color="indigo"
-                        />
-                        <MetricCard
-                            title="Cotações"
-                            value={stats.activeQuotes.toString()}
-                            icon={FileText}
-                            description={`Média: ${stats.mediaCotacoesPorFornecedor}/fornecedor`}
-                            color="orange"
-                        />
-                    </div>
-
-                    {viewMode === "grid" ? (
-                        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                            {paginatedData.items.map(supplier => (
-                                <Card key={supplier.id} className="group hover:shadow-lg transition-all duration-200">
-                                    <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
-                                        <div className="flex items-start justify-between">
-                                            <div className="space-y-2 sm:space-y-3 flex-1">
-                                                <div className="flex items-center gap-2 sm:gap-3">
-                                                    <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                                                        <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <CardTitle className="text-base font-semibold truncate">
-                                                            {capitalize(supplier.name)}
-                                                        </CardTitle>
-                                                        <p className="text-sm text-muted-foreground truncate mt-0.5">
-                                                            {capitalize(supplier.contact)}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <StatusBadge status={supplier.status} />
-                                                    {renderNumericRating(supplier.rating)}
-                                                </div>
-                                            </div>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <SupplierQuoteHistoryDialog
-                                                        supplierName={supplier.name}
-                                                        supplierId={supplier.id}
-                                                        trigger={
-                                                            <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                                                <Eye className="h-4 w-4 mr-2" />
-                                                                Ver Histórico
-                                                            </DropdownMenuItem>
-                                                        }
-                                                    />
-                                                    <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                                                        <Edit className="h-4 w-4 mr-2" />
-                                                        Editar
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        className="text-destructive focus:text-destructive"
-                                                        onClick={() => setDeletingSupplier(supplier)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4 mr-2" />
-                                                        Excluir
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
-                                    </CardHeader>
-
-                                    <CardContent className="space-y-3 p-3 sm:p-4 pt-0">
-                                        <div className="space-y-2.5">
-                                            <div className="flex items-center justify-between py-2 border-b border-border/50">
-                                                <div className="flex items-center gap-2 text-muted-foreground">
-                                                    <DollarSign className="h-3.5 w-3.5" />
-                                                    <span className="text-xs">Limite</span>
-                                                </div>
-                                                <span className="text-sm font-medium">{supplier.limit}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between py-2 border-b border-border/50">
-                                                <div className="flex items-center gap-2 text-muted-foreground">
-                                                    <TrendingUp className="h-3.5 w-3.5" />
-                                                    <span className="text-xs">Preço Médio</span>
-                                                </div>
-                                                <span className="text-sm font-medium">{supplier.avgPrice}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between py-2 border-b border-border/50">
-                                                <div className="flex items-center gap-2 text-muted-foreground">
-                                                    <FileText className="h-3.5 w-3.5" />
-                                                    <span className="text-xs">Cotações</span>
-                                                </div>
-                                                <span className="text-sm font-medium">{supplier.activeQuotes}</span>
-                                            </div>
-
-                                            <div className="pt-2.5">
-                                                <AddQuoteDialog onAdd={handleAddQuote} trigger={
-                                                    <Button size="sm" variant="outline" className="w-full h-9">
-                                                        <Plus className="h-3.5 w-3.5 mr-1.5" />
-                                                        Nova Cotação
-                                                    </Button>
-                                                } />
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <StatusBadge status={supplier.status} />
+                          {renderNumericRating(supplier.rating)}
                         </div>
-                    ) : (
-                        <Card>
-                            <CardContent className="p-0">
-                                <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Fornecedor</TableHead>
-                                                <TableHead>Status</TableHead>
-                                                <TableHead>Limite</TableHead>
-                                                <TableHead>Preço Médio</TableHead>
-                                                <TableHead>Cotações</TableHead>
-                                                <TableHead>Avaliação</TableHead>
-                                                <TableHead className="text-right">Ações</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {paginatedData.items.map(supplier => (
-                                                <TableRow key={supplier.id}>
-                                                    <TableCell>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                                                <Building2 className="h-4 w-4 text-primary" />
-                                                            </div>
-                                                            <div>
-                                                                <div className="font-medium">{capitalize(supplier.name)}</div>
-                                                                <div className="text-xs text-muted-foreground">{capitalize(supplier.contact)}</div>
-                                                            </div>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <StatusBadge status={supplier.status} />
-                                                    </TableCell>
-                                                    <TableCell>{supplier.limit}</TableCell>
-                                                    <TableCell>{supplier.avgPrice}</TableCell>
-                                                    <TableCell>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="font-medium">{supplier.activeQuotes}</span>
-                                                            <span className="text-xs text-muted-foreground">/ {supplier.totalQuotes}</span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {renderNumericRating(supplier.rating)}
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => openWhatsApp(supplier)}
-                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                                            >
-                                                                <MessageCircle className="h-4 w-4" />
-                                                            </Button>
-                                                            <DropdownMenu>
-                                                                <DropdownMenuTrigger asChild>
-                                                                    <Button variant="ghost" size="sm">
-                                                                        <MoreVertical className="h-4 w-4" />
-                                                                    </Button>
-                                                                </DropdownMenuTrigger>
-                                                                <DropdownMenuContent align="end">
-                                                                    <SupplierQuoteHistoryDialog
-                                                                        supplierName={supplier.name}
-                                                                        supplierId={supplier.id}
-                                                                        trigger={
-                                                                            <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                                                                <Eye className="h-4 w-4 mr-2" />
-                                                                                Ver Histórico
-                                                                            </DropdownMenuItem>
-                                                                        }
-                                                                    />
-                                                                    <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                                                                        <Edit className="h-4 w-4 mr-2" />
-                                                                        Editar
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem
-                                                                        className="text-destructive"
-                                                                        onClick={() => setDeletingSupplier(supplier)}
-                                                                    >
-                                                                        <Trash2 className="h-4 w-4 mr-2" />
-                                                                        Excluir
-                                                                    </DropdownMenuItem>
-                                                                </DropdownMenuContent>
-                                                            </DropdownMenu>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                                <div className="border-t px-4 py-4">
-                                    <DataPagination
-                                        currentPage={paginatedData.pagination.currentPage}
-                                        totalPages={paginatedData.pagination.totalPages}
-                                        itemsPerPage={paginatedData.pagination.itemsPerPage}
-                                        totalItems={paginatedData.pagination.totalItems}
-                                        onPageChange={paginatedData.pagination.goToPage}
-                                        onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                                        startIndex={paginatedData.pagination.startIndex}
-                                        endIndex={paginatedData.pagination.endIndex}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {filteredSuppliers.length === 0 && (
-                        <Card>
-                            <CardContent className="p-12 text-center">
-                                <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                <h3 className="text-lg font-semibold mb-2">Nenhum fornecedor encontrado</h3>
-                                <p className="text-muted-foreground mb-4">
-                                    Tente ajustar os filtros ou adicione novos fornecedores
-                                </p>
-                                <Button onClick={() => addSupplierRef.current?.click()}>
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Adicionar Fornecedor
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    <EditSupplierDialog
-                        supplier={editingSupplier}
-                        open={!!editingSupplier}
-                        onOpenChange={open => !open && setEditingSupplier(null)}
-                        onEdit={handleEditSupplier}
-                    />
-
-                    <DeleteSupplierDialog
-                        supplier={deletingSupplier}
-                        open={!!deletingSupplier}
-                        onOpenChange={open => !open && setDeletingSupplier(null)}
-                        onDelete={handleDeleteSupplier}
-                    />
-
-                    {/* Hidden triggers for dialogs */}
-                    <div className="hidden">
-                        <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
-                        <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <SupplierQuoteHistoryDialog
+                            supplierName={supplier.name}
+                            supplierId={supplier.id}
+                            trigger={
+                              <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver Histórico
+                              </DropdownMenuItem>
+                            }
+                          />
+                          <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => setDeletingSupplier(supplier)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-3 p-3 sm:p-4 pt-0">
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between py-2 border-b border-border/50">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <DollarSign className="h-3.5 w-3.5" />
+                          <span className="text-xs">Limite</span>
+                        </div>
+                        <span className="text-sm font-medium">{supplier.limit}</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-border/50">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <TrendingUp className="h-3.5 w-3.5" />
+                          <span className="text-xs">Preço Médio</span>
+                        </div>
+                        <span className="text-sm font-medium">{supplier.avgPrice}</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-border/50">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <FileText className="h-3.5 w-3.5" />
+                          <span className="text-xs">Cotações</span>
+                        </div>
+                        <span className="text-sm font-medium">{supplier.activeQuotes}</span>
+                      </div>
+
+                      <div className="pt-2.5">
+                        <AddQuoteDialog onAdd={handleAddQuote} trigger={
+                          <Button size="sm" variant="outline" className="w-full h-9">
+                            <Plus className="h-3.5 w-3.5 mr-1.5" />
+                            Nova Cotação
+                          </Button>
+                        } />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Fornecedor</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Limite</TableHead>
+                        <TableHead>Preço Médio</TableHead>
+                        <TableHead>Cotações</TableHead>
+                        <TableHead>Avaliação</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedData.items.map(supplier => (
+                        <TableRow key={supplier.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Building2 className="h-4 w-4 text-primary" />
+                              </div>
+                              <div>
+                                <div className="font-medium">{capitalize(supplier.name)}</div>
+                                <div className="text-xs text-muted-foreground">{capitalize(supplier.contact)}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <StatusBadge status={supplier.status} />
+                          </TableCell>
+                          <TableCell>{supplier.limit}</TableCell>
+                          <TableCell>{supplier.avgPrice}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">{supplier.activeQuotes}</span>
+                              <span className="text-xs text-muted-foreground">/ {supplier.totalQuotes}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {renderNumericRating(supplier.rating)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openWhatsApp(supplier)}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <SupplierQuoteHistoryDialog
+                                    supplierName={supplier.name}
+                                    supplierId={supplier.id}
+                                    trigger={
+                                      <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                        <Eye className="h-4 w-4 mr-2" />
+                                        Ver Histórico
+                                      </DropdownMenuItem>
+                                    }
+                                  />
+                                  <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Editar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => setDeletingSupplier(supplier)}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Excluir
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-            </PageWrapper>
-        </>
-    );
+                <div className="border-t px-4 py-4">
+                  <DataPagination
+                    currentPage={paginatedData.pagination.currentPage}
+                    totalPages={paginatedData.pagination.totalPages}
+                    itemsPerPage={paginatedData.pagination.itemsPerPage}
+                    totalItems={paginatedData.pagination.totalItems}
+                    onPageChange={paginatedData.pagination.goToPage}
+                    onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                    startIndex={paginatedData.pagination.startIndex}
+                    endIndex={paginatedData.pagination.endIndex}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {filteredSuppliers.length === 0 && (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Nenhum fornecedor encontrado</h3>
+                <p className="text-muted-foreground mb-4">
+                  Tente ajustar os filtros ou adicione novos fornecedores
+                </p>
+                <Button onClick={() => addSupplierRef.current?.click()}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Fornecedor
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          <EditSupplierDialog
+            supplier={editingSupplier}
+            open={!!editingSupplier}
+            onOpenChange={open => !open && setEditingSupplier(null)}
+            onEdit={handleEditSupplier}
+          />
+
+          <DeleteSupplierDialog
+            supplier={deletingSupplier}
+            open={!!deletingSupplier}
+            onOpenChange={open => !open && setDeletingSupplier(null)}
+            onDelete={handleDeleteSupplier}
+          />
+
+          {/* Hidden triggers for dialogs */}
+          <div className="hidden">
+            <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
+            <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
+          </div>
+        </div>
+      </PageWrapper>
+    </>
+  );
 }
