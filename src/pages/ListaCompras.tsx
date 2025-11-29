@@ -145,7 +145,7 @@ export default function ListaCompras() {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
           </div>
         </div>
 
