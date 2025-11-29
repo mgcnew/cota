@@ -278,6 +278,37 @@ export default function Fornecedores() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <MetricCard
+              title="Fornecedores"
+              value={stats.total}
+              icon={Building2}
+              trend={{ value: "+15", label: "novos este mês", type: "positive" }}
+              variant="info"
+            />
+            <MetricCard
+              title="Ativos"
+              value={stats.active}
+              icon={TrendingUp}
+              trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
+              variant="success"
+            />
+            <MetricCard
+              title="Limite Total"
+              value={stats.totalLimit}
+              icon={DollarSign}
+              trend={{ value: `R$ ${stats.limiteMedioPorAtivo}k`, label: "média por ativo", type: "neutral" }}
+              variant="default"
+            />
+            <MetricCard
+              title="Cotações"
+              value={stats.activeQuotes}
+              icon={FileText}
+              trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
+              variant="warning"
+            />
+          </div>
+
           <PageHeader
             title="Fornecedores"
             description="Gerencie seus fornecedores e cotações"
@@ -328,37 +359,6 @@ export default function Fornecedores() {
               </div>
             </div>
           </PageHeader>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <MetricCard
-              title="Fornecedores"
-              value={stats.total}
-              icon={Building2}
-              trend={{ value: "+15", label: "novos este mês", type: "positive" }}
-              variant="info"
-            />
-            <MetricCard
-              title="Ativos"
-              value={stats.active}
-              icon={TrendingUp}
-              trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
-              variant="success"
-            />
-            <MetricCard
-              title="Limite Total"
-              value={stats.totalLimit}
-              icon={DollarSign}
-              trend={{ value: `R$ ${stats.limiteMedioPorAtivo}k`, label: "média por ativo", type: "neutral" }}
-              variant="default"
-            />
-            <MetricCard
-              title="Cotações"
-              value={stats.activeQuotes}
-              icon={FileText}
-              trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
-              variant="warning"
-            />
-          </div>
 
           {viewMode === "grid" ? (
             <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -456,89 +456,125 @@ export default function Fornecedores() {
               ))}
             </div>
           ) : (
-            <Card>
+            <Card className="border-0 bg-transparent">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Fornecedor</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Limite</TableHead>
-                        <TableHead>Preço Médio</TableHead>
-                        <TableHead>Cotações</TableHead>
-                        <TableHead>Avaliação</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
+                        <TableHead colSpan={7} className="px-1 pb-3 pt-0 border-none">
+                          <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-purple-200/60 dark:border-purple-900/40 rounded-lg shadow-sm px-4 py-3">
+                            <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
+                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                <Building2 className="h-4 w-4" />
+                              </div>
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Fornecedor</span>
+                            </div>
+                            <div className="hidden sm:flex w-[15%] px-2 justify-center items-center gap-1.5">
+                              <CircleDot className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Status</span>
+                            </div>
+                            <div className="hidden sm:flex w-[15%] px-2 justify-center items-center gap-1.5">
+                              <DollarSign className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Limite</span>
+                            </div>
+                            <div className="hidden md:flex w-[15%] px-2 justify-center items-center gap-1.5">
+                              <TrendingUp className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Preço Médio</span>
+                            </div>
+                            <div className="hidden lg:flex w-[10%] px-2 justify-center items-center gap-1.5">
+                              <FileText className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Cotações</span>
+                            </div>
+                            <div className="hidden lg:flex w-[10%] px-2 justify-center items-center gap-1.5">
+                              <Star className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
+                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Avaliação</span>
+                            </div>
+                            <div className="w-[5%] flex justify-end items-center gap-1.5 px-2">
+                              <MoreVertical className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
+                            </div>
+                          </div>
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {paginatedData.items.map(supplier => (
-                        <TableRow key={supplier.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <Building2 className="h-4 w-4 text-primary" />
+                        <TableRow key={supplier.id} className="group border-none">
+                          <TableCell colSpan={7} className="px-1 py-3">
+                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-purple-300/60 dark:hover:border-purple-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
+                              <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                  <Building2 className="h-4 w-4 text-primary" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-medium text-sm text-gray-900 dark:text-white truncate">{capitalize(supplier.name)}</div>
+                                  <div className="text-xs text-muted-foreground truncate">{capitalize(supplier.contact)}</div>
+                                </div>
                               </div>
-                              <div>
-                                <div className="font-medium">{capitalize(supplier.name)}</div>
-                                <div className="text-xs text-muted-foreground">{capitalize(supplier.contact)}</div>
+
+                              <div className="hidden sm:flex w-[15%] px-2 justify-center items-center">
+                                <StatusBadge status={supplier.status} />
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <StatusBadge status={supplier.status} />
-                          </TableCell>
-                          <TableCell>{supplier.limit}</TableCell>
-                          <TableCell>{supplier.avgPrice}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">{supplier.activeQuotes}</span>
-                              <span className="text-xs text-muted-foreground">/ {supplier.totalQuotes}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {renderNumericRating(supplier.rating)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => openWhatsApp(supplier)}
-                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                              >
-                                <MessageCircle className="h-4 w-4" />
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <SupplierQuoteHistoryDialog
-                                    supplierName={supplier.name}
-                                    supplierId={supplier.id}
-                                    trigger={
-                                      <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        Ver Histórico
-                                      </DropdownMenuItem>
-                                    }
-                                  />
-                                  <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Editar
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-destructive"
-                                    onClick={() => setDeletingSupplier(supplier)}
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Excluir
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+
+                              <div className="hidden sm:flex w-[15%] px-2 justify-center items-center">
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.limit}</span>
+                              </div>
+
+                              <div className="hidden md:flex w-[15%] px-2 justify-center items-center">
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.avgPrice}</span>
+                              </div>
+
+                              <div className="hidden lg:flex w-[10%] px-2 justify-center items-center">
+                                <div className="flex items-center gap-1">
+                                  <span className="font-medium text-sm">{supplier.activeQuotes}</span>
+                                  <span className="text-xs text-muted-foreground">/ {supplier.totalQuotes}</span>
+                                </div>
+                              </div>
+
+                              <div className="hidden lg:flex w-[10%] px-2 justify-center items-center">
+                                {renderNumericRating(supplier.rating)}
+                              </div>
+
+                              <div className="w-[5%] flex justify-end items-center gap-2 px-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => openWhatsApp(supplier)}
+                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 w-8 p-0"
+                                >
+                                  <MessageCircle className="h-4 w-4" />
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <SupplierQuoteHistoryDialog
+                                      supplierName={supplier.name}
+                                      supplierId={supplier.id}
+                                      trigger={
+                                        <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                          <Eye className="h-4 w-4 mr-2" />
+                                          Ver Histórico
+                                        </DropdownMenuItem>
+                                      }
+                                    />
+                                    <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
+                                      <Edit className="h-4 w-4 mr-2" />
+                                      Editar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className="text-destructive"
+                                      onClick={() => setDeletingSupplier(supplier)}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Excluir
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
                             </div>
                           </TableCell>
                         </TableRow>
