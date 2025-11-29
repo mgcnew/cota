@@ -12,7 +12,7 @@ import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import { usePedidos } from "@/hooks/usePedidos";
 import { useToast } from "@/hooks/use-toast";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
-import { ViewToggle } from "@/components/common/ViewToggle";
+import { ViewToggle } from "@/components/ui/view-toggle";
 
 export default function ListaCompras() {
   const { viewMode, setViewMode } = useResponsiveViewMode();
