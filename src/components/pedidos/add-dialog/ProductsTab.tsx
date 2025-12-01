@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
-import { Package, Plus, Copy, Trash2, Check, ChevronsUpDown, X } from "lucide-react";
+import { Package, Plus, Copy, Trash2, Check, ChevronsUpDown, X, Loader2 } from "lucide-react";
 import { PedidoItem } from "./types";
 import { formatDecimalDisplay } from "@/lib/text-utils";
 import { cn } from "@/lib/utils";
 
 interface ProductsTabProps {
     isMobile: boolean;
+    productsLoading: boolean;
     // Product selection states
     filteredProducts: any[];
     products: any[];
@@ -49,6 +50,7 @@ interface ProductsTabProps {
 
 export function ProductsTab({
     isMobile,
+    productsLoading,
     filteredProducts,
     products,
     selectedProduct,
@@ -150,7 +152,7 @@ export function ProductsTab({
                                             )}
                                         </Button>
                                     </div>
-                                </PopoverTrigger>
+                                 </PopoverTrigger>
                                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
                                     <Command shouldFilter={false}>
                                         <CommandInput 
@@ -165,44 +167,53 @@ export function ProductsTab({
                                             className={isMobile ? 'h-11 text-base' : ''}
                                         />
                                         <CommandList className="max-h-[300px]">
-                                            <CommandEmpty>
-                                                {productSearch.length >= 1
-                                                    ? `Nenhum produto encontrado para "${productSearch}"` 
-                                                    : `Digite pelo menos 1 letra para buscar entre ${products.length} produtos...`
-                                                }
-                                            </CommandEmpty>
-                                            <CommandGroup>
-                                                {filteredProducts.length > 0 ? (
-                                                    filteredProducts.slice(0, 50).map((product) => (
-                                                        <CommandItem
-                                                            key={product.id}
-                                                            value={`${product.name} ${product.id}`}
-                                                            onSelect={() => {
-                                                                handleProductSelect(product);
-                                                                setProductSearch("");
-                                                                setProductPopoverOpen(false);
-                                                            }}
-                                                            className="cursor-pointer"
-                                                        >
-                                                            <Check
-                                                                className={cn(
-                                                                    "mr-2 h-4 w-4",
-                                                                    selectedProduct?.id === product.id ? "opacity-100" : "opacity-0"
-                                                                )}
-                                                            />
-                                                            {product.name}
-                                                        </CommandItem>
-                                                    ))
-                                                ) : productSearch.length >= 1 ? (
-                                                    <div className="px-2 py-6 text-center text-sm text-muted-foreground">
-                                                        Nenhum produto encontrado para "{productSearch}"
-                                                    </div>
-                                                ) : (
-                                                    <div className="px-2 py-6 text-center text-sm text-muted-foreground">
-                                                        Digite pelo menos 1 letra para buscar produtos...
-                                                    </div>
-                                                )}
-                                            </CommandGroup>
+                                            {productsLoading ? (
+                                                <div className="flex items-center justify-center p-8">
+                                                    <Loader2 className="h-5 w-5 animate-spin mr-2 text-pink-500" />
+                                                    <span className="text-sm text-muted-foreground">Carregando produtos...</span>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <CommandEmpty>
+                                                        {productSearch.length >= 1
+                                                            ? `Nenhum produto encontrado para "${productSearch}"` 
+                                                            : `Digite para buscar entre ${products.length} produtos...`
+                                                        }
+                                                    </CommandEmpty>
+                                                    <CommandGroup>
+                                                        {filteredProducts.length > 0 ? (
+                                                            filteredProducts.slice(0, 50).map((product) => (
+                                                                <CommandItem
+                                                                    key={product.id}
+                                                                    value={`${product.name} ${product.id}`}
+                                                                    onSelect={() => {
+                                                                        handleProductSelect(product);
+                                                                        setProductSearch("");
+                                                                        setProductPopoverOpen(false);
+                                                                    }}
+                                                                    className="cursor-pointer"
+                                                                >
+                                                                    <Check
+                                                                        className={cn(
+                                                                            "mr-2 h-4 w-4",
+                                                                            selectedProduct?.id === product.id ? "opacity-100" : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    {product.name}
+                                                                </CommandItem>
+                                                            ))
+                                                        ) : productSearch.length >= 1 ? (
+                                                            <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                                                                Nenhum produto encontrado para "{productSearch}"
+                                                            </div>
+                                                        ) : (
+                                                            <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                                                                Digite para buscar produtos...
+                                                            </div>
+                                                        )}
+                                                    </CommandGroup>
+                                                </>
+                                            )}
                                         </CommandList>
                                     </Command>
                                 </PopoverContent>
