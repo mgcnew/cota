@@ -48,6 +48,7 @@ export default function AddPedidoDialog({
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [supplierSearch, setSupplierSearch] = useState("");
   const debouncedProductSearch = useDebounce(productSearch, 300);
@@ -97,17 +98,6 @@ export default function AddPedidoDialog({
       } else {
         setItens([]);
       }
-
-      // Abrir popover e focar no campo de busca após um pequeno delay
-      setTimeout(() => {
-        setProductPopoverOpen(true);
-        setTimeout(() => {
-          const searchInput = document.querySelector('[placeholder*="Buscar entre"]') as HTMLInputElement;
-          if (searchInput) {
-            searchInput.focus();
-          }
-        }, 100);
-      }, 300);
     }
   }, [open, preSelectedProducts]);
 
@@ -198,6 +188,7 @@ export default function AddPedidoDialog({
   };
 
   const loadProducts = async () => {
+    setProductsLoading(true);
     try {
       const {
         data: {
@@ -253,13 +244,15 @@ export default function AddPedidoDialog({
         description: "Não foi possível carregar produtos",
         variant: "destructive"
       });
+    } finally {
+      setProductsLoading(false);
     }
   };
 
-  // Filter products - mostrar todos ou filtrados
+  // Filter products - mostrar todos quando não há busca
   const filteredProducts = useMemo(() => {
-    if (!debouncedProductSearch || debouncedProductSearch.trim().length < 1) {
-      return []; // Não mostra nada até digitar pelo menos 1 caractere
+    if (!debouncedProductSearch || debouncedProductSearch.trim().length === 0) {
+      return products; // Retornar TODOS os produtos quando não há busca
     }
     const searchLower = debouncedProductSearch.toLowerCase().trim();
     return products.filter(p => 
@@ -686,6 +679,7 @@ export default function AddPedidoDialog({
               {activeTab === 'produtos' && (
                 <ProductsTab
                   isMobile={isMobile}
+                  productsLoading={productsLoading}
                   filteredProducts={filteredProducts}
                   products={products}
                   selectedProduct={selectedProduct}
