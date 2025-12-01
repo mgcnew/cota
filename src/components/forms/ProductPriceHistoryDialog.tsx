@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Package, TrendingUp, TrendingDown, Calendar, Building2, DollarSign, Minus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProductPriceHistory } from "@/hooks/useProductPriceHistory";
-import { useMobile } from "@/contexts/MobileProvider";
 
 interface ProductPriceHistoryDialogProps {
   productName: string;
@@ -16,7 +15,7 @@ interface ProductPriceHistoryDialogProps {
 
 export function ProductPriceHistoryDialog({ productName, productId, trigger }: ProductPriceHistoryDialogProps) {
   const [open, setOpen] = useState(false);
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   
   // Buscar dados reais do histórico de preços
   const { data: priceHistory = [], isLoading, error } = useProductPriceHistory(productId);

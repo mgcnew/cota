@@ -19,7 +19,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useMobile } from "@/contexts/MobileProvider";
 import {
   Form,
   FormControl,
@@ -62,7 +61,7 @@ interface AddSupplierDialogProps {
 }
 
 export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogProps) {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   const [open, setOpen] = useState(false);
   const scrollPositionRef = useRef<number>(0);
   const { logActivity } = useActivityLog();

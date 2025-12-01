@@ -9,7 +9,6 @@ import { Calendar, Package, Award, Search, DollarSign, ClipboardList, X } from "
 import { cn } from "@/lib/utils";
 import { useSupplierQuoteHistory } from "@/hooks/useSupplierQuoteHistory";
 import { useSupplierOrderHistory } from "@/hooks/useSupplierOrderHistory";
-import { useMobile } from "@/contexts/MobileProvider";
 
 interface SupplierQuoteHistoryDialogProps {
   supplierName: string;
@@ -18,7 +17,7 @@ interface SupplierQuoteHistoryDialogProps {
 }
 
 export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }: SupplierQuoteHistoryDialogProps) {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("quotes");
   const [searchTerm, setSearchTerm] = useState("");

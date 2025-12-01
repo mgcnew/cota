@@ -1,10 +1,10 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useCallback, startTransition } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
+import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,18 +19,12 @@ import {
   Info,
   AlertTriangle,
   Flame,
-  Loader2,
   Clock,
   Search
 } from "lucide-react";
-import { useMobile } from "@/contexts/MobileProvider";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { useNotes, type Importance, type Note } from "@/hooks/useNotes";
-import { useNotesMobile } from "@/hooks/mobile/useNotesMobile";
-import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { MobileFAB } from "@/components/mobile/MobileFAB";
-import { DataPagination } from "@/components/ui/data-pagination";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useToast } from "@/hooks/use-toast";
 
@@ -66,42 +60,9 @@ const importanceConfig = {
 };
 
 export default function Anotacoes() {
-  const isMobile = useMobile();
   const { toast } = useToast();
 
-  // Hooks condicionais
-  const desktopNotes = useNotes();
-  const mobileNotes = useNotesMobile();
-
-  const {
-    notes: desktopNotesList,
-    isLoading: desktopLoading,
-    createNote: desktopCreateNote,
-    updateNote: desktopUpdateNote,
-    toggleResolve: desktopToggleResolve,
-    deleteNote: desktopDeleteNote
-  } = desktopNotes;
-
-  const {
-    notes: mobileNotesList,
-    isLoading: mobileLoading,
-    search: mobileSearch,
-    setSearch: setMobileSearch,
-    pagination: mobilePagination,
-    refetch: mobileRefetch,
-    createNote: mobileCreateNote,
-    updateNote: mobileUpdateNote,
-    toggleResolve: mobileToggleResolve,
-    deleteNote: mobileDeleteNote
-  } = mobileNotes;
-
-  // Usar dados apropriados baseado no dispositivo
-  const notes = isMobile ? (Array.isArray(mobileNotesList) ? mobileNotesList : []) : (Array.isArray(desktopNotesList) ? desktopNotesList : []);
-  const isLoading = isMobile ? mobileLoading : desktopLoading;
-  const createNote = isMobile ? mobileCreateNote : desktopCreateNote;
-  const updateNote = isMobile ? mobileUpdateNote : desktopUpdateNote;
-  const toggleResolve = isMobile ? mobileToggleResolve : desktopToggleResolve;
-  const deleteNote = isMobile ? mobileDeleteNote : desktopDeleteNote;
+  const { notes, isLoading, createNote, updateNote, toggleResolve, deleteNote } = useNotes();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
@@ -118,20 +79,10 @@ export default function Anotacoes() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const scrollPositionRef = useRef(0);
-
-  // Atualizar busca mobile quando debouncedSearch mudar
-  useEffect(() => {
-    if (isMobile && setMobileSearch) {
-      setMobileSearch(debouncedSearch);
-    }
-  }, [isMobile, debouncedSearch, setMobileSearch]);
 
   const filteredNotes = useMemo(() => {
     if (!notes || !Array.isArray(notes)) return [];
-    if (isMobile) return notes; // Mobile já filtra no servidor
 
-    // Desktop: filtrar por resolved e busca
     let filtered = notes.filter(note => !note.resolved);
 
     if (debouncedSearch.trim()) {
@@ -144,15 +95,14 @@ export default function Anotacoes() {
     }
 
     return filtered;
-  }, [notes, isMobile, debouncedSearch]);
+  }, [notes, debouncedSearch]);
 
   const resolvedNotes = useMemo(() => {
     if (!notes || !Array.isArray(notes)) return [];
-    if (isMobile) return []; // Mobile não mostra resolvidas
     return notes.filter(note => note.resolved);
-  }, [notes, isMobile]);
+  }, [notes]);
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) {
@@ -164,9 +114,9 @@ export default function Anotacoes() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData.title, formData.content]);
 
-  const handleCreateNote = async () => {
+  const handleCreateNote = useCallback(async () => {
     if (!validateForm()) {
       toast({
         title: "Erro",
@@ -185,20 +135,24 @@ export default function Anotacoes() {
 
     setFormData({ title: "", content: "", importance: "medium", observation: "" });
     setErrors({});
-    setShowCreateDialog(false);
-  };
-
-  const handleEditNote = (note: Note) => {
-    setEditingNote(note);
-    setFormData({
-      title: note.title,
-      content: note.content,
-      importance: note.importance,
-      observation: note.observation || "",
+    startTransition(() => {
+      setShowCreateDialog(false);
     });
-  };
+  }, [formData, validateForm, createNote, toast]);
 
-  const handleUpdateNote = async () => {
+  const handleEditNote = useCallback((note: Note) => {
+    startTransition(() => {
+      setEditingNote(note);
+      setFormData({
+        title: note.title,
+        content: note.content,
+        importance: note.importance,
+        observation: note.observation || "",
+      });
+    });
+  }, []);
+
+  const handleUpdateNote = useCallback(async () => {
     if (!editingNote) return;
 
     if (!validateForm()) {
@@ -218,25 +172,29 @@ export default function Anotacoes() {
       observation: formData.observation?.trim() || undefined,
     });
 
-    setEditingNote(null);
-    setFormData({ title: "", content: "", importance: "medium", observation: "" });
-    setErrors({});
-  };
+    startTransition(() => {
+      setEditingNote(null);
+      setFormData({ title: "", content: "", importance: "medium", observation: "" });
+      setErrors({});
+    });
+  }, [editingNote, formData, validateForm, updateNote, toast]);
 
-  const handleResolveNote = async (noteId: string) => {
+  const handleResolveNote = useCallback(async (noteId: string) => {
     await toggleResolve.mutateAsync(noteId);
-  };
+  }, [toggleResolve]);
 
-  const handleDeleteNote = async (noteId: string) => {
+  const handleDeleteNote = useCallback(async (noteId: string) => {
     if (!confirm("Tem certeza que deseja excluir esta anotação?")) return;
     await deleteNote.mutateAsync(noteId);
-  };
+  }, [deleteNote]);
 
-  const resetForm = () => {
-    setFormData({ title: "", content: "", importance: "medium", observation: "" });
-    setEditingNote(null);
-    setErrors({});
-  };
+  const resetForm = useCallback(() => {
+    startTransition(() => {
+      setFormData({ title: "", content: "", importance: "medium", observation: "" });
+      setEditingNote(null);
+      setErrors({});
+    });
+  }, []);
 
   const FormContent = () => (
     <div className="space-y-4">
@@ -314,160 +272,140 @@ export default function Anotacoes() {
           description="Organize e gerencie suas anotações importantes"
           icon={StickyNote}
           actions={
-            !isMobile && (
-              <Dialog open={showCreateDialog || editingNote !== null} onOpenChange={(open) => {
-                if (!open) {
-                  setShowCreateDialog(false);
-                  setEditingNote(null);
-                  resetForm();
-                }
-              }}>
-                <DialogTrigger asChild>
+            <Dialog open={showCreateDialog || editingNote !== null} onOpenChange={(open) => {
+              if (!open) {
+                setShowCreateDialog(false);
+                setEditingNote(null);
+                resetForm();
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Button
+                  ref={dialogTriggerRef}
+                  onClick={() => setShowCreateDialog(true)}
+                  className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Anotação
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{editingNote ? "Editar Anotação" : "Nova Anotação"}</DialogTitle>
+                </DialogHeader>
+                <FormContent />
+                <div className="flex justify-end gap-2 pt-4">
                   <Button
-                    ref={dialogTriggerRef}
-                    onClick={() => setShowCreateDialog(true)}
-                    className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    variant="outline"
+                    onClick={() => {
+                      setShowCreateDialog(false);
+                      setEditingNote(null);
+                      resetForm();
+                    }}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Anotação
+                    Cancelar
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>{editingNote ? "Editar Anotação" : "Nova Anotação"}</DialogTitle>
-                  </DialogHeader>
-                  <FormContent />
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setShowCreateDialog(false);
-                        setEditingNote(null);
-                        resetForm();
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={editingNote ? handleUpdateNote : handleCreateNote}
-                      className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
-                    >
-                      {editingNote ? "Atualizar" : "Criar"}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )
+                  <Button
+                    onClick={editingNote ? handleUpdateNote : handleCreateNote}
+                    className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
+                  >
+                    {editingNote ? "Atualizar" : "Criar"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           }
         >
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Buscar anotações..."
+          <div className="flex-shrink-0">
+            <ExpandableSearch
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              onChange={setSearchQuery}
+              placeholder="Buscar anotações..."
+              accentColor="purple"
+              expandedWidth="w-64"
             />
           </div>
         </PageHeader>
 
         {/* Notas Ativas */}
         {filteredNotes && Array.isArray(filteredNotes) && filteredNotes.length > 0 && (
-          <PullToRefresh onRefresh={isMobile ? async () => { await mobileRefetch(); } : undefined} disabled={!isMobile}>
-            <div className="space-y-3">
-              {filteredNotes.map((note, index) => {
-                const config = importanceConfig[note.importance];
-                const Icon = config.icon;
+          <div className="space-y-3">
+            {filteredNotes.map((note, index) => {
+              const config = importanceConfig[note.importance];
+              const Icon = config.icon;
 
-                return (
-                  <motion.div
-                    key={note.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: index * 0.03 }}
-                  >
-                    <Card className={`${config.color} border-l-4 hover:shadow-md transition-shadow duration-200`}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 space-y-2">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Icon className={`h-4 w-4 ${config.iconColor}`} />
-                              <Badge className={config.badgeColor}>
-                                {config.label}
-                              </Badge>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                {new Date(note.created_at).toLocaleDateString('pt-BR')}
-                              </div>
+              return (
+                <motion.div
+                  key={note.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: index * 0.03 }}
+                >
+                  <Card className={`${config.color} border-l-4 hover:shadow-md transition-shadow duration-200`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Icon className={`h-4 w-4 ${config.iconColor}`} />
+                            <Badge className={config.badgeColor}>
+                              {config.label}
+                            </Badge>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {new Date(note.created_at).toLocaleDateString('pt-BR')}
                             </div>
-
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {note.title}
-                            </h3>
-
-                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                              {note.content}
-                            </p>
-
-                            {note.observation && (
-                              <div className="pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
-                                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                                  {note.observation}
-                                </p>
-                              </div>
-                            )}
                           </div>
 
-                          <div className="flex flex-col gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditNote(note as any)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleResolveNote(note.id)}
-                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                            >
-                              <CheckCircle2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteNote(note.id)}
-                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {note.title}
+                          </h3>
+
+                          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                            {note.content}
+                          </p>
+
+                          {note.observation && (
+                            <div className="pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                                {note.observation}
+                              </p>
+                            </div>
+                          )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
 
-            {/* Paginação Mobile */}
-            {isMobile && mobilePagination && typeof mobilePagination.totalItems === 'number' && (
-              <div className="mt-4">
-                <DataPagination
-                  currentPage={mobilePagination.currentPage ?? 1}
-                  totalPages={mobilePagination.totalPages ?? 0}
-                  itemsPerPage={mobilePagination.pageSize ?? 20}
-                  totalItems={mobilePagination.totalItems ?? 0}
-                  onPageChange={mobilePagination.goToPage ?? (() => { })}
-                  onItemsPerPageChange={mobilePagination.setItemsPerPage ?? mobilePagination.setPageSize ?? (() => { })}
-                  startIndex={mobilePagination.startIndex ?? 0}
-                  endIndex={mobilePagination.endIndex ?? 0}
-                />
-              </div>
-            )}
-          </PullToRefresh>
+                        <div className="flex flex-col gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditNote(note as any)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleResolveNote(note.id)}
+                            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                          >
+                            <CheckCircle2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteNote(note.id)}
+                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
         )}
 
         {/* Empty State */}
@@ -481,55 +419,6 @@ export default function Anotacoes() {
               {searchQuery ? "Tente ajustar sua busca" : "Crie sua primeira anotação para começar"}
             </p>
           </div>
-        )}
-
-        {/* Mobile FAB */}
-        {isMobile && (
-          <>
-            <MobileFAB
-              onClick={() => setShowCreateDialog(true)}
-              label="Nova Anotação"
-            />
-
-            <Sheet
-              open={showCreateDialog || editingNote !== null}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setShowCreateDialog(false);
-                  setEditingNote(null);
-                  resetForm();
-                }
-              }}
-            >
-              <SheetContent side="bottom" className="h-[90vh]">
-                <SheetHeader>
-                  <SheetTitle>{editingNote ? "Editar Anotação" : "Nova Anotação"}</SheetTitle>
-                </SheetHeader>
-                <div className="mt-4">
-                  <FormContent />
-                  <div className="flex gap-2 pt-4 mt-4 border-t">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setShowCreateDialog(false);
-                        setEditingNote(null);
-                        resetForm();
-                      }}
-                      className="flex-1"
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={editingNote ? handleUpdateNote : handleCreateNote}
-                      className="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
-                    >
-                      {editingNote ? "Atualizar" : "Criar"}
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </>
         )}
 
         {/* Notas Resolvidas */}

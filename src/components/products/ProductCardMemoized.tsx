@@ -6,13 +6,12 @@ import { Package, Edit, Trash2, TrendingUp, TrendingDown, Minus, History, Buildi
 import { capitalize } from "@/lib/text-utils";
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
 import type { Product } from "@/hooks/useProducts";
-import type { ProductMobile } from "@/hooks/mobile/useProductsMobile";
 
 interface ProductCardProps {
-  product: Product | ProductMobile;
+  product: Product;
   isMobile: boolean;
-  onEdit: (product: Product | ProductMobile) => void;
-  onDelete: (product: Product | ProductMobile) => void;
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
   onImageClick?: (url: string) => void;
   getTrendIcon: (trend: string) => JSX.Element;
   getStatusBadge: (quotesCount: number) => JSX.Element;

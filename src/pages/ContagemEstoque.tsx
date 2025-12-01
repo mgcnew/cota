@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { TableActionGroup } from "@/components/ui/table-action-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -29,7 +31,6 @@ import {
 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useStockCounts } from "@/hooks/useStockCounts";
-import { useStockCountsMobile } from "@/hooks/mobile/useStockCountsMobile";
 import { useStockSectors } from "@/hooks/useStockSectors";
 import { useToast } from "@/hooks/use-toast";
 import { ViewStockCountDialog } from "@/components/stock/ViewStockCountDialog";
@@ -42,40 +43,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { cn } from "@/lib/utils";
-import { useMobile } from "@/contexts/MobileProvider";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreVertical, Filter } from "lucide-react";
-import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { MobileSearchWithAction } from "@/components/mobile/MobileSearchWithAction";
-import { MobileActionSheet } from "@/components/mobile/MobileActionSheet";
-import { DataPagination } from "@/components/ui/data-pagination";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export default function ContagemEstoque() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   
-  // Estados devem ser declarados antes de serem usados nos hooks
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  
-  // Hooks condicionais: mobile vs desktop
-  const desktopData = useStockCounts();
   const debouncedSearch = useDebounce(searchTerm, 300);
-  const mobileData = useStockCountsMobile(
-    debouncedSearch,
-    statusFilter as "all" | "pendente" | "em_andamento" | "finalizada" | "cancelada",
-    isMobile
-  );
   
-  // Usar dados mobile ou desktop baseado na plataforma
-  const stockCounts = isMobile ? (mobileData.stockCounts || []) : desktopData.stockCounts;
-  const isLoading = isMobile ? mobileData.isLoading : desktopData.isLoading;
-  const createStockCount = isMobile ? mobileData.createStockCount : desktopData.createStockCount;
-  const updateStockCount = isMobile ? mobileData.updateStockCount : desktopData.updateStockCount;
-  const deleteStockCount = isMobile ? mobileData.deleteStockCount : desktopData.deleteStockCount;
+  const { stockCounts, isLoading, createStockCount, updateStockCount, deleteStockCount } = useStockCounts();
   
   const { sectors } = useStockSectors();
   const [selectedCount, setSelectedCount] = useState<string | null>(null);
@@ -88,31 +69,13 @@ export default function ContagemEstoque() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [isCreatingCount, setIsCreatingCount] = useState(false);
   
-  // Ref para trigger do dialog de criação (usado pelo MobileFAB)
-  const createDialogRef = useRef<HTMLButtonElement>(null);
-  
-  // Ref para preservar posição de scroll ao abrir/fechar modal
-  const scrollPositionRef = useRef<number>(0);
-  
-  // Handler para abrir/fechar modal com preservação de scroll
   const handleCreateDialogOpenChange = (open: boolean) => {
-    if (open) {
-      // Salvar posição de scroll atual
-      scrollPositionRef.current = window.scrollY;
-    } else {
-      // Resetar campos
+    if (!open) {
       setSelectedOrderId("");
       setCountNotes("");
       setCountType("from_order");
     }
     setCreateDialogOpen(open);
-    
-    // Restaurar scroll após fechar (apenas no mobile)
-    if (!open && isMobile) {
-      setTimeout(() => {
-        window.scrollTo(0, scrollPositionRef.current);
-      }, 100);
-    }
   };
 
   // Carregar pedidos disponíveis para criar contagem (apenas quando dialog está aberto)
@@ -152,39 +115,17 @@ export default function ContagemEstoque() {
     loadOrders();
   }, [createDialogOpen, user, toast]);
 
-  // Filtros: mobile usa server-side, desktop usa client-side
-  // Otimização: mobile não precisa filtrar novamente, já vem do servidor
   const filteredCounts = useMemo(() => {
-    if (isMobile) {
-      // Mobile já vem filtrado do servidor - retornar direto
-      return stockCounts;
-    }
-    // Desktop: filtrar client-side
     return stockCounts.filter(count => {
       const matchesSearch = 
-        (count as any).order?.supplier_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        count.notes?.toLowerCase().includes(searchTerm.toLowerCase());
+        (count as any).order?.supplier_name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        count.notes?.toLowerCase().includes(debouncedSearch.toLowerCase());
       
       const matchesStatus = statusFilter === "all" || count.status === statusFilter;
       
       return matchesSearch && matchesStatus;
     });
-  }, [stockCounts, searchTerm, statusFilter, isMobile]);
-  
-  // Função para invalidar cache (usado pelo PullToRefresh) - memoizada
-  const invalidateCache = useCallback(async () => {
-    if (isMobile) {
-      await mobileData.refetch();
-    } else {
-      // Desktop não tem refetch direto, mas podemos invalidar queries
-      // Por enquanto, apenas recarregar a página ou fazer refetch manual
-    }
-  }, [isMobile, mobileData]);
-  
-  // Função para trigger do dialog de criação (usado pelo MobileFAB)
-  const triggerCreateDialog = () => {
-    setCreateDialogOpen(true);
-  };
+  }, [stockCounts, debouncedSearch, statusFilter]);
 
   // Memoizar getStatusBadge para evitar recriação
   const getStatusBadge = useCallback((status: string) => {
@@ -265,28 +206,21 @@ export default function ContagemEstoque() {
 
     setIsCreatingCount(true);
     try {
-      const newCount = isMobile
-        ? await createStockCount.mutateAsync({
-            order_id: countType === "from_order" ? selectedOrderId : undefined,
-            notes: countNotes || undefined,
-          })
-        : await createStockCount.mutateAsync({
-            order_id: countType === "from_order" ? selectedOrderId : undefined,
-            notes: countNotes || undefined,
-          });
+      const newCount = await createStockCount.mutateAsync({
+        order_id: countType === "from_order" ? selectedOrderId : undefined,
+        notes: countNotes || undefined,
+      });
 
       setCreateDialogOpen(false);
       setSelectedOrderId("");
       setCountNotes("");
       setCountType("from_order");
 
-      // Abrir o modal de visualização automaticamente após criar
       if (newCount) {
         setSelectedCount(newCount.id);
         setViewDialogOpen(true);
       }
     } catch (error) {
-      // Erro já é tratado pelo hook
       console.error('Erro ao criar contagem:', error);
     } finally {
       setIsCreatingCount(false);
@@ -301,35 +235,24 @@ export default function ContagemEstoque() {
 
   const handleFinalizeCount = useCallback(async (countId: string) => {
     try {
-      if (isMobile) {
-        await updateStockCount.mutateAsync({
-          id: countId,
-          status: "finalizada",
-        });
-      } else {
-        await updateStockCount.mutateAsync({
-          id: countId,
-          status: "finalizada",
-        });
-      }
+      await updateStockCount.mutateAsync({
+        id: countId,
+        status: "finalizada",
+      });
     } catch (error) {
       console.error('Erro ao finalizar contagem:', error);
     }
-  }, [isMobile, updateStockCount]);
+  }, [updateStockCount]);
 
   const handleDeleteCount = useCallback(async (countId: string) => {
     if (confirm("Tem certeza que deseja excluir esta contagem?")) {
       try {
-        if (isMobile) {
-          await deleteStockCount.mutateAsync(countId);
-        } else {
-          await deleteStockCount.mutateAsync(countId);
-        }
+        await deleteStockCount.mutateAsync(countId);
       } catch (error) {
         console.error('Erro ao excluir contagem:', error);
       }
     }
-  }, [isMobile, deleteStockCount]);
+  }, [deleteStockCount]);
 
   // Calcular estatísticas
   const stats = useMemo(() => {
@@ -362,8 +285,7 @@ export default function ContagemEstoque() {
   return (
     <PageWrapper>
       <div className="page-container">
-        {/* Statistics Cards - Oculto no mobile */}
-        {!isMobile && (
+        {/* Statistics Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
           {/* Card 1: Total */}
           <Card className="group relative overflow-hidden bg-indigo-600 dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300">
@@ -539,70 +461,19 @@ export default function ContagemEstoque() {
             </CardContent>
           </Card>
         </div>
-        )}
 
         {/* Filtros */}
-        {isMobile ? (
-          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none mb-4">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                  <Input 
-                    placeholder="Buscar..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 w-full h-11 text-base bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <MobileActionSheet
-                  title="Filtros"
-                  trigger={
-                    <Button
-                      variant="outline"
-                      className="h-11 px-4 border-2 border-gray-200/60 dark:border-gray-700/60"
-                    >
-                      <Filter className="h-4 w-4 mr-2" />
-                      Filtros
-                    </Button>
-                  }
-                  open={filtersOpen}
-                  onOpenChange={setFiltersOpen}
-                >
-                  <div className="p-4 space-y-4">
-                    <h3 className="font-semibold text-lg mb-4">Filtros</h3>
-                    <div>
-                      <Label className="mb-2 block">Status</Label>
-                      <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="h-11 text-base">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos os Status</SelectItem>
-                          <SelectItem value="pendente">Pendente</SelectItem>
-                          <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                          <SelectItem value="finalizada">Finalizada</SelectItem>
-                          <SelectItem value="cancelada">Cancelada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </MobileActionSheet>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
+        <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
             <CardContent className="p-3 md:p-4">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
                 <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end flex-1">
-                  <div className="relative flex-1 sm:flex-initial">
-                    <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                    <Input 
-                      placeholder="Buscar por fornecedor ou observações..." 
+                  <div className="flex-shrink-0">
+                    <ExpandableSearch
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 sm:pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white"
+                      onChange={setSearchTerm}
+                      placeholder="Buscar por fornecedor ou observações..."
+                      accentColor="orange"
+                      expandedWidth="w-72"
                     />
                   </div>
                   
@@ -629,7 +500,6 @@ export default function ContagemEstoque() {
               </div>
             </CardContent>
           </Card>
-        )}
 
         {/* Lista de Contagens */}
         {isLoading && stockCounts.length === 0 ? (
@@ -659,133 +529,8 @@ export default function ContagemEstoque() {
           </Card>
         ) : (
           <>
-            {/* Mobile: Cards */}
-            {isMobile ? (
-              <>
-                <PullToRefresh
-                  onRefresh={async () => {
-                    await invalidateCache();
-                  }}
-                  disabled={!isMobile}
-                >
-                  <div className="grid gap-3 sm:gap-4 grid-cols-1">
-                    {filteredCounts.map((count) => {
-                    const colors = getStatusColors(count.status);
-                    return (
-                    <Card key={count.id} className={cn("group border border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-br", colors.bg, "dark:from-[#1C1F26] dark:to-[#1C1F26]", "backdrop-blur-sm")}>
-                      <CardHeader className="pb-3 p-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2 flex-1">
-                            <div className={cn("p-1.5 rounded-lg", colors.iconBg)}>
-                              <ClipboardList className={cn("h-4 w-4", colors.iconColor)} />
-                            </div>
-                            <div className="space-y-1.5 flex-1 min-w-0">
-                              <CardTitle className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                {isMobile 
-                                  ? ((count as any).supplier_name || "Contagem Livre")
-                                  : ((count as any).order?.supplier_name || "Contagem Livre")
-                                }
-                              </CardTitle>
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                {getStatusBadge(count.status)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      
-                      <CardContent className="space-y-3 p-3">
-                        <div className="p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <div className="flex items-center gap-1.5 mb-1.5">
-                                <Calendar className="h-3 w-3 text-gray-500" />
-                                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Data</span>
-                              </div>
-                              <p className="text-base font-bold text-gray-800 dark:text-gray-200">
-                                {format(new Date(count.count_date), "dd/MM/yyyy", { locale: ptBR })}
-                              </p>
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-1.5 mb-1.5">
-                                <Package className="h-3 w-3 text-orange-600" />
-                                <span className="text-xs font-medium text-orange-700 dark:text-orange-400">Pedido</span>
-                              </div>
-                              <p className="text-base font-bold text-orange-800 dark:text-orange-300">
-                                {isMobile ? (count.order_id ? "Sim" : "Não") : ((count as any).order ? "Sim" : "Não")}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {count.notes && (
-                          <div className="p-2.5 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30">
-                            <div className="flex items-center gap-1.5 mb-1.5">
-                              <FileText className="h-3 w-3 text-blue-600" />
-                              <span className="text-xs font-medium text-blue-700 dark:text-blue-400">Observações</span>
-                            </div>
-                            <p className="text-[10px] font-semibold text-blue-800 dark:text-blue-300 line-clamp-2">
-                              {count.notes}
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewCount(count.id)}
-                              className="h-8 w-8 p-0 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-200 shadow-sm hover:shadow-md"
-                            >
-                              <Eye className="h-3 w-3" />
-                            </Button>
-                            {count.status !== "finalizada" && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleFinalizeCount(count.id)}
-                                className="h-8 w-8 p-0 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-600 hover:text-emerald-700 dark:hover:text-emerald-300 transition-all duration-200 shadow-sm hover:shadow-md"
-                              >
-                                <CheckCircle className="h-3 w-3" />
-                              </Button>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteCount(count.id)}
-                              className="h-8 w-8 p-0 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 hover:border-red-300 dark:hover:border-red-600 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 shadow-sm hover:shadow-md"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-                </div>
-                
-                {/* Paginação Mobile */}
-                {mobileData.pagination && (
-                  <div className="mt-4">
-                    <DataPagination
-                      currentPage={mobileData.pagination.currentPage ?? 1}
-                      totalPages={mobileData.pagination.totalPages ?? 1}
-                      itemsPerPage={(mobileData.pagination as any).itemsPerPage ?? 20}
-                      totalItems={mobileData.pagination.totalItems ?? 0}
-                      onPageChange={mobileData.pagination.goToPage}
-                      onItemsPerPageChange={(mobileData.pagination as any).onItemsPerPageChange || (() => {})}
-                      startIndex={(mobileData.pagination as any).startIndex ?? 0}
-                      endIndex={(mobileData.pagination as any).endIndex ?? 0}
-                    />
-                  </div>
-                  )}
-                </PullToRefresh>
-              </>
-            ) : (
-              /* Desktop: Tabela */
-              <Card className="border-0 bg-transparent">
+            {/* Desktop: Tabela */}
+            <Card className="border-0 bg-transparent">
                 <CardContent className="p-0">
                   <div className="overflow-x-auto w-full">
                     <Table className="w-full">
@@ -876,38 +621,13 @@ export default function ContagemEstoque() {
 
                                 {/* Ações - Largura fixa */}
                                 <div className="w-[10%] pl-4">
-                                  <div className="flex items-center justify-end gap-2 pointer-events-auto">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleViewCount(count.id)}
-                                      className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 p-0 h-8 w-8 rounded-lg border border-orange-200 dark:border-orange-800 hover:border-orange-300 dark:hover:border-orange-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all"
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 h-8 w-8 p-0 rounded-full !transition-colors">
-                                          <MoreVertical className="h-4 w-4" />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
-                                        <DropdownMenuLabel className="text-gray-600 font-medium">Mais Ações</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        {count.status !== "finalizada" && (
-                                          <DropdownMenuItem onClick={() => handleFinalizeCount(count.id)} className="hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer transition-colors">
-                                            <CheckCircle className="h-4 w-4 mr-2 text-emerald-600" />
-                                            Finalizar
-                                          </DropdownMenuItem>
-                                        )}
-                                        <DropdownMenuItem className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer" onClick={() => handleDeleteCount(count.id)}>
-                                          <Trash2 className="h-4 w-4 mr-2" />
-                                          Excluir
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </div>
+                                  <TableActionGroup
+                                    onView={() => handleViewCount(count.id)}
+                                    onDelete={() => handleDeleteCount(count.id)}
+                                    onFinalize={count.status !== "finalizada" ? () => handleFinalizeCount(count.id) : undefined}
+                                    showEdit={false}
+                                    showFinalize={count.status !== "finalizada"}
+                                  />
                                 </div>
                               </div>
                             </TableCell>
@@ -918,7 +638,6 @@ export default function ContagemEstoque() {
                   </div>
                 </CardContent>
               </Card>
-            )}
           </>
         )}
 

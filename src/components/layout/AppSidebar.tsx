@@ -90,7 +90,10 @@ export function AppSidebar() {
     return saved !== null ? saved === 'true' : true;
   });
 
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  // Por padrão, todas as categorias começam colapsadas
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
+    () => new Set(menuCategories.map(c => c.title))
+  );
 
   // Salvar preferência e notificar AppLayout
   useEffect(() => {
@@ -108,6 +111,11 @@ export function AppSidebar() {
       }
       return newSet;
     });
+  };
+
+  // Colapsa todas as categorias exceto a especificada
+  const collapseOtherCategories = (keepOpen: string) => {
+    setCollapsedCategories(new Set(menuCategories.filter(c => c.title !== keepOpen).map(c => c.title)));
   };
 
   const SidebarContent = ({ expanded = true, mobile = false }: { expanded?: boolean, mobile?: boolean }) => (
@@ -162,6 +170,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           end={item.url === "/dashboard"}
+                          onClick={() => collapseOtherCategories(category.title)}
                           className={({ isActive }) => cn(
                             "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group",
                             isActive

@@ -1,13 +1,12 @@
 import { memo, useCallback, useMemo, useRef, useEffect, useState } from "react";
 import { ProductCardMemoized } from "./ProductCardMemoized";
 import type { Product } from "@/hooks/useProducts";
-import type { ProductMobile } from "@/hooks/mobile/useProductsMobile";
 
 interface ProductsVirtualListProps {
-  products: (Product | ProductMobile)[];
+  products: Product[];
   isMobile: boolean;
-  onEdit: (product: Product | ProductMobile) => void;
-  onDelete: (product: Product | ProductMobile) => void;
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
   onImageClick?: (url: string) => void;
   getTrendIcon: (trend: string) => JSX.Element;
   getStatusBadge: (quotesCount: number) => JSX.Element;

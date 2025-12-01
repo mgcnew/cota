@@ -4,6 +4,8 @@ import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { TableActionGroup } from "@/components/ui/table-action-group";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
@@ -264,9 +266,14 @@ export default function Pedidos() {
 
             <div className="flex flex-col sm:flex-row items-stretch gap-3 sm:justify-end flex-1 lg:flex-initial">
               {/* Barra de busca */}
-              <div className="relative flex-1 sm:flex-initial">
-                <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                <Input placeholder="Buscar por fornecedor, produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 sm:pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+              <div className="flex-shrink-0">
+                <ExpandableSearch
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  placeholder="Buscar por fornecedor, produto ou ID..."
+                  accentColor="orange"
+                  expandedWidth="w-72"
+                />
               </div>
 
               <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="w-full sm:w-[180px] h-10 bg-white/85 dark:bg-gray-900/60 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-orange-300/70 dark:hover:border-orange-500/70 focus:border-orange-400 dark:focus:border-orange-400 focus:ring-2 focus:ring-orange-200/40 dark:focus:ring-orange-700/40 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 px-3 text-gray-900 dark:text-gray-100">
@@ -413,24 +420,12 @@ export default function Pedidos() {
 
                         {/* Ações - Largura fixa */}
                         <div className="w-[10%] pl-4">
-                          <div className="flex justify-end gap-2">
-                            {/* Botão Visualizar/Editar - Unificado */}
-                            <Button variant="outline" size="sm" onClick={() => {
-                              setSelectedPedido(pedido);
-                              setPedidoDialogOpen(true);
-                            }} className="h-8 w-8 p-0 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-200 shadow-sm hover:shadow-md">
-                              <Eye className="h-3 w-3" />
-                              <span className="sr-only">Ver/Editar pedido</span>
-                            </Button>
-
-                            {/* Botão Excluir - Destrutivo */}
-                            <Button variant="outline" size="sm" onClick={() => {
-                              setSelectedPedido(pedido);
-                              setDeleteDialogOpen(true);
-                            }} className="h-8 w-8 p-0 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 hover:border-red-300 dark:hover:border-red-600 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 shadow-sm hover:shadow-md">
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
+                          <TableActionGroup
+                            onView={() => { setSelectedPedido(pedido); setPedidoDialogOpen(true); }}
+                            onDelete={() => { setSelectedPedido(pedido); setDeleteDialogOpen(true); }}
+                            showEdit={false}
+                            viewLabel="Ver"
+                          />
                         </div>
                       </div>
                     </TableCell>

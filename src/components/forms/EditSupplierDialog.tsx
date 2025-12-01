@@ -16,7 +16,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useMobile } from "@/contexts/MobileProvider";
 import {
   Form,
   FormControl,
@@ -73,7 +72,7 @@ export default function EditSupplierDialog({
   onOpenChange,
   onEdit,
 }: EditSupplierDialogProps) {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   const scrollPositionRef = useRef<number>(0);
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),

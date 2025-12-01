@@ -123,6 +123,8 @@ export function EditShoppingListItemDialog({
                         type="number"
                         step="0.01"
                         {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value === "" ? "" : e.target.value)}
                         className="flex-1"
                       />
                       <div className="px-3 py-2 bg-muted rounded-md text-sm min-w-[60px] text-center">
@@ -180,6 +182,8 @@ export function EditShoppingListItemDialog({
                         type="number"
                         step="0.01"
                         {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value === "" ? undefined : e.target.value)}
                         className="pl-10"
                       />
                     </div>

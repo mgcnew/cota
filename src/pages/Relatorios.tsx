@@ -39,7 +39,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useMobile } from "@/contexts/MobileProvider";
 
 // Tipos para melhor type safety
 interface ReportType {
@@ -167,8 +166,8 @@ export default function Relatorios() {
   const [loadingHistorico, setLoadingHistorico] = useState(true);
   const { paginate: paginateHistorico } = usePagination<any>({ initialItemsPerPage: 10 });
 
-  // Estados e hooks para carousel mobile
-  const isMobile = useMobile();
+  // Removida dependência mobile
+  const isMobile = false;
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
   // Callbacks memoizados para navegação do carousel

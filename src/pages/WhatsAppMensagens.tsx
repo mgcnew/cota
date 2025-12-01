@@ -24,7 +24,6 @@ import {
   Sparkles,
   Zap
 } from "lucide-react";
-import { useMobile } from "@/contexts/MobileProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
@@ -35,7 +34,7 @@ interface UploadedImage {
 }
 
 export default function WhatsAppMensagens() {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   const [mensagem, setMensagem] = useState("");
   const [imagens, setImagens] = useState<UploadedImage[]>([]);
   const [contatos, setContatos] = useState<string[]>([]);

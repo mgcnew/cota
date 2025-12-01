@@ -12,7 +12,6 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Calendar, Package, Users, TrendingDown, Edit2, Edit3, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus, Edit, Plus, Trash2, Check, ChevronsUpDown, Loader2, Calendar as CalendarIcon, BarChart3, AlertCircle, Eye, Info } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { useMobile } from "@/contexts/MobileProvider";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -48,7 +47,6 @@ import ConvertToOrderDialog from "./ConvertToOrderDialog";
 import ConvertToMultipleOrdersDialog, { SupplierOrder } from "./ConvertToMultipleOrdersDialog";
 
 import { SelectSupplierPerProductDialog } from "./SelectSupplierPerProductDialog";
-import { useCotacaoDetails } from "@/hooks/mobile/useCotacoesMobile";
 import { QuoteDetailsTab } from "../cotacoes/view-dialog/QuoteDetailsTab";
 import { QuoteValuesTab } from "../cotacoes/view-dialog/QuoteValuesTab";
 import { QuoteComparisonTab } from "../cotacoes/view-dialog/QuoteComparisonTab";
@@ -60,29 +58,22 @@ import {
   productLineSchema,
   quoteSchema
 } from "../cotacoes/view-dialog/types";
-import { convertQuoteDetailsToQuote } from "../cotacoes/view-dialog/helpers";
 
 
 
 export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab, readOnly = false, open: externalOpen, onOpenChange: externalOnOpenChange }: ViewQuoteDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
 
   // Usar controle externo se fornecido, senão usar interno
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
 
-  // Para mobile: usar hook para carregar dados apenas quando modal abre
-  const { data: quoteDetailsData, isLoading: isLoadingDetails } = useCotacaoDetails(
-    quoteId || null,
-    open && !!quoteId && !quote // Só carrega se modal está aberto, tem quoteId e não tem quote
-  );
+  // Usar quote prop diretamente (removida lógica de lazy loading mobile)
+  const currentQuote: Quote | null = quote || null;
 
-  // Determinar qual quote usar: dados carregados do hook ou quote passado como prop
-  const currentQuote: Quote | null = quote || (quoteDetailsData ? convertQuoteDetailsToQuote(quoteDetailsData) : null);
-
-  // Estado de loading: quando está carregando dados do hook
-  const isLoadingQuote = !currentQuote && (isLoadingDetails || (quoteId && !quoteDetailsData && open));
+  // Estado de loading (removida lógica mobile)
+  const isLoadingQuote = false;
 
   // Se não há quote e modal não está aberto, apenas renderizar trigger
   if (!open && !currentQuote) {
@@ -297,25 +288,16 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
       if (productsRes.data) setEditProducts(productsRes.data);
       if (suppliersRes.data) setEditSuppliers(suppliersRes.data);
 
-      // Load quote details (se não vier do hook)
-      let quoteData = null;
-      if (quoteId && quoteDetailsData) {
-        // Dados já vêm do hook, usar diretamente
-        quoteData = quoteDetailsData;
-      } else if (!quoteId || quote) {
-        // Carregar dados manualmente apenas se necessário
-        const { data: loadedQuoteData } = await supabase
-          .from("quotes")
-          .select(`
-            *,
-            quote_items(*),
-            quote_suppliers(*)
-          `)
-          .eq("id", currentQuote.id)
-          .single();
-
-        quoteData = loadedQuoteData;
-      }
+      // Load quote details
+      const { data: quoteData } = await supabase
+        .from("quotes")
+        .select(`
+          *,
+          quote_items(*),
+          quote_suppliers(*)
+        `)
+        .eq("id", currentQuote.id)
+        .single();
 
       if (quoteData) {
         // Set products

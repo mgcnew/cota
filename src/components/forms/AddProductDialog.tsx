@@ -18,7 +18,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useMobile } from "@/contexts/MobileProvider";
 import {
   Form,
   FormControl,
@@ -81,7 +80,7 @@ interface AddProductDialogProps {
 }
 
 export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddProductDialogProps) {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const handleSetOpen = externalOnOpenChange || ((newOpen: boolean) => setInternalOpen(newOpen));

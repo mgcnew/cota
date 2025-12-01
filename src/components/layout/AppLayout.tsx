@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
-import { usePagePreload } from "@/hooks/mobile/usePagePreload";
 import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3, Sparkles, Mic, MessageSquare } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
@@ -81,8 +80,6 @@ export function AppLayout() {
     };
   }, []);
 
-  // Preload inteligente de páginas relacionadas
-  usePagePreload();
 
   const handleLogout = async () => {
     try {
@@ -198,12 +195,13 @@ export function AppLayout() {
         {/* Main Content */}
         <main
           className={cn(
-            "flex-1 w-full pb-20 md:pb-0 relative pt-[4.5rem] transition-all duration-300 ease-in-out",
+            "flex-1 w-full pb-20 md:pb-0 relative pt-[4.5rem] transition-all duration-300 ease-in-out overflow-x-hidden overflow-y-auto",
             isSidebarExpanded ? "md:pl-[17rem]" : "md:pl-24"
           )}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          <div className="min-h-full w-full max-w-full page-content-wrapper">
-            <div className="w-full max-w-full">
+          <div className="min-h-full w-full max-w-full page-content-wrapper overflow-x-hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="w-full max-w-full overflow-x-hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               <SmoothPageTransition>
                 <Outlet />
               </SmoothPageTransition>

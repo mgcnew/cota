@@ -9,11 +9,8 @@ import { AppLayout } from "./components/layout/AppLayout";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { CompanyAutoSetup } from "./components/auth/CompanyAutoSetup";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import { MobileProvider } from "./contexts/MobileProvider";
 import { Loader2 } from "lucide-react";
 import { initScrollbarFix } from "./utils/scrollbar-fix";
-import { useScrollOptimization } from "./hooks/mobile/useScrollOptimization";
-import "./styles/mobile-scroll-optimization.css";
 
 // Páginas públicas - carregamento imediato
 import Auth from "./pages/Auth";
@@ -52,20 +49,15 @@ const PageLoader = () => (
   </div>
 );
 
-// QueryClient otimizado para mobile e desktop
+// QueryClient configuração padrão
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Reduzir staleTime em mobile para dados mais frescos
-      staleTime: typeof window !== 'undefined' && window.innerWidth < 768 ? 30000 : 60000,
-      // Cache mais agressivo em mobile
-      gcTime: typeof window !== 'undefined' && window.innerWidth < 768 ? 300000 : 600000,
-      // Retry menos vezes em mobile para economizar dados
-      retry: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 3,
-      // Não refetch automaticamente em mobile ao focar janela
-      refetchOnWindowFocus: typeof window !== 'undefined' && window.innerWidth >= 768,
-      // Não refetch ao reconectar em mobile
-      refetchOnReconnect: typeof window !== 'undefined' && window.innerWidth >= 768,
+      staleTime: 60000,
+      gcTime: 600000,
+      retry: 3,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
     },
   },
 });
@@ -76,9 +68,6 @@ const App = () => {
     return cleanup;
   }, []);
 
-  // Otimizações de scroll mobile
-  useScrollOptimization();
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -87,9 +76,8 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              <MobileProvider>
-                <CompanyAutoSetup />
-                <Routes>
+              <CompanyAutoSetup />
+              <Routes>
                 {/* Rotas públicas */}
                 <Route path="/" element={<Landing />} />
                 <Route path="/pricing" element={<Pricing />} />
@@ -126,7 +114,6 @@ const App = () => {
                 {/* Rota 404 */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              </MobileProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

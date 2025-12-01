@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { useMobile } from "@/contexts/MobileProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,7 +31,7 @@ export default function AddPedidoDialog({
   onAdd,
   preSelectedProducts = []
 }: AddPedidoDialogProps) {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   const {
     toast
   } = useToast();
@@ -99,24 +98,29 @@ export default function AddPedidoDialog({
         setItens([]);
       }
 
-      // Focar no campo de busca após um pequeno delay
+      // Abrir popover e focar no campo de busca após um pequeno delay
       setTimeout(() => {
-        const searchInput = document.querySelector('[placeholder*="buscar produtos"]') as HTMLInputElement;
-        if (searchInput) {
-          searchInput.focus();
-        }
+        setProductPopoverOpen(true);
+        setTimeout(() => {
+          const searchInput = document.querySelector('[placeholder*="Buscar entre"]') as HTMLInputElement;
+          if (searchInput) {
+            searchInput.focus();
+          }
+        }, 100);
       }, 300);
     }
   }, [open, preSelectedProducts]);
 
   // Prevenir scroll flash durante mudança de tab
   useEffect(() => {
-    setIsTransitioning(true);
-    const timer = setTimeout(() => {
-      setIsTransitioning(false);
-    }, 200);
-    return () => clearTimeout(timer);
-  }, [activeTab]);
+    if (open) {
+      setIsTransitioning(true);
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, open]);
 
   // Atalhos de teclado
   useEffect(() => {
@@ -254,8 +258,13 @@ export default function AddPedidoDialog({
 
   // Filter products - mostrar todos ou filtrados
   const filteredProducts = useMemo(() => {
-    if (!debouncedProductSearch) return products; // Mostra todos quando não há busca
-    return products.filter(p => p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase()));
+    if (!debouncedProductSearch || debouncedProductSearch.trim().length < 1) {
+      return []; // Não mostra nada até digitar pelo menos 1 caractere
+    }
+    const searchLower = debouncedProductSearch.toLowerCase().trim();
+    return products.filter(p => 
+      p.name.toLowerCase().includes(searchLower)
+    ).slice(0, 100); // Limitar a 100 resultados para performance
   }, [products, debouncedProductSearch]);
   const handleAddItem = () => {
     setItens([...itens, {
@@ -279,6 +288,11 @@ export default function AddPedidoDialog({
   };
 
   const handleProductSelect = (product: any) => {
+    if (!product || !product.id) {
+      setSelectedProduct(null);
+      return;
+    }
+    
     setSelectedProduct(product);
 
     // Auto-preencher preço se disponível
@@ -333,13 +347,29 @@ export default function AddPedidoDialog({
     }
   };
   const handleNext = () => {
-    if (currentTabIndex < tabs.length - 1) {
-      setActiveTab(tabs[currentTabIndex + 1].id);
+    if (currentTabIndex < tabs.length - 1 && canProceedToNext()) {
+      const nextTab = tabs[currentTabIndex + 1];
+      setActiveTab(nextTab.id);
+      // Scroll para o topo ao mudar de tab
+      setTimeout(() => {
+        const contentArea = document.querySelector('[class*="overflow-y-auto"]') as HTMLElement;
+        if (contentArea) {
+          contentArea.scrollTop = 0;
+        }
+      }, 100);
     }
   };
   const handlePrevious = () => {
     if (currentTabIndex > 0) {
-      setActiveTab(tabs[currentTabIndex - 1].id);
+      const prevTab = tabs[currentTabIndex - 1];
+      setActiveTab(prevTab.id);
+      // Scroll para o topo ao mudar de tab
+      setTimeout(() => {
+        const contentArea = document.querySelector('[class*="overflow-y-auto"]') as HTMLElement;
+        if (contentArea) {
+          contentArea.scrollTop = 0;
+        }
+      }, 100);
     }
   };
   const getTabStatus = (tabId: string) => {
@@ -413,10 +443,11 @@ export default function AddPedidoDialog({
     setNewProductPrice("");
     setProductSearch("");
     setErrors({});
+    setProductPopoverOpen(true);
 
     // Focar no campo de busca após adicionar
     setTimeout(() => {
-      const searchInput = document.querySelector('[placeholder*="buscar produtos"]') as HTMLInputElement;
+      const searchInput = document.querySelector('[placeholder*="Buscar entre"]') as HTMLInputElement;
       if (searchInput) {
         searchInput.focus();
       }
@@ -596,14 +627,36 @@ export default function AddPedidoDialog({
         <div className="flex space-x-1 bg-white dark:bg-gray-900 rounded-md p-0.5 border border-gray-200 dark:border-gray-700 min-w-0">
           {tabs.map(tab => {
             const status = getTabStatus(tab.id);
-            return <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={`
-                    flex-1 flex items-center justify-center gap-1 ${isMobile ? 'px-3 py-2' : 'px-2 py-1.5'} rounded ${isMobile ? 'text-sm' : 'text-xs'} font-medium transition-all duration-200
-                    ${status === 'current'
-                ? 'bg-pink-600 dark:bg-pink-500 text-white shadow-sm'
-                : status === 'completed'
-                  ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
-                  : 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}
-                  `}>
+            const tabIndex = tabs.findIndex(t => t.id === tab.id);
+            const canClick = tabIndex <= currentTabIndex || (tabIndex === currentTabIndex + 1 && canProceedToNext());
+            
+            return <button 
+              key={tab.id} 
+              type="button" 
+              onClick={() => {
+                if (canClick) {
+                  setActiveTab(tab.id);
+                  // Scroll para o topo ao mudar de tab
+                  setTimeout(() => {
+                    const contentArea = document.querySelector('[class*="overflow-y-auto"]') as HTMLElement;
+                    if (contentArea) {
+                      contentArea.scrollTop = 0;
+                    }
+                  }, 100);
+                }
+              }}
+              disabled={!canClick}
+              className={`
+                flex-1 flex items-center justify-center gap-1 ${isMobile ? 'px-3 py-2' : 'px-2 py-1.5'} rounded ${isMobile ? 'text-sm' : 'text-xs'} font-medium transition-all duration-200
+                ${status === 'current'
+                  ? 'bg-pink-600 dark:bg-pink-500 text-white shadow-sm'
+                  : status === 'completed'
+                    ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
+                    : canClick
+                      ? 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      : 'bg-transparent text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'}
+              `}
+            >
               {status === 'completed' ? <CheckCircle className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'}`} /> : <tab.icon className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'}`} />}
               <span className={isMobile ? 'inline' : 'hidden sm:inline'}>{tab.label}</span>
             </button>;
@@ -815,14 +868,36 @@ export default function AddPedidoDialog({
           <div className="flex space-x-1 bg-white dark:bg-gray-900 rounded-md p-0.5 border border-gray-200 dark:border-gray-700 min-w-0">
             {tabs.map(tab => {
               const status = getTabStatus(tab.id);
-              return <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={`
-                    flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-xs font-medium transition-all
-                    ${status === 'current'
-                  ? 'bg-pink-600 dark:bg-pink-500 text-white'
-                  : status === 'completed'
-                    ? 'bg-green-500 dark:bg-green-600 text-white'
-                    : 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}
-                  `}>
+              const tabIndex = tabs.findIndex(t => t.id === tab.id);
+              const canClick = tabIndex <= currentTabIndex || (tabIndex === currentTabIndex + 1 && canProceedToNext());
+              
+              return <button 
+                key={tab.id} 
+                type="button" 
+                onClick={() => {
+                  if (canClick) {
+                    setActiveTab(tab.id);
+                    // Scroll para o topo ao mudar de tab
+                    setTimeout(() => {
+                      const contentArea = document.querySelector('[class*="overflow-y-auto"]') as HTMLElement;
+                      if (contentArea) {
+                        contentArea.scrollTop = 0;
+                      }
+                    }, 100);
+                  }
+                }}
+                disabled={!canClick}
+                className={`
+                  flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-xs font-medium transition-all
+                  ${status === 'current'
+                    ? 'bg-pink-600 dark:bg-pink-500 text-white'
+                    : status === 'completed'
+                      ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
+                      : canClick
+                        ? 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                        : 'bg-transparent text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'}
+                `}
+              >
                 {status === 'completed' ? <CheckCircle className="h-3 w-3" /> : <tab.icon className="h-3 w-3" />}
                 <span className="hidden sm:inline text-xs">{tab.label}</span>
               </button>;

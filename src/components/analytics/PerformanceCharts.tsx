@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, BarChart3 } from "lucide-react";
-import { useMobile } from "@/contexts/MobileProvider";
 import {
   BarChart,
   Bar,
@@ -44,7 +43,7 @@ export function PerformanceCharts({
   performanceFornecedores,
   tendenciasMensais,
 }: PerformanceChartsProps) {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   
   // Componente para mensagem quando gráficos não estão disponíveis no mobile
   const MobilePlaceholder = ({ title }: { title: string }) => (

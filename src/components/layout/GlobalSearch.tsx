@@ -21,7 +21,6 @@ import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { usePedidos } from "@/hooks/usePedidos";
-import { useMobile } from "@/contexts/MobileProvider";
 
 interface GlobalSearchProps {
   open: boolean;
@@ -30,7 +29,7 @@ interface GlobalSearchProps {
 
 export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const navigate = useNavigate();
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
 
@@ -398,7 +397,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 }
 
 export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
 
   return (
     <TooltipProvider>

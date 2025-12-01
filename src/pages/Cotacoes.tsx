@@ -6,13 +6,11 @@ import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Quote, FornecedorParticipante } from "@/hooks/useCotacoes";
-import { useCotacoesMobile } from "@/hooks/mobile/useCotacoesMobile";
-import type { CotacaoMobile } from "@/hooks/mobile/useCotacoesMobile";
-import { CotacoesMobileList } from "@/components/cotacoes/CotacoesMobileList";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { FileText, Plus, Search, Filter, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ChevronDown, Package, Clock, CircleDot, ClipboardList, ChevronLeft, ChevronRight } from "lucide-react";
-import { capitalize } from "@/lib/text-utils";
+import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { TableActionGroup } from "@/components/ui/table-action-group";
+import { FileText, Plus, Search, Eye, Edit, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, Package, Clock, CircleDot, ClipboardList } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,7 +21,6 @@ import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { cn } from "@/lib/utils";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
-import { useMobile } from "@/contexts/MobileProvider";
 import { useToast } from "@/hooks/use-toast";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageWrapper } from "@/components/layout/PageWrapper";
@@ -42,8 +39,6 @@ export default function CotacoesRefactored() {
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const [statusFilter, setStatusFilter] = useState("all");
     const [supplierFilter, setSupplierFilter] = useState("all");
-    const [activeCardIndex, setActiveCardIndex] = useState(0);
-    const isMobile = useMobile();
     const addQuoteRef = useRef<HTMLButtonElement>(null);
     const { toast } = useToast();
 
@@ -52,16 +47,6 @@ export default function CotacoesRefactored() {
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
     const [selectedQuoteForEdit, setSelectedQuoteForEdit] = useState<Quote | null>(null);
-
-    const handlePrevCard = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        setActiveCardIndex((prev) => (prev === 0 ? 3 : prev - 1));
-    }, []);
-
-    const handleNextCard = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        setActiveCardIndex((prev) => (prev === 3 ? 0 : prev + 1));
-    }, []);
 
     useEffect(() => {
         const fornecedor = searchParams.get('fornecedor');
@@ -74,21 +59,24 @@ export default function CotacoesRefactored() {
         }
     }, [searchParams]);
 
-    const desktopData = useCotacoes();
-    const mobileData = useCotacoesMobile({
-        searchTerm: debouncedSearchTerm,
-        statusFilter,
-        supplierFilter,
-    });
+    const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, updateQuote, convertToOrder, isUpdating } = useCotacoes();
 
-    const cotacoes = isMobile ? (mobileData.cotacoes as unknown as Quote[]) : desktopData.cotacoes;
-    const isLoading = isMobile ? mobileData.isLoading : desktopData.isLoading;
-    const refetch = isMobile ? mobileData.refetch : desktopData.refetch;
-    const updateSupplierProductValue = isMobile ? mobileData.updateSupplierProductValue : desktopData.updateSupplierProductValue;
-    const deleteQuote = isMobile ? mobileData.deleteQuote : desktopData.deleteQuote;
-    const updateQuote = isMobile ? mobileData.updateQuote : desktopData.updateQuote;
-    const convertToOrder = isMobile ? mobileData.convertToOrder : desktopData.convertToOrder;
-    const isUpdating = isMobile ? mobileData.isUpdating : desktopData.isUpdating;
+    // Atualizar selectedQuoteForEdit e selectedQuote quando os dados forem atualizados
+    useEffect(() => {
+        if (selectedQuoteForEdit && cotacoes.length > 0) {
+            const updatedQuote = cotacoes.find(q => q.id === selectedQuoteForEdit.id);
+            if (updatedQuote) {
+                setSelectedQuoteForEdit(updatedQuote);
+            }
+        }
+        if (selectedQuote && cotacoes.length > 0) {
+            const updatedQuote = cotacoes.find(q => q.id === selectedQuote.id);
+            if (updatedQuote) {
+                setSelectedQuote(updatedQuote);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [cotacoes]);
 
     const handleViewQuote = useCallback((quote: Quote) => {
         startTransition(() => {
@@ -98,18 +86,10 @@ export default function CotacoesRefactored() {
     }, []);
 
     const handleEditQuote = useCallback((quote: Quote) => {
-        if (!isMobile) {
-            startTransition(() => {
-                setSelectedQuoteForEdit(quote);
-            });
-        } else {
-            startTransition(() => {
-                setSelectedQuote(quote);
-                setDesktopEditMode(true);
-                setViewDialogOpen(true);
-            });
-        }
-    }, [isMobile]);
+        startTransition(() => {
+            setSelectedQuoteForEdit(quote);
+        });
+    }, []);
 
     const handleDeleteQuote = useCallback((quote: Quote) => {
         startTransition(() => {
@@ -117,32 +97,6 @@ export default function CotacoesRefactored() {
             setDeleteDialogOpen(true);
         });
     }, []);
-
-    const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
-    const [isEditMode, setIsEditMode] = useState(false);
-    const [desktopEditMode, setDesktopEditMode] = useState(false);
-
-    const handleViewQuoteMobile = useCallback((quote: CotacaoMobile) => {
-        startTransition(() => {
-            setSelectedQuoteId(quote.id);
-            setIsEditMode(false);
-            setViewDialogOpen(true);
-        });
-    }, []);
-
-    const handleEditQuoteMobile = useCallback((quote: CotacaoMobile) => {
-        startTransition(() => {
-            setSelectedQuoteId(quote.id);
-            setIsEditMode(true);
-            setViewDialogOpen(true);
-        });
-    }, []);
-
-    const handleDeleteQuoteMobile = useCallback((quote: CotacaoMobile) => {
-        if (mobileData.deleteQuote) {
-            mobileData.deleteQuote(quote.id);
-        }
-    }, [mobileData]);
 
     const getStatusBadge = useCallback((status: string) => {
         const variants = {
@@ -356,49 +310,12 @@ export default function CotacoesRefactored() {
         <PageWrapper>
             <div className="page-container">
                 {/* Statistics Cards */}
-                {isMobile ? (
-                    <div className="mb-8">
-                        <div className="relative">
-                            <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center gap-2 pt-3 pb-2 px-4">
-                                <Button variant="ghost" size="sm" onClick={handlePrevCard} className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
-                                    <ChevronLeft className="h-4 w-4" />
-                                </Button>
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 dark:bg-gray-900/40 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
-                                    <span className="text-xs font-semibold text-white dark:text-gray-200">
-                                        {activeCardIndex + 1} / 4
-                                    </span>
-                                </div>
-                                <Button variant="ghost" size="sm" onClick={handleNextCard} className="h-8 w-8 p-0 rounded-full bg-white/20 dark:bg-gray-900/40 hover:bg-white/30 dark:hover:bg-gray-900/60 text-white dark:text-gray-200 backdrop-blur-sm border border-white/30 dark:border-gray-700/50 shadow-lg">
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-
-                            <div className="relative overflow-hidden rounded-xl" style={{ minHeight: '180px' }}>
-                                <div className="flex" style={{ transform: `translateX(-${activeCardIndex * 100}%)`, transition: 'none' }}>
-                                    <div className="w-full flex-shrink-0">
-                                        <MetricCard title="Ativas" value={stats.porStatus.ativas} icon={FileText} variant="info" trend={{ value: `${stats.percentualAtivas}%`, label: "do total", type: "neutral" }} />
-                                    </div>
-                                    <div className="w-full flex-shrink-0">
-                                        <MetricCard title="Pendentes" value={stats.porStatus.pendentes} icon={Calendar} variant="default" trend={{ value: stats.pendentesMais24h.toString(), label: "atrasadas (>24h)", type: stats.pendentesMais24h > 0 ? "negative" : "positive" }} />
-                                    </div>
-                                    <div className="w-full flex-shrink-0">
-                                        <MetricCard title="Economia" value={stats.economiaFormatada} icon={DollarSign} variant="success" trend={{ value: "Total", label: "economizado", type: "positive" }} />
-                                    </div>
-                                    <div className="w-full flex-shrink-0">
-                                        <MetricCard title="Fornecedores" value={stats.mediaFornecedores} icon={Building2} variant="default" trend={{ value: stats.totalFornecedoresUnicos.toString(), label: "únicos", type: "neutral" }} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <MetricCard title="Ativas" value={stats.porStatus.ativas} icon={FileText} variant="info" trend={{ value: `${stats.percentualAtivas}%`, label: "do total", type: "neutral" }} />
-                        <MetricCard title="Pendentes" value={stats.porStatus.pendentes} icon={Calendar} variant="default" trend={{ value: stats.pendentesMais24h.toString(), label: "atrasadas (>24h)", type: stats.pendentesMais24h > 0 ? "negative" : "positive" }} />
-                        <MetricCard title="Economia" value={stats.economiaFormatada} icon={DollarSign} variant="success" trend={{ value: "Total", label: "economizado", type: "positive" }} />
-                        <MetricCard title="Fornecedores" value={stats.mediaFornecedores} icon={Building2} variant="default" trend={{ value: stats.totalFornecedoresUnicos.toString(), label: "únicos", type: "neutral" }} />
-                    </div>
-                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <MetricCard title="Ativas" value={stats.porStatus.ativas} icon={FileText} variant="info" trend={{ value: `${stats.percentualAtivas}%`, label: "do total", type: "neutral" }} />
+                    <MetricCard title="Pendentes" value={stats.porStatus.pendentes} icon={Calendar} variant="default" trend={{ value: stats.pendentesMais24h.toString(), label: "atrasadas (>24h)", type: stats.pendentesMais24h > 0 ? "negative" : "positive" }} />
+                    <MetricCard title="Economia" value={stats.economiaFormatada} icon={DollarSign} variant="success" trend={{ value: "Total", label: "economizado", type: "positive" }} />
+                    <MetricCard title="Fornecedores" value={stats.mediaFornecedores} icon={Building2} variant="default" trend={{ value: stats.totalFornecedoresUnicos.toString(), label: "únicos", type: "neutral" }} />
+                </div>
 
                 {/* Page Header */}
                 <PageHeader
@@ -434,9 +351,14 @@ export default function CotacoesRefactored() {
                 >
                     <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full">
                         <div className="flex gap-2 flex-1 sm:flex-initial">
-                            <div className="relative flex-1 sm:flex-initial">
-                                <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4 z-10" />
-                                <Input placeholder="Buscar por produto ou ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 sm:pl-12 pr-4 w-full sm:w-64 h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-teal-300/70 dark:hover:border-teal-600/70 focus:border-teal-400 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50 dark:focus:ring-teal-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white" />
+                            <div className="flex-shrink-0">
+                                <ExpandableSearch
+                                    value={searchTerm}
+                                    onChange={setSearchTerm}
+                                    placeholder="Buscar por produto ou ID..."
+                                    accentColor="teal"
+                                    expandedWidth="w-64"
+                                />
                             </div>
                             <Button onClick={() => addQuoteRef.current?.click()} className="sm:hidden bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl flex-shrink-0 px-4">
                                 <Plus className="h-4 w-4" />
@@ -474,21 +396,7 @@ export default function CotacoesRefactored() {
 
                 {/* Cotações View */}
                 <AnimatePresence mode="wait">
-                    {isMobile ? (
-                        <motion.div key="mobile-list" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                            <CotacoesMobileList
-                                cotacoes={mobileData.cotacoes}
-                                isLoading={mobileData.isLoading}
-                                isFetchingNextPage={mobileData.isFetchingNextPage}
-                                hasNextPage={mobileData.hasNextPage}
-                                fetchNextPage={mobileData.fetchNextPage}
-                                onView={handleViewQuoteMobile}
-                                onEdit={handleEditQuoteMobile}
-                                onDelete={handleDeleteQuoteMobile}
-                                getStatusBadge={getStatusBadge}
-                            />
-                        </motion.div>
-                    ) : selectedQuoteForEdit ? (
+                    {selectedQuoteForEdit ? (
                         <motion.div key="edit-view" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
                             <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
                                 <QuoteEditView
@@ -790,25 +698,14 @@ export default function CotacoesRefactored() {
                                                                         </div>
 
                                                                         <div className="w-[10%] px-2">
-                                                                            <div className="flex items-center justify-end gap-2">
-                                                                                {cotacao.status !== "concluida" ? (
-                                                                                    <Button variant="ghost" size="sm" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 p-0 h-8 w-8 rounded-lg border border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all" onClick={() => handleEditQuote(cotacao)}>
-                                                                                        <Edit className="h-4 w-4" />
-                                                                                        <span className="sr-only">Editar cotação</span>
-                                                                                    </Button>
-                                                                                ) : (
-                                                                                    <Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 p-0 h-8 w-8 rounded-lg border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all" onClick={() => handleViewQuote(cotacao)}>
-                                                                                        <Eye className="h-4 w-4" />
-                                                                                        <span className="sr-only">Gerenciar cotação</span>
-                                                                                    </Button>
-                                                                                )}
-                                                                                {cotacao.status !== "concluida" && (
-                                                                                    <Button variant="ghost" size="sm" className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 p-0 h-8 w-8 rounded-lg border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 flex items-center justify-center shadow-sm hover:shadow-md !transition-all" onClick={() => handleDeleteQuote(cotacao)}>
-                                                                                        <Trash2 className="h-4 w-4" />
-                                                                                        <span className="sr-only">Excluir cotação</span>
-                                                                                    </Button>
-                                                                                )}
-                                                                            </div>
+                                                                            <TableActionGroup
+                                                                                onView={cotacao.status === "concluida" ? () => handleViewQuote(cotacao) : undefined}
+                                                                                onEdit={cotacao.status !== "concluida" ? () => handleEditQuote(cotacao) : undefined}
+                                                                                onDelete={cotacao.status !== "concluida" ? () => handleDeleteQuote(cotacao) : undefined}
+                                                                                showView={cotacao.status === "concluida"}
+                                                                                showEdit={cotacao.status !== "concluida"}
+                                                                                showDelete={cotacao.status !== "concluida"}
+                                                                            />
                                                                         </div>
                                                                     </div>
                                                                 </TableCell>
@@ -829,7 +726,7 @@ export default function CotacoesRefactored() {
                     )}
                 </AnimatePresence>
 
-                {!isMobile && filteredCotacoes.length === 0 && !isLoading && (
+                {filteredCotacoes.length === 0 && !isLoading && (
                     <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80 dark:border-gray-700/30">
                         <CardContent className="p-12 text-center">
                             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -852,18 +749,17 @@ export default function CotacoesRefactored() {
                     </Suspense>
                 )}
 
-                {viewDialogOpen && (
+                {viewDialogOpen && selectedQuote && (
                     <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="bg-white dark:bg-gray-900 rounded-lg p-4"><div className="w-8 h-8 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin" /></div></div>}>
                         <ViewQuoteDialog
-                            quote={!isMobile ? selectedQuote || undefined : undefined}
-                            quoteId={isMobile ? selectedQuoteId || undefined : undefined}
+                            quote={selectedQuote}
                             onUpdateSupplierProductValue={updateSupplierProductValue ? (quoteId, supplierId, productId, newValue) => updateSupplierProductValue({ quoteId, supplierId, productId, newValue }) : undefined}
                             onConvertToOrder={convertToOrder ? (quoteId, orders) => convertToOrder({ quoteId, orders }) : undefined}
                             onEdit={updateQuote ? (quoteId, data) => updateQuote({ quoteId, data }) : undefined}
                             isUpdating={isUpdating}
-                            defaultTab={(isMobile ? isEditMode : desktopEditMode) ? "edicao" : "detalhes"}
+                            defaultTab="detalhes"
                             open={viewDialogOpen}
-                            onOpenChange={(open) => { if (!open) startTransition(() => { setViewDialogOpen(false); setSelectedQuoteId(null); setIsEditMode(false); setDesktopEditMode(false); setSelectedQuote(null); }); }}
+                            onOpenChange={(open) => { if (!open) startTransition(() => { setViewDialogOpen(false); setSelectedQuote(null); }); }}
                             trigger={<div />}
                         />
                     </Suspense>

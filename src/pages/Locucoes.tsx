@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMobile } from '@/contexts/MobileProvider';
 import { 
   Mic, 
   Play, 
@@ -133,7 +132,7 @@ const tiposLocucao: VoiceType[] = [
 ];
 
 export default function Locucoes() {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   // API Key padrão configurada
   const DEFAULT_API_KEY = 'AIzaSyAuLwffF13_0aHKc8X5LEhw5-wp4kQmj0c';
 

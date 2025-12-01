@@ -7,6 +7,8 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { TableActionGroup } from "@/components/ui/table-action-group";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Package, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download } from "lucide-react";
@@ -381,12 +383,13 @@ export default function Produtos() {
             }
           >
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
-              <div className="flex-1 min-w-0">
-                <Input
-                  placeholder="Buscar produtos..."
+              <div className="flex-shrink-0">
+                <ExpandableSearch
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 max-w-xs"
+                  onChange={setSearchQuery}
+                  placeholder="Buscar produtos..."
+                  accentColor="orange"
+                  expandedWidth="w-64"
                 />
               </div>
               <div className="flex-1 sm:flex-initial">
@@ -508,25 +511,28 @@ export default function Produtos() {
                                   <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount || 0}</span>
                                 </div>
 
-                                <div className="w-[10%] flex justify-end items-center gap-1.5 px-2">
-                                  <ProductPriceHistoryDialog productName={product.name} productId={product.id} trigger={<Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 p-0 h-8 w-8 rounded-lg border border-primary/20 dark:border-primary/30 hover:border-primary/40 dark:hover:border-primary/50 flex items-center justify-center shadow-sm hover:shadow-md !transition-all">
-                                    <History className="h-4 w-4" />
-                                  </Button>} />
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 h-8 w-8 p-0 rounded-full !transition-colors">
-                                        <MoreVertical className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
-                                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleEditProduct(product); }} className="hover:bg-green-50 hover:text-green-700 cursor-pointer transition-colors py-2">
-                                        <Edit className="h-4 w-4 mr-2 text-green-600" /> <span className="font-medium">Editar Produto</span>
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDeleteProduct(product); }} className="text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors py-2">
-                                        <Trash2 className="h-4 w-4 mr-2" /> <span className="font-medium">Excluir Produto</span>
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
+                                <div className="w-[10%] flex justify-end items-center px-2">
+                                  <TableActionGroup
+                                    showView={false}
+                                    onEdit={() => handleEditProduct(product)}
+                                    onDelete={() => handleDeleteProduct(product)}
+                                    additionalActions={[
+                                      {
+                                        icon: <History className="h-3.5 w-3.5" />,
+                                        label: "Histórico",
+                                        onClick: () => {},
+                                        variant: "default" as const,
+                                      }
+                                    ]}
+                                    dropdownItems={[
+                                      {
+                                        icon: <History className="h-4 w-4" />,
+                                        label: "Ver Histórico de Preços",
+                                        onClick: () => {},
+                                      }
+                                    ]}
+                                    dropdownLabel="Mais Opções"
+                                  />
                                 </div>
                               </div>
                             </TableCell>

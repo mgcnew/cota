@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, ShoppingCart } from "lucide-react";
-import { useMobile } from "@/contexts/MobileProvider";
 import { useShoppingList } from "@/hooks/useShoppingList";
 import { useProducts } from "@/hooks/useProducts";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -21,41 +20,54 @@ interface AddProductToListDialogProps {
 }
 
 export function AddProductToListDialog({ open, onOpenChange }: AddProductToListDialogProps) {
-  const isMobile = useMobile();
+  const isMobile = false; // Removida dependência mobile
   const { products } = useProducts();
   const { addItem } = useShoppingList();
 
-  const [productSearch, setProductSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [quantity, setQuantity] = useState<number>(1);
   const [priority, setPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
-  const [notes, setNotes] = useState("");
-  const [estimatedPrice, setEstimatedPrice] = useState<number>(0);
   const [openCombobox, setOpenCombobox] = useState(false);
+  const [notesLength, setNotesLength] = useState(0);
+
+  // Refs para inputs não controlados
+  const quantityRef = useRef<HTMLInputElement>(null);
+  const estimatedPriceRef = useRef<HTMLInputElement>(null);
+  const notesRef = useRef<HTMLTextAreaElement>(null);
 
   // Reset form quando fechar
   useEffect(() => {
     if (!open) {
       setSelectedProduct(null);
-      setQuantity(1);
       setPriority("medium");
-      setNotes("");
-      setEstimatedPrice(0);
-      setProductSearch("");
+      setOpenCombobox(false);
+      // Resetar valores dos inputs
+      if (quantityRef.current) quantityRef.current.value = "1";
+      if (estimatedPriceRef.current) estimatedPriceRef.current.value = "";
+      if (notesRef.current) notesRef.current.value = "";
+      setNotesLength(0);
     }
   }, [open]);
 
   const handleSubmit = async () => {
     if (!selectedProduct) return;
 
+    const quantityValue = quantityRef.current?.value || "1";
+    const estimatedPriceValue = estimatedPriceRef.current?.value || "";
+    const notesValue = notesRef.current?.value || "";
+
+    const quantityNum = parseFloat(quantityValue) || 0;
+    const estimatedPriceNum = parseFloat(estimatedPriceValue) || 0;
+
+    if (quantityNum <= 0) return;
+
     await addItem.mutateAsync({
       product_id: selectedProduct.id,
       product_name: selectedProduct.name,
-      quantity,
+      quantity: quantityNum,
       unit: selectedProduct.unit || "un",
       priority,
-      notes: notes.trim() || undefined,
-      estimated_price: estimatedPrice > 0 ? estimatedPrice : undefined,
+      notes: notesValue.trim() || undefined,
+      estimated_price: estimatedPriceNum > 0 ? estimatedPriceNum : undefined,
       category: selectedProduct.category || undefined,
     });
 
@@ -80,21 +92,17 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-full p-0">
-            <Command>
-              <CommandInput placeholder="Buscar produto..." value={productSearch} onValueChange={setProductSearch} />
+            <Command shouldFilter={true}>
+              <CommandInput placeholder="Buscar produto..." />
               <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
               <CommandList>
                 <CommandGroup>
                   {products
-                    .filter(p =>
-                      p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-                      (p.category && p.category.toLowerCase().includes(productSearch.toLowerCase()))
-                    )
                     .slice(0, 50)
                     .map((product) => (
                       <CommandItem
                         key={product.id}
-                        value={product.name}
+                        value={`${product.name} ${product.category || ''}`}
                         onSelect={() => {
                           setSelectedProduct(product);
                           setOpenCombobox(false);
@@ -126,11 +134,11 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
         <Label htmlFor="quantity">Quantidade *</Label>
         <Input
           id="quantity"
+          ref={quantityRef}
           type="number"
           min="0.01"
           step="0.01"
-          value={quantity}
-          onChange={(e) => setQuantity(Number(e.target.value))}
+          defaultValue="1"
           placeholder="Ex: 10"
         />
       </div>
@@ -156,11 +164,11 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
         <Label htmlFor="estimated_price">Preço Estimado (opcional)</Label>
         <Input
           id="estimated_price"
+          ref={estimatedPriceRef}
           type="number"
           min="0"
           step="0.01"
-          value={estimatedPrice}
-          onChange={(e) => setEstimatedPrice(Number(e.target.value))}
+          defaultValue=""
           placeholder="R$ 0,00"
         />
       </div>
@@ -170,14 +178,15 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
         <Label htmlFor="notes">Observações (opcional)</Label>
         <Textarea
           id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          ref={notesRef}
+          defaultValue=""
           placeholder="Adicione observações sobre este produto..."
           rows={3}
           maxLength={500}
+          onChange={(e) => setNotesLength(e.target.value.length)}
         />
         <p className="text-xs text-muted-foreground">
-          {notes.length}/500 caracteres
+          {notesLength}/500 caracteres
         </p>
       </div>
     </div>
@@ -217,7 +226,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!selectedProduct || quantity <= 0 || addItem.isPending}
+              disabled={!selectedProduct || !quantityRef.current?.value || parseFloat(quantityRef.current?.value || "0") <= 0 || addItem.isPending}
               className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
               {addItem.isPending ? (
@@ -248,7 +257,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!selectedProduct || quantity <= 0 || addItem.isPending}
+            disabled={!selectedProduct || !quantityRef.current?.value || parseFloat(quantityRef.current?.value || "0") <= 0 || addItem.isPending}
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
           >
             {addItem.isPending ? (

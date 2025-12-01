@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense, startTransition } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -9,18 +9,14 @@ import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { TableActionGroup } from "@/components/ui/table-action-group";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Search, Plus, Phone, Mail, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, History, MessageCircle, Award, Star, Clock, CircleDot, CreditCard, ShoppingCart, ClipboardList, Filter } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
-import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
-import DeleteSupplierDialog from "@/components/forms/DeleteSupplierDialog";
-import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
-import { ImportSuppliersDialog } from "@/components/forms/ImportSuppliersDialog";
-import { SupplierQuoteHistoryDialog } from "@/components/forms/SupplierQuoteHistoryDialog";
 import { toast } from "@/hooks/use-toast";
 import { MetricCard } from "@/components/ui/metric-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -30,6 +26,14 @@ import { usePagination } from "@/hooks/usePagination";
 import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
+
+// Lazy load dialogs
+const AddSupplierDialog = lazy(() => import("@/components/forms/AddSupplierDialog").then(m => ({ default: m.default })));
+const EditSupplierDialog = lazy(() => import("@/components/forms/EditSupplierDialog").then(m => ({ default: m.default })));
+const DeleteSupplierDialog = lazy(() => import("@/components/forms/DeleteSupplierDialog").then(m => ({ default: m.default })));
+const AddQuoteDialog = lazy(() => import("@/components/forms/AddQuoteDialog").then(m => ({ default: m.default })));
+const ImportSuppliersDialog = lazy(() => import("@/components/forms/ImportSuppliersDialog").then(m => ({ default: m.ImportSuppliersDialog })));
+const SupplierQuoteHistoryDialog = lazy(() => import("@/components/forms/SupplierQuoteHistoryDialog").then(m => ({ default: m.SupplierQuoteHistoryDialog })));
 
 interface Supplier {
   id: string;
@@ -334,13 +338,13 @@ export default function Fornecedores() {
             }
           >
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Buscar fornecedores..."
+              <div className="flex-shrink-0">
+                <ExpandableSearch
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  onChange={setSearchQuery}
+                  placeholder="Buscar fornecedores..."
+                  accentColor="amber"
+                  expandedWidth="w-64"
                 />
               </div>
               <div className="flex gap-2">
@@ -392,16 +396,18 @@ export default function Fornecedores() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <SupplierQuoteHistoryDialog
-                            supplierName={supplier.name}
-                            supplierId={supplier.id}
-                            trigger={
-                              <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                Ver Histórico
-                              </DropdownMenuItem>
-                            }
-                          />
+                          <Suspense fallback={<DropdownMenuItem disabled>Carregando...</DropdownMenuItem>}>
+                            <SupplierQuoteHistoryDialog
+                              supplierName={supplier.name}
+                              supplierId={supplier.id}
+                              trigger={
+                                <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Ver Histórico
+                                </DropdownMenuItem>
+                              }
+                            />
+                          </Suspense>
                           <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Editar
@@ -443,12 +449,14 @@ export default function Fornecedores() {
                       </div>
 
                       <div className="pt-2.5">
-                        <AddQuoteDialog onAdd={handleAddQuote} trigger={
-                          <Button size="sm" variant="outline" className="w-full h-9">
-                            <Plus className="h-3.5 w-3.5 mr-1.5" />
-                            Nova Cotação
-                          </Button>
-                        } />
+                        <Suspense fallback={<Button size="sm" variant="outline" className="w-full h-9" disabled>Carregando...</Button>}>
+                          <AddQuoteDialog onAdd={handleAddQuote} trigger={
+                            <Button size="sm" variant="outline" className="w-full h-9">
+                              <Plus className="h-3.5 w-3.5 mr-1.5" />
+                              Nova Cotação
+                            </Button>
+                          } />
+                        </Suspense>
                       </div>
                     </div>
                   </CardContent>
@@ -535,45 +543,28 @@ export default function Fornecedores() {
                                 {renderNumericRating(supplier.rating)}
                               </div>
 
-                              <div className="w-[5%] flex justify-end items-center gap-2 px-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => openWhatsApp(supplier)}
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 w-8 p-0"
-                                >
-                                  <MessageCircle className="h-4 w-4" />
-                                </Button>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <SupplierQuoteHistoryDialog
-                                      supplierName={supplier.name}
-                                      supplierId={supplier.id}
-                                      trigger={
-                                        <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                          <Eye className="h-4 w-4 mr-2" />
-                                          Ver Histórico
-                                        </DropdownMenuItem>
-                                      }
-                                    />
-                                    <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                                      <Edit className="h-4 w-4 mr-2" />
-                                      Editar
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="text-destructive"
-                                      onClick={() => setDeletingSupplier(supplier)}
-                                    >
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Excluir
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                              <div className="w-[10%] flex justify-end items-center px-2">
+                                <TableActionGroup
+                                  showView={false}
+                                  onEdit={() => setEditingSupplier(supplier)}
+                                  onDelete={() => setDeletingSupplier(supplier)}
+                                  additionalActions={[
+                                    {
+                                      icon: <MessageCircle className="h-3.5 w-3.5" />,
+                                      label: "WhatsApp",
+                                      onClick: () => openWhatsApp(supplier),
+                                      variant: "success" as const,
+                                    }
+                                  ]}
+                                  dropdownItems={[
+                                    {
+                                      icon: <Eye className="h-4 w-4" />,
+                                      label: "Ver Histórico",
+                                      onClick: () => {},
+                                    }
+                                  ]}
+                                  dropdownLabel="Mais Opções"
+                                />
                               </div>
                             </div>
                           </TableCell>
@@ -614,24 +605,34 @@ export default function Fornecedores() {
             </Card>
           )}
 
-          <EditSupplierDialog
-            supplier={editingSupplier}
-            open={!!editingSupplier}
-            onOpenChange={open => !open && setEditingSupplier(null)}
-            onEdit={handleEditSupplier}
-          />
+          {editingSupplier && (
+            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="bg-white dark:bg-gray-900 rounded-lg p-4"><div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" /></div></div>}>
+              <EditSupplierDialog
+                supplier={editingSupplier}
+                open={!!editingSupplier}
+                onOpenChange={open => { if (!open) startTransition(() => setEditingSupplier(null)); }}
+                onEdit={handleEditSupplier}
+              />
+            </Suspense>
+          )}
 
-          <DeleteSupplierDialog
-            supplier={deletingSupplier}
-            open={!!deletingSupplier}
-            onOpenChange={open => !open && setDeletingSupplier(null)}
-            onDelete={handleDeleteSupplier}
-          />
+          {deletingSupplier && (
+            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="bg-white dark:bg-gray-900 rounded-lg p-4"><div className="w-8 h-8 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" /></div></div>}>
+              <DeleteSupplierDialog
+                supplier={deletingSupplier}
+                open={!!deletingSupplier}
+                onOpenChange={open => { if (!open) startTransition(() => setDeletingSupplier(null)); }}
+                onDelete={handleDeleteSupplier}
+              />
+            </Suspense>
+          )}
 
           {/* Hidden triggers for dialogs */}
           <div className="hidden">
-            <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
-            <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
+            <Suspense fallback={null}>
+              <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
+              <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
+            </Suspense>
           </div>
         </div>
       </PageWrapper>

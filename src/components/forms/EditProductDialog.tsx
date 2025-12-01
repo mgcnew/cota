@@ -16,7 +16,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useProductDetails } from "@/hooks/mobile/useProductDetails";
 import {
   Form,
   FormControl,
@@ -100,27 +99,8 @@ function EditProductDialogInternal({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const { toast } = useToast();
   
-  // Lazy loading de detalhes no mobile (apenas se productId fornecido e product não)
-  // Se o product já foi fornecido, não precisa fazer query
-  const shouldLoadDetails = isMobile && !product && productId;
-  const { productDetails, isLoading: isLoadingDetails } = useProductDetails(
-    shouldLoadDetails ? productId : null
-  );
-  
-  // Usar product prop primeiro (já disponível), senão usar productDetails do lazy loading
-  const currentProduct: Product | null = product || (productDetails && typeof productDetails === 'object' && 'id' in productDetails ? {
-    id: (productDetails as any).id,
-    name: (productDetails as any).name,
-    category: (productDetails as any).category,
-    unit: (productDetails as any).unit,
-    barcode: (productDetails as any).barcode,
-    image_url: (productDetails as any).image_url,
-    lastQuotePrice: (productDetails as any).lastQuotePrice || 'R$ 0,00',
-    bestSupplier: (productDetails as any).bestSupplier || 'N/A',
-    quotesCount: (productDetails as any).quotesCount || 0,
-    lastUpdate: (productDetails as any).lastUpdate || new Date().toLocaleDateString('pt-BR'),
-    trend: (productDetails as any).trend || 'stable',
-  } as Product : null);
+  // Usar product prop diretamente (removida lógica de lazy loading mobile)
+  const currentProduct: Product | null = product;
   
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -167,9 +147,8 @@ function EditProductDialogInternal({
   // Não renderizar nada se não estiver aberto
   if (!open) return null;
   
-  // Se estiver no mobile e não tiver produto ainda, mostrar loading dentro do Sheet
-  // Mas só se realmente estiver carregando (não mostrar se o produto já foi fornecido)
-  const isLoading = isMobile && !currentProduct && isLoadingDetails && shouldLoadDetails;
+  // Verificar se está carregando (removida lógica de lazy loading mobile)
+  const isLoading = false;
   
   // Se não tiver produto e não estiver carregando, não renderizar
   // (Isso evita renderizar o modal vazio)
