@@ -26,7 +26,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
 
 export default function ListaCompras() {
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const { toast } = useToast();
   const { refetch: refetchPedidos } = usePedidos();
 

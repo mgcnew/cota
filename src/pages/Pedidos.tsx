@@ -25,7 +25,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
 
 export default function Pedidos() {
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const { paginate } = usePagination<any>({ initialItemsPerPage: 10 });
 
   const [searchTerm, setSearchTerm] = useState("");

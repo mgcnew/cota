@@ -64,7 +64,7 @@ export default function Fornecedores() {
   const { user, loading } = useAuth();
   const { canViewSensitiveData } = useUserRole();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
   const { suppliers, isLoading: suppliersLoading, error: suppliersError, deleteSupplier, updateSupplier, refetch: invalidateCache } = useSuppliers();
 
