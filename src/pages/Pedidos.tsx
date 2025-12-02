@@ -88,11 +88,11 @@ export default function Pedidos() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pendente: { className: "border-amber-300 bg-amber-50 text-amber-700", label: "Pendente" },
-      processando: { className: "border-blue-300 bg-blue-50 text-blue-700", label: "Processando" },
-      confirmado: { className: "border-indigo-300 bg-indigo-50 text-indigo-700", label: "Confirmado" },
-      entregue: { className: "border-emerald-300 bg-emerald-50 text-emerald-700", label: "Entregue" },
-      cancelado: { className: "border-red-300 bg-red-50 text-red-700", label: "Cancelado" }
+      pendente: { className: "border-warning/30 bg-warning/10 text-warning", label: "Pendente" },
+      processando: { className: "border-primary/30 bg-primary/10 text-primary", label: "Processando" },
+      confirmado: { className: "border-primary/30 bg-primary/10 text-primary", label: "Confirmado" },
+      entregue: { className: "border-success/30 bg-success/10 text-success", label: "Entregue" },
+      cancelado: { className: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelado" }
     };
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendente;
     return <Badge variant="outline" className={cn("font-medium", config.className)}>{config.label}</Badge>;
