@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
+import { useProducts } from "@/hooks/useProducts";
+import { useSuppliers } from "@/hooks/useSuppliers";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Quote } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +25,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
 import DeleteQuoteDialog from "@/components/forms/DeleteQuoteDialog";
-import ViewQuoteDialog from "@/components/forms/ViewQuoteDialog";
+import ResumoCotacaoDialog from "@/components/forms/ResumoCotacaoDialog";
 import GerenciarCotacaoDialog from "@/components/forms/GerenciarCotacaoDialog";
 
 export default function Cotacoes() {
@@ -48,7 +50,13 @@ export default function Cotacoes() {
     if (produto) setSearchTerm(produto);
   }, [searchParams]);
 
-  const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, convertToOrder, updateQuote, isUpdating } = useCotacoes();
+  const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, convertToOrder, updateQuoteStatus, addQuoteItem, removeQuoteItem, addQuoteSupplier, removeQuoteSupplier, isUpdating } = useCotacoes();
+  const { products: allProducts } = useProducts();
+  const { suppliers: allSuppliers } = useSuppliers();
+  
+  // Preparar listas para o modal de gerenciar
+  const availableProducts = useMemo(() => allProducts.map(p => ({ id: p.id, name: p.name, unit: p.unit || 'un' })), [allProducts]);
+  const availableSuppliers = useMemo(() => allSuppliers.map(s => ({ id: s.id, name: s.name })), [allSuppliers]);
 
   useEffect(() => {
     if (selectedQuote && cotacoes.length > 0) {
@@ -69,18 +77,24 @@ export default function Cotacoes() {
     startTransition(() => { setSelectedQuote(quote); setDeleteDialogOpen(true); });
   }, []);
 
+  const statusOptions = [
+    { value: "ativa", label: "Ativa", className: "border-teal-300 bg-teal-50 text-teal-700" },
+    { value: "pendente", label: "Pendente", className: "border-amber-300 bg-amber-50 text-amber-700" },
+    { value: "planejada", label: "Planejada", className: "border-blue-300 bg-blue-50 text-blue-700" },
+    { value: "concluida", label: "Concluída", className: "border-emerald-300 bg-emerald-50 text-emerald-700" },
+    { value: "finalizada", label: "Finalizada", className: "border-green-300 bg-green-50 text-green-700" },
+    { value: "expirada", label: "Expirada", className: "border-red-300 bg-red-50 text-red-700" }
+  ];
+
   const getStatusBadge = useCallback((status: string) => {
-    const config: Record<string, { className: string; label: string }> = {
-      ativa: { className: "border-teal-300 bg-teal-50 text-teal-700", label: "Ativa" },
-      pendente: { className: "border-amber-300 bg-amber-50 text-amber-700", label: "Pendente" },
-      planejada: { className: "border-blue-300 bg-blue-50 text-blue-700", label: "Planejada" },
-      concluida: { className: "border-emerald-300 bg-emerald-50 text-emerald-700", label: "Concluída" },
-      finalizada: { className: "border-green-300 bg-green-50 text-green-700", label: "Finalizada" },
-      expirada: { className: "border-red-300 bg-red-50 text-red-700", label: "Expirada" }
-    };
-    const c = config[status] || config.pendente;
-    return <Badge variant="outline" className={cn("font-medium text-xs", c.className)}>{c.label}</Badge>;
+    const config = statusOptions.find(s => s.value === status) || statusOptions[1];
+    return <Badge variant="outline" className={cn("font-medium text-xs", config.className)}>{config.label}</Badge>;
   }, []);
+
+  const handleStatusChange = useCallback((quoteId: string, newStatus: string) => {
+    updateQuoteStatus({ quoteId, status: newStatus });
+    toast({ title: "Status atualizado!" });
+  }, [updateQuoteStatus, toast]);
 
   const calcularEconomiaCotacao = (cotacao: Quote) => {
     if (!cotacao.fornecedoresParticipantes || cotacao.fornecedoresParticipantes.length < 2) return { economia: 0, percentual: 0 };
@@ -154,7 +168,24 @@ export default function Cotacoes() {
                         <div className="p-2 rounded-xl bg-teal-100 dark:bg-teal-900/30"><FileText className="h-5 w-5 text-teal-600" /></div>
                         <div className="flex-1 min-w-0">
                           <CardTitle className="text-sm font-bold truncate"><CapitalizedText>{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText></CardTitle>
-                          <div className="flex items-center gap-2 mt-1">{getStatusBadge(cotacao.status)}</div>
+                          <div className="flex items-center gap-2 mt-1">
+{(cotacao.status === "finalizada" || cotacao.status === "concluida") ? (
+                            getStatusBadge(cotacao.status)
+                          ) : (
+                            <Select value={cotacao.status} onValueChange={(value) => handleStatusChange(cotacao.id, value)}>
+                              <SelectTrigger className={cn("h-6 w-[90px] text-[10px] font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.status)?.className || "border-amber-300 bg-amber-50 text-amber-700")}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {statusOptions.map(opt => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    <span className={cn("text-xs font-medium", opt.className.split(' ').find(c => c.startsWith('text-')))}>{opt.label}</span>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
                         </div>
                       </div>
                       <DropdownMenu>
@@ -209,7 +240,25 @@ export default function Cotacoes() {
                             <div className="w-[18%] flex items-center gap-3 px-2"><div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center border border-teal-200/50"><ClipboardList className="h-4 w-4 text-teal-600" /></div><div className="min-w-0 flex-1"><div className="font-semibold text-sm">#{cotacaoNumero.toString().padStart(4, '0')}</div><div className="text-xs text-muted-foreground md:hidden truncate"><CapitalizedText>{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText></div></div></div>
                             <div className="hidden md:block w-[20%] px-2"><div className="max-w-[150px]" title={cotacao.produto}><CapitalizedText className="font-medium text-sm truncate">{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText><div className="text-xs text-muted-foreground mt-1"><span className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded-md"><Package className="h-3 w-3" />{String(cotacao.quantidade || '')}</span></div></div></div>
                             <div className="hidden lg:block w-[15%] px-2"><div className="text-xs space-y-1"><div className="flex items-center gap-1"><Calendar className="h-3 w-3 text-primary" />{String(cotacao.dataInicio || '')}</div><div className="flex items-center gap-1 text-muted-foreground"><Calendar className="h-3 w-3" />{String(cotacao.dataFim || '')}</div></div></div>
-                            <div className="w-[12%] px-2 flex flex-col gap-1 items-center">{getStatusBadge(cotacao.statusReal)}{cotacao.statusReal === 'planejada' && cotacao.dataPlanejada && <Badge variant="outline" className="bg-primary/10 text-primary text-xs"><Clock className="h-3 w-3 mr-1" />{new Date(cotacao.dataPlanejada).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</Badge>}</div>
+                            <div className="w-[12%] px-2 flex flex-col gap-1 items-center">
+                              {(cotacao.statusReal === "finalizada" || cotacao.statusReal === "concluida") ? (
+                                getStatusBadge(cotacao.statusReal)
+                              ) : (
+                                <Select value={cotacao.statusReal} onValueChange={(value) => handleStatusChange(cotacao.id, value)}>
+                                  <SelectTrigger className={cn("h-7 w-[100px] text-xs font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.statusReal)?.className || "border-amber-300 bg-amber-50 text-amber-700")}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {statusOptions.map(opt => (
+                                      <SelectItem key={opt.value} value={opt.value}>
+                                        <span className={cn("text-xs font-medium", opt.className.split(' ').find(c => c.startsWith('text-')))}>{opt.label}</span>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                              {cotacao.statusReal === 'planejada' && cotacao.dataPlanejada && <Badge variant="outline" className="bg-primary/10 text-primary text-xs"><Clock className="h-3 w-3 mr-1" />{new Date(cotacao.dataPlanejada).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</Badge>}
+                            </div>
                             <div className="w-[15%] px-2"><div className="space-y-1"><div className="font-bold text-green-600 text-sm">{String(cotacao.melhorPreco || 'R$ 0,00')}</div><div className="text-xs text-muted-foreground truncate max-w-[100px]">{String(cotacao.melhorFornecedor || '-')}</div>{(() => { const { percentual } = calcularEconomiaCotacao(cotacao); return percentual > 0 ? <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium"><DollarSign className="h-3 w-3" />-{percentual.toFixed(1)}%</div> : <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted text-muted-foreground rounded-md text-xs"><DollarSign className="h-3 w-3" />0%</div>; })()}</div></div>
                             <div className="hidden sm:block w-[10%] px-2"><div className="flex justify-center"><Badge variant="outline" className="bg-primary/10 border-primary/20 text-primary font-medium"><Building2 className="h-3 w-3 mr-1" />{cotacao.fornecedores}</Badge></div></div>
                             <div className="w-[10%] px-2 flex justify-end"><DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-teal-600 hover:bg-teal-50"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-40">{(cotacao.status === "concluida" || cotacao.status === "finalizada") ? (<DropdownMenuItem onClick={() => handleViewQuote(cotacao)}><Eye className="h-4 w-4 mr-2" />Resumo</DropdownMenuItem>) : (<><DropdownMenuItem onClick={() => handleGerenciarQuote(cotacao)}><ClipboardList className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem><DropdownMenuItem onClick={() => handleDeleteQuote(cotacao)} className="text-destructive"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem></>)}</DropdownMenuContent></DropdownMenu></div>
@@ -226,8 +275,8 @@ export default function Cotacoes() {
         )}
         {filteredCotacoes.length === 0 && !isLoading && <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80"><CardContent className="p-12 text-center"><FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" /><h3 className="text-lg font-semibold mb-2">Nenhuma cotação encontrada</h3><p className="text-gray-600 mb-4">Tente ajustar os filtros ou crie uma nova cotação</p></CardContent></Card>}
         {addDialogOpen && <AddQuoteDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={() => { refetch(); setAddDialogOpen(false); }} trigger={<div />} />}
-        {viewDialogOpen && selectedQuote && <ViewQuoteDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} quote={selectedQuote} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({ quoteId, supplierId, productId, newValue })} onConvertToOrder={(quoteId, orders) => convertToOrder({ quoteId, orders })} isUpdating={isUpdating} readOnly />}
-        {gerenciarDialogOpen && selectedQuote && <GerenciarCotacaoDialog open={gerenciarDialogOpen} onOpenChange={setGerenciarDialogOpen} quote={selectedQuote} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({ quoteId, supplierId, productId, newValue })} onConvertToOrder={(quoteId, orders) => convertToOrder({ quoteId, orders })} onRefresh={refetch} isUpdating={isUpdating} />}
+        {viewDialogOpen && selectedQuote && <ResumoCotacaoDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} quote={selectedQuote} />}
+        {gerenciarDialogOpen && selectedQuote && <GerenciarCotacaoDialog open={gerenciarDialogOpen} onOpenChange={setGerenciarDialogOpen} quote={selectedQuote} onUpdateSupplierProductValue={(quoteId, supplierId, productId, newValue) => updateSupplierProductValue({ quoteId, supplierId, productId, newValue })} onConvertToOrder={(quoteId, orders) => convertToOrder({ quoteId, orders })} onAddQuoteItem={addQuoteItem} onRemoveQuoteItem={removeQuoteItem} onAddQuoteSupplier={addQuoteSupplier} onRemoveQuoteSupplier={removeQuoteSupplier} availableProducts={availableProducts} availableSuppliers={availableSuppliers} onRefresh={refetch} isUpdating={isUpdating} />}
         {deleteDialogOpen && selectedQuote && <DeleteQuoteDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} quote={selectedQuote} onDelete={(id) => { deleteQuote(id); setDeleteDialogOpen(false); }} trigger={<div />} />}
       </div>
     </PageWrapper>
