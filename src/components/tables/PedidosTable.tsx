@@ -69,14 +69,14 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
             <TableRow 
               key={pedido.id}
               className={cn(
-                "hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md border-b border-gray-100/60",
-                index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                "hover:bg-accent/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md border-b border-border",
+                index % 2 === 0 ? "bg-card" : "bg-muted/30"
               )}
             >
               <TableCell className="py-4 px-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center flex-shrink-0 border border-purple-200/50">
-                    <ShoppingCart className="h-4 w-4 text-purple-600" />
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20">
+                    <ShoppingCart className="h-4 w-4 text-primary" />
                   </div>
                   <div className="min-w-0">
                     <div className="table-cell-primary font-mono truncate">
@@ -94,7 +94,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
                 <div className="min-w-0">
                   <div className="table-cell-primary truncate">{capitalize(pedido.fornecedor)}</div>
                   <div className="table-cell-secondary mt-1">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
                       <Package className="h-3 w-3" />
                       {pedido.itens} itens
                     </span>
@@ -118,11 +118,11 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
               
               <TableCell className="hidden lg:table-cell py-4">
                 <div className="text-sm space-y-1">
-                  <div className="flex items-center gap-1 text-gray-900">
-                    <Truck className="h-3 w-3 text-purple-600" />
+                  <div className="flex items-center gap-1 text-foreground">
+                    <Truck className="h-3 w-3 text-primary" />
                     {pedido.dataEntrega}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     Entrega prevista
                   </div>
                 </div>
@@ -133,7 +133,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
               </TableCell>
               
               <TableCell className="text-right py-4">
-                <div className="font-bold text-green-600 text-base">{pedido.total}</div>
+                <div className="font-bold text-success text-base">{pedido.total}</div>
               </TableCell>
               
               <TableCell className="py-4 px-4">
@@ -142,7 +142,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
                     variant="ghost" 
                     size="sm"
                     onClick={() => onView(pedido)}
-                    className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200"
+                    className="h-8 w-8 p-0 hover:bg-accent transition-colors duration-200"
                   >
                     <Eye className="h-4 w-4 transition-colors duration-200" />
                     <span className="sr-only">Visualizar pedido</span>
@@ -152,7 +152,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
                     variant="ghost" 
                     size="sm"
                     onClick={() => onEdit(pedido)}
-                    className="h-8 w-8 p-0 hover:bg-amber-100 hover:text-amber-700 transition-colors duration-200"
+                    className="h-8 w-8 p-0 hover:bg-accent transition-colors duration-200"
                   >
                     <Edit className="h-4 w-4 transition-colors duration-200" />
                     <span className="sr-only">Editar pedido</span>
@@ -162,7 +162,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
                     variant="ghost" 
                     size="sm"
                     onClick={() => onDelete(pedido)}
-                    className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-700 transition-colors duration-200"
+                    className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive transition-colors duration-200"
                   >
                     <Trash2 className="h-4 w-4 transition-colors duration-200" />
                     <span className="sr-only">Excluir pedido</span>
