@@ -57,14 +57,14 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
             <TableRow 
               key={cotacao.id}
               className={cn(
-                "hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-cyan-50/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md border-b border-gray-100/60",
-                index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                "hover:bg-accent/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md border-b border-border",
+                index % 2 === 0 ? "bg-card" : "bg-muted/30"
               )}
             >
               <TableCell className="py-4 px-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/10 flex items-center justify-center flex-shrink-0 border border-teal-200/50">
-                    <FileText className="h-4 w-4 text-teal-600" />
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20">
+                    <FileText className="h-4 w-4 text-primary" />
                   </div>
                   <div className="min-w-0">
                     <div className="table-cell-primary font-mono truncate">
@@ -90,7 +90,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                     </CapitalizedText>
                   </div>
                   <div className="table-cell-secondary mt-1">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
                       <Package className="h-3 w-3" />
                       {cotacao.quantidade}
                     </span>
@@ -100,11 +100,11 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
               
               <TableCell className="hidden lg:table-cell py-4">
                 <div className="text-sm space-y-1">
-                  <div className="flex items-center gap-1 text-gray-900">
-                    <Calendar className="h-3 w-3 text-teal-600" />
+                  <div className="flex items-center gap-1 text-foreground">
+                    <Calendar className="h-3 w-3 text-primary" />
                     {cotacao.dataInicio}
                   </div>
-                  <div className="flex items-center gap-1 text-gray-500">
+                  <div className="flex items-center gap-1 text-muted-foreground">
                     <Calendar className="h-3 w-3" />
                     {cotacao.dataFim}
                   </div>
@@ -117,11 +117,11 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
               
               <TableCell className="py-4">
                 <div className="space-y-1">
-                  <div className="font-bold text-green-600 text-base">{cotacao.melhorPreco}</div>
+                  <div className="font-bold text-success text-base">{cotacao.melhorPreco}</div>
                   <CapitalizedText as="div" className="table-cell-secondary truncate max-w-[120px]">
                     {cotacao.melhorFornecedor}
                   </CapitalizedText>
-                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-medium">
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-success/10 text-success rounded-md text-xs font-medium">
                     <DollarSign className="h-3 w-3" />
                     -{cotacao.economia}
                   </div>
@@ -131,7 +131,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
               <TableCell className="hidden sm:table-cell py-4">
                 <Badge 
                   variant="outline" 
-                  className="bg-blue-50 border-blue-200 text-blue-700 font-medium"
+                  className="bg-primary/10 border-primary/20 text-primary font-medium"
                 >
                   <Building2 className="h-3 w-3 mr-1" />
                   {cotacao.fornecedores}
@@ -145,7 +145,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="h-8 w-8 p-0 hover:bg-teal-100 hover:text-teal-700 transition-colors duration-200"
+                        className="h-8 w-8 p-0 hover:bg-accent transition-colors duration-200"
                       >
                         <MoreVertical className="h-4 w-4 transition-colors duration-200" />
                         <span className="sr-only">Abrir menu de ações</span>

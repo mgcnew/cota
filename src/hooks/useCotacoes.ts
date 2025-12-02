@@ -570,7 +570,7 @@ export function useCotacoes() {
 
       const { error } = await supabase
         .from("quote_items")
-        .insert({ quote_id: quoteId, product_id: productId, product_name: productName, quantidade, unidade });
+        .insert([{ quote_id: quoteId, product_id: productId, product_name: productName, quantidade: String(quantidade), unidade }]);
 
       if (error) throw error;
     },
