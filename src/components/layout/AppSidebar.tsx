@@ -22,6 +22,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Menu,
+  LogOut,
+  Settings,
   LucideIcon
 } from "lucide-react";
 import {
@@ -36,8 +38,11 @@ import {
   SheetContent,
   SheetTrigger,
   SheetTitle,
-  SheetDescription
+  SheetDescription,
+  SheetClose
 } from "@/components/ui/sheet";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface MenuItem {
   title: string;
@@ -91,12 +96,15 @@ const menuCategories: MenuCategory[] = [
 const allMenuItems = menuCategories.flatMap((c) => c.items);
 
 export function AppSidebar() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile } = useUserProfile();
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
     const saved = localStorage.getItem("sidebarExpanded");
@@ -130,6 +138,23 @@ export function AppSidebar() {
     setCollapsedCategories(
       new Set(menuCategories.filter((c) => c.title !== keepOpen).map((c) => c.title))
     );
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logout realizado com sucesso!",
+        description: "Você saiu do sistema.",
+      });
+      navigate("/", { replace: true });
+    } catch (error) {
+      toast({
+        title: "Erro ao sair",
+        description: "Ocorreu um erro ao fazer logout. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
 
@@ -318,7 +343,7 @@ export function AppSidebar() {
       </div>
 
       {/* Mobile Sidebar */}
-      <Sheet>
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetTrigger asChild>
           <Button
             variant="ghost"
@@ -330,13 +355,107 @@ export function AppSidebar() {
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="p-0 w-72 border-r border-gray-200 dark:border-gray-700/50"
+          className="p-0 w-72 border-r border-gray-200 dark:border-gray-700/50 bg-white dark:bg-[#1a1d24]"
         >
           <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
           <SheetDescription className="sr-only">
             Menu principal da aplicação
           </SheetDescription>
-          <SidebarContent expanded mobile />
+          
+          {/* Mobile Menu Content - Simplified without categories */}
+          <div className="w-full h-full flex flex-col overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center gap-3 h-16 px-4 border-b border-gray-200 dark:border-gray-700/50">
+              <UserAvatar
+                user={user}
+                profile={profile}
+                size="md"
+                showStatus
+                clickable
+                onClick={() => {
+                  setProfileDialogOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
+                  {profile?.full_name || user?.email?.split("@")[0] || "Usuário"}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Membro</p>
+              </div>
+            </div>
+
+            {/* Menu Items - Direct list without categories */}
+            <div className="flex-1 flex flex-col py-3 px-3 overflow-y-auto scrollbar-hide">
+              <div className="space-y-1">
+                {allMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = item.url === "/dashboard" 
+                    ? location.pathname === "/dashboard"
+                    : location.pathname.startsWith(item.url);
+                  
+                  return (
+                    <NavLink
+                      key={item.title}
+                      to={item.url}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
+                        isActive
+                          ? "bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg shadow-pink-500/25"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-700/50 active:bg-gray-200 dark:active:bg-gray-600/50"
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "w-5 h-5 transition-colors flex-shrink-0",
+                          isActive
+                            ? "text-white"
+                            : "text-gray-500 dark:text-gray-300"
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "text-sm font-medium truncate transition-colors",
+                          isActive
+                            ? "text-white"
+                            : "text-gray-700 dark:text-gray-200"
+                        )}
+                      >
+                        {item.title}
+                      </span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="px-3 py-3 border-t border-gray-200 dark:border-gray-700/50 space-y-1">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  navigate('/dashboard/configuracoes');
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full justify-start gap-3 px-3 py-3 h-auto text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-sm font-medium">Configurações</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full justify-start gap-3 px-3 py-3 h-auto text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="text-sm font-medium">Sair</span>
+              </Button>
+            </div>
+          </div>
         </SheetContent>
       </Sheet>
 

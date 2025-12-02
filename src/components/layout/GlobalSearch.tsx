@@ -29,9 +29,17 @@ interface GlobalSearchProps {
 
 export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const navigate = useNavigate();
-  const isMobile = false; // Removida dependência mobile
+  const [isMobile, setIsMobile] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
+
+  // Detectar mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch real data from database
   const { products } = useProducts();
@@ -397,8 +405,6 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 }
 
 export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
-  const isMobile = false; // Removida dependência mobile
-
   return (
     <TooltipProvider>
       <Tooltip>
@@ -407,34 +413,31 @@ export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
             variant="outline"
             onClick={onClick}
             className={cn(
-              "relative justify-start transition-all duration-200 active:scale-95 md:active:scale-100 touch-manipulation",
+              "relative transition-all duration-200 active:scale-95 touch-manipulation",
               // Mobile: apenas ícone
-              isMobile && "w-10 h-10 p-0 rounded-lg",
-              // Tablet+: barra completa
-              !isMobile && "w-full text-sm h-10 px-4 justify-start",
+              "w-9 h-9 p-0 rounded-lg md:w-full md:h-10 md:px-4 md:justify-start",
               "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
               "border border-input hover:bg-accent hover:text-accent-foreground"
             )}
           >
-            {isMobile ? (
-              // Mobile: apenas lupa
-              <Search className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              // Desktop: barra completa
-              <div className="flex items-center w-full gap-3">
-                <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-muted-foreground font-normal flex-1 text-left">
-                  Buscar cotações, produtos, fornecedores...
-                </span>
-              </div>
-            )}
+            {/* Mobile: apenas lupa */}
+            <Search className="h-4 w-4 text-muted-foreground md:hidden" />
+            
+            {/* Desktop: barra completa */}
+            <div className="hidden md:flex items-center w-full gap-3">
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="text-muted-foreground font-normal flex-1 text-left text-sm truncate">
+                Buscar cotações, produtos...
+              </span>
+              <kbd className="hidden lg:inline-flex h-5 px-1.5 select-none items-center justify-center rounded border border-input bg-muted font-mono text-[10px] font-medium text-muted-foreground">
+                ⌘K
+              </kbd>
+            </div>
           </Button>
         </TooltipTrigger>
-        {!isMobile && (
-          <TooltipContent side="bottom">
-            <p className="text-xs">Pressione <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">⌘</kbd> + <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">K</kbd> para abrir</p>
-          </TooltipContent>
-        )}
+        <TooltipContent side="bottom" className="hidden md:block">
+          <p className="text-xs">Pressione <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">⌘</kbd> + <kbd className="px-1 py-0.5 rounded border bg-muted text-[10px] font-mono">K</kbd> para abrir</p>
+        </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
