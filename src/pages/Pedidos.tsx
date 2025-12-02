@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { Table, TableCell, TableRow } from "@/components/ui/table";

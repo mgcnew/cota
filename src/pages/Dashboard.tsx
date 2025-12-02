@@ -18,7 +18,7 @@ import { useDashboard } from '@/hooks/useDashboard';
 
 import { EvolutionChart } from '@/components/dashboard/EvolutionChart';
 import { EconomyChart } from '@/components/dashboard/EconomyChart';
-import { useNavigate } from 'react-router-dom';
+
 
 const DEFAULT_METRICS = {
     cotacoesAtivas: 0,
@@ -46,7 +46,6 @@ export default function DashboardRefactored() {
     const [selectedPeriod, setSelectedPeriod] = useState('6m');
     const [evolutionPeriod, setEvolutionPeriod] = useState('7d');
     const [economyPeriod, setEconomyPeriod] = useState('7d');
-    const navigate = useNavigate();
 
     // Data Hooks
     const dashboardData = useDashboard();
