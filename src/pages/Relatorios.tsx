@@ -39,6 +39,9 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { PageWrapper } from "@/components/layout/PageWrapper";
+import { PageHeader } from "@/components/ui/page-header";
+import { MetricCard } from "@/components/ui/metric-card";
 
 // Tipos para melhor type safety
 interface ReportType {
@@ -1482,20 +1485,86 @@ export default function Relatorios() {
       </div>
     </div>;
   if (loading) {
-    return <LoadingSkeleton />;
+    return <PageWrapper><LoadingSkeleton /></PageWrapper>;
   }
-  return <div className="page-container">
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6">
-            {/* Botão Período - Sempre visível */}
-            <Dialog open={isPeriodDialogOpen} onOpenChange={setIsPeriodDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className={`bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 flex items-center gap-2 text-gray-900 dark:text-white ${startDate && endDate ? 'ring-2 ring-purple-500 dark:ring-purple-400 bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-600' : ''}`}>
-                  <Calendar className="h-4 w-4" />
-                  <span className="hidden sm:inline">{dateRangeText}</span>
-                  <span className="sm:hidden">Período</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
+  return (
+    <PageWrapper>
+      <div className="page-container">
+      {/* MetricCards padronizados */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+        <MetricCard
+          title="Economia Total"
+          value={estatisticasGerais.economiaTotal}
+          icon={DollarSign}
+          variant="success"
+          trend={{
+            value: estatisticasGerais.economiaPercentual,
+            label: "do total",
+            type: "positive"
+          }}
+        />
+        <MetricCard
+          title="Cotações"
+          value={estatisticasGerais.cotacoesRealizadas}
+          icon={FileText}
+          variant="info"
+          trend={{
+            value: `${estatisticasGerais.pedidosGerados}`,
+            label: "pedidos gerados",
+            type: "neutral"
+          }}
+        />
+        <MetricCard
+          title="Fornecedores"
+          value={estatisticasGerais.fornecedoresAtivos}
+          icon={Building2}
+          variant="default"
+          trend={{
+            value: `${estatisticasGerais.fornecedoresAtivos}`,
+            label: "ativos no período",
+            type: "neutral"
+          }}
+        />
+        <MetricCard
+          title="Produtos"
+          value={estatisticasGerais.produtosCotados}
+          icon={Package}
+          variant="warning"
+          trend={{
+            value: `${estatisticasGerais.produtosCotados}`,
+            label: "cotados no período",
+            type: "neutral"
+          }}
+        />
+      </div>
+
+      {/* PageHeader */}
+      <PageHeader
+        title="Relatórios"
+        description="Geração e análise de relatórios do sistema"
+        icon={FileText}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setIsPeriodDialogOpen(true)}>
+              <Calendar className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">{dateRangeText}</span>
+              <span className="sm:hidden">Período</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="hidden sm:flex">
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+            <Button size="sm" onClick={handleExportAll} disabled={isGenerating} className="hidden sm:flex bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white">
+              <Download className="h-4 w-4 mr-2" />
+              {isGenerating ? 'Gerando...' : 'Exportar'}
+            </Button>
+          </div>
+        }
+      />
+
+      {/* Dialog de Período */}
+      <Dialog open={isPeriodDialogOpen} onOpenChange={setIsPeriodDialogOpen}>
+        <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
                 <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-purple-50/80 via-violet-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden">
                   {/* Efeitos decorativos de fundo */}
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-violet-500/5 to-purple-500/5"></div>
@@ -1612,126 +1681,43 @@ export default function Relatorios() {
               </DialogContent>
             </Dialog>
           
-            {/* Botão Atualizar - Visível apenas no desktop */}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRefresh} 
-              disabled={refreshing} 
-              className="hidden sm:flex bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 items-center gap-2 text-gray-900 dark:text-white"
-            >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Atualizar
-            </Button>
-            
-            {/* Dialog de Filtros - Visível apenas no desktop */}
-            <Dialog open={isFiltersDialogOpen} onOpenChange={setIsFiltersDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className={`hidden sm:flex bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 items-center gap-2 text-gray-900 dark:text-white ${hasFilters ? 'ring-2 ring-purple-500 dark:ring-purple-400 bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-600' : ''}`}>
-                  <Filter className="h-4 w-4" />
-                  Filtros
-                  {hasFilters && <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
-                      {selectedFornecedores.length + selectedProdutos.length}
-                    </Badge>}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
-                <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-purple-50/80 via-violet-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden">
-                  {/* Efeitos decorativos de fundo */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-violet-500/5 to-purple-500/5"></div>
-                  <div className="absolute top-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -translate-x-16 -translate-y-16"></div>
-                  <div className="absolute bottom-0 right-0 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl translate-x-12 translate-y-12"></div>
-                  
-                  <div className="relative z-10 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-violet-500 to-purple-600 flex items-center justify-center text-white shadow-lg ring-2 ring-purple-100/50">
-                      <Filter className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <DialogTitle className="text-xl font-bold text-gray-900">Filtros Avançados</DialogTitle>
-                      <p className="text-sm text-gray-600 mt-0.5">Personalize os dados dos seus relatórios</p>
-                    </div>
-                  </div>
-                </DialogHeader>
-                
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-                  <ReportFilters selectedFornecedores={selectedFornecedores} selectedProdutos={selectedProdutos} onFornecedoresChange={setSelectedFornecedores} onProdutosChange={setSelectedProdutos} onReset={handleResetFilters} />
-                </div>
-                
-                <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    {hasFilters ? <span className="flex items-center gap-1">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        {selectedFornecedores.length + selectedProdutos.length} filtro{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''} aplicado{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''}
-                      </span> : <span className="text-gray-500">Nenhum filtro aplicado</span>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {hasFilters && <Button variant="outline" size="sm" onClick={handleResetFilters} className="text-gray-600 hover:text-gray-800">
-                        Limpar todos
-                      </Button>}
-                    <Button onClick={() => setIsFiltersDialogOpen(false)} className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white">
-                      Aplicar filtros
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+      {/* Dialog de Filtros */}
+      <Dialog open={isFiltersDialogOpen} onOpenChange={setIsFiltersDialogOpen}>
+        <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
+          <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-purple-50/80 via-violet-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden">
+            <div className="relative z-10 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-violet-500 to-purple-600 flex items-center justify-center text-white shadow-lg ring-2 ring-purple-100/50">
+                <Filter className="h-5 w-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold text-gray-900">Filtros Avançados</DialogTitle>
+                <p className="text-sm text-gray-600 mt-0.5">Personalize os dados dos seus relatórios</p>
+              </div>
+            </div>
+          </DialogHeader>
           
-            {/* Botão Exportar Todos - Visível apenas no desktop */}
-            <Button 
-              size="sm" 
-              onClick={handleExportAll} 
-              disabled={isGenerating} 
-              className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0"
-            >
-              <Download className="h-4 w-4" />
-              {isGenerating ? 'Gerando...' : 'Exportar Todos'}
-            </Button>
-
-            {/* Dropdown Menu Mobile - Consolidar ações */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="sm:hidden bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 h-10 w-10 p-0"
-                >
-                  <MoreVertical className="h-4 w-4 text-gray-900 dark:text-white" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
-                <DropdownMenuLabel className="text-gray-600 dark:text-gray-400 font-medium">Ações</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={handleRefresh} 
-                  disabled={refreshing}
-                  className="cursor-pointer"
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                  Atualizar
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setIsFiltersDialogOpen(true)}
-                  className="cursor-pointer"
-                >
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filtros
-                  {hasFilters && (
-                    <Badge variant="secondary" className="ml-auto px-1.5 py-0.5 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
-                      {selectedFornecedores.length + selectedProdutos.length}
-                    </Badge>
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={handleExportAll} 
-                  disabled={isGenerating}
-                  className="cursor-pointer"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  {isGenerating ? 'Gerando...' : 'Exportar Todos'}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <ReportFilters selectedFornecedores={selectedFornecedores} selectedProdutos={selectedProdutos} onFornecedoresChange={setSelectedFornecedores} onProdutosChange={setSelectedProdutos} onReset={handleResetFilters} />
           </div>
+          
+          <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              {hasFilters ? <span className="flex items-center gap-1">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  {selectedFornecedores.length + selectedProdutos.length} filtro{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''} aplicado{selectedFornecedores.length + selectedProdutos.length > 1 ? 's' : ''}
+                </span> : <span className="text-gray-500">Nenhum filtro aplicado</span>}
+            </div>
+            <div className="flex items-center gap-2">
+              {hasFilters && <Button variant="outline" size="sm" onClick={handleResetFilters} className="text-gray-600 hover:text-gray-800">
+                  Limpar todos
+                </Button>}
+              <Button onClick={() => setIsFiltersDialogOpen(false)} className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white">
+                Aplicar filtros
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Progress Bar Melhorado */}
       {isGenerating && <Card className="border-blue-200 bg-blue-50 mb-6">
@@ -2417,5 +2403,7 @@ export default function Relatorios() {
         onOpenChange={setViewDialogOpen}
         item={selectedItem}
       />
-    </div>;
+      </div>
+    </PageWrapper>
+  );
 }

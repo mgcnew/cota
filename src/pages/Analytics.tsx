@@ -15,6 +15,9 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { useInsights } from "@/hooks/useInsights";
 import { InsightsPanel } from "@/components/analytics/InsightsPanel";
 import { PerformanceCharts } from "@/components/analytics/PerformanceCharts";
+import { PageWrapper } from "@/components/layout/PageWrapper";
+import { PageHeader } from "@/components/ui/page-header";
+import { MetricCard } from "@/components/ui/metric-card";
 import { 
   BarChart3, TrendingUp, TrendingDown, Calendar, Filter, Download, 
   DollarSign, Package, Building2, Target, Loader2, RefreshCw, 
@@ -175,11 +178,31 @@ export default function Analytics() {
   );
 
   if (isLoading) {
-    return <LoadingSkeleton />;
+    return <PageWrapper><LoadingSkeleton /></PageWrapper>;
   }
 
   return (
-    <div className="page-container bg-gray-50/50 dark:bg-transparent">
+    <PageWrapper>
+      <div className="page-container bg-gray-50/50 dark:bg-transparent">
+      {/* Page Header */}
+      <PageHeader
+        title="Analytics"
+        description="Análise de desempenho e métricas do sistema"
+        icon={BarChart3}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleRefresh}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Atualizar
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportAnalytics}>
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+          </div>
+        }
+      />
+
       {/* Filters */}
       {isGenerating && (
         <Card className="border-blue-200 dark:border-blue-700/30 bg-blue-50 dark:bg-blue-900/20">
@@ -216,73 +239,27 @@ export default function Analytics() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
-          {/* Métricas Principais - Inspiração Dashboard Statistics Card 2 */}
+          {/* Métricas Principais - Usando MetricCard padronizado */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
             {metricas.map((metrica, index) => {
               const icons = [DollarSign, Clock, CheckCircle, Users];
               const Icon = icons[index] || DollarSign;
-              const cardColors = [
-                'bg-emerald-600',
-                'bg-blue-600',
-                'bg-purple-600',
-                'bg-orange-600'
-              ];
-              const bgColor = cardColors[index] || cardColors[0];
+              const variants: Array<"success" | "info" | "default" | "warning"> = ['success', 'info', 'default', 'warning'];
+              const variant = variants[index] || 'default';
               
               return (
-                <Card key={metrica.titulo} className={`group relative overflow-hidden ${bgColor} dark:bg-[#1C1F26] border-0 shadow-lg dark:shadow-xl hover:shadow-2xl dark:hover:shadow-2xl rounded-xl transition-shadow duration-300`}>
-                  {/* Decoração SVG sutil */}
-                  <svg
-                    className="absolute right-0 top-0 h-full w-2/3 pointer-events-none opacity-10 dark:opacity-5 group-hover:opacity-15 dark:group-hover:opacity-8 transition-opacity duration-300"
-                    viewBox="0 0 300 200"
-                    fill="none"
-                    style={{ zIndex: 0 }}
-                  >
-                    <circle cx="220" cy="100" r="90" fill="#fff" fillOpacity="0.08" />
-                    <circle cx="260" cy="60" r="60" fill="#fff" fillOpacity="0.10" />
-                    <circle cx="200" cy="160" r="50" fill="#fff" fillOpacity="0.07" />
-                    <circle cx="270" cy="150" r="30" fill="#fff" fillOpacity="0.12" />
-                  </svg>
-
-                  <CardHeader className="border-0 z-10 relative pb-3">
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-white/70 dark:text-gray-400" />
-                      <CardTitle className="text-white/90 dark:text-gray-300 text-sm font-medium">
-                        {metrica.titulo}
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2.5 z-10 relative">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xl font-semibold tracking-tight text-white dark:text-white truncate">
-                        {metrica.valor}
-                      </span>
-                      {metrica.variacao && (
-                        <Badge className={`bg-white/20 text-white font-semibold border-0`}>
-                          {metrica.tipo === 'negativo' && <TrendingDown className="w-3 h-3" />}
-                          {metrica.tipo !== 'negativo' && <TrendingUp className="w-3 h-3" />}
-                          {metrica.variacao}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="text-xs text-white/80 dark:text-gray-400 mt-2 border-t border-white/20 dark:border-gray-700/30 pt-2.5">
-                      <div className="flex items-center justify-between">
-                        <span>{metrica.descricao}:</span>
-                        <span className="font-medium text-white dark:text-gray-300">
-                          {metrica.valor}
-                        </span>
-                      </div>
-                      {metrica.variacao && (
-                        <div className="flex items-center justify-between mt-1.5 text-white/70 dark:text-gray-500">
-                          <span>Variação:</span>
-                          <span className={`font-medium ${metrica.tipo === 'negativo' ? 'text-red-300' : 'text-green-300'}`}>
-                            {metrica.variacao}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <MetricCard
+                  key={metrica.titulo}
+                  title={metrica.titulo}
+                  value={metrica.valor}
+                  icon={Icon}
+                  variant={variant}
+                  trend={metrica.variacao ? {
+                    value: metrica.variacao,
+                    label: metrica.descricao,
+                    type: metrica.tipo === 'negativo' ? 'negative' : 'positive'
+                  } : undefined}
+                />
               );
             })}
           </div>
@@ -427,6 +404,7 @@ export default function Analytics() {
           />
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }
