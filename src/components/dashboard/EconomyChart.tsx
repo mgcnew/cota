@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
     BarChart,
     Bar,
@@ -21,6 +21,15 @@ interface EconomyChartProps {
 }
 
 export function EconomyChart({ data, period, onPeriodChange, isLoading }: EconomyChartProps) {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     const stats = useMemo(() => {
         if (!data || data.length === 0) {
             return {
@@ -101,7 +110,7 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
                         <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-green-500" />
                     </div>
                 ) : (
-                    <ResponsiveContainer width="100%" height={window.innerWidth < 640 ? 200 : 320}>
+                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 320}>
                         <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
                             <XAxis
