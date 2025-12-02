@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { Table, TableCell, TableRow } from "@/components/ui/table";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
+
 import { 
   ShoppingCart, Plus, Truck, CheckCircle, Clock, XCircle, Trash2, 
   Loader2, DollarSign, Package, Building2, Calendar, MoreVertical, CircleDot 
@@ -25,7 +26,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
 
 export default function Pedidos() {
-  const { viewMode, setViewMode } = useResponsiveViewMode();
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const { paginate } = usePagination<any>({ initialItemsPerPage: 10 });
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -86,17 +87,7 @@ export default function Pedidos() {
   const handleEditPedido = () => refetch();
   const handleDeletePedido = () => refetch();
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pendente: { className: "border-warning/30 bg-warning/10 text-warning", label: "Pendente" },
-      processando: { className: "border-primary/30 bg-primary/10 text-primary", label: "Processando" },
-      confirmado: { className: "border-primary/30 bg-primary/10 text-primary", label: "Confirmado" },
-      entregue: { className: "border-success/30 bg-success/10 text-success", label: "Entregue" },
-      cancelado: { className: "border-destructive/30 bg-destructive/10 text-destructive", label: "Cancelado" }
-    };
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendente;
-    return <Badge variant="outline" className={cn("font-medium", config.className)}>{config.label}</Badge>;
-  };
+
 
   const getStatusIcon = (status: string) => {
     const icons = { pendente: Clock, processando: Clock, confirmado: CheckCircle, entregue: Truck, cancelado: XCircle };
@@ -285,7 +276,7 @@ export default function Pedidos() {
                         </div>
                         
                         <div className="flex items-center gap-2 mb-3">
-                          {getStatusBadge(pedido.status)}
+                          <StatusBadge status={pedido.status} />
                           <span className="text-xs text-muted-foreground">{pedido.dataPedido}</span>
                         </div>
                         
@@ -390,7 +381,7 @@ export default function Pedidos() {
                                   </div>
                                   <div className="text-xs text-muted-foreground">Entrega prevista</div>
                                 </div>
-                                <div className="w-[12%] px-2 flex justify-center">{getStatusBadge(pedido.status)}</div>
+                                <div className="w-[12%] px-2 flex justify-center"><StatusBadge status={pedido.status} /></div>
                                 <div className="w-[12%] px-2 text-center">
                                   <div className="font-bold text-emerald-600 text-base">{pedido.total}</div>
                                 </div>
@@ -475,7 +466,7 @@ export default function Pedidos() {
                               <CardTitle className="text-sm font-bold truncate" title={pedido.fornecedor}>
                                 {capitalize(abbreviateSupplierName(pedido.fornecedor, 25))}
                               </CardTitle>
-                              <div className="flex items-center gap-2 mt-1">{getStatusBadge(pedido.status)}</div>
+                              <div className="flex items-center gap-2 mt-1"><StatusBadge status={pedido.status} /></div>
                             </div>
                           </div>
                           <DropdownMenu>

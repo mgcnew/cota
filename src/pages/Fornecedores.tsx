@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense, startTransition } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -8,11 +7,11 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { TableActionGroup } from "@/components/ui/table-action-group";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Search, Plus, Phone, Mail, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, History, MessageCircle, Award, Star, Clock, CircleDot, CreditCard, ShoppingCart, ClipboardList, Filter } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, History, MessageCircle, Star, CircleDot } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,7 +22,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
+
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 
@@ -66,7 +65,7 @@ export default function Fornecedores() {
   const { user, loading } = useAuth();
   const { canViewSensitiveData } = useUserRole();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const { viewMode, setViewMode } = useResponsiveViewMode();
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   const { suppliers, isLoading: suppliersLoading, error: suppliersError, deleteSupplier, updateSupplier, refetch: invalidateCache } = useSuppliers();
 
@@ -168,30 +167,7 @@ export default function Fornecedores() {
 
   const paginatedData = paginate(filteredSuppliers);
 
-  const getStatusBadge = useCallback((status: string) => {
-    const statusConfig = {
-      active: {
-        variant: "default" as const,
-        label: "Ativo",
-        className: "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 font-semibold shadow-sm"
-      },
-      inactive: {
-        variant: "secondary" as const,
-        label: "Inativo",
-        className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200 font-semibold shadow-sm"
-      },
-      pending: {
-        variant: "outline" as const,
-        label: "Pendente",
-        className: "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 font-semibold shadow-sm"
-      }
-    };
-    const config = statusConfig[status as keyof typeof statusConfig];
-    if (!config) return null;
-    return <Badge variant={config.variant} className={config.className}>
-      {config.label}
-    </Badge>;
-  }, []);
+
 
   const renderNumericRating = useCallback((rating: number) => (
     <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
@@ -664,19 +640,14 @@ export default function Fornecedores() {
           )}
 
           {filteredSuppliers.length === 0 && (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Nenhum fornecedor encontrado</h3>
-                <p className="text-muted-foreground mb-4">
-                  Tente ajustar os filtros ou adicione novos fornecedores
-                </p>
-                <Button onClick={() => addSupplierRef.current?.click()}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Fornecedor
-                </Button>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={Building2}
+              title="Nenhum fornecedor encontrado"
+              description="Tente ajustar os filtros ou adicione novos fornecedores"
+              actionLabel="Adicionar Fornecedor"
+              actionIcon={Plus}
+              onAction={() => addSupplierRef.current?.click()}
+            />
           )}
 
           {editingSupplier && (

@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
@@ -315,10 +316,11 @@ export default function Analytics() {
               </CardHeader>
               <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
                 {performanceFornecedores.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Building2 className="h-10 w-10 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum fornecedor encontrado</p>
-                  </div>
+                  <EmptyState 
+                    icon={Building2} 
+                    title="Nenhum fornecedor encontrado" 
+                    variant="inline" 
+                  />
                 ) : (
                   <div className="space-y-2 sm:space-y-2.5">
                     {performanceFornecedores.slice(0, 4).map((fornecedor, idx) => (
@@ -345,12 +347,13 @@ export default function Analytics() {
           {/* Top Produtos - Grid Profissional 2 Colunas */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4">
             {topProdutos.length === 0 ? (
-              <Card className="col-span-full bg-white dark:bg-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm">
-                <CardContent className="p-6 text-center">
-                  <Package className="h-12 w-12 mx-auto mb-3 text-gray-400 dark:text-gray-500" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum produto encontrado no período selecionado</p>
-                </CardContent>
-              </Card>
+              <div className="col-span-full">
+                <EmptyState 
+                  icon={Package} 
+                  title="Nenhum produto encontrado" 
+                  description="Nenhum produto encontrado no período selecionado"
+                />
+              </div>
             ) : (
               topProdutos.slice(0, 6).map((produto, index) => (
               <Card key={produto.produto} className="bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">

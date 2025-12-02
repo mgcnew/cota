@@ -6,17 +6,17 @@ import { useProducts } from "@/hooks/useProducts";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { TableActionGroup } from "@/components/ui/table-action-group";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { useExportCSV } from "@/hooks/useExportCSV";
 import { Package, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import type { Product } from "@/hooks/useProducts";
@@ -41,7 +41,6 @@ export default function Produtos() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -179,81 +178,51 @@ export default function Produtos() {
     return "cotado";
   }, []);
 
-  const getStatusBadge = useCallback((status: string) => {
-    const statusConfig = {
-      ativo: { label: "Ativo", className: "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400" },
-      cotado: { label: "Cotado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400" },
-      pendente: { label: "Pendente", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400" },
-      sem_cotacao: { label: "Sem Cotação", className: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300" },
-    };
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.sem_cotacao;
-    return <Badge variant="outline" className={`text-xs font-medium ${config.className}`}>
-      {config.label}
-    </Badge>;
-  }, []);
+
+
+  const { exportToCSV } = useExportCSV();
 
   const handleExportProducts = useCallback(() => {
-    try {
-      if (safeFilteredProducts.length === 0) {
-        toast({
-          title: "Nenhum produto para exportar",
-          description: "Não há produtos filtrados para exportar.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const exportData = safeFilteredProducts.map((product) => ({
-        'Nome': product.name,
-        'Categoria': product.category || 'Sem Categoria',
-        'Código de Barras': product.barcode || 'N/A',
-        'Unidade': product.unit || 'un',
-        'Status': getProductStatus(product),
-        'Preço': product.lastQuotePrice || 'R$ 0,00',
-        'Melhor Fornecedor': product.bestSupplier || 'N/A',
-        'Cotações': product.quotesCount || 0,
-      }));
-
-      const headers = Object.keys(exportData[0] || {});
-      const csvContent = [
-        headers.join(','),
-        ...exportData.map(row =>
-          headers.map(header => {
-            const value = row[header as keyof typeof row];
-            if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-              return `"${value.replace(/"/g, '""')}"`;
-            }
-            return value || '';
-          }).join(',')
-        )
-      ].join('\n');
-
-      const BOM = '\uFEFF';
-      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `produtos_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
+    if (safeFilteredProducts.length === 0) {
       toast({
-        title: "Exportação realizada",
-        description: `${exportData.length} produtos exportados com sucesso.`,
-      });
-    } catch (error) {
-      console.error('Erro ao exportar produtos:', error);
-      toast({
-        title: "Erro ao exportar",
-        description: "Não foi possível exportar os produtos. Tente novamente.",
+        title: "Nenhum produto para exportar",
+        description: "Não há produtos filtrados para exportar.",
         variant: "destructive",
       });
+      return;
     }
-  }, [safeFilteredProducts, toast, getProductStatus]);
+
+    const exportData = safeFilteredProducts.map((product) => ({
+      name: product.name,
+      category: product.category || 'Sem Categoria',
+      barcode: product.barcode || 'N/A',
+      unit: product.unit || 'un',
+      status: getProductStatus(product),
+      price: product.lastQuotePrice || 'R$ 0,00',
+      bestSupplier: product.bestSupplier || 'N/A',
+      quotesCount: product.quotesCount || 0,
+    }));
+
+    exportToCSV({
+      filename: 'produtos',
+      data: exportData,
+      columns: {
+        name: 'Nome',
+        category: 'Categoria',
+        barcode: 'Código de Barras',
+        unit: 'Unidade',
+        status: 'Status',
+        price: 'Preço',
+        bestSupplier: 'Melhor Fornecedor',
+        quotesCount: 'Cotações',
+      }
+    });
+
+    toast({
+      title: "Exportação realizada",
+      description: `${exportData.length} produtos exportados com sucesso.`,
+    });
+  }, [safeFilteredProducts, toast, getProductStatus, exportToCSV]);
 
   const handleAddProduct = useCallback(() => {
     startTransition(() => {
@@ -404,15 +373,15 @@ export default function Produtos() {
           <Card className="border-0 bg-transparent">
             <CardContent className="p-0">
               {paginatedData.items.length === 0 && !productsLoading ? (
-                <div className="p-8 sm:p-12 text-center">
-                  <Package className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-gray-400" />
-                  <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Nenhum produto encontrado.</p>
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2">Tente ajustar sua busca ou filtros.</p>
-                  <Button onClick={handleAddProduct} className="mt-4 bg-primary hover:bg-primary/90 text-white">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Produto
-                  </Button>
-                </div>
+                <EmptyState
+                  icon={Package}
+                  title="Nenhum produto encontrado"
+                  description="Tente ajustar sua busca ou filtros."
+                  actionLabel="Adicionar Produto"
+                  actionIcon={Plus}
+                  onAction={handleAddProduct}
+                  variant="inline"
+                />
               ) : (
                 <>
                   {/* Mobile Cards View */}
@@ -474,7 +443,7 @@ export default function Produtos() {
                           <div className="flex items-center gap-2">
                             <CircleDot className="h-3.5 w-3.5 text-gray-500" />
                             <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                            {getStatusBadge(getProductStatus(product))}
+                            <StatusBadge status={getProductStatus(product)} />
                           </div>
                           <div className="flex items-center gap-2">
                             <Barcode className="h-3.5 w-3.5 text-gray-500" />
@@ -570,7 +539,7 @@ export default function Produtos() {
                                 </div>
 
                                 <div className="w-[13%] px-2 flex justify-center items-center">
-                                  {getStatusBadge(getProductStatus(product))}
+                                  <StatusBadge status={getProductStatus(product)} />
                                 </div>
 
                                 <div className="w-[12%] px-2 flex justify-center items-center gap-1">
@@ -702,24 +671,7 @@ export default function Produtos() {
             </Suspense>
           )}
 
-          <Dialog open={!!imagePreviewUrl} onOpenChange={() => setImagePreviewUrl(null)}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-center">Imagem do Produto</DialogTitle>
-              </DialogHeader>
-              <div className="flex items-center justify-center p-2">
-                {imagePreviewUrl ? (
-                  <div className="w-full aspect-square rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-lg">
-                    <img src={imagePreviewUrl} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-full aspect-square bg-primary/10 dark:bg-primary/20 rounded-xl flex items-center justify-center border-2 border-primary/20 dark:border-primary/30">
-                    <Package className="h-24 w-24 text-orange-600 dark:text-orange-400" />
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+
         </div>
       </PageWrapper>
     </>

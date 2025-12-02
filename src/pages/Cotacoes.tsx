@@ -17,7 +17,7 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
+import { useExportCSV } from "@/hooks/useExportCSV";
 import { cn } from "@/lib/utils";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +30,7 @@ import GerenciarCotacaoDialog from "@/components/forms/GerenciarCotacaoDialog";
 
 export default function Cotacoes() {
   const [searchParams] = useSearchParams();
-  const { viewMode, setViewMode } = useResponsiveViewMode();
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const { paginate } = usePagination<Quote>({ initialItemsPerPage: 10 });
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -114,14 +114,26 @@ export default function Cotacoes() {
     });
   }, [cotacoes, debouncedSearchTerm, statusFilter, supplierFilter]);
 
+  const { exportToCSV } = useExportCSV();
+
   const handleExportQuotes = useCallback(() => {
-    if (filteredCotacoes.length === 0) { toast({ title: "Nenhuma cotação", variant: "destructive" }); return; }
-    const data = filteredCotacoes.map(c => ({ ID: c.id.substring(0, 8), Produto: c.produto, Status: c.statusReal, MelhorPreco: c.melhorPreco }));
-    const csv = [Object.keys(data[0]).join(','), ...data.map(r => Object.values(r).join(','))].join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `cotacoes_${new Date().toISOString().split('T')[0]}.csv`; link.click();
+    if (filteredCotacoes.length === 0) { 
+      toast({ title: "Nenhuma cotação", variant: "destructive" }); 
+      return; 
+    }
+    const data = filteredCotacoes.map(c => ({ 
+      id: c.id.substring(0, 8), 
+      produto: c.produto, 
+      status: c.statusReal, 
+      melhorPreco: c.melhorPreco 
+    }));
+    exportToCSV({
+      filename: 'cotacoes',
+      data,
+      columns: { id: 'ID', produto: 'Produto', status: 'Status', melhorPreco: 'Melhor Preço' }
+    });
     toast({ title: "Exportado!" });
-  }, [filteredCotacoes, toast]);
+  }, [filteredCotacoes, toast, exportToCSV]);
 
   const stats = useMemo(() => {
     const ativas = cotacoes.filter(c => c.statusReal === "ativa").length;

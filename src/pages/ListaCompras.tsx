@@ -21,12 +21,12 @@ import { ShoppingListCards } from "@/components/shopping-list/ShoppingListCards"
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import { usePedidos } from "@/hooks/usePedidos";
 import { useToast } from "@/hooks/use-toast";
-import { useResponsiveViewMode } from "@/hooks/useResponsiveViewMode";
+
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
 
 export default function ListaCompras() {
-  const { viewMode, setViewMode } = useResponsiveViewMode();
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const { toast } = useToast();
   const { refetch: refetchPedidos } = usePedidos();
 
