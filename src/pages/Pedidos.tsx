@@ -382,23 +382,25 @@ export default function Pedidos() {
                 {paginatedData.items.map((pedido) => {
                   const getStatusColors = (status: string) => {
                     const colors = {
-                      entregue: { border: "border-green-300/60", bg: "from-white to-green-50/30", iconColor: "text-green-600" },
-                      confirmado: { border: "border-blue-300/60", bg: "from-white to-blue-50/30", iconColor: "text-blue-600" },
-                      processando: { border: "border-amber-300/60", bg: "from-white to-amber-50/30", iconColor: "text-amber-600" },
-                      cancelado: { border: "border-red-300/60", bg: "from-white to-red-50/30", iconColor: "text-red-600" },
-                      pendente: { border: "border-gray-300/60", bg: "from-white to-gray-50/30", iconColor: "text-gray-600" }
+                      entregue: { bg: "from-card to-success/5", iconBg: "bg-success/10", iconColor: "text-success" },
+                      confirmado: { bg: "from-card to-primary/5", iconBg: "bg-primary/10", iconColor: "text-primary" },
+                      processando: { bg: "from-card to-warning/5", iconBg: "bg-warning/10", iconColor: "text-warning" },
+                      cancelado: { bg: "from-card to-destructive/5", iconBg: "bg-destructive/10", iconColor: "text-destructive" },
+                      pendente: { bg: "from-card to-muted/50", iconBg: "bg-muted", iconColor: "text-foreground" }
                     };
                     return colors[status as keyof typeof colors] || colors.pendente;
                   };
                   const colors = getStatusColors(pedido.status);
                   
                   return (
-                    <Card key={pedido.id} className={cn("group border bg-gradient-to-br", colors.bg, "hover:shadow-xl transition-shadow duration-200")}>
+                    <Card key={pedido.id} className={cn("group border bg-gradient-to-br border-border", colors.bg, "hover:shadow-xl transition-shadow duration-200")}>
                       <CardHeader className="pb-3 p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3 flex-1">
-                            <div className={cn("p-2 rounded-xl", colors.iconColor)}>
-                              {getStatusIcon(pedido.status)}
+                            <div className={cn("p-2 rounded-xl", colors.iconBg)}>
+                              <span className={cn("inline-flex", colors.iconColor)}>
+                                {getStatusIcon(pedido.status)}
+                              </span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <CardTitle className="text-sm font-bold truncate" title={pedido.fornecedor}>
@@ -425,36 +427,36 @@ export default function Pedidos() {
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-3 p-4 pt-0">
-                        <div className="p-3 rounded-xl bg-gray-50/80 border border-gray-200/60">
+                        <div className="p-3 rounded-xl bg-muted/50 border border-border">
                           <div className="grid grid-cols-2 gap-3">
                             <div>
                               <div className="flex items-center gap-1 mb-1">
-                                <ShoppingCart className="h-3 w-3 text-gray-500" />
-                                <span className="text-xs font-medium text-gray-600">Pedido</span>
+                                <ShoppingCart className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-xs font-medium text-muted-foreground">Pedido</span>
                               </div>
-                              <p className="text-sm font-bold">#{pedido.id.substring(0, 8)}</p>
+                              <p className="text-sm font-bold text-foreground">#{pedido.id.substring(0, 8)}</p>
                             </div>
                             <div>
                               <div className="flex items-center gap-1 mb-1">
-                                <Package className="h-3 w-3 text-orange-600" />
-                                <span className="text-xs font-medium text-orange-700">Itens</span>
+                                <Package className="h-3 w-3 text-warning" />
+                                <span className="text-xs font-medium text-warning">Itens</span>
                               </div>
-                              <p className="text-sm font-bold text-orange-800">{pedido.itens}</p>
+                              <p className="text-sm font-bold text-warning">{pedido.itens}</p>
                             </div>
                           </div>
                         </div>
-                        <div className="p-2.5 rounded-lg bg-blue-50/80 border border-blue-200/60">
+                        <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20">
                           <div className="flex items-center gap-1 mb-1">
-                            <Calendar className="h-3 w-3 text-blue-600" />
-                            <span className="text-xs font-medium text-blue-700">Entrega</span>
+                            <Calendar className="h-3 w-3 text-primary" />
+                            <span className="text-xs font-medium text-primary">Entrega</span>
                           </div>
-                          <p className="text-xs font-semibold text-blue-800">{pedido.dataEntrega || 'Não definida'}</p>
+                          <p className="text-xs font-semibold text-foreground">{pedido.dataEntrega || 'Não definida'}</p>
                         </div>
-                        <div className="pt-2 border-t border-gray-200">
+                        <div className="pt-2 border-t border-border">
                           <div className="flex justify-between items-center">
                             <div>
                               <p className="text-xs text-muted-foreground">Valor Total</p>
-                              <p className="text-lg font-bold text-emerald-600">{pedido.total}</p>
+                              <p className="text-lg font-bold text-success">{pedido.total}</p>
                             </div>
                           </div>
                         </div>
