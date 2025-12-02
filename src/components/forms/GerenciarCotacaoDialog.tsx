@@ -43,7 +43,21 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
   // Estado para edição de produtos/fornecedores
   const [selectedProductToAdd, setSelectedProductToAdd] = useState("");
   const [productQuantity, setProductQuantity] = useState("1");
+  const [productUnit, setProductUnit] = useState("un");
   const [selectedSupplierToAdd, setSelectedSupplierToAdd] = useState("");
+  
+  const unidadesMedida = [
+    { value: "un", label: "Unidade (un)" },
+    { value: "kg", label: "Quilograma (kg)" },
+    { value: "g", label: "Grama (g)" },
+    { value: "cx", label: "Caixa (cx)" },
+    { value: "pct", label: "Pacote (pct)" },
+    { value: "lt", label: "Litro (lt)" },
+    { value: "ml", label: "Mililitro (ml)" },
+    { value: "dz", label: "Dúzia (dz)" },
+    { value: "fd", label: "Fardo (fd)" },
+    { value: "sc", label: "Saco (sc)" },
+  ];
 
   const products = (quote as any)?._raw?.quote_items || [];
   const fornecedores = quote.fornecedoresParticipantes || [];
@@ -223,10 +237,11 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
       productId: product.id,
       productName: product.name,
       quantidade: Number(productQuantity) || 1,
-      unidade: product.unit || 'un'
+      unidade: productUnit
     });
     setSelectedProductToAdd("");
     setProductQuantity("1");
+    setProductUnit("un");
   };
 
   const handleRemoveProduct = (productId: string) => {
@@ -328,6 +343,16 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           placeholder="Qtd"
                           className="w-20 bg-white dark:bg-gray-800"
                         />
+                        <Select value={productUnit} onValueChange={setProductUnit}>
+                          <SelectTrigger className="w-[100px] bg-white dark:bg-gray-800">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {unidadesMedida.map(u => (
+                              <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Button 
                           onClick={handleAddProduct} 
                           disabled={!selectedProductToAdd}
