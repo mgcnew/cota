@@ -78,12 +78,12 @@ export default function Cotacoes() {
   }, []);
 
   const statusOptions = [
-    { value: "ativa", label: "Ativa", className: "border-teal-300 bg-teal-50 text-teal-700 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-300" },
-    { value: "pendente", label: "Pendente", className: "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300" },
-    { value: "planejada", label: "Planejada", className: "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300" },
-    { value: "concluida", label: "Concluída", className: "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" },
-    { value: "finalizada", label: "Finalizada", className: "border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300" },
-    { value: "expirada", label: "Expirada", className: "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300" }
+    { value: "ativa", label: "Ativa", className: "border-primary/30 bg-primary/10 text-primary" },
+    { value: "pendente", label: "Pendente", className: "border-warning/30 bg-warning/10 text-warning" },
+    { value: "planejada", label: "Planejada", className: "border-primary/30 bg-primary/10 text-primary" },
+    { value: "concluida", label: "Concluída", className: "border-success/30 bg-success/10 text-success" },
+    { value: "finalizada", label: "Finalizada", className: "border-success/30 bg-success/10 text-success" },
+    { value: "expirada", label: "Expirada", className: "border-destructive/30 bg-destructive/10 text-destructive" }
   ];
 
   const getStatusBadge = useCallback((status: string) => {
@@ -157,7 +157,7 @@ export default function Cotacoes() {
         {viewMode === "grid" ? (
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {paginatedData.items.map((cotacao, index) => {
-              const colors: Record<string, string> = { ativa: "border-teal-300/60 from-white to-teal-50/30", pendente: "border-amber-300/60 from-white to-amber-50/30", concluida: "border-green-300/60 from-white to-green-50/30" };
+              const colors: Record<string, string> = { ativa: "border-primary/30 from-card to-primary/5", pendente: "border-warning/30 from-card to-warning/5", concluida: "border-success/30 from-card to-success/5" };
               const color = colors[cotacao.status] || colors.pendente;
               const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
               return (
@@ -165,7 +165,7 @@ export default function Cotacoes() {
                   <CardHeader className="pb-3 p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3 flex-1">
-                        <div className="p-2 rounded-xl bg-teal-100 dark:bg-teal-900/30"><FileText className="h-5 w-5 text-teal-600" /></div>
+                        <div className="p-2 rounded-xl bg-primary/10"><FileText className="h-5 w-5 text-primary" /></div>
                         <div className="flex-1 min-w-0">
                           <CardTitle className="text-sm font-bold truncate"><CapitalizedText>{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText></CardTitle>
                           <div className="flex items-center gap-2 mt-1">
@@ -173,7 +173,7 @@ export default function Cotacoes() {
                             getStatusBadge(cotacao.status)
                           ) : (
                             <Select value={cotacao.status} onValueChange={(value) => handleStatusChange(cotacao.id, value)}>
-                              <SelectTrigger className={cn("h-6 w-[90px] text-[10px] font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.status)?.className || "border-amber-300 bg-amber-50 text-amber-700")}>
+                              <SelectTrigger className={cn("h-6 w-[90px] text-[10px] font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.status)?.className || "border-warning/30 bg-warning/10 text-warning")}>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -204,20 +204,20 @@ export default function Cotacoes() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3 p-4 pt-0">
-                    <div className="p-3 rounded-xl bg-gray-50/80 border border-gray-200/60">
+                    <div className="p-3 rounded-xl bg-muted/50 border border-border">
                       <div className="grid grid-cols-2 gap-3">
-                        <div><div className="flex items-center gap-1 mb-1"><FileText className="h-3 w-3 text-gray-500" /><span className="text-xs text-gray-600">Cotação</span></div><p className="text-sm font-bold">#{cotacaoNumero.toString().padStart(4, '0')}</p></div>
-                        <div><div className="flex items-center gap-1 mb-1"><Building2 className="h-3 w-3 text-blue-600" /><span className="text-xs text-blue-700">Fornecedores</span></div><p className="text-sm font-bold text-blue-800">{cotacao.fornecedores}</p></div>
+                        <div><div className="flex items-center gap-1 mb-1"><FileText className="h-3 w-3 text-muted-foreground" /><span className="text-xs text-muted-foreground">Cotação</span></div><p className="text-sm font-bold text-foreground">#{cotacaoNumero.toString().padStart(4, '0')}</p></div>
+                        <div><div className="flex items-center gap-1 mb-1"><Building2 className="h-3 w-3 text-primary" /><span className="text-xs text-primary">Fornecedores</span></div><p className="text-sm font-bold text-primary">{cotacao.fornecedores}</p></div>
                       </div>
                     </div>
                     <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20">
-                      <div className="flex items-center gap-1 mb-1"><Calendar className="h-3 w-3 text-indigo-600" /><span className="text-xs text-indigo-700">Período</span></div>
-                      <p className="text-xs font-semibold text-indigo-800">{String(cotacao.dataInicio || '')} - {String(cotacao.dataFim || '')}</p>
+                      <div className="flex items-center gap-1 mb-1"><Calendar className="h-3 w-3 text-primary" /><span className="text-xs text-primary">Período</span></div>
+                      <p className="text-xs font-semibold text-foreground">{String(cotacao.dataInicio || '')} - {String(cotacao.dataFim || '')}</p>
                     </div>
-                    <div className="pt-2 border-t border-gray-200">
+                    <div className="pt-2 border-t border-border">
                       <div className="flex justify-between items-center">
                         <div><p className="text-xs text-muted-foreground">Melhor Preço</p><p className="text-lg font-bold text-success">{String(cotacao.melhorPreco || 'R$ 0,00')}</p><p className="text-xs text-muted-foreground truncate max-w-[120px]">{String(cotacao.melhorFornecedor || '-')}</p></div>
-                        {(() => { const { percentual } = calcularEconomiaCotacao(cotacao); return percentual > 0 ? <Badge variant="secondary" className="text-success">-{percentual.toFixed(1)}%</Badge> : <Badge variant="secondary" className="text-gray-600">0%</Badge>; })()}
+                        {(() => { const { percentual } = calcularEconomiaCotacao(cotacao); return percentual > 0 ? <Badge variant="secondary" className="text-success">-{percentual.toFixed(1)}%</Badge> : <Badge variant="secondary" className="text-muted-foreground">0%</Badge>; })()}
                       </div>
                     </div>
                   </CardContent>
@@ -229,23 +229,23 @@ export default function Cotacoes() {
           <Card className="border-0 bg-transparent">
             <CardContent className="p-0">
               <Table>
-                <thead><tr><td colSpan={7} className="px-1 pb-3 pt-0 border-none"><div className="flex items-center bg-white/95 dark:bg-gray-800 border border-teal-200/60 dark:border-gray-700 rounded-lg shadow-sm px-4 py-3"><div className="w-[18%] flex items-center gap-2"><div className="w-8 h-8 rounded-lg bg-teal-500/15 dark:bg-teal-500/20 flex items-center justify-center text-teal-600 dark:text-teal-400"><ClipboardList className="h-4 w-4" /></div><span className="uppercase text-[11px] font-semibold text-teal-800 dark:text-teal-300">Cotação</span></div><div className="hidden md:flex w-[20%] pl-2 items-center gap-1.5"><Package className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" /><span className="uppercase text-[11px] font-semibold text-teal-800 dark:text-teal-300">Produto</span></div><div className="hidden lg:flex w-[15%] pl-2 items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" /><span className="uppercase text-[11px] font-semibold text-teal-800 dark:text-teal-300">Período</span></div><div className="w-[12%] pl-2 flex justify-center items-center gap-1.5"><CircleDot className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" /><span className="uppercase text-[11px] font-semibold text-teal-800 dark:text-teal-300">Status</span></div><div className="w-[15%] pl-2 flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" /><span className="uppercase text-[11px] font-semibold text-teal-800 dark:text-teal-300">Melhor Preço</span></div><div className="hidden sm:flex w-[10%] pl-2 justify-center items-center gap-1.5"><Building2 className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" /><span className="uppercase text-[11px] font-semibold text-teal-800 dark:text-teal-300">Fornec.</span></div><div className="w-[10%] pl-4 flex justify-end items-center gap-1.5"><MoreVertical className="h-3.5 w-3.5 text-teal-600/70 dark:text-teal-400/70" /><span className="uppercase text-[11px] font-semibold text-teal-800 dark:text-teal-300">Ações</span></div></div></td></tr></thead>
+                <thead><tr><td colSpan={7} className="px-1 pb-3 pt-0 border-none"><div className="flex items-center bg-card/95 border border-border rounded-lg shadow-sm px-4 py-3"><div className="w-[18%] flex items-center gap-2"><div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><ClipboardList className="h-4 w-4" /></div><span className="uppercase text-[11px] font-semibold text-foreground">Cotação</span></div><div className="hidden md:flex w-[20%] pl-2 items-center gap-1.5"><Package className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Produto</span></div><div className="hidden lg:flex w-[15%] pl-2 items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Período</span></div><div className="w-[12%] pl-2 flex justify-center items-center gap-1.5"><CircleDot className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Status</span></div><div className="w-[15%] pl-2 flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Melhor Preço</span></div><div className="hidden sm:flex w-[10%] pl-2 justify-center items-center gap-1.5"><Building2 className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Fornec.</span></div><div className="w-[10%] pl-4 flex justify-end items-center gap-1.5"><MoreVertical className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Ações</span></div></div></td></tr></thead>
                 <tbody>
                   {paginatedData.items.map((cotacao, index) => {
                     const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
                     return (
                       <TableRow key={cotacao.id} className="group border-none">
                         <TableCell colSpan={7} className="px-1 py-3">
-                          <div className="flex items-center px-1.5 py-2 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-teal-300/60 dark:hover:border-teal-700/50 transition-all">
-                            <div className="w-[18%] flex items-center gap-3 px-2"><div className="w-8 h-8 rounded-lg bg-teal-500/10 dark:bg-teal-500/20 flex items-center justify-center border border-teal-200/50 dark:border-teal-700/50"><ClipboardList className="h-4 w-4 text-teal-600 dark:text-teal-400" /></div><div className="min-w-0 flex-1"><div className="font-semibold text-sm text-gray-900 dark:text-white">#{cotacaoNumero.toString().padStart(4, '0')}</div><div className="text-xs text-muted-foreground md:hidden truncate"><CapitalizedText>{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText></div></div></div>
-                            <div className="hidden md:block w-[20%] px-2"><div className="max-w-[150px]" title={cotacao.produto}><CapitalizedText className="font-medium text-sm text-gray-900 dark:text-white truncate">{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText><div className="text-xs text-muted-foreground mt-1"><span className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted dark:bg-gray-700 rounded-md"><Package className="h-3 w-3" />{String(cotacao.quantidade || '')}</span></div></div></div>
-                            <div className="hidden lg:block w-[15%] px-2"><div className="text-xs space-y-1"><div className="flex items-center gap-1 text-gray-700 dark:text-gray-300"><Calendar className="h-3 w-3 text-primary" />{String(cotacao.dataInicio || '')}</div><div className="flex items-center gap-1 text-muted-foreground"><Calendar className="h-3 w-3" />{String(cotacao.dataFim || '')}</div></div></div>
+                          <div className="flex items-center px-1.5 py-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:border-primary/30 transition-all">
+                            <div className="w-[18%] flex items-center gap-3 px-2"><div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20"><ClipboardList className="h-4 w-4 text-primary" /></div><div className="min-w-0 flex-1"><div className="font-semibold text-sm text-foreground">#{cotacaoNumero.toString().padStart(4, '0')}</div><div className="text-xs text-muted-foreground md:hidden truncate"><CapitalizedText>{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText></div></div></div>
+                            <div className="hidden md:block w-[20%] px-2"><div className="max-w-[150px]" title={cotacao.produto}><CapitalizedText className="font-medium text-sm text-foreground truncate">{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText><div className="text-xs text-muted-foreground mt-1"><span className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded-md"><Package className="h-3 w-3" />{String(cotacao.quantidade || '')}</span></div></div></div>
+                            <div className="hidden lg:block w-[15%] px-2"><div className="text-xs space-y-1"><div className="flex items-center gap-1 text-foreground"><Calendar className="h-3 w-3 text-primary" />{String(cotacao.dataInicio || '')}</div><div className="flex items-center gap-1 text-muted-foreground"><Calendar className="h-3 w-3" />{String(cotacao.dataFim || '')}</div></div></div>
                             <div className="w-[12%] px-2 flex flex-col gap-1 items-center">
                               {(cotacao.statusReal === "finalizada" || cotacao.statusReal === "concluida") ? (
                                 getStatusBadge(cotacao.statusReal)
                               ) : (
                                 <Select value={cotacao.statusReal} onValueChange={(value) => handleStatusChange(cotacao.id, value)}>
-                                  <SelectTrigger className={cn("h-7 w-[100px] text-xs font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.statusReal)?.className || "border-amber-300 bg-amber-50 text-amber-700")}>
+                                  <SelectTrigger className={cn("h-7 w-[100px] text-xs font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.statusReal)?.className || "border-warning/30 bg-warning/10 text-warning")}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
