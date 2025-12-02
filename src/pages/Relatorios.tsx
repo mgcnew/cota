@@ -8,11 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { TrendingUp, TrendingDown, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock, MoreVertical, History, Activity, ShoppingCart, X, Search, Users, Timer, Target, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -169,8 +168,8 @@ export default function Relatorios() {
   const [loadingHistorico, setLoadingHistorico] = useState(true);
   const { paginate: paginateHistorico } = usePagination<any>({ initialItemsPerPage: 10 });
 
-  // Removida dependência mobile
-  const isMobile = false;
+  // Detecção de mobile usando hook centralizado
+  const isMobile = useIsMobile();
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
   // Callbacks memoizados para navegação do carousel
