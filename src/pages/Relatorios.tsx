@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { TrendingUp, TrendingDown, FileText, Download, Calendar, BarChart3, DollarSign, Package, Building2, Eye, Loader2, RefreshCw, FileSpreadsheet, PieChart, Filter, CheckCircle, Clock, MoreVertical, History, Activity, ShoppingCart, X, Search, Users, Timer, Target, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
@@ -32,10 +32,10 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { useInsights } from "@/hooks/useInsights";
 import { InsightsPanel } from "@/components/analytics/InsightsPanel";
 import { PerformanceCharts } from "@/components/analytics/PerformanceCharts";
-import ViewHistoricoDialog from "@/components/forms/ViewHistoricoDialog";
-import { usePagination } from "@/hooks/usePagination";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ActivityHistory } from "@/components/reports/ActivityHistory";
+import { ReportGenerator } from "@/components/reports/ReportGenerator";
+
+
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { PageWrapper } from "@/components/layout/PageWrapper";
@@ -152,21 +152,6 @@ export default function Relatorios() {
     selectedProdutos
   });
   const { insights, isGenerating: isGeneratingInsights, lastGenerated, generateInsights } = useInsights();
-  
-  // Estados para Histórico
-  const [historicoSearchTerm, setHistoricoSearchTerm] = useState("");
-  const [historicoTipoFilter, setHistoricoTipoFilter] = useState("all");
-  const [historicoUsuarioFilter, setHistoricoUsuarioFilter] = useState("all");
-  const [historicoValorMin, setHistoricoValorMin] = useState("");
-  const [historicoValorMax, setHistoricoValorMax] = useState("");
-  const [historicoEconomiaMin, setHistoricoEconomiaMin] = useState("");
-  const [historicoDataInicio, setHistoricoDataInicio] = useState<Date>();
-  const [historicoDataFim, setHistoricoDataFim] = useState<Date>();
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [historico, setHistorico] = useState<any[]>([]);
-  const [loadingHistorico, setLoadingHistorico] = useState(true);
-  const { paginate: paginateHistorico } = usePagination<any>({ initialItemsPerPage: 10 });
 
   // Detecção de mobile usando hook centralizado
   const isMobile = useIsMobile();
@@ -938,202 +923,6 @@ export default function Relatorios() {
 
     return String(value);
   }, []);
-
-  // Função para carregar histórico
-  const loadHistorico = useCallback(async () => {
-    try {
-      setLoadingHistorico(true);
-      if (!user?.id) {
-        setHistorico([]);
-        setLoadingHistorico(false);
-        return;
-      }
-
-      const { data: companyData, error: companyError } = await supabase
-        .from("company_users")
-        .select("company_id")
-        .eq("user_id", user.id)
-        .single();
-
-      if (companyError || !companyData?.company_id) {
-        console.error("Erro ao buscar empresa:", companyError);
-        setHistorico([]);
-        setLoadingHistorico(false);
-        return;
-      }
-
-      // Buscar dados do activity_log
-      const { data: activityData, error: activityError } = await supabase
-        .from("activity_log")
-        .select("*")
-        .eq("company_id", companyData.company_id)
-        .order("created_at", { ascending: false })
-        .limit(1000);
-
-      if (activityError) {
-        console.error("Erro ao buscar activity_log:", activityError);
-      }
-
-      let formattedData: any[] = [];
-      
-      // Se há dados no activity_log, usar eles
-      if (activityData && activityData.length > 0) {
-        formattedData = activityData.map(item => ({
-          id: item.id,
-          tipo: item.tipo,
-          acao: item.acao,
-          detalhes: item.detalhes,
-          data: format(new Date(item.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
-          usuario: user?.email || "Usuário",
-          valor: item.valor ? `R$ ${parseFloat(item.valor.toString()).toFixed(2).replace(".", ",")}` : "",
-          economia: item.economia ? `${parseFloat(item.economia.toString()).toFixed(2)}%` : "",
-          created_at: item.created_at
-        }));
-      } else {
-        // Se não há dados no activity_log, buscar dados históricos de outras tabelas
-        console.log("Nenhum dado no activity_log, buscando dados históricos de outras tabelas...");
-        
-        // Buscar cotações recentes
-        const { data: quotesData } = await supabase
-          .from("quotes")
-          .select("id, status, data_inicio, created_at, company_id")
-          .eq("company_id", companyData.company_id)
-          .order("data_inicio", { ascending: false })
-          .limit(100);
-
-        // Buscar pedidos recentes
-        const { data: ordersData } = await supabase
-          .from("orders")
-          .select("id, status, supplier_name, total_value, created_at, company_id")
-          .eq("company_id", companyData.company_id)
-          .order("created_at", { ascending: false })
-          .limit(100);
-
-        // Buscar produtos recentes
-        const { data: productsData } = await supabase
-          .from("products")
-          .select("id, name, created_at, company_id")
-          .eq("company_id", companyData.company_id)
-          .order("created_at", { ascending: false })
-          .limit(50);
-
-        // Buscar fornecedores recentes
-        const { data: suppliersData } = await supabase
-          .from("suppliers")
-          .select("id, name, created_at, company_id")
-          .eq("company_id", companyData.company_id)
-          .order("created_at", { ascending: false })
-          .limit(50);
-
-        // Combinar todos os dados históricos
-        const allHistoricalData: any[] = [];
-
-        // Adicionar cotações
-        if (quotesData) {
-          quotesData.forEach(quote => {
-            const dateToUse = quote.data_inicio || quote.created_at;
-            allHistoricalData.push({
-              id: quote.id,
-              tipo: "cotacao",
-              acao: `Cotação ${quote.status === "concluida" || quote.status === "finalizada" ? "finalizada" : quote.status === "ativa" ? "criada" : quote.status}`,
-              detalhes: `Cotação ${quote.status === "concluida" || quote.status === "finalizada" ? "finalizada" : quote.status === "ativa" ? "criada" : quote.status}`,
-              data: format(new Date(dateToUse), "dd/MM/yyyy HH:mm", { locale: ptBR }),
-              usuario: user?.email || "Usuário",
-              valor: "",
-              economia: "",
-              created_at: dateToUse
-            });
-          });
-        }
-
-        // Adicionar pedidos
-        if (ordersData) {
-          ordersData.forEach(order => {
-            allHistoricalData.push({
-              id: order.id,
-              tipo: "pedido",
-              acao: `Pedido ${order.status === "pendente" ? "criado" : order.status}`,
-              detalhes: `Pedido para ${order.supplier_name || "Fornecedor"} - ${order.status}`,
-              data: format(new Date(order.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
-              usuario: user?.email || "Usuário",
-              valor: order.total_value ? `R$ ${parseFloat(order.total_value.toString()).toFixed(2).replace(".", ",")}` : "",
-              economia: "",
-              created_at: order.created_at
-            });
-          });
-        }
-
-        // Adicionar produtos
-        if (productsData) {
-          productsData.forEach(product => {
-            allHistoricalData.push({
-              id: product.id,
-              tipo: "produto",
-              acao: "Produto criado",
-              detalhes: `Produto "${product.name}" adicionado ao catálogo`,
-              data: format(new Date(product.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
-              usuario: user?.email || "Usuário",
-              valor: "",
-              economia: "",
-              created_at: product.created_at
-            });
-          });
-        }
-
-        // Adicionar fornecedores
-        if (suppliersData) {
-          suppliersData.forEach(supplier => {
-            allHistoricalData.push({
-              id: supplier.id,
-              tipo: "fornecedor",
-              acao: "Fornecedor criado",
-              detalhes: `Fornecedor "${supplier.name}" adicionado`,
-              data: format(new Date(supplier.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
-              usuario: user?.email || "Usuário",
-              valor: "",
-              economia: "",
-              created_at: supplier.created_at
-            });
-          });
-        }
-
-        // Ordenar por data mais recente
-        formattedData = allHistoricalData.sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-      }
-      
-      setHistorico(formattedData);
-    } catch (error) {
-      console.error("Erro ao carregar histórico:", error);
-      toast({
-        title: "Erro ao carregar histórico",
-        description: "Não foi possível carregar o histórico de atividades.",
-        variant: "destructive"
-      });
-      setHistorico([]);
-    } finally {
-      setLoadingHistorico(false);
-    }
-  }, [user, toast]);
-
-  // Carregar histórico apenas quando a aba de histórico for ativada pela primeira vez
-  const hasLoadedHistorico = useRef(false);
-  const lastHistoricoTab = useRef<string | null>(null);
-  useEffect(() => {
-    if (user && activeUnifiedTab === "historico") {
-      // Só carregar se ainda não carregou ou se mudou de aba
-      if (!hasLoadedHistorico.current || lastHistoricoTab.current !== activeUnifiedTab) {
-        loadHistorico();
-        hasLoadedHistorico.current = true;
-        lastHistoricoTab.current = activeUnifiedTab;
-      }
-    } else {
-      // Resetar quando sair da aba de histórico
-      lastHistoricoTab.current = null;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, activeUnifiedTab]); // Removido loadHistorico das dependências para evitar re-execuções
 
   // Helper functions para renderizar Cards Relatórios (memoizadas inline)
   const renderRelatoriosCard1 = useMemo(() => (
@@ -2322,86 +2111,10 @@ export default function Relatorios() {
         </TabsContent>
 
         {/* Aba Histórico */}
-        <TabsContent value="historico" className="space-y-6 mt-0">
-          {loadingHistorico ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-            </div>
-          ) : (
-            <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <History className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                  Histórico de Atividades
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {historico.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm font-medium">Nenhuma atividade encontrada</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Buscar no histórico..."
-                        value={historicoSearchTerm}
-                        onChange={(e) => setHistoricoSearchTerm(e.target.value)}
-                        className="flex-1"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      {historico
-                        .filter(item => 
-                          item.acao?.toLowerCase().includes(historicoSearchTerm.toLowerCase()) ||
-                          item.detalhes?.toLowerCase().includes(historicoSearchTerm.toLowerCase())
-                        )
-                        .slice(0, 50)
-                        .map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
-                            onClick={() => {
-                              setSelectedItem(item);
-                              setViewDialogOpen(true);
-                            }}
-                          >
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <Activity className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                  {item.acao}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                  {item.detalhes}
-                                </p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                  {item.data}
-                                </p>
-                              </div>
-                            </div>
-                            {item.valor && (
-                              <Badge variant="outline" className="ml-2 flex-shrink-0">
-                                {item.valor}
-                              </Badge>
-                            )}
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+        <TabsContent value="historico" className="mt-0">
+          <ActivityHistory isActive={activeUnifiedTab === "historico"} />
         </TabsContent>
       </Tabs>
-
-      <ViewHistoricoDialog
-        open={viewDialogOpen}
-        onOpenChange={setViewDialogOpen}
-        item={selectedItem}
-      />
       </div>
     </PageWrapper>
   );
