@@ -94,7 +94,7 @@ export default function Historico() {
       }
 
 
-      // Buscar dados do activity_log
+      // Buscar dados do activity_log - limitado a 100 para performance
       const { data: activityData, error: activityError } = await supabase
         .from("activity_log")
         .select("*")
@@ -102,7 +102,7 @@ export default function Historico() {
         .order("created_at", {
           ascending: false
         })
-        .limit(1000); // Limitar para performance
+        .limit(100);
 
       if (activityError) {
         console.error("Erro ao buscar activity_log:", activityError);
@@ -131,37 +131,38 @@ export default function Historico() {
         // Se não há dados no activity_log, buscar dados históricos de outras tabelas
         console.log("Nenhum dado no activity_log, buscando dados históricos de outras tabelas...");
         
-        // Buscar cotações recentes
-        const { data: quotesData } = await supabase
-          .from("quotes")
-          .select("id, status, created_at, company_id")
-          .eq("company_id", companyData.company_id)
-          .order("created_at", { ascending: false })
-          .limit(100);
+        // Buscar dados históricos em paralelo para melhor performance
+        const [quotesResult, ordersResult, productsResult, suppliersResult] = await Promise.all([
+          supabase
+            .from("quotes")
+            .select("id, status, created_at")
+            .eq("company_id", companyData.company_id)
+            .order("created_at", { ascending: false })
+            .limit(30),
+          supabase
+            .from("orders")
+            .select("id, status, supplier_name, total_value, created_at")
+            .eq("company_id", companyData.company_id)
+            .order("created_at", { ascending: false })
+            .limit(30),
+          supabase
+            .from("products")
+            .select("id, name, created_at")
+            .eq("company_id", companyData.company_id)
+            .order("created_at", { ascending: false })
+            .limit(20),
+          supabase
+            .from("suppliers")
+            .select("id, name, created_at")
+            .eq("company_id", companyData.company_id)
+            .order("created_at", { ascending: false })
+            .limit(20)
+        ]);
 
-        // Buscar pedidos recentes
-        const { data: ordersData } = await supabase
-          .from("orders")
-          .select("id, status, supplier_name, total_value, created_at, company_id")
-          .eq("company_id", companyData.company_id)
-          .order("created_at", { ascending: false })
-          .limit(100);
-
-        // Buscar produtos recentes
-        const { data: productsData } = await supabase
-          .from("products")
-          .select("id, name, created_at, company_id")
-          .eq("company_id", companyData.company_id)
-          .order("created_at", { ascending: false })
-          .limit(50);
-
-        // Buscar fornecedores recentes
-        const { data: suppliersData } = await supabase
-          .from("suppliers")
-          .select("id, name, created_at, company_id")
-          .eq("company_id", companyData.company_id)
-          .order("created_at", { ascending: false })
-          .limit(50);
+        const quotesData = quotesResult.data;
+        const ordersData = ordersResult.data;
+        const productsData = productsResult.data;
+        const suppliersData = suppliersResult.data;
 
         // Combinar todos os dados históricos
         const allHistoricalData: any[] = [];
@@ -359,7 +360,7 @@ export default function Historico() {
     <PageWrapper>
       <div className="page-container">
       {/* MetricCards padronizados */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 overflow-visible">
         <MetricCard
           title="Total de Ações"
           value={stats.totalAcoes}
@@ -707,9 +708,27 @@ export default function Historico() {
           </div>
 
           {/* Componente de Paginação */}
-          {filteredHistorico.length > 0 && <div className="mt-6 border-t pt-4">
-              <DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} />
-            </div>}
+          {filteredHistorico.length > 0 && (
+            <div className="mt-4 sm:mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-muted-foreground order-2 sm:order-1">
+                  {paginatedData.pagination.startIndex + 1}-{paginatedData.pagination.endIndex} de {paginatedData.pagination.totalItems}
+                </span>
+                <div className="order-1 sm:order-2">
+                  <DataPagination 
+                    currentPage={paginatedData.pagination.currentPage} 
+                    totalPages={paginatedData.pagination.totalPages} 
+                    itemsPerPage={paginatedData.pagination.itemsPerPage} 
+                    totalItems={paginatedData.pagination.totalItems} 
+                    onPageChange={paginatedData.pagination.goToPage} 
+                    onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
+                    startIndex={paginatedData.pagination.startIndex} 
+                    endIndex={paginatedData.pagination.endIndex} 
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

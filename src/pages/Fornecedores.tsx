@@ -282,7 +282,7 @@ export default function Fornecedores() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
             <MetricCard
               title="Fornecedores"
               value={stats.total}
@@ -466,7 +466,72 @@ export default function Fornecedores() {
           ) : (
             <Card className="border-0 bg-transparent">
               <CardContent className="p-0">
-                <div className="overflow-x-auto">
+                {/* Mobile Cards View */}
+                <div className="md:hidden space-y-3 p-2">
+                  {paginatedData.items.map(supplier => (
+                    <div 
+                      key={supplier.id} 
+                      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Building2 className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{capitalize(supplier.name)}</p>
+                            <p className="text-xs text-muted-foreground truncate">{capitalize(supplier.contact)}</p>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
+                              <Edit className="h-4 w-4 mr-2" /> Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openWhatsApp(supplier)} className="text-green-600">
+                              <MessageCircle className="h-4 w-4 mr-2" /> WhatsApp
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setDeletingSupplier(supplier)} className="text-red-600">
+                              <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 mb-3">
+                        <StatusBadge status={supplier.status} />
+                        {renderNumericRating(supplier.rating)}
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-3.5 w-3.5 text-green-600" />
+                          <span className="text-gray-500 dark:text-gray-400">Limite:</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">{supplier.limit}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-3.5 w-3.5 text-blue-600" />
+                          <span className="text-gray-500 dark:text-gray-400">Cotações:</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">{supplier.activeQuotes}/{supplier.totalQuotes}</span>
+                        </div>
+                        <div className="flex items-center gap-2 col-span-2">
+                          <TrendingUp className="h-3.5 w-3.5 text-purple-600" />
+                          <span className="text-gray-500 dark:text-gray-400">Preço Médio:</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">{supplier.avgPrice}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -478,15 +543,15 @@ export default function Fornecedores() {
                               </div>
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Fornecedor</span>
                             </div>
-                            <div className="hidden sm:flex w-[15%] px-2 justify-center items-center gap-1.5">
+                            <div className="w-[15%] px-2 flex justify-center items-center gap-1.5">
                               <CircleDot className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Status</span>
                             </div>
-                            <div className="hidden sm:flex w-[15%] px-2 justify-center items-center gap-1.5">
+                            <div className="w-[15%] px-2 flex justify-center items-center gap-1.5">
                               <DollarSign className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Limite</span>
                             </div>
-                            <div className="hidden md:flex w-[15%] px-2 justify-center items-center gap-1.5">
+                            <div className="hidden lg:flex w-[15%] px-2 justify-center items-center gap-1.5">
                               <TrendingUp className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Preço Médio</span>
                             </div>
@@ -494,7 +559,7 @@ export default function Fornecedores() {
                               <FileText className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Cotações</span>
                             </div>
-                            <div className="hidden lg:flex w-[10%] px-2 justify-center items-center gap-1.5">
+                            <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-1.5">
                               <Star className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
                               <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Avaliação</span>
                             </div>
@@ -508,7 +573,7 @@ export default function Fornecedores() {
                     <TableBody>
                       {paginatedData.items.map(supplier => (
                         <TableRow key={supplier.id} className="group border-none">
-                          <TableCell colSpan={7} className="px-1 py-3">
+                          <TableCell colSpan={7} className="px-1 py-2">
                             <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-purple-300/60 dark:hover:border-purple-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                               <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
                                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -520,15 +585,15 @@ export default function Fornecedores() {
                                 </div>
                               </div>
 
-                              <div className="hidden sm:flex w-[15%] px-2 justify-center items-center">
+                              <div className="w-[15%] px-2 flex justify-center items-center">
                                 <StatusBadge status={supplier.status} />
                               </div>
 
-                              <div className="hidden sm:flex w-[15%] px-2 justify-center items-center">
+                              <div className="w-[15%] px-2 flex justify-center items-center">
                                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.limit}</span>
                               </div>
 
-                              <div className="hidden md:flex w-[15%] px-2 justify-center items-center">
+                              <div className="hidden lg:flex w-[15%] px-2 justify-center items-center">
                                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.avgPrice}</span>
                               </div>
 
@@ -539,7 +604,7 @@ export default function Fornecedores() {
                                 </div>
                               </div>
 
-                              <div className="hidden lg:flex w-[10%] px-2 justify-center items-center">
+                              <div className="hidden xl:flex w-[10%] px-2 justify-center items-center">
                                 {renderNumericRating(supplier.rating)}
                               </div>
 
@@ -573,17 +638,26 @@ export default function Fornecedores() {
                     </TableBody>
                   </Table>
                 </div>
-                <div className="border-t px-4 py-4">
-                  <DataPagination
-                    currentPage={paginatedData.pagination.currentPage}
-                    totalPages={paginatedData.pagination.totalPages}
-                    itemsPerPage={paginatedData.pagination.itemsPerPage}
-                    totalItems={paginatedData.pagination.totalItems}
-                    onPageChange={paginatedData.pagination.goToPage}
-                    onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                    startIndex={paginatedData.pagination.startIndex}
-                    endIndex={paginatedData.pagination.endIndex}
-                  />
+                
+                {/* Pagination */}
+                <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground order-2 sm:order-1">
+                      {paginatedData.pagination.startIndex + 1}-{paginatedData.pagination.endIndex} de {paginatedData.pagination.totalItems}
+                    </span>
+                    <div className="order-1 sm:order-2">
+                        <DataPagination
+                        currentPage={paginatedData.pagination.currentPage}
+                        totalPages={paginatedData.pagination.totalPages}
+                        itemsPerPage={paginatedData.pagination.itemsPerPage}
+                        totalItems={paginatedData.pagination.totalItems}
+                        onPageChange={paginatedData.pagination.goToPage}
+                        onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                        startIndex={paginatedData.pagination.startIndex}
+                        endIndex={paginatedData.pagination.endIndex}
+                      />
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

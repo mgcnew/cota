@@ -151,7 +151,7 @@ export default function Pedidos() {
     <PageWrapper>
       <div className="page-container">
         {/* MetricCards padronizados */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 overflow-visible">
           <MetricCard
             title="Pedidos Ativos"
             value={stats.pedidosAtivos}
@@ -250,7 +250,68 @@ export default function Pedidos() {
             {viewMode === "table" ? (
               <Card className="border-0 bg-transparent">
                 <CardContent className="p-0">
-                  <div className="overflow-hidden">
+                  {/* Mobile Cards View */}
+                  <div className="md:hidden space-y-3 p-2">
+                    {paginatedData.items.map((pedido) => (
+                      <div 
+                        key={pedido.id} 
+                        className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 border border-orange-200/50">
+                              {getStatusIcon(pedido.status)}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{capitalize(abbreviateSupplierName(pedido.fornecedor, 25))}</p>
+                              <p className="text-xs text-muted-foreground font-mono">#{pedido.id.substring(0, 8)}</p>
+                            </div>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setPedidoDialogOpen(true); }}>
+                                <ShoppingCart className="h-4 w-4 mr-2" /> Gerenciar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setDeleteDialogOpen(true); }} className="text-red-600">
+                                <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 mb-3">
+                          {getStatusBadge(pedido.status)}
+                          <span className="text-xs text-muted-foreground">{pedido.dataPedido}</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div className="flex items-center gap-2">
+                            <Package className="h-3.5 w-3.5 text-orange-600" />
+                            <span className="text-gray-500 dark:text-gray-400">Itens:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white">{pedido.itens}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Truck className="h-3.5 w-3.5 text-blue-600" />
+                            <span className="text-gray-500 dark:text-gray-400">Entrega:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white">{pedido.dataEntrega || '-'}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30 flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Valor Total</span>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">{pedido.total}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-hidden">
                     <Table>
                       <thead>
                         <tr>
@@ -266,11 +327,11 @@ export default function Pedidos() {
                                 <Building2 className="h-3.5 w-3.5 text-orange-600/70" />
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Fornecedor</span>
                               </div>
-                              <div className="hidden md:flex w-[18%] px-2 items-center gap-1.5">
+                              <div className="hidden lg:flex w-[18%] px-2 items-center gap-1.5">
                                 <Package className="h-3.5 w-3.5 text-orange-600/70" />
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Produtos</span>
                               </div>
-                              <div className="hidden lg:flex w-[15%] px-2 items-center gap-1.5">
+                              <div className="hidden xl:flex w-[15%] px-2 items-center gap-1.5">
                                 <Truck className="h-3.5 w-3.5 text-orange-600/70" />
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Entrega</span>
                               </div>
@@ -315,14 +376,14 @@ export default function Pedidos() {
                                     </span>
                                   </div>
                                 </div>
-                                <div className="hidden md:block w-[18%] px-2">
+                                <div className="hidden lg:block w-[18%] px-2">
                                   <div className="text-sm truncate max-w-[150px]">
                                     {capitalize(pedido.produtos[0])}
                                     {pedido.produtos.length > 1 && <span className="text-muted-foreground"> +{pedido.produtos.length - 1}</span>}
                                   </div>
                                   <div className="text-xs text-muted-foreground mt-1">{pedido.produtos.length} produto{pedido.produtos.length !== 1 ? 's' : ''}</div>
                                 </div>
-                                <div className="hidden lg:block w-[15%] px-2">
+                                <div className="hidden xl:block w-[15%] px-2">
                                   <div className="flex items-center gap-1 text-sm">
                                     <Truck className="h-3 w-3 text-orange-600" />
                                     {pedido.dataEntrega || '-'}
@@ -363,17 +424,25 @@ export default function Pedidos() {
                       </tbody>
                     </Table>
                   </div>
-                  <div className="border-t border-orange-100/80 dark:border-gray-700/30 bg-gradient-to-r from-orange-50/30 to-amber-50/30 px-6 py-4">
-                    <DataPagination
-                      currentPage={paginatedData.pagination.currentPage}
-                      totalPages={paginatedData.pagination.totalPages}
-                      itemsPerPage={paginatedData.pagination.itemsPerPage || 10}
-                      totalItems={paginatedData.pagination.totalItems}
-                      onPageChange={paginatedData.pagination.goToPage}
-                      onItemsPerPageChange={paginatedData.pagination.setItemsPerPage || (() => {})}
-                      startIndex={paginatedData.pagination.startIndex || 0}
-                      endIndex={paginatedData.pagination.endIndex || 0}
-                    />
+                  {/* Pagination */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                      <span className="text-xs text-muted-foreground order-2 sm:order-1">
+                        {(paginatedData.pagination.startIndex || 0) + 1}-{paginatedData.pagination.endIndex || 0} de {paginatedData.pagination.totalItems}
+                      </span>
+                      <div className="order-1 sm:order-2">
+                        <DataPagination
+                          currentPage={paginatedData.pagination.currentPage}
+                          totalPages={paginatedData.pagination.totalPages}
+                          itemsPerPage={paginatedData.pagination.itemsPerPage || 10}
+                          totalItems={paginatedData.pagination.totalItems}
+                          onPageChange={paginatedData.pagination.goToPage}
+                          onItemsPerPageChange={paginatedData.pagination.setItemsPerPage || (() => {})}
+                          startIndex={paginatedData.pagination.startIndex || 0}
+                          endIndex={paginatedData.pagination.endIndex || 0}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
