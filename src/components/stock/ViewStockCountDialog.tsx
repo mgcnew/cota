@@ -1,24 +1,25 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Download, Share2, MapPin, Loader2, Plus, X, Package, CheckCircle2, FileText, Edit, Trash2 } from "lucide-react";
-import jsPDF from 'jspdf';
+import { Download, Share2, MapPin, Loader2, Plus, Package, CheckCircle2, FileText, Edit2, Trash2, ClipboardList, Search } from "lucide-react";
+import jsPDF from "jspdf";
 import { useStockCounts } from "@/hooks/useStockCounts";
 import { useStockCountItems } from "@/hooks/useStockCountItems";
 import { useStockSectors } from "@/hooks/useStockSectors";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/components/auth/AuthProvider";
 import { useQueryClient } from "@tanstack/react-query";
-import { Dialog as AddSectorDialog, DialogContent as AddSectorDialogContent, DialogHeader as AddSectorDialogHeader, DialogTitle as AddSectorDialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { useDebounce } from "@/hooks/useDebounce";
 
-interface ViewStockCountDialogProps {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   stockCountId: string | null;
@@ -30,1007 +31,671 @@ interface OrderProduct {
   product_name: string;
   quantity: number;
   unit: string;
-  unit_price: number;
-  total_price: number;
 }
 
-interface SectorQuantity {
-  sectorId: string;
-  quantity: number;
-}
-
-export function ViewStockCountDialog({
-  open,
-  onOpenChange,
-  stockCountId,
-}: ViewStockCountDialogProps) {
+export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props) {
   const { stockCounts } = useStockCounts();
-  const { items, updateItem, isLoading } = useStockCountItems(stockCountId || '');
+  const { items, updateItem, isLoading: loadingItems } = useStockCountItems(stockCountId || "");
   const { sectors, activeSectors, createSector } = useStockSectors();
   const { toast } = useToast();
-  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([]);
+  const [searchResults, setSearchResults] = useState<OrderProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [loadingSearch, setLoadingSearch] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<OrderProduct | null>(null);
-  const [selectedSector, setSelectedSector] = useState<string>("");
-  const [quantity, setQuantity] = useState<number>(0);
-  const [sectorQuantities, setSectorQuantities] = useState<SectorQuantity[]>([]); // Quantidades já contadas para o produto atual
-  const [newSectorName, setNewSectorName] = useState("");
-  const [newSectorDescription, setNewSectorDescription] = useState("");
-  const [showAddSectorDialog, setShowAddSectorDialog] = useState(false);
-  const [isCreatingSector, setIsCreatingSector] = useState(false);
-  const [countedProducts, setCountedProducts] = useState<Set<string>>(new Set()); // IDs dos produtos já contados
+  const [selectedSector, setSelectedSector] = useState("");
+  const [quantity, setQuantity] = useState(0);
+  const [productSearch, setProductSearch] = useState("");
   const [showSummary, setShowSummary] = useState(false);
-  const [editingItem, setEditingItem] = useState<string | null>(null);
-  const [editQuantity, setEditQuantity] = useState<number>(0);
+  const [showAddSector, setShowAddSector] = useState(false);
+  const [newSectorName, setNewSectorName] = useState("");
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editQty, setEditQty] = useState(0);
 
-  // Encontrar a contagem apenas se stockCountId existir
-  const count = stockCountId ? stockCounts.find(c => c.id === stockCountId) : null;
+  const count = stockCountId ? stockCounts.find((c) => c.id === stockCountId) : null;
+  const canEdit = count?.status === "pendente" || count?.status === "em_andamento";
+  const isFromOrder = !!count?.order_id;
+  const debouncedSearch = useDebounce(productSearch, 300);
 
-  // Buscar produtos do pedido quando a contagem tiver order_id
+  // Carregar produtos do pedido (apenas para contagem de pedido)
   useEffect(() => {
-    if (!count?.order_id || !open) return;
-
-    const loadOrderProducts = async () => {
-      setLoadingProducts(true);
-      try {
-        const { data, error } = await supabase
-          .from('order_items')
-          .select('*')
-          .eq('order_id', count.order_id)
-          .order('product_name', { ascending: true });
-
-        if (error) throw error;
-        setOrderProducts(data || []);
-      } catch (error: any) {
-        console.error('Erro ao carregar produtos do pedido:', error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os produtos do pedido.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoadingProducts(false);
-      }
+    if (!open || !count?.order_id) return;
+    setLoadingProducts(true);
+    const loadProducts = async () => {
+      const { data } = await supabase
+        .from("order_items")
+        .select("id, product_id, product_name, quantity, unit")
+        .eq("order_id", count.order_id)
+        .order("product_name");
+      setOrderProducts(data || []);
+      setLoadingProducts(false);
     };
+    loadProducts();
+  }, [count?.order_id, open]);
 
-    loadOrderProducts();
-  }, [count?.order_id, open, toast]);
+  // Buscar produtos do catálogo (contagem livre) - busca sob demanda
+  const searchCatalogProducts = useCallback(async (searchTerm: string) => {
+    if (!searchTerm || searchTerm.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setLoadingSearch(true);
+    try {
+      const { data } = await supabase
+        .from("products")
+        .select("id, name, unit")
+        .ilike("name", `%${searchTerm}%`)
+        .order("name")
+        .limit(20);
+      
+      const results: OrderProduct[] = (data || []).map(p => ({
+        id: p.id,
+        product_id: p.id,
+        product_name: p.name,
+        quantity: 0,
+        unit: p.unit || "un"
+      }));
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error);
+    } finally {
+      setLoadingSearch(false);
+    }
+  }, []);
 
-  // Resetar estado quando fechar o dialog
+  // Executar busca quando o termo mudar (contagem livre)
+  useEffect(() => {
+    if (!isFromOrder && open) {
+      searchCatalogProducts(debouncedSearch);
+    }
+  }, [debouncedSearch, isFromOrder, open, searchCatalogProducts]);
+
+  // Reset ao fechar
   useEffect(() => {
     if (!open) {
-      setCountedProducts(new Set());
       setOrderProducts([]);
+      setSearchResults([]);
       setSelectedProduct(null);
-      setSectorQuantities([]);
       setSelectedSector("");
       setQuantity(0);
+      setProductSearch("");
+      setShowSummary(false);
+      setShowAddSector(false);
     }
   }, [open]);
 
-  // Criar chave estável para items baseada apenas em IDs e quantidades contadas
-  const itemsKey = useMemo(() => {
-    if (!items || items.length === 0) return '';
-    return items
-      .map(item => `${item.id}-${item.quantity_counted || 0}`)
-      .sort()
-      .join('|');
-  }, [items]);
-
-  // Calcular produtos contados de forma memoizada
-  const countedProductsSet = useMemo(() => {
-    if (!open || !stockCountId) return new Set<string>();
-    
-    const canEdit = count?.status === 'pendente' || count?.status === 'em_andamento';
-    if (canEdit) return new Set<string>();
-    
-    const counted = new Set<string>();
-    items.forEach(item => {
-      const productId = item.order_item_id || item.product_id || '';
-      if (productId && item.quantity_counted && item.quantity_counted > 0) {
-        counted.add(productId);
-      }
-    });
-    return counted;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, stockCountId, itemsKey, count?.status]);
-
-  // Atualizar countedProducts apenas quando o Set calculado mudar
-  useEffect(() => {
-    setCountedProducts(countedProductsSet);
-  }, [countedProductsSet]);
-
-  // Calcular quantidades por setor de forma memoizada
-  const calculatedSectorQuantities = useMemo(() => {
-    if (!selectedProduct || !stockCountId) return [];
-
-    const productId = selectedProduct.id;
-    const productItems = items.filter(item => 
-      (item.order_item_id === productId || item.product_id === productId) && 
-      item.sector_id &&
-      item.quantity_counted && 
-      item.quantity_counted > 0
+  // Produtos filtrados
+  const filteredProducts = useMemo(() => {
+    if (!productSearch.trim()) return orderProducts;
+    return orderProducts.filter((p) =>
+      p.product_name.toLowerCase().includes(productSearch.toLowerCase())
     );
+  }, [orderProducts, productSearch]);
 
-    const quantitiesMap = new Map<string, number>();
-    productItems.forEach(item => {
-      if (item.sector_id) {
-        const current = quantitiesMap.get(item.sector_id) || 0;
-        quantitiesMap.set(item.sector_id, current + (item.quantity_counted || 0));
+  // Quantidades por setor do produto selecionado
+  const productSectorQtys = useMemo(() => {
+    if (!selectedProduct) return [];
+    return items
+      .filter(
+        (i) =>
+          (i.order_item_id === selectedProduct.id ||
+            i.product_id === selectedProduct.product_id) &&
+          i.quantity_counted > 0
+      )
+      .map((i) => ({
+        id: i.id,
+        sectorId: i.sector_id,
+        sectorName: sectors.find((s) => s.id === i.sector_id)?.name || "Desconhecido",
+        qty: i.quantity_counted,
+      }));
+  }, [selectedProduct, items, sectors]);
+
+  const totalProductQty = productSectorQtys.reduce((sum, s) => sum + s.qty, 0);
+
+  // Resumo geral
+  const summaryData = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        name: string;
+        sectors: { sectorName: string; qty: number }[];
+        total: number;
+        items: { id: string; sectorId: string; qty: number }[];
+      }
+    >();
+    items.forEach((item) => {
+      if (item.quantity_counted > 0) {
+        const key = item.order_item_id || item.product_id || item.product_name;
+        if (!map.has(key)) {
+          map.set(key, { name: item.product_name, sectors: [], total: 0, items: [] });
+        }
+        const p = map.get(key)!;
+        const sectorName = sectors.find((s) => s.id === item.sector_id)?.name || "Desconhecido";
+        const existing = p.sectors.find((s) => s.sectorName === sectorName);
+        if (existing) {
+          existing.qty += item.quantity_counted;
+        } else {
+          p.sectors.push({ sectorName, qty: item.quantity_counted });
+        }
+        p.total += item.quantity_counted;
+        p.items.push({
+          id: item.id,
+          sectorId: item.sector_id || "",
+          qty: item.quantity_counted,
+        });
       }
     });
+    return Array.from(map.values());
+  }, [items, sectors]);
 
-    return Array.from(quantitiesMap.entries()).map(([sectorId, quantity]) => ({
-      sectorId,
-      quantity,
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedProduct?.id, itemsKey, stockCountId]);
+  const grandTotal = summaryData.reduce((sum, p) => sum + p.total, 0);
 
-  // Atualizar sectorQuantities apenas quando o cálculo mudar
-  useEffect(() => {
-    setSectorQuantities(calculatedSectorQuantities);
-  }, [calculatedSectorQuantities]);
+  // Quantidade contada de um produto
+  const getCountedQty = (productId: string) =>
+    items
+      .filter(
+        (i) =>
+          (i.order_item_id === productId || i.product_id === productId) &&
+          i.quantity_counted > 0
+      )
+      .reduce((s, i) => s + i.quantity_counted, 0);
 
-  // Selecionar produto para contagem
-  const handleSelectProduct = (product: OrderProduct) => {
-    setSelectedProduct(product);
-    setSelectedSector("");
-    setQuantity(0);
-  };
-
-  // Adicionar quantidade para um setor
-  const handleAddQuantity = async () => {
+  // Adicionar quantidade
+  const handleAddQty = async () => {
     if (!selectedProduct || !selectedSector || !stockCountId || quantity <= 0) {
-      toast({
-        title: "Dados incompletos",
-        description: "Por favor, selecione um setor e insira uma quantidade válida.",
-        variant: "destructive",
-      });
+      toast({ title: "Preencha todos os campos", variant: "destructive" });
       return;
     }
-
     try {
-      // Verificar se já existe um item para este produto e setor
-      let existingItem = items.find(item => 
-        (item.order_item_id === selectedProduct.id || item.product_id === selectedProduct.product_id) &&
-        item.sector_id === selectedSector
+      const existing = items.find(
+        (i) =>
+          (i.order_item_id === selectedProduct.id ||
+            i.product_id === selectedProduct.product_id) &&
+          i.sector_id === selectedSector
       );
-
-      if (existingItem) {
-        // Atualizar quantidade existente (somar)
-        const newQuantity = (existingItem.quantity_counted || 0) + quantity;
+      if (existing) {
         await updateItem.mutateAsync({
-          id: existingItem.id,
-          quantity_counted: newQuantity,
+          id: existing.id,
+          quantity_counted: (existing.quantity_counted || 0) + quantity,
         });
       } else {
-        // Criar novo item
-        const { error: insertError } = await supabase
-          .from('stock_count_items')
-          .insert({
-            stock_count_id: stockCountId,
-            order_item_id: selectedProduct.id,
-            product_id: selectedProduct.product_id,
-            product_name: selectedProduct.product_name,
-            sector_id: selectedSector,
-            quantity_ordered: selectedProduct.quantity,
-            quantity_existing: 0,
-            quantity_counted: quantity,
-          });
-
-        if (insertError) throw insertError;
-        queryClient.invalidateQueries({ queryKey: ['stock-count-items', stockCountId] });
+        await supabase.from("stock_count_items").insert({
+          stock_count_id: stockCountId,
+          order_item_id: selectedProduct.id,
+          product_id: selectedProduct.product_id,
+          product_name: selectedProduct.product_name,
+          sector_id: selectedSector,
+          quantity_ordered: selectedProduct.quantity,
+          quantity_existing: 0,
+          quantity_counted: quantity,
+        });
+        queryClient.invalidateQueries({ queryKey: ["stock-count-items", stockCountId] });
       }
-
-      // Atualizar lista de quantidades do setor
-      const existing = sectorQuantities.find(sq => sq.sectorId === selectedSector);
-      if (existing) {
-        setSectorQuantities(sectorQuantities.map(sq =>
-          sq.sectorId === selectedSector ? { ...sq, quantity: existing.quantity + quantity } : sq
-        ));
-      } else {
-        setSectorQuantities([...sectorQuantities, { sectorId: selectedSector, quantity }]);
-      }
-
-      // Limpar campos
       setQuantity(0);
       setSelectedSector("");
-
-      toast({
-        title: "Quantidade adicionada",
-        description: "A quantidade foi registrada com sucesso.",
-      });
-    } catch (error: any) {
-      console.error('Erro ao adicionar quantidade:', error);
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível adicionar a quantidade.",
-        variant: "destructive",
-      });
+      toast({ title: "Quantidade adicionada" });
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
     }
   };
 
-  // Confirmar contagem do produto atual
-  const handleConfirmProductCount = () => {
-    if (!selectedProduct || !stockCountId || !count) return;
-
-    // Se status for pendente ou em_andamento, não marcar como definitivamente contado
-    // para permitir edição posterior
-    const canEdit = count.status === 'pendente' || count.status === 'em_andamento';
-    
-    if (!canEdit) {
-      // Apenas marcar como contado se não puder editar (status finalizada)
-      setCountedProducts(new Set([...countedProducts, selectedProduct.id]));
-    }
-
-    // Invalidar queries para atualizar a lista de itens
-    queryClient.invalidateQueries({ queryKey: ['stock-count-items', stockCountId] });
-
-    // Limpar seleção
+  // Confirmar produto
+  const handleConfirmProduct = () => {
+    queryClient.invalidateQueries({ queryKey: ["stock-count-items", stockCountId] });
     setSelectedProduct(null);
     setSelectedSector("");
     setQuantity(0);
-    setSectorQuantities([]);
-
-    toast({
-      title: "Contagem confirmada",
-      description: canEdit 
-        ? `${selectedProduct.product_name} foi salvo. Você pode editar novamente se necessário.`
-        : `${selectedProduct.product_name} foi confirmado.`,
-    });
+    toast({ title: "Produto salvo" });
   };
 
-  // Criar novo setor
+  // Criar setor
   const handleCreateSector = async () => {
-    if (!newSectorName.trim()) {
-      toast({
-        title: "Nome obrigatório",
-        description: "Por favor, informe o nome do setor.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsCreatingSector(true);
+    if (!newSectorName.trim()) return;
     try {
-      await createSector.mutateAsync({
-        name: newSectorName.trim(),
-        description: newSectorDescription.trim() || undefined,
-      });
-      
+      await createSector.mutateAsync({ name: newSectorName.trim() });
       setNewSectorName("");
-      setNewSectorDescription("");
-      setShowAddSectorDialog(false);
-
-      toast({
-        title: "Setor criado",
-        description: "O setor foi criado e adicionado à lista.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro ao criar setor",
-        description: error.message || "Não foi possível criar o setor.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCreatingSector(false);
+      setShowAddSector(false);
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
     }
   };
 
-  // Calcular total de quantidades do produto atual
-  const totalProductQuantity = useMemo(() => {
-    return sectorQuantities.reduce((sum, sq) => sum + sq.quantity, 0);
-  }, [sectorQuantities]);
+  // Editar item
+  const handleSaveEdit = async () => {
+    if (!editingItemId) return;
+    try {
+      await updateItem.mutateAsync({ id: editingItemId, quantity_counted: editQty });
+      queryClient.invalidateQueries({ queryKey: ["stock-count-items", stockCountId] });
+      setEditingItemId(null);
+      toast({ title: "Atualizado" });
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
+    }
+  };
 
-  // Agrupar itens por produto para o resumo
-  const summaryData = useMemo(() => {
-    const productMap = new Map<string, {
-      product_name: string;
-      sectors: Array<{ sectorName: string; quantity: number }>;
-      total: number;
-      items: Array<{ id: string; sector_id: string; quantity_counted: number }>;
-    }>();
+  // Excluir item
+  const handleDeleteItem = async (id: string) => {
+    if (!confirm("Excluir esta quantidade?")) return;
+    try {
+      await supabase.from("stock_count_items").delete().eq("id", id);
+      queryClient.invalidateQueries({ queryKey: ["stock-count-items", stockCountId] });
+      toast({ title: "Removido" });
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
+    }
+  };
 
-    items.forEach(item => {
-      if (item.quantity_counted && item.quantity_counted > 0) {
-        const productId = item.order_item_id || item.product_id || '';
-        const productName = item.product_name || 'Produto Desconhecido';
-        
-        if (!productMap.has(productId)) {
-          productMap.set(productId, {
-            product_name: productName,
-            sectors: [],
-            total: 0,
-            items: [],
-          });
-        }
-
-        const product = productMap.get(productId)!;
-        const sector = sectors.find(s => s.id === item.sector_id);
-        
-        const existingSector = product.sectors.find(s => s.sectorName === sector?.name);
-        if (existingSector) {
-          existingSector.quantity += item.quantity_counted;
-        } else {
-          product.sectors.push({
-            sectorName: sector?.name || 'Setor Desconhecido',
-            quantity: item.quantity_counted,
-          });
-        }
-
-        product.total += item.quantity_counted;
-        product.items.push({
-          id: item.id,
-          sector_id: item.sector_id || '',
-          quantity_counted: item.quantity_counted,
-        });
+  // Gerar PDF
+  const handlePDF = () => {
+    if (summaryData.length === 0) return;
+    const doc = new jsPDF();
+    let y = 20;
+    doc.setFontSize(18);
+    doc.text("Contagem de Estoque", 20, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(`Fornecedor: ${(count as any)?.order?.supplier_name || "Contagem Livre"}`, 20, y);
+    y += 7;
+    doc.text(`Data: ${count ? format(new Date(count.created_at), "dd/MM/yyyy", { locale: ptBR }) : ""}`, 20, y);
+    y += 15;
+    summaryData.forEach((p) => {
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text(p.name, 20, y);
+      y += 6;
+      doc.setFont("helvetica", "normal");
+      p.sectors.forEach((s) => {
+        doc.text(`  ${s.sectorName}: ${s.qty} un`, 25, y);
+        y += 5;
+      });
+      doc.text(`  Total: ${p.total} un`, 25, y);
+      y += 8;
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
       }
     });
-
-    return Array.from(productMap.values());
-  }, [items, sectors]);
-
-  // Gerar PDF da contagem
-  const handleGeneratePDF = () => {
-    if (!count || summaryData.length === 0) {
-      toast({
-        title: "Nenhum dado",
-        description: "Não há dados para gerar o PDF.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const doc = new jsPDF();
-      const margin = 15;
-      let y = margin;
-
-      // Título
-      doc.setFontSize(18);
-      doc.text('Contagem de Estoque', margin, y);
-      y += 10;
-
-      // Informações da contagem
-      doc.setFontSize(10);
-      doc.text(`Pedido: ${count.order?.supplier_name || 'Contagem Livre'}`, margin, y);
-      y += 5;
-      doc.text(`Data: ${new Date(count.created_at).toLocaleDateString('pt-BR')}`, margin, y);
-      y += 5;
-      if (count.notes) {
-        doc.text(`Observações: ${count.notes}`, margin, y);
-        y += 5;
-      }
-      y += 5;
-
-      // Tabela de produtos
-      doc.setFontSize(12);
-      doc.text('Resumo da Contagem', margin, y);
-      y += 8;
-
-      // Cabeçalho da tabela
-      doc.setFontSize(9);
-      doc.setFillColor(240, 240, 240);
-      doc.rect(margin, y, 180, 7, 'F');
-      doc.text('Produto', margin + 2, y + 5);
-      doc.text('Setor', margin + 60, y + 5);
-      doc.text('Quantidade', margin + 120, y + 5);
-      doc.text('Total', margin + 160, y + 5);
-      y += 7;
-
-      doc.setFontSize(8);
-      summaryData.forEach((product, index) => {
-        if (y > 270) {
-          doc.addPage();
-          y = margin;
-        }
-
-        product.sectors.forEach((sector, sectorIndex) => {
-          if (y > 270) {
-            doc.addPage();
-            y = margin;
-          }
-
-          if (sectorIndex === 0) {
-            doc.setFont('helvetica', 'bold');
-            doc.text(product.product_name.substring(0, 35), margin + 2, y + 4);
-            doc.setFont('helvetica', 'normal');
-          }
-          
-          doc.text(sector.sectorName.substring(0, 20), margin + 60, y + 4);
-          doc.text(sector.quantity.toString(), margin + 120, y + 4);
-          
-          if (sectorIndex === product.sectors.length - 1) {
-            doc.setFont('helvetica', 'bold');
-            doc.text(product.total.toString(), margin + 160, y + 4);
-            doc.setFont('helvetica', 'normal');
-          }
-          
-          y += 5;
-        });
-
-        // Linha separadora
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, y, margin + 180, y);
-        y += 3;
-      });
-
-      // Total geral
-      const grandTotal = summaryData.reduce((sum, p) => sum + p.total, 0);
-      y += 5;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.text(`Total Geral: ${grandTotal} unidades`, margin + 120, y);
-      
-      doc.save(`contagem_estoque_${count.id.substring(0, 8)}.pdf`);
-
-      toast({
-        title: "PDF gerado",
-        description: "O PDF foi baixado com sucesso.",
-      });
-    } catch (error: any) {
-      console.error('Erro ao gerar PDF:', error);
-      toast({
-        title: "Erro ao gerar PDF",
-        description: error.message || "Não foi possível gerar o PDF.",
-        variant: "destructive",
-      });
-    }
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(`TOTAL GERAL: ${grandTotal} unidades`, 20, y + 5);
+    doc.save(`contagem_${stockCountId?.slice(0, 8)}.pdf`);
   };
 
-  // Compartilhar via WhatsApp
-  const handleShareWhatsApp = () => {
-    if (!count || summaryData.length === 0) {
-      toast({
-        title: "Nenhum dado",
-        description: "Não há dados para compartilhar.",
-        variant: "destructive",
+  // WhatsApp
+  const handleWhatsApp = () => {
+    if (summaryData.length === 0) return;
+    let msg = `*CONTAGEM DE ESTOQUE*\n`;
+    msg += `Fornecedor: ${(count as any)?.order?.supplier_name || "Contagem Livre"}\n\n`;
+    summaryData.forEach((p) => {
+      msg += `*${p.name}*\n`;
+      p.sectors.forEach((s) => {
+        msg += `  • ${s.sectorName}: ${s.qty} un\n`;
       });
-      return;
-    }
-
-    try {
-      let message = `📦 *CONTAGEM DE ESTOQUE*\n\n`;
-      message += `📋 Pedido: ${count.order?.supplier_name || 'Contagem Livre'}\n`;
-      message += `📅 Data: ${new Date(count.created_at).toLocaleDateString('pt-BR')}\n`;
-      if (count.notes) {
-        message += `📝 Obs: ${count.notes}\n`;
-      }
-      message += `\n━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-      summaryData.forEach((product, index) => {
-        message += `*${product.product_name}*\n`;
-        product.sectors.forEach(sector => {
-          message += `  • ${sector.sectorName}: ${sector.quantity} un\n`;
-        });
-        message += `  Total: *${product.total} un*\n`;
-        if (index < summaryData.length - 1) {
-          message += `\n`;
-        }
-      });
-
-      const grandTotal = summaryData.reduce((sum, p) => sum + p.total, 0);
-      message += `\n━━━━━━━━━━━━━━━━━━━━\n`;
-      message += `*TOTAL GERAL: ${grandTotal} unidades*\n`;
-
-      const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-      
-      window.open(whatsappUrl, '_blank');
-
-      toast({
-        title: "WhatsApp aberto",
-        description: "A mensagem foi preparada para compartilhamento.",
-      });
-    } catch (error: any) {
-      console.error('Erro ao compartilhar no WhatsApp:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível abrir o WhatsApp.",
-        variant: "destructive",
-      });
-    }
+      msg += `  Total: ${p.total} un\n\n`;
+    });
+    msg += `*TOTAL GERAL: ${grandTotal} unidades*`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
-  // Editar quantidade de um item
-  const handleEditItem = async (itemId: string, currentQuantity: number) => {
-    setEditingItem(itemId);
-    setEditQuantity(currentQuantity);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editingItem || editQuantity < 0) return;
-
-    try {
-      await updateItem.mutateAsync({
-        id: editingItem,
-        quantity_counted: editQuantity,
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['stock-count-items', stockCountId] });
-      
-      setEditingItem(null);
-      setEditQuantity(0);
-
-      toast({
-        title: "Quantidade atualizada",
-        description: "A quantidade foi atualizada com sucesso.",
-      });
-    } catch (error: any) {
-      console.error('Erro ao atualizar quantidade:', error);
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível atualizar a quantidade.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteItem = async (itemId: string) => {
-    if (!confirm('Tem certeza que deseja remover esta quantidade?')) return;
-
-    try {
-      await supabase
-        .from('stock_count_items')
-        .delete()
-        .eq('id', itemId);
-
-      queryClient.invalidateQueries({ queryKey: ['stock-count-items', stockCountId] });
-
-      toast({
-        title: "Quantidade removida",
-        description: "A quantidade foi removida com sucesso.",
-      });
-    } catch (error: any) {
-      console.error('Erro ao remover quantidade:', error);
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível remover a quantidade.",
-        variant: "destructive",
-      });
-    }
-  };
+  if (!count) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <p className="text-center py-8 text-muted-foreground">Contagem não encontrada</p>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
-    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-6xl w-[90vw] max-h-[85vh] h-[80vh] overflow-hidden flex flex-col p-0">
-          <DialogHeader className="px-4 py-3 border-b flex-shrink-0">
-            <DialogTitle className="flex items-center justify-between text-base">
-            <span>Contagem de Estoque</span>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8"
-                onClick={() => setShowSummary(true)}
-                disabled={summaryData.length === 0}
-              >
-                <FileText className="h-3.5 w-3.5 mr-1.5" />
-                Resumo
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8"
-                onClick={handleGeneratePDF}
-                disabled={summaryData.length === 0}
-              >
-                <Download className="h-3.5 w-3.5 mr-1.5" />
-                PDF
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8"
-                onClick={handleShareWhatsApp}
-                disabled={summaryData.length === 0}
-              >
-                <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                WhatsApp
-              </Button>
-            </div>
-          </DialogTitle>
-        </DialogHeader>
-
-          <div className="flex-1 overflow-hidden">
-            {!count ? (
-              <div className="flex items-center justify-center h-full py-12">
-                <p className="text-muted-foreground">Contagem não encontrada.</p>
-              </div>
-            ) : isLoading || loadingProducts ? (
-              <div className="flex items-center justify-center h-full py-12">
-            <Loader2 className="h-8 w-8 animate-spin" />
+      <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-orange-500 to-amber-600 p-4 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white text-lg flex items-center gap-2">
+              <ClipboardList className="w-5 h-5" />
+              {(count as any)?.order?.supplier_name || "Contagem Livre"}
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-orange-100 mt-1">
+            {format(new Date(count.created_at), "dd/MM/yyyy", { locale: ptBR })}
+            {count.notes && ` • ${count.notes}`}
+          </p>
+          <div className="flex gap-2 mt-3">
+            <Button size="sm" variant="secondary" onClick={() => setShowSummary(true)} disabled={summaryData.length === 0}>
+              <FileText className="w-4 h-4 mr-1" /> Resumo
+            </Button>
+            <Button size="sm" variant="secondary" onClick={handlePDF} disabled={summaryData.length === 0}>
+              <Download className="w-4 h-4 mr-1" /> PDF
+            </Button>
+            <Button size="sm" variant="secondary" onClick={handleWhatsApp} disabled={summaryData.length === 0}>
+              <Share2 className="w-4 h-4 mr-1" /> WhatsApp
+            </Button>
           </div>
-            ) : (
-              <div className="h-full overflow-auto grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-              {/* Coluna Direita: Lista de Produtos do Pedido */}
-              <Card className="flex flex-col overflow-hidden h-fit lg:h-full">
-                <CardHeader className="border-b flex-shrink-0 px-3 py-2">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <Package className="h-4 w-4" />
-                    Produtos do Pedido ({orderProducts.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-1 overflow-hidden p-0 min-h-0">
-                  <ScrollArea className="h-full max-h-[60vh] lg:max-h-none">
-                    <div className="p-2 space-y-1">
-                      {orderProducts.length === 0 ? (
-                        <div className="text-center py-6 text-muted-foreground text-sm">
-                          {count.order_id 
-                            ? "Nenhum produto encontrado neste pedido."
-                            : "Esta contagem não foi criada a partir de um pedido."
-                          }
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-hidden">
+          {loadingItems || loadingProducts ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
+              {/* Lista de Produtos */}
+              <div className="border-r p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Package className="w-4 h-4 text-orange-500" />
+                  <span className="font-medium">
+                    {isFromOrder ? `Produtos do Pedido (${orderProducts.length})` : "Buscar Produtos"}
+                  </span>
+                </div>
+                <div className="relative mb-3">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder={isFromOrder ? "Filtrar produtos..." : "Digite para buscar produtos..."}
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    className="pl-9"
+                  />
+                  {loadingSearch && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-orange-500" />
+                  )}
+                </div>
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-2 pr-2">
+                    {isFromOrder ? (
+                      // Contagem de pedido - mostrar produtos filtrados
+                      filteredProducts.length === 0 ? (
+                        <div className="text-center py-8">
+                          <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                          <p className="text-muted-foreground text-sm">
+                            {productSearch ? "Nenhum produto encontrado" : "Nenhum produto no pedido"}
+                          </p>
                         </div>
                       ) : (
-                        orderProducts.map((product) => {
+                        filteredProducts.map((product) => {
+                          const counted = getCountedQty(product.id);
                           const isSelected = selectedProduct?.id === product.id;
-                          const isCounted = countedProducts.has(product.id);
-                          // Permitir edição se status for pendente ou em_andamento
-                          const canEdit = count?.status === 'pendente' || count?.status === 'em_andamento';
-                          const canSelect = canEdit || !isCounted;
                           return (
                             <div
                               key={product.id}
-                              onClick={() => canSelect && handleSelectProduct(product)}
-                              className={`p-2 border rounded text-sm transition-colors ${
-                                isSelected 
-                                  ? 'bg-primary/10 border-primary' 
-                                  : isCounted && !canEdit
-                                    ? 'bg-muted/30 border-muted cursor-not-allowed opacity-60'
-                                    : canSelect
-                                      ? 'hover:bg-muted/50 cursor-pointer'
-                                      : 'bg-muted/30 border-muted cursor-not-allowed opacity-60'
-                              }`}
+                              onClick={() => setSelectedProduct(product)}
+                              className={cn(
+                                "p-3 rounded-lg border cursor-pointer transition-all",
+                                isSelected
+                                  ? "border-orange-500 bg-orange-50 dark:bg-orange-950/30"
+                                  : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                              )}
                             >
                               <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                  <p className="font-medium text-xs">{product.product_name}</p>
-                                  <p className="text-xs text-muted-foreground mt-0.5">
-                                    Quantidade pedida: {product.quantity} {product.unit || 'un'}
-                                  </p>
-                                </div>
-                                {isCounted && (
-                                  <CheckCircle2 className={`h-4 w-4 flex-shrink-0 ${canEdit ? 'text-blue-600' : 'text-green-600'}`} />
+                                <span className="font-medium text-sm">{product.product_name}</span>
+                                {counted > 0 && (
+                                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+                                    {counted} un
+                                  </Badge>
                                 )}
                               </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Pedido: {product.quantity} {product.unit || "un"}
+                              </p>
                             </div>
                           );
                         })
-                      )}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-
-              {/* Coluna Esquerda: Contagem do Produto Selecionado */}
-              <Card className="flex flex-col overflow-hidden h-fit lg:h-full">
-                <CardHeader className="border-b flex-shrink-0 px-3 py-2">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4" />
-                    {selectedProduct ? `Contagem: ${selectedProduct.product_name}` : "Selecione um produto"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0">
-                  {!selectedProduct ? (
-                    <div className="flex items-center justify-center h-full p-6">
-                      <div className="text-center text-muted-foreground">
-                        <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm">Clique em um produto à direita para começar a contagem</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Informações do Produto */}
-                      <div className="p-3 border-b bg-muted/30">
-                        <div className="space-y-1">
-                          <p className="font-semibold text-sm">{selectedProduct.product_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Total contado: <span className="font-semibold text-primary">{totalProductQuantity}</span> unidades
+                      )
+                    ) : (
+                      // Contagem livre - busca sob demanda
+                      !productSearch || productSearch.length < 2 ? (
+                        <div className="text-center py-8">
+                          <Search className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                          <p className="text-muted-foreground text-sm">
+                            Digite pelo menos 2 caracteres para buscar
                           </p>
                         </div>
-                      </div>
-
-                      {/* Formulário de Adicionar Quantidade */}
-                      <div className="p-3 border-b space-y-3">
-                        <div className="flex gap-2">
-                          <Select
-                            value={selectedSector}
-                            onValueChange={setSelectedSector}
-                          >
-                            <SelectTrigger className="flex-1 h-9 text-xs">
-                              <SelectValue placeholder="Selecione um setor" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {activeSectors.length === 0 ? (
-                                <SelectItem value="none" disabled>
-                                  Nenhum setor disponível
-                                </SelectItem>
-                              ) : (
-                                activeSectors.map((sector) => (
-                                  <SelectItem key={sector.id} value={sector.id}>
-                                    {sector.name}
-                                  </SelectItem>
-                                ))
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            onClick={() => setShowAddSectorDialog(true)}
-                            size="sm"
-                            variant="outline"
-                            className="h-9 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white"
-                          >
-                            <Plus className="h-3.5 w-3.5 mr-1.5" />
-                            Novo Setor
-                          </Button>
+                      ) : loadingSearch ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="w-5 h-5 animate-spin text-orange-500 mr-2" />
+                          <span className="text-sm text-muted-foreground">Buscando...</span>
                         </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="quantity-input" className="text-xs">
-                            Quantidade
-                          </Label>
-                          <div className="flex gap-2">
-                            <Input
-                              id="quantity-input"
-                              type="number"
-                              min="0"
-                              step="1"
-                              value={quantity || ""}
-                              onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
-                              placeholder="0"
-                              className="text-sm font-semibold h-9"
-                            />
-                            <Button
-                              onClick={handleAddQuantity}
-                              disabled={!selectedSector || quantity <= 0}
-                              className="h-9 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
-                            >
-                              Adicionar
-                            </Button>
-                          </div>
+                      ) : searchResults.length === 0 ? (
+                        <div className="text-center py-8">
+                          <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                          <p className="text-muted-foreground text-sm">Nenhum produto encontrado</p>
                         </div>
-                      </div>
-
-                      {/* Lista de Quantidades por Setor */}
-                      <ScrollArea className="flex-1 min-h-0">
-                        <div className="p-3 space-y-2">
-                          {sectorQuantities.length === 0 ? (
-                            <div className="text-center py-4 text-muted-foreground text-xs">
-                              <p>Nenhuma quantidade adicionada ainda.</p>
-                              <p className="mt-1">Selecione um setor e insira uma quantidade acima.</p>
-                            </div>
-                          ) : (
-                            sectorQuantities.map((sq) => {
-                              const sector = sectors.find(s => s.id === sq.sectorId);
-                              return (
-                                <div
-                                  key={sq.sectorId}
-                                  className="p-2 border rounded flex items-center justify-between"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                                    <span className="text-xs font-medium">{sector?.name || "Setor Desconhecido"}</span>
-                                  </div>
-                                  <span className="text-xs font-semibold text-primary">{sq.quantity} unidades</span>
-                                </div>
-                              );
-                            })
-                          )}
-                        </div>
-                      </ScrollArea>
-
-                      {/* Botão de Confirmar */}
-                      <div className="p-3 border-t bg-muted/30">
-                        <Button
-                          onClick={handleConfirmProductCount}
-                          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                          disabled={sectorQuantities.length === 0}
-                        >
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Confirmar Contagem
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-                </div>
-              )}
-          </div>
-      </DialogContent>
-    </Dialog>
-
-      {/* Dialog: Resumo da Contagem */}
-      <Dialog open={showSummary} onOpenChange={setShowSummary}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
-          <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
-            <DialogTitle className="flex items-center justify-between">
-              <span>Resumo da Contagem</span>
-              <Button variant="outline" size="sm" onClick={() => setShowSummary(false)}>
-                <X className="h-4 w-4 mr-2" />
-                Fechar
-              </Button>
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="flex-1 overflow-auto p-6">
-            {summaryData.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>Nenhuma contagem registrada ainda.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {summaryData.map((product) => (
-                  <Card key={product.product_name} className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold text-base">{product.product_name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Total contado: {product.total} unidades
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-primary">{product.total} un</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        {product.items.map((item) => {
-                          const sector = sectors.find(s => s.id === item.sector_id);
-                          const isEditing = editingItem === item.id;
-                          
+                      ) : (
+                        searchResults.map((product) => {
+                          const counted = getCountedQty(product.id);
+                          const isSelected = selectedProduct?.id === product.id;
                           return (
                             <div
-                              key={item.id}
-                              className="flex items-center justify-between p-2 border rounded bg-muted/30"
+                              key={product.id}
+                              onClick={() => setSelectedProduct(product)}
+                              className={cn(
+                                "p-3 rounded-lg border cursor-pointer transition-all",
+                                isSelected
+                                  ? "border-orange-500 bg-orange-50 dark:bg-orange-950/30"
+                                  : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                              )}
                             >
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                                  <span className="text-sm font-medium">
-                                    {sector?.name || 'Setor Desconhecido'}
-                                  </span>
-                                </div>
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium text-sm">{product.product_name}</span>
+                                {counted > 0 && (
+                                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+                                    {counted} un
+                                  </Badge>
+                                )}
                               </div>
-                              
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Unidade: {product.unit || "un"}
+                              </p>
+                            </div>
+                          );
+                        })
+                      )
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              {/* Contagem do Produto */}
+              <div className="p-4">
+                {selectedProduct ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold">{selectedProduct.product_name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Total contado: <span className="font-bold text-orange-600">{totalProductQty} un</span>
+                        </p>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => setSelectedProduct(null)}>
+                        Fechar
+                      </Button>
+                    </div>
+
+                    {/* Formulário */}
+                    {canEdit && (
+                      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-3">
+                        <div className="flex gap-2">
+                          <Select value={selectedSector} onValueChange={setSelectedSector}>
+                            <SelectTrigger className="flex-1">
+                              <SelectValue placeholder="Selecione o setor" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {activeSectors.map((s) => (
+                                <SelectItem key={s.id} value={s.id}>
+                                  {s.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button size="icon" variant="outline" onClick={() => setShowAddSector(true)}>
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            placeholder="Quantidade"
+                            value={quantity || ""}
+                            onChange={(e) => setQuantity(Number(e.target.value))}
+                            className="flex-1"
+                          />
+                          <Button onClick={handleAddQty} disabled={!selectedSector || quantity <= 0}>
+                            Adicionar
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quantidades por setor */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Quantidades por setor</Label>
+                      {productSectorQtys.length === 0 ? (
+                        <p className="text-sm text-muted-foreground py-4 text-center">
+                          Nenhuma quantidade registrada
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {productSectorQtys.map((sq) => (
+                            <div
+                              key={sq.id}
+                              className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded"
+                            >
                               <div className="flex items-center gap-2">
-                                {isEditing ? (
+                                <MapPin className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm">{sq.sectorName}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {editingItemId === sq.id ? (
                                   <>
                                     <Input
                                       type="number"
-                                      min="0"
-                                      step="1"
-                                      value={editQuantity}
-                                      onChange={(e) => setEditQuantity(parseInt(e.target.value) || 0)}
-                                      className="w-20 h-8 text-sm"
+                                      value={editQty}
+                                      onChange={(e) => setEditQty(Number(e.target.value))}
+                                      className="w-20 h-8"
                                     />
-                                    <Button
-                                      size="sm"
-                                      onClick={handleSaveEdit}
-                                      className="h-8"
-                                    >
+                                    <Button size="sm" onClick={handleSaveEdit}>
                                       Salvar
                                     </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => {
-                                        setEditingItem(null);
-                                        setEditQuantity(0);
-                                      }}
-                                      className="h-8"
-                                    >
+                                    <Button size="sm" variant="ghost" onClick={() => setEditingItemId(null)}>
                                       Cancelar
                                     </Button>
                                   </>
                                 ) : (
                                   <>
-                                    <span className="text-sm font-semibold min-w-[60px] text-right">
-                                      {item.quantity_counted} un
-                                    </span>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => handleEditItem(item.id, item.quantity_counted)}
-                                      className="h-8 w-8 p-0"
-                                    >
-                                      <Edit className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => handleDeleteItem(item.id)}
-                                      className="h-8 w-8 p-0 text-destructive"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
+                                    <span className="font-medium">{sq.qty} un</span>
+                                    {canEdit && (
+                                      <>
+                                        <Button
+                                          size="icon"
+                                          variant="ghost"
+                                          className="h-7 w-7"
+                                          onClick={() => {
+                                            setEditingItemId(sq.id);
+                                            setEditQty(sq.qty);
+                                          }}
+                                        >
+                                          <Edit2 className="w-3 h-3" />
+                                        </Button>
+                                        <Button
+                                          size="icon"
+                                          variant="ghost"
+                                          className="h-7 w-7 text-red-500"
+                                          onClick={() => handleDeleteItem(sq.id)}
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                      </>
+                                    )}
                                   </>
                                 )}
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </Card>
-                ))}
 
-                <Card className="p-4 bg-primary/5 border-primary/20">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold">Total Geral</span>
-                    <span className="text-2xl font-bold text-primary">
-                      {summaryData.reduce((sum, p) => sum + p.total, 0)} unidades
-                    </span>
+                    {canEdit && productSectorQtys.length > 0 && (
+                      <Button onClick={handleConfirmProduct} className="w-full bg-green-600 hover:bg-green-700">
+                        <CheckCircle2 className="w-4 h-4 mr-2" /> Confirmar Produto
+                      </Button>
+                    )}
                   </div>
-                </Card>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog: Criar Novo Setor */}
-      <AddSectorDialog open={showAddSectorDialog} onOpenChange={setShowAddSectorDialog}>
-        <AddSectorDialogContent>
-          <AddSectorDialogHeader>
-            <AddSectorDialogTitle>Criar Novo Setor</AddSectorDialogTitle>
-          </AddSectorDialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="sector-name">Nome do Setor *</Label>
-              <Input
-                id="sector-name"
-                value={newSectorName}
-                onChange={(e) => setNewSectorName(e.target.value)}
-                placeholder="Ex: Geladeira 1, Freezer 2, etc."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sector-description">Descrição (opcional)</Label>
-              <Textarea
-                id="sector-description"
-                value={newSectorDescription}
-                onChange={(e) => setNewSectorDescription(e.target.value)}
-                placeholder="Adicione uma descrição para este setor..."
-                rows={3}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowAddSectorDialog(false);
-                  setNewSectorName("");
-                  setNewSectorDescription("");
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleCreateSector}
-                disabled={isCreatingSector || !newSectorName.trim()}
-                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
-              >
-                {isCreatingSector ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Criando...
-                  </>
                 ) : (
-                  "Criar Setor"
+                  <div className="flex flex-col items-center justify-center h-full py-16 text-center">
+                    <Package className="w-12 h-12 text-gray-300 mb-3" />
+                    <p className="text-muted-foreground">Selecione um produto para contar</p>
+                  </div>
                 )}
-              </Button>
+              </div>
             </div>
-          </div>
-        </AddSectorDialogContent>
-      </AddSectorDialog>
-    </>
+          )}
+        </div>
+
+        {/* Modal Resumo */}
+        <Dialog open={showSummary} onOpenChange={setShowSummary}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>Resumo da Contagem</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {summaryData.map((p, i) => (
+                <div key={i} className="border rounded-lg p-3">
+                  <h4 className="font-semibold">{p.name}</h4>
+                  <div className="mt-2 space-y-1">
+                    {p.sectors.map((s, j) => (
+                      <div key={j} className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{s.sectorName}</span>
+                        <span>{s.qty} un</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-2 pt-2 border-t flex justify-between font-medium">
+                    <span>Total</span>
+                    <span>{p.total} un</span>
+                  </div>
+                </div>
+              ))}
+              <div className="bg-orange-50 dark:bg-orange-950/30 rounded-lg p-4 flex justify-between items-center">
+                <span className="font-semibold text-lg">Total Geral</span>
+                <span className="text-2xl font-bold text-orange-600">{grandTotal} un</span>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal Novo Setor */}
+        <Dialog open={showAddSector} onOpenChange={setShowAddSector}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo Setor</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Nome do setor</Label>
+                <Input
+                  value={newSectorName}
+                  onChange={(e) => setNewSectorName(e.target.value)}
+                  placeholder="Ex: Geladeira 1, Freezer..."
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setShowAddSector(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleCreateSector} disabled={!newSectorName.trim()}>
+                  Criar Setor
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </DialogContent>
+    </Dialog>
   );
 }
