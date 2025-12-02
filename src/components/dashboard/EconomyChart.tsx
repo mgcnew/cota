@@ -54,24 +54,24 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
 
     return (
         <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/30 shadow-sm dark:shadow-lg hover:shadow-md dark:hover:shadow-xl rounded-xl hover:border-gray-300 dark:hover:border-gray-600/50 transition-all duration-300">
-            <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700/30">
-                <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-3 text-base">
-                            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg shadow-sm">
-                                <DollarSign className="h-4 w-4 text-white" />
+            <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-gray-100 dark:border-gray-700/30">
+                <div className="flex flex-col gap-2 sm:gap-3">
+                    <div className="flex items-center justify-between gap-2">
+                        <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
+                            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg shadow-sm">
+                                <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                             </div>
-                            <span className="font-semibold text-gray-900 dark:text-white">
+                            <span className="font-semibold text-gray-900 dark:text-white truncate">
                                 Economia Gerada
                             </span>
                         </CardTitle>
                         <Select value={period} onValueChange={onPeriodChange}>
-                            <SelectTrigger className="w-[140px] h-9 text-xs border-gray-200 dark:border-gray-700/60 hover:border-green-400 dark:hover:border-green-500">
+                            <SelectTrigger className="w-[100px] sm:w-[140px] h-8 sm:h-9 text-xs border-gray-200 dark:border-gray-700/60 hover:border-green-400 dark:hover:border-green-500">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="7d">Últimos 7 dias</SelectItem>
-                                <SelectItem value="1m">Último mês</SelectItem>
+                                <SelectItem value="7d">7 dias</SelectItem>
+                                <SelectItem value="1m">1 mês</SelectItem>
                                 <SelectItem value="3m">3 meses</SelectItem>
                                 <SelectItem value="6m">6 meses</SelectItem>
                                 <SelectItem value="1y">1 ano</SelectItem>
@@ -79,8 +79,8 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
                         </Select>
                     </div>
                     {data && data.length > 0 && (
-                        <div className="flex items-center gap-4 text-xs">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs">
+                            <div className="flex items-center gap-1 sm:gap-2">
                                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
                                 <span className="text-gray-600 dark:text-gray-400">Total:</span>
                                 <span className="font-semibold text-gray-900 dark:text-white">
@@ -95,13 +95,13 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
                     )}
                 </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-2 sm:p-4">
                 {isLoading ? (
-                    <div className="flex items-center justify-center h-[320px]">
-                        <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+                    <div className="flex items-center justify-center h-[200px] sm:h-[320px]">
+                        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-green-500" />
                     </div>
                 ) : (
-                    <ResponsiveContainer width="100%" height={320}>
+                    <ResponsiveContainer width="100%" height={window.innerWidth < 640 ? 200 : 320}>
                         <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
                             <XAxis

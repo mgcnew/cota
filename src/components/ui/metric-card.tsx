@@ -84,28 +84,28 @@ export function MetricCard({
         className
       )}
     >
-      <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className={cn("text-sm font-semibold", styles.titleColor)}>
+      <CardHeader className="relative flex flex-row items-center justify-between space-y-0 p-3 sm:p-4 pb-1 sm:pb-2">
+        <CardTitle className={cn("text-xs sm:text-sm font-semibold truncate pr-2", styles.titleColor)}>
           {title}
         </CardTitle>
         <div className={cn(
-          "p-2.5 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200",
+          "p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200 flex-shrink-0",
           styles.iconBg
         )}>
-          <Icon className={cn("h-4 w-4 md:h-5 md:w-5", styles.iconColor)} />
+          <Icon className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5", styles.iconColor)} />
         </div>
       </CardHeader>
 
-      <CardContent className="relative">
-        <div className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+      <CardContent className="relative p-3 sm:p-4 pt-1 sm:pt-2">
+        <div className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate">
           {value}
         </div>
         {trend && (
-          <div className="flex items-center gap-1 mt-2">
-            <span className={cn("text-xs font-semibold", trendColor)}>
+          <div className="flex items-center gap-1 mt-1 sm:mt-2 flex-wrap">
+            <span className={cn("text-[10px] sm:text-xs font-semibold", trendColor)}>
               {trend.value}
             </span>
-            <span className="text-xs text-gray-600 dark:text-gray-400">
+            <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">
               {trend.label}
             </span>
           </div>

@@ -1,5 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useCallback } from 'react';
 import {
     BarChart3,
     DollarSign,
@@ -11,7 +10,6 @@ import {
 } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
-import { PageHeader } from '@/components/ui/page-header';
 import { MetricCard } from '@/components/ui/metric-card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -20,6 +18,7 @@ import { useDashboard } from '@/hooks/useDashboard';
 
 import { EvolutionChart } from '@/components/dashboard/EvolutionChart';
 import { EconomyChart } from '@/components/dashboard/EconomyChart';
+import { useNavigate } from 'react-router-dom';
 
 const DEFAULT_METRICS = {
     cotacoesAtivas: 0,
@@ -101,9 +100,44 @@ export default function DashboardRefactored() {
 
     return (
         <PageWrapper>
-            <div className="page-container">
-                {/* Cards de Métricas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="page-container space-y-4 sm:space-y-6">
+                {/* Header Responsivo */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+                                Dashboard
+                            </h1>
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                                Visão geral e métricas de desempenho
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
+                            <SelectTrigger className="w-full sm:w-[140px] h-10">
+                                <Calendar className="mr-2 h-4 w-4" />
+                                <SelectValue placeholder="Período" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="7d">7 dias</SelectItem>
+                                <SelectItem value="1m">1 mês</SelectItem>
+                                <SelectItem value="3m">3 meses</SelectItem>
+                                <SelectItem value="6m">6 meses</SelectItem>
+                                <SelectItem value="1y">1 ano</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="icon" className="h-10 w-10 flex-shrink-0">
+                            <Filter className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Cards de Métricas - Responsivos */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
                     <MetricCard
                         title="Cotações Ativas"
                         value={metrics.cotacoesAtivas}
@@ -141,7 +175,7 @@ export default function DashboardRefactored() {
                     />
 
                     <MetricCard
-                        title="Taxa de Aprovação"
+                        title="Taxa Aprovação"
                         value={`${metrics.taxaAprovacao}%`}
                         icon={Target}
                         variant="info"
@@ -153,35 +187,8 @@ export default function DashboardRefactored() {
                     />
                 </div>
 
-                {/* Page Header */}
-                <PageHeader
-                    title="Dashboard"
-                    description="Visão geral e métricas principais de desempenho."
-                    icon={LayoutDashboard}
-                    actions={
-                        <div className="flex items-center gap-2">
-                            <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
-                                <SelectTrigger className="w-[140px]">
-                                    <Calendar className="mr-2 h-4 w-4" />
-                                    <SelectValue placeholder="Período" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="7d">Últimos 7 dias</SelectItem>
-                                    <SelectItem value="1m">Último mês</SelectItem>
-                                    <SelectItem value="3m">3 meses</SelectItem>
-                                    <SelectItem value="6m">6 meses</SelectItem>
-                                    <SelectItem value="1y">1 ano</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Button variant="outline" size="icon">
-                                <Filter className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    }
-                />
-
-                {/* Gráficos */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                {/* Gráficos - Responsivos */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     <EvolutionChart
                         data={evolutionData}
                         period={evolutionPeriod}

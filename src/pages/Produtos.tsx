@@ -293,7 +293,7 @@ export default function Produtos() {
       <PageWrapper>
         <div className="page-container">
           {/* Cards de Métricas */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 overflow-visible">
             <MetricCard
               title="Total de Produtos"
               value={stats.totalProducts.toLocaleString('pt-BR')}
@@ -348,12 +348,12 @@ export default function Produtos() {
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button className="h-10 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar
+                    <Button className="h-9 sm:h-10 px-3 sm:px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm">
+                      <Plus className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Adicionar</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[180px]">
+                  <DropdownMenuContent align="end" className="w-[200px]">
                     <DropdownMenuLabel>Ações</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }}>
@@ -365,34 +365,32 @@ export default function Produtos() {
                     <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }}>
                       <Download className="h-4 w-4 mr-2" /> Exportar Produtos
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate("/dashboard/contagem-estoque")}>
                       <ClipboardList className="h-4 w-4 mr-2" /> Contagem de Estoque
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/dashboard/relatorios?tab=produtos")}>
-                      <FileText className="h-4 w-4 mr-2" /> Relatórios de Produtos
+                      <FileText className="h-4 w-4 mr-2" /> Relatórios
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/dashboard/analytics")}>
-                      <TrendingUp className="h-4 w-4 mr-2" /> Análise de Produtos
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setAuthDialogOpen(true)}>
-                      <Building2 className="h-4 w-4 mr-2" /> Gerenciar Empresas
+                      <TrendingUp className="h-4 w-4 mr-2" /> Analytics
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             }
           >
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
-              <div className="flex-shrink-0">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full">
+              <div className="flex-1 sm:flex-shrink-0">
                 <ExpandableSearch
                   value={searchQuery}
                   onChange={setSearchQuery}
                   placeholder="Buscar produtos..."
                   accentColor="orange"
-                  expandedWidth="w-64"
+                  expandedWidth="w-full sm:w-64"
                 />
               </div>
-              <div className="flex-1 sm:flex-initial">
+              <div className="flex-1 sm:flex-initial sm:w-[180px]">
                 <CategorySelect
                   categories={safeCategories}
                   products={safeProducts}
@@ -406,10 +404,10 @@ export default function Produtos() {
           <Card className="border-0 bg-transparent">
             <CardContent className="p-0">
               {paginatedData.items.length === 0 && !productsLoading ? (
-                <div className="p-12 text-center">
-                  <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">Nenhum produto encontrado.</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Tente ajustar sua busca ou filtros.</p>
+                <div className="p-8 sm:p-12 text-center">
+                  <Package className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-gray-400" />
+                  <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Nenhum produto encontrado.</p>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2">Tente ajustar sua busca ou filtros.</p>
                   <Button onClick={handleAddProduct} className="mt-4 bg-primary hover:bg-primary/90 text-white">
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar Produto
@@ -417,7 +415,87 @@ export default function Produtos() {
                 </div>
               ) : (
                 <>
-                  <div className="overflow-x-auto w-full">
+                  {/* Mobile Cards View */}
+                  <div className="md:hidden space-y-3 p-2">
+                    {paginatedData.items.map((product) => (
+                      <div 
+                        key={product.id} 
+                        className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0">
+                              {product.image_url ? (
+                                <img src={product.image_url} alt={product.name} className="w-10 h-10 rounded-xl object-cover" />
+                              ) : (
+                                <Package className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{capitalize(product.name)}</p>
+                              <Badge variant="secondary" className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary text-xs mt-1">
+                                {capitalize(product.category)}
+                              </Badge>
+                            </div>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditProduct(product)}>
+                                <Edit className="h-4 w-4 mr-2" /> Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDeleteProduct(product)} className="text-red-600">
+                                <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem>
+                                <History className="h-4 w-4 mr-2" /> Histórico
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-3.5 w-3.5 text-green-600" />
+                            <span className="text-gray-500 dark:text-gray-400">Preço:</span>
+                            <span className="font-semibold text-green-700 dark:text-green-400">{product.lastQuotePrice}</span>
+                            {getTrendIcon(product.trend)}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <ClipboardList className="h-3.5 w-3.5 text-blue-600" />
+                            <span className="text-gray-500 dark:text-gray-400">Cotações:</span>
+                            <span className="font-semibold text-blue-700 dark:text-blue-400">{product.quotesCount || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CircleDot className="h-3.5 w-3.5 text-gray-500" />
+                            <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                            {getStatusBadge(getProductStatus(product))}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Barcode className="h-3.5 w-3.5 text-gray-500" />
+                            <span className="text-gray-500 dark:text-gray-400">Código:</span>
+                            <span className="text-gray-700 dark:text-gray-300 truncate">{product.barcode || "N/A"}</span>
+                          </div>
+                        </div>
+                        
+                        {product.bestSupplier && (
+                          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30 flex items-center gap-2 text-xs">
+                            <Building2 className="h-3.5 w-3.5 text-gray-500" />
+                            <span className="text-gray-500 dark:text-gray-400">Fornecedor:</span>
+                            <span className="text-gray-700 dark:text-gray-300 truncate">{capitalize(product.bestSupplier)}</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto w-full">
                     <Table className="w-full">
                       <TableHeader>
                         <TableRow>
@@ -429,19 +507,19 @@ export default function Produtos() {
                                 </div>
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Produto</span>
                               </div>
-                              <div className="hidden md:flex w-[15%] px-2 justify-center items-center gap-1.5">
+                              <div className="w-[15%] px-2 flex justify-center items-center gap-1.5">
                                 <Tags className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Categoria</span>
                               </div>
-                              <div className="hidden md:flex w-[12%] px-2 justify-center items-center gap-1.5">
+                              <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-1.5">
                                 <Barcode className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Código</span>
                               </div>
-                              <div className="hidden sm:flex w-[13%] px-2 justify-center items-center gap-1.5">
+                              <div className="w-[13%] px-2 flex justify-center items-center gap-1.5">
                                 <CircleDot className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Status</span>
                               </div>
-                              <div className="hidden sm:flex w-[12%] px-2 justify-center items-center gap-1.5">
+                              <div className="w-[12%] px-2 flex justify-center items-center gap-1.5">
                                 <DollarSign className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Preço</span>
                               </div>
@@ -449,7 +527,7 @@ export default function Produtos() {
                                 <Building2 className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Fornecedor</span>
                               </div>
-                              <div className="hidden sm:flex w-[8%] px-2 justify-center items-center gap-1.5">
+                              <div className="w-[8%] px-2 flex justify-center items-center gap-1.5">
                                 <ClipboardList className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
                                 <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Cotações</span>
                               </div>
@@ -464,7 +542,7 @@ export default function Produtos() {
                       <TableBody>
                         {paginatedData.items.map((product) => (
                           <TableRow key={product.id} className="group border-none">
-                            <TableCell colSpan={8} className="px-1 py-3">
+                            <TableCell colSpan={8} className="px-1 py-2">
                               <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-orange-300/60 dark:hover:border-orange-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
                                 <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
                                   <div className="w-8 h-8 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -479,23 +557,23 @@ export default function Produtos() {
                                   </div>
                                 </div>
 
-                                <div className="hidden md:flex w-[15%] px-2 justify-center items-center">
+                                <div className="w-[15%] px-2 flex justify-center items-center">
                                   <Badge variant="secondary" className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary">
                                     {capitalize(product.category)}
                                   </Badge>
                                 </div>
 
-                                <div className="hidden md:flex w-[12%] px-2 justify-center items-center">
+                                <div className="hidden lg:flex w-[12%] px-2 justify-center items-center">
                                   <Badge variant="outline" className="text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600">
                                     {product.barcode || "N/A"}
                                   </Badge>
                                 </div>
 
-                                <div className="hidden sm:flex w-[13%] px-2 justify-center items-center">
+                                <div className="w-[13%] px-2 flex justify-center items-center">
                                   {getStatusBadge(getProductStatus(product))}
                                 </div>
 
-                                <div className="hidden sm:flex w-[12%] px-2 justify-center items-center gap-1">
+                                <div className="w-[12%] px-2 flex justify-center items-center gap-1">
                                   <span className="font-semibold text-green-700 dark:text-green-400 text-sm">{product.lastQuotePrice}</span>
                                   {getTrendIcon(product.trend)}
                                 </div>
@@ -504,7 +582,7 @@ export default function Produtos() {
                                   <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{capitalize(product.bestSupplier || "N/A")}</span>
                                 </div>
 
-                                <div className="hidden sm:flex w-[8%] px-2 justify-center items-center gap-1">
+                                <div className="w-[8%] px-2 flex justify-center items-center gap-1">
                                   <div className="p-1 bg-blue-100 dark:bg-blue-900/20 rounded-full">
                                     <ClipboardList className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                                   </div>
@@ -541,24 +619,28 @@ export default function Produtos() {
                       </TableBody>
                     </Table>
                   </div>
-                  <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
-                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                      <span className="text-xs">
+
+                  {/* Pagination */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-600 dark:text-gray-400">
+                      <span className="text-xs order-2 sm:order-1">
                         {paginatedData.items.length > 0
                           ? `${((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}-${Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}`
                           : '0'
                         } de {safeFilteredProducts.length}
                       </span>
-                      <DataPagination
-                        currentPage={paginatedData.pagination.currentPage}
-                        totalPages={paginatedData.pagination.totalPages}
-                        itemsPerPage={paginatedData.pagination.itemsPerPage}
-                        totalItems={safeFilteredProducts.length}
-                        onPageChange={paginatedData.pagination.goToPage}
-                        onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                        startIndex={((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}
-                        endIndex={Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}
-                      />
+                      <div className="order-1 sm:order-2">
+                        <DataPagination
+                          currentPage={paginatedData.pagination.currentPage}
+                          totalPages={paginatedData.pagination.totalPages}
+                          itemsPerPage={paginatedData.pagination.itemsPerPage}
+                          totalItems={safeFilteredProducts.length}
+                          onPageChange={paginatedData.pagination.goToPage}
+                          onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                          startIndex={((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}
+                          endIndex={Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}
+                        />
+                      </div>
                     </div>
                   </div>
                 </>
