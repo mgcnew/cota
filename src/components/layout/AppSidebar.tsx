@@ -1,11 +1,11 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { UserProfileDialog } from "@/components/profile/UserProfileDialog";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
   Package,
@@ -21,17 +21,28 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
-  Menu
-} from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+  Menu,
+  LucideIcon
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+  SheetDescription
+} from "@/components/ui/sheet";
 
-// Categorias com seus respectivos itens de menu
 interface MenuItem {
   title: string;
   url: string;
-  icon: any;
+  icon: LucideIcon;
 }
 
 interface MenuCategory {
@@ -77,32 +88,34 @@ const menuCategories: MenuCategory[] = [
   }
 ];
 
+const allMenuItems = menuCategories.flatMap((c) => c.items);
+
 export function AppSidebar() {
-  const { theme } = useTheme();
   const { user } = useAuth();
   const { profile } = useUserProfile();
-  const isDark = theme === 'dark';
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const location = useLocation();
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
-  // State para sidebar expandida/colapsada (Desktop)
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
-    const saved = localStorage.getItem('sidebarExpanded');
-    return saved !== null ? saved === 'true' : true;
+    const saved = localStorage.getItem("sidebarExpanded");
+    return saved !== null ? saved === "true" : true;
   });
 
-  // Por padrão, todas as categorias começam colapsadas
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
-    () => new Set(menuCategories.map(c => c.title))
+    () => new Set(menuCategories.map((c) => c.title))
   );
 
-  // Salvar preferência e notificar AppLayout
   useEffect(() => {
-    localStorage.setItem('sidebarExpanded', String(isSidebarExpanded));
-    window.dispatchEvent(new CustomEvent('sidebarToggle', { detail: { expanded: isSidebarExpanded } }));
+    localStorage.setItem("sidebarExpanded", String(isSidebarExpanded));
+    window.dispatchEvent(
+      new CustomEvent("sidebarToggle", { detail: { expanded: isSidebarExpanded } })
+    );
   }, [isSidebarExpanded]);
 
   const toggleCategory = (categoryTitle: string) => {
-    setCollapsedCategories(prev => {
+    setCollapsedCategories((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(categoryTitle)) {
         newSet.delete(categoryTitle);
@@ -113,18 +126,28 @@ export function AppSidebar() {
     });
   };
 
-  // Colapsa todas as categorias exceto a especificada
   const collapseOtherCategories = (keepOpen: string) => {
-    setCollapsedCategories(new Set(menuCategories.filter(c => c.title !== keepOpen).map(c => c.title)));
+    setCollapsedCategories(
+      new Set(menuCategories.filter((c) => c.title !== keepOpen).map((c) => c.title))
+    );
   };
 
-  const SidebarContent = ({ expanded = true, mobile = false }: { expanded?: boolean, mobile?: boolean }) => (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-[#1C1F26] overflow-hidden">
+
+  const SidebarContent = ({
+    expanded = true,
+    mobile = false
+  }: {
+    expanded?: boolean;
+    mobile?: boolean;
+  }) => (
+    <div className="w-full h-full flex flex-col bg-white dark:bg-[#1a1d24] overflow-hidden">
       {/* Header */}
-      <div className={cn(
-        "flex items-center h-20 px-4 border-b border-gray-200/60 dark:border-gray-700/30 bg-gradient-to-b from-gray-50/50 to-white dark:from-transparent dark:to-transparent transition-all duration-300",
-        expanded ? "gap-3" : "justify-center"
-      )}>
+      <div
+        className={cn(
+          "flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700/50 transition-all duration-300",
+          expanded ? "gap-3" : "justify-center"
+        )}
+      >
         <UserAvatar
           user={user}
           profile={profile}
@@ -133,93 +156,118 @@ export function AppSidebar() {
           clickable
           onClick={() => setProfileDialogOpen(true)}
         />
-        <div className={cn(
-          "flex-1 min-w-0 transition-all duration-300 overflow-hidden",
-          expanded ? "opacity-100 w-auto" : "opacity-0 w-0 hidden"
-        )}>
-          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-            {profile?.full_name || user?.email?.split('@')[0] || 'Usuário'}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-            Membro
-          </p>
-        </div>
+        {expanded && (
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
+              {profile?.full_name || user?.email?.split("@")[0] || "Usuário"}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Membro</p>
+          </div>
+        )}
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 flex flex-col py-3 px-3 space-y-0 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 flex flex-col py-3 px-2 overflow-y-auto scrollbar-hide">
         {expanded ? (
-          // Versão expandida com categorias
-          menuCategories.map((category, categoryIndex) => {
+          menuCategories.map((category, idx) => {
             const isCollapsed = collapsedCategories.has(category.title);
             return (
-              <div key={category.title} className={categoryIndex > 0 ? "mt-5" : ""}>
+              <div key={category.title} className={idx > 0 ? "mt-4" : ""}>
                 <button
                   onClick={() => toggleCategory(category.title)}
-                  className="w-full flex items-center justify-between px-3 py-3 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-pink-600 dark:hover:text-pink-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/40"
+                  className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-pink-600 dark:hover:text-pink-400"
                 >
-                  <span className="truncate">{category.title}</span>
-                  {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />}
+                  <span>{category.title}</span>
+                  {isCollapsed ? (
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  )}
                 </button>
 
                 {!isCollapsed && (
-                  <div className="space-y-1 mt-1.5 pb-2">
-                    {category.items.map((item) => {
-                      return (
-                        <NavLink
-                          key={item.title}
-                          to={item.url}
-                          end={item.url === "/dashboard"}
-                          onClick={() => collapseOtherCategories(category.title)}
-                          className={({ isActive }) => cn(
-                            "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group",
+                  <div className="space-y-1 mt-1 px-1">
+                    {category.items.map((item) => (
+                      <NavLink
+                        key={item.title}
+                        to={item.url}
+                        end={item.url === "/dashboard"}
+                        onClick={() => collapseOtherCategories(category.title)}
+                        className={({ isActive }) =>
+                          cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
                             isActive
-                              ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60 hover:translate-x-0.5"
-                          )}
-                        >
-                          {({ isActive }) => (
-                            <>
-                              <item.icon className={cn("w-5 h-5 transition-colors flex-shrink-0", isActive ? "text-white" : "text-gray-500 dark:text-gray-400 group-hover:text-pink-600 dark:group-hover:text-pink-400")} />
-                              <span className="text-sm font-medium truncate">{item.title}</span>
-                            </>
-                          )}
-                        </NavLink>
-                      );
-                    })}
+                              ? "bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg shadow-pink-500/25"
+                              : "hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:translate-x-0.5"
+                          )
+                        }
+                      >
+                        {({ isActive }) => (
+                          <>
+                            <item.icon
+                              className={cn(
+                                "w-5 h-5 transition-colors flex-shrink-0",
+                                isActive
+                                  ? "text-white"
+                                  : "text-gray-500 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-400"
+                              )}
+                            />
+                            <span
+                              className={cn(
+                                "text-sm font-medium truncate transition-colors",
+                                isActive
+                                  ? "text-white"
+                                  : "text-gray-700 dark:text-gray-200 group-hover:text-pink-600 dark:group-hover:text-pink-400"
+                              )}
+                            >
+                              {item.title}
+                            </span>
+                          </>
+                        )}
+                      </NavLink>
+                    ))}
                   </div>
-                )}
-
-                {categoryIndex < menuCategories.length - 1 && (
-                  <div className="mt-3 mb-2 mx-3 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700/40 to-transparent" />
                 )}
               </div>
             );
           })
         ) : (
-          // Versão colapsada - apenas ícones
           <TooltipProvider delayDuration={0}>
             <div className="flex flex-col gap-2 mt-2">
-              {menuCategories.flatMap(c => c.items).map((item) => {
+              {allMenuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = item.url === "/dashboard" 
+                  ? location.pathname === "/dashboard"
+                  : location.pathname.startsWith(item.url);
+                
                 return (
                   <Tooltip key={item.title}>
                     <TooltipTrigger asChild>
                       <NavLink
                         to={item.url}
-                        end={item.url === "/dashboard"}
-                        className={({ isActive }) => cn(
-                          "relative flex items-center justify-center h-10 w-10 mx-auto rounded-xl transition-all duration-300 group",
-                          isActive
-                            ? "bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-lg"
-                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        className={cn(
+                          "flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-all duration-200",
+                          isActive 
+                            ? "shadow-lg shadow-pink-500/25" 
+                            : "hover:bg-gray-100 dark:hover:bg-gray-700/50"
                         )}
+                        style={{
+                          backgroundColor: isActive ? '#ec4899' : undefined
+                        }}
                       >
-                        {({ isActive }) => (
-                          <item.icon className={cn("w-5 h-5 transition-colors", isActive ? "text-white" : "group-hover:text-gray-900 dark:group-hover:text-white")} />
-                        )}
+                        <Icon
+                          className="w-5 h-5"
+                          style={{
+                            color: isActive ? '#ffffff' : (isDark ? '#d1d5db' : '#374151')
+                          }}
+                        />
                       </NavLink>
                     </TooltipTrigger>
-                    <TooltipContent side="right" sideOffset={10} className="font-semibold text-sm z-[60]">
+                    <TooltipContent
+                      side="right"
+                      sideOffset={12}
+                      className="font-medium text-sm z-[60] bg-gray-900 text-white border-0 shadow-lg"
+                    >
                       {item.title}
                     </TooltipContent>
                   </Tooltip>
@@ -230,51 +278,69 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* Toggle Button (Desktop only) */}
+      {/* Toggle Button */}
       {!mobile && (
-        <div className="px-3 py-3 border-t border-gray-200/60 dark:border-gray-700/30">
+        <div className="px-2 py-2 border-t border-gray-200 dark:border-gray-700/50">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsSidebarExpanded(!expanded)}
             className={cn(
-              "w-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300",
+              "w-full transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-pink-600 dark:hover:text-pink-400",
               expanded ? "justify-between px-3" : "justify-center px-0"
             )}
           >
-            {expanded && <span className="text-xs font-medium text-gray-500">Recolher menu</span>}
-            {expanded ? <PanelLeftClose className="w-4 h-4 text-gray-500" /> : <PanelLeftOpen className="w-4 h-4 text-gray-500" />}
+            {expanded && <span className="text-xs font-medium">Recolher</span>}
+            {expanded ? (
+              <PanelLeftClose className="w-4 h-4" />
+            ) : (
+              <PanelLeftOpen className="w-4 h-4" />
+            )}
           </Button>
         </div>
       )}
     </div>
   );
 
-  return <>
-    {/* Desktop Sidebar */}
-    <div className={cn(
-      "hidden md:flex fixed z-50 left-1 top-1 bottom-1 transition-all duration-300 ease-in-out",
-      isSidebarExpanded ? "w-64" : "w-20"
-    )}>
-      <div className="w-full h-full rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-gray-300/80 dark:border-gray-600/50 overflow-hidden">
-        <SidebarContent expanded={isSidebarExpanded} />
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <div
+        className={cn(
+          "hidden md:flex fixed z-50 left-1 top-1 bottom-1 transition-all duration-300 ease-in-out",
+          isSidebarExpanded ? "w-64" : "w-[72px]"
+        )}
+      >
+        <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg shadow-black/10 dark:shadow-black/30 border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-[#1a1d24]">
+          <SidebarContent expanded={isSidebarExpanded} />
+        </div>
       </div>
-    </div>
 
-    {/* Mobile Sidebar (Sheet) */}
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden fixed top-3 left-3 z-50 h-10 w-10 rounded-lg bg-white/80 dark:bg-[#1C1F26]/90 backdrop-blur-sm border border-gray-200 dark:border-gray-800 shadow-sm">
-          <Menu className="h-5 w-5" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-72 border-r border-gray-200 dark:border-gray-800">
-        <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
-        <SheetDescription className="sr-only">Menu principal da aplicação para navegação entre páginas.</SheetDescription>
-        <SidebarContent expanded={true} mobile={true} />
-      </SheetContent>
-    </Sheet>
+      {/* Mobile Sidebar */}
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden fixed top-3 left-3 z-50 h-10 w-10 rounded-lg backdrop-blur-sm shadow-sm bg-white/90 dark:bg-gray-900/90 border border-gray-200 dark:border-gray-700/50 text-gray-700 dark:text-gray-300"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="left"
+          className="p-0 w-72 border-r border-gray-200 dark:border-gray-700/50"
+        >
+          <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
+          <SheetDescription className="sr-only">
+            Menu principal da aplicação
+          </SheetDescription>
+          <SidebarContent expanded mobile />
+        </SheetContent>
+      </Sheet>
 
-    <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
-  </>;
+      <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
+    </>
+  );
 }
