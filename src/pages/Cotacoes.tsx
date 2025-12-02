@@ -140,7 +140,7 @@ export default function Cotacoes() {
   return (
     <PageWrapper>
       <div className="page-container">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <MetricCard title="Ativas" value={stats.ativas} icon={FileText} variant="info" trend={{ value: `${stats.percentualAtivas}%`, label: "do total", type: "neutral" }} />
           <MetricCard title="Pendentes" value={stats.pendentes} icon={Calendar} variant="default" trend={{ value: "0", label: "atrasadas", type: "positive" }} />
           <MetricCard title="Economia" value={stats.economiaFormatada} icon={DollarSign} variant="success" trend={{ value: "Total", label: "economizado", type: "positive" }} />
@@ -228,48 +228,269 @@ export default function Cotacoes() {
         ) : (
           <Card className="border-0 bg-transparent">
             <CardContent className="p-0">
-              <Table>
-                <thead><tr><td colSpan={7} className="px-1 pb-3 pt-0 border-none"><div className="flex items-center bg-card/95 border border-border rounded-lg shadow-sm px-4 py-3"><div className="w-[18%] flex items-center gap-2"><div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><ClipboardList className="h-4 w-4" /></div><span className="uppercase text-[11px] font-semibold text-foreground">Cotação</span></div><div className="hidden md:flex w-[20%] pl-2 items-center gap-1.5"><Package className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Produto</span></div><div className="hidden lg:flex w-[15%] pl-2 items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Período</span></div><div className="w-[12%] pl-2 flex justify-center items-center gap-1.5"><CircleDot className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Status</span></div><div className="w-[15%] pl-2 flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Melhor Preço</span></div><div className="hidden sm:flex w-[10%] pl-2 justify-center items-center gap-1.5"><Building2 className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Fornec.</span></div><div className="w-[10%] pl-4 flex justify-end items-center gap-1.5"><MoreVertical className="h-3.5 w-3.5 text-primary" /><span className="uppercase text-[11px] font-semibold text-foreground">Ações</span></div></div></td></tr></thead>
-                <tbody>
-                  {paginatedData.items.map((cotacao, index) => {
-                    const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
-                    return (
-                      <TableRow key={cotacao.id} className="group border-none">
-                        <TableCell colSpan={7} className="px-1 py-3">
-                          <div className="flex items-center px-1.5 py-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:border-primary/30 transition-all">
-                            <div className="w-[18%] flex items-center gap-3 px-2"><div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20"><ClipboardList className="h-4 w-4 text-primary" /></div><div className="min-w-0 flex-1"><div className="font-semibold text-sm text-foreground">#{cotacaoNumero.toString().padStart(4, '0')}</div><div className="text-xs text-muted-foreground md:hidden truncate"><CapitalizedText>{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText></div></div></div>
-                            <div className="hidden md:block w-[20%] px-2"><div className="max-w-[150px]" title={cotacao.produto}><CapitalizedText className="font-medium text-sm text-foreground truncate">{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText><div className="text-xs text-muted-foreground mt-1"><span className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded-md"><Package className="h-3 w-3" />{String(cotacao.quantidade || '')}</span></div></div></div>
-                            <div className="hidden lg:block w-[15%] px-2"><div className="text-xs space-y-1"><div className="flex items-center gap-1 text-foreground"><Calendar className="h-3 w-3 text-primary" />{String(cotacao.dataInicio || '')}</div><div className="flex items-center gap-1 text-muted-foreground"><Calendar className="h-3 w-3" />{String(cotacao.dataFim || '')}</div></div></div>
-                            <div className="w-[12%] px-2 flex flex-col gap-1 items-center">
-                              {(cotacao.statusReal === "finalizada" || cotacao.statusReal === "concluida") ? (
-                                getStatusBadge(cotacao.statusReal)
-                              ) : (
-                                <Select value={cotacao.statusReal} onValueChange={(value) => handleStatusChange(cotacao.id, value)}>
-                                  <SelectTrigger className={cn("h-7 w-[100px] text-xs font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.statusReal)?.className || "border-warning/30 bg-warning/10 text-warning")}>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {statusOptions.map(opt => (
-                                      <SelectItem key={opt.value} value={opt.value}>
-                                        <span className={cn("text-xs font-medium", opt.className.split(' ').find(c => c.startsWith('text-')))}>{opt.label}</span>
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                              {cotacao.statusReal === 'planejada' && cotacao.dataPlanejada && <Badge variant="outline" className="bg-primary/10 text-primary text-xs"><Clock className="h-3 w-3 mr-1" />{new Date(cotacao.dataPlanejada).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</Badge>}
-                            </div>
-                            <div className="w-[15%] px-2"><div className="space-y-1"><div className="font-bold text-green-600 dark:text-green-400 text-sm">{String(cotacao.melhorPreco || 'R$ 0,00')}</div><div className="text-xs text-muted-foreground truncate max-w-[100px]">{String(cotacao.melhorFornecedor || '-')}</div>{(() => { const { percentual } = calcularEconomiaCotacao(cotacao); return percentual > 0 ? <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-md text-xs font-medium"><DollarSign className="h-3 w-3" />-{percentual.toFixed(1)}%</div> : <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted dark:bg-gray-700 text-muted-foreground rounded-md text-xs"><DollarSign className="h-3 w-3" />0%</div>; })()}</div></div>
-                            <div className="hidden sm:block w-[10%] px-2"><div className="flex justify-center"><Badge variant="outline" className="bg-primary/10 dark:bg-primary/20 border-primary/20 dark:border-primary/30 text-primary dark:text-primary font-medium"><Building2 className="h-3 w-3 mr-1" />{cotacao.fornecedores}</Badge></div></div>
-                            <div className="w-[10%] px-2 flex justify-end"><DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 dark:text-gray-500 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-40">{(cotacao.status === "concluida" || cotacao.status === "finalizada") ? (<DropdownMenuItem onClick={() => handleViewQuote(cotacao)}><Eye className="h-4 w-4 mr-2" />Resumo</DropdownMenuItem>) : (<><DropdownMenuItem onClick={() => handleGerenciarQuote(cotacao)}><ClipboardList className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem><DropdownMenuItem onClick={() => handleDeleteQuote(cotacao)} className="text-destructive"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem></>)}</DropdownMenuContent></DropdownMenu></div>
+              {/* Mobile Cards View */}
+              <div className="md:hidden space-y-3 p-2">
+                {paginatedData.items.map((cotacao, index) => {
+                  const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
+                  const { percentual } = calcularEconomiaCotacao(cotacao);
+                  return (
+                    <div 
+                      key={cotacao.id} 
+                      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <ClipboardList className="h-5 w-5 text-primary" />
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </tbody>
-              </Table>
-              <div className="border-t border-teal-100/80 dark:border-gray-700 bg-gradient-to-r from-teal-50/30 to-cyan-50/30 dark:from-gray-800 dark:to-gray-800 px-6 py-4"><DataPagination currentPage={paginatedData.pagination.currentPage} totalPages={paginatedData.pagination.totalPages} itemsPerPage={paginatedData.pagination.itemsPerPage} totalItems={paginatedData.pagination.totalItems} onPageChange={paginatedData.pagination.goToPage} onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} startIndex={paginatedData.pagination.startIndex} endIndex={paginatedData.pagination.endIndex} /></div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                              <CapitalizedText>{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText>
+                            </p>
+                            <p className="text-xs text-muted-foreground font-mono">#{cotacaoNumero.toString().padStart(4, '0')}</p>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {(cotacao.status === "concluida" || cotacao.status === "finalizada") ? (
+                              <DropdownMenuItem onClick={() => handleViewQuote(cotacao)}>
+                                <Eye className="h-4 w-4 mr-2" /> Resumo
+                              </DropdownMenuItem>
+                            ) : (
+                              <>
+                                <DropdownMenuItem onClick={() => handleGerenciarQuote(cotacao)}>
+                                  <ClipboardList className="h-4 w-4 mr-2" /> Gerenciar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteQuote(cotacao)} className="text-destructive">
+                                  <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 mb-3">
+                        {getStatusBadge(cotacao.statusReal)}
+                        <Badge variant="outline" className="bg-primary/10 text-primary text-xs">
+                          <Building2 className="h-3 w-3 mr-1" />{cotacao.fornecedores}
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3 text-xs mb-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3.5 w-3.5 text-primary" />
+                          <span className="text-gray-500 dark:text-gray-400">Início:</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{String(cotacao.dataInicio || '-')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                          <span className="text-gray-500 dark:text-gray-400">Fim:</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{String(cotacao.dataFim || '-')}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-3 border-t border-gray-100 dark:border-gray-700/30 flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Melhor Preço</p>
+                          <p className="font-bold text-green-600 dark:text-green-400 text-lg">{String(cotacao.melhorPreco || 'R$ 0,00')}</p>
+                          <p className="text-xs text-muted-foreground truncate max-w-[120px]">{String(cotacao.melhorFornecedor || '-')}</p>
+                        </div>
+                        {percentual > 0 ? (
+                          <Badge variant="secondary" className="text-success">-{percentual.toFixed(1)}%</Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-muted-foreground">0%</Badge>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table>
+                  <thead>
+                    <tr>
+                      <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
+                        <div className="flex items-center bg-card/95 border border-border rounded-lg shadow-sm px-4 py-3">
+                          <div className="w-[18%] flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                              <ClipboardList className="h-4 w-4" />
+                            </div>
+                            <span className="uppercase text-[11px] font-semibold text-foreground">Cotação</span>
+                          </div>
+                          <div className="w-[20%] pl-2 flex items-center gap-1.5">
+                            <Package className="h-3.5 w-3.5 text-primary" />
+                            <span className="uppercase text-[11px] font-semibold text-foreground">Produto</span>
+                          </div>
+                          <div className="hidden lg:flex w-[15%] pl-2 items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5 text-primary" />
+                            <span className="uppercase text-[11px] font-semibold text-foreground">Período</span>
+                          </div>
+                          <div className="w-[12%] pl-2 flex justify-center items-center gap-1.5">
+                            <CircleDot className="h-3.5 w-3.5 text-primary" />
+                            <span className="uppercase text-[11px] font-semibold text-foreground">Status</span>
+                          </div>
+                          <div className="w-[15%] pl-2 flex items-center gap-1.5">
+                            <DollarSign className="h-3.5 w-3.5 text-primary" />
+                            <span className="uppercase text-[11px] font-semibold text-foreground">Melhor Preço</span>
+                          </div>
+                          <div className="hidden lg:flex w-[10%] pl-2 justify-center items-center gap-1.5">
+                            <Building2 className="h-3.5 w-3.5 text-primary" />
+                            <span className="uppercase text-[11px] font-semibold text-foreground">Fornec.</span>
+                          </div>
+                          <div className="w-[10%] pl-4 flex justify-end items-center gap-1.5">
+                            <MoreVertical className="h-3.5 w-3.5 text-primary" />
+                            <span className="uppercase text-[11px] font-semibold text-foreground">Ações</span>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedData.items.map((cotacao, index) => {
+                      const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
+                      const { percentual } = calcularEconomiaCotacao(cotacao);
+                      return (
+                        <TableRow key={cotacao.id} className="group border-none">
+                          <TableCell colSpan={7} className="px-1 py-2">
+                            <div className="flex items-center px-2 py-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:border-primary/30 transition-all">
+                              <div className="w-[18%] flex items-center gap-3 px-2">
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                                  <ClipboardList className="h-4 w-4 text-primary" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-semibold text-sm text-foreground">#{cotacaoNumero.toString().padStart(4, '0')}</div>
+                                </div>
+                              </div>
+                              <div className="w-[20%] px-2">
+                                <div className="max-w-[150px]" title={cotacao.produto}>
+                                  <CapitalizedText className="font-medium text-sm text-foreground truncate block">
+                                    {typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}
+                                  </CapitalizedText>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded-md">
+                                      <Package className="h-3 w-3" />{String(cotacao.quantidade || '')}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="hidden lg:block w-[15%] px-2">
+                                <div className="text-xs space-y-1">
+                                  <div className="flex items-center gap-1 text-foreground">
+                                    <Calendar className="h-3 w-3 text-primary" />{String(cotacao.dataInicio || '')}
+                                  </div>
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Calendar className="h-3 w-3" />{String(cotacao.dataFim || '')}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="w-[12%] px-2 flex flex-col gap-1 items-center">
+                                {(cotacao.statusReal === "finalizada" || cotacao.statusReal === "concluida") ? (
+                                  getStatusBadge(cotacao.statusReal)
+                                ) : (
+                                  <Select value={cotacao.statusReal} onValueChange={(value) => handleStatusChange(cotacao.id, value)}>
+                                    <SelectTrigger className={cn("h-7 w-[100px] text-xs font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.statusReal)?.className || "border-warning/30 bg-warning/10 text-warning")}>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {statusOptions.map(opt => (
+                                        <SelectItem key={opt.value} value={opt.value}>
+                                          <span className={cn("text-xs font-medium", opt.className.split(' ').find(c => c.startsWith('text-')))}>{opt.label}</span>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                )}
+                                {cotacao.statusReal === 'planejada' && cotacao.dataPlanejada && (
+                                  <Badge variant="outline" className="bg-primary/10 text-primary text-xs">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    {new Date(cotacao.dataPlanejada).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="w-[15%] px-2">
+                                <div className="space-y-1">
+                                  <div className="font-bold text-green-600 dark:text-green-400 text-sm">{String(cotacao.melhorPreco || 'R$ 0,00')}</div>
+                                  <div className="text-xs text-muted-foreground truncate max-w-[100px]">{String(cotacao.melhorFornecedor || '-')}</div>
+                                  {percentual > 0 ? (
+                                    <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-md text-xs font-medium">
+                                      <DollarSign className="h-3 w-3" />-{percentual.toFixed(1)}%
+                                    </div>
+                                  ) : (
+                                    <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted dark:bg-gray-700 text-muted-foreground rounded-md text-xs">
+                                      <DollarSign className="h-3 w-3" />0%
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="hidden lg:block w-[10%] px-2">
+                                <div className="flex justify-center">
+                                  <Badge variant="outline" className="bg-primary/10 dark:bg-primary/20 border-primary/20 dark:border-primary/30 text-primary font-medium">
+                                    <Building2 className="h-3 w-3 mr-1" />{cotacao.fornecedores}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="w-[10%] px-2 flex justify-end">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 dark:text-gray-500 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-40">
+                                    {(cotacao.status === "concluida" || cotacao.status === "finalizada") ? (
+                                      <DropdownMenuItem onClick={() => handleViewQuote(cotacao)}>
+                                        <Eye className="h-4 w-4 mr-2" />Resumo
+                                      </DropdownMenuItem>
+                                    ) : (
+                                      <>
+                                        <DropdownMenuItem onClick={() => handleGerenciarQuote(cotacao)}>
+                                          <ClipboardList className="h-4 w-4 mr-2" />Gerenciar
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleDeleteQuote(cotacao)} className="text-destructive">
+                                          <Trash2 className="h-4 w-4 mr-2" />Excluir
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </div>
+              
+              {/* Pagination */}
+              <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <span className="text-xs text-muted-foreground order-2 sm:order-1">
+                    {paginatedData.pagination.startIndex + 1}-{paginatedData.pagination.endIndex} de {paginatedData.pagination.totalItems}
+                  </span>
+                  <div className="order-1 sm:order-2">
+                    <DataPagination 
+                      currentPage={paginatedData.pagination.currentPage} 
+                      totalPages={paginatedData.pagination.totalPages} 
+                      itemsPerPage={paginatedData.pagination.itemsPerPage} 
+                      totalItems={paginatedData.pagination.totalItems} 
+                      onPageChange={paginatedData.pagination.goToPage} 
+                      onItemsPerPageChange={paginatedData.pagination.setItemsPerPage} 
+                      startIndex={paginatedData.pagination.startIndex} 
+                      endIndex={paginatedData.pagination.endIndex} 
+                    />
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
