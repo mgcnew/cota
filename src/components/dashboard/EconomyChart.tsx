@@ -1,4 +1,5 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
     BarChart,
     Bar,
@@ -21,14 +22,7 @@ interface EconomyChartProps {
 }
 
 export function EconomyChart({ data, period, onPeriodChange, isLoading }: EconomyChartProps) {
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 640);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
+    const isMobile = useIsMobile();
 
     const stats = useMemo(() => {
         if (!data || data.length === 0) {
