@@ -1,15 +1,14 @@
 import { useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
-    ComposedChart,
-    Bar,
+    LineChart,
+    Line,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
-    ReferenceLine,
-    Area
+    ReferenceLine
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -116,106 +115,65 @@ export function EvolutionChart({ data, period, onPeriodChange, isLoading }: Evol
                     )}
                 </div>
             </CardHeader>
-            <CardContent className="p-2 sm:p-4">
+            <CardContent className="p-1 sm:p-2 pt-2 sm:pt-3">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-[200px] sm:h-[320px]">
                         <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-purple-500" />
                     </div>
                 ) : (
-                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 320}>
-                        <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
-                            <defs>
-                                <linearGradient id="colorCotacoes" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.4} />
-                                    <stop offset="95%" stopColor="#7C3AED" stopOpacity={0.05} />
-                                </linearGradient>
-                                <linearGradient id="colorFornecedores" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#22C55E" stopOpacity={0.35} />
-                                    <stop offset="95%" stopColor="#22C55E" stopOpacity={0.05} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
+                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 280}>
+                        <LineChart data={data} margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/30" opacity={0.4} vertical={false} />
                             <XAxis
                                 dataKey={period === '7d' ? 'day' : 'month'}
-                                stroke="#6b7280"
-                                className="dark:stroke-gray-500"
-                                style={{ fontSize: '12px', fontWeight: 500 }}
-                                tickLine={false}
-                                axisLine={{ stroke: '#e5e7eb', className: 'dark:stroke-gray-700/30' }}
-                            />
-                            <YAxis
-                                yAxisId="left"
-                                stroke="#6b7280"
-                                className="dark:stroke-gray-500"
-                                style={{ fontSize: '12px', fontWeight: 500 }}
+                                stroke="#9ca3af"
+                                fontSize={11}
                                 tickLine={false}
                                 axisLine={false}
                             />
                             <YAxis
-                                yAxisId="right"
-                                orientation="right"
-                                stroke="#22C55E"
-                                className="dark:stroke-green-400"
-                                style={{ fontSize: '12px', fontWeight: 500 }}
+                                stroke="#9ca3af"
+                                fontSize={11}
                                 tickLine={false}
                                 axisLine={false}
+                                width={35}
                             />
                             <ReferenceLine
-                                yAxisId="left"
                                 y={stats.avgCotacoes}
                                 stroke="#7C3AED"
                                 strokeDasharray="4 4"
-                                strokeWidth={1.5}
-                                strokeOpacity={0.6}
-                            />
-                            <ReferenceLine
-                                yAxisId="right"
-                                y={stats.avgFornecedores}
-                                stroke="#22C55E"
-                                strokeDasharray="4 4"
-                                strokeWidth={1.5}
-                                strokeOpacity={0.6}
+                                strokeWidth={1}
+                                strokeOpacity={0.5}
                             />
                             <Tooltip
-                                content={({ active, payload, label }) => {
-                                    if (active && payload && payload.length) {
-                                        return (
-                                            <div className="bg-white dark:bg-[#1C1F26] p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700/30 backdrop-blur-sm">
-                                                <p className="font-semibold text-gray-900 dark:text-white mb-2.5 text-sm">{label}</p>
-                                                <div className="space-y-2">
-                                                    {payload.map((entry: any, index: number) => (
-                                                        <div key={index} className="flex items-center gap-2">
-                                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                                                            <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">{entry.name}:</span>
-                                                            <span className="font-semibold text-gray-900 dark:text-white">{entry.value}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        );
-                                    }
-                                    return null;
+                                contentStyle={{
+                                    backgroundColor: 'rgba(255,255,255,0.95)',
+                                    border: '1px solid #e5e7eb',
+                                    borderRadius: '8px',
+                                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                                    fontSize: '12px'
                                 }}
+                                labelStyle={{ fontWeight: 600, marginBottom: '4px' }}
                             />
-                            <Area
-                                yAxisId="left"
+                            <Line
                                 type="monotone"
                                 dataKey="cotacoes"
                                 name="Cotações"
                                 stroke="#7C3AED"
-                                strokeWidth={3}
-                                fill="url(#colorCotacoes)"
-                                activeDot={{ r: 6, strokeWidth: 0, fill: '#7C3AED' }}
+                                strokeWidth={2.5}
+                                dot={{ r: 4, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 6, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
                             />
-                            <Bar
-                                yAxisId="right"
+                            <Line
+                                type="monotone"
                                 dataKey="fornecedores"
                                 name="Fornecedores"
-                                fill="url(#colorFornecedores)"
-                                radius={[4, 4, 0, 0]}
-                                barSize={20}
+                                stroke="#22C55E"
+                                strokeWidth={2.5}
+                                dot={{ r: 4, fill: '#22C55E', strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 6, fill: '#22C55E', strokeWidth: 2, stroke: '#fff' }}
                             />
-                        </ComposedChart>
+                        </LineChart>
                     </ResponsiveContainer>
                 )}
             </CardContent>

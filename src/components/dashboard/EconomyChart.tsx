@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
-    BarChart,
-    Bar,
+    AreaChart,
+    Area,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
-    ResponsiveContainer,
-    Cell
+    ResponsiveContainer
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -98,59 +97,58 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
                     )}
                 </div>
             </CardHeader>
-            <CardContent className="p-2 sm:p-4">
+            <CardContent className="p-1 sm:p-2 pt-2 sm:pt-3">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-[200px] sm:h-[320px]">
                         <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-green-500" />
                     </div>
                 ) : (
-                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 320}>
-                        <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/20" opacity={0.3} vertical={false} />
+                    <ResponsiveContainer width="100%" height={isMobile ? 200 : 280}>
+                        <AreaChart data={data} margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
+                            <defs>
+                                <linearGradient id="economyGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                                    <stop offset="100%" stopColor="#10b981" stopOpacity={0.05} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/30" opacity={0.4} vertical={false} />
                             <XAxis
                                 dataKey={period === '7d' ? 'day' : 'month'}
-                                stroke="#6b7280"
-                                className="dark:stroke-gray-500"
-                                style={{ fontSize: '12px', fontWeight: 500 }}
-                                tickLine={false}
-                                axisLine={{ stroke: '#e5e7eb', className: 'dark:stroke-gray-700/30' }}
-                            />
-                            <YAxis
-                                stroke="#6b7280"
-                                className="dark:stroke-gray-500"
-                                style={{ fontSize: '12px', fontWeight: 500 }}
+                                stroke="#9ca3af"
+                                fontSize={11}
                                 tickLine={false}
                                 axisLine={false}
-                                tickFormatter={(value) => `R$ ${value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value}`}
+                            />
+                            <YAxis
+                                stroke="#9ca3af"
+                                fontSize={10}
+                                tickLine={false}
+                                axisLine={false}
+                                width={85}
+                                tickFormatter={(value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                             />
                             <Tooltip
-                                cursor={{ fill: 'rgba(0,0,0,0.05)' }}
-                                content={({ active, payload, label }) => {
-                                    if (active && payload && payload.length) {
-                                        return (
-                                            <div className="bg-white dark:bg-[#1C1F26] p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700/30 backdrop-blur-sm">
-                                                <p className="font-semibold text-gray-900 dark:text-white mb-2.5 text-sm">{label}</p>
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-2 h-2 rounded-full bg-green-500" />
-                                                        <span className="text-sm text-gray-600 dark:text-gray-400">Economia:</span>
-                                                        <span className="font-semibold text-gray-900 dark:text-white">
-                                                            {formatCurrency(payload[0].value as number)}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    }
-                                    return null;
+                                contentStyle={{
+                                    backgroundColor: 'rgba(255,255,255,0.95)',
+                                    border: '1px solid #e5e7eb',
+                                    borderRadius: '8px',
+                                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                                    fontSize: '12px'
                                 }}
+                                labelStyle={{ fontWeight: 600, marginBottom: '4px' }}
+                                formatter={(value: number) => [formatCurrency(value), 'Economia']}
                             />
-                            <Bar dataKey="economia" radius={[4, 4, 0, 0]}>
-                                {data.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill || '#10b981'} />
-                                ))}
-                            </Bar>
-                        </BarChart>
+                            <Area
+                                type="monotone"
+                                dataKey="economia"
+                                name="Economia"
+                                stroke="#10b981"
+                                strokeWidth={2.5}
+                                fill="url(#economyGradient)"
+                                dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                            />
+                        </AreaChart>
                     </ResponsiveContainer>
                 )}
             </CardContent>
