@@ -70,62 +70,65 @@ export function TableActionGroup({
   const hasDropdownItems = dropdownItems.filter(item => !item.hidden).length > 0;
 
   return (
-    <div className={cn("flex items-center justify-end gap-1.5", className)}>
-      {/* View Button */}
-      {showView && onView && (
-        <ExpandableActionButton
-          icon={<Eye className="h-3.5 w-3.5" />}
-          label={viewLabel}
-          onClick={onView}
-          variant="view"
-        />
-      )}
-
-      {/* Edit Button */}
-      {showEdit && onEdit && (
-        <ExpandableActionButton
-          icon={<Edit className="h-3.5 w-3.5" />}
-          label={editLabel}
-          onClick={onEdit}
-          variant="edit"
-        />
-      )}
-
-      {/* Finalize Button */}
-      {showFinalize && onFinalize && (
-        <ExpandableActionButton
-          icon={<CheckCircle className="h-3.5 w-3.5" />}
-          label={finalizeLabel}
-          onClick={onFinalize}
-          variant="success"
-        />
-      )}
-
-      {/* Delete Button */}
-      {showDelete && onDelete && (
-        <ExpandableActionButton
-          icon={<Trash2 className="h-3.5 w-3.5" />}
-          label={deleteLabel}
-          onClick={onDelete}
-          variant="delete"
-        />
-      )}
-
-      {/* Additional Actions */}
-      {additionalActions.map((action, index) => (
-        !action.hidden && (
+    <div className={cn("group/actions flex items-center justify-end gap-1.5", className)}>
+      {/* Action Buttons - Hidden by default, visible on row hover */}
+      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {/* View Button */}
+        {showView && onView && (
           <ExpandableActionButton
-            key={index}
-            icon={action.icon}
-            label={action.label}
-            onClick={action.onClick}
-            variant={action.variant || "default"}
-            disabled={action.disabled}
+            icon={<Eye className="h-3.5 w-3.5" />}
+            label={viewLabel}
+            onClick={onView}
+            variant="view"
           />
-        )
-      ))}
+        )}
 
-      {/* Dropdown Menu for More Actions */}
+        {/* Edit Button */}
+        {showEdit && onEdit && (
+          <ExpandableActionButton
+            icon={<Edit className="h-3.5 w-3.5" />}
+            label={editLabel}
+            onClick={onEdit}
+            variant="edit"
+          />
+        )}
+
+        {/* Finalize Button */}
+        {showFinalize && onFinalize && (
+          <ExpandableActionButton
+            icon={<CheckCircle className="h-3.5 w-3.5" />}
+            label={finalizeLabel}
+            onClick={onFinalize}
+            variant="success"
+          />
+        )}
+
+        {/* Delete Button */}
+        {showDelete && onDelete && (
+          <ExpandableActionButton
+            icon={<Trash2 className="h-3.5 w-3.5" />}
+            label={deleteLabel}
+            onClick={onDelete}
+            variant="delete"
+          />
+        )}
+
+        {/* Additional Actions */}
+        {additionalActions.map((action, index) => (
+          !action.hidden && (
+            <ExpandableActionButton
+              key={index}
+              icon={action.icon}
+              label={action.label}
+              onClick={action.onClick}
+              variant={action.variant || "default"}
+              disabled={action.disabled}
+            />
+          )
+        ))}
+      </div>
+
+      {/* Dropdown Menu - Always visible */}
       {hasDropdownItems && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
