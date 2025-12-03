@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,12 +59,19 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
     { value: "sc", label: "Saco (sc)" },
   ];
 
-  const products = (quote as any)?._raw?.quote_items || [];
-  const fornecedores = quote.fornecedoresParticipantes || [];
+  // Memoizar dados base
+  const products = useMemo(() => (quote as any)?._raw?.quote_items || [], [quote]);
+  const fornecedores = useMemo(() => quote.fornecedoresParticipantes || [], [quote.fornecedoresParticipantes]);
   
-  // Filtrar produtos e fornecedores que ainda não estão na cotação
-  const productsNotInQuote = availableProducts.filter(p => !products.some((item: any) => item.product_id === p.id));
-  const suppliersNotInQuote = availableSuppliers.filter(s => !fornecedores.some(f => f.id === s.id));
+  // Memoizar filtros de produtos e fornecedores
+  const productsNotInQuote = useMemo(() => 
+    availableProducts.filter(p => !products.some((item: any) => item.product_id === p.id)),
+    [availableProducts, products]
+  );
+  const suppliersNotInQuote = useMemo(() => 
+    availableSuppliers.filter(s => !fornecedores.some(f => f.id === s.id)),
+    [availableSuppliers, fornecedores]
+  );
 
   // Inicializar seleções com melhor preço
   useEffect(() => {
@@ -108,36 +115,49 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
     }
   }, [editingProductId]);
 
-  const getSupplierProductValue = (supplierId: string, productId: string): number => {
+  // Memoizar supplierItems para evitar recálculos
+  const supplierItems = useMemo(() => {
     const raw = quote as any;
-    const supplierItems = raw._supplierItems || raw._raw?.quote_supplier_items || [];
+    return raw._supplierItems || raw._raw?.quote_supplier_items || [];
+  }, [quote]);
+
+  const getSupplierProductValue = useCallback((supplierId: string, productId: string): number => {
     const item = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === productId);
     return item?.valor_oferecido || 0;
-  };
+  }, [supplierItems]);
 
-  const getCurrentProductValue = (supplierId: string, productId: string): number => {
+  const getCurrentProductValue = useCallback((supplierId: string, productId: string): number => {
     if (selectedSupplier === supplierId && editedValues[productId] !== undefined) {
       return editedValues[productId];
     }
     return getSupplierProductValue(supplierId, productId);
-  };
+  }, [selectedSupplier, editedValues, getSupplierProductValue]);
 
-  const getBestPriceInfoForProduct = (productId: string): { bestPrice: number; bestSupplierId: string | null } => {
-    let bestPrice = Infinity;
-    let bestSupplierId: string | null = null;
-    fornecedores.forEach(f => {
-      const value = getSupplierProductValue(f.id, productId);
-      if (value > 0 && value < bestPrice) { bestPrice = value; bestSupplierId = f.id; }
+  // Memoizar mapa de melhores preços por produto
+  const bestPricesMap = useMemo(() => {
+    const map = new Map<string, { bestPrice: number; bestSupplierId: string | null }>();
+    products.forEach((product: any) => {
+      let bestPrice = Infinity;
+      let bestSupplierId: string | null = null;
+      fornecedores.forEach(f => {
+        const value = getSupplierProductValue(f.id, product.product_id);
+        if (value > 0 && value < bestPrice) { bestPrice = value; bestSupplierId = f.id; }
+      });
+      map.set(product.product_id, { bestPrice: bestPrice === Infinity ? 0 : bestPrice, bestSupplierId });
     });
-    return { bestPrice: bestPrice === Infinity ? 0 : bestPrice, bestSupplierId };
-  };
+    return map;
+  }, [products, fornecedores, getSupplierProductValue]);
 
-  const handleStartEdit = (productId: string, currentValue: number) => {
+  const getBestPriceInfoForProduct = useCallback((productId: string): { bestPrice: number; bestSupplierId: string | null } => {
+    return bestPricesMap.get(productId) || { bestPrice: 0, bestSupplierId: null };
+  }, [bestPricesMap]);
+
+  const handleStartEdit = useCallback((productId: string, currentValue: number) => {
     setEditingProductId(productId);
     setEditedValues(prev => ({ ...prev, [productId]: currentValue }));
-  };
+  }, []);
 
-  const handleSaveEdit = async (productId: string) => {
+  const handleSaveEdit = useCallback(async (productId: string) => {
     if (selectedSupplier && editedValues[productId] !== undefined) {
       try {
         await onUpdateSupplierProductValue(quote.id, selectedSupplier, productId, editedValues[productId]);
@@ -148,21 +168,31 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
         toast({ title: "❌ Erro ao salvar", variant: "destructive" });
       }
     }
-  };
+  }, [selectedSupplier, editedValues, quote.id, onUpdateSupplierProductValue, onRefresh]);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditingProductId(null);
     setEditedValues({});
-  };
+  }, []);
 
-  const calcularTotalFornecedor = (supplierId: string) => {
-    return products.reduce((total: number, product: any) => total + getSupplierProductValue(supplierId, product.product_id), 0);
-  };
+  // Memoizar totais por fornecedor
+  const supplierTotals = useMemo(() => {
+    const totals = new Map<string, number>();
+    fornecedores.forEach(f => {
+      const total = products.reduce((sum: number, product: any) => sum + getSupplierProductValue(f.id, product.product_id), 0);
+      totals.set(f.id, total);
+    });
+    return totals;
+  }, [fornecedores, products, getSupplierProductValue]);
+
+  const calcularTotalFornecedor = useCallback((supplierId: string) => {
+    return supplierTotals.get(supplierId) || 0;
+  }, [supplierTotals]);
 
   const safeStr = (val: any) => (typeof val === 'string' ? val : String(val || ''));
 
-  // Calcular total da seleção atual
-  const calcularTotalSelecao = () => {
+  // Memoizar total da seleção atual
+  const totalSelecao = useMemo(() => {
     return products.reduce((total: number, product: any) => {
       const supplierId = productSelections[product.product_id];
       if (supplierId) {
@@ -170,18 +200,18 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
       }
       return total;
     }, 0);
-  };
+  }, [products, productSelections, getSupplierProductValue]);
 
-  // Calcular melhor total possível
-  const calcularMelhorTotal = () => {
+  // Memoizar melhor total possível
+  const melhorTotal = useMemo(() => {
     return products.reduce((total: number, product: any) => {
       const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
       return total + bestPrice;
     }, 0);
-  };
+  }, [products, getBestPriceInfoForProduct]);
 
-  // Agrupar produtos por fornecedor selecionado
-  const getSupplierGroups = () => {
+  // Memoizar grupos de fornecedores
+  const supplierGroups = useMemo(() => {
     const groups = new Map<string, { supplierId: string; supplierName: string; products: any[] }>();
     
     Object.entries(productSelections).forEach(([productId, supplierId]) => {
@@ -200,7 +230,7 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
     });
     
     return Array.from(groups.values());
-  };
+  }, [productSelections, products, fornecedores, getSupplierProductValue]);
 
   // Converter em pedido(s)
   const handleConvertToOrder = () => {
@@ -209,14 +239,13 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
       return;
     }
 
-    const groups = getSupplierGroups();
-    if (groups.length === 0) {
+    if (supplierGroups.length === 0) {
       toast({ title: "Selecione fornecedores para os produtos", variant: "destructive" });
       return;
     }
 
     if (onConvertToOrder) {
-      const orders = groups.map(group => ({
+      const orders = supplierGroups.map(group => ({
         supplierId: group.supplierId,
         productIds: group.products.map((p: any) => p.product_id),
         deliveryDate,
@@ -228,13 +257,50 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
     }
   };
 
-  const stats = {
-    totalProdutos: products.length,
-    totalFornecedores: fornecedores.length,
-    fornecedoresRespondidos: fornecedores.filter(f => f.status === "respondido").length,
-    melhorValor: Math.min(...fornecedores.filter(f => f.valorOferecido > 0).map(f => f.valorOferecido)) || 0,
-    melhorFornecedor: fornecedores.find(f => f.valorOferecido === Math.min(...fornecedores.filter(x => x.valorOferecido > 0).map(x => x.valorOferecido)))?.nome || '-'
-  };
+  // Memoizar stats
+  const stats = useMemo(() => {
+    const fornecedoresComValor = fornecedores.filter(f => f.valorOferecido > 0);
+    const valores = fornecedoresComValor.map(f => f.valorOferecido);
+    const melhorValor = valores.length > 0 ? Math.min(...valores) : 0;
+    
+    return {
+      totalProdutos: products.length,
+      totalFornecedores: fornecedores.length,
+      fornecedoresRespondidos: fornecedores.filter(f => f.status === "respondido").length,
+      melhorValor,
+      melhorFornecedor: fornecedoresComValor.find(f => f.valorOferecido === melhorValor)?.nome || '-'
+    };
+  }, [products.length, fornecedores]);
+
+  // Memoizar dados de preços por produto para a tab de resumo
+  const productPricesData = useMemo(() => {
+    return products.map((product: any) => {
+      const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
+      const bestSupplierName = fornecedores.find(f => f.id === bestSupplierId)?.nome || "-";
+      
+      const allPrices = fornecedores
+        .map(f => ({
+          nome: f.nome,
+          value: getSupplierProductValue(f.id, product.product_id)
+        }))
+        .filter(p => p.value > 0)
+        .sort((a, b) => a.value - b.value);
+      
+      const worstPrice = allPrices.length > 0 ? allPrices[allPrices.length - 1].value : 0;
+      const savings = worstPrice > 0 && bestPrice > 0 ? worstPrice - bestPrice : 0;
+      
+      return {
+        productId: product.product_id,
+        productName: product.product_name,
+        quantidade: product.quantidade,
+        unidade: product.unidade,
+        bestPrice,
+        bestSupplierName,
+        allPrices,
+        savings
+      };
+    });
+  }, [products, fornecedores, getBestPriceInfoForProduct, getSupplierProductValue]);
 
 
 
@@ -335,59 +401,44 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                   </h3>
                   <Card className="overflow-hidden">
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {products.map((product: any) => {
-                        const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
-                        const bestSupplierName = fornecedores.find(f => f.id === bestSupplierId)?.nome || "-";
-
-                        const allPrices = fornecedores
-                          .map(f => ({
-                            nome: f.nome,
-                            value: getSupplierProductValue(f.id, product.product_id)
-                          }))
-                          .filter(p => p.value > 0)
-                          .sort((a, b) => a.value - b.value);
-
-                        const worstPrice = allPrices.length > 0 ? allPrices[allPrices.length - 1].value : 0;
-                        const savings = worstPrice > 0 && bestPrice > 0 ? worstPrice - bestPrice : 0;
-
-                        return (
-                          <div key={product.product_id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-gray-900 dark:text-white truncate">
-                                  {safeStr(product.product_name)}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                  {safeStr(product.quantidade)} {safeStr(product.unidade)}
-                                </p>
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                {bestPrice > 0 ? (
-                                  <>
-                                    <div className="flex items-center gap-2 justify-end">
-                                      <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                                      <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                                        R$ {bestPrice.toFixed(2)}
-                                      </span>
-                                    </div>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                                      {safeStr(bestSupplierName)}
-                                    </p>
-                                    {savings > 0 && (
-                                      <Badge className="mt-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-[10px]">
-                                        <TrendingDown className="h-2.5 w-2.5 mr-0.5" />
-                                        Economia: R$ {savings.toFixed(2)}
-                                      </Badge>
-                                    )}
-                                  </>
-                                ) : (
-                                  <Badge variant="outline" className="text-gray-400">Sem preço</Badge>
+                      {productPricesData.map((item) => (
+                        <div key={item.productId} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900 dark:text-white truncate">
+                                {safeStr(item.productName)}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                {safeStr(item.quantidade)} {safeStr(item.unidade)}
+                              </p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              {item.bestPrice > 0 ? (
+                                <>
+                                  <div className="flex items-center gap-2 justify-end">
+                                    <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                                    <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                                      R$ {item.bestPrice.toFixed(2)}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                                    {safeStr(item.bestSupplierName)}
+                                  </p>
+                                  {item.savings > 0 && (
+                                    <Badge className="mt-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-[10px]">
+                                      <TrendingDown className="h-2.5 w-2.5 mr-0.5" />
+                                      Economia: R$ {item.savings.toFixed(2)}
+                                    </Badge>
+                                  )}
+                                </>
+                              ) : (
+                                <Badge variant="outline" className="text-gray-400">Sem preço</Badge>
                                 )}
                               </div>
                             </div>
-                            {allPrices.length > 1 && (
+                            {item.allPrices.length > 1 && (
                               <div className="mt-2 flex flex-wrap gap-1.5">
-                                {allPrices.map((price, idx) => (
+                                {item.allPrices.map((price, idx) => (
                                   <Badge
                                     key={idx}
                                     variant={idx === 0 ? "default" : "outline"}
@@ -404,8 +455,7 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                               </div>
                             )}
                           </div>
-                        );
-                      })}
+                        ))}
                     </div>
                   </Card>
                 </div>
@@ -848,20 +898,20 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <Card className="p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                     <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" /><span className="text-xs text-blue-700 dark:text-blue-300">Total Selecionado</span></div>
-                    <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">R$ {calcularTotalSelecao().toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">R$ {totalSelecao.toFixed(2)}</p>
                   </Card>
                   <Card className="p-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
                     <div className="flex items-center gap-2 mb-1"><Award className="h-4 w-4 text-green-600 dark:text-green-400" /><span className="text-xs text-green-700 dark:text-green-300">Melhor Total Possível</span></div>
-                    <p className="text-2xl font-bold text-green-800 dark:text-green-200">R$ {calcularMelhorTotal().toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-800 dark:text-green-200">R$ {melhorTotal.toFixed(2)}</p>
                   </Card>
                 </div>
 
-                {calcularTotalSelecao() > calcularMelhorTotal() && (
+                {totalSelecao > melhorTotal && (
                   <Card className="p-3 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                       <span className="text-sm text-amber-700 dark:text-amber-300">
-                        Você pode economizar R$ {(calcularTotalSelecao() - calcularMelhorTotal()).toFixed(2)} selecionando os melhores preços
+                        Você pode economizar R$ {(totalSelecao - melhorTotal).toFixed(2)} selecionando os melhores preços
                       </span>
                     </div>
                   </Card>
@@ -935,16 +985,16 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 </Card>
 
                 {/* Pedidos que serão gerados */}
-                {getSupplierGroups().length > 0 && (
+                {supplierGroups.length > 0 && (
                   <Card className="border-gray-200 dark:border-gray-700">
                     <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                       <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                         <ShoppingCart className="h-4 w-4" />
-                        {getSupplierGroups().length === 1 ? "Pedido que será gerado" : `${getSupplierGroups().length} pedidos que serão gerados`}
+                        {supplierGroups.length === 1 ? "Pedido que será gerado" : `${supplierGroups.length} pedidos que serão gerados`}
                       </h3>
                     </div>
                     <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {getSupplierGroups().map((group, index) => (
+                      {supplierGroups.map((group, index) => (
                         <div key={group.supplierId} className="p-4">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                             <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -979,7 +1029,7 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 {/* Botão de converter */}
                 <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white h-12 text-base">
                   <ShoppingCart className="h-5 w-5 mr-2" />
-                  {getSupplierGroups().length > 1 ? `Gerar ${getSupplierGroups().length} Pedidos` : "Converter em Pedido"}
+                  {supplierGroups.length > 1 ? `Gerar ${supplierGroups.length} Pedidos` : "Converter em Pedido"}
                 </Button>
               </div>
             </ScrollArea>
