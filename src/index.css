@@ -520,6 +520,324 @@
   }
 }
 
+/* ============================================
+   TAB TRANSITIONS - Smooth UX Animations
+   Requirements: 5.2
+   ============================================ */
+
+/* Tab content fade and slide animation */
+@keyframes tabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tabFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* Tab trigger indicator animation */
+@keyframes tabIndicatorSlide {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Tab content wrapper with smooth transitions */
+.tab-content-animated {
+  animation: tabFadeIn 0.3s ease-out forwards;
+}
+
+.tab-content-exit {
+  animation: tabFadeOut 0.2s ease-in forwards;
+}
+
+/* Enhanced tab trigger styles */
+.tab-trigger-enhanced {
+  @apply relative overflow-hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-trigger-enhanced::after {
+  content: '';
+  @apply absolute bottom-0 left-0 right-0 h-0.5 bg-primary;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-trigger-enhanced[data-state="active"]::after {
+  transform: scaleX(1);
+}
+
+.tab-trigger-enhanced:hover:not([data-state="active"])::after {
+  transform: scaleX(0.5);
+  @apply bg-primary/50;
+}
+
+/* ============================================
+   STANDARDIZED CARD & PANEL STYLES
+   Requirements: 5.1, 5.3
+   ============================================ */
+
+/* Base card with consistent styling */
+.card-standard {
+  @apply rounded-xl border bg-card text-card-foreground;
+  @apply border-gray-200 dark:border-gray-700/30;
+  @apply shadow-sm hover:shadow-md;
+  @apply transition-all duration-300 ease-out;
+}
+
+.card-standard:hover {
+  @apply border-gray-300 dark:border-gray-600/40;
+}
+
+/* Interactive card with hover effects */
+.card-interactive {
+  @apply card-standard cursor-pointer;
+  @apply hover:scale-[1.01] hover:-translate-y-0.5;
+  @apply active:scale-[0.99];
+}
+
+/* Panel with subtle background */
+.panel-standard {
+  @apply rounded-lg p-4;
+  @apply bg-gray-50 dark:bg-gray-800/50;
+  @apply border border-gray-100 dark:border-gray-700/20;
+  @apply transition-colors duration-200;
+}
+
+.panel-standard:hover {
+  @apply bg-gray-100/80 dark:bg-gray-800/70;
+}
+
+/* Highlighted panel for important content */
+.panel-highlight {
+  @apply panel-standard;
+  @apply bg-purple-50/50 dark:bg-purple-900/10;
+  @apply border-purple-200/50 dark:border-purple-700/30;
+}
+
+.panel-highlight:hover {
+  @apply bg-purple-100/50 dark:bg-purple-900/20;
+  @apply border-purple-300/50 dark:border-purple-600/40;
+}
+
+/* Card header with consistent spacing */
+.card-header-standard {
+  @apply flex items-center justify-between pb-3;
+}
+
+.card-header-standard .card-title {
+  @apply text-base font-semibold flex items-center gap-2;
+}
+
+/* Card content with consistent padding */
+.card-content-standard {
+  @apply p-4 sm:p-6;
+}
+
+/* List item in cards */
+.card-list-item {
+  @apply flex items-start gap-3 p-4;
+  @apply hover:bg-gray-50 dark:hover:bg-gray-800/50;
+  @apply transition-colors duration-200 cursor-pointer;
+  @apply border-b border-gray-100 dark:border-gray-800 last:border-b-0;
+}
+
+.card-list-item:active {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+/* Icon container in cards */
+.card-icon-container {
+  @apply p-2 rounded-lg;
+  @apply transition-transform duration-200;
+}
+
+.card-list-item:hover .card-icon-container {
+  @apply scale-110;
+}
+
+/* Status-based icon backgrounds */
+.icon-bg-purple {
+  @apply bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400;
+}
+
+.icon-bg-blue {
+  @apply bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400;
+}
+
+.icon-bg-green {
+  @apply bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400;
+}
+
+.icon-bg-orange {
+  @apply bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400;
+}
+
+.icon-bg-red {
+  @apply bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400;
+}
+
+/* Empty state styling */
+.empty-state {
+  @apply flex flex-col items-center justify-center text-center;
+  @apply py-12 px-4 space-y-4;
+}
+
+.empty-state-icon {
+  @apply p-4 rounded-full;
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+.empty-state-icon svg {
+  @apply h-8 w-8 text-gray-400;
+}
+
+.empty-state-title {
+  @apply text-lg font-semibold text-gray-900 dark:text-gray-100;
+}
+
+.empty-state-description {
+  @apply text-sm text-gray-500 dark:text-gray-400 max-w-md;
+}
+
+/* Divider for card sections */
+.card-divider {
+  @apply border-t border-gray-100 dark:border-gray-800;
+}
+
+/* ============================================
+   ENHANCED BUTTON STYLES
+   Requirements: 5.4
+   ============================================ */
+
+/* Enhanced button with better visual feedback */
+.btn-enhanced {
+  @apply relative overflow-hidden;
+  @apply transition-all duration-200 ease-out;
+  @apply hover:shadow-md active:scale-[0.98];
+}
+
+/* Ripple effect on click */
+.btn-enhanced::after {
+  content: '';
+  @apply absolute inset-0 rounded-md;
+  @apply bg-white/20 opacity-0;
+  @apply transition-opacity duration-200;
+}
+
+.btn-enhanced:active::after {
+  @apply opacity-100;
+}
+
+/* Primary button with gradient and glow */
+.btn-primary-enhanced {
+  @apply btn-enhanced;
+  @apply bg-gradient-to-r from-purple-600 to-violet-600;
+  @apply hover:from-purple-700 hover:to-violet-700;
+  @apply hover:shadow-lg hover:shadow-purple-500/25;
+  @apply text-white font-medium;
+}
+
+.btn-primary-enhanced:active {
+  @apply from-purple-800 to-violet-800;
+}
+
+/* Secondary/outline button with subtle hover */
+.btn-outline-enhanced {
+  @apply btn-enhanced;
+  @apply border border-gray-200 dark:border-gray-700;
+  @apply bg-white dark:bg-gray-900;
+  @apply hover:border-purple-300 dark:hover:border-purple-700;
+  @apply hover:bg-purple-50 dark:hover:bg-purple-900/20;
+  @apply hover:text-purple-700 dark:hover:text-purple-300;
+}
+
+.btn-outline-enhanced:active {
+  @apply bg-purple-100 dark:bg-purple-900/30;
+}
+
+/* Ghost button with subtle feedback */
+.btn-ghost-enhanced {
+  @apply btn-enhanced;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+  @apply active:bg-gray-200 dark:active:bg-gray-700;
+}
+
+/* Icon button with circular hover effect */
+.btn-icon-enhanced {
+  @apply relative rounded-full p-2;
+  @apply transition-all duration-200;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+  @apply hover:scale-110;
+  @apply active:scale-95;
+}
+
+/* Success button variant */
+.btn-success-enhanced {
+  @apply btn-enhanced;
+  @apply bg-gradient-to-r from-green-500 to-emerald-500;
+  @apply hover:from-green-600 hover:to-emerald-600;
+  @apply hover:shadow-lg hover:shadow-green-500/25;
+  @apply text-white font-medium;
+}
+
+/* Danger button variant */
+.btn-danger-enhanced {
+  @apply btn-enhanced;
+  @apply bg-gradient-to-r from-red-500 to-rose-500;
+  @apply hover:from-red-600 hover:to-rose-600;
+  @apply hover:shadow-lg hover:shadow-red-500/25;
+  @apply text-white font-medium;
+}
+
+/* Loading state for buttons */
+.btn-loading {
+  @apply relative pointer-events-none;
+}
+
+.btn-loading::before {
+  content: '';
+  @apply absolute inset-0 rounded-md;
+  @apply bg-white/30 dark:bg-black/30;
+  @apply animate-pulse;
+}
+
+/* Button group styling */
+.btn-group {
+  @apply flex items-center;
+}
+
+.btn-group > button:not(:first-child) {
+  @apply rounded-l-none border-l-0;
+}
+
+.btn-group > button:not(:last-child) {
+  @apply rounded-r-none;
+}
+
+/* Focus ring enhancement */
+.btn-focus-ring {
+  @apply focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2;
+}
+
 /* Custom Scrollbar - Elegant & Invisible */
 @layer base {
   .scrollbar-thin::-webkit-scrollbar {

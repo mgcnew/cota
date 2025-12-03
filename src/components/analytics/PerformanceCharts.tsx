@@ -1,4 +1,6 @@
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, BarChart3 } from "lucide-react";
 import {
   BarChart,
@@ -37,11 +39,44 @@ interface TendenciaMensal {
 interface PerformanceChartsProps {
   performanceFornecedores: Fornecedor[];
   tendenciasMensais: TendenciaMensal[];
+  isLoading?: boolean;
 }
 
-export function PerformanceCharts({
+/**
+ * ChartSkeleton - Skeleton loader for individual chart cards
+ * Requirements: 2.3, 6.3
+ */
+function ChartSkeleton({ title }: { title: string }) {
+  return (
+    <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm">
+      <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+        <Skeleton className="h-5 w-48" />
+      </CardHeader>
+      <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+        <div className="h-[250px] sm:h-[300px] flex flex-col justify-between">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-full space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * PerformanceCharts - Componente memoizado para gráficos de performance
+ * 
+ * Usa React.memo para evitar re-renders desnecessários.
+ * Requirements: 6.5
+ */
+export const PerformanceCharts = memo(function PerformanceCharts({
   performanceFornecedores,
   tendenciasMensais,
+  isLoading = false,
 }: PerformanceChartsProps) {
   const isMobile = false; // Removida dependência mobile
   
@@ -154,6 +189,26 @@ export function PerformanceCharts({
 
   // Verificar se há dados
   const hasData = topFornecedores.length > 0 || tendenciasMensais.length > 0;
+
+  // Loading state with skeleton loaders
+  if (isLoading) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <div>
+          <Skeleton className="h-8 w-48 mb-1" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4">
+          <ChartSkeleton title="Top 5 Fornecedores" />
+          <ChartSkeleton title="Distribuição de Performance" />
+          <ChartSkeleton title="Evolução Mensal - Cotações" />
+          <ChartSkeleton title="Evolução Mensal - Economia" />
+          <ChartSkeleton title="Taxa de Resposta" />
+          <ChartSkeleton title="Economia por Fornecedor" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -589,4 +644,4 @@ export function PerformanceCharts({
       )}
     </div>
   );
-}
+});

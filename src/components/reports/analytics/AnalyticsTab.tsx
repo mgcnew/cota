@@ -2,13 +2,13 @@
  * AnalyticsTab - Componente principal da aba Analytics
  * 
  * Orquestra MetricsGrid/Carousel, PerformanceCharts e InsightsPanel.
- * Implementa lazy loading para charts.
+ * Implementa lazy loading para charts e otimizações de performance.
  * 
  * @module components/reports/analytics/AnalyticsTab
- * Requirements: 2.4, 2.5
+ * Requirements: 2.4, 2.5, 6.5
  */
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useCallback, useMemo, memo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useInsights } from "@/hooks/useInsights";
@@ -74,12 +74,14 @@ function InsightsSkeleton() {
 /**
  * AnalyticsTab - Aba de Analytics com métricas, gráficos e insights
  * 
+ * Componente memoizado com otimizações de performance usando useMemo e useCallback.
+ * 
  * @param startDate - Data inicial do período
  * @param endDate - Data final do período
  * @param selectedFornecedores - Fornecedores selecionados para filtro
  * @param selectedProdutos - Produtos selecionados para filtro
  */
-export function AnalyticsTab({
+export const AnalyticsTab = memo(function AnalyticsTab({
   startDate,
   endDate,
   selectedFornecedores,
@@ -110,38 +112,41 @@ export function AnalyticsTab({
   } = useInsights();
 
   /**
-   * Handler para gerar insights - prepara os dados de analytics
-   * e chama a função generateInsights do hook
+   * Memoized analytics data for insights generation
+   * Prevents recalculation on every render
    */
-  const handleGenerateInsights = () => {
-    // Preparar dados de analytics no formato esperado pelo hook
-    const analyticsData = {
-      metricas: {
-        taxaEconomia: parseFloat(metricas[0]?.valor?.replace('%', '') || '0'),
-        tempoMedioCotacao: parseFloat(metricas[1]?.valor?.replace(' dias', '') || '0'),
-        taxaResposta: parseFloat(metricas[2]?.valor?.replace('%', '') || '0'),
-        valorMedioPedido: parseFloat(metricas[3]?.valor?.replace(/[R$\s.]/g, '').replace(',', '.') || '0'),
-      },
-      topProdutos: topProdutos.map(p => ({
-        nome: p.produto,
-        economia: p.economiaTotal || 0,
-        cotacoes: p.cotacoes,
-      })),
-      performanceFornecedores: performanceFornecedores.map(f => ({
-        nome: f.fornecedor,
-        score: f.score,
-        cotacoes: f.cotacoes,
-        taxaResposta: parseFloat(f.taxaResposta?.replace('%', '') || '0'),
-      })),
-      tendenciasMensais: tendenciasMensais.map(t => ({
-        mes: t.mes,
-        cotacoes: t.cotacoes,
-        economia: t.economia,
-      })),
-    };
-    
-    generateInsights(analyticsData);
-  };
+  const analyticsDataForInsights = useMemo(() => ({
+    metricas: {
+      taxaEconomia: parseFloat(metricas[0]?.valor?.replace('%', '') || '0'),
+      tempoMedioCotacao: parseFloat(metricas[1]?.valor?.replace(' dias', '') || '0'),
+      taxaResposta: parseFloat(metricas[2]?.valor?.replace('%', '') || '0'),
+      valorMedioPedido: parseFloat(metricas[3]?.valor?.replace(/[R$\s.]/g, '').replace(',', '.') || '0'),
+    },
+    topProdutos: topProdutos.map(p => ({
+      nome: p.produto,
+      economia: p.economiaTotal || 0,
+      cotacoes: p.cotacoes,
+    })),
+    performanceFornecedores: performanceFornecedores.map(f => ({
+      nome: f.fornecedor,
+      score: f.score,
+      cotacoes: f.cotacoes,
+      taxaResposta: parseFloat(f.taxaResposta?.replace('%', '') || '0'),
+    })),
+    tendenciasMensais: tendenciasMensais.map(t => ({
+      mes: t.mes,
+      cotacoes: t.cotacoes,
+      economia: t.economia,
+    })),
+  }), [metricas, topProdutos, performanceFornecedores, tendenciasMensais]);
+
+  /**
+   * Memoized handler para gerar insights
+   * Usa useCallback para evitar recriação da função em cada render
+   */
+  const handleGenerateInsights = useCallback(() => {
+    generateInsights(analyticsDataForInsights);
+  }, [generateInsights, analyticsDataForInsights]);
 
   return (
     <div className="space-y-6">
@@ -183,6 +188,6 @@ export function AnalyticsTab({
       </section>
     </div>
   );
-}
+});
 
 export default AnalyticsTab;

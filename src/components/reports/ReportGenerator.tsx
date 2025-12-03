@@ -1,8 +1,9 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -43,6 +44,51 @@ const REPORT_TYPES: ReportType[] = [
   { id: "conversao", titulo: "Taxa de Conversão", descricao: "Conversão cotações em pedidos", icone: Target, categoria: 'estrategico' },
 ];
 
+/**
+ * ReportTableSkeleton - Skeleton loader for report table
+ * Displays while report data is being generated
+ * Requirements: 2.3, 6.3
+ */
+function ReportTableSkeleton() {
+  return (
+    <Card className="border-gray-200 dark:border-gray-700/30">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-4" />
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-5 w-20 ml-2" />
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <TableHead key={i}>
+                    <Skeleton className="h-4 w-20" />
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[1, 2, 3, 4, 5].map((row) => (
+                <TableRow key={row}>
+                  {[1, 2, 3, 4, 5, 6].map((cell) => (
+                    <TableCell key={cell}>
+                      <Skeleton className="h-4 w-16" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 const COLUMN_NAMES: Record<string, string> = {
   periodo: 'Período', totalCotacoes: 'Total Cotações', economiaGerada: 'Economia',
   economiaPercentual: 'Economia (%)', melhorFornecedor: 'Melhor Fornecedor',
@@ -64,7 +110,13 @@ const COLUMN_NAMES: Record<string, string> = {
   pedidosGerados: 'Pedidos Gerados', valorCotacoes: 'Valor Cotações', valorPedidos: 'Valor Pedidos'
 };
 
-export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: ReportGeneratorProps) {
+/**
+ * ReportGenerator - Componente memoizado para geração de relatórios
+ * 
+ * Usa React.memo para evitar re-renders desnecessários.
+ * Requirements: 6.5
+ */
+export const ReportGenerator = memo(function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: ReportGeneratorProps) {
   const { toast } = useToast();
   const [selectedType, setSelectedType] = useState("economia");
   const [reportData, setReportData] = useState<any[] | null>(null);
@@ -174,10 +226,12 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
   return (
     <div className="space-y-6">
       {/* Seleção de Relatório */}
-      <Card className="border-gray-200 dark:border-gray-700/30">
-        <CardHeader className="pb-3">
+      <Card className="card-standard">
+        <CardHeader className="card-header-standard px-4 sm:px-6 pt-4 sm:pt-6">
           <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+            <div className="card-icon-container icon-bg-purple">
+              <FileText className="h-4 w-4" />
+            </div>
             Gerar Relatório
           </CardTitle>
         </CardHeader>
@@ -213,22 +267,30 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
             <div className="space-y-2 sm:col-span-2 lg:col-span-1">
               <Label className="text-sm">Ações</Label>
               <div className="flex gap-2">
-                <Button onClick={generateReport} disabled={loading || !startDate || !endDate} className="flex-1 bg-purple-600 hover:bg-purple-700">
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+                <Button 
+                  onClick={generateReport} 
+                  disabled={loading || !startDate || !endDate} 
+                  className={`flex-1 btn-primary-enhanced ${loading ? 'btn-loading' : ''}`}
+                >
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Eye className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:scale-110" />}
                   Visualizar
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" disabled={!reportData || reportData.length === 0}>
-                      <Download className="h-4 w-4 mr-2" />
-                      <ChevronDown className="h-3 w-3" />
+                    <Button 
+                      variant="outline" 
+                      disabled={!reportData || reportData.length === 0}
+                      className="btn-outline-enhanced"
+                    >
+                      <Download className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:translate-y-0.5" />
+                      <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuLabel>Formato</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => downloadReport('pdf')}>PDF</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => downloadReport('excel')}>Excel</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => downloadReport('pdf')} className="cursor-pointer transition-colors duration-200">PDF</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => downloadReport('excel')} className="cursor-pointer transition-colors duration-200">Excel</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -236,29 +298,39 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
           </div>
 
           {/* Info do relatório selecionado */}
-          <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-            <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-              <selectedReport.icone className="h-5 w-5 text-purple-600" />
+          <div className="panel-highlight flex items-center gap-3">
+            <div className="card-icon-container icon-bg-purple">
+              <selectedReport.icone className="h-5 w-5" />
             </div>
             <div>
               <p className="font-medium text-sm">{selectedReport.titulo}</p>
               <p className="text-xs text-gray-500">{selectedReport.descricao}</p>
             </div>
-            <Badge variant="outline" className="ml-auto capitalize">{selectedReport.categoria}</Badge>
+            <Badge variant="outline" className="ml-auto capitalize transition-colors duration-200">{selectedReport.categoria}</Badge>
           </div>
         </CardContent>
       </Card>
 
+      {/* Loading Skeleton */}
+      {loading && <ReportTableSkeleton />}
+
       {/* Resultado do Relatório */}
-      {reportData && reportData.length > 0 && (
-        <Card className="border-gray-200 dark:border-gray-700/30">
-          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+      {!loading && reportData && reportData.length > 0 && (
+        <Card className="card-standard overflow-hidden">
+          <CardHeader className="card-header-standard px-4 sm:px-6 pt-4 sm:pt-6">
             <CardTitle className="text-base flex items-center gap-2">
-              <selectedReport.icone className="h-4 w-4" />
+              <div className="card-icon-container icon-bg-purple">
+                <selectedReport.icone className="h-4 w-4" />
+              </div>
               {selectedReport.titulo}
-              <Badge variant="secondary">{reportData.length} registros</Badge>
+              <Badge variant="secondary" className="transition-all duration-200">{reportData.length} registros</Badge>
             </CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => { setReportData(null); setHasAttemptedGeneration(false); }}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => { setReportData(null); setHasAttemptedGeneration(false); }}
+              className="transition-all duration-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+            >
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
@@ -298,25 +370,23 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
 
       {/* Empty State - Nenhum dado encontrado */}
       {hasAttemptedGeneration && reportData !== null && reportData.length === 0 && (
-        <Card className="border-gray-200 dark:border-gray-700/30 border-dashed">
+        <Card className="card-standard border-dashed">
           <CardContent className="py-12">
-            <div className="flex flex-col items-center justify-center text-center space-y-4">
-              <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-800">
-                <FileSearch className="h-8 w-8 text-gray-400" />
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <FileSearch />
               </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  Nenhum dado encontrado
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
-                  Não foram encontrados dados para o relatório "{selectedReport.titulo}" no período selecionado.
-                </p>
-              </div>
+              <h3 className="empty-state-title">
+                Nenhum dado encontrado
+              </h3>
+              <p className="empty-state-description">
+                Não foram encontrados dados para o relatório "{selectedReport.titulo}" no período selecionado.
+              </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button 
                   variant="outline" 
                   onClick={onOpenPeriodDialog}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 btn-enhanced"
                 >
                   <CalendarDays className="h-4 w-4" />
                   Alterar período
@@ -324,7 +394,7 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
                 <Button 
                   variant="outline"
                   onClick={() => { setHasAttemptedGeneration(false); setReportData(null); }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 btn-enhanced"
                 >
                   <X className="h-4 w-4" />
                   Limpar
@@ -339,8 +409,8 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
       )}
 
       {/* Lista de Relatórios Disponíveis */}
-      <Card className="border-gray-200 dark:border-gray-700/30">
-        <CardHeader className="pb-3">
+      <Card className="card-standard overflow-hidden">
+        <CardHeader className="card-header-standard px-4 sm:px-6 pt-4 sm:pt-6">
           <CardTitle className="text-base">Relatórios Disponíveis</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -350,28 +420,26 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
                 key={report.id}
                 onClick={() => { setSelectedType(report.id); setReportData(null); setHasAttemptedGeneration(false); }}
                 className={cn(
-                  "flex items-center gap-3 p-4 bg-white dark:bg-gray-900 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors",
-                  selectedType === report.id && "ring-2 ring-purple-500 ring-inset"
+                  "flex items-center gap-3 p-4 bg-white dark:bg-gray-900 cursor-pointer",
+                  "hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                  "transition-all duration-200 ease-out",
+                  "group",
+                  selectedType === report.id && "ring-2 ring-purple-500 ring-inset bg-purple-50/50 dark:bg-purple-900/10"
                 )}
               >
                 <div className={cn(
-                  "p-2 rounded-lg",
-                  report.categoria === 'financeiro' && "bg-green-100 dark:bg-green-900/30",
-                  report.categoria === 'operacional' && "bg-blue-100 dark:bg-blue-900/30",
-                  report.categoria === 'estrategico' && "bg-purple-100 dark:bg-purple-900/30"
+                  "card-icon-container transition-transform duration-200 group-hover:scale-110",
+                  report.categoria === 'financeiro' && "icon-bg-green",
+                  report.categoria === 'operacional' && "icon-bg-blue",
+                  report.categoria === 'estrategico' && "icon-bg-purple"
                 )}>
-                  <report.icone className={cn(
-                    "h-4 w-4",
-                    report.categoria === 'financeiro' && "text-green-600",
-                    report.categoria === 'operacional' && "text-blue-600",
-                    report.categoria === 'estrategico' && "text-purple-600"
-                  )} />
+                  <report.icone className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{report.titulo}</p>
                   <p className="text-xs text-gray-500 truncate">{report.descricao}</p>
                 </div>
-                <Badge variant="outline" className="text-xs capitalize hidden sm:inline-flex">
+                <Badge variant="outline" className="text-xs capitalize hidden sm:inline-flex transition-colors duration-200">
                   {report.categoria}
                 </Badge>
               </div>
@@ -381,4 +449,4 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
       </Card>
     </div>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,93 @@ interface HistoricoItem {
   created_at: string;
 }
 
-export function ActivityHistory({ isActive }: ActivityHistoryProps) {
+/**
+ * Retorna o ícone correspondente ao tipo de atividade
+ */
+const getTipoIcon = (tipo: string) => {
+  const icons: Record<string, typeof FileText> = {
+    cotacao: FileText,
+    pedido: ShoppingCart,
+    produto: Package,
+    fornecedor: Building2
+  };
+  return icons[tipo] || History;
+};
+
+/**
+ * Retorna a cor do badge correspondente ao tipo de atividade
+ */
+const getTipoBadgeColor = (tipo: string) => {
+  const colors: Record<string, string> = {
+    cotacao: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+    pedido: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    produto: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+    fornecedor: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+  };
+  return colors[tipo] || "bg-gray-100 text-gray-700";
+};
+
+/**
+ * ActivityItem - Componente memoizado para exibir um item de atividade
+ * 
+ * Usa React.memo para evitar re-renders desnecessários quando as props não mudam.
+ * Requirements: 6.5
+ */
+interface ActivityItemProps {
+  item: HistoricoItem;
+  onSelect: (item: HistoricoItem) => void;
+}
+
+const ActivityItem = memo(function ActivityItem({ item, onSelect }: ActivityItemProps) {
+  const Icon = getTipoIcon(item.tipo);
+  
+  const handleClick = useCallback(() => {
+    onSelect(item);
+  }, [item, onSelect]);
+
+  return (
+    <div
+      className="card-list-item group"
+      onClick={handleClick}
+    >
+      <div className={cn("card-icon-container", getTipoBadgeColor(item.tipo))}>
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="font-medium text-sm text-gray-900 dark:text-white truncate">
+            {item.acao}
+          </span>
+          <Badge variant="outline" className="text-xs capitalize transition-colors duration-200">
+            {item.tipo}
+          </Badge>
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+          {item.detalhes}
+        </p>
+        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+          <span>{item.data}</span>
+          {item.valor && <span className="text-green-600 font-medium">{item.valor}</span>}
+        </div>
+      </div>
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+      >
+        <Eye className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+});
+
+/**
+ * ActivityHistory - Componente memoizado para exibir histórico de atividades
+ * 
+ * Usa React.memo para evitar re-renders desnecessários.
+ * Requirements: 6.5
+ */
+export const ActivityHistory = memo(function ActivityHistory({ isActive }: ActivityHistoryProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const { paginate } = usePagination<HistoricoItem>({ initialItemsPerPage: 10 });
@@ -188,25 +274,11 @@ export function ActivityHistory({ isActive }: ActivityHistoryProps) {
 
   const paginatedData = paginate(filteredHistorico);
 
-  const getTipoIcon = (tipo: string) => {
-    const icons: Record<string, typeof FileText> = {
-      cotacao: FileText,
-      pedido: ShoppingCart,
-      produto: Package,
-      fornecedor: Building2
-    };
-    return icons[tipo] || History;
-  };
-
-  const getTipoBadgeColor = (tipo: string) => {
-    const colors: Record<string, string> = {
-      cotacao: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-      pedido: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-      produto: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-      fornecedor: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-    };
-    return colors[tipo] || "bg-gray-100 text-gray-700";
-  };
+  // Memoized callback for selecting an item
+  const handleSelectItem = useCallback((item: HistoricoItem) => {
+    setSelectedItem(item);
+    setViewDialogOpen(true);
+  }, []);
 
   if (loading) {
     return (
@@ -219,7 +291,7 @@ export function ActivityHistory({ isActive }: ActivityHistoryProps) {
   return (
     <div className="space-y-4">
       {/* Filtros */}
-      <Card className="border-gray-200 dark:border-gray-700/30">
+      <Card className="card-standard">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -228,11 +300,11 @@ export function ActivityHistory({ isActive }: ActivityHistoryProps) {
                 placeholder="Buscar no histórico..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                className="pl-9 transition-all duration-200 focus:ring-2 focus:ring-purple-500/20"
               />
             </div>
             <Select value={tipoFilter} onValueChange={setTipoFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] transition-all duration-200">
                 <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
               <SelectContent>
@@ -248,62 +320,42 @@ export function ActivityHistory({ isActive }: ActivityHistoryProps) {
       </Card>
 
       {/* Lista de Atividades */}
-      <Card className="border-gray-200 dark:border-gray-700/30">
-        <CardHeader className="pb-3">
+      <Card className="card-standard overflow-hidden">
+        <CardHeader className="card-header-standard px-4 sm:px-6 pt-4 sm:pt-6">
           <CardTitle className="text-base flex items-center gap-2">
-            <History className="h-4 w-4" />
+            <div className="card-icon-container icon-bg-purple">
+              <History className="h-4 w-4" />
+            </div>
             Atividades Recentes
-            <Badge variant="secondary" className="ml-2">{filteredHistorico.length}</Badge>
+            <Badge variant="secondary" className="ml-2 transition-all duration-200">{filteredHistorico.length}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {paginatedData.items.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>Nenhuma atividade encontrada</p>
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <History className="h-8 w-8" />
+              </div>
+              <p className="empty-state-title">Nenhuma atividade encontrada</p>
+              <p className="empty-state-description">
+                Tente ajustar os filtros ou aguarde novas atividades serem registradas.
+              </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
-              {paginatedData.items.map((item) => {
-                const Icon = getTipoIcon(item.tipo);
-                return (
-                  <div
-                    key={item.id}
-                    className="flex items-start gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-                    onClick={() => { setSelectedItem(item); setViewDialogOpen(true); }}
-                  >
-                    <div className={cn("p-2 rounded-lg", getTipoBadgeColor(item.tipo))}>
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm text-gray-900 dark:text-white truncate">
-                          {item.acao}
-                        </span>
-                        <Badge variant="outline" className="text-xs capitalize">
-                          {item.tipo}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {item.detalhes}
-                      </p>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                        <span>{item.data}</span>
-                        {item.valor && <span className="text-green-600 font-medium">{item.valor}</span>}
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </div>
-                );
-              })}
+            <div>
+              {paginatedData.items.map((item) => (
+                <ActivityItem
+                  key={item.id}
+                  item={item}
+                  onSelect={handleSelectItem}
+                />
+              ))}
             </div>
           )}
           
           {/* Paginação */}
           {paginatedData.items.length > 0 && (
-            <div className="border-t border-gray-100 dark:border-gray-800 p-4">
+            <div className="card-divider p-4">
               <DataPagination
                 currentPage={paginatedData.pagination.currentPage}
                 totalPages={paginatedData.pagination.totalPages}
@@ -327,4 +379,4 @@ export function ActivityHistory({ isActive }: ActivityHistoryProps) {
       />
     </div>
   );
-}
+});

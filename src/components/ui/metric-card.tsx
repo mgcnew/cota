@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,13 @@ interface MetricCardProps {
   className?: string;
 }
 
-export function MetricCard({
+/**
+ * MetricCard - Componente memoizado para exibir métricas
+ * 
+ * Usa React.memo para evitar re-renders desnecessários quando as props não mudam.
+ * Requirements: 6.5
+ */
+export const MetricCard = memo(function MetricCard({
   title,
   value,
   icon: Icon,
@@ -113,4 +120,4 @@ export function MetricCard({
       </CardContent>
     </Card>
   );
-}
+});

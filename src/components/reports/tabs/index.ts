@@ -5,3 +5,4 @@
  */
 
 export { ReportsTab } from './ReportsTab';
+export { HistoryTab } from './HistoryTab';

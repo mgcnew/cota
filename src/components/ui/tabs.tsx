@@ -27,7 +27,21 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background",
+      // Smooth transition for all state changes
+      "transition-all duration-300 ease-out",
+      // Active state with smooth animation
+      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+      // Hover state with subtle feedback
+      "hover:bg-background/50 hover:text-foreground/80",
+      // Active hover state
+      "data-[state=active]:hover:bg-background data-[state=active]:hover:text-foreground",
+      // Focus states
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      // Disabled state
+      "disabled:pointer-events-none disabled:opacity-50",
+      // Scale effect on active
+      "data-[state=active]:scale-[1.02]",
       className,
     )}
     {...props}
@@ -43,6 +57,10 @@ const TabsContent = React.forwardRef<
     ref={ref}
     className={cn(
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      // Smooth fade-in animation for tab content
+      "data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-2",
+      "data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0",
+      "duration-300 ease-out",
       className,
     )}
     {...props}

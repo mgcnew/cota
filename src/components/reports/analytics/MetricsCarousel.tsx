@@ -2,12 +2,13 @@
  * MetricsCarousel - Componente para exibir métricas em carousel (mobile)
  * 
  * Implementa carousel com navegação para métricas em dispositivos móveis.
+ * Usa React.memo para evitar re-renders desnecessários.
  * 
  * @module components/reports/analytics/MetricsCarousel
- * Requirements: 2.2
+ * Requirements: 2.2, 6.5
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { MetricCard } from "@/components/ui/metric-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -66,10 +67,12 @@ function MetricSkeleton() {
 /**
  * MetricsCarousel - Exibe métricas em carousel para mobile
  * 
+ * Componente memoizado para evitar re-renders desnecessários.
+ * 
  * @param metrics - Array de métricas a serem exibidas
  * @param isLoading - Estado de carregamento
  */
-export function MetricsCarousel({ metrics, isLoading }: MetricsCarouselProps) {
+export const MetricsCarousel = memo(function MetricsCarousel({ metrics, isLoading }: MetricsCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   
   // Garante que sempre temos métricas para exibir
@@ -190,6 +193,6 @@ export function MetricsCarousel({ metrics, isLoading }: MetricsCarouselProps) {
       </p>
     </div>
   );
-}
+});
 
 export default MetricsCarousel;

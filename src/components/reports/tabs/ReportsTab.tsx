@@ -3,18 +3,19 @@
  * 
  * Orchestrates the ReportGenerator and ReportPreview components for the Reports tab.
  * Provides a unified interface for generating and previewing reports.
+ * Memoizado para evitar re-renders desnecessários.
  * 
  * @module components/reports/tabs/ReportsTab
  * 
- * Requirements: 3.1, 3.2, 3.3, 3.5
+ * Requirements: 3.1, 3.2, 3.3, 3.5, 6.5
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { ReportGenerator } from "@/components/reports/ReportGenerator";
 import { ReportPreview } from "@/components/reports/ReportPreview";
 import type { ReportsTabProps } from "@/types/reports";
 
-export function ReportsTab({ startDate, endDate, onOpenPeriodDialog }: ReportsTabProps) {
+export const ReportsTab = memo(function ReportsTab({ startDate, endDate, onOpenPeriodDialog }: ReportsTabProps) {
   const [previewState, setPreviewState] = useState<{
     isOpen: boolean;
     type: string;
@@ -63,6 +64,6 @@ export function ReportsTab({ startDate, endDate, onOpenPeriodDialog }: ReportsTa
       />
     </div>
   );
-}
+});
 
 export default ReportsTab;

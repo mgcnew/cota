@@ -2,11 +2,13 @@
  * MetricsGrid - Componente para exibir métricas em grid responsivo (desktop)
  * 
  * Renderiza 4 métricas em um grid responsivo usando o MetricCard existente.
+ * Usa React.memo para evitar re-renders desnecessários.
  * 
  * @module components/reports/analytics/MetricsGrid
- * Requirements: 2.1, 2.3
+ * Requirements: 2.1, 2.3, 6.5
  */
 
+import { memo } from "react";
 import { MetricCard } from "@/components/ui/metric-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -63,10 +65,12 @@ function MetricSkeleton() {
 /**
  * MetricsGrid - Exibe métricas em grid responsivo para desktop
  * 
+ * Componente memoizado para evitar re-renders desnecessários.
+ * 
  * @param metrics - Array de métricas a serem exibidas (máximo 4)
  * @param isLoading - Estado de carregamento
  */
-export function MetricsGrid({ metrics, isLoading }: MetricsGridProps) {
+export const MetricsGrid = memo(function MetricsGrid({ metrics, isLoading }: MetricsGridProps) {
   // Garante que sempre temos exatamente 4 métricas para o grid
   const displayMetrics = metrics.slice(0, 4);
 
@@ -107,6 +111,6 @@ export function MetricsGrid({ metrics, isLoading }: MetricsGridProps) {
       })}
     </div>
   );
-}
+});
 
 export default MetricsGrid;

@@ -28,9 +28,9 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
         variant="outline" 
         size="sm" 
         onClick={onOpenPeriodDialog}
-        className="hover:border-purple-300 hover:bg-purple-50 transition-colors"
+        className="btn-outline-enhanced"
       >
-        <Calendar className="h-4 w-4 mr-2" />
+        <Calendar className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:scale-110" />
         <span className="hidden sm:inline">{dateRangeText}</span>
         <span className="sm:hidden">Período</span>
       </Button>
@@ -41,9 +41,9 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
         size="sm" 
         onClick={onRefresh} 
         disabled={isRefreshing} 
-        className="hidden sm:flex hover:border-purple-300 hover:bg-purple-50 transition-colors"
+        className="hidden sm:flex btn-outline-enhanced"
       >
-        <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+        <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-200 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180'}`} />
         Atualizar
       </Button>
 
@@ -52,9 +52,9 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
         size="sm" 
         onClick={onExportAll} 
         disabled={isExporting} 
-        className="hidden sm:flex bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white transition-all"
+        className={`hidden sm:flex btn-primary-enhanced ${isExporting ? 'btn-loading' : ''}`}
       >
-        <Download className="h-4 w-4 mr-2" />
+        <Download className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:translate-y-0.5" />
         {isExporting ? 'Gerando...' : 'Exportar'}
       </Button>
     </div>
