@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { DollarSign, Building2, BarChart3, TrendingUp, ShoppingCart, Package, Timer, Target, Calendar, Download, Eye, Loader2, FileText, ChevronDown, X } from "lucide-react";
+import { DollarSign, Building2, BarChart3, TrendingUp, ShoppingCart, Package, Timer, Target, Calendar, Download, Eye, Loader2, FileText, ChevronDown, X, FileSearch, CalendarDays } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useReportEconomia } from "@/hooks/useReportEconomia";
 import { useReportFornecedores } from "@/hooks/useReportFornecedores";
@@ -69,6 +69,7 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
   const [selectedType, setSelectedType] = useState("economia");
   const [reportData, setReportData] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasAttemptedGeneration, setHasAttemptedGeneration] = useState(false);
 
   // Hooks de relatórios
   const reportEconomia = useReportEconomia();
@@ -96,6 +97,7 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
     }
 
     setLoading(true);
+    setHasAttemptedGeneration(true);
     try {
       let data: any[] = [];
       switch (selectedType) {
@@ -109,11 +111,9 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
         case 'conversao': data = await reportConversao.generateReport(startDate, endDate); break;
       }
       setReportData(data);
-      if (!data || data.length === 0) {
-        toast({ title: "Nenhum dado encontrado", description: "Tente outro período", variant: "destructive" });
-      }
     } catch (error) {
       toast({ title: "Erro ao gerar relatório", variant: "destructive" });
+      setReportData([]);
     } finally {
       setLoading(false);
     }
@@ -185,7 +185,7 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
               <Label className="text-sm">Tipo de Relatório</Label>
-              <Select value={selectedType} onValueChange={(v) => { setSelectedType(v); setReportData(null); }}>
+              <Select value={selectedType} onValueChange={(v) => { setSelectedType(v); setReportData(null); setHasAttemptedGeneration(false); }}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -258,7 +258,7 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
               {selectedReport.titulo}
               <Badge variant="secondary">{reportData.length} registros</Badge>
             </CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => setReportData(null)}>
+            <Button variant="ghost" size="sm" onClick={() => { setReportData(null); setHasAttemptedGeneration(false); }}>
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
@@ -275,8 +275,8 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reportData.slice(0, 10).map((row, i) => (
-                    <TableRow key={i}>
+                  {reportData.slice(0, 10).map((row, rowIndex) => (
+                    <TableRow key={rowIndex}>
                       {Object.entries(row).slice(0, 6).map(([key, value]) => (
                         <TableCell key={key} className="text-sm whitespace-nowrap">
                           {formatCellValue(key, value)}
@@ -296,6 +296,48 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
         </Card>
       )}
 
+      {/* Empty State - Nenhum dado encontrado */}
+      {hasAttemptedGeneration && reportData !== null && reportData.length === 0 && (
+        <Card className="border-gray-200 dark:border-gray-700/30 border-dashed">
+          <CardContent className="py-12">
+            <div className="flex flex-col items-center justify-center text-center space-y-4">
+              <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-800">
+                <FileSearch className="h-8 w-8 text-gray-400" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Nenhum dado encontrado
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
+                  Não foram encontrados dados para o relatório "{selectedReport.titulo}" no período selecionado.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button 
+                  variant="outline" 
+                  onClick={onOpenPeriodDialog}
+                  className="flex items-center gap-2"
+                >
+                  <CalendarDays className="h-4 w-4" />
+                  Alterar período
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => { setHasAttemptedGeneration(false); setReportData(null); }}
+                  className="flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Limpar
+                </Button>
+              </div>
+              <p className="text-xs text-gray-400 dark:text-gray-500 pt-2">
+                Dica: Tente expandir o período de datas ou selecionar outro tipo de relatório.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Lista de Relatórios Disponíveis */}
       <Card className="border-gray-200 dark:border-gray-700/30">
         <CardHeader className="pb-3">
@@ -306,7 +348,7 @@ export function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: Repo
             {REPORT_TYPES.map(report => (
               <div
                 key={report.id}
-                onClick={() => { setSelectedType(report.id); setReportData(null); }}
+                onClick={() => { setSelectedType(report.id); setReportData(null); setHasAttemptedGeneration(false); }}
                 className={cn(
                   "flex items-center gap-3 p-4 bg-white dark:bg-gray-900 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors",
                   selectedType === report.id && "ring-2 ring-purple-500 ring-inset"
