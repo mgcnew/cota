@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, Building2, X, DollarSign, Edit2, TrendingDown, FileText, Calendar, Check, ClipboardList, Users, ShoppingCart, AlertCircle, Award, Plus, Trash2, Settings } from "lucide-react";
+import { Package, Building2, X, DollarSign, Edit2, TrendingDown, FileText, Calendar, Check, ClipboardList, Users, ShoppingCart, AlertCircle, Award, Plus, Trash2, Settings, Trophy, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { Quote } from "@/hooks/useCotacoes";
@@ -29,7 +29,7 @@ interface GerenciarCotacaoDialogProps {
 }
 
 export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUpdateSupplierProductValue, onConvertToOrder, onAddQuoteItem, onRemoveQuoteItem, onAddQuoteSupplier, onRemoveQuoteSupplier, availableProducts = [], availableSuppliers = [], onRefresh }: GerenciarCotacaoDialogProps) {
-  const [activeTab, setActiveTab] = useState("detalhes");
+  const [activeTab, setActiveTab] = useState("resumo");
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, number>>({});
@@ -78,18 +78,28 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
     }
   }, [open, products.length]);
 
+  // Ref para controlar se é a primeira abertura do modal
+  const isFirstOpen = useRef(true);
+
   useEffect(() => {
     if (open) {
-      setActiveTab("detalhes");
-      if (fornecedores.length > 0) setSelectedSupplier(fornecedores[0].id);
+      // Só reseta a tab na primeira abertura
+      if (isFirstOpen.current) {
+        setActiveTab("resumo");
+        isFirstOpen.current = false;
+      }
+      if (fornecedores.length > 0 && !selectedSupplier) {
+        setSelectedSupplier(fornecedores[0].id);
+      }
       setDeliveryDate("");
       setObservations("");
     } else {
       setSelectedSupplier("");
       setEditingProductId(null);
       setEditedValues({});
+      isFirstOpen.current = true; // Reset para próxima abertura
     }
-  }, [open, fornecedores]);
+  }, [open]);
 
   useEffect(() => {
     if (editingProductId && editInputRef.current) {
@@ -226,6 +236,8 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
     melhorFornecedor: fornecedores.find(f => f.valorOferecido === Math.min(...fornecedores.filter(x => x.valorOferecido > 0).map(x => x.valorOferecido)))?.nome || '-'
   };
 
+
+
   // Handlers para edição
   const handleAddProduct = () => {
     if (!selectedProductToAdd || !onAddQuoteItem) return;
@@ -294,6 +306,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="flex-shrink-0 w-full justify-start rounded-none border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-0 h-auto overflow-x-auto">
+            <TabsTrigger value="resumo" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
+              <Trophy className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Resumo Geral</span><span className="sm:hidden">Resumo</span>
+            </TabsTrigger>
             <TabsTrigger value="editar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
               <Settings className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Editar Cotação</span><span className="sm:hidden">Editar</span>
             </TabsTrigger>
@@ -307,6 +322,96 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
               <ShoppingCart className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Converter em Pedido</span><span className="sm:hidden">Pedido</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Tab Resumo Geral */}
+          <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-0">
+            <ScrollArea className="h-full">
+              <div className="p-4 sm:p-6 space-y-6">
+                {/* Tabela de Preços por Produto */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Melhor Preço por Produto
+                  </h3>
+                  <Card className="overflow-hidden">
+                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {products.map((product: any) => {
+                        const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
+                        const bestSupplierName = fornecedores.find(f => f.id === bestSupplierId)?.nome || "-";
+
+                        const allPrices = fornecedores
+                          .map(f => ({
+                            nome: f.nome,
+                            value: getSupplierProductValue(f.id, product.product_id)
+                          }))
+                          .filter(p => p.value > 0)
+                          .sort((a, b) => a.value - b.value);
+
+                        const worstPrice = allPrices.length > 0 ? allPrices[allPrices.length - 1].value : 0;
+                        const savings = worstPrice > 0 && bestPrice > 0 ? worstPrice - bestPrice : 0;
+
+                        return (
+                          <div key={product.product_id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-900 dark:text-white truncate">
+                                  {safeStr(product.product_name)}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                  {safeStr(product.quantidade)} {safeStr(product.unidade)}
+                                </p>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                {bestPrice > 0 ? (
+                                  <>
+                                    <div className="flex items-center gap-2 justify-end">
+                                      <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                                      <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                                        R$ {bestPrice.toFixed(2)}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                                      {safeStr(bestSupplierName)}
+                                    </p>
+                                    {savings > 0 && (
+                                      <Badge className="mt-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-[10px]">
+                                        <TrendingDown className="h-2.5 w-2.5 mr-0.5" />
+                                        Economia: R$ {savings.toFixed(2)}
+                                      </Badge>
+                                    )}
+                                  </>
+                                ) : (
+                                  <Badge variant="outline" className="text-gray-400">Sem preço</Badge>
+                                )}
+                              </div>
+                            </div>
+                            {allPrices.length > 1 && (
+                              <div className="mt-2 flex flex-wrap gap-1.5">
+                                {allPrices.map((price, idx) => (
+                                  <Badge
+                                    key={idx}
+                                    variant={idx === 0 ? "default" : "outline"}
+                                    className={cn(
+                                      "text-[10px]",
+                                      idx === 0
+                                        ? "bg-emerald-600 hover:bg-emerald-600"
+                                        : "text-gray-500 dark:text-gray-400"
+                                    )}
+                                  >
+                                    {safeStr(price.nome)}: R$ {price.value.toFixed(2)}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
           {/* Tab Editar Cotação */}
           <TabsContent value="editar" className="flex-1 overflow-auto m-0 p-0">
