@@ -1,24 +1,15 @@
-import { useState, useMemo, useCallback, memo } from 'react';
-import { LayoutDashboard, Calendar, BarChart3, Users, Target, FileText } from 'lucide-react';
+import { useMemo, useCallback, memo } from 'react';
+import { LayoutDashboard, BarChart3, Users, Target, FileText } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { MetricCard } from '@/components/ui/metric-card';
 import { ResponsiveGrid } from '@/components/responsive/ResponsiveGrid';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDashboard } from '@/hooks/useDashboard';
 import { EvolutionChart } from '@/components/dashboard/EvolutionChart';
 import { EconomyChart } from '@/components/dashboard/EconomyChart';
 import { EconomyHeroCard } from '@/components/dashboard/EconomyHeroCard';
 import { ExecutiveSummary } from '@/components/dashboard/ExecutiveSummary';
-
-const PERIOD_OPTIONS = [
-  { value: '7d', label: '7 dias' },
-  { value: '1m', label: '1 mês' },
-  { value: '3m', label: '3 meses' },
-  { value: '6m', label: '6 meses' },
-  { value: '1y', label: '1 ano' },
-] as const;
 
 const MONTHS_MAP: Record<string, number> = { '1m': 1, '3m': 3, '6m': 6, '1y': 12 };
 const MONTH_NAMES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -73,10 +64,6 @@ const DashboardSkeleton = memo(function DashboardSkeleton() {
 });
 
 export default function Dashboard() {
-  const [selectedPeriod, setSelectedPeriod] = useState('6m');
-  const [evolutionPeriod, setEvolutionPeriod] = useState('7d');
-  const [economyPeriod, setEconomyPeriod] = useState('7d');
-
   const dashboardData = useDashboard();
   const metrics = dashboardData?.metrics ?? DEFAULT_METRICS;
   const monthlyData = dashboardData?.monthlyData ?? [];
@@ -93,11 +80,11 @@ export default function Dashboard() {
     return filtered;
   }, [dailyData, monthlyData]);
 
-  const evolutionData = useMemo(() => filterDataByPeriod(evolutionPeriod), [filterDataByPeriod, evolutionPeriod]);
-  
+  // Dados dos gráficos - período fixo 7d para simplicidade
+  const evolutionData = useMemo(() => filterDataByPeriod('7d'), [filterDataByPeriod]);
   const economyData = useMemo(() => 
-    filterDataByPeriod(economyPeriod).map((item, i) => ({ ...item, fill: CHART_COLORS[i % 6] })),
-    [filterDataByPeriod, economyPeriod]
+    filterDataByPeriod('7d').map((item, i) => ({ ...item, fill: CHART_COLORS[i % 6] })),
+    [filterDataByPeriod]
   );
 
   // Memoizar trends para evitar recálculos
@@ -111,31 +98,17 @@ export default function Dashboard() {
   return (
     <PageWrapper>
       <div className="page-container space-y-4 sm:space-y-6">
-        {/* Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/25 flex-shrink-0">
-              <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">Dashboard Executivo</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                Visão geral de desempenho e economia
-              </p>
-            </div>
+        {/* Header - Simplificado */}
+        <header className="flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/25 flex-shrink-0">
+            <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
-          
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger className="w-full sm:w-[140px] h-10 flex-shrink-0">
-              <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
-              <SelectValue placeholder="Período" />
-            </SelectTrigger>
-            <SelectContent>
-              {PERIOD_OPTIONS.map(({ value, label }) => (
-                <SelectItem key={value} value={value}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">Dashboard Executivo</h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+              Visão geral de desempenho e economia
+            </p>
+          </div>
         </header>
 
         {isLoading ? (
@@ -198,14 +171,14 @@ export default function Dashboard() {
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <EvolutionChart
                 data={evolutionData}
-                period={evolutionPeriod}
-                onPeriodChange={setEvolutionPeriod}
+                period="7d"
+                onPeriodChange={() => {}}
                 isLoading={false}
               />
               <EconomyChart
                 data={economyData}
-                period={economyPeriod}
-                onPeriodChange={setEconomyPeriod}
+                period="7d"
+                onPeriodChange={() => {}}
                 isLoading={false}
               />
             </section>

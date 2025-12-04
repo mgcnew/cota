@@ -18,47 +18,48 @@ interface MetricCardProps {
   className?: string;
 }
 
+// Cores com melhor contraste no modo claro
 const VARIANT_STYLES = {
   default: {
-    cardBg: "bg-purple-50 dark:bg-purple-950/30",
+    cardBg: "bg-purple-50/80 dark:bg-purple-950/30",
     iconBg: "bg-purple-600 dark:bg-purple-500",
     border: "border-purple-200 dark:border-purple-800",
     glow: "shadow-md hover:shadow-lg shadow-purple-100 dark:shadow-purple-900/50",
-    titleColor: "text-purple-700 dark:text-purple-300",
+    titleColor: "text-purple-800 dark:text-purple-300",
   },
   success: {
-    cardBg: "bg-green-50 dark:bg-green-950/30",
-    iconBg: "bg-green-600 dark:bg-green-500",
-    border: "border-green-200 dark:border-green-800",
-    glow: "shadow-md hover:shadow-lg shadow-green-100 dark:shadow-green-900/50",
-    titleColor: "text-green-700 dark:text-green-300",
+    cardBg: "bg-emerald-50/80 dark:bg-emerald-950/30",
+    iconBg: "bg-emerald-600 dark:bg-emerald-500",
+    border: "border-emerald-200 dark:border-emerald-800",
+    glow: "shadow-md hover:shadow-lg shadow-emerald-100 dark:shadow-emerald-900/50",
+    titleColor: "text-emerald-800 dark:text-emerald-300",
   },
   warning: {
-    cardBg: "bg-amber-50 dark:bg-amber-950/30",
+    cardBg: "bg-amber-50/80 dark:bg-amber-950/30",
     iconBg: "bg-amber-600 dark:bg-amber-500",
     border: "border-amber-200 dark:border-amber-800",
     glow: "shadow-md hover:shadow-lg shadow-amber-100 dark:shadow-amber-900/50",
-    titleColor: "text-amber-700 dark:text-amber-300",
+    titleColor: "text-amber-800 dark:text-amber-300",
   },
   error: {
-    cardBg: "bg-red-50 dark:bg-red-950/30",
+    cardBg: "bg-red-50/80 dark:bg-red-950/30",
     iconBg: "bg-red-600 dark:bg-red-500",
     border: "border-red-200 dark:border-red-800",
     glow: "shadow-md hover:shadow-lg shadow-red-100 dark:shadow-red-900/50",
-    titleColor: "text-red-700 dark:text-red-300",
+    titleColor: "text-red-800 dark:text-red-300",
   },
   info: {
-    cardBg: "bg-blue-50 dark:bg-blue-950/30",
+    cardBg: "bg-blue-50/80 dark:bg-blue-950/30",
     iconBg: "bg-blue-600 dark:bg-blue-500",
     border: "border-blue-200 dark:border-blue-800",
     glow: "shadow-md hover:shadow-lg shadow-blue-100 dark:shadow-blue-900/50",
-    titleColor: "text-blue-700 dark:text-blue-300",
+    titleColor: "text-blue-800 dark:text-blue-300",
   },
 } as const;
 
 const TREND_COLORS = {
-  positive: "text-green-600 dark:text-green-400",
-  negative: "text-red-600 dark:text-red-400",
+  positive: "text-emerald-700 dark:text-emerald-400",
+  negative: "text-red-700 dark:text-red-400",
   neutral: "text-gray-600 dark:text-gray-400",
 } as const;
 
@@ -88,7 +89,7 @@ export const MetricCard = memo(function MetricCard({
       )}
     >
       <div className="relative flex flex-row items-center justify-between space-y-0">
-        <CardTitle className={cn("text-xs sm:text-sm font-semibold truncate pr-2", styles.titleColor)}>
+        <CardTitle className={cn("text-xs sm:text-sm font-bold truncate pr-2", styles.titleColor)}>
           {title}
         </CardTitle>
         <div className={cn(
@@ -101,15 +102,15 @@ export const MetricCard = memo(function MetricCard({
       </div>
 
       <div className="relative mt-2 sm:mt-3">
-        <div className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground truncate">
+        <div className="text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white truncate">
           {value}
         </div>
         {trend && (
           <div className="flex items-center gap-1 mt-1 sm:mt-2 flex-wrap">
-            <span className={cn("text-[10px] sm:text-xs font-semibold", TREND_COLORS[trend.type])}>
+            <span className={cn("text-[10px] sm:text-xs font-bold", TREND_COLORS[trend.type])}>
               {trend.value}
             </span>
-            <span className="text-[10px] sm:text-xs text-muted-foreground truncate">
+            <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
               {trend.label}
             </span>
           </div>
