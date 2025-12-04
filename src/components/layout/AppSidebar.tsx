@@ -1,10 +1,10 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { UserProfileDialog } from "@/components/profile/UserProfileDialog";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
@@ -39,10 +39,8 @@ import {
   SheetTrigger,
   SheetTitle,
   SheetDescription,
-  SheetClose
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 interface MenuItem {
   title: string;
@@ -122,7 +120,7 @@ export function AppSidebar() {
     );
   }, [isSidebarExpanded]);
 
-  const toggleCategory = (categoryTitle: string) => {
+  const toggleCategory = useCallback((categoryTitle: string) => {
     setCollapsedCategories((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(categoryTitle)) {
@@ -132,15 +130,15 @@ export function AppSidebar() {
       }
       return newSet;
     });
-  };
+  }, []);
 
-  const collapseOtherCategories = (keepOpen: string) => {
+  const collapseOtherCategories = useCallback((keepOpen: string) => {
     setCollapsedCategories(
       new Set(menuCategories.filter((c) => c.title !== keepOpen).map((c) => c.title))
     );
-  };
+  }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await signOut();
       toast({
@@ -155,7 +153,12 @@ export function AppSidebar() {
         variant: "destructive",
       });
     }
-  };
+  }, [signOut, toast, navigate]);
+
+  // Fechar menu mobile ao navegar
+  const handleMobileNavigation = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
 
 
   const SidebarContent = ({
@@ -342,34 +345,34 @@ export function AppSidebar() {
         </div>
       </div>
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar - Otimizado para performance */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden fixed top-3 left-3 z-50 h-10 w-10 rounded-lg backdrop-blur-sm shadow-sm bg-white/90 dark:bg-gray-900/90 border border-gray-200 dark:border-gray-700/50 text-gray-700 dark:text-gray-300"
+            className="md:hidden fixed top-3 left-3 z-50 h-10 w-10 rounded-lg bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 shadow-sm active:scale-95 transition-transform"
           >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="p-0 w-72 border-r border-gray-200 dark:border-gray-700/50 bg-white dark:bg-[#1a1d24]"
+          className="p-0 w-[280px] border-r border-gray-200 dark:border-gray-700/50 bg-white dark:bg-[#1a1d24]"
         >
           <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
           <SheetDescription className="sr-only">
             Menu principal da aplicação
           </SheetDescription>
           
-          {/* Mobile Menu Content - Simplified without categories */}
-          <div className="w-full h-full flex flex-col overflow-hidden">
+          {/* Mobile Menu Content - Simplificado para performance */}
+          <div className="w-full h-full flex flex-col">
             {/* Header */}
-            <div className="flex items-center gap-3 h-16 px-4 border-b border-gray-200 dark:border-gray-700/50">
+            <div className="flex items-center gap-3 h-14 px-4 border-b border-gray-200 dark:border-gray-700/50 flex-shrink-0">
               <UserAvatar
                 user={user}
                 profile={profile}
-                size="md"
+                size="sm"
                 showStatus
                 clickable
                 onClick={() => {
@@ -381,79 +384,58 @@ export function AppSidebar() {
                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
                   {profile?.full_name || user?.email?.split("@")[0] || "Usuário"}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Membro</p>
               </div>
             </div>
 
-            {/* Menu Items - Direct list without categories */}
-            <div className="flex-1 flex flex-col py-3 px-3 overflow-y-auto scrollbar-hide">
-              <div className="space-y-1">
-                {allMenuItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = item.url === "/dashboard" 
-                    ? location.pathname === "/dashboard"
-                    : location.pathname.startsWith(item.url);
-                  
-                  return (
-                    <NavLink
-                      key={item.title}
-                      to={item.url}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
-                        isActive
-                          ? "bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg shadow-pink-500/25"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-700/50 active:bg-gray-200 dark:active:bg-gray-600/50"
-                      )}
-                    >
-                      <Icon
-                        className={cn(
-                          "w-5 h-5 transition-colors flex-shrink-0",
-                          isActive
-                            ? "text-white"
-                            : "text-gray-500 dark:text-gray-300"
-                        )}
-                      />
-                      <span
-                        className={cn(
-                          "text-sm font-medium truncate transition-colors",
-                          isActive
-                            ? "text-white"
-                            : "text-gray-700 dark:text-gray-200"
-                        )}
-                      >
-                        {item.title}
-                      </span>
-                    </NavLink>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Menu Items - Lista direta sem animações pesadas */}
+            <nav className="flex-1 py-2 px-2 overflow-y-auto overscroll-contain">
+              {allMenuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = item.url === "/dashboard" 
+                  ? location.pathname === "/dashboard"
+                  : location.pathname.startsWith(item.url);
+                
+                return (
+                  <NavLink
+                    key={item.title}
+                    to={item.url}
+                    onClick={handleMobileNavigation}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-0.5",
+                      isActive
+                        ? "bg-pink-500 text-white"
+                        : "text-gray-700 dark:text-gray-200 active:bg-gray-100 dark:active:bg-gray-700/50"
+                    )}
+                  >
+                    <Icon className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-white" : "text-gray-500 dark:text-gray-400")} />
+                    <span className="text-sm font-medium">{item.title}</span>
+                  </NavLink>
+                );
+              })}
+            </nav>
 
             {/* Footer Actions */}
-            <div className="px-3 py-3 border-t border-gray-200 dark:border-gray-700/50 space-y-1">
-              <Button
-                variant="ghost"
+            <div className="px-2 py-2 border-t border-gray-200 dark:border-gray-700/50 flex-shrink-0">
+              <button
                 onClick={() => {
                   navigate('/dashboard/configuracoes');
                   setMobileMenuOpen(false);
                 }}
-                className="w-full justify-start gap-3 px-3 py-3 h-auto text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-700/50"
               >
                 <Settings className="w-5 h-5" />
                 <span className="text-sm font-medium">Configurações</span>
-              </Button>
-              <Button
-                variant="ghost"
+              </button>
+              <button
                 onClick={() => {
                   handleLogout();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full justify-start gap-3 px-3 py-3 h-auto text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-red-600 dark:text-red-400 active:bg-red-50 dark:active:bg-red-950/20"
               >
                 <LogOut className="w-5 h-5" />
                 <span className="text-sm font-medium">Sair</span>
-              </Button>
+              </button>
             </div>
           </div>
         </SheetContent>
