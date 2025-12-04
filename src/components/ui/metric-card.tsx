@@ -18,42 +18,42 @@ interface MetricCardProps {
   className?: string;
 }
 
-// Cores com melhor contraste no modo claro
+// Modo claro: pastéis suaves | Modo escuro: fundo neutro escuro com hierarquia via ícones/bordas
 const VARIANT_STYLES = {
   default: {
-    cardBg: "bg-purple-50/80 dark:bg-purple-950/30",
-    iconBg: "bg-purple-600 dark:bg-purple-500",
-    border: "border-purple-200 dark:border-purple-800",
-    glow: "shadow-md hover:shadow-lg shadow-purple-100 dark:shadow-purple-900/50",
-    titleColor: "text-purple-800 dark:text-purple-300",
+    cardBg: "bg-purple-50 dark:bg-gray-900/80",
+    iconBg: "bg-purple-500 dark:bg-purple-600",
+    border: "border-purple-200/60 dark:border-purple-500/20",
+    glow: "shadow-sm hover:shadow-md",
+    titleColor: "text-purple-700 dark:text-purple-400",
   },
   success: {
-    cardBg: "bg-emerald-50/80 dark:bg-emerald-950/30",
-    iconBg: "bg-emerald-600 dark:bg-emerald-500",
-    border: "border-emerald-200 dark:border-emerald-800",
-    glow: "shadow-md hover:shadow-lg shadow-emerald-100 dark:shadow-emerald-900/50",
-    titleColor: "text-emerald-800 dark:text-emerald-300",
+    cardBg: "bg-emerald-50 dark:bg-gray-900/80",
+    iconBg: "bg-emerald-500 dark:bg-emerald-600",
+    border: "border-emerald-200/60 dark:border-emerald-500/20",
+    glow: "shadow-sm hover:shadow-md",
+    titleColor: "text-emerald-700 dark:text-emerald-400",
   },
   warning: {
-    cardBg: "bg-amber-50/80 dark:bg-amber-950/30",
-    iconBg: "bg-amber-600 dark:bg-amber-500",
-    border: "border-amber-200 dark:border-amber-800",
-    glow: "shadow-md hover:shadow-lg shadow-amber-100 dark:shadow-amber-900/50",
-    titleColor: "text-amber-800 dark:text-amber-300",
+    cardBg: "bg-amber-50 dark:bg-gray-900/80",
+    iconBg: "bg-amber-500 dark:bg-amber-600",
+    border: "border-amber-200/60 dark:border-amber-500/20",
+    glow: "shadow-sm hover:shadow-md",
+    titleColor: "text-amber-700 dark:text-amber-400",
   },
   error: {
-    cardBg: "bg-red-50/80 dark:bg-red-950/30",
-    iconBg: "bg-red-600 dark:bg-red-500",
-    border: "border-red-200 dark:border-red-800",
-    glow: "shadow-md hover:shadow-lg shadow-red-100 dark:shadow-red-900/50",
-    titleColor: "text-red-800 dark:text-red-300",
+    cardBg: "bg-red-50 dark:bg-gray-900/80",
+    iconBg: "bg-red-500 dark:bg-red-600",
+    border: "border-red-200/60 dark:border-red-500/20",
+    glow: "shadow-sm hover:shadow-md",
+    titleColor: "text-red-700 dark:text-red-400",
   },
   info: {
-    cardBg: "bg-blue-50/80 dark:bg-blue-950/30",
-    iconBg: "bg-blue-600 dark:bg-blue-500",
-    border: "border-blue-200 dark:border-blue-800",
-    glow: "shadow-md hover:shadow-lg shadow-blue-100 dark:shadow-blue-900/50",
-    titleColor: "text-blue-800 dark:text-blue-300",
+    cardBg: "bg-blue-50 dark:bg-gray-900/80",
+    iconBg: "bg-blue-500 dark:bg-blue-600",
+    border: "border-blue-200/60 dark:border-blue-500/20",
+    glow: "shadow-sm hover:shadow-md",
+    titleColor: "text-blue-700 dark:text-blue-400",
   },
 } as const;
 

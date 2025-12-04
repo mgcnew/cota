@@ -25,6 +25,8 @@ import { useToast } from "@/hooks/use-toast";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
+import { ProductsHeroCard } from "@/components/products/ProductsHeroCard";
+import { ProductsStatusSummary } from "@/components/products/ProductsStatusSummary";
 
 // Lazy load dialogs
 const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
@@ -86,24 +88,20 @@ export default function Produtos() {
         totalProducts: 0,
         totalCategories: 0,
         activeQuotes: 0,
-        produtosPorStatus: {
-          ativos: 0,
-          cotados: 0,
-          pendentes: 0,
-          semCotacao: 0
-        },
+        produtosPorStatus: { ativos: 0, cotados: 0, pendentes: 0, semCotacao: 0 },
         percentualComCotacao: 0,
         topCategoria: null,
         mediaCotacoesPorProduto: "0.0",
         averageValue: "R$ 0,00",
+        averageValueNumeric: 0,
         economiaMediaPorProduto: "0",
+        economiaPotencial: 0,
         percentualEconomiaMedia: 0,
         productsWithPrices: 0,
       };
     }
 
     const totalCategories = Math.max(0, safeCategories.length - 1);
-
     const activeQuotes = safeProducts.reduce((sum, p) => sum + (p.quotesCount || 0), 0);
 
     const produtosPorStatus = {
@@ -123,8 +121,7 @@ export default function Produtos() {
       const cat = p.category || 'Sem Categoria';
       categoriaCount.set(cat, (categoriaCount.get(cat) || 0) + 1);
     });
-    const topCategoria = Array.from(categoriaCount.entries())
-      .sort((a, b) => b[1] - a[1])[0];
+    const topCategoriaEntry = Array.from(categoriaCount.entries()).sort((a, b) => b[1] - a[1])[0];
 
     const produtosComCotacaoParaMedia = safeProducts.filter((p) => (p.quotesCount || 0) > 0);
     const mediaCotacoesPorProduto = produtosComCotacaoParaMedia.length > 0
@@ -133,7 +130,9 @@ export default function Produtos() {
 
     const productsWithPrices = safeProducts.filter((p) => p.lastQuotePrice !== "R$ 0,00");
     let averageValue = "R$ 0,00";
+    let averageValueNumeric = 0;
     let economiaMediaPorProduto = "0";
+    let economiaPotencial = 0;
     let percentualEconomiaMedia = 0;
 
     if (productsWithPrices.length > 0) {
@@ -141,13 +140,14 @@ export default function Produtos() {
         const price = parseFloat(p.lastQuotePrice.replace(/[^\d,]/g, '').replace(',', '.'));
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
-      averageValue = `R$ ${(total / productsWithPrices.length).toFixed(2)}`;
+      averageValueNumeric = total / productsWithPrices.length;
+      averageValue = `R$ ${averageValueNumeric.toFixed(2)}`;
 
       const produtosComMultiplasCotacoes = safeProducts.filter((p) => (p.quotesCount || 0) >= 2);
       if (produtosComMultiplasCotacoes.length > 0) {
         percentualEconomiaMedia = Math.round((produtosComMultiplasCotacoes.length / productsWithPrices.length) * 12);
-        const valorMedio = total / productsWithPrices.length;
-        economiaMediaPorProduto = (valorMedio * (percentualEconomiaMedia / 100)).toFixed(2);
+        economiaMediaPorProduto = (averageValueNumeric * (percentualEconomiaMedia / 100)).toFixed(2);
+        economiaPotencial = total * 0.08; // 8% de economia potencial estimada
       }
     }
 
@@ -157,10 +157,12 @@ export default function Produtos() {
       activeQuotes,
       produtosPorStatus,
       percentualComCotacao,
-      topCategoria: topCategoria ? { nome: topCategoria[0], count: topCategoria[1] } : null,
+      topCategoria: topCategoriaEntry ? { nome: topCategoriaEntry[0], count: topCategoriaEntry[1] } : null,
       mediaCotacoesPorProduto,
       averageValue,
+      averageValueNumeric,
       economiaMediaPorProduto,
+      economiaPotencial,
       percentualEconomiaMedia,
       productsWithPrices: productsWithPrices.length,
     };
@@ -262,24 +264,31 @@ export default function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Cards de Métricas com ResponsiveGrid */}
+          {/* Hero Section - Destaque Executivo */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+            <ProductsHeroCard
+              totalProducts={stats.totalProducts}
+              productsWithPrice={stats.productsWithPrices}
+              averagePrice={stats.averageValueNumeric}
+              economyPotential={stats.economiaPotencial}
+              percentWithQuotes={stats.percentualComCotacao}
+            />
+            <ProductsStatusSummary
+              ativos={stats.produtosPorStatus.ativos}
+              cotados={stats.produtosPorStatus.cotados}
+              pendentes={stats.produtosPorStatus.pendentes}
+              semCotacao={stats.produtosPorStatus.semCotacao}
+              topCategoria={stats.topCategoria}
+            />
+          </section>
+
+          {/* Cards de Métricas Secundárias */}
           <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6 overflow-visible">
             <MetricCard
-              title="Total de Produtos"
-              value={stats.totalProducts.toLocaleString('pt-BR')}
-              icon={Package}
-              variant="default"
-              trend={{
-                value: `${stats.percentualComCotacao}%`,
-                label: "com cotação",
-                type: "neutral"
-              }}
-            />
-            <MetricCard
-              title="Categorias Ativas"
+              title="Categorias"
               value={stats.totalCategories}
               icon={Filter}
-              variant="default"
+              variant="warning"
               trend={{
                 value: stats.topCategoria ? stats.topCategoria.count.toString() : "0",
                 label: stats.topCategoria ? `em ${capitalize(stats.topCategoria.nome)}` : "produtos",
@@ -290,7 +299,7 @@ export default function Produtos() {
               title="Cotações Ativas"
               value={typeof stats.activeQuotes === 'number' ? stats.activeQuotes.toLocaleString('pt-BR') : 0}
               icon={FileText}
-              variant="default"
+              variant="info"
               trend={{
                 value: stats.mediaCotacoesPorProduto,
                 label: "por produto",
@@ -304,8 +313,19 @@ export default function Produtos() {
               variant="success"
               trend={{
                 value: stats.productsWithPrices.toString(),
-                label: "produtos com preço",
+                label: "com preço",
                 type: "neutral"
+              }}
+            />
+            <MetricCard
+              title="Economia Potencial"
+              value={`${stats.percentualEconomiaMedia}%`}
+              icon={TrendingUp}
+              variant="success"
+              trend={{
+                value: `R$ ${stats.economiaMediaPorProduto}`,
+                label: "por produto",
+                type: "positive"
               }}
             />
           </ResponsiveGrid>
