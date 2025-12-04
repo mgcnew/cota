@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -170,76 +170,75 @@ export function ReportPreview({
     }
   };
 
+  const footerContent = (
+    <div className="flex justify-between items-center">
+      <div className="text-sm text-muted-foreground">
+        Este é apenas um preview. O relatório completo terá mais detalhes e formatação profissional.
+      </div>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          onClick={() => onDownload('excel')}
+          disabled={!reportData}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Excel
+        </Button>
+        <Button
+          onClick={() => onDownload('pdf')}
+          disabled={!reportData}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          PDF
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Preview: {getReportTitle()}
-            </DialogTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-              >
-                <ZoomOut className="h-3 w-3" />
-              </Button>
-              <span className="text-sm font-medium">{Math.round(zoom * 100)}%</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setZoom(Math.min(2, zoom + 0.1))}
-              >
-                <ZoomIn className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          {/* Preview Content */}
-          <ScrollArea className="h-96 w-full border rounded-lg p-4">
-            <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
-              {/* Report Header */}
-              <div className="mb-6 pb-4 border-b">
-                <h1 className="text-2xl font-bold text-foreground">Sistema de Cotações</h1>
-                <h2 className="text-lg text-muted-foreground">{getReportTitle()}</h2>
-                <p className="text-sm text-muted-foreground">Gerado em: {formatDate(new Date())}</p>
-              </div>
-              
-              {/* Report Content */}
-              {renderPreviewContent()}
-            </div>
-          </ScrollArea>
-          
-          {/* Download Actions */}
-          <div className="flex justify-between items-center pt-4 border-t">
-            <div className="text-sm text-muted-foreground">
-              Este é apenas um preview. O relatório completo terá mais detalhes e formatação profissional.
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => onDownload('excel')}
-                disabled={!reportData}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Excel
-              </Button>
-              <Button
-                onClick={() => onDownload('pdf')}
-                disabled={!reportData}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                PDF
-              </Button>
-            </div>
-          </div>
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={onClose}
+      title={`Preview: ${getReportTitle()}`}
+      footer={footerContent}
+      desktopMaxWidth="xl"
+      className="max-w-4xl"
+    >
+      <div className="space-y-4">
+        {/* Zoom Controls */}
+        <div className="flex items-center gap-2 justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
+          >
+            <ZoomOut className="h-3 w-3" />
+          </Button>
+          <span className="text-sm font-medium">{Math.round(zoom * 100)}%</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoom(Math.min(2, zoom + 0.1))}
+          >
+            <ZoomIn className="h-3 w-3" />
+          </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        {/* Preview Content */}
+        <ScrollArea className="h-96 w-full border rounded-lg p-4">
+          <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
+            {/* Report Header */}
+            <div className="mb-6 pb-4 border-b">
+              <h1 className="text-2xl font-bold text-foreground">Sistema de Cotações</h1>
+              <h2 className="text-lg text-muted-foreground">{getReportTitle()}</h2>
+              <p className="text-sm text-muted-foreground">Gerado em: {formatDate(new Date())}</p>
+            </div>
+            
+            {/* Report Content */}
+            {renderPreviewContent()}
+          </div>
+        </ScrollArea>
+      </div>
+    </ResponsiveModal>
   );
 }

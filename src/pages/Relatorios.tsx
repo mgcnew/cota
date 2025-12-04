@@ -24,6 +24,7 @@ import { useDatePeriod } from "@/hooks/useDatePeriod";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
+import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 
 // Layout components
 import { ReportsHeader, PeriodDialog, FiltersDialog } from "@/components/reports/layout";
@@ -206,8 +207,8 @@ export default function Relatorios() {
   return (
     <PageWrapper>
       <div className="page-container">
-        {/* Metric Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 overflow-visible">
+        {/* Metric Cards com ResponsiveGrid */}
+        <ResponsiveGrid gap="md" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-6 overflow-visible">
           <MetricCard
             title="Economia Total"
             value={estatisticas.economiaTotal}
@@ -236,7 +237,7 @@ export default function Relatorios() {
             variant="warning"
             trend={produtosCardTrend}
           />
-        </div>
+        </ResponsiveGrid>
 
         {/* Page Header with Actions */}
         <PageHeader

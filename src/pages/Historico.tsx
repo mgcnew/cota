@@ -18,6 +18,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
+import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { History, Search, Filter, Eye, Download, Calendar, TrendingUp, TrendingDown, FileText, ShoppingCart, Building2, X, Loader2, Activity, Clock, DollarSign } from "lucide-react";
 
 export default function Historico() {
@@ -359,8 +360,8 @@ export default function Historico() {
   return (
     <PageWrapper>
       <div className="page-container">
-      {/* MetricCards padronizados */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 overflow-visible">
+      {/* MetricCards padronizados com ResponsiveGrid */}
+      <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6 overflow-visible">
         <MetricCard
           title="Total de Ações"
           value={stats.totalAcoes}
@@ -405,7 +406,7 @@ export default function Historico() {
             type: "positive"
           }}
         />
-      </div>
+      </ResponsiveGrid>
 
       {/* PageHeader */}
       <PageHeader

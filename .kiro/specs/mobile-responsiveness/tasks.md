@@ -237,55 +237,118 @@
     - **Property 8: Font sizes respect mobile scale**
     - **Validates: Requirements 8.1, 8.2, 8.3**
 
-- [ ] 12. Implementar espaçamento responsivo
-  - [ ] 12.1 Criar classes de espaçamento responsivo
+- [-] 12. Implementar espaçamento responsivo
+
+
+
+
+  - [x] 12.1 Criar classes de espaçamento responsivo
+
+
+
+
+
     - Padding horizontal: 16px em mobile
     - Gap entre seções: 16px em mobile
     - Headers compactos em mobile
     - _Requirements: 9.1, 9.2, 9.3_
-  - [ ]* 12.2 Escrever property test para spacing
+  - [x] 12.2 Escrever property test para spacing
+
+
+
+
+
     - **Property 9: Spacing respects mobile scale**
     - **Validates: Requirements 9.1, 9.2**
 
-- [ ] 13. Checkpoint - Garantir que todos os testes passam
+- [x] 13. Checkpoint - Garantir que todos os testes passam
+
+
+
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 14. Migrar componentes existentes (REMOVER DUPLICAÇÕES)
-  - [ ] 14.1 Migrar modais existentes para ResponsiveModal
+- [x] 14. Migrar componentes existentes (REMOVER DUPLICAÇÕES)
+
+
+
+
+
+  - [x] 14.1 Migrar modais existentes para ResponsiveModal
+
+
     - Identificar todos os Dialog usados no sistema
     - Substituir por ResponsiveModal mantendo funcionalidade
     - _Requirements: 1.1, 1.2_
-  - [ ] 14.2 Migrar tabelas existentes para ResponsiveTable
+  - [x] 14.2 Migrar tabelas existentes para ResponsiveTable
+
+
     - Identificar páginas com código duplicado: Cotacoes.tsx, Pedidos.tsx, Fornecedores.tsx
     - REMOVER seções `{/* Mobile Cards View */}` e `{/* Desktop Table View */}` duplicadas
     - Substituir por ResponsiveTable que usa renderização condicional (não CSS hiding)
     - Definir prioridades de colunas
     - _Requirements: 2.1, 2.2, 2.3, 6.5_
-  - [ ] 14.3 Migrar cards de métricas para ResponsiveCard
+  - [x] 14.3 Migrar cards de métricas para ResponsiveCard
+
     - Atualizar MetricCard para usar ResponsiveCard
     - Aplicar grid responsivo no Dashboard
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 15. Implementar navegação responsiva
-  - [ ] 15.1 Atualizar sidebar para mobile
+- [x] 15. Implementar navegação responsiva
+
+
+
+
+
+
+
+  - [x] 15.1 Atualizar sidebar para mobile
+
+
+
+
     - Converter para menu hamburger em mobile
     - Implementar drawer lateral com 80% de largura
     - Fechar ao tocar fora
     - _Requirements: 5.1, 5.2, 5.3_
-  - [ ] 15.2 Implementar tabs responsivas
+  - [x] 15.2 Implementar tabs responsivas
+
+
+
+
     - Converter para scroll horizontal em mobile
     - Adicionar indicador de mais itens
     - _Requirements: 5.5_
-  - [ ] 15.3 Implementar paginação responsiva
+  - [x] 15.3 Implementar paginação responsiva
+
+
+
+
     - Simplificar para prev/next em mobile
     - Manter indicador de página atual
     - _Requirements: 9.5_
 
-- [ ] 16. Implementar filtros responsivos
-  - [ ] 16.1 Criar componente ResponsiveFilters
+- [x] 16. Implementar filtros responsivos
+
+
+
+
+
+
+  - [x] 16.1 Criar componente ResponsiveFilters
+
     - Colapsar filtros em botão em mobile
     - Abrir drawer de filtros ao clicar
     - _Requirements: 9.4_
 
-- [ ] 17. Final Checkpoint - Garantir que todos os testes passam
+- [x] 17. Final Checkpoint - Garantir que todos os testes passam
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.

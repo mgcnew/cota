@@ -14,6 +14,7 @@ import { Table, TableCell, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MetricCard } from "@/components/ui/metric-card";
+import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
@@ -152,12 +153,12 @@ export default function Cotacoes() {
   return (
     <PageWrapper>
       <div className="page-container">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6">
           <MetricCard title="Ativas" value={stats.ativas} icon={FileText} variant="info" trend={{ value: `${stats.percentualAtivas}%`, label: "do total", type: "neutral" }} />
           <MetricCard title="Pendentes" value={stats.pendentes} icon={Calendar} variant="default" trend={{ value: "0", label: "atrasadas", type: "positive" }} />
           <MetricCard title="Economia" value={stats.economiaFormatada} icon={DollarSign} variant="success" trend={{ value: "Total", label: "economizado", type: "positive" }} />
           <MetricCard title="Fornecedores" value={stats.mediaFornecedores} icon={Building2} variant="default" trend={{ value: stats.totalFornecedoresUnicos.toString(), label: "únicos", type: "neutral" }} />
-        </div>
+        </ResponsiveGrid>
         <PageHeader title="Cotações" icon={ClipboardList} actions={<div className="flex items-center gap-2"><ViewToggle view={viewMode} onViewChange={setViewMode} /><DropdownMenu><DropdownMenuTrigger asChild><Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-10 rounded-xl"><Plus className="h-4 w-4 mr-2" />Ações</Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-48"><DropdownMenuLabel>Gerenciar</DropdownMenuLabel><DropdownMenuSeparator /><DropdownMenuItem onSelect={() => startTransition(() => setAddDialogOpen(true))}><Plus className="h-4 w-4 mr-2" />Nova Cotação</DropdownMenuItem><DropdownMenuItem onSelect={handleExportQuotes}><Download className="h-4 w-4 mr-2" />Exportar</DropdownMenuItem></DropdownMenuContent></DropdownMenu></div>}>
           <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full">
             <ExpandableSearch value={searchTerm} onChange={setSearchTerm} placeholder="Buscar..." accentColor="teal" expandedWidth="w-64" />

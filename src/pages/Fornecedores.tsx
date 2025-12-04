@@ -24,6 +24,7 @@ import { usePagination } from "@/hooks/usePagination";
 
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
+import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 
 // Lazy load dialogs
 const AddSupplierDialog = lazy(() => import("@/components/forms/AddSupplierDialog").then(m => ({ default: m.default })));
@@ -257,7 +258,7 @@ export default function Fornecedores() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6">
             <MetricCard
               title="Fornecedores"
               value={stats.total}
@@ -286,7 +287,7 @@ export default function Fornecedores() {
               trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
               variant="warning"
             />
-          </div>
+          </ResponsiveGrid>
 
           <PageHeader
             title="Fornecedores"

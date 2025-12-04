@@ -24,6 +24,7 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useToast } from "@/hooks/use-toast";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
+import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 
 // Lazy load dialogs
 const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
@@ -261,8 +262,8 @@ export default function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Cards de Métricas */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 overflow-visible">
+          {/* Cards de Métricas com ResponsiveGrid */}
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6 overflow-visible">
             <MetricCard
               title="Total de Produtos"
               value={stats.totalProducts.toLocaleString('pt-BR')}
@@ -307,7 +308,7 @@ export default function Produtos() {
                 type: "neutral"
               }}
             />
-          </div>
+          </ResponsiveGrid>
 
           {/* Page Header */}
           <PageHeader

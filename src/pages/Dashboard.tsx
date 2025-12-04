@@ -11,6 +11,7 @@ import {
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { MetricCard } from '@/components/ui/metric-card';
+import { ResponsiveGrid } from '@/components/responsive/ResponsiveGrid';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -135,8 +136,8 @@ export default function DashboardRefactored() {
                     </div>
                 </div>
 
-                {/* Cards de Métricas - Responsivos */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                {/* Cards de Métricas - Responsivos com ResponsiveGrid */}
+                <ResponsiveGrid gap="md" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
                     <MetricCard
                         title="Cotações Ativas"
                         value={metrics.cotacoesAtivas}
@@ -184,7 +185,7 @@ export default function DashboardRefactored() {
                             type: metrics.variacaoTaxaAprovacao >= 0 ? "positive" : "negative"
                         }}
                     />
-                </div>
+                </ResponsiveGrid>
 
                 {/* Gráficos - Responsivos */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

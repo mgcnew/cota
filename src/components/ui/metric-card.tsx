@@ -1,7 +1,9 @@
 import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ResponsiveCard } from "@/components/responsive/ResponsiveCard";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 interface MetricCardProps {
   title: string;
@@ -20,7 +22,8 @@ interface MetricCardProps {
  * MetricCard - Componente memoizado para exibir métricas
  * 
  * Usa React.memo para evitar re-renders desnecessários quando as props não mudam.
- * Requirements: 6.5
+ * Utiliza ResponsiveCard para padding responsivo automático.
+ * Requirements: 3.1, 3.5, 6.5
  */
 export const MetricCard = memo(function MetricCard({
   title,
@@ -30,6 +33,7 @@ export const MetricCard = memo(function MetricCard({
   variant = "default",
   className
 }: MetricCardProps) {
+  const { isMobile } = useBreakpoint();
   const variantStyles = {
     default: {
       cardBg: "bg-purple-50 dark:bg-purple-950/30",
@@ -81,29 +85,39 @@ export const MetricCard = memo(function MetricCard({
       ? "text-red-600 dark:text-red-400"
       : "text-gray-600 dark:text-gray-400";
 
+  // Icon size: 25% smaller on mobile (Requirement 3.5)
+  const iconSize = isMobile 
+    ? "h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5"
+    : "h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5";
+
   return (
-    <Card
+    <ResponsiveCard
+      size="default"
+      padding="md"
+      interactive={true}
       className={cn(
-        "relative overflow-hidden border-2 transition-all duration-200 hover:scale-[1.02] group",
+        "relative overflow-hidden border-2 transition-all duration-200 group",
+        !isMobile && "hover:scale-[1.02]",
         styles.border,
         styles.glow,
         styles.cardBg,
         className
       )}
     >
-      <CardHeader className="relative flex flex-row items-center justify-between space-y-0 p-3 sm:p-4 pb-1 sm:pb-2">
+      <div className="relative flex flex-row items-center justify-between space-y-0">
         <CardTitle className={cn("text-xs sm:text-sm font-semibold truncate pr-2", styles.titleColor)}>
           {title}
         </CardTitle>
         <div className={cn(
-          "p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl shadow-md group-hover:scale-110 transition-transform duration-200 flex-shrink-0",
+          "p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl shadow-md flex-shrink-0",
+          !isMobile && "group-hover:scale-110 transition-transform duration-200",
           styles.iconBg
         )}>
-          <Icon className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5", styles.iconColor)} />
+          <Icon className={cn(iconSize, styles.iconColor)} />
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="relative p-3 sm:p-4 pt-1 sm:pt-2">
+      <div className="relative mt-2 sm:mt-3">
         <div className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white truncate">
           {value}
         </div>
@@ -117,7 +131,7 @@ export const MetricCard = memo(function MetricCard({
             </span>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </ResponsiveCard>
   );
 });

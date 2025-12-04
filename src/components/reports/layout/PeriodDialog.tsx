@@ -11,7 +11,7 @@
 
 import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
 import { Calendar, Clock, CheckCircle } from "lucide-react";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import type { PeriodDialogProps } from "@/types/reports";
@@ -49,29 +49,50 @@ export const PeriodDialog: React.FC<PeriodDialogProps> = ({
     }
   };
 
+  const footerContent = (
+    <div className="flex items-center justify-between">
+      <div className="text-sm text-gray-600">
+        {startDate && endDate && isValidDateRange ? (
+          <span className="flex items-center gap-1">
+            <CheckCircle className="h-4 w-4 text-green-500" />
+            Período definido
+          </span>
+        ) : startDate && endDate && !isValidDateRange ? (
+          <span className="text-red-500">Período inválido</span>
+        ) : (
+          <span className="text-gray-500">Selecione um período</span>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="outline" 
+          onClick={() => onOpenChange(false)} 
+          className="text-gray-600 hover:text-gray-800"
+        >
+          Cancelar
+        </Button>
+        <Button 
+          onClick={handleApply} 
+          disabled={!isValidDateRange}
+          className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white disabled:opacity-50"
+        >
+          Aplicar período
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-hidden border-0 shadow-2xl rounded-xl sm:rounded-2xl p-0 flex flex-col">
-        {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100/60 bg-gradient-to-br from-purple-50/80 via-violet-50/60 to-purple-50/40 backdrop-blur-sm relative overflow-hidden">
-          {/* Decorative background effects */}
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-violet-500/5 to-purple-500/5"></div>
-          <div className="absolute top-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -translate-x-16 -translate-y-16"></div>
-          <div className="absolute bottom-0 right-0 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl translate-x-12 translate-y-12"></div>
-          
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-violet-500 to-purple-600 flex items-center justify-center text-white shadow-lg ring-2 ring-purple-100/50">
-              <Calendar className="h-5 w-5" />
-            </div>
-            <div>
-              <DialogTitle className="text-xl font-bold text-gray-900">Selecionar Período</DialogTitle>
-              <p className="text-sm text-gray-600 mt-0.5">Defina o intervalo de datas para os relatórios</p>
-            </div>
-          </div>
-        </DialogHeader>
-        
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title="Selecionar Período"
+      description="Defina o intervalo de datas para os relatórios"
+      footer={footerContent}
+      desktopMaxWidth="md"
+      className="w-[95vw] max-w-[500px]"
+    >
+      <div className="space-y-6">
           {/* Quick Presets */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -183,41 +204,8 @@ export const PeriodDialog: React.FC<PeriodDialogProps> = ({
               </div>
             </div>
           )}
-        </div>
-        
-        {/* Footer */}
-        <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
-          <div className="text-sm text-gray-600">
-            {startDate && endDate && isValidDateRange ? (
-              <span className="flex items-center gap-1">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Período definido
-              </span>
-            ) : startDate && endDate && !isValidDateRange ? (
-              <span className="text-red-500">Período inválido</span>
-            ) : (
-              <span className="text-gray-500">Selecione um período</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)} 
-              className="text-gray-600 hover:text-gray-800"
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleApply} 
-              disabled={!isValidDateRange}
-              className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white disabled:opacity-50"
-            >
-              Aplicar período
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ResponsiveModal>
   );
 };
 

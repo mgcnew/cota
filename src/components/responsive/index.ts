@@ -22,8 +22,21 @@ export type { ResponsiveFormFieldProps } from './ResponsiveFormField';
 export { ResponsiveFormActions } from './ResponsiveFormActions';
 export type { ResponsiveFormActionsProps } from './ResponsiveFormActions';
 
+export {
+  ResponsiveTabs,
+  ResponsiveTabsList,
+  ResponsiveTabsTrigger,
+  ResponsiveTabsContent,
+} from './ResponsiveTabs';
+
+export { ResponsivePagination } from './ResponsivePagination';
+export type { ResponsivePaginationProps } from './ResponsivePagination';
+
 export { LazyImage, SimpleLazyImage } from './LazyImage';
 export type { LazyImageProps } from './LazyImage';
+
+export { ResponsiveFilters } from './ResponsiveFilters';
+export type { ResponsiveFiltersProps } from './ResponsiveFilters';
 
 // Re-export useBreakpoint hook for convenience
 export { useBreakpoint, BREAKPOINTS } from '@/hooks/useBreakpoint';
