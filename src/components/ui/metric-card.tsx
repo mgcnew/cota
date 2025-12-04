@@ -18,42 +18,42 @@ interface MetricCardProps {
   className?: string;
 }
 
-// Modo claro: pastéis suaves | Modo escuro: fundo neutro escuro com hierarquia via ícones/bordas
+// Modo claro: cores vibrantes com hierarquia | Modo escuro: fundo neutro escuro
 const VARIANT_STYLES = {
   default: {
-    cardBg: "bg-purple-50 dark:bg-gray-900/80",
-    iconBg: "bg-purple-500 dark:bg-purple-600",
-    border: "border-purple-200/60 dark:border-purple-500/20",
-    glow: "shadow-sm hover:shadow-md",
-    titleColor: "text-purple-700 dark:text-purple-400",
+    cardBg: "bg-gradient-to-br from-purple-100 to-violet-50 dark:from-gray-900 dark:to-gray-900",
+    iconBg: "bg-purple-600 dark:bg-purple-600",
+    border: "border-purple-200/70 dark:border-purple-500/20",
+    glow: "shadow-md hover:shadow-lg",
+    titleColor: "text-purple-800 dark:text-purple-400",
   },
   success: {
-    cardBg: "bg-emerald-50 dark:bg-gray-900/80",
-    iconBg: "bg-emerald-500 dark:bg-emerald-600",
-    border: "border-emerald-200/60 dark:border-emerald-500/20",
-    glow: "shadow-sm hover:shadow-md",
-    titleColor: "text-emerald-700 dark:text-emerald-400",
+    cardBg: "bg-gradient-to-br from-emerald-100 to-teal-50 dark:from-gray-900 dark:to-gray-900",
+    iconBg: "bg-emerald-600 dark:bg-emerald-600",
+    border: "border-emerald-200/70 dark:border-emerald-500/20",
+    glow: "shadow-md hover:shadow-lg",
+    titleColor: "text-emerald-800 dark:text-emerald-400",
   },
   warning: {
-    cardBg: "bg-amber-50 dark:bg-gray-900/80",
-    iconBg: "bg-amber-500 dark:bg-amber-600",
-    border: "border-amber-200/60 dark:border-amber-500/20",
-    glow: "shadow-sm hover:shadow-md",
-    titleColor: "text-amber-700 dark:text-amber-400",
+    cardBg: "bg-gradient-to-br from-amber-100 to-yellow-50 dark:from-gray-900 dark:to-gray-900",
+    iconBg: "bg-amber-600 dark:bg-amber-600",
+    border: "border-amber-200/70 dark:border-amber-500/20",
+    glow: "shadow-md hover:shadow-lg",
+    titleColor: "text-amber-800 dark:text-amber-400",
   },
   error: {
-    cardBg: "bg-red-50 dark:bg-gray-900/80",
-    iconBg: "bg-red-500 dark:bg-red-600",
-    border: "border-red-200/60 dark:border-red-500/20",
-    glow: "shadow-sm hover:shadow-md",
-    titleColor: "text-red-700 dark:text-red-400",
+    cardBg: "bg-gradient-to-br from-red-100 to-rose-50 dark:from-gray-900 dark:to-gray-900",
+    iconBg: "bg-red-600 dark:bg-red-600",
+    border: "border-red-200/70 dark:border-red-500/20",
+    glow: "shadow-md hover:shadow-lg",
+    titleColor: "text-red-800 dark:text-red-400",
   },
   info: {
-    cardBg: "bg-blue-50 dark:bg-gray-900/80",
-    iconBg: "bg-blue-500 dark:bg-blue-600",
-    border: "border-blue-200/60 dark:border-blue-500/20",
-    glow: "shadow-sm hover:shadow-md",
-    titleColor: "text-blue-700 dark:text-blue-400",
+    cardBg: "bg-gradient-to-br from-blue-100 to-indigo-50 dark:from-gray-900 dark:to-gray-900",
+    iconBg: "bg-blue-600 dark:bg-blue-600",
+    border: "border-blue-200/70 dark:border-blue-500/20",
+    glow: "shadow-md hover:shadow-lg",
+    titleColor: "text-blue-800 dark:text-blue-400",
   },
 } as const;
 
@@ -80,7 +80,7 @@ export const MetricCard = memo(function MetricCard({
       padding="md"
       interactive
       className={cn(
-        "relative overflow-hidden border-2 transition-all duration-200 group",
+        "relative overflow-hidden border transition-all duration-200 group",
         styles.border,
         styles.glow,
         styles.cardBg,
