@@ -99,7 +99,7 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#F6F7F9] dark:bg-[#16181D] overflow-x-hidden">
+    <div className="min-h-screen w-full bg-background overflow-x-hidden">
       {/* Desktop Sidebar Flutuante */}
       <AppSidebar />
 
@@ -108,7 +108,7 @@ export function AppLayout() {
         {/* Header Fixo Minimalista */}
         <header
           className={cn(
-            "fixed top-1 right-1 left-1 md:right-1 z-40 h-16 bg-white/80 dark:bg-[#1C1F26]/95 backdrop-blur-xl border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300 ease-in-out",
+            "fixed top-1 right-1 left-1 md:right-1 z-40 h-16 bg-card/80 backdrop-blur-xl border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300 ease-in-out",
             isSidebarExpanded ? "md:left-[17rem]" : "md:left-24"
           )}
         >

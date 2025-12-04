@@ -1272,3 +1272,67 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================
+   DARK MODE CONSISTENCY UTILITIES
+   Standardized colors using CSS variables
+   ============================================ */
+
+@layer components {
+  /* Card backgrounds - use CSS variables for consistency */
+  .bg-card-surface {
+    @apply bg-white dark:bg-card;
+  }
+  
+  .bg-card-elevated {
+    @apply bg-white dark:bg-card;
+  }
+  
+  /* Background surfaces */
+  .bg-surface-primary {
+    @apply bg-background;
+  }
+  
+  .bg-surface-secondary {
+    @apply bg-gray-50 dark:bg-secondary;
+  }
+  
+  /* Border colors - consistent across themes */
+  .border-subtle {
+    @apply border-gray-200 dark:border-border;
+  }
+  
+  .border-muted {
+    @apply border-gray-100 dark:border-border/50;
+  }
+  
+  /* Text colors - semantic naming */
+  .text-primary-content {
+    @apply text-gray-900 dark:text-foreground;
+  }
+  
+  .text-secondary-content {
+    @apply text-gray-600 dark:text-muted-foreground;
+  }
+  
+  .text-muted-content {
+    @apply text-gray-500 dark:text-muted-foreground/70;
+  }
+}
+
+/* Chart tooltip styles for dark mode */
+@layer utilities {
+  .chart-tooltip {
+    background-color: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark .chart-tooltip {
+    background-color: hsl(var(--card)) !important;
+    border-color: hsl(var(--border)) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  }
+}

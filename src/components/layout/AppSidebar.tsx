@@ -168,7 +168,7 @@ export function AppSidebar() {
     expanded?: boolean;
     mobile?: boolean;
   }) => (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-[#1a1d24] overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-card overflow-hidden">
       {/* Header */}
       <div
         className={cn(
@@ -340,7 +340,7 @@ export function AppSidebar() {
           isSidebarExpanded ? "w-64" : "w-[72px]"
         )}
       >
-        <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg shadow-black/10 dark:shadow-black/30 border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-[#1a1d24]">
+        <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg shadow-black/10 dark:shadow-black/30 border border-subtle bg-card">
           <SidebarContent expanded={isSidebarExpanded} />
         </div>
       </div>
@@ -358,7 +358,7 @@ export function AppSidebar() {
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="p-0 w-[280px] border-r border-gray-200 dark:border-gray-700/50 bg-white dark:bg-[#1a1d24]"
+          className="p-0 w-[280px] border-r border-subtle bg-card"
         >
           <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
           <SheetDescription className="sr-only">

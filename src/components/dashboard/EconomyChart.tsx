@@ -41,15 +41,15 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
   }, [data]);
 
   return (
-    <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/30 shadow-sm rounded-xl transition-all duration-300 hover:shadow-md">
-      <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-gray-100 dark:border-gray-700/30">
+    <Card className="bg-card border border-subtle shadow-sm rounded-xl transition-all duration-300 hover:shadow-md">
+      <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-muted">
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
               <div className="p-1.5 sm:p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg shadow-sm">
                 <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
               </div>
-              <span className="font-semibold text-gray-900 dark:text-white truncate">Economia Gerada</span>
+              <span className="font-semibold text-foreground truncate">Economia Gerada</span>
             </CardTitle>
             <Select value={period} onValueChange={onPeriodChange}>
               <SelectTrigger className="w-[100px] sm:w-[140px] h-8 sm:h-9 text-xs border-gray-200 dark:border-gray-700/60 hover:border-green-400">
@@ -67,8 +67,8 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs">
               <div className="flex items-center gap-1 sm:gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-gray-600 dark:text-gray-400">Total:</span>
-                <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(stats.totalEconomia)}</span>
+                <span className="text-muted-foreground">Total:</span>
+                <span className="font-semibold text-foreground">{formatCurrency(stats.totalEconomia)}</span>
                 <span className={`flex items-center gap-1 ${stats.trendEconomia >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                   {stats.trendEconomia >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                   {Math.abs(stats.trendEconomia).toFixed(1)}%
@@ -105,13 +105,14 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'rgba(255,255,255,0.95)',
-                  border: '1px solid #e5e7eb',
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
                   boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                   fontSize: '12px',
+                  color: 'hsl(var(--foreground))',
                 }}
-                labelStyle={{ fontWeight: 600, marginBottom: '4px' }}
+                labelStyle={{ fontWeight: 600, marginBottom: '4px', color: 'hsl(var(--foreground))' }}
                 formatter={(value: number) => [formatCurrency(value), 'Economia']}
               />
               <Area

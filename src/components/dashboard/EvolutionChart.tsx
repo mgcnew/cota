@@ -53,15 +53,15 @@ export function EvolutionChart({ data, period, onPeriodChange, isLoading }: Evol
   );
 
   return (
-    <Card className="col-span-1 lg:col-span-2 bg-white dark:bg-[#1C1F26] border border-gray-200 dark:border-gray-700/30 shadow-sm rounded-xl">
-      <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-gray-100 dark:border-gray-700/30">
+    <Card className="col-span-1 lg:col-span-2 bg-card border border-subtle shadow-sm rounded-xl">
+      <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-muted">
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
               <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary to-primary-light rounded-lg shadow-sm">
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
               </div>
-              <span className="font-semibold text-gray-900 dark:text-white truncate">Evolução das Cotações</span>
+              <span className="font-semibold text-foreground truncate">Evolução das Cotações</span>
             </CardTitle>
             <Select value={period} onValueChange={onPeriodChange}>
               <SelectTrigger className="w-[100px] sm:w-[140px] h-8 sm:h-9 text-xs">
@@ -79,14 +79,14 @@ export function EvolutionChart({ data, period, onPeriodChange, isLoading }: Evol
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs">
               <div className="flex items-center gap-1 sm:gap-2">
                 <div className="w-2 h-2 rounded-full bg-purple-500" />
-                <span className="text-gray-600 dark:text-gray-400">Cotações:</span>
-                <span className="font-semibold text-gray-900 dark:text-white">{Math.round(stats.avgCotacoes)}</span>
+                <span className="text-muted-foreground">Cotações:</span>
+                <span className="font-semibold text-foreground">{Math.round(stats.avgCotacoes)}</span>
                 <TrendIndicator value={stats.trendCotacoes} color="purple" />
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-gray-600 dark:text-gray-400">Fornec:</span>
-                <span className="font-semibold text-gray-900 dark:text-white">{Math.round(stats.avgFornecedores)}</span>
+                <span className="text-muted-foreground">Fornec:</span>
+                <span className="font-semibold text-foreground">{Math.round(stats.avgFornecedores)}</span>
                 <TrendIndicator value={stats.trendFornecedores} color="green" />
               </div>
             </div>
@@ -108,13 +108,14 @@ export function EvolutionChart({ data, period, onPeriodChange, isLoading }: Evol
               <ReferenceLine y={stats.avgCotacoes} stroke="#7C3AED" strokeDasharray="4 4" strokeWidth={1} strokeOpacity={0.5} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'rgba(255,255,255,0.95)',
-                  border: '1px solid #e5e7eb',
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
                   boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                   fontSize: '12px',
+                  color: 'hsl(var(--foreground))',
                 }}
-                labelStyle={{ fontWeight: 600, marginBottom: '4px' }}
+                labelStyle={{ fontWeight: 600, marginBottom: '4px', color: 'hsl(var(--foreground))' }}
               />
               <Line type="monotone" dataKey="cotacoes" name="Cotações" stroke="#7C3AED" strokeWidth={2.5}
                 dot={{ r: 4, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
