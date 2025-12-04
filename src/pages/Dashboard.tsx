@@ -1,208 +1,158 @@
 import { useState, useMemo, useCallback } from 'react';
-import {
-    BarChart3,
-    DollarSign,
-    Users,
-    Target,
-    LayoutDashboard,
-    Calendar,
-    Filter
-} from 'lucide-react';
+import { LayoutDashboard, Calendar, Filter, BarChart3, DollarSign, Users, Target } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { MetricCard } from '@/components/ui/metric-card';
 import { ResponsiveGrid } from '@/components/responsive/ResponsiveGrid';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
 import { useDashboard } from '@/hooks/useDashboard';
-
 import { EvolutionChart } from '@/components/dashboard/EvolutionChart';
 import { EconomyChart } from '@/components/dashboard/EconomyChart';
 
+const PERIOD_OPTIONS = [
+  { value: '7d', label: '7 dias' },
+  { value: '1m', label: '1 mês' },
+  { value: '3m', label: '3 meses' },
+  { value: '6m', label: '6 meses' },
+  { value: '1y', label: '1 ano' },
+] as const;
+
+const MONTHS_MAP: Record<string, number> = { '1m': 1, '3m': 3, '6m': 6, '1y': 12 };
 
 const DEFAULT_METRICS = {
-    cotacoesAtivas: 0,
-    fornecedores: 0,
-    economiaGerada: 0,
-    economiaPotencial: 0,
-    eficienciaEconomia: 0,
-    competitividadeMedia: 0,
-    mediaFornecedoresParticipantes: 0,
-    produtosCotados: 0,
-    taxaAtividade: 0,
-    taxaAprovacao: 0,
-    taxaAprovacaoAnterior: 0,
-    variacaoTaxaAprovacao: 0,
-    aprovacoesTotal: 0,
-    pendenciasTotal: 0,
-    rejeicoesTotal: 0,
-    crescimentoCotacoes: 0,
-    crescimentoEconomia: 0,
-    ultimos7DiasCotacoes: [0, 0, 0, 0, 0, 0, 0],
-    economiaPorPeriodo: [] as Array<{ key: string; label: string; economiaRealizada: number; economiaPotencial: number; eficienciaEconomia: number; }>,
+  cotacoesAtivas: 0,
+  fornecedores: 0,
+  economiaGerada: 0,
+  taxaAprovacao: 0,
+  taxaAtividade: 0,
+  crescimentoCotacoes: 0,
+  crescimentoEconomia: 0,
+  variacaoTaxaAprovacao: 0,
 };
 
-export default function DashboardRefactored() {
-    const [selectedPeriod, setSelectedPeriod] = useState('6m');
-    const [evolutionPeriod, setEvolutionPeriod] = useState('7d');
-    const [economyPeriod, setEconomyPeriod] = useState('7d');
+export default function Dashboard() {
+  const [selectedPeriod, setSelectedPeriod] = useState('6m');
+  const [evolutionPeriod, setEvolutionPeriod] = useState('7d');
+  const [economyPeriod, setEconomyPeriod] = useState('7d');
 
-    // Data Hooks
-    const dashboardData = useDashboard();
+  const { metrics = DEFAULT_METRICS, monthlyData = [], dailyData = [], isLoading = false } = useDashboard() ?? {};
 
-    // Data Selection
-    const metrics = dashboardData?.metrics ?? DEFAULT_METRICS;
-    const monthlyData = dashboardData?.monthlyData ?? [];
-    const dailyData = dashboardData?.dailyData ?? [];
-    const isLoading = dashboardData?.isLoading ?? false;
+  const filterDataByPeriod = useCallback((period: string) => {
+    if (period === '7d') return dailyData;
+    
+    const months = MONTHS_MAP[period] || 6;
+    let filtered = monthlyData.slice(-months);
+    
+    if (period === '1y') {
+      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      filtered = filtered.filter((item: any) => monthNames.indexOf(item.month) >= 9);
+    }
+    
+    return filtered;
+  }, [dailyData, monthlyData]);
 
-    // Filter Logic
-    const filterDataByPeriod = useCallback((period: string) => {
-        if (period === '7d') {
-            return dailyData;
-        }
-        const monthsMap: Record<string, number> = {
-            '1m': 1,
-            '3m': 3,
-            '6m': 6,
-            '1y': 12
-        };
-        const months = monthsMap[period] || 6;
-        let filteredData = monthlyData.slice(-months);
-        // For larger periods, filter to October onwards
-        if (period === '1y') {
-            filteredData = filteredData.filter((item: any) => {
-                const monthIndex = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].indexOf(item.month);
-                return monthIndex >= 9; // October is index 9
-            });
-        }
-        return filteredData;
-    }, [dailyData, monthlyData]);
+  const evolutionData = useMemo(() => filterDataByPeriod(evolutionPeriod), [filterDataByPeriod, evolutionPeriod]);
+  
+  const economyData = useMemo(() => {
+    const colors = ['#10b981', '#34d399', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'];
+    return filterDataByPeriod(economyPeriod).map((item, i) => ({ ...item, fill: colors[i % 6] }));
+  }, [filterDataByPeriod, economyPeriod]);
 
-    const evolutionData = useMemo(() => filterDataByPeriod(evolutionPeriod), [filterDataByPeriod, evolutionPeriod]);
-    const economyData = useMemo(() => filterDataByPeriod(economyPeriod).map((item, index) => ({
-        ...item,
-        fill: ['#10b981', '#34d399', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'][index % 6]
-    })), [filterDataByPeriod, economyPeriod]);
+  const formatCurrency = useCallback((value?: number) => {
+    const safe = Number.isFinite(value) ? Number(value) : 0;
+    return `R$ ${safe.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }, []);
 
-    // Formatters
-    const formatCurrency = useCallback((value?: number) => {
-        const safeValue = Number.isFinite(value) ? Number(value) : 0;
-        return `R$ ${safeValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }, []);
+  const getTrend = (value: number, label: string): { value: string; label: string; type: 'positive' | 'negative' | 'neutral' } => ({
+    value: `${Math.abs(value)}%`,
+    label,
+    type: value >= 0 ? 'positive' : 'negative',
+  });
 
-    // Filter Logic (Simplified for now)
-    const handlePeriodChange = (value: string) => {
-        setSelectedPeriod(value);
-        // Implementar lógica de filtro real se necessário
-    };
-
-    return (
-        <PageWrapper>
-            <div className="page-container space-y-4 sm:space-y-6">
-                {/* Header Responsivo */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                            <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
-                                Dashboard
-                            </h1>
-                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
-                                Visão geral e métricas de desempenho
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
-                            <SelectTrigger className="w-full sm:w-[140px] h-10">
-                                <Calendar className="mr-2 h-4 w-4" />
-                                <SelectValue placeholder="Período" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="7d">7 dias</SelectItem>
-                                <SelectItem value="1m">1 mês</SelectItem>
-                                <SelectItem value="3m">3 meses</SelectItem>
-                                <SelectItem value="6m">6 meses</SelectItem>
-                                <SelectItem value="1y">1 ano</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Button variant="outline" size="icon" className="h-10 w-10 flex-shrink-0">
-                            <Filter className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Cards de Métricas - Responsivos com ResponsiveGrid */}
-                <ResponsiveGrid gap="md" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
-                    <MetricCard
-                        title="Cotações Ativas"
-                        value={metrics.cotacoesAtivas}
-                        icon={BarChart3}
-                        variant="default"
-                        trend={{
-                            value: `${Math.abs(metrics.crescimentoCotacoes)}%`,
-                            label: "vs mês anterior",
-                            type: metrics.crescimentoCotacoes >= 0 ? "positive" : "negative"
-                        }}
-                    />
-
-                    <MetricCard
-                        title="Economia Gerada"
-                        value={formatCurrency(metrics.economiaGerada)}
-                        icon={DollarSign}
-                        variant="success"
-                        trend={{
-                            value: `${Math.abs(metrics.crescimentoEconomia)}%`,
-                            label: "vs mês anterior",
-                            type: metrics.crescimentoEconomia >= 0 ? "positive" : "negative"
-                        }}
-                    />
-
-                    <MetricCard
-                        title="Fornecedores"
-                        value={metrics.fornecedores}
-                        icon={Users}
-                        variant="info"
-                        trend={{
-                            value: `${metrics.taxaAtividade}%`,
-                            label: "taxa de atividade",
-                            type: "neutral"
-                        }}
-                    />
-
-                    <MetricCard
-                        title="Taxa Aprovação"
-                        value={`${metrics.taxaAprovacao}%`}
-                        icon={Target}
-                        variant="info"
-                        trend={{
-                            value: `${Math.abs(metrics.variacaoTaxaAprovacao)}%`,
-                            label: "vs mês anterior",
-                            type: metrics.variacaoTaxaAprovacao >= 0 ? "positive" : "negative"
-                        }}
-                    />
-                </ResponsiveGrid>
-
-                {/* Gráficos - Responsivos */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                    <EvolutionChart
-                        data={evolutionData}
-                        period={evolutionPeriod}
-                        onPeriodChange={setEvolutionPeriod}
-                        isLoading={isLoading}
-                    />
-                    <EconomyChart
-                        data={economyData}
-                        period={economyPeriod}
-                        onPeriodChange={setEconomyPeriod}
-                        isLoading={isLoading}
-                    />
-                </div>
+  return (
+    <PageWrapper>
+      <div className="page-container space-y-4 sm:space-y-6">
+        {/* Header */}
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-        </PageWrapper>
-    );
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                Visão geral e métricas de desempenho
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-full sm:w-[140px] h-10">
+                <Calendar className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent>
+                {PERIOD_OPTIONS.map(({ value, label }) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon" className="h-10 w-10 flex-shrink-0">
+              <Filter className="h-4 w-4" />
+            </Button>
+          </div>
+        </header>
+
+        {/* Metric Cards */}
+        <ResponsiveGrid gap="md" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
+          <MetricCard
+            title="Cotações Ativas"
+            value={metrics.cotacoesAtivas}
+            icon={BarChart3}
+            variant="default"
+            trend={getTrend(metrics.crescimentoCotacoes, 'vs mês anterior')}
+          />
+          <MetricCard
+            title="Economia Gerada"
+            value={formatCurrency(metrics.economiaGerada)}
+            icon={DollarSign}
+            variant="success"
+            trend={getTrend(metrics.crescimentoEconomia, 'vs mês anterior')}
+          />
+          <MetricCard
+            title="Fornecedores"
+            value={metrics.fornecedores}
+            icon={Users}
+            variant="info"
+            trend={{ value: `${metrics.taxaAtividade}%`, label: 'taxa de atividade', type: 'neutral' }}
+          />
+          <MetricCard
+            title="Taxa Aprovação"
+            value={`${metrics.taxaAprovacao}%`}
+            icon={Target}
+            variant="info"
+            trend={getTrend(metrics.variacaoTaxaAprovacao, 'vs mês anterior')}
+          />
+        </ResponsiveGrid>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          <EvolutionChart
+            data={evolutionData}
+            period={evolutionPeriod}
+            onPeriodChange={setEvolutionPeriod}
+            isLoading={isLoading}
+          />
+          <EconomyChart
+            data={economyData}
+            period={economyPeriod}
+            onPeriodChange={setEconomyPeriod}
+            isLoading={isLoading}
+          />
+        </div>
+      </div>
+    </PageWrapper>
+  );
 }
