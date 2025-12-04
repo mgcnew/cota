@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 export default {
   darkMode: ["class"],
@@ -122,5 +123,145 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // Mobile responsiveness utility classes plugin
+    // Requirements: 7.1, 9.1, 9.2
+    plugin(function({ addUtilities }) {
+      addUtilities({
+        // Touch target - minimum 44x44px for accessible touch interactions
+        // Requirement: 7.1
+        '.touch-target': {
+          'min-height': '44px',
+          'min-width': '44px',
+        },
+        // Responsive padding - adapts to screen size
+        // Requirement: 9.1
+        '.p-responsive': {
+          'padding': '0.75rem', // 12px mobile
+          '@screen sm': {
+            'padding': '1rem', // 16px tablet
+          },
+          '@screen lg': {
+            'padding': '1.5rem', // 24px desktop
+          },
+        },
+        // Responsive horizontal padding for page layouts
+        // Requirement: 9.1
+        '.px-responsive': {
+          'padding-left': '1rem', // 16px mobile
+          'padding-right': '1rem',
+          '@screen sm': {
+            'padding-left': '1.5rem', // 24px tablet
+            'padding-right': '1.5rem',
+          },
+          '@screen lg': {
+            'padding-left': '2rem', // 32px desktop
+            'padding-right': '2rem',
+          },
+        },
+        // Responsive vertical padding
+        '.py-responsive': {
+          'padding-top': '0.75rem', // 12px mobile
+          'padding-bottom': '0.75rem',
+          '@screen sm': {
+            'padding-top': '1rem', // 16px tablet
+            'padding-bottom': '1rem',
+          },
+          '@screen lg': {
+            'padding-top': '1.5rem', // 24px desktop
+            'padding-bottom': '1.5rem',
+          },
+        },
+        // Responsive gap - adapts spacing between elements
+        // Requirement: 9.2
+        '.gap-responsive': {
+          'gap': '0.5rem', // 8px mobile
+          '@screen sm': {
+            'gap': '1rem', // 16px tablet
+          },
+          '@screen lg': {
+            'gap': '1.5rem', // 24px desktop
+          },
+        },
+        // Responsive text - body text with minimum 14px on mobile
+        // Requirement: 8.1
+        '.text-responsive': {
+          'font-size': '0.875rem', // 14px mobile
+          'line-height': '1.5',
+          '@screen sm': {
+            'font-size': '1rem', // 16px tablet/desktop
+          },
+        },
+        // Responsive heading - scales down 20% on mobile
+        // Requirement: 8.2
+        '.heading-responsive': {
+          'font-size': '1.125rem', // 18px mobile (20% smaller than 22.5px)
+          'line-height': '1.3',
+          '@screen sm': {
+            'font-size': '1.25rem', // 20px tablet
+          },
+          '@screen lg': {
+            'font-size': '1.5rem', // 24px desktop
+          },
+        },
+        // Large heading responsive
+        '.heading-lg-responsive': {
+          'font-size': '1.5rem', // 24px mobile
+          'line-height': '1.2',
+          '@screen sm': {
+            'font-size': '1.875rem', // 30px tablet
+          },
+          '@screen lg': {
+            'font-size': '2.25rem', // 36px desktop
+          },
+        },
+        // Responsive label - minimum 12px
+        // Requirement: 8.3
+        '.label-responsive': {
+          'font-size': '0.75rem', // 12px mobile
+          '@screen sm': {
+            'font-size': '0.875rem', // 14px tablet/desktop
+          },
+        },
+        // Section gap - spacing between page sections
+        // Requirement: 9.2
+        '.section-gap': {
+          'margin-bottom': '1rem', // 16px mobile
+          '@screen sm': {
+            'margin-bottom': '1.25rem', // 20px tablet
+          },
+          '@screen lg': {
+            'margin-bottom': '1.5rem', // 24px desktop
+          },
+        },
+        // Card padding responsive
+        '.card-padding': {
+          'padding': '0.75rem', // 12px mobile
+          '@screen sm': {
+            'padding': '1rem', // 16px tablet
+          },
+          '@screen lg': {
+            'padding': '1.5rem', // 24px desktop
+          },
+        },
+        // Mobile-optimized animations - shorter duration
+        // Requirement: 6.1
+        '.transition-mobile': {
+          'transition-duration': '150ms',
+          '@screen sm': {
+            'transition-duration': '200ms',
+          },
+        },
+        // Disable hover effects on mobile (touch devices)
+        '.hover-desktop': {
+          '@media (hover: hover)': {
+            '&:hover': {
+              'opacity': '0.8',
+            },
+          },
+        },
+      });
+    }),
+  ],
 } satisfies Config;
