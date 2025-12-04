@@ -11,12 +11,22 @@ import { Package, Building2, X, DollarSign, Edit2, TrendingDown, FileText, Calen
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { Quote } from "@/hooks/useCotacoes";
+import { PricingUnit } from "@/utils/priceNormalization";
+import { PriceConverter } from "@/components/forms/PriceConverter";
+
+// Pricing unit options for the selector - Requirements: 1.1
+const PRICING_UNIT_OPTIONS: { value: PricingUnit; label: string }[] = [
+  { value: "kg", label: "por kg" },
+  { value: "un", label: "por unidade" },
+  { value: "cx", label: "por caixa" },
+  { value: "pct", label: "por pacote" },
+];
 
 interface GerenciarCotacaoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   quote: Quote;
-  onUpdateSupplierProductValue: (quoteId: string, supplierId: string, productId: string, newValue: number) => void;
+  onUpdateSupplierProductValue: (params: { quoteId: string; supplierId: string; productId: string; newValue: number; unidadePreco?: PricingUnit; fatorConversao?: number; quantidadePorEmbalagem?: number }) => void;
   onConvertToOrder?: (quoteId: string, orders: Array<{ supplierId: string; productIds: string[]; deliveryDate: string; observations?: string }>) => void;
   onAddQuoteItem?: (data: { quoteId: string; productId: string; productName: string; quantidade: number; unidade: string }) => void;
   onRemoveQuoteItem?: (data: { quoteId: string; productId: string }) => void;
@@ -33,6 +43,7 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, number>>({});
+  const [editedPricingMetadata, setEditedPricingMetadata] = useState<Record<string, { unidadePreco: PricingUnit; fatorConversao?: number }>>({});
   const editInputRef = useRef<HTMLInputElement>(null);
   
   // Estado para conversão
@@ -152,27 +163,83 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
     return bestPricesMap.get(productId) || { bestPrice: 0, bestSupplierId: null };
   }, [bestPricesMap]);
 
-  const handleStartEdit = useCallback((productId: string, currentValue: number) => {
+  // Helper to get pricing metadata for a supplier item
+  const getSupplierItemPricingMetadata = useCallback((supplierId: string, productId: string): { unidadePreco: PricingUnit | null; fatorConversao: number | null } => {
+    const item = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === productId);
+    return {
+      unidadePreco: item?.unidade_preco || null,
+      fatorConversao: item?.fator_conversao || null
+    };
+  }, [supplierItems]);
+
+  // Helper to get current pricing unit for display
+  const getCurrentPricingUnit = useCallback((productId: string): PricingUnit => {
+    if (editedPricingMetadata[productId]?.unidadePreco) {
+      return editedPricingMetadata[productId].unidadePreco;
+    }
+    if (selectedSupplier) {
+      const metadata = getSupplierItemPricingMetadata(selectedSupplier, productId);
+      if (metadata?.unidadePreco) {
+        return metadata.unidadePreco;
+      }
+    }
+    return "un";
+  }, [editedPricingMetadata, selectedSupplier, getSupplierItemPricingMetadata]);
+
+  // Check if conversion factor is required (for cx or pct)
+  const isConversionFactorRequired = useCallback((productId: string): boolean => {
+    const unit = editedPricingMetadata[productId]?.unidadePreco || getCurrentPricingUnit(productId);
+    return unit === "cx" || unit === "pct";
+  }, [editedPricingMetadata, getCurrentPricingUnit]);
+
+  // Format price with unit label
+  const formatPriceWithUnit = useCallback((value: number, productId: string): string => {
+    const unit = getCurrentPricingUnit(productId);
+    const unitLabel = PRICING_UNIT_OPTIONS.find((o) => o.value === unit)?.label.replace("por ", "/") || "/un";
+    return `R$ ${value.toFixed(2)}${unitLabel}`;
+  }, [getCurrentPricingUnit]);
+
+  const handleStartEdit = useCallback((productId: string, currentValue: number, currentMetadata?: { unidadePreco: PricingUnit | null; fatorConversao: number | null }) => {
     setEditingProductId(productId);
     setEditedValues(prev => ({ ...prev, [productId]: currentValue }));
+    if (currentMetadata?.unidadePreco) {
+      setEditedPricingMetadata(prev => ({
+        ...prev,
+        [productId]: {
+          unidadePreco: currentMetadata.unidadePreco!,
+          fatorConversao: currentMetadata.fatorConversao || undefined
+        }
+      }));
+    }
   }, []);
 
   const handleSaveEdit = useCallback(async (productId: string) => {
     if (selectedSupplier && editedValues[productId] !== undefined) {
       try {
-        await onUpdateSupplierProductValue(quote.id, selectedSupplier, productId, editedValues[productId]);
+        const metadata = editedPricingMetadata[productId];
+        await onUpdateSupplierProductValue({
+          quoteId: quote.id,
+          supplierId: selectedSupplier,
+          productId,
+          newValue: editedValues[productId],
+          unidadePreco: metadata?.unidadePreco,
+          fatorConversao: metadata?.fatorConversao,
+          quantidadePorEmbalagem: metadata?.fatorConversao // Same as fatorConversao for now
+        });
         setEditingProductId(null);
+        setEditedPricingMetadata({});
         toast({ title: "✅ Valor atualizado!" });
         onRefresh();
       } catch {
         toast({ title: "❌ Erro ao salvar", variant: "destructive" });
       }
     }
-  }, [selectedSupplier, editedValues, quote.id, onUpdateSupplierProductValue, onRefresh]);
+  }, [selectedSupplier, editedValues, editedPricingMetadata, quote.id, onUpdateSupplierProductValue, onRefresh]);
 
   const handleCancelEdit = useCallback(() => {
     setEditingProductId(null);
     setEditedValues({});
+    setEditedPricingMetadata({});
   }, []);
 
   // Memoizar totais por fornecedor
@@ -826,28 +893,113 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                   </td>
                                   <td className="px-3 sm:px-4 py-3">
                                     {isEditing ? (
-                                      <div className="flex items-center gap-2">
-                                        <Input 
-                                          ref={editInputRef} 
-                                          type="number" 
-                                          step="0.01" 
-                                          min="0" 
-                                          value={editedValues[product.product_id] || 0}
-                                          onChange={(e) => setEditedValues(prev => ({ ...prev, [product.product_id]: Number(e.target.value) }))}
-                                          onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(product.product_id); if (e.key === 'Escape') handleCancelEdit(); }}
-                                          className="w-24 sm:w-28 h-8 text-sm bg-white dark:bg-gray-900 border-teal-300 dark:border-teal-700 focus:ring-teal-500" 
-                                        />
-                                        <Button size="sm" onClick={() => handleSaveEdit(product.product_id)} className="h-8 w-8 p-0 bg-teal-600 hover:bg-teal-700 text-white">
-                                          <Check className="h-4 w-4" />
-                                        </Button>
-                                        <Button size="sm" variant="outline" onClick={handleCancelEdit} className="h-8 w-8 p-0 border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400">
-                                          <X className="h-4 w-4" />
-                                        </Button>
+                                      <div className="flex flex-col gap-2">
+                                        {/* Row 1: Value input, pricing unit selector, PriceConverter, and action buttons */}
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <Input 
+                                            ref={editInputRef} 
+                                            type="number" 
+                                            step="0.01" 
+                                            min="0" 
+                                            value={editedValues[product.product_id] || 0}
+                                            onChange={(e) => setEditedValues(prev => ({ ...prev, [product.product_id]: Number(e.target.value) }))}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(product.product_id); if (e.key === 'Escape') handleCancelEdit(); }}
+                                            className="w-20 sm:w-24 h-8 text-sm bg-white dark:bg-gray-900 border-teal-300 dark:border-teal-700 focus:ring-teal-500" 
+                                          />
+                                          {/* Pricing Unit Selector - Requirements: 1.1 */}
+                                          <Select
+                                            value={editedPricingMetadata[product.product_id]?.unidadePreco || getCurrentPricingUnit(product.product_id)}
+                                            onValueChange={(value: PricingUnit) => {
+                                              setEditedPricingMetadata(prev => ({
+                                                ...prev,
+                                                [product.product_id]: {
+                                                  ...prev[product.product_id],
+                                                  unidadePreco: value,
+                                                  fatorConversao: value === "cx" || value === "pct" ? prev[product.product_id]?.fatorConversao : undefined
+                                                }
+                                              }));
+                                            }}
+                                          >
+                                            <SelectTrigger className="w-[90px] h-8 text-xs border-teal-300 dark:border-teal-700">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {PRICING_UNIT_OPTIONS.map((option) => (
+                                                <SelectItem key={option.value} value={option.value} className="text-xs">
+                                                  {option.label}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                          <PriceConverter
+                                            currentValue={editedValues[product.product_id] || currentValue}
+                                            productQuantity={product.quantidade}
+                                            productUnit={product.unidade}
+                                            onConvert={(metadata) => {
+                                              setEditedValues(prev => ({ ...prev, [product.product_id]: metadata.convertedValue }));
+                                              setEditedPricingMetadata(prev => ({
+                                                ...prev,
+                                                [product.product_id]: {
+                                                  unidadePreco: metadata.targetUnit,
+                                                  fatorConversao: metadata.conversionFactor
+                                                }
+                                              }));
+                                              setTimeout(() => { editInputRef.current?.focus(); editInputRef.current?.select(); }, 100);
+                                            }}
+                                          />
+                                          <div className="flex gap-0.5">
+                                            <Button 
+                                              size="sm" 
+                                              onClick={() => handleSaveEdit(product.product_id)} 
+                                              disabled={isConversionFactorRequired(product.product_id) && !editedPricingMetadata[product.product_id]?.fatorConversao}
+                                              className="h-8 w-8 p-0 bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
+                                            >
+                                              <Check className="h-4 w-4" />
+                                            </Button>
+                                            <Button size="sm" variant="outline" onClick={handleCancelEdit} className="h-8 w-8 p-0 border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400">
+                                              <X className="h-4 w-4" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                        {/* Row 2: Conversion factor input (conditional) - Requirements: 1.2, 1.5 */}
+                                        {isConversionFactorRequired(product.product_id) && (
+                                          <div className="flex items-center gap-1.5 pl-0.5">
+                                            <span className="text-[10px] text-gray-500 dark:text-gray-400">Qtd por embalagem:</span>
+                                            <Input
+                                              type="number"
+                                              value={editedPricingMetadata[product.product_id]?.fatorConversao || ""}
+                                              onChange={(e) => {
+                                                const value = Number(e.target.value);
+                                                setEditedPricingMetadata(prev => ({
+                                                  ...prev,
+                                                  [product.product_id]: {
+                                                    ...prev[product.product_id],
+                                                    unidadePreco: prev[product.product_id]?.unidadePreco || getCurrentPricingUnit(product.product_id),
+                                                    fatorConversao: value > 0 ? value : undefined
+                                                  }
+                                                }));
+                                              }}
+                                              className={cn(
+                                                "w-16 h-7 text-xs rounded-md",
+                                                !editedPricingMetadata[product.product_id]?.fatorConversao ? "border-red-300 dark:border-red-700" : "border-gray-300 dark:border-gray-600"
+                                              )}
+                                              step="1"
+                                              min="1"
+                                              placeholder="Ex: 12"
+                                            />
+                                            <span className="text-[10px] text-gray-400">
+                                              {editedPricingMetadata[product.product_id]?.unidadePreco === "cx" ? "un/cx" : "un/pct"}
+                                            </span>
+                                            {!editedPricingMetadata[product.product_id]?.fatorConversao && (
+                                              <span className="text-[10px] text-red-500">* obrigatório</span>
+                                            )}
+                                          </div>
+                                        )}
                                       </div>
                                     ) : (
                                       <div className="flex items-center gap-2 flex-wrap">
                                         <span className={cn("font-semibold text-sm", isBestPrice ? "text-green-700 dark:text-green-300" : "text-gray-900 dark:text-white")}>
-                                          R$ {currentValue.toFixed(2)}
+                                          {formatPriceWithUnit(currentValue, product.product_id)}
                                         </span>
                                         {isBestPrice && (
                                           <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0 h-5">
@@ -862,7 +1014,10 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                       <Button 
                                         size="sm" 
                                         variant="ghost" 
-                                        onClick={() => handleStartEdit(product.product_id, currentValue)} 
+                                        onClick={() => {
+                                          const currentMetadata = getSupplierItemPricingMetadata(selectedSupplier, product.product_id);
+                                          handleStartEdit(product.product_id, currentValue, currentMetadata);
+                                        }} 
                                         className="h-8 w-8 p-0 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30"
                                       >
                                         <Edit2 className="h-4 w-4" />
