@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { PricingUnit } from "@/utils/priceNormalization";
 
 // Schemas de validação para edição
 export const productLineSchema = z.object({
@@ -55,7 +56,17 @@ export interface Quote {
 export interface ViewQuoteDialogProps {
     quote?: Quote; // Opcional para mobile (usar quoteId)
     quoteId?: string; // Para mobile: carregar dados com hook
-    onUpdateSupplierProductValue?: (quoteId: string, supplierId: string, productId: string, newValue: number) => void;
+    onUpdateSupplierProductValue?: (
+        quoteId: string,
+        supplierId: string,
+        productId: string,
+        newValue: number,
+        pricingMetadata?: {
+            unidadePreco?: PricingUnit;
+            fatorConversao?: number;
+            quantidadePorEmbalagem?: number;
+        }
+    ) => void;
     onConvertToOrder?: (quoteId: string, orders: Array<{
         supplierId: string;
         productIds: string[];

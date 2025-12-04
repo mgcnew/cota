@@ -92,6 +92,9 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, number>>({});
+  const [editedPricingMetadata, setEditedPricingMetadata] = useState<
+    Record<string, { unidadePreco: import("@/utils/priceNormalization").PricingUnit; fatorConversao?: number }>
+  >({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [convertDialogOpen, setConvertDialogOpen] = useState(false);
   const [selectedSupplierForConversion, setSelectedSupplierForConversion] = useState<{ id: string; name: string } | null>(null);
@@ -127,9 +130,26 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     name: "produtos",
   });
 
-  const handleStartEdit = (productId: string, currentValue: number) => {
+  const handleStartEdit = (
+    productId: string,
+    currentValue: number,
+    currentMetadata?: {
+      unidadePreco: import("@/utils/priceNormalization").PricingUnit | null;
+      fatorConversao: number | null;
+    }
+  ) => {
     setEditingProductId(productId);
-    setEditedValues(prev => ({ ...prev, [productId]: currentValue }));
+    setEditedValues((prev) => ({ ...prev, [productId]: currentValue }));
+    // Initialize pricing metadata from current saved values
+    if (currentMetadata?.unidadePreco) {
+      setEditedPricingMetadata((prev) => ({
+        ...prev,
+        [productId]: {
+          unidadePreco: currentMetadata.unidadePreco!,
+          fatorConversao: currentMetadata.fatorConversao ?? undefined,
+        },
+      }));
+    }
     setHasUnsavedChanges(true);
   };
 
@@ -155,15 +175,41 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
 
     // Limpar valores editados quando trocar de fornecedor
     setEditedValues({});
+    setEditedPricingMetadata({});
     setEditingProductId(null);
     setHasUnsavedChanges(false);
   }, [selectedSupplier]);
 
   const handleSaveEdit = async (productId: string) => {
-    if (selectedSupplier && onUpdateSupplierProductValue && editedValues[productId] !== undefined && currentQuote) {
-      // Salvar no banco
-      await onUpdateSupplierProductValue(currentQuote.id, selectedSupplier, productId, editedValues[productId]);
+    if (
+      selectedSupplier &&
+      onUpdateSupplierProductValue &&
+      editedValues[productId] !== undefined &&
+      currentQuote
+    ) {
+      // Get pricing metadata for this product
+      const pricingMetadata = editedPricingMetadata[productId];
+
+      // Salvar no banco with pricing metadata
+      await onUpdateSupplierProductValue(
+        currentQuote.id,
+        selectedSupplier,
+        productId,
+        editedValues[productId],
+        pricingMetadata
+          ? {
+              unidadePreco: pricingMetadata.unidadePreco,
+              fatorConversao: pricingMetadata.fatorConversao,
+              quantidadePorEmbalagem: pricingMetadata.fatorConversao,
+            }
+          : undefined
+      );
       setEditingProductId(null);
+      setEditedPricingMetadata((prev) => {
+        const newState = { ...prev };
+        delete newState[productId];
+        return newState;
+      });
       setHasUnsavedChanges(false);
     }
   };
@@ -171,6 +217,28 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const handleCancelEdit = () => {
     setEditingProductId(null);
     setEditedValues({});
+    setEditedPricingMetadata({});
+  };
+
+  // Get pricing metadata for a supplier item
+  const getSupplierItemPricingMetadata = (
+    supplierId: string,
+    productId: string
+  ): {
+    unidadePreco: import("@/utils/priceNormalization").PricingUnit | null;
+    fatorConversao: number | null;
+  } => {
+    if (!currentQuote) return { unidadePreco: null, fatorConversao: null };
+    const supplierItems =
+      currentQuote._supplierItems || currentQuote._raw?.quote_supplier_items || [];
+    const item = supplierItems.find(
+      (item: any) =>
+        item.supplier_id === supplierId && item.product_id === productId
+    );
+    return {
+      unidadePreco: item?.unidade_preco || null,
+      fatorConversao: item?.fator_conversao || null,
+    };
   };
 
   // Get products from the quote (com verificação de null)
@@ -1359,10 +1427,13 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                           selectedSupplier={selectedSupplier}
                           setSelectedSupplier={setSelectedSupplier}
                           getCurrentProductValue={getCurrentProductValue}
+                          getSupplierItemPricingMetadata={getSupplierItemPricingMetadata}
                           getBestPriceInfoForProduct={getBestPriceInfoForProduct}
                           editingProductId={editingProductId}
                           editedValues={editedValues}
                           setEditedValues={setEditedValues}
+                          editedPricingMetadata={editedPricingMetadata}
+                          setEditedPricingMetadata={setEditedPricingMetadata}
                           handleSaveEdit={handleSaveEdit}
                           handleCancelEdit={handleCancelEdit}
                           handleStartEdit={handleStartEdit}

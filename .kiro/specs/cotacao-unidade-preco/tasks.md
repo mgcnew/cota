@@ -1,26 +1,42 @@
 # Implementation Plan
 
-- [ ] 1. Database Schema Migration
-  - [ ] 1.1 Create migration file to add new columns to quote_supplier_items table
+- [x] 1. Database Schema Migration
+
+
+
+
+  - [x] 1.1 Create migration file to add new columns to quote_supplier_items table
+
     - Add column `unidade_preco` (varchar(10), nullable, default null)
     - Add column `fator_conversao` (decimal(10,4), nullable)
     - Add column `quantidade_por_embalagem` (decimal(10,4), nullable)
     - _Requirements: 5.1, 5.2, 5.3_
-  - [ ] 1.2 Create migration to set default values for existing records
+  - [x] 1.2 Create migration to set default values for existing records
+
     - Set unidade_preco based on product's base unit from products table
     - Set fator_conversao to 1 for existing records
     - _Requirements: 5.4_
-  - [ ] 1.3 Update Supabase types file with new columns
+  - [x] 1.3 Update Supabase types file with new columns
+
     - Regenerate types or manually add new fields to QuoteSupplierItem type
     - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] 2. Price Normalization Utility
-  - [ ] 2.1 Create priceNormalization.ts utility file
+- [x] 2. Price Normalization Utility
+
+
+
+
+
+  - [x] 2.1 Create priceNormalization.ts utility file
+
+
     - Define PricingUnit type ('kg' | 'un' | 'cx' | 'pct')
     - Define PriceMetadata interface
     - Define NormalizedPrice interface
     - _Requirements: 2.1_
-  - [ ] 2.2 Implement normalizePrice function
+
+  - [x] 2.2 Implement normalizePrice function
+
     - Handle conversion from cx/pct to base unit using fator_conversao
     - Calculate valorUnitario (price per base unit)
     - Calculate valorTotal (total price for purchase quantity)
@@ -28,56 +44,112 @@
   - [ ]* 2.3 Write property test for price normalization
     - **Property 1: Price Normalization Consistency**
     - **Validates: Requirements 2.1**
-  - [ ] 2.4 Implement calculateEconomy function
+  - [x] 2.4 Implement calculateEconomy function
+
+
     - Normalize all supplier prices to same base
     - Find min and max normalized prices
     - Calculate economy as (max - min) × quantity
     - Return economiaReal, melhorPreco, piorPreco
     - _Requirements: 2.2, 2.4_
-  - [ ]* 2.5 Write property test for economy calculation
+  - [x] 2.5 Write property test for economy calculation
+
+
+
+
+
+
     - **Property 2: Economy Calculation Formula**
     - **Validates: Requirements 2.2**
-  - [ ]* 2.6 Write property test for total economy aggregation
+  - [x] 2.6 Write property test for total economy aggregation
+
+
+
+
+
+
     - **Property 3: Total Economy Aggregation**
     - **Validates: Requirements 2.4**
 
-- [ ] 3. Checkpoint - Ensure all tests pass
+- [x] 3. Checkpoint - Ensure all tests pass
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Update useCotacoes Hook
-  - [ ] 4.1 Update updateSupplierProductValue mutation
+- [x] 4. Update useCotacoes Hook
+
+
+
+
+
+  - [x] 4.1 Update updateSupplierProductValue mutation
+
+
     - Accept new parameters: unidadePreco, fatorConversao, quantidadePorEmbalagem
     - Save all metadata to quote_supplier_items
     - _Requirements: 1.3, 4.2_
-  - [ ] 4.2 Update quote data fetching to include new fields
+  - [x] 4.2 Update quote data fetching to include new fields
+
+
     - Include unidade_preco, fator_conversao, quantidade_por_embalagem in select
     - Map to frontend types
     - _Requirements: 1.4_
-  - [ ]* 4.3 Write property test for default pricing unit
+  - [x] 4.3 Write property test for default pricing unit
+
+
+
+
+
+
     - **Property 7: Default Pricing Unit**
     - **Validates: Requirements 5.5**
 
-- [ ] 5. Update QuoteValuesTab UI
-  - [ ] 5.1 Add pricing unit selector to edit mode
+- [x] 5. Update QuoteValuesTab UI
+
+
+
+
+
+
+  - [x] 5.1 Add pricing unit selector to edit mode
+
     - Create dropdown with options: kg, unidade, caixa, pacote
     - Show selector when editing a price
     - _Requirements: 1.1_
-  - [ ] 5.2 Add conditional conversion factor input
+  - [x] 5.2 Add conditional conversion factor input
+
+
     - Show input when pricing unit is 'cx' or 'pct'
     - Add validation to require value > 0
     - _Requirements: 1.2, 1.5_
   - [ ]* 5.3 Write property test for conversion factor requirement
     - **Property 4: Conversion Factor Requirement**
     - **Validates: Requirements 1.5**
-  - [ ] 5.4 Update price display to show unit label
+
+  - [x] 5.4 Update price display to show unit label
+
     - Format as "R$ X.XX/kg" or "R$ X.XX/un"
     - Show original unit if different from base
     - _Requirements: 1.4, 3.4_
-  - [ ]* 5.5 Write property test for price display format
+  - [x] 5.5 Write property test for price display format
+
+
+
+
+
+
     - **Property 5: Price Display Format**
     - **Validates: Requirements 1.4**
 
-- [ ] 6. Checkpoint - Ensure all tests pass
+- [x] 6. Checkpoint - Ensure all tests pass
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 7. Update PriceConverter Integration

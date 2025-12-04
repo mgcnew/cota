@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { PricingUnit } from '@/utils/priceNormalization';
 
 export interface FornecedorParticipante {
   id: string;
@@ -9,6 +10,21 @@ export interface FornecedorParticipante {
   dataResposta: string | null;
   observacoes: string;
   status: "pendente" | "respondido";
+}
+
+// Interface for supplier item with pricing metadata
+export interface SupplierItemWithPricing {
+  id: string;
+  quote_id: string;
+  supplier_id: string;
+  product_id: string;
+  product_name: string;
+  valor_oferecido: number | null;
+  unidade_preco: PricingUnit | null;
+  fator_conversao: number | null;
+  quantidade_por_embalagem: number | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Quote {
@@ -27,6 +43,23 @@ export interface Quote {
   melhorFornecedor: string;
   economia: string;
   fornecedoresParticipantes: FornecedorParticipante[];
+}
+
+/**
+ * Determines the default pricing unit based on product's base unit
+ * Requirements: 5.5 - Default to product's base unit when not specified
+ */
+function getDefaultPricingUnit(productUnit?: string): PricingUnit {
+  if (!productUnit) return 'un';
+  
+  const normalizedUnit = productUnit.toLowerCase().trim();
+  const weightUnits = ['kg', 'g', 'mg', 'ton', 'tonelada'];
+  
+  if (weightUnits.includes(normalizedUnit)) {
+    return 'kg';
+  }
+  
+  return 'un';
 }
 
 export function useCotacoes() {
@@ -61,14 +94,62 @@ export function useCotacoes() {
 
         console.log(`✅ Fetched ${quotesData.length} quotes`);
 
-        // Fetch all quote_supplier_items separately
-        const { data: supplierItemsData, error: supplierItemsError } = await supabase
-          .from("quote_supplier_items")
-          .select("*");
+        // Fetch all quote_supplier_items separately with pricing metadata
+        // Requirements: 1.4 - Include unidade_preco, fator_conversao, quantidade_por_embalagem
+        // Try to fetch with new columns first, fallback to basic columns if they don't exist
+        let supplierItemsData: any[] | null = null;
+        let supplierItemsError: any = null;
 
+        try {
+          const result = await supabase
+            .from("quote_supplier_items")
+            .select(`
+              id,
+              quote_id,
+              supplier_id,
+              product_id,
+              product_name,
+              valor_oferecido,
+              unidade_preco,
+              fator_conversao,
+              quantidade_por_embalagem,
+              created_at,
+              updated_at
+            `);
+          supplierItemsData = result.data;
+          supplierItemsError = result.error;
+        } catch (e) {
+          console.warn("⚠️ Error fetching with new columns, trying fallback:", e);
+        }
+
+        // Fallback: if error (columns might not exist), try without new columns
         if (supplierItemsError) {
-          console.error("❌ Error fetching supplier items:", supplierItemsError);
-          throw supplierItemsError;
+          console.warn("⚠️ Pricing columns may not exist, fetching without them:", supplierItemsError.message);
+          const fallbackResult = await supabase
+            .from("quote_supplier_items")
+            .select(`
+              id,
+              quote_id,
+              supplier_id,
+              product_id,
+              product_name,
+              valor_oferecido,
+              created_at,
+              updated_at
+            `);
+          
+          if (fallbackResult.error) {
+            console.error("❌ Error fetching supplier items (fallback):", fallbackResult.error);
+            throw fallbackResult.error;
+          }
+          
+          // Add null values for missing columns
+          supplierItemsData = (fallbackResult.data || []).map(item => ({
+            ...item,
+            unidade_preco: null,
+            fator_conversao: null,
+            quantidade_por_embalagem: null
+          }));
         }
 
         console.log(`✅ Fetched ${supplierItemsData?.length || 0} supplier items`);
@@ -78,8 +159,23 @@ export function useCotacoes() {
         const suppliers = Array.isArray(quote.quote_suppliers) ? quote.quote_suppliers : [];
 
         // Get supplier items for this quote with safety checks
-        const quoteSupplierItems = Array.isArray(supplierItemsData)
-          ? supplierItemsData.filter(item => item?.quote_id === quote.id)
+        // Map to SupplierItemWithPricing type including pricing metadata
+        const quoteSupplierItems: SupplierItemWithPricing[] = Array.isArray(supplierItemsData)
+          ? supplierItemsData
+              .filter(item => item?.quote_id === quote.id)
+              .map(item => ({
+                id: item.id,
+                quote_id: item.quote_id,
+                supplier_id: item.supplier_id,
+                product_id: item.product_id,
+                product_name: item.product_name,
+                valor_oferecido: item.valor_oferecido,
+                unidade_preco: item.unidade_preco as PricingUnit | null,
+                fator_conversao: item.fator_conversao,
+                quantidade_por_embalagem: item.quantidade_por_embalagem,
+                created_at: item.created_at,
+                updated_at: item.updated_at
+              }))
           : [];
 
         const fornecedoresParticipantes: FornecedorParticipante[] = suppliers.map(s => {
@@ -200,17 +296,24 @@ export function useCotacoes() {
   });
 
   // Mutation to update supplier value for a specific product
+  // Requirements: 1.3, 4.2 - Accept and save pricing unit metadata
   const updateSupplierProductValue = useMutation({
     mutationFn: async ({ 
       quoteId, 
       supplierId, 
       productId, 
-      newValue 
+      newValue,
+      unidadePreco,
+      fatorConversao,
+      quantidadePorEmbalagem
     }: { 
       quoteId: string; 
       supplierId: string; 
       productId: string; 
       newValue: number;
+      unidadePreco?: PricingUnit;
+      fatorConversao?: number;
+      quantidadePorEmbalagem?: number;
     }) => {
       // First check if record exists
       const { data: existing } = await supabase
@@ -222,24 +325,31 @@ export function useCotacoes() {
         .maybeSingle();
 
       if (existing) {
-        // Update existing record
+        // Update existing record with pricing metadata
         const { error } = await supabase
           .from("quote_supplier_items")
           .update({
-            valor_oferecido: newValue
+            valor_oferecido: newValue,
+            unidade_preco: unidadePreco ?? null,
+            fator_conversao: fatorConversao ?? null,
+            quantidade_por_embalagem: quantidadePorEmbalagem ?? null
           })
           .eq("id", existing.id);
 
         if (error) throw error;
       } else {
-        // Get product name
+        // Get product name and base unit for default pricing unit
         const { data: productData } = await supabase
           .from("products")
-          .select("name")
+          .select("name, unit")
           .eq("id", productId)
           .single();
 
-        // Create new record
+        // Determine default pricing unit based on product's base unit
+        // Requirements: 5.5 - Default to product's base unit
+        const defaultUnidadePreco = getDefaultPricingUnit(productData?.unit);
+
+        // Create new record with pricing metadata
         const { error } = await supabase
           .from("quote_supplier_items")
           .insert({
@@ -247,7 +357,10 @@ export function useCotacoes() {
             supplier_id: supplierId,
             product_id: productId,
             product_name: productData?.name || "Produto",
-            valor_oferecido: newValue
+            valor_oferecido: newValue,
+            unidade_preco: unidadePreco ?? defaultUnidadePreco,
+            fator_conversao: fatorConversao ?? null,
+            quantidade_por_embalagem: quantidadePorEmbalagem ?? null
           });
 
         if (error) throw error;
