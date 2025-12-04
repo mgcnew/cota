@@ -91,74 +91,149 @@
     - **Property 2: Modal height constraint in mobile**
     - **Validates: Requirements 1.1, 1.2, 1.3**
 
-- [ ] 5. Implementar ResponsiveTable
-  - [ ] 5.1 Criar componente ResponsiveTable com interface de colunas
+- [x] 5. Implementar ResponsiveTable
+
+
+
+
+  - [x] 5.1 Criar componente ResponsiveTable com interface de colunas
+
     - Definir interface Column com propriedade priority (high/medium/low)
     - Implementar lógica de visibilidade baseada em breakpoint
     - _Requirements: 2.2, 2.3_
-  - [ ] 5.2 Implementar transformação para cards em mobile
+  - [x] 5.2 Implementar transformação para cards em mobile
+
     - Renderizar dados como cards empilhados em mobile
     - Manter informações agrupadas com hierarquia visual
     - Incluir menu de ações via dropdown
     - _Requirements: 2.1, 2.4, 2.5_
-  - [ ]* 5.3 Escrever property tests para ResponsiveTable
+  - [x] 5.3 Escrever property tests para ResponsiveTable
+
+
+
+
+
+
     - **Property 3: Table transforms to cards in mobile**
     - **Property 4: Column visibility respects priority**
     - **Validates: Requirements 2.1, 2.2, 2.3**
 
-- [ ] 6. Checkpoint - Garantir que todos os testes passam
+- [x] 6. Checkpoint - Garantir que todos os testes passam
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Implementar ResponsiveCard e grid system
-  - [ ] 7.1 Criar componente ResponsiveCard
+- [x] 7. Implementar ResponsiveCard e grid system
+
+
+
+
+  - [x] 7.1 Criar componente ResponsiveCard
+
+
     - Implementar variantes de tamanho (compact/default/large)
     - Aplicar padding responsivo automático (12px mobile, 16px tablet, 24px desktop)
     - Reduzir tamanho de ícones em 25% para mobile
     - _Requirements: 3.1, 3.5_
-  - [ ] 7.2 Criar componente ResponsiveGrid
+  - [x] 7.2 Criar componente ResponsiveGrid
+
+
     - Implementar grid de 2 colunas em mobile
     - Implementar grid de 2-3 colunas em tablet
     - Implementar grid de 4 colunas em desktop
     - _Requirements: 3.2, 3.3, 3.4_
-  - [ ]* 7.3 Escrever property test para grid columns
+  - [x] 7.3 Escrever property test para grid columns
+
+
+
+
+
+
+
+
+
     - **Property 5: Grid columns match breakpoint**
     - **Validates: Requirements 3.2, 3.3, 3.4**
 
-- [ ] 8. Implementar formulários responsivos
-  - [ ] 8.1 Criar componente ResponsiveFormField
+- [x] 8. Implementar formulários responsivos
+
+
+
+
+
+  - [x] 8.1 Criar componente ResponsiveFormField
+
+
     - Empilhar campos verticalmente em mobile
     - Aplicar altura mínima de 44px para inputs
     - _Requirements: 4.1, 4.2_
-  - [ ] 8.2 Criar componente ResponsiveFormActions
+
+  - [x] 8.2 Criar componente ResponsiveFormActions
+
     - Empilhar botões verticalmente em mobile com primário no topo
     - Manter layout horizontal em desktop
     - _Requirements: 4.3_
 
-- [ ] 9. Checkpoint - Garantir que todos os testes passam
+- [x] 9. Checkpoint - Garantir que todos os testes passam
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 10. Implementar otimizações de performance mobile
-  - [ ] 10.1 Criar utilitário de animações condicionais
+- [x] 10. Implementar otimizações de performance mobile
+
+
+
+
+
+  - [x] 10.1 Criar utilitário de animações condicionais
+
+
     - Desabilitar hover effects em mobile
     - Reduzir duração de transições para 150ms em mobile
     - Criar classes CSS condicionais para animações
     - _Requirements: 6.1_
-  - [ ]* 10.2 Escrever property test para animações
+  - [x] 10.2 Escrever property test para animações
+
+
+
+
+
+
     - **Property 7: Animations disabled in mobile**
     - **Validates: Requirements 6.1**
-  - [ ] 10.3 Implementar lazy loading para imagens
+  - [x] 10.3 Implementar lazy loading para imagens
+
+
     - Adicionar loading="lazy" em imagens
     - Implementar placeholder de baixa resolução
     - _Requirements: 6.3_
 
-- [ ] 11. Implementar tipografia responsiva
-  - [ ] 11.1 Criar classes de tipografia responsiva
+- [x] 11. Implementar tipografia responsiva
+
+
+
+
+
+
+  - [x] 11.1 Criar classes de tipografia responsiva
+
     - Texto de corpo: mínimo 14px em mobile
     - Títulos: escala reduzida em 20% para mobile
     - Labels: mínimo 12px
     - Valores monetários: fonte tabular
     - _Requirements: 8.1, 8.2, 8.3, 8.5_
-  - [ ]* 11.2 Escrever property test para font sizes
+  - [x] 11.2 Escrever property test para font sizes
+
+
+
+
+
+
     - **Property 8: Font sizes respect mobile scale**
     - **Validates: Requirements 8.1, 8.2, 8.3**
 

@@ -16,6 +16,27 @@ export type { ResponsiveCardProps, CardSize, CardPadding } from './ResponsiveCar
 export { ResponsiveGrid } from './ResponsiveGrid';
 export type { ResponsiveGridProps, GridConfig } from './ResponsiveGrid';
 
+export { ResponsiveFormField } from './ResponsiveFormField';
+export type { ResponsiveFormFieldProps } from './ResponsiveFormField';
+
+export { ResponsiveFormActions } from './ResponsiveFormActions';
+export type { ResponsiveFormActionsProps } from './ResponsiveFormActions';
+
+export { LazyImage, SimpleLazyImage } from './LazyImage';
+export type { LazyImageProps } from './LazyImage';
+
 // Re-export useBreakpoint hook for convenience
 export { useBreakpoint, BREAKPOINTS } from '@/hooks/useBreakpoint';
 export type { Breakpoint, BreakpointState } from '@/hooks/useBreakpoint';
+
+// Re-export mobile animation utilities
+export { useMobileAnimations } from '@/hooks/useMobileAnimations';
+export type { MobileAnimationOptions, UseMobileAnimationsReturn } from '@/hooks/useMobileAnimations';
+export { 
+  ANIMATION_CONFIG, 
+  mobileAnimationClasses,
+  getAnimationConfig,
+  getTransitionDuration,
+  getHoverClasses,
+  buildAnimationClasses 
+} from '@/utils/mobileAnimations';

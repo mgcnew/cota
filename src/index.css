@@ -1031,3 +1031,244 @@
 .placeholder-text {
   @apply text-sm font-normal text-muted-foreground/50;
 }
+
+/* ============================================
+   RESPONSIVE TYPOGRAPHY SYSTEM
+   Requirements: 8.1, 8.2, 8.3, 8.5
+   - Body text: minimum 14px on mobile
+   - Headings: 20% reduced scale on mobile
+   - Labels: minimum 12px
+   - Monetary values: tabular font
+   ============================================ */
+
+/* Body text responsive - minimum 14px on mobile with line-height 1.5 */
+/* Requirement: 8.1 */
+.text-body-mobile {
+  @apply text-sm leading-relaxed; /* 14px with 1.5 line-height */
+}
+
+@media (min-width: 640px) {
+  .text-body-mobile {
+    @apply text-base; /* 16px on tablet/desktop */
+  }
+}
+
+/* Headings responsive - 20% reduced on mobile */
+/* Requirement: 8.2 */
+.text-heading-1-mobile {
+  @apply text-3xl font-bold leading-tight; /* 30px mobile */
+}
+
+@media (min-width: 640px) {
+  .text-heading-1-mobile {
+    @apply text-4xl; /* 36px tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-heading-1-mobile {
+    @apply text-5xl; /* 48px desktop */
+  }
+}
+
+.text-heading-2-mobile {
+  @apply text-2xl font-bold leading-tight; /* 24px mobile */
+}
+
+@media (min-width: 640px) {
+  .text-heading-2-mobile {
+    @apply text-3xl; /* 30px tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-heading-2-mobile {
+    @apply text-4xl; /* 36px desktop */
+  }
+}
+
+.text-heading-3-mobile {
+  @apply text-xl font-semibold leading-snug; /* 20px mobile */
+}
+
+@media (min-width: 640px) {
+  .text-heading-3-mobile {
+    @apply text-2xl; /* 24px tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-heading-3-mobile {
+    @apply text-3xl; /* 30px desktop */
+  }
+}
+
+.text-heading-4-mobile {
+  @apply text-lg font-semibold leading-snug; /* 18px mobile */
+}
+
+@media (min-width: 640px) {
+  .text-heading-4-mobile {
+    @apply text-xl; /* 20px tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-heading-4-mobile {
+    @apply text-2xl; /* 24px desktop */
+  }
+}
+
+/* Labels responsive - minimum 12px */
+/* Requirement: 8.3 */
+.text-label-mobile {
+  @apply text-xs font-medium; /* 12px minimum */
+}
+
+@media (min-width: 640px) {
+  .text-label-mobile {
+    @apply text-sm; /* 14px on tablet/desktop */
+  }
+}
+
+/* Monetary/numeric values - tabular font for consistent alignment */
+/* Requirement: 8.5 */
+.text-tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.text-monetary-mobile {
+  @apply text-sm; /* 14px mobile */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@media (min-width: 640px) {
+  .text-monetary-mobile {
+    @apply text-base; /* 16px tablet/desktop */
+  }
+}
+
+/* Large monetary values for metrics/stats */
+.text-monetary-lg-mobile {
+  @apply text-2xl font-bold; /* 24px mobile */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@media (min-width: 640px) {
+  .text-monetary-lg-mobile {
+    @apply text-3xl; /* 30px tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-monetary-lg-mobile {
+    @apply text-4xl; /* 36px desktop */
+  }
+}
+
+/* Caption text - minimum 12px */
+.text-caption-mobile {
+  @apply text-xs text-muted-foreground; /* 12px minimum */
+}
+
+/* ============================================
+   MOBILE ANIMATION OPTIMIZATIONS
+   Requirements: 6.1
+   - Disable hover effects on mobile
+   - Reduce transition durations to 150ms on mobile
+   ============================================ */
+
+/* Mobile-optimized transitions - 150ms on mobile, 200ms on desktop */
+@layer utilities {
+  .transition-mobile-optimized {
+    @apply transition-all duration-150 ease-out;
+  }
+  
+  @media (min-width: 640px) {
+    .transition-mobile-optimized {
+      @apply duration-200;
+    }
+  }
+}
+
+/* Disable hover effects on touch devices */
+@media (hover: none) {
+  .hover-disabled-mobile:hover {
+    transform: none !important;
+    box-shadow: inherit !important;
+    opacity: 1 !important;
+    background-color: inherit !important;
+  }
+  
+  /* Disable card hover lift on mobile */
+  .card-elevated:hover {
+    transform: none;
+  }
+  
+  .metrics-card:hover {
+    transform: none;
+  }
+  
+  /* Disable complex hover animations on mobile */
+  .card-gradient-primary:hover,
+  .card-gradient-success:hover,
+  .card-gradient-warning:hover,
+  .card-gradient-info:hover {
+    transform: none;
+  }
+  
+  /* Reduce animation complexity on mobile */
+  .fade-in-up {
+    animation-duration: 0.3s;
+  }
+  
+  .stagger-child {
+    animation-duration: 0.3s;
+  }
+}
+
+/* Enable hover effects only on devices with hover capability */
+@media (hover: hover) {
+  .hover-enabled-desktop:hover {
+    opacity: 0.8;
+  }
+  
+  .hover-scale-enabled:hover {
+    transform: scale(1.02);
+  }
+  
+  .hover-lift-enabled:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Active state feedback for touch devices */
+@media (hover: none) {
+  .touch-feedback:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+    transition-duration: 100ms;
+  }
+  
+  /* Button touch feedback */
+  button:active,
+  [role="button"]:active {
+    transform: scale(0.98);
+    transition-duration: 100ms;
+  }
+}
+
+/* Reduced motion preference support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

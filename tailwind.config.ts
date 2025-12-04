@@ -249,16 +249,204 @@ export default {
         // Requirement: 6.1
         '.transition-mobile': {
           'transition-duration': '150ms',
+          'transition-timing-function': 'cubic-bezier(0.4, 0, 0.2, 1)',
           '@screen sm': {
             'transition-duration': '200ms',
           },
         },
         // Disable hover effects on mobile (touch devices)
+        // Uses @media (hover: hover) to detect devices with hover capability
         '.hover-desktop': {
           '@media (hover: hover)': {
             '&:hover': {
               'opacity': '0.8',
             },
+          },
+        },
+        // Hover scale effect only on desktop
+        '.hover-scale-desktop': {
+          '@media (hover: hover)': {
+            '&:hover': {
+              'transform': 'scale(1.02)',
+            },
+          },
+        },
+        // Hover lift effect only on desktop
+        '.hover-lift-desktop': {
+          '@media (hover: hover)': {
+            '&:hover': {
+              'transform': 'translateY(-2px)',
+              'box-shadow': '0 4px 12px rgba(0, 0, 0, 0.15)',
+            },
+          },
+        },
+        // No hover effects class - explicitly disable hover on mobile
+        '.no-hover-mobile': {
+          '@media (hover: none)': {
+            '&:hover': {
+              'transform': 'none',
+              'box-shadow': 'none',
+              'opacity': '1',
+            },
+          },
+        },
+        // Active state for touch feedback on mobile
+        '.active-mobile': {
+          '@media (hover: none)': {
+            '&:active': {
+              'transform': 'scale(0.98)',
+              'opacity': '0.9',
+            },
+          },
+        },
+        // ============================================
+        // RESPONSIVE TYPOGRAPHY CLASSES
+        // Requirements: 8.1, 8.2, 8.3, 8.5
+        // ============================================
+        
+        // Body text responsive - minimum 14px on mobile with proper line-height
+        // Requirement: 8.1
+        '.text-body-responsive': {
+          'font-size': '0.875rem', // 14px mobile
+          'line-height': '1.5',
+          '@screen sm': {
+            'font-size': '1rem', // 16px tablet/desktop
+          },
+        },
+        // Small body text - minimum 14px on mobile
+        '.text-body-sm-responsive': {
+          'font-size': '0.875rem', // 14px mobile (minimum)
+          'line-height': '1.5',
+          '@screen sm': {
+            'font-size': '0.875rem', // 14px tablet/desktop
+          },
+        },
+        // Heading H1 responsive - 20% reduced on mobile
+        // Requirement: 8.2
+        '.text-h1-responsive': {
+          'font-size': '1.875rem', // 30px mobile (20% smaller than 37.5px)
+          'line-height': '1.2',
+          'font-weight': '700',
+          '@screen sm': {
+            'font-size': '2.25rem', // 36px tablet
+          },
+          '@screen lg': {
+            'font-size': '3rem', // 48px desktop
+          },
+        },
+        // Heading H2 responsive - 20% reduced on mobile
+        '.text-h2-responsive': {
+          'font-size': '1.5rem', // 24px mobile (20% smaller than 30px)
+          'line-height': '1.25',
+          'font-weight': '700',
+          '@screen sm': {
+            'font-size': '1.875rem', // 30px tablet
+          },
+          '@screen lg': {
+            'font-size': '2.25rem', // 36px desktop
+          },
+        },
+        // Heading H3 responsive - 20% reduced on mobile
+        '.text-h3-responsive': {
+          'font-size': '1.25rem', // 20px mobile (20% smaller than 25px)
+          'line-height': '1.3',
+          'font-weight': '600',
+          '@screen sm': {
+            'font-size': '1.5rem', // 24px tablet
+          },
+          '@screen lg': {
+            'font-size': '1.875rem', // 30px desktop
+          },
+        },
+        // Heading H4 responsive - 20% reduced on mobile
+        '.text-h4-responsive': {
+          'font-size': '1.125rem', // 18px mobile (20% smaller than 22.5px)
+          'line-height': '1.3',
+          'font-weight': '600',
+          '@screen sm': {
+            'font-size': '1.25rem', // 20px tablet
+          },
+          '@screen lg': {
+            'font-size': '1.5rem', // 24px desktop
+          },
+        },
+        // Label responsive - minimum 12px
+        // Requirement: 8.3
+        '.text-label-responsive': {
+          'font-size': '0.75rem', // 12px mobile (minimum)
+          'line-height': '1.4',
+          'font-weight': '500',
+          '@screen sm': {
+            'font-size': '0.875rem', // 14px tablet/desktop
+          },
+        },
+        // Small label - always 12px minimum
+        '.text-label-sm-responsive': {
+          'font-size': '0.75rem', // 12px (minimum)
+          'line-height': '1.4',
+          'font-weight': '500',
+        },
+        // Monetary/numeric values - tabular font for alignment
+        // Requirement: 8.5
+        '.text-monetary': {
+          'font-variant-numeric': 'tabular-nums',
+          'font-feature-settings': '"tnum"',
+        },
+        // Monetary value responsive - tabular font with responsive sizing
+        '.text-monetary-responsive': {
+          'font-size': '0.875rem', // 14px mobile
+          'line-height': '1.5',
+          'font-variant-numeric': 'tabular-nums',
+          'font-feature-settings': '"tnum"',
+          '@screen sm': {
+            'font-size': '1rem', // 16px tablet/desktop
+          },
+        },
+        // Large monetary value (for metrics/stats)
+        '.text-monetary-lg-responsive': {
+          'font-size': '1.5rem', // 24px mobile
+          'line-height': '1.2',
+          'font-weight': '700',
+          'font-variant-numeric': 'tabular-nums',
+          'font-feature-settings': '"tnum"',
+          '@screen sm': {
+            'font-size': '1.875rem', // 30px tablet
+          },
+          '@screen lg': {
+            'font-size': '2.25rem', // 36px desktop
+          },
+        },
+        // Caption text responsive - minimum 12px
+        '.text-caption-responsive': {
+          'font-size': '0.75rem', // 12px mobile (minimum)
+          'line-height': '1.4',
+          'color': 'hsl(var(--muted-foreground))',
+          '@screen sm': {
+            'font-size': '0.75rem', // 12px tablet/desktop
+          },
+        },
+        // Combined mobile-optimized interaction class
+        '.interaction-mobile': {
+          'transition-duration': '150ms',
+          'transition-timing-function': 'cubic-bezier(0.4, 0, 0.2, 1)',
+          '@media (hover: none)': {
+            '&:active': {
+              'transform': 'scale(0.98)',
+              'opacity': '0.9',
+            },
+          },
+          '@media (hover: hover)': {
+            'transition-duration': '200ms',
+            '&:hover': {
+              'opacity': '0.8',
+            },
+          },
+        },
+        // Disable all animations on mobile for performance
+        '.animate-desktop-only': {
+          'animation': 'none',
+          '@screen sm': {
+            'animation': 'inherit',
           },
         },
       });
