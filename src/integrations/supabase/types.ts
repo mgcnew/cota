@@ -530,40 +530,31 @@ export type Database = {
       quote_supplier_items: {
         Row: {
           created_at: string
-          fator_conversao: number | null
           id: string
           product_id: string
           product_name: string
-          quantidade_por_embalagem: number | null
           quote_id: string
           supplier_id: string
-          unidade_preco: string | null
           updated_at: string
           valor_oferecido: number | null
         }
         Insert: {
           created_at?: string
-          fator_conversao?: number | null
           id?: string
           product_id: string
           product_name: string
-          quantidade_por_embalagem?: number | null
           quote_id: string
           supplier_id: string
-          unidade_preco?: string | null
           updated_at?: string
           valor_oferecido?: number | null
         }
         Update: {
           created_at?: string
-          fator_conversao?: number | null
           id?: string
           product_id?: string
           product_name?: string
-          quantidade_por_embalagem?: number | null
           quote_id?: string
           supplier_id?: string
-          unidade_preco?: string | null
           updated_at?: string
           valor_oferecido?: number | null
         }

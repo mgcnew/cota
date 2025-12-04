@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useRef, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
