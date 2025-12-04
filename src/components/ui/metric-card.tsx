@@ -81,7 +81,6 @@ export const MetricCard = memo(function MetricCard({
       interactive
       className={cn(
         "relative overflow-hidden border-2 transition-all duration-200 group",
-        !isMobile && "hover:scale-[1.02]",
         styles.border,
         styles.glow,
         styles.cardBg,
