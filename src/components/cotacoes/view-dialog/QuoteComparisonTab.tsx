@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Package, Star, ShoppingCart, BarChart3, Building2, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Quote } from "./types";
+import { normalizePrice, PriceMetadata } from "@/utils/priceNormalization";
 
 interface QuoteComparisonTabProps {
     products: any[];
@@ -16,6 +17,8 @@ interface QuoteComparisonTabProps {
     handleConvertToOrder: () => void;
     isUpdating: boolean;
     readOnly?: boolean;
+    getNormalizedUnitPrice?: (supplierId: string, productId: string) => number;
+    getSupplierItemPricingMetadata?: (supplierId: string, productId: string) => { unidadePreco: any; fatorConversao: number | null };
 }
 
 export function QuoteComparisonTab({
@@ -26,8 +29,34 @@ export function QuoteComparisonTab({
     getBestPriceInfoForProduct,
     handleConvertToOrder,
     isUpdating,
-    readOnly = false
+    readOnly = false,
+    getNormalizedUnitPrice,
+    getSupplierItemPricingMetadata
 }: QuoteComparisonTabProps) {
+    // Helper function to get normalized unit price with fallback
+    const getNormalizedPrice = (supplierId: string, productId: string): number => {
+        if (getNormalizedUnitPrice) {
+            return getNormalizedUnitPrice(supplierId, productId);
+        }
+        // Fallback: return original value if normalized price function not provided
+        return getSupplierProductValue(supplierId, productId);
+    };
+
+    // Helper function to get pricing metadata with fallback
+    const getPricingMetadata = (supplierId: string, productId: string) => {
+        if (getSupplierItemPricingMetadata) {
+            return getSupplierItemPricingMetadata(supplierId, productId);
+        }
+        return { unidadePreco: null, fatorConversao: null };
+    };
+
+    // Helper to check if original unit differs from base unit
+    const shouldShowOriginalUnit = (supplierId: string, productId: string): boolean => {
+        const metadata = getPricingMetadata(supplierId, productId);
+        if (!metadata.unidadePreco) return false;
+        // Show original unit if it's not the base unit (kg or un)
+        return metadata.unidadePreco === 'cx' || metadata.unidadePreco === 'pct';
+    };
     return (
         <ScrollArea className="h-full">
             <div className="h-full flex flex-col p-2.5 sm:p-3">
@@ -140,16 +169,21 @@ export function QuoteComparisonTab({
                                                 </p>
                                             </td>
                                             {currentQuote.fornecedoresParticipantes.map(fornecedor => {
-                                                const value = getSupplierProductValue(fornecedor.id, product.product_id);
+                                                const originalValue = getSupplierProductValue(fornecedor.id, product.product_id);
+                                                const normalizedUnitPrice = getNormalizedPrice(fornecedor.id, product.product_id);
                                                 const isBestPrice = fornecedor.id === bestSupplierId;
                                                 const isWinning = bestSupplier?.id === fornecedor.id;
+                                                const showOriginalUnit = shouldShowOriginalUnit(fornecedor.id, product.product_id);
+                                                const metadata = getPricingMetadata(fornecedor.id, product.product_id);
 
-                                                // Calcular economia se houver outros valores
-                                                const allValues = currentQuote.fornecedoresParticipantes
-                                                    .map(f => getSupplierProductValue(f.id, product.product_id))
+                                                // Calcular economia usando preços normalizados
+                                                const allNormalizedPrices = currentQuote.fornecedoresParticipantes
+                                                    .map(f => getNormalizedPrice(f.id, product.product_id))
                                                     .filter(v => v > 0);
-                                                const maxValue = allValues.length > 0 ? Math.max(...allValues) : 0;
-                                                const economia = maxValue > 0 && value > 0 ? maxValue - value : 0;
+                                                const maxNormalizedPrice = allNormalizedPrices.length > 0 ? Math.max(...allNormalizedPrices) : 0;
+                                                const economia = maxNormalizedPrice > 0 && normalizedUnitPrice > 0 
+                                                    ? (maxNormalizedPrice - normalizedUnitPrice) * product.quantidade 
+                                                    : 0;
 
                                                 return (
                                                     <td key={fornecedor.id} className={cn(
@@ -158,20 +192,40 @@ export function QuoteComparisonTab({
                                                         isBestPrice && "bg-emerald-50/80 dark:bg-emerald-900/30",
                                                         isWinning && "border-l-2 border-r-2 border-emerald-300/60 dark:border-emerald-700/60"
                                                     )}>
-                                                        {value > 0 ? (
+                                                        {originalValue > 0 ? (
                                                             <div className="flex flex-col items-center gap-0.5">
-                                                                <div className={cn(
-                                                                    "rounded-md font-bold inline-flex items-center justify-center gap-0.5 px-2 py-1 shadow-sm transition-all",
-                                                                    (currentQuote?.fornecedoresParticipantes.length ?? 0) > 5
-                                                                        ? "text-[10px] min-w-[75px]"
-                                                                        : "text-xs min-w-[85px]",
-                                                                    isBestPrice
-                                                                        ? "bg-emerald-600 dark:bg-gray-700 text-white ring-1 ring-emerald-200 dark:ring-emerald-800"
-                                                                        : "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100 border border-purple-200 dark:border-purple-800"
-                                                                )}>
-                                                                    {isBestPrice && <TrendingDown className="h-2.5 w-2.5 flex-shrink-0" />}
-                                                                    <span className="whitespace-nowrap">R$ {value.toFixed(2)}</span>
-                                                                </div>
+                                                                <TooltipProvider>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <div className={cn(
+                                                                                "rounded-md font-bold inline-flex items-center justify-center gap-0.5 px-2 py-1 shadow-sm transition-all cursor-help",
+                                                                                (currentQuote?.fornecedoresParticipantes.length ?? 0) > 5
+                                                                                    ? "text-[10px] min-w-[75px]"
+                                                                                    : "text-xs min-w-[85px]",
+                                                                                isBestPrice
+                                                                                    ? "bg-emerald-600 dark:bg-gray-700 text-white ring-1 ring-emerald-200 dark:ring-emerald-800"
+                                                                                    : "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100 border border-purple-200 dark:border-purple-800"
+                                                            )}>
+                                                                                {isBestPrice && <TrendingDown className="h-2.5 w-2.5 flex-shrink-0" />}
+                                                                                <span className="whitespace-nowrap">R$ {normalizedUnitPrice.toFixed(2)}</span>
+                                                                            </div>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <div className="text-xs space-y-1">
+                                                                                <p><strong>Preço normalizado:</strong> R$ {normalizedUnitPrice.toFixed(2)}/un</p>
+                                                                                {showOriginalUnit && (
+                                                                                    <p><strong>Preço original:</strong> R$ {originalValue.toFixed(2)}/{metadata.unidadePreco}</p>
+                                                                                )}
+                                                                                <p><strong>Total:</strong> R$ {(normalizedUnitPrice * product.quantidade).toFixed(2)}</p>
+                                                                            </div>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </TooltipProvider>
+                                                                {showOriginalUnit && (
+                                                                    <span className="text-[8px] text-gray-500 dark:text-gray-400">
+                                                                        orig: R$ {originalValue.toFixed(2)}/{metadata.unidadePreco}
+                                                                    </span>
+                                                                )}
                                                                 {isBestPrice && economia > 0 && (
                                                                     <Badge className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[9px] h-4 px-1 font-semibold">
                                                                         Eco: R$ {economia.toFixed(2)}

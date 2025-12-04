@@ -7,11 +7,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+export interface ConversionMetadata {
+  convertedValue: number;
+  targetUnit: 'kg' | 'un';
+  conversionFactor: number;
+}
+
 interface PriceConverterProps {
   currentValue?: number;
   productQuantity: string;
   productUnit: string; // "kg", "un", "cx"
-  onConvert: (convertedValue: number) => void;
+  onConvert: (metadata: ConversionMetadata) => void;
   trigger?: React.ReactNode;
 }
 
@@ -77,7 +83,13 @@ export function PriceConverter({
 
   const handleApply = () => {
     if (result !== null && result > 0) {
-      onConvert(result);
+      const quantity = normalizeNumber(quantityPerBox);
+      const metadata: ConversionMetadata = {
+        convertedValue: result,
+        targetUnit: conversionUnit,
+        conversionFactor: quantity,
+      };
+      onConvert(metadata);
       setOpen(false);
       // Limpar campos após aplicar
       setPricePerBox("");

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo } from 'react';
+import { normalizePrice, calculateEconomy, type PriceMetadata } from '@/utils/priceNormalization';
 
 const COMPETITIVE_THRESHOLD = 0.05;
 const APPROVAL_TARGET = 75;
@@ -48,7 +49,27 @@ const buildSupplierTotals = (quote: any): SupplierTotals[] => {
     const quoteItem = quote.quote_items?.find((qi: any) => qi.product_id === item.product_id);
     const parsedQuantity = parseFloat(quoteItem?.quantidade ?? '1');
     const quantidade = Number.isFinite(parsedQuantity) && parsedQuantity > 0 ? parsedQuantity : 1;
-    const valorTotal = rawValor * quantidade;
+    
+    // Get purchase unit from quote item
+    const purchaseUnit = quoteItem?.unidade_compra || 'un';
+    
+    // Build price metadata from supplier item
+    const priceMetadata: PriceMetadata = {
+      valorOferecido: rawValor,
+      unidadePreco: (item.unidade_preco || 'un') as any,
+      fatorConversao: item.fator_conversao || undefined,
+      quantidadePorEmbalagem: item.quantidade_por_embalagem || undefined,
+    };
+    
+    // Normalize price to get total value
+    let valorTotal: number;
+    try {
+      const normalized = normalizePrice(priceMetadata, quantidade, purchaseUnit);
+      valorTotal = normalized.valorTotal;
+    } catch (error) {
+      // If normalization fails, fall back to simple multiplication
+      valorTotal = rawValor * quantidade;
+    }
 
     if (valorTotal <= 0) return;
 
@@ -69,7 +90,7 @@ const buildSupplierTotals = (quote: any): SupplierTotals[] => {
     .filter(({ total }) => total > 0);
 };
 
-const calculateQuoteEconomics = (supplierTotals: SupplierTotals[]): QuoteEconomics => {
+const calculateQuoteEconomics = (supplierTotals: SupplierTotals[], quote?: any): QuoteEconomics => {
   const validSuppliers = supplierTotals.filter(({ total }) => total > 0);
 
   if (validSuppliers.length < 2) {
@@ -272,7 +293,7 @@ export function useDashboard() {
       const supplierTotals = buildSupplierTotals(quote);
       if (supplierTotals.length === 0) return;
 
-      const economics = calculateQuoteEconomics(supplierTotals);
+      const economics = calculateQuoteEconomics(supplierTotals, quote);
       economiaTotalRealizada += economics.economiaRealizada;
       economiaPotencialTotal += economics.economiaPotencial;
       fornecedoresValidosTotal += economics.fornecedoresValidos;
@@ -377,7 +398,7 @@ export function useDashboard() {
 
       const supplierTotals = buildSupplierTotals(quote);
       if (supplierTotals.length === 0) return;
-      const economics = calculateQuoteEconomics(supplierTotals);
+      const economics = calculateQuoteEconomics(supplierTotals, quote);
       economiaMesAtual += economics.economiaRealizada;
       economiaPotencialMesAtual += economics.economiaPotencial;
     });
@@ -391,7 +412,7 @@ export function useDashboard() {
 
       const supplierTotals = buildSupplierTotals(quote);
       if (supplierTotals.length === 0) return;
-      const economics = calculateQuoteEconomics(supplierTotals);
+      const economics = calculateQuoteEconomics(supplierTotals, quote);
       economiaMesAnterior += economics.economiaRealizada;
       economiaPotencialMesAnterior += economics.economiaPotencial;
     });
@@ -448,7 +469,7 @@ export function useDashboard() {
         const supplierTotals = buildSupplierTotals(quote);
         if (supplierTotals.length < 2) return;
 
-        const economics = calculateQuoteEconomics(supplierTotals);
+        const economics = calculateQuoteEconomics(supplierTotals, quote);
         totalRealizada += economics.economiaRealizada;
         totalPotencial += economics.economiaPotencial;
       });

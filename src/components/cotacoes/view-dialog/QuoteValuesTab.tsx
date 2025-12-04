@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { DollarSign, Package, Edit2, Save, X, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PriceConverter } from "@/components/forms/PriceConverter";
+import { PriceConverter, ConversionMetadata } from "@/components/forms/PriceConverter";
 import { Quote } from "./types";
 import { PricingUnit } from "@/utils/priceNormalization";
 
@@ -289,11 +289,22 @@ export function QuoteValuesTab({
                                   }
                                   productQuantity={product.quantidade}
                                   productUnit={product.unidade}
-                                  onConvert={(convertedValue) => {
+                                  onConvert={(metadata) => {
+                                    // Auto-set pricing unit from PriceConverter result - Requirements: 4.1, 4.3
+                                    // Auto-set conversion factor from PriceConverter result - Requirements: 4.1, 4.2, 4.3
                                     setEditedValues((prev) => ({
                                       ...prev,
-                                      [product.product_id]: convertedValue,
+                                      [product.product_id]: metadata.convertedValue,
                                     }));
+                                    if (setEditedPricingMetadata) {
+                                      setEditedPricingMetadata((prev) => ({
+                                        ...prev,
+                                        [product.product_id]: {
+                                          unidadePreco: metadata.targetUnit,
+                                          fatorConversao: metadata.conversionFactor,
+                                        },
+                                      }));
+                                    }
                                     setTimeout(() => {
                                       editInputRef.current?.focus();
                                       editInputRef.current?.select();
