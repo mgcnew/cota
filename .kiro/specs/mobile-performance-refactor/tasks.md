@@ -288,7 +288,12 @@
 
     - Usar componente compartilhado para todos os status
     - _Requirements: 3.4_
-  - [ ]* 9.6 Write property test for StatusBadge consistency
+  - [x] 9.6 Write property test for StatusBadge consistency
+
+
+
+
+
     - **Property 7: StatusBadge Consistency**
     - **Validates: Requirements 3.4, 5.4**
   - [x] 9.7 Usar ResponsiveModal para modais de cotação

@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useExportCSV } from "@/hooks/useExportCSV";
-import { Package, Plus, Filter, MoreVertical, Edit, Trash2, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download } from "lucide-react";
+import { Package, Plus, Filter, MoreVertical, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
@@ -25,7 +25,6 @@ import { useToast } from "@/hooks/use-toast";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
-import { VirtualList } from "@/components/responsive/VirtualList";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import { ProductsHeroCard } from "@/components/products/ProductsHeroCard";
 import { ProductsStatusSummary } from "@/components/products/ProductsStatusSummary";
@@ -286,7 +285,7 @@ export default function Produtos() {
           </section>
 
           {/* Cards de Métricas Secundárias */}
-          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6 overflow-visible">
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6">
             <MetricCard
               title="Categorias"
               value={stats.totalCategories}
@@ -408,24 +407,16 @@ export default function Produtos() {
                 />
               ) : (
                 <>
-                  {/* Mobile Cards View - Virtualized for lists > 20 items */}
-                  <div className="md:hidden p-2">
-                    <VirtualList
-                      items={safeFilteredProducts}
-                      itemHeight={180}
-                      threshold={20}
-                      height={Math.min(safeFilteredProducts.length * 180, window.innerHeight - 300)}
-                      overscan={3}
-                      renderItem={(product, index, style) => (
-                        <MobileProductCard
-                          key={product.id}
-                          product={product}
-                          onEdit={handleEditProduct}
-                          onDelete={handleDeleteProduct}
-                          style={style}
-                        />
-                      )}
-                    />
+                  {/* Mobile Cards View - Paginated for better UX */}
+                  <div className="md:hidden px-3 py-4 space-y-3">
+                    {paginatedData.items.map((product) => (
+                      <MobileProductCard
+                        key={product.id}
+                        product={product}
+                        onEdit={handleEditProduct}
+                        onDelete={handleDeleteProduct}
+                      />
+                    ))}
                   </div>
 
                   {/* Desktop Table View */}
