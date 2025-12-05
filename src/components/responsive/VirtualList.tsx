@@ -1,5 +1,6 @@
 import * as React from "react";
-import { FixedSizeList, VariableSizeList, ListChildComponentProps } from "react-window";
+import { List, useDynamicRowHeight } from "react-window";
+import type { ListImperativeAPI } from "react-window";
 import { cn } from "@/lib/utils";
 
 export interface VirtualListProps<T> {
@@ -57,35 +58,6 @@ export interface VirtualListProps<T> {
   initialScrollOffset?: number;
 }
 
-/**
- * Row component for FixedSizeList
- */
-function FixedRow<T>({
-  index,
-  style,
-  data,
-}: ListChildComponentProps<{
-  items: T[];
-  renderItem: (item: T, index: number, style: React.CSSProperties) => React.ReactNode;
-}>) {
-  const { items, renderItem } = data;
-  return <>{renderItem(items[index], index, style)}</>;
-}
-
-/**
- * Row component for VariableSizeList
- */
-function VariableRow<T>({
-  index,
-  style,
-  data,
-}: ListChildComponentProps<{
-  items: T[];
-  renderItem: (item: T, index: number, style: React.CSSProperties) => React.ReactNode;
-}>) {
-  const { items, renderItem } = data;
-  return <>{renderItem(items[index], index, style)}</>;
-}
 
 /**
  * Non-virtualized list for small item counts
@@ -157,23 +129,15 @@ export function VirtualList<T>({
   threshold = 20,
   overscan = 5,
   height = 400,
-  width = '100%',
   className,
-  innerClassName,
-  keyExtractor,
-  onScroll,
-  initialScrollOffset = 0,
 }: VirtualListProps<T>): JSX.Element {
-  const listRef = React.useRef<FixedSizeList | VariableSizeList>(null);
+  const listRef = React.useRef<ListImperativeAPI>(null);
   const isVariableHeight = typeof itemHeight === 'function';
-
-  // Handle scroll events
-  const handleScroll = React.useCallback(
-    ({ scrollOffset }: { scrollOffset: number }) => {
-      onScroll?.(scrollOffset);
-    },
-    [onScroll]
-  );
+  
+  // For dynamic row heights, use the hook
+  const dynamicRowHeight = useDynamicRowHeight({
+    defaultRowHeight: typeof itemHeight === 'number' ? itemHeight : 60,
+  });
 
   // If items count is below threshold, render without virtualization
   if (items.length <= threshold) {
@@ -186,57 +150,30 @@ export function VirtualList<T>({
     );
   }
 
-  // Data to pass to row components
-  const itemData = React.useMemo(
+  // Determine row height to use
+  const rowHeightValue = isVariableHeight 
+    ? dynamicRowHeight 
+    : (itemHeight as number);
+
+  // Row props to pass to the row component
+  const rowProps = React.useMemo(
     () => ({ items, renderItem }),
     [items, renderItem]
   );
 
-  // Render virtualized list
-  if (isVariableHeight) {
-    return (
-      <VariableSizeList
-        ref={listRef as React.RefObject<VariableSizeList>}
-        height={height}
-        width={width}
-        itemCount={items.length}
-        itemSize={itemHeight as (index: number) => number}
-        itemData={itemData}
-        overscanCount={overscan}
-        onScroll={handleScroll}
-        initialScrollOffset={initialScrollOffset}
-        className={cn("scrollbar-thin scrollbar-thumb-muted", className)}
-        innerElementType={innerClassName ? 
-          React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-            (props, ref) => <div ref={ref} className={innerClassName} {...props} />
-          ) : undefined
-        }
-      >
-        {VariableRow as React.ComponentType<ListChildComponentProps<typeof itemData>>}
-      </VariableSizeList>
-    );
-  }
-
   return (
-    <FixedSizeList
-      ref={listRef as React.RefObject<FixedSizeList>}
-      height={height}
-      width={width}
-      itemCount={items.length}
-      itemSize={itemHeight as number}
-      itemData={itemData}
-      overscanCount={overscan}
-      onScroll={handleScroll}
-      initialScrollOffset={initialScrollOffset}
+    <List
+      listRef={listRef}
+      style={{ height, width: '100%' }}
       className={cn("scrollbar-thin scrollbar-thumb-muted", className)}
-      innerElementType={innerClassName ? 
-        React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-          (props, ref) => <div ref={ref} className={innerClassName} {...props} />
-        ) : undefined
-      }
-    >
-      {FixedRow as React.ComponentType<ListChildComponentProps<typeof itemData>>}
-    </FixedSizeList>
+      rowCount={items.length}
+      rowHeight={rowHeightValue}
+      rowProps={rowProps}
+      overscanCount={overscan}
+      rowComponent={({ index, style, items: rowItems, renderItem: rowRenderItem }) => (
+        <>{rowRenderItem(rowItems[index], index, style)}</>
+      )}
+    />
   );
 }
 

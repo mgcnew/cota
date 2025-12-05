@@ -25,8 +25,11 @@ import { useToast } from "@/hooks/use-toast";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
+import { VirtualList } from "@/components/responsive/VirtualList";
+import { LazyImage } from "@/components/responsive/LazyImage";
 import { ProductsHeroCard } from "@/components/products/ProductsHeroCard";
 import { ProductsStatusSummary } from "@/components/products/ProductsStatusSummary";
+import { MobileProductCard } from "@/components/products/MobileProductCard";
 
 // Import dialogs directly for better UX (no loading delay)
 import { AddProductDialog } from "@/components/forms/AddProductDialog";
@@ -338,7 +341,7 @@ export default function Produtos() {
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button className="h-9 sm:h-10 px-3 sm:px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm">
+                    <Button className="h-11 sm:h-10 min-w-[44px] px-3 sm:px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm touch-target">
                       <Plus className="h-4 w-4 sm:mr-2" />
                       <span className="hidden sm:inline">Adicionar</span>
                     </Button>
@@ -346,23 +349,23 @@ export default function Produtos() {
                   <DropdownMenuContent align="end" className="w-[200px]">
                     <DropdownMenuLabel>Ações</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }}>
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
                       <Plus className="h-4 w-4 mr-2" /> Adicionar Produto
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }}>
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
                       <FileUp className="h-4 w-4 mr-2" /> Importar Produtos
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }}>
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }} className="min-h-[44px]">
                       <Download className="h-4 w-4 mr-2" /> Exportar Produtos
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/contagem-estoque")}>
+                    <DropdownMenuItem onClick={() => navigate("/dashboard/contagem-estoque")} className="min-h-[44px]">
                       <ClipboardList className="h-4 w-4 mr-2" /> Contagem de Estoque
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/relatorios?tab=produtos")}>
+                    <DropdownMenuItem onClick={() => navigate("/dashboard/relatorios?tab=produtos")} className="min-h-[44px]">
                       <FileText className="h-4 w-4 mr-2" /> Relatórios
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/analytics")}>
+                    <DropdownMenuItem onClick={() => navigate("/dashboard/analytics")} className="min-h-[44px]">
                       <TrendingUp className="h-4 w-4 mr-2" /> Analytics
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -405,83 +408,24 @@ export default function Produtos() {
                 />
               ) : (
                 <>
-                  {/* Mobile Cards View */}
-                  <div className="md:hidden space-y-3 p-2">
-                    {paginatedData.items.map((product) => (
-                      <div 
-                        key={product.id} 
-                        className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm"
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0">
-                              {product.image_url ? (
-                                <img src={product.image_url} alt={product.name} className="w-10 h-10 rounded-xl object-cover" />
-                              ) : (
-                                <Package className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{capitalize(product.name)}</p>
-                              <Badge variant="secondary" className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary text-xs mt-1">
-                                {capitalize(product.category)}
-                              </Badge>
-                            </div>
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditProduct(product)}>
-                                <Edit className="h-4 w-4 mr-2" /> Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDeleteProduct(product)} className="text-red-600">
-                                <Trash2 className="h-4 w-4 mr-2" /> Excluir
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem>
-                                <History className="h-4 w-4 mr-2" /> Histórico
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-3 text-xs">
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="h-3.5 w-3.5 text-green-600" />
-                            <span className="text-gray-500 dark:text-gray-400">Preço:</span>
-                            <span className="font-semibold text-green-700 dark:text-green-400">{product.lastQuotePrice}</span>
-                            {getTrendIcon(product.trend)}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <ClipboardList className="h-3.5 w-3.5 text-blue-600" />
-                            <span className="text-gray-500 dark:text-gray-400">Cotações:</span>
-                            <span className="font-semibold text-blue-700 dark:text-blue-400">{product.quotesCount || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <CircleDot className="h-3.5 w-3.5 text-gray-500" />
-                            <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                            <StatusBadge status={getProductStatus(product)} />
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Barcode className="h-3.5 w-3.5 text-gray-500" />
-                            <span className="text-gray-500 dark:text-gray-400">Código:</span>
-                            <span className="text-gray-700 dark:text-gray-300 truncate">{product.barcode || "N/A"}</span>
-                          </div>
-                        </div>
-                        
-                        {product.bestSupplier && (
-                          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30 flex items-center gap-2 text-xs">
-                            <Building2 className="h-3.5 w-3.5 text-gray-500" />
-                            <span className="text-gray-500 dark:text-gray-400">Fornecedor:</span>
-                            <span className="text-gray-700 dark:text-gray-300 truncate">{capitalize(product.bestSupplier)}</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                  {/* Mobile Cards View - Virtualized for lists > 20 items */}
+                  <div className="md:hidden p-2">
+                    <VirtualList
+                      items={safeFilteredProducts}
+                      itemHeight={180}
+                      threshold={20}
+                      height={Math.min(safeFilteredProducts.length * 180, window.innerHeight - 300)}
+                      overscan={3}
+                      renderItem={(product, index, style) => (
+                        <MobileProductCard
+                          key={product.id}
+                          product={product}
+                          onEdit={handleEditProduct}
+                          onDelete={handleDeleteProduct}
+                          style={style}
+                        />
+                      )}
+                    />
                   </div>
 
                   {/* Desktop Table View */}
@@ -535,9 +479,15 @@ export default function Produtos() {
                             <TableCell colSpan={8} className="px-1 py-2">
                               <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:border-orange-300/60 dark:hover:border-orange-700/50">
                                 <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                                  <div className="w-8 h-8 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                  <div className="w-8 h-8 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden">
                                     {product.image_url ? (
-                                      <img src={product.image_url} alt={product.name} className="w-8 h-8 rounded-lg object-cover" />
+                                      <LazyImage 
+                                        src={product.image_url} 
+                                        alt={product.name} 
+                                        className="w-8 h-8 rounded-lg object-cover"
+                                        showSkeleton={true}
+                                        fallback={<Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />}
+                                      />
                                     ) : (
                                       <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                                     )}

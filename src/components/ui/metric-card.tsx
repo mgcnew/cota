@@ -75,7 +75,7 @@ export const MetricCard = memo(function MetricCard({
   return (
     <ResponsiveCard
       size="default"
-      padding="md"
+      padding="sm"
       interactive={false}
       className={cn(
         "relative overflow-hidden border",
@@ -85,12 +85,13 @@ export const MetricCard = memo(function MetricCard({
         className
       )}
     >
-      <div className="flex flex-row items-center justify-between">
-        <CardTitle className={cn("text-xs sm:text-sm font-bold truncate pr-2", styles.titleColor)}>
+      <div className="flex flex-row items-center justify-between gap-2">
+        <CardTitle className={cn("text-xs sm:text-sm font-bold truncate flex-1", styles.titleColor)}>
           {title}
         </CardTitle>
-        <div className={cn("p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl shadow-md flex-shrink-0", styles.iconBg)}>
-          <Icon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
+        {/* Icon with 44x44px minimum touch target on mobile */}
+        <div className={cn("p-2 sm:p-2.5 rounded-lg sm:rounded-xl shadow-md flex-shrink-0 min-h-11 min-w-11 sm:min-h-auto sm:min-w-auto flex items-center justify-center", styles.iconBg)}>
+          <Icon className="h-4 w-4 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
         </div>
       </div>
 

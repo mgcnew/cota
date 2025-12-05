@@ -1,15 +1,17 @@
-import { useMemo, useCallback, memo } from 'react';
+import { useMemo, useCallback, Suspense, lazy } from 'react';
 import { LayoutDashboard, BarChart3, Users, Target, FileText } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { MetricCard } from '@/components/ui/metric-card';
 import { ResponsiveGrid } from '@/components/responsive/ResponsiveGrid';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageSkeleton } from '@/components/responsive/PageSkeleton';
 import { useDashboard } from '@/hooks/useDashboard';
-import { EvolutionChart } from '@/components/dashboard/EvolutionChart';
-import { EconomyChart } from '@/components/dashboard/EconomyChart';
 import { EconomyHeroCard } from '@/components/dashboard/EconomyHeroCard';
 import { ExecutiveSummary } from '@/components/dashboard/ExecutiveSummary';
+
+// Lazy load chart components for performance
+const EvolutionChart = lazy(() => import('@/components/dashboard/EvolutionChart').then(m => ({ default: m.EvolutionChart })));
+const EconomyChart = lazy(() => import('@/components/dashboard/EconomyChart').then(m => ({ default: m.EconomyChart })));
 
 const MONTHS_MAP: Record<string, number> = { '1m': 1, '3m': 3, '6m': 6, '1y': 12 };
 const MONTH_NAMES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -42,26 +44,7 @@ const getTrend = (value: number, label: string): TrendType => ({
   type: value >= 0 ? 'positive' : 'negative',
 });
 
-// Skeleton para loading
-const DashboardSkeleton = memo(function DashboardSkeleton() {
-  return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <Skeleton className="h-[220px] sm:h-[260px] rounded-xl" />
-        <Skeleton className="h-[220px] sm:h-[260px] rounded-xl" />
-      </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-[100px] sm:h-[120px] rounded-xl" />
-        ))}
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <Skeleton className="h-[280px] sm:h-[340px] lg:col-span-2 rounded-xl" />
-        <Skeleton className="h-[280px] sm:h-[340px] rounded-xl" />
-      </div>
-    </div>
-  );
-});
+
 
 export default function Dashboard() {
   const dashboardData = useDashboard();
@@ -112,7 +95,7 @@ export default function Dashboard() {
         </header>
 
         {isLoading ? (
-          <DashboardSkeleton />
+          <PageSkeleton variant="dashboard" sections={3} itemsPerSection={4} />
         ) : (
           <>
             {/* Hero Section - Economy + Summary */}
@@ -167,21 +150,23 @@ export default function Dashboard() {
               </ResponsiveGrid>
             </section>
 
-            {/* Charts */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              <EvolutionChart
-                data={evolutionData}
-                period="7d"
-                onPeriodChange={() => {}}
-                isLoading={false}
-              />
-              <EconomyChart
-                data={economyData}
-                period="7d"
-                onPeriodChange={() => {}}
-                isLoading={false}
-              />
-            </section>
+            {/* Charts - Lazy loaded after metrics */}
+            <Suspense fallback={<PageSkeleton variant="dashboard" sections={2} itemsPerSection={2} />}>
+              <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                <EvolutionChart
+                  data={evolutionData}
+                  period="7d"
+                  onPeriodChange={() => {}}
+                  isLoading={false}
+                />
+                <EconomyChart
+                  data={economyData}
+                  period="7d"
+                  onPeriodChange={() => {}}
+                  isLoading={false}
+                />
+              </section>
+            </Suspense>
           </>
         )}
       </div>

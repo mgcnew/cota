@@ -8,6 +8,7 @@ import { useSuppliers } from "@/hooks/useSuppliers";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Quote } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { FileText, Plus, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, Package, Clock, CircleDot, ClipboardList, Eye } from "lucide-react";
 import { Table, TableCell, TableRow } from "@/components/ui/table";
@@ -87,10 +88,8 @@ export default function Cotacoes() {
     { value: "expirada", label: "Expirada", className: "border-destructive/30 bg-destructive/10 text-destructive" }
   ];
 
-  const getStatusBadge = useCallback((status: string) => {
-    const config = statusOptions.find(s => s.value === status) || statusOptions[1];
-    return <Badge variant="outline" className={cn("font-medium text-xs", config.className)}>{config.label}</Badge>;
-  }, []);
+  // Using shared StatusBadge component for consistent styling across the app
+  // Requirements: 3.4 - Padronizar uso de StatusBadge
 
   const handleStatusChange = useCallback((quoteId: string, newStatus: string) => {
     updateQuoteStatus({ quoteId, status: newStatus });
@@ -168,7 +167,7 @@ export default function Cotacoes() {
         </PageHeader>
 
         {viewMode === "grid" ? (
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-200">
             {paginatedData.items.map((cotacao, index) => {
               const colors: Record<string, string> = { ativa: "border-primary/30 from-card to-primary/5", pendente: "border-warning/30 from-card to-warning/5", concluida: "border-success/30 from-card to-success/5" };
               const color = colors[cotacao.status] || colors.pendente;
@@ -183,7 +182,7 @@ export default function Cotacoes() {
                           <CardTitle className="text-sm font-bold truncate"><CapitalizedText>{typeof cotacao.produtoResumo === 'string' ? cotacao.produtoResumo : String(cotacao.produtoResumo || '')}</CapitalizedText></CardTitle>
                           <div className="flex items-center gap-2 mt-1">
 {(cotacao.status === "finalizada" || cotacao.status === "concluida") ? (
-                            getStatusBadge(cotacao.status)
+                            <StatusBadge status={cotacao.status} />
                           ) : (
                             <Select value={cotacao.status} onValueChange={(value) => handleStatusChange(cotacao.id, value)}>
                               <SelectTrigger className={cn("h-6 w-[90px] text-[10px] font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.status)?.className || "border-warning/30 bg-warning/10 text-warning")}>
@@ -239,7 +238,7 @@ export default function Cotacoes() {
             })}
           </div>
         ) : (
-          <Card className="border-0 bg-transparent">
+          <Card className="border-0 bg-transparent animate-in fade-in duration-200">
             <CardContent className="p-0">
               {/* Mobile Cards View */}
               <div className="md:hidden space-y-3 p-2">
@@ -289,7 +288,7 @@ export default function Cotacoes() {
                       </div>
                       
                       <div className="flex items-center gap-2 mb-3">
-                        {getStatusBadge(cotacao.statusReal)}
+                        <StatusBadge status={cotacao.statusReal} />
                         <Badge variant="outline" className="bg-primary/10 text-primary text-xs">
                           <Building2 className="h-3 w-3 mr-1" />{cotacao.fornecedores}
                         </Badge>
@@ -406,7 +405,7 @@ export default function Cotacoes() {
                               </div>
                               <div className="w-[12%] px-2 flex flex-col gap-1 items-center">
                                 {(cotacao.statusReal === "finalizada" || cotacao.statusReal === "concluida") ? (
-                                  getStatusBadge(cotacao.statusReal)
+                                  <StatusBadge status={cotacao.statusReal} />
                                 ) : (
                                   <Select value={cotacao.statusReal} onValueChange={(value) => handleStatusChange(cotacao.id, value)}>
                                     <SelectTrigger className={cn("h-7 w-[100px] text-xs font-medium border rounded-full px-2", statusOptions.find(s => s.value === cotacao.statusReal)?.className || "border-warning/30 bg-warning/10 text-warning")}>
