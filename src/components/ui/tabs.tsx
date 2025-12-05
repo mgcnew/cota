@@ -28,8 +28,8 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background",
-      // Smooth transition for all state changes
-      "transition-all duration-300 ease-out",
+      // Transição simplificada para performance
+      "transition-colors duration-150",
       // Active state with smooth animation
       "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
       // Hover state with subtle feedback

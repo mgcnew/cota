@@ -69,7 +69,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
             <TableRow 
               key={pedido.id}
               className={cn(
-                "hover:bg-accent/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md border-b border-border",
+                "sm:hover:bg-accent/50 border-b border-border",
                 index % 2 === 0 ? "bg-card" : "bg-muted/30"
               )}
             >

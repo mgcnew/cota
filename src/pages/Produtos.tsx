@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense, startTransition } from "react";
+import { useState, useEffect, useMemo, useCallback, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -28,11 +28,11 @@ import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { ProductsHeroCard } from "@/components/products/ProductsHeroCard";
 import { ProductsStatusSummary } from "@/components/products/ProductsStatusSummary";
 
-// Lazy load dialogs
-const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
-const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
-const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
-const ImportProductsDialog = lazy(() => import("@/components/forms/ImportProductsDialog").then(m => ({ default: m.ImportProductsDialog })));
+// Import dialogs directly for better UX (no loading delay)
+import { AddProductDialog } from "@/components/forms/AddProductDialog";
+import { EditProductDialog } from "@/components/forms/EditProductDialog";
+import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
+import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
 
 export default function Produtos() {
   const navigate = useNavigate();
@@ -410,7 +410,7 @@ export default function Produtos() {
                     {paginatedData.items.map((product) => (
                       <div 
                         key={product.id} 
-                        className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm hover:shadow-md transition-shadow"
+                        className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm"
                       >
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -533,7 +533,7 @@ export default function Produtos() {
                         {paginatedData.items.map((product) => (
                           <TableRow key={product.id} className="group border-none">
                             <TableCell colSpan={8} className="px-1 py-2">
-                              <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-orange-300/60 dark:hover:border-orange-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
+                              <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:border-orange-300/60 dark:hover:border-orange-700/50">
                                 <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
                                   <div className="w-8 h-8 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 shadow-sm">
                                     {product.image_url ? (
@@ -638,58 +638,46 @@ export default function Produtos() {
             </CardContent>
           </Card>
 
-          {addDialogOpen && (
-            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="bg-white dark:bg-gray-900 rounded-lg p-4"><div className="w-8 h-8 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin" /></div></div>}>
-              <AddProductDialog
-                onProductAdded={() => { invalidateCache(); startTransition(() => { setAddDialogOpen(false); }); }}
-                onCategoryAdded={invalidateCache}
-                open={addDialogOpen}
-                onOpenChange={(open) => { if (!open) startTransition(() => { setAddDialogOpen(false); }); }}
-              />
-            </Suspense>
-          )}
+          <AddProductDialog
+            onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
+            onCategoryAdded={invalidateCache}
+            open={addDialogOpen}
+            onOpenChange={setAddDialogOpen}
+          />
 
-          {importDialogOpen && (
-            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="bg-white dark:bg-gray-900 rounded-lg p-4"><div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" /></div></div>}>
-              <ImportProductsDialog
-                onProductsImported={() => { invalidateCache(); startTransition(() => { setImportDialogOpen(false); }); }}
-                onCategoryAdded={invalidateCache}
-                open={importDialogOpen}
-                onOpenChange={(open) => { if (!open) startTransition(() => { setImportDialogOpen(false); }); }}
-              />
-            </Suspense>
-          )}
+          <ImportProductsDialog
+            onProductsImported={() => { invalidateCache(); setImportDialogOpen(false); }}
+            onCategoryAdded={invalidateCache}
+            open={importDialogOpen}
+            onOpenChange={setImportDialogOpen}
+          />
 
           {editingProduct && (
-            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="bg-white dark:bg-gray-900 rounded-lg p-4"><div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin" /></div></div>}>
-              <EditProductDialog
-                product={editingProduct}
-                open={!!editingProduct}
-                onOpenChange={(open) => { if (!open) startTransition(() => { setEditingProduct(null); }); }}
-                onProductUpdated={(updatedProduct) => {
-                  if (typeof updateProduct === 'function') {
-                    updateProduct({ productId: updatedProduct.id, data: { name: updatedProduct.name, category: updatedProduct.category, unit: updatedProduct.unit, barcode: updatedProduct.barcode } });
-                  }
-                  startTransition(() => { setEditingProduct(null); });
-                }}
-                onCategoryAdded={invalidateCache}
-                categories={safeCategories}
-              />
-            </Suspense>
+            <EditProductDialog
+              product={editingProduct}
+              open={!!editingProduct}
+              onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
+              onProductUpdated={(updatedProduct) => {
+                if (typeof updateProduct === 'function') {
+                  updateProduct({ productId: updatedProduct.id, data: { name: updatedProduct.name, category: updatedProduct.category, unit: updatedProduct.unit, barcode: updatedProduct.barcode } });
+                }
+                setEditingProduct(null);
+              }}
+              onCategoryAdded={invalidateCache}
+              categories={safeCategories}
+            />
           )}
 
           {deletingProduct && (
-            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="bg-white dark:bg-gray-900 rounded-lg p-4"><div className="w-8 h-8 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" /></div></div>}>
-              <DeleteProductDialog
-                product={deletingProduct}
-                open={!!deletingProduct}
-                onOpenChange={(open) => { if (!open) startTransition(() => { setDeletingProduct(null); }); }}
-                onProductDeleted={(id) => {
-                  if (typeof deleteProduct === 'function') { deleteProduct(id); }
-                  startTransition(() => { setDeletingProduct(null); });
-                }}
-              />
-            </Suspense>
+            <DeleteProductDialog
+              product={deletingProduct}
+              open={!!deletingProduct}
+              onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
+              onProductDeleted={(id) => {
+                if (typeof deleteProduct === 'function') { deleteProduct(id); }
+                setDeletingProduct(null);
+              }}
+            />
           )}
 
 

@@ -50,7 +50,7 @@ export function PageHeader({
 
             {/* Área de filtros e busca com card elevado */}
             {children && (
-                <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200/60 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-shadow duration-200 p-4 md:p-5">
+                <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200/60 dark:border-gray-700/50 shadow-sm p-4 md:p-5">
                     <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-start md:items-center justify-between">
                         {children}
                     </div>

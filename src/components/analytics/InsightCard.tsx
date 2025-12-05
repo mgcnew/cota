@@ -54,7 +54,7 @@ export function InsightCard({ insight }: InsightCardProps) {
   const prioridade = prioridadeConfig[insight.prioridade];
 
   return (
-    <Card className="p-6 hover:shadow-md transition-shadow">
+    <Card className="p-6">
       <div className="flex items-start gap-4">
         <div className={`p-3 rounded-lg ${config.bgColor}`}>
           <Icon className={`h-5 w-5 ${config.color}`} />

@@ -29,7 +29,7 @@ export function IconButton({
     <Button
       variant="outline"
       className={cn(
-        "h-20 md:h-24 flex-col gap-2 border-2 transition-all duration-300 hover:scale-105 hover:shadow-md",
+        "h-20 md:h-24 flex-col gap-2 border-2 transition-colors duration-150",
         variantStyles[variant],
         className
       )}

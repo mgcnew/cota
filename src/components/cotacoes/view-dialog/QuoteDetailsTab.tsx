@@ -84,7 +84,7 @@ export function QuoteDetailsTab({
 
                     {/* Seção 2: Melhor Oferta Destaque */}
                     {bestSupplier && (
-                        <Card className="p-3 sm:p-4 border-2 border-success/30 dark:border-success/30 bg-success/5 dark:bg-success/10 rounded-lg shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
+                        <Card className="p-3 sm:p-4 border-2 border-success/30 dark:border-success/30 bg-success/5 dark:bg-success/10 rounded-lg shadow-md dark:shadow-none">
                             <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-2.5 flex-1 min-w-0">
                                     <div className="p-2 rounded-lg bg-success text-white flex-shrink-0">

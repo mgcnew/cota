@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -6,7 +7,7 @@ export type StatusType =
   | "ativo" | "inativo" | "pendente" | "concluido" | "expirado" | "cancelado"
   | "ativa" | "concluida" | "expirada" | "cancelada" | "planejada" | "finalizada"
   | "em_andamento" | "baixo_estoque" | "sem_estoque" | "entregue" | "enviado"
-  | "cotado" | "sem_cotacao" | "confirmado";
+  | "cotado" | "sem_cotacao" | "confirmado" | "processando";
 
 interface StatusBadgeProps {
   status: StatusType | string;
@@ -14,6 +15,7 @@ interface StatusBadgeProps {
   customLabel?: string;
 }
 
+// Objeto estático - não recria a cada render
 const statusConfig: Record<string, { label: string; className: string }> = {
   // Ativos
   active: { label: "Ativo", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800" },
@@ -58,11 +60,15 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   // Produtos
   cotado: { label: "Cotado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
   sem_cotacao: { label: "Sem Cotação", className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700" },
+  
+  // Pedidos
+  processando: { label: "Processando", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
 };
 
 const defaultConfig = { label: "Desconhecido", className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400" };
 
-export function StatusBadge({ status, className, customLabel }: StatusBadgeProps) {
+// Memoizado para evitar re-renders desnecessários
+export const StatusBadge = memo(function StatusBadge({ status, className, customLabel }: StatusBadgeProps) {
   const normalizedStatus = status?.toLowerCase().trim() || "";
   const config = statusConfig[normalizedStatus] || defaultConfig;
 
@@ -74,4 +80,4 @@ export function StatusBadge({ status, className, customLabel }: StatusBadgeProps
       {customLabel || config.label}
     </Badge>
   );
-}
+});

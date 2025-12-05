@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo, useCallback } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,7 +28,29 @@ const calcTrend = (values: number[]) => {
   return firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg) * 100 : 0;
 };
 
-export function EvolutionChart({ data, period, onPeriodChange, isLoading }: EvolutionChartProps) {
+// Componente memoizado para indicador de tendência
+const TrendIndicator = memo(function TrendIndicator({ value }: { value: number }) {
+  return (
+    <span className={`flex items-center ${value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+      {value >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+      {Math.abs(value).toFixed(0)}%
+    </span>
+  );
+});
+
+// Tooltip style estático para evitar recriação
+const TOOLTIP_STYLE = {
+  backgroundColor: 'hsl(var(--card))',
+  border: '1px solid hsl(var(--border))',
+  borderRadius: '8px',
+  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+  fontSize: '12px',
+  color: 'hsl(var(--foreground))',
+};
+
+const LABEL_STYLE = { fontWeight: 600, marginBottom: '4px', color: 'hsl(var(--foreground))' };
+
+export const EvolutionChart = memo(function EvolutionChart({ data, period, onPeriodChange, isLoading }: EvolutionChartProps) {
   const isMobile = useIsMobile();
 
   const stats = useMemo(() => {
@@ -45,12 +67,8 @@ export function EvolutionChart({ data, period, onPeriodChange, isLoading }: Evol
     };
   }, [data]);
 
-  const TrendIndicator = ({ value, color }: { value: number; color: string }) => (
-    <span className={`flex items-center ${value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-      {value >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-      {Math.abs(value).toFixed(0)}%
-    </span>
-  );
+  const chartHeight = useMemo(() => isMobile ? 200 : 280, [isMobile]);
+  const dataKey = useMemo(() => period === '7d' ? 'day' : 'month', [period]);
 
   return (
     <Card className="col-span-1 lg:col-span-2 bg-card border border-subtle shadow-sm rounded-xl">
@@ -100,30 +118,22 @@ export function EvolutionChart({ data, period, onPeriodChange, isLoading }: Evol
             <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-purple-500" />
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={isMobile ? 200 : 280}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <LineChart data={data} margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/30" opacity={0.4} vertical={false} />
-              <XAxis dataKey={period === '7d' ? 'day' : 'month'} stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
+              <XAxis dataKey={dataKey} stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
               <YAxis stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} width={35} />
               <ReferenceLine y={stats.avgCotacoes} stroke="#7C3AED" strokeDasharray="4 4" strokeWidth={1} strokeOpacity={0.5} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                  fontSize: '12px',
-                  color: 'hsl(var(--foreground))',
-                }}
-                labelStyle={{ fontWeight: 600, marginBottom: '4px', color: 'hsl(var(--foreground))' }}
-              />
+              <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={LABEL_STYLE} />
               <Line type="monotone" dataKey="cotacoes" name="Cotações" stroke="#7C3AED" strokeWidth={2.5}
                 dot={{ r: 4, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
                 activeDot={{ r: 6, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
+                isAnimationActive={false}
               />
               <Line type="monotone" dataKey="fornecedores" name="Fornecedores" stroke="#22C55E" strokeWidth={2.5}
                 dot={{ r: 4, fill: '#22C55E', strokeWidth: 2, stroke: '#fff' }}
                 activeDot={{ r: 6, fill: '#22C55E', strokeWidth: 2, stroke: '#fff' }}
+                isAnimationActive={false}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -131,4 +141,4 @@ export function EvolutionChart({ data, period, onPeriodChange, isLoading }: Evol
       </CardContent>
     </Card>
   );
-}
+});

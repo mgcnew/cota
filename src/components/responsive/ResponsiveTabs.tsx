@@ -80,7 +80,7 @@ const ResponsiveTabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background",
-      "transition-all duration-300 ease-out",
+      "transition-colors duration-150",
       "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
       "hover:bg-background/50 hover:text-foreground/80",
       "data-[state=active]:hover:bg-background data-[state=active]:hover:text-foreground",

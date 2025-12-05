@@ -341,7 +341,7 @@ export default function Anotacoes() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.03 }}
                 >
-                  <Card className={`${config.color} border-l-4 hover:shadow-md transition-shadow duration-200`}>
+                  <Card className={`${config.color} border-l-4`}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 space-y-2">

@@ -174,7 +174,7 @@ export default function Cotacoes() {
               const color = colors[cotacao.status] || colors.pendente;
               const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
               return (
-                <Card key={cotacao.id} className={cn("group border bg-gradient-to-br", color, "hover:shadow-xl transition-shadow")}>
+                <Card key={cotacao.id} className={cn("group border bg-gradient-to-br", color)}>
                   <CardHeader className="pb-3 p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3 flex-1">
@@ -249,7 +249,7 @@ export default function Cotacoes() {
                   return (
                     <div 
                       key={cotacao.id} 
-                      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm hover:shadow-md transition-shadow"
+                      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm"
                     >
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -373,7 +373,7 @@ export default function Cotacoes() {
                       return (
                         <TableRow key={cotacao.id} className="group border-none">
                           <TableCell colSpan={7} className="px-1 py-2">
-                            <div className="flex items-center px-2 py-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border hover:shadow-md hover:border-primary/30 transition-all">
+                            <div className="flex items-center px-2 py-2 bg-card/90 rounded-lg border border-border hover:border-primary/30">
                               <div className="w-[18%] flex items-center gap-3 px-2">
                                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                                   <ClipboardList className="h-4 w-4 text-primary" />

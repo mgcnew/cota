@@ -23,7 +23,7 @@ export const ProductsHeroCard = memo(function ProductsHeroCard({
   const hasGoodCoverage = percentWithQuotes >= 70;
 
   return (
-    <Card className="relative overflow-hidden border border-orange-200/70 dark:border-orange-500/20 bg-gradient-to-br from-orange-100 to-amber-50 dark:from-gray-900 dark:to-gray-900 shadow-md hover:shadow-lg transition-all duration-200">
+    <Card className="relative overflow-hidden border border-orange-200/70 dark:border-orange-500/20 bg-gradient-to-br from-orange-100 to-amber-50 dark:from-gray-900 dark:to-gray-900 shadow-md sm:hover:shadow-lg sm:transition-shadow sm:duration-150">
       <div className="p-4 sm:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -62,7 +62,7 @@ export const ProductsHeroCard = memo(function ProductsHeroCard({
           </div>
           <div className="h-3 bg-orange-200 dark:bg-gray-800 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-500 dark:to-orange-400 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-500 dark:to-orange-400 rounded-full"
               style={{ width: `${progressPercent}%` }}
             />
           </div>

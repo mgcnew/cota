@@ -430,7 +430,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                 ) : (
                   <div className={isMobile ? 'space-y-3' : 'space-y-4'}>
                     {orderHistory.map((order) => (
-                      <div key={order.id} className={`border border-gray-200 dark:border-gray-700 rounded-xl ${isMobile ? 'p-3' : 'p-4'} bg-white dark:bg-gray-800/60 ${isMobile ? '' : 'hover:shadow-md transition-shadow'}`}>
+                      <div key={order.id} className={`border border-gray-200 dark:border-gray-700 rounded-xl ${isMobile ? 'p-3' : 'p-4'} bg-white dark:bg-gray-800/60`}>
                         <div className={`flex flex-col ${isMobile ? '' : 'md:flex-row md:justify-between md:items-start'} gap-4`}>
                           <div className="space-y-2">
                             <div className={`flex items-center gap-2 ${isMobile ? 'text-base' : 'text-sm'} font-semibold text-gray-900 dark:text-white`}>

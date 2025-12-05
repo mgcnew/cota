@@ -1,7 +1,7 @@
 import * as React from "react";
+import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 /**
  * Size variants for ResponsiveCard
@@ -74,6 +74,7 @@ const sizeClasses: Record<CardSize, string> = {
  * - Icon sizing: 25% smaller on mobile
  * - Hover effects disabled on mobile (touch devices)
  * - Automatic responsive spacing
+ * - Memoized for performance
  * 
  * @example
  * ```tsx
@@ -90,7 +91,7 @@ const sizeClasses: Record<CardSize, string> = {
  * 
  * Requirements: 3.1, 3.5
  */
-export function ResponsiveCard({
+export const ResponsiveCard = memo(function ResponsiveCard({
   children,
   size = 'default',
   padding = 'md',
@@ -98,8 +99,6 @@ export function ResponsiveCard({
   interactive = true,
   ...props
 }: ResponsiveCardProps): JSX.Element {
-  const { isMobile } = useBreakpoint();
-
   return (
     <Card
       className={cn(
@@ -109,10 +108,8 @@ export function ResponsiveCard({
         paddingClasses[padding],
         // Size-specific gap
         sizeClasses[size],
-        // Interactive hover effects (disabled on mobile)
-        interactive && !isMobile && 'hover:shadow-md hover:bg-accent/50 transition-all duration-200 cursor-pointer',
-        // Mobile-specific styling
-        isMobile && 'shadow-sm',
+        // Interactive hover effects (desktop only) - transição simplificada para performance
+        interactive && 'sm:hover:shadow-md sm:transition-shadow sm:duration-100',
         className
       )}
       {...props}
@@ -122,6 +119,6 @@ export function ResponsiveCard({
       </CardContent>
     </Card>
   );
-}
+});
 
 export default ResponsiveCard;

@@ -60,7 +60,7 @@ export function CategorySelect({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Select value={selectedCategory} onValueChange={onCategoryChange}>
-        <SelectTrigger className="w-full sm:w-[280px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-orange-300/70 dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-gray-900 dark:text-white">
+        <SelectTrigger className="w-full sm:w-[280px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 sm:hover:border-orange-300/70 sm:dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm text-gray-900 dark:text-white">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-orange-600 dark:text-orange-400" />
             <SelectValue placeholder="Selecione uma categoria" />

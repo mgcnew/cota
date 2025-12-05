@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo, useCallback } from "react";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
 
 const accentColors = {
   teal: {
@@ -55,7 +54,7 @@ interface ExpandableSearchProps {
   expandedWidth?: string;
 }
 
-export function ExpandableSearch({
+export const ExpandableSearch = memo(function ExpandableSearch({
   value,
   onChange,
   placeholder = "Buscar...",
@@ -70,6 +69,7 @@ export function ExpandableSearch({
 
   const colors = accentColors[accentColor];
   const shouldStayExpanded = isFocused || value.length > 0;
+  const isOpen = isExpanded || shouldStayExpanded;
 
   // Handle click outside to collapse
   useEffect(() => {
@@ -85,107 +85,97 @@ export function ExpandableSearch({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [value]);
 
-  const handleExpand = () => {
+  const handleExpand = useCallback(() => {
     setIsExpanded(true);
-    setTimeout(() => inputRef.current?.focus(), 100);
-  };
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }, []);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     onChange("");
     inputRef.current?.focus();
-  };
+  }, [onChange]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  }, [onChange]);
+
+  const handleFocus = useCallback(() => setIsFocused(true), []);
+  const handleBlur = useCallback(() => setIsFocused(false), []);
+  const handleMouseEnter = useCallback(() => !shouldStayExpanded && setIsExpanded(true), [shouldStayExpanded]);
+  const handleMouseLeave = useCallback(() => !shouldStayExpanded && setIsExpanded(false), [shouldStayExpanded]);
+  const handleClick = useCallback(() => !isExpanded && handleExpand(), [isExpanded, handleExpand]);
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
-      <motion.div
-        initial={false}
-        animate={{
-          width: isExpanded || shouldStayExpanded ? "100%" : "40px",
-        }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
+      <div
         className={cn(
           "relative flex items-center h-10 rounded-xl overflow-hidden",
-          "bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm",
+          "bg-white/80 dark:bg-gray-800/80",
           "border-2 border-gray-200/60 dark:border-gray-700/60",
-          "shadow-sm transition-shadow duration-200",
-          isExpanded || shouldStayExpanded
+          "shadow-sm transition-[width] duration-150",
+          isOpen
             ? cn(
                 expandedWidth,
                 colors.focusBorder,
                 colors.focusRing,
-                "focus-within:ring-2 hover:shadow-md"
+                "focus-within:ring-2"
               )
             : cn(
                 "w-10 cursor-pointer",
                 colors.hoverBorder,
-                colors.bgHover,
-                "hover:shadow-md"
+                colors.bgHover
               )
         )}
-        onMouseEnter={() => !shouldStayExpanded && setIsExpanded(true)}
-        onMouseLeave={() => !shouldStayExpanded && setIsExpanded(false)}
-        onClick={() => !isExpanded && handleExpand()}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
       >
         {/* Search Icon */}
         <div
           className={cn(
-            "absolute left-3 top-1/2 transform -translate-y-1/2 z-10 transition-colors duration-200",
-            isExpanded || shouldStayExpanded
-              ? colors.iconColor
-              : "text-gray-400 dark:text-gray-500"
+            "absolute left-3 top-1/2 transform -translate-y-1/2 z-10 transition-colors duration-100",
+            isOpen ? colors.iconColor : "text-gray-400 dark:text-gray-500"
           )}
         >
           <Search className="h-4 w-4" />
         </div>
 
         {/* Input */}
-        <AnimatePresence>
-          {(isExpanded || shouldStayExpanded) && (
-            <motion.input
-              ref={inputRef}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              type="text"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder={placeholder}
-              className={cn(
-                "w-full h-full pl-10 pr-8 bg-transparent",
-                "text-sm text-gray-900 dark:text-white",
-                "placeholder:text-gray-400 dark:placeholder:text-gray-500",
-                "focus:outline-none"
-              )}
-            />
-          )}
-        </AnimatePresence>
+        {isOpen && (
+          <input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            placeholder={placeholder}
+            className={cn(
+              "w-full h-full pl-10 pr-8 bg-transparent",
+              "text-sm text-gray-900 dark:text-white",
+              "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+              "focus:outline-none"
+            )}
+          />
+        )}
 
         {/* Clear Button */}
-        <AnimatePresence>
-          {value && (isExpanded || shouldStayExpanded) && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.15 }}
-              onClick={handleClear}
-              className={cn(
-                "absolute right-2 top-1/2 transform -translate-y-1/2",
-                "p-1 rounded-full transition-colors duration-150",
-                "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
-                "hover:bg-gray-100 dark:hover:bg-gray-700"
-              )}
-              type="button"
-            >
-              <X className="h-3.5 w-3.5" />
-            </motion.button>
-          )}
-        </AnimatePresence>
-      </motion.div>
+        {value && isOpen && (
+          <button
+            onClick={handleClear}
+            className={cn(
+              "absolute right-2 top-1/2 transform -translate-y-1/2",
+              "p-1 rounded-full transition-colors duration-100",
+              "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
+              "hover:bg-gray-100 dark:hover:bg-gray-700"
+            )}
+            type="button"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
     </div>
   );
-}
+});
 

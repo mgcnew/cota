@@ -24,7 +24,7 @@ export const EconomyHeroCard = memo(function EconomyHeroCard({
   const isPositiveGrowth = crescimentoEconomia >= 0;
 
   return (
-    <Card className="relative overflow-hidden border border-emerald-200/70 dark:border-emerald-500/20 bg-gradient-to-br from-emerald-100 to-teal-50 dark:from-gray-900 dark:to-gray-900 shadow-md hover:shadow-lg transition-all duration-200">
+    <Card className="relative overflow-hidden border border-emerald-200/70 dark:border-emerald-500/20 bg-gradient-to-br from-emerald-100 to-teal-50 dark:from-gray-900 dark:to-gray-900 shadow-md sm:hover:shadow-lg sm:transition-shadow sm:duration-150">
       <div className="p-4 sm:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -67,7 +67,7 @@ export const EconomyHeroCard = memo(function EconomyHeroCard({
           </div>
           <div className="h-3 bg-emerald-200 dark:bg-gray-800 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-500 dark:to-emerald-400 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-500 dark:to-emerald-400 rounded-full"
               style={{ width: `${progressPercent}%` }}
             />
           </div>

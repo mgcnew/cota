@@ -232,7 +232,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4">
         {/* Comparativo de Fornecedores */}
-        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-blue-500/60 dark:border-blue-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-blue-500/60 dark:border-blue-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Top 5 Fornecedores - Score de Performance
@@ -287,7 +287,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
         </Card>
 
         {/* Pizza Chart - Distribuição de Performance */}
-        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-purple-500/60 dark:border-purple-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-purple-500/60 dark:border-purple-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Distribuição de Performance - Top 5
@@ -346,7 +346,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
         </Card>
 
         {/* Tendência Mensal - Cotações */}
-        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-emerald-500/60 dark:border-emerald-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-emerald-500/60 dark:border-emerald-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Evolução Mensal - Número de Cotações
@@ -431,7 +431,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
         </Card>
 
         {/* Tendência Mensal - Economia */}
-        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-green-500/60 dark:border-green-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-green-500/60 dark:border-green-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Evolução Mensal - Taxa de Economia
@@ -516,7 +516,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
         </Card>
 
         {/* Gráfico de Barras - Taxa de Resposta */}
-        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-indigo-500/60 dark:border-indigo-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-indigo-500/60 dark:border-indigo-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Taxa de Resposta por Fornecedor
@@ -578,7 +578,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
         </Card>
 
         {/* Novo Gráfico - Economia Total por Fornecedor */}
-        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none sm:hover:shadow-md sm:dark:hover:shadow-lg transition-all duration-200">
+        <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
               Economia Alcançada por Fornecedor

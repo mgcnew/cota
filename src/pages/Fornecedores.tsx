@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense, startTransition } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -26,13 +26,13 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 
-// Lazy load dialogs
-const AddSupplierDialog = lazy(() => import("@/components/forms/AddSupplierDialog").then(m => ({ default: m.default })));
-const EditSupplierDialog = lazy(() => import("@/components/forms/EditSupplierDialog").then(m => ({ default: m.default })));
-const DeleteSupplierDialog = lazy(() => import("@/components/forms/DeleteSupplierDialog").then(m => ({ default: m.default })));
-const AddQuoteDialog = lazy(() => import("@/components/forms/AddQuoteDialog").then(m => ({ default: m.default })));
-const ImportSuppliersDialog = lazy(() => import("@/components/forms/ImportSuppliersDialog").then(m => ({ default: m.ImportSuppliersDialog })));
-const SupplierQuoteHistoryDialog = lazy(() => import("@/components/forms/SupplierQuoteHistoryDialog").then(m => ({ default: m.SupplierQuoteHistoryDialog })));
+// Import dialogs directly for better UX (no loading delay)
+import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
+import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
+import DeleteSupplierDialog from "@/components/forms/DeleteSupplierDialog";
+import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
+import { ImportSuppliersDialog } from "@/components/forms/ImportSuppliersDialog";
+import { SupplierQuoteHistoryDialog } from "@/components/forms/SupplierQuoteHistoryDialog";
 
 interface Supplier {
   id: string;
@@ -343,7 +343,7 @@ export default function Fornecedores() {
           {viewMode === "grid" ? (
             <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {paginatedData.items.map(supplier => (
-                <Card key={supplier.id} className="group hover:shadow-lg transition-all duration-200">
+                <Card key={supplier.id} className="group">
                   <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
                     <div className="flex items-start justify-between">
                       <div className="space-y-2 sm:space-y-3 flex-1">
@@ -372,18 +372,16 @@ export default function Fornecedores() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <Suspense fallback={<DropdownMenuItem disabled>Carregando...</DropdownMenuItem>}>
-                            <SupplierQuoteHistoryDialog
-                              supplierName={supplier.name}
-                              supplierId={supplier.id}
-                              trigger={
-                                <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  Ver Histórico
-                                </DropdownMenuItem>
-                              }
-                            />
-                          </Suspense>
+                          <SupplierQuoteHistoryDialog
+                            supplierName={supplier.name}
+                            supplierId={supplier.id}
+                            trigger={
+                              <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver Histórico
+                              </DropdownMenuItem>
+                            }
+                          />
                           <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Editar
@@ -425,14 +423,12 @@ export default function Fornecedores() {
                       </div>
 
                       <div className="pt-2.5">
-                        <Suspense fallback={<Button size="sm" variant="outline" className="w-full h-9" disabled>Carregando...</Button>}>
-                          <AddQuoteDialog onAdd={handleAddQuote} trigger={
-                            <Button size="sm" variant="outline" className="w-full h-9">
-                              <Plus className="h-3.5 w-3.5 mr-1.5" />
-                              Nova Cotação
-                            </Button>
-                          } />
-                        </Suspense>
+                        <AddQuoteDialog onAdd={handleAddQuote} trigger={
+                          <Button size="sm" variant="outline" className="w-full h-9">
+                            <Plus className="h-3.5 w-3.5 mr-1.5" />
+                            Nova Cotação
+                          </Button>
+                        } />
                       </div>
                     </div>
                   </CardContent>
@@ -447,7 +443,7 @@ export default function Fornecedores() {
                   {paginatedData.items.map(supplier => (
                     <div 
                       key={supplier.id} 
-                      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm hover:shadow-md transition-shadow"
+                      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm"
                     >
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -550,7 +546,7 @@ export default function Fornecedores() {
                       {paginatedData.items.map(supplier => (
                         <TableRow key={supplier.id} className="group border-none">
                           <TableCell colSpan={7} className="px-1 py-2">
-                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 hover:border-purple-300/60 dark:hover:border-purple-700/50 transition-[box-shadow,border-color] duration-200 [&_*]:!transition-none">
+                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:border-purple-300/60 dark:hover:border-purple-700/50">
                               <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
                                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                                   <Building2 className="h-4 w-4 text-primary" />
@@ -651,33 +647,27 @@ export default function Fornecedores() {
           )}
 
           {editingSupplier && (
-            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="bg-white dark:bg-gray-900 rounded-lg p-4"><div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" /></div></div>}>
-              <EditSupplierDialog
-                supplier={editingSupplier}
-                open={!!editingSupplier}
-                onOpenChange={open => { if (!open) startTransition(() => setEditingSupplier(null)); }}
-                onEdit={handleEditSupplier}
-              />
-            </Suspense>
+            <EditSupplierDialog
+              supplier={editingSupplier}
+              open={!!editingSupplier}
+              onOpenChange={open => { if (!open) setEditingSupplier(null); }}
+              onEdit={handleEditSupplier}
+            />
           )}
 
           {deletingSupplier && (
-            <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="bg-white dark:bg-gray-900 rounded-lg p-4"><div className="w-8 h-8 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" /></div></div>}>
-              <DeleteSupplierDialog
-                supplier={deletingSupplier}
-                open={!!deletingSupplier}
-                onOpenChange={open => { if (!open) startTransition(() => setDeletingSupplier(null)); }}
-                onDelete={handleDeleteSupplier}
-              />
-            </Suspense>
+            <DeleteSupplierDialog
+              supplier={deletingSupplier}
+              open={!!deletingSupplier}
+              onOpenChange={open => { if (!open) setDeletingSupplier(null); }}
+              onDelete={handleDeleteSupplier}
+            />
           )}
 
           {/* Hidden triggers for dialogs */}
           <div className="hidden">
-            <Suspense fallback={null}>
-              <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
-              <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
-            </Suspense>
+            <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
+            <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
           </div>
         </div>
       </PageWrapper>

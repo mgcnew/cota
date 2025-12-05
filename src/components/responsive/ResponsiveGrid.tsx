@@ -1,4 +1,5 @@
 import * as React from "react";
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 
 export interface GridConfig {
@@ -34,7 +35,7 @@ const gridConfigs: Record<string, string> = {
   '1-3-4': 'grid-cols-1 sm:grid-cols-3 lg:grid-cols-4',
 };
 
-export function ResponsiveGrid({
+export const ResponsiveGrid = memo(function ResponsiveGrid({
   children,
   config = { mobile: 2, tablet: 2, desktop: 4 },
   gap = 'md',
@@ -50,6 +51,6 @@ export function ResponsiveGrid({
       {children}
     </div>
   );
-}
+});
 
 export default ResponsiveGrid;

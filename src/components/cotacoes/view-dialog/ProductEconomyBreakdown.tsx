@@ -263,7 +263,7 @@ export function ProductEconomyBreakdown({
         {sortedEconomies.map((item) => (
           <Card
             key={item.productId}
-            className="border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+            className="border border-gray-200 dark:border-gray-700"
           >
             <div className="p-4 space-y-3">
               {/* Product Header */}

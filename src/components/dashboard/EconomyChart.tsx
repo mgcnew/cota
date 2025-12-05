@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,18 @@ interface EconomyChartProps {
   isLoading?: boolean;
 }
 
+// Tooltip style estático para evitar recriação
+const TOOLTIP_STYLE = {
+  backgroundColor: 'hsl(var(--card))',
+  border: '1px solid hsl(var(--border))',
+  borderRadius: '8px',
+  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+  fontSize: '12px',
+  color: 'hsl(var(--foreground))',
+};
+
+const LABEL_STYLE = { fontWeight: 600, marginBottom: '4px', color: 'hsl(var(--foreground))' };
+
 const PERIOD_OPTIONS = [
   { value: '7d', label: '7 dias' },
   { value: '1m', label: '1 mês' },
@@ -23,7 +35,10 @@ const PERIOD_OPTIONS = [
 const formatCurrency = (value: number) =>
   `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export function EconomyChart({ data, period, onPeriodChange, isLoading }: EconomyChartProps) {
+// Formatter memoizado
+const tooltipFormatter = (value: number): [string, string] => [formatCurrency(value), 'Economia'];
+
+export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodChange, isLoading }: EconomyChartProps) {
   const isMobile = useIsMobile();
 
   const stats = useMemo(() => {
@@ -40,8 +55,11 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
     return { totalEconomia, trendEconomia };
   }, [data]);
 
+  const chartHeight = useMemo(() => isMobile ? 200 : 280, [isMobile]);
+  const dataKey = useMemo(() => period === '7d' ? 'day' : 'month', [period]);
+
   return (
-    <Card className="bg-card border border-subtle shadow-sm rounded-xl transition-all duration-300 hover:shadow-md">
+    <Card className="bg-card border border-subtle shadow-sm rounded-xl sm:hover:shadow-md sm:transition-shadow sm:duration-150">
       <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-muted">
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center justify-between gap-2">
@@ -85,7 +103,7 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
             <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-green-500" />
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={isMobile ? 200 : 280}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <AreaChart data={data} margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
               <defs>
                 <linearGradient id="economyGradient" x1="0" y1="0" x2="0" y2="1">
@@ -94,7 +112,7 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/30" opacity={0.4} vertical={false} />
-              <XAxis dataKey={period === '7d' ? 'day' : 'month'} stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
+              <XAxis dataKey={dataKey} stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
               <YAxis
                 stroke="#9ca3af"
                 fontSize={10}
@@ -103,18 +121,7 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
                 width={85}
                 tickFormatter={(v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                  fontSize: '12px',
-                  color: 'hsl(var(--foreground))',
-                }}
-                labelStyle={{ fontWeight: 600, marginBottom: '4px', color: 'hsl(var(--foreground))' }}
-                formatter={(value: number) => [formatCurrency(value), 'Economia']}
-              />
+              <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={LABEL_STYLE} formatter={tooltipFormatter} />
               <Area
                 type="monotone"
                 dataKey="economia"
@@ -124,6 +131,7 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
                 fill="url(#economyGradient)"
                 dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
                 activeDot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                isAnimationActive={false}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -131,4 +139,4 @@ export function EconomyChart({ data, period, onPeriodChange, isLoading }: Econom
       </CardContent>
     </Card>
   );
-}
+});

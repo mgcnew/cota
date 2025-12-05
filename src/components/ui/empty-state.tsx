@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +15,7 @@ interface EmptyStateProps {
   variant?: "card" | "inline";
 }
 
-export function EmptyState({
+export const EmptyState = memo(function EmptyState({
   icon: Icon,
   title,
   description,
@@ -55,4 +56,4 @@ export function EmptyState({
       </CardContent>
     </Card>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo, useMemo, useCallback } from "react";
 import {
   Select,
   SelectContent,
@@ -26,7 +27,7 @@ interface DataPaginationProps {
   endIndex: number;
 }
 
-export function DataPagination({
+export const DataPagination = memo(function DataPagination({
   currentPage,
   totalPages,
   itemsPerPage,
@@ -36,10 +37,16 @@ export function DataPagination({
   startIndex,
   endIndex,
 }: DataPaginationProps) {
-  const getPageNumbers = () => {
+  // Valores padrão para evitar erros durante carregamento
+  const safeItemsPerPage = itemsPerPage || 10;
+  const safeTotalItems = totalItems || 0;
+  const safeTotalPages = totalPages || 0;
+  const safeCurrentPage = currentPage || 1;
+  const safeStartIndex = startIndex ?? 0;
+  const safeEndIndex = endIndex ?? 0;
+
+  const pageNumbers = useMemo(() => {
     const pages: (number | "ellipsis")[] = [];
-    const safeTotalPages = totalPages || 0;
-    const safeCurrentPage = currentPage || 1;
     const showEllipsis = safeTotalPages > 7;
 
     if (!showEllipsis) {
@@ -65,15 +72,19 @@ export function DataPagination({
     }
 
     return pages;
-  };
+  }, [safeTotalPages, safeCurrentPage]);
 
-  // Valores padrão para evitar erros durante carregamento
-  const safeItemsPerPage = itemsPerPage || 10;
-  const safeTotalItems = totalItems || 0;
-  const safeTotalPages = totalPages || 0;
-  const safeCurrentPage = currentPage || 1;
-  const safeStartIndex = startIndex ?? 0;
-  const safeEndIndex = endIndex ?? 0;
+  const handleItemsPerPageChange = useCallback((value: string) => {
+    onItemsPerPageChange(Number(value));
+  }, [onItemsPerPageChange]);
+
+  const handlePrevious = useCallback(() => {
+    if (safeCurrentPage > 1) onPageChange(safeCurrentPage - 1);
+  }, [safeCurrentPage, onPageChange]);
+
+  const handleNext = useCallback(() => {
+    if (safeCurrentPage < safeTotalPages) onPageChange(safeCurrentPage + 1);
+  }, [safeCurrentPage, safeTotalPages, onPageChange]);
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-4">
@@ -88,7 +99,7 @@ export function DataPagination({
           <span className="text-sm text-muted-foreground">Itens por página:</span>
           <Select
             value={safeItemsPerPage.toString()}
-            onValueChange={(value) => onItemsPerPageChange(Number(value))}
+            onValueChange={handleItemsPerPageChange}
           >
             <SelectTrigger className="h-8 w-[70px]">
               <SelectValue />
@@ -107,12 +118,12 @@ export function DataPagination({
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => safeCurrentPage > 1 && onPageChange(safeCurrentPage - 1)}
+                  onClick={handlePrevious}
                   className={safeCurrentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
 
-              {getPageNumbers().map((page, idx) =>
+              {pageNumbers.map((page, idx) =>
                 page === "ellipsis" ? (
                   <PaginationItem key={`ellipsis-${idx}`}>
                     <PaginationEllipsis />
@@ -132,7 +143,7 @@ export function DataPagination({
 
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => safeCurrentPage < safeTotalPages && onPageChange(safeCurrentPage + 1)}
+                  onClick={handleNext}
                   className={safeCurrentPage === safeTotalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
@@ -142,4 +153,4 @@ export function DataPagination({
       </div>
     </div>
   );
-}
+});

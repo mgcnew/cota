@@ -64,7 +64,7 @@ export const ExecutiveSummary = memo(function ExecutiveSummary({
   ];
 
   return (
-    <Card className="bg-gradient-to-br from-blue-100 to-indigo-50 dark:from-gray-900 dark:to-gray-900 border border-blue-200/70 dark:border-blue-500/20 shadow-md hover:shadow-lg transition-all duration-200">
+    <Card className="bg-gradient-to-br from-blue-100 to-indigo-50 dark:from-gray-900 dark:to-gray-900 border border-blue-200/70 dark:border-blue-500/20 shadow-md sm:hover:shadow-lg sm:transition-shadow sm:duration-150">
       <div className="p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 gap-2">

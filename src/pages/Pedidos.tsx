@@ -246,7 +246,7 @@ export default function Pedidos() {
                     {paginatedData.items.map((pedido) => (
                       <div 
                         key={pedido.id} 
-                        className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm hover:shadow-md transition-shadow"
+                        className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm"
                       >
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -346,7 +346,7 @@ export default function Pedidos() {
                         {paginatedData.items.map((pedido) => (
                           <TableRow key={pedido.id} className="group border-none">
                             <TableCell colSpan={7} className="px-1 py-3">
-                              <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:shadow-md hover:border-orange-300/60 transition-all duration-200">
+                              <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:border-orange-300/60 dark:hover:border-orange-700/50">
                                 <div className="w-[15%] flex items-center gap-3 pr-4">
                                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center border border-orange-200/50">
                                     <ShoppingCart className="h-4 w-4 text-orange-600" />
@@ -453,7 +453,7 @@ export default function Pedidos() {
                   const colors = getStatusColors(pedido.status);
                   
                   return (
-                    <Card key={pedido.id} className={cn("group border bg-gradient-to-br border-border", colors.bg, "hover:shadow-xl transition-shadow duration-200")}>
+                    <Card key={pedido.id} className={cn("group border bg-gradient-to-br border-border", colors.bg)}>
                       <CardHeader className="pb-3 p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3 flex-1">

@@ -1,32 +1,25 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import { ReactNode } from "react";
+import { ReactNode, memo } from "react";
 
 interface PageTransitionProps {
   children: ReactNode;
 }
 
+// Transição simplificada - apenas fade para melhor performance
 const pageVariants = {
-  initial: {
-    opacity: 0,
-    x: 30,
-  },
-  in: {
-    opacity: 1,
-    x: 0,
-  },
-  out: {
-    opacity: 0,
-    x: -30,
-  },
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 0 },
 };
 
+// Duração reduzida para transição mais rápida
 const pageTransition = {
-  duration: 0.3,
-  ease: [0.4, 0.0, 0.2, 1] as const,
+  duration: 0.15,
+  ease: "easeOut" as const,
 };
 
-export function PageTransition({ children }: PageTransitionProps) {
+export const PageTransition = memo(function PageTransition({ children }: PageTransitionProps) {
   const location = useLocation();
 
   return (
@@ -39,10 +32,9 @@ export function PageTransition({ children }: PageTransitionProps) {
         variants={pageVariants}
         transition={pageTransition}
         className="w-full h-full"
-        style={{ willChange: 'transform, opacity' }}
       >
         {children}
       </motion.div>
     </AnimatePresence>
   );
-}
+});

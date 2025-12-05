@@ -667,8 +667,8 @@ export default function Historico() {
             {paginatedData.items.map(item => {
             const iconColorClass = item.tipo === "cotacao" ? "text-info" : item.tipo === "pedido" ? "text-warning" : item.tipo === "fornecedor" ? "text-primary" : "text-success";
             const bgColorClass = item.tipo === "cotacao" ? "bg-info/10" : item.tipo === "pedido" ? "bg-warning/10" : item.tipo === "fornecedor" ? "bg-primary/10" : "bg-success/10";
-            return <div key={item.id} className="group flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700/30 hover:border-primary/50 dark:hover:border-primary/40 bg-white dark:bg-gray-800/30 backdrop-blur-sm hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-300">
-                <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center mt-0.5 transition-transform duration-300 group-hover:scale-110 flex-shrink-0", bgColorClass)}>
+            return <div key={item.id} className="group flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700/30 hover:border-primary/50 dark:hover:border-primary/40 bg-white dark:bg-gray-800/30">
+                <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center mt-0.5 flex-shrink-0", bgColorClass)}>
                   <div className={iconColorClass}>
                     {getTipoIcon(item.tipo)}
                   </div>

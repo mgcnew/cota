@@ -3,7 +3,6 @@ import { CardTitle } from "@/components/ui/card";
 import { ResponsiveCard } from "@/components/responsive/ResponsiveCard";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 interface MetricCardProps {
   title: string;
@@ -71,36 +70,31 @@ export const MetricCard = memo(function MetricCard({
   variant = "default",
   className,
 }: MetricCardProps) {
-  const { isMobile } = useBreakpoint();
   const styles = VARIANT_STYLES[variant];
 
   return (
     <ResponsiveCard
       size="default"
       padding="md"
-      interactive
+      interactive={false}
       className={cn(
-        "relative overflow-hidden border transition-all duration-200 group",
+        "relative overflow-hidden border",
         styles.border,
         styles.glow,
         styles.cardBg,
         className
       )}
     >
-      <div className="relative flex flex-row items-center justify-between space-y-0">
+      <div className="flex flex-row items-center justify-between">
         <CardTitle className={cn("text-xs sm:text-sm font-bold truncate pr-2", styles.titleColor)}>
           {title}
         </CardTitle>
-        <div className={cn(
-          "p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl shadow-md flex-shrink-0",
-          !isMobile && "group-hover:scale-110 transition-transform duration-200",
-          styles.iconBg
-        )}>
+        <div className={cn("p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl shadow-md flex-shrink-0", styles.iconBg)}>
           <Icon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
         </div>
       </div>
 
-      <div className="relative mt-2 sm:mt-3">
+      <div className="mt-2 sm:mt-3">
         <div className="text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white truncate">
           {value}
         </div>
