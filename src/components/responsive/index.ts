@@ -30,13 +30,25 @@ export {
 } from './ResponsiveTabs';
 
 export { ResponsivePagination } from './ResponsivePagination';
-export type { ResponsivePaginationProps } from './ResponsivePagination';
 
 export { LazyImage, SimpleLazyImage } from './LazyImage';
 export type { LazyImageProps } from './LazyImage';
 
 export { ResponsiveFilters } from './ResponsiveFilters';
 export type { ResponsiveFiltersProps } from './ResponsiveFilters';
+
+// New infrastructure components
+export { PageSkeleton } from './PageSkeleton';
+export type { PageSkeletonProps, PageSkeletonVariant } from './PageSkeleton';
+
+export { VirtualList } from './VirtualList';
+export type { VirtualListProps } from './VirtualList';
+
+export { InfiniteScroll, useInfiniteScroll } from './InfiniteScroll';
+export type { InfiniteScrollProps } from './InfiniteScroll';
+
+export { MobileFilters } from './MobileFilters';
+export type { MobileFiltersProps, FilterConfig } from './MobileFilters';
 
 // Re-export useBreakpoint hook for convenience
 export { useBreakpoint, BREAKPOINTS } from '@/hooks/useBreakpoint';

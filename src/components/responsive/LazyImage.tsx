@@ -1,16 +1,33 @@
 /**
  * LazyImage Component
  * 
- * Implements lazy loading for images with low-resolution placeholder support.
+ * Implements lazy loading for images with blur-up placeholder support and WebP format.
  * Optimized for mobile performance by deferring image loading until needed.
  * 
- * Requirements: 6.3
+ * Requirements: 2.4, 6.3, 17.1, 17.2
  * - Apply lazy loading with loading="lazy" attribute
- * - Implement placeholder of low resolution while loading
+ * - Implement blur-up placeholder effect during loading
+ * - Support WebP format with fallback for unsupported browsers
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+
+/**
+ * Check if WebP is supported by the browser
+ */
+const checkWebPSupport = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const webP = new Image();
+    webP.onload = webP.onerror = () => {
+      resolve(webP.height === 2);
+    };
+    webP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
+  });
+};
+
+// Cache WebP support check result
+let webPSupported: boolean | null = null;
 
 export interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   /** Source URL for the image */
@@ -19,8 +36,12 @@ export interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement
   alt: string;
   /** Optional low-resolution placeholder image URL */
   placeholder?: string;
-  /** Optional blur placeholder (base64 or URL) */
+  /** Optional blur placeholder (base64 or URL) for blur-up effect */
   blurPlaceholder?: string;
+  /** Optional blur data URL (tiny base64 image for blur effect) */
+  blurDataURL?: string;
+  /** WebP source URL (will be used if browser supports WebP) */
+  webpSrc?: string;
   /** Width of the image (helps prevent layout shift) */
   width?: number | string;
   /** Height of the image (helps prevent layout shift) */
@@ -39,6 +60,8 @@ export interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement
   showSkeleton?: boolean;
   /** Custom fallback element when image fails to load */
   fallback?: React.ReactNode;
+  /** Enable blur-up effect (default: true when blurPlaceholder or blurDataURL is provided) */
+  enableBlurUp?: boolean;
 }
 
 /**
@@ -59,6 +82,8 @@ export function LazyImage({
   alt,
   placeholder,
   blurPlaceholder,
+  blurDataURL,
+  webpSrc,
   width,
   height,
   aspectRatio,
@@ -68,10 +93,22 @@ export function LazyImage({
   onError,
   showSkeleton = true,
   fallback,
+  enableBlurUp,
   ...props
 }: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [supportsWebP, setSupportsWebP] = useState<boolean | null>(webPSupported);
+
+  // Check WebP support on mount
+  useEffect(() => {
+    if (webpSrc && webPSupported === null) {
+      checkWebPSupport().then((supported) => {
+        webPSupported = supported;
+        setSupportsWebP(supported);
+      });
+    }
+  }, [webpSrc]);
 
   const handleLoad = useCallback(() => {
     setIsLoaded(true);
@@ -83,15 +120,19 @@ export function LazyImage({
     onError?.();
   }, [onError]);
 
+  // Determine the blur source for blur-up effect
+  const blurSrc = blurDataURL || blurPlaceholder;
+  const shouldBlur = enableBlurUp ?? !!blurSrc;
+
   // Generate placeholder based on dimensions
   const placeholderSrc = useMemo(() => {
     if (placeholder) return placeholder;
-    if (blurPlaceholder) return blurPlaceholder;
+    if (blurSrc) return blurSrc;
     
     const w = typeof width === 'number' ? width : 100;
     const h = typeof height === 'number' ? height : 100;
     return generatePlaceholderSvg(w, h);
-  }, [placeholder, blurPlaceholder, width, height]);
+  }, [placeholder, blurSrc, width, height]);
 
   // Calculate aspect ratio style
   const aspectRatioStyle = useMemo(() => {
@@ -108,6 +149,14 @@ export function LazyImage({
     return {};
   }, [aspectRatio, width, height]);
 
+  // Determine the final image source (WebP if supported, otherwise original)
+  const finalSrc = useMemo(() => {
+    if (webpSrc && supportsWebP) {
+      return webpSrc;
+    }
+    return src;
+  }, [src, webpSrc, supportsWebP]);
+
   // Show fallback if error occurred
   if (hasError && fallback) {
     return <>{fallback}</>;
@@ -121,24 +170,26 @@ export function LazyImage({
       )}
       style={aspectRatioStyle}
     >
-      {/* Skeleton/Placeholder layer */}
+      {/* Blur-up placeholder layer */}
       {showSkeleton && !isLoaded && !hasError && (
         <div 
           className={cn(
-            'absolute inset-0 bg-muted animate-pulse',
-            blurPlaceholder && 'blur-sm'
+            'absolute inset-0 bg-muted',
+            !blurSrc && 'animate-pulse',
+            shouldBlur && blurSrc && 'blur-lg scale-110 transform'
           )}
           style={{
-            backgroundImage: blurPlaceholder ? `url(${blurPlaceholder})` : undefined,
+            backgroundImage: blurSrc ? `url(${blurSrc})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
+            transition: 'opacity 300ms ease-out',
           }}
         />
       )}
       
       {/* Main image with native lazy loading */}
       <img
-        src={src}
+        src={finalSrc}
         alt={alt}
         width={width}
         height={height}
@@ -147,8 +198,8 @@ export function LazyImage({
         onLoad={handleLoad}
         onError={handleError}
         className={cn(
-          'transition-opacity duration-300',
-          isLoaded ? 'opacity-100' : 'opacity-0',
+          'transition-all duration-300 ease-out',
+          isLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-sm',
           hasError && 'hidden',
           className
         )}

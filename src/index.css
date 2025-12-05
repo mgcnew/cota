@@ -1336,3 +1336,537 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
   }
 }
+
+
+/* ============================================
+   CSS-ONLY ANIMATION SYSTEM
+   Requirements: 11.1, 11.4, 11.5
+   - Use CSS transforms and opacity only
+   - Hardware-accelerated animations
+   - Duration limits: 150ms hover, 200ms transition, 300ms modal
+   ============================================ */
+
+@layer utilities {
+  /* ============================================
+     BASE TRANSITION CLASSES (transform/opacity only)
+     Requirement: 11.1 - Use CSS transforms and opacity only
+     ============================================ */
+  
+  .transition-transform-opacity {
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* ============================================
+     EASING CLASSES
+     ============================================ */
+  
+  .ease-spring {
+    transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  /* ============================================
+     HOVER EFFECT CLASSES (transform/opacity only)
+     Requirement: 11.5 - Hover transitions under 150ms
+     ============================================ */
+  
+  .hover-scale {
+    @apply duration-150;
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+  
+  .hover-lift {
+    @apply duration-150;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  
+  .hover-fade {
+    @apply duration-150;
+  }
+  
+  .hover-fade:hover {
+    opacity: 0.8;
+  }
+  
+  .hover-scale-fade {
+    @apply duration-150;
+  }
+  
+  .hover-scale-fade:hover {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+  
+  /* ============================================
+     ACTIVE/PRESS EFFECT CLASSES
+     For tactile touch feedback
+     ============================================ */
+  
+  .active-press:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+  
+  .active-scale:active {
+    transform: scale(0.97);
+  }
+  
+  /* ============================================
+     GPU ACCELERATION HELPERS
+     Requirement: 11.4 - Hardware-accelerated animations
+     ============================================ */
+  
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .will-change-opacity {
+    will-change: opacity;
+  }
+}
+
+/* ============================================
+   ENTER/EXIT ANIMATIONS (transform/opacity only)
+   Requirement: 11.1 - Use CSS transforms and opacity only
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOutBottom {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@layer utilities {
+  /* Animation classes with duration limits */
+  .animate-fade-in {
+    animation: fadeIn 200ms ease-out forwards;
+  }
+  
+  .animate-fade-out {
+    animation: fadeOut 200ms ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 200ms ease-out forwards;
+  }
+  
+  .animate-scale-out {
+    animation: scaleOut 200ms ease-out forwards;
+  }
+  
+  /* Modal animations - 300ms duration */
+  .animate-slide-in-bottom {
+    animation: slideInBottom 300ms ease-out forwards;
+  }
+  
+  .animate-slide-out-bottom {
+    animation: slideOutBottom 300ms ease-out forwards;
+  }
+  
+  .animate-slide-in-right {
+    animation: slideInRight 300ms ease-out forwards;
+  }
+  
+  .animate-slide-out-right {
+    animation: slideOutRight 300ms ease-out forwards;
+  }
+}
+
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   Requirement: 11.2 - Respect prefers-reduced-motion
+   Disables non-essential animations when user prefers reduced motion
+   ============================================ */
+
+@layer utilities {
+  /* Motion-reduce utility classes */
+  .motion-reduce {
+    /* Base class for elements that should respect reduced motion */
+  }
+  
+  /* Disable transitions when reduced motion is preferred */
+  @media (prefers-reduced-motion: reduce) {
+    .motion-reduce,
+    .motion-reduce * {
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+    }
+    
+    .motion-reduce\:transition-none {
+      transition: none !important;
+    }
+    
+    .motion-reduce\:transform-none {
+      transform: none !important;
+    }
+    
+    .motion-reduce\:animate-none {
+      animation: none !important;
+    }
+    
+    /* Disable all hover animations */
+    .hover-scale:hover,
+    .hover-lift:hover,
+    .hover-fade:hover,
+    .hover-scale-fade:hover {
+      transform: none !important;
+      opacity: 1 !important;
+    }
+    
+    /* Disable active press animations */
+    .active-press:active,
+    .active-scale:active {
+      transform: none !important;
+      opacity: 1 !important;
+    }
+    
+    /* Disable enter/exit animations */
+    .animate-fade-in,
+    .animate-fade-out,
+    .animate-scale-in,
+    .animate-scale-out,
+    .animate-slide-in-bottom,
+    .animate-slide-out-bottom,
+    .animate-slide-in-right,
+    .animate-slide-out-right {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    
+    /* Disable card hover effects */
+    .card-elevated:hover,
+    .metrics-card:hover,
+    .card-gradient-primary:hover,
+    .card-gradient-success:hover,
+    .card-gradient-warning:hover,
+    .card-gradient-info:hover,
+    .card-interactive:hover {
+      transform: none !important;
+    }
+    
+    /* Disable stagger animations */
+    .stagger-child,
+    .fade-in-up {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+  
+  /* Motion-safe utility classes - only animate when motion is safe */
+  @media (prefers-reduced-motion: no-preference) {
+    .motion-safe\:animate-fade-in {
+      animation: fadeIn 200ms ease-out forwards;
+    }
+    
+    .motion-safe\:transition-all {
+      transition: all 200ms ease-out;
+    }
+    
+    .motion-safe\:transition-transform {
+      transition: transform 200ms ease-out;
+    }
+    
+    .motion-safe\:transition-opacity {
+      transition: opacity 200ms ease-out;
+    }
+  }
+}
+
+/* ============================================
+   ESSENTIAL ANIMATIONS (always enabled)
+   These animations are essential for UX and should not be disabled
+   ============================================ */
+
+@layer utilities {
+  /* Loading spinner - essential for feedback */
+  .animate-spin-essential {
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Focus ring - essential for accessibility */
+  .focus-ring-essential {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  
+  /* Progress bar - essential for feedback */
+  .animate-progress-essential {
+    transition: width 100ms linear;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ============================================
+   TOUCH TARGET UTILITIES
+   Requirements: 2.5, 18.1
+   - Minimum 44x44px touch targets for all interactive elements
+   - Apply to buttons and interactive elements
+   ============================================ */
+
+@layer utilities {
+  /* Base touch target - ensures minimum 44x44px */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Touch target with centered content */
+  .touch-target-centered {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Touch target for icon buttons */
+  .touch-target-icon {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px; /* (44 - 24) / 2 for 24px icons */
+  }
+  
+  /* Touch target for list items */
+  .touch-target-list-item {
+    min-height: 44px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Touch target with expanded hit area using pseudo-element */
+  .touch-target-expanded {
+    position: relative;
+  }
+  
+  .touch-target-expanded::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Touch target for inline elements (links, etc.) */
+  .touch-target-inline {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  
+  /* Touch target for small buttons that need larger hit area */
+  .touch-target-small {
+    position: relative;
+    min-height: 32px;
+    min-width: 32px;
+  }
+  
+  .touch-target-small::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Touch-friendly spacing for interactive elements */
+  .touch-spacing {
+    padding: 12px 16px;
+  }
+  
+  /* Touch-friendly gap between interactive elements */
+  .touch-gap {
+    gap: 8px;
+  }
+  
+  /* Ensure buttons have adequate touch targets on mobile */
+  @media (max-width: 767px) {
+    button:not(.touch-target-small),
+    [role="button"]:not(.touch-target-small),
+    a[href]:not(.touch-target-inline) {
+      min-height: 44px;
+    }
+    
+    /* Icon buttons on mobile */
+    .btn-icon,
+    button[aria-label]:not([aria-label=""]) {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+}
+
+/* ============================================
+   INTERACTIVE ELEMENT TOUCH FEEDBACK
+   Provides visual feedback for touch interactions
+   ============================================ */
+
+@layer utilities {
+  /* Touch feedback with scale */
+  .touch-feedback-scale {
+    transition: transform 100ms ease-out;
+  }
+  
+  .touch-feedback-scale:active {
+    transform: scale(0.97);
+  }
+  
+  /* Touch feedback with opacity */
+  .touch-feedback-opacity {
+    transition: opacity 100ms ease-out;
+  }
+  
+  .touch-feedback-opacity:active {
+    opacity: 0.7;
+  }
+  
+  /* Combined touch feedback */
+  .touch-feedback {
+    transition: transform 100ms ease-out, opacity 100ms ease-out;
+  }
+  
+  .touch-feedback:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+  }
+  
+  /* Touch ripple effect (CSS-only approximation) */
+  .touch-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .touch-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: currentColor;
+    opacity: 0;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 300ms ease-out, height 300ms ease-out, opacity 300ms ease-out;
+  }
+  
+  .touch-ripple:active::after {
+    width: 200%;
+    height: 200%;
+    opacity: 0.1;
+  }
+}
