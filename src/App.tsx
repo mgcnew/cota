@@ -4,20 +4,29 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, ReactNode } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { CompanyAutoSetup } from "./components/auth/CompanyAutoSetup";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import { initScrollbarFix } from "./utils/scrollbar-fix";
 
-// Páginas públicas - carregamento imediato
-import Auth from "./pages/Auth";
-import AcceptInvite from "./pages/AcceptInvite";
-import NotFound from "./pages/NotFound";
-import Landing from "./pages/Landing";
-import Pricing from "./pages/Pricing";
+/**
+ * All pages are lazy loaded for code splitting (Requirements 12.1, 12.2)
+ * Each page is loaded in a separate chunk to minimize initial bundle size
+ */
+
+// Páginas públicas - lazy load para reduzir bundle inicial
+const Landing = lazy(() => import("./pages/Landing"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Auth = lazy(() => import("./pages/Auth"));
+const AcceptInvite = lazy(() => import("./pages/AcceptInvite"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Prefetch function for probable next pages (Requirements 16.5)
+const prefetchDashboard = () => import("./pages/Dashboard");
 
 // Páginas principais - lazy load
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -49,6 +58,19 @@ const PageLoader = () => (
   </div>
 );
 
+/**
+ * PageWrapper - Wraps lazy-loaded pages with ErrorBoundary and Suspense
+ * Provides consistent error handling and loading states across all pages
+ * Requirements: 10.5, 12.1, 12.2
+ */
+const PageWrapper = ({ children }: { children: ReactNode }) => (
+  <ErrorBoundary>
+    <Suspense fallback={<PageLoader />}>
+      {children}
+    </Suspense>
+  </ErrorBoundary>
+);
+
 // QueryClient configuração padrão
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,13 +100,13 @@ const App = () => {
             <AuthProvider>
               <CompanyAutoSetup />
               <Routes>
-                {/* Rotas públicas */}
-                <Route path="/" element={<Landing />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/accept-invite" element={<AcceptInvite />} />
+                {/* Rotas públicas - lazy loaded with ErrorBoundary (Requirements 10.5, 12.1, 12.2) */}
+                <Route path="/" element={<PageWrapper><Landing /></PageWrapper>} />
+                <Route path="/pricing" element={<PageWrapper><Pricing /></PageWrapper>} />
+                <Route path="/auth" element={<PageWrapper><Auth /></PageWrapper>} />
+                <Route path="/accept-invite" element={<PageWrapper><AcceptInvite /></PageWrapper>} />
                 
-                {/* Rotas protegidas */}
+                {/* Rotas protegidas - with ErrorBoundary */}
                 <Route
                   path="/dashboard/*"
                   element={
@@ -93,26 +115,26 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 >
-                  <Route index element={<Suspense fallback={<PageLoader />}><Dashboard /></Suspense>} />
-                  <Route path="produtos" element={<Suspense fallback={<PageLoader />}><Produtos /></Suspense>} />
-                  <Route path="fornecedores" element={<Suspense fallback={<PageLoader />}><Fornecedores /></Suspense>} />
-                  <Route path="cotacoes" element={<Suspense fallback={<PageLoader />}><Cotacoes /></Suspense>} />
-                  <Route path="pedidos" element={<Suspense fallback={<PageLoader />}><Pedidos /></Suspense>} />
+                  <Route index element={<PageWrapper><Dashboard /></PageWrapper>} />
+                  <Route path="produtos" element={<PageWrapper><Produtos /></PageWrapper>} />
+                  <Route path="fornecedores" element={<PageWrapper><Fornecedores /></PageWrapper>} />
+                  <Route path="cotacoes" element={<PageWrapper><Cotacoes /></PageWrapper>} />
+                  <Route path="pedidos" element={<PageWrapper><Pedidos /></PageWrapper>} />
                   <Route path="historico" element={<Navigate to="/dashboard/relatorios?tab=historico" replace />} />
-                  <Route path="relatorios" element={<Suspense fallback={<PageLoader />}><Relatorios /></Suspense>} />
+                  <Route path="relatorios" element={<PageWrapper><Relatorios /></PageWrapper>} />
                   <Route path="analytics" element={<Navigate to="/dashboard/relatorios?tab=analytics" replace />} />
-                  <Route path="locucoes" element={<Suspense fallback={<PageLoader />}><Locucoes /></Suspense>} />
-                  <Route path="extra" element={<Suspense fallback={<PageLoader />}><Extra /></Suspense>} />
-                  <Route path="agente-copywriting" element={<Suspense fallback={<PageLoader />}><AgenteCopywriting /></Suspense>} />
-                  <Route path="whatsapp-mensagens" element={<Suspense fallback={<PageLoader />}><WhatsAppMensagens /></Suspense>} />
-                  <Route path="contagem-estoque" element={<Suspense fallback={<PageLoader />}><ContagemEstoque /></Suspense>} />
-                  <Route path="anotacoes" element={<Suspense fallback={<PageLoader />}><Anotacoes /></Suspense>} />
-                  <Route path="lista-compras" element={<Suspense fallback={<PageLoader />}><ListaCompras /></Suspense>} />
-                  <Route path="configuracoes" element={<Suspense fallback={<PageLoader />}><Configuracoes /></Suspense>} />
+                  <Route path="locucoes" element={<PageWrapper><Locucoes /></PageWrapper>} />
+                  <Route path="extra" element={<PageWrapper><Extra /></PageWrapper>} />
+                  <Route path="agente-copywriting" element={<PageWrapper><AgenteCopywriting /></PageWrapper>} />
+                  <Route path="whatsapp-mensagens" element={<PageWrapper><WhatsAppMensagens /></PageWrapper>} />
+                  <Route path="contagem-estoque" element={<PageWrapper><ContagemEstoque /></PageWrapper>} />
+                  <Route path="anotacoes" element={<PageWrapper><Anotacoes /></PageWrapper>} />
+                  <Route path="lista-compras" element={<PageWrapper><ListaCompras /></PageWrapper>} />
+                  <Route path="configuracoes" element={<PageWrapper><Configuracoes /></PageWrapper>} />
                 </Route>
 
-                {/* Rota 404 */}
-                <Route path="*" element={<NotFound />} />
+                {/* Rota 404 - lazy loaded with ErrorBoundary */}
+                <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
               </Routes>
             </AuthProvider>
           </BrowserRouter>

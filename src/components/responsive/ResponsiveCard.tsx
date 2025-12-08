@@ -110,6 +110,8 @@ export const ResponsiveCard = memo(function ResponsiveCard({
         sizeClasses[size],
         // Interactive hover effects (desktop only) - transição simplificada para performance
         interactive && 'sm:hover:shadow-md sm:transition-shadow sm:duration-100',
+        // Touch feedback for mobile (Requirements: 18.5)
+        interactive && 'touch-feedback',
         className
       )}
       {...props}

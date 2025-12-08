@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, ArrowRight, Zap, Shield, BarChart3, Users, Package, Building2, TrendingUp, Mail, Phone } from "lucide-react";
+import { Check, ArrowRight, Mail, Phone } from "lucide-react";
+import { ResponsiveGrid } from "@/components/responsive";
 
 export default function Pricing() {
   const plans = [
@@ -103,53 +104,55 @@ export default function Pricing() {
         </p>
       </section>
 
-      {/* Pricing Cards */}
+      {/* Pricing Cards - Using ResponsiveGrid for consistent responsive layout */}
       <section className="container mx-auto px-4 py-8 pb-20">
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {plans.map((plan) => (
-            <Card
-              key={plan.name}
-              className={plan.popular ? "border-orange-500 border-2 relative" : ""}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-orange-500">Mais Popular</Badge>
-                </div>
-              )}
-              <CardHeader>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  {plan.period && (
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <ul className="space-y-3">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link to={plan.ctaLink} className="block">
-                  <Button
-                    className="w-full"
-                    variant={plan.ctaVariant}
-                    size="lg"
-                  >
-                    {plan.cta}
-                    {plan.ctaVariant === "default" && (
-                      <ArrowRight className="ml-2 h-4 w-4" />
+        <div className="max-w-6xl mx-auto">
+          <ResponsiveGrid config={{ mobile: 1, tablet: 2, desktop: 3 }} gap="lg">
+            {plans.map((plan) => (
+              <Card
+                key={plan.name}
+                className={plan.popular ? "border-orange-500 border-2 relative" : ""}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-orange-500">Mais Popular</Badge>
+                  </div>
+                )}
+                <CardHeader>
+                  <CardTitle className="text-xl sm:text-2xl">{plan.name}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                  <div className="mt-4">
+                    <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
+                    {plan.period && (
+                      <span className="text-muted-foreground">{plan.period}</span>
                     )}
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ))}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link to={plan.ctaLink} className="block">
+                    <Button
+                      className="w-full min-h-[44px]"
+                      variant={plan.ctaVariant}
+                      size="lg"
+                    >
+                      {plan.cta}
+                      {plan.ctaVariant === "default" && (
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      )}
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </ResponsiveGrid>
         </div>
       </section>
 

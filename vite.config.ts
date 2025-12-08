@@ -26,4 +26,28 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom"],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        /**
+         * Manual chunk splitting for better code splitting (Requirements 12.4)
+         * Separates heavy libraries into their own chunks for lazy loading
+         */
+        manualChunks: {
+          // Recharts library in separate chunk for lazy loading
+          'vendor-charts': ['recharts'],
+          // React core libraries
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // UI component libraries
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-popover'],
+          // Query and state management
+          'vendor-query': ['@tanstack/react-query'],
+          // Date utilities
+          'vendor-date': ['date-fns'],
+        },
+      },
+    },
+    // Increase chunk size warning limit for vendor chunks
+    chunkSizeWarningLimit: 1000,
+  },
 }));

@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { usePrefetch, prefetchDashboard } from "@/hooks/usePrefetch";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +40,10 @@ export default function Auth() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Refs for autofocus
+  const loginEmailRef = useRef<HTMLInputElement>(null);
+  const signupEmailRef = useRef<HTMLInputElement>(null);
+
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -64,6 +68,24 @@ export default function Auth() {
       navigate(redirectTo, { replace: true });
     }
   }, [user, navigate, searchParams]);
+
+  // Autofocus first input field on mount (Requirements 16.2)
+  useEffect(() => {
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      const mode = searchParams.get("mode");
+      if (mode === "signup") {
+        signupEmailRef.current?.focus();
+      } else {
+        loginEmailRef.current?.focus();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [searchParams]);
+
+  // Prefetch Dashboard after Auth page loads (Requirements 16.5)
+  // This ensures faster navigation after successful login
+  usePrefetch(prefetchDashboard, 1500);
 
   const handleLogin = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -243,8 +265,10 @@ export default function Auth() {
                         <FormLabel>E-mail</FormLabel>
                         <FormControl>
                           <Input
+                            ref={loginEmailRef}
                             type="email"
                             placeholder="seu@email.com"
+                            autoComplete="email"
                             {...field}
                             disabled={isLoading}
                           />
@@ -275,7 +299,7 @@ export default function Auth() {
 
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full min-h-[44px]"
                     size="lg"
                     disabled={isLoading}
                   >
@@ -303,8 +327,10 @@ export default function Auth() {
                         <FormLabel>E-mail</FormLabel>
                         <FormControl>
                           <Input
+                            ref={signupEmailRef}
                             type="email"
                             placeholder="seu@email.com"
+                            autoComplete="email"
                             {...field}
                             disabled={isLoading}
                           />
@@ -354,7 +380,7 @@ export default function Auth() {
 
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full min-h-[44px]"
                     size="lg"
                     disabled={isLoading}
                   >

@@ -50,6 +50,14 @@ export type { InfiniteScrollProps } from './InfiniteScroll';
 export { MobileFilters } from './MobileFilters';
 export type { MobileFiltersProps, FilterConfig } from './MobileFilters';
 
+// Fade-in animation for loading completion (Requirements 10.4)
+export { FadeIn, FadeInContent } from './FadeIn';
+export type { FadeInProps, FadeInContentProps } from './FadeIn';
+
+// Lazy loading for off-screen content (Requirements 12.5)
+export { LazySection, useIntersectionObserver } from './LazySection';
+export type { LazySectionProps } from './LazySection';
+
 // Re-export useBreakpoint hook for convenience
 export { useBreakpoint, BREAKPOINTS } from '@/hooks/useBreakpoint';
 export type { Breakpoint, BreakpointState } from '@/hooks/useBreakpoint';

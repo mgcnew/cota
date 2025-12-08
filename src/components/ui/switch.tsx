@@ -9,7 +9,15 @@ const Switch = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SwitchPrimitives.Root
     className={cn(
-      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
+      // Visual size: h-6 w-11 (24px x 44px)
+      // Touch target: touch-target-expanded ensures 44x44px hit area via pseudo-element
+      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full",
+      "border-2 border-transparent transition-colors duration-150",
+      "data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+      "disabled:cursor-not-allowed disabled:opacity-50",
+      // Touch target: expanded hit area for accessibility (Requirements: 2.5, 18.1)
+      "touch-target-expanded",
       className,
     )}
     {...props}

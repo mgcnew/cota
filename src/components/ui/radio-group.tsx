@@ -20,7 +20,13 @@ const RadioGroupItem = React.forwardRef<
     <RadioGroupPrimitive.Item
       ref={ref}
       className={cn(
-        "aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        // Visual size: h-4 w-4 (16px)
+        // Touch target: touch-target-expanded ensures 44x44px hit area via pseudo-element
+        "aspect-square h-4 w-4 rounded-full border border-primary text-primary",
+        "ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        // Touch target: expanded hit area for accessibility (Requirements: 2.5, 18.1)
+        "touch-target-expanded",
         className,
       )}
       {...props}

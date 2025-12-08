@@ -18,7 +18,7 @@
 export const TYPOGRAPHY_CONFIG = {
   mobile: {
     body: {
-      fontSize: 14, // minimum 14px - Requirement 8.1
+      fontSize: 16, // minimum 16px - Requirement 18.3
       lineHeight: 1.5,
     },
     heading1: {
@@ -127,7 +127,7 @@ export const TYPOGRAPHY_CONFIG = {
  * Minimum font size requirements
  */
 export const MIN_FONT_SIZES = {
-  body: 14, // Requirement 8.1
+  body: 16, // Requirement 18.3 - minimum 16px for body text on mobile
   label: 12, // Requirement 8.3
   caption: 12,
 } as const;

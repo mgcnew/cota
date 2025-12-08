@@ -580,121 +580,243 @@
     - Salvar localmente se offline
     - _Requirements: 15.4_
 
-- [ ] 22. Checkpoint - Garantir que todos os testes passam
+- [x] 22. Checkpoint - Garantir que todos os testes passam
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Fase 12: Páginas de Entrada (Landing, Auth, Pricing)
 
-- [ ] 23. Otimizar páginas de entrada
-  - [ ] 23.1 Otimizar Landing para first contentful paint
+- [x] 23. Otimizar páginas de entrada
+
+
+
+
+
+  - [x] 23.1 Otimizar Landing para first contentful paint
+
+
     - Above-the-fold em < 1s
     - _Requirements: 16.1_
-  - [ ] 23.2 Implementar autofocus no Auth
+
+  - [x] 23.2 Implementar autofocus no Auth
+
     - Focar primeiro input automaticamente
     - _Requirements: 16.2_
-  - [ ] 23.3 Usar ResponsiveGrid no Pricing
+
+  - [x] 23.3 Usar ResponsiveGrid no Pricing
+
     - Cards de preço em grid responsivo
     - _Requirements: 16.3_
-  - [ ] 23.4 Implementar loading state em forms
+
+  - [x] 23.4 Implementar loading state em forms
+
     - Desabilitar submit + loading indicator
     - _Requirements: 16.4_
-  - [ ]* 23.5 Write property test for form submit loading state
+  - [x] 23.5 Write property test for form submit loading state
+
+
+
+
+
+
     - **Property 17: Form Submit Loading State**
     - **Validates: Requirements 16.4**
-  - [ ] 23.6 Implementar prefetch de páginas prováveis
+  - [x] 23.6 Implementar prefetch de páginas prováveis
+
+
     - Preload Dashboard após login
     - _Requirements: 16.5_
 
-- [ ] 24. Checkpoint - Garantir que todos os testes passam
+- [x] 24. Checkpoint - Garantir que todos os testes passam
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Fase 13: Lazy Loading e Code Splitting
 
-- [ ] 25. Implementar lazy loading global
-  - [ ] 25.1 Configurar React.lazy para todas as páginas
+- [x] 25. Implementar lazy loading global
+
+
+
+
+
+  - [x] 25.1 Configurar React.lazy para todas as páginas
+
+
     - Cada página em chunk separado
     - _Requirements: 12.1, 12.2_
-  - [ ]* 25.2 Write property test for lazy loading pages
+  - [x] 25.2 Write property test for lazy loading pages
+
+
+
+
+
+
     - **Property 9: Lazy Loading for Pages**
     - **Validates: Requirements 12.2**
-  - [ ] 25.3 Implementar lazy loading para dialogs
+  - [x] 25.3 Implementar lazy loading para dialogs
+
+
     - Carregar dialogs apenas quando necessário
     - _Requirements: 12.3_
-  - [ ]* 25.4 Write property test for lazy loading dialogs
+  - [x] 25.4 Write property test for lazy loading dialogs
+
+
+
+
+
+
     - **Property 10: Lazy Loading for Dialogs**
     - **Validates: Requirements 12.3**
-  - [ ] 25.5 Separar chart library em chunk próprio
+  - [x] 25.5 Separar chart library em chunk próprio
+
+
     - Recharts em bundle separado
     - _Requirements: 12.4_
-  - [ ] 25.6 Implementar intersection observer para conteúdo off-screen
+
+  - [x] 25.6 Implementar intersection observer para conteúdo off-screen
+
     - Lazy load seções abaixo do fold
     - _Requirements: 12.5_
 
-- [ ] 26. Checkpoint - Garantir que todos os testes passam
+- [x] 26. Checkpoint - Garantir que todos os testes passam
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Fase 14: Otimização de Imagens e Assets
 
-- [ ] 27. Otimizar imagens e assets
-  - [ ] 27.1 Implementar blur placeholder em todas as imagens
+- [x] 27. Otimizar imagens e assets
+
+
+
+
+
+  - [x] 27.1 Implementar blur placeholder em todas as imagens
+
+
     - Usar LazyImage consistentemente
     - _Requirements: 17.1_
-  - [ ] 27.2 Configurar WebP com fallback
+
+  - [x] 27.2 Configurar WebP com fallback
+
     - Servir WebP quando suportado
     - _Requirements: 17.2_
-  - [ ] 27.3 Otimizar tamanhos de avatar
+
+  - [x] 27.3 Otimizar tamanhos de avatar
+
     - Thumbnails otimizados por contexto
     - _Requirements: 17.3_
-  - [ ] 27.4 Verificar uso de SVG para ícones
+
+  - [x] 27.4 Verificar uso de SVG para ícones
+
     - Lucide icons já são SVG
     - _Requirements: 17.4_
-  - [ ] 27.5 Implementar compressão de upload
+
+  - [x] 27.5 Implementar compressão de upload
+
     - Max 500KB para imagens enviadas
     - _Requirements: 17.5_
 
-- [ ] 28. Checkpoint - Garantir que todos os testes passam
+- [x] 28. Checkpoint - Garantir que todos os testes passam
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Fase 15: Consistência Visual e Acessibilidade
 
-- [ ] 29. Garantir consistência visual e acessibilidade
-  - [ ] 29.1 Auditar e corrigir touch targets
+- [x] 29. Garantir consistência visual e acessibilidade
+
+
+
+
+
+
+  - [x] 29.1 Auditar e corrigir touch targets
+
     - Verificar todos os botões têm min 44x44px
     - _Requirements: 18.1_
-  - [ ] 29.2 Padronizar spacing scale
+
+  - [x] 29.2 Padronizar spacing scale
+
     - Usar escala de 4px consistentemente
     - _Requirements: 18.2_
-  - [ ] 29.3 Verificar tipografia mobile
+
+  - [x] 29.3 Verificar tipografia mobile
+
     - Body text min 16px no mobile
     - _Requirements: 18.3_
-  - [ ] 29.4 Verificar contraste de cores
+
+  - [x] 29.4 Verificar contraste de cores
+
     - WCAG AA compliance
     - _Requirements: 18.4_
-  - [ ] 29.5 Implementar feedback visual em touch
+  - [x] 29.5 Implementar feedback visual em touch
+
+
     - Active states em elementos interativos
     - _Requirements: 18.5_
 
-- [ ] 30. Checkpoint - Garantir que todos os testes passam
+- [x] 30. Checkpoint - Garantir que todos os testes passam
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Fase 16: Error Handling e Estados de Erro
 
-- [ ] 31. Implementar error handling consistente
-  - [ ] 31.1 Criar componente ErrorState reutilizável
+- [x] 31. Implementar error handling consistente
+
+
+
+
+
+  - [x] 31.1 Criar componente ErrorState reutilizável
+
+
     - Mensagem de erro + botão retry
     - _Requirements: 10.5_
-  - [ ]* 31.2 Write property test for error state with retry
+  - [x] 31.2 Write property test for error state with retry
+
+
+
+
+
+
     - **Property 16: Error State with Retry**
+
     - **Validates: Requirements 10.5**
-  - [ ] 31.3 Implementar ErrorBoundary em páginas
+  - [x] 31.3 Implementar ErrorBoundary em páginas
+
     - Capturar erros de render
     - _Requirements: 10.5_
-  - [ ] 31.4 Implementar fade-in ao completar loading
+  - [x] 31.4 Implementar fade-in ao completar loading
+
+
     - Transição suave < 200ms
     - _Requirements: 10.4_
-  - [ ]* 31.5 Write property test for transform-only animations
+
+  - [x]* 31.5 Write property test for transform-only animations
+
+
+
+
+
 ,    - **Property 11: Transform-Only Animations**
     - **Validates: Requirements 11.1, 11.4**
 
-- [ ] 32. Final Checkpoint - Garantir que todos os testes passam
+- [x] 32. Final Checkpoint - Garantir que todos os testes passam
+
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.

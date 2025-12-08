@@ -80,8 +80,8 @@ export const MobileOrderCard = memo(function MobileOrderCard({
     <div 
       className={cn(
         "bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm",
-        // Touch-optimized: min 44px touch targets
-        "touch-manipulation",
+        // Touch-optimized: min 44px touch targets + visual feedback (Requirements: 18.5)
+        "touch-manipulation touch-feedback",
         className
       )}
     >

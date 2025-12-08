@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Package, Edit, Trash2, TrendingUp, TrendingDown, Minus, History, Building2, FileText, Clock, Scale } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
+import { LazyImage } from "@/components/responsive/LazyImage";
 import type { Product } from "@/hooks/useProducts";
 
 interface ProductCardProps {
@@ -69,20 +70,16 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
               onClick={handleImageClickInternal}
             >
               {product.image_url && !imageError ? (
-                <>
-                  {/* Skeleton placeholder */}
-                  {!imageLoaded && (
-                    <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
-                  )}
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className={`w-full h-full object-cover sm:transition-transform sm:duration-200 sm:group-hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                    loading="lazy"
-                    onLoad={handleImageLoad}
-                    onError={handleImageError}
-                  />
-                </>
+                <LazyImage
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-full object-cover sm:transition-transform sm:duration-200 sm:group-hover:scale-110"
+                  containerClassName="w-full h-full"
+                  showSkeleton={true}
+                  enableBlurUp={true}
+                  onLoad={handleImageLoad}
+                  onError={handleImageError}
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <Package className="h-6 w-6 sm:h-7 sm:w-7 text-orange-600 dark:text-orange-400" />

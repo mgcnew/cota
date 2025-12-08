@@ -20,6 +20,36 @@ const sizeClasses = {
   xl: "h-24 w-24 text-2xl",
 };
 
+/**
+ * Optimized thumbnail sizes for avatars by context
+ * Requirements: 17.3
+ */
+const thumbnailSizes = {
+  sm: 32,   // 32x32 for small avatars (lists, comments)
+  md: 40,   // 40x40 for medium avatars (headers, cards)
+  lg: 64,   // 64x64 for large avatars (profiles)
+  xl: 96,   // 96x96 for extra large avatars (profile pages)
+};
+
+/**
+ * Generate optimized avatar URL with size parameters
+ * Works with Supabase Storage URLs
+ */
+function getOptimizedAvatarUrl(url: string | undefined, size: keyof typeof thumbnailSizes): string | undefined {
+  if (!url) return undefined;
+  
+  // If it's a Supabase storage URL, we can add transform parameters
+  // Supabase supports image transformations via URL parameters
+  if (url.includes('supabase') && url.includes('/storage/')) {
+    const targetSize = thumbnailSizes[size];
+    // Add width and height parameters for Supabase image transformation
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}width=${targetSize}&height=${targetSize}&resize=cover`;
+  }
+  
+  return url;
+}
+
 export function UserAvatar({
   user,
   profile,
@@ -53,6 +83,9 @@ export function UserAvatar({
     return `hsl(${hue}, 70%, 50%)`;
   };
 
+  // Get optimized avatar URL based on size
+  const optimizedAvatarUrl = getOptimizedAvatarUrl(profile?.avatar_url, size);
+
   return (
     <div className="relative inline-block">
       <Avatar
@@ -63,8 +96,13 @@ export function UserAvatar({
         )}
         onClick={clickable ? onClick : undefined}
       >
-        {profile?.avatar_url && (
-          <AvatarImage src={profile.avatar_url} alt={profile.full_name || "User"} />
+        {optimizedAvatarUrl && (
+          <AvatarImage 
+            src={optimizedAvatarUrl} 
+            alt={profile?.full_name || "User"} 
+            loading="lazy"
+            decoding="async"
+          />
         )}
         <AvatarFallback
           style={{

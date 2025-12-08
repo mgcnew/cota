@@ -36,6 +36,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Package, Upload, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { LazyImage } from "@/components/responsive/LazyImage";
+import { 
+  compressImageForUpload, 
+  needsCompression, 
+  getCompressionInfo 
+} from "@/utils/imageCompression";
 
 const productSchema = z.object({
   name: z.string()
@@ -168,11 +174,11 @@ function EditProductDialogInternal({
       return;
     }
 
-    // Validar tamanho (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Allow larger files since we'll compress them (max 10MB input)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Arquivo muito grande",
-        description: "A imagem deve ter no máximo 5MB.",
+        description: "A imagem deve ter no máximo 10MB.",
         variant: "destructive",
       });
       return;
@@ -180,14 +186,27 @@ function EditProductDialogInternal({
 
     setIsUploadingImage(true);
     try {
+      // Compress image if needed (> 500KB)
+      let processedFile: File = file;
+      if (needsCompression(file)) {
+        const originalSize = file.size;
+        processedFile = await compressImageForUpload(file);
+        const info = getCompressionInfo(originalSize, processedFile.size);
+        
+        toast({
+          title: "Imagem comprimida",
+          description: `${info.originalSizeKB}KB → ${info.compressedSizeKB}KB (${info.savedPercent}% menor)`,
+        });
+      }
+
       // Upload para o Supabase Storage
-      const fileExt = file.name.split('.').pop();
+      const fileExt = processedFile.name.split('.').pop();
       const fileName = `${currentProduct.id}-${Date.now()}.${fileExt}`;
       const filePath = `product-images/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(filePath, file, {
+        .upload(filePath, processedFile, {
           cacheControl: '3600',
           upsert: false
         });
@@ -200,7 +219,7 @@ function EditProductDialogInternal({
         .getPublicUrl(filePath);
 
       setNewImageUrl(publicUrl);
-      setImageFile(file);
+      setImageFile(processedFile);
       
       toast({
         title: "Imagem carregada!",
@@ -278,16 +297,19 @@ function EditProductDialogInternal({
                   </div>
                 ) : (
                   <>
-                    <img 
+                    <LazyImage 
                       src={newImageUrl || currentProduct.image_url} 
                       alt={currentProduct.name}
                       className="w-full h-full object-cover"
+                      containerClassName="w-full h-full"
+                      showSkeleton={true}
+                      enableBlurUp={true}
                     />
                     {newImageUrl && (
                       <button
                         type="button"
                         onClick={handleRemoveNewImage}
-                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                       >
                         <X className="h-3 w-3" />
                       </button>

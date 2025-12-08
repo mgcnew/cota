@@ -54,15 +54,15 @@ const desktopWidthArb = fc.integer({ min: 1024, max: 1920 });
 describe('Responsive Typography - Property Tests', () => {
   /**
    * **Feature: mobile-responsiveness, Property 8: Font sizes respect mobile scale**
-   * **Validates: Requirements 8.1**
+   * **Validates: Requirements 18.3**
    * 
-   * Property: Body text has minimum font-size of 14px on mobile
+   * Property: Body text has minimum font-size of 16px on mobile
    */
-  it('body text has minimum 14px font size on mobile', () => {
+  it('body text has minimum 16px font size on mobile', () => {
     const mobileBodySize = TYPOGRAPHY_CONFIG.mobile.body.fontSize;
     
     expect(mobileBodySize).toBeGreaterThanOrEqual(MIN_FONT_SIZES.body);
-    expect(mobileBodySize).toBe(14);
+    expect(mobileBodySize).toBe(16);
   });
 
   /**
@@ -215,20 +215,20 @@ describe('Responsive Typography - Property Tests', () => {
 
   /**
    * **Feature: mobile-responsiveness, Property 8: Font sizes respect mobile scale**
-   * **Validates: Requirements 8.1, 8.2, 8.3**
+   * **Validates: Requirements 18.3**
    * 
-   * Property: For any mobile screen width, body text is at least 14px
+   * Property: For any mobile screen width, body text is at least 16px
    */
-  it('body text is at least 14px for any mobile screen width', () => {
+  it('body text is at least 16px for any mobile screen width', () => {
     fc.assert(
       fc.property(mobileWidthArb, (width) => {
         const breakpoint = getBreakpoint(width);
         expect(breakpoint).toBe('mobile');
         
         const bodySize = getFontSize('body', breakpoint);
-        expect(bodySize).toBeGreaterThanOrEqual(14);
+        expect(bodySize).toBeGreaterThanOrEqual(16);
         
-        return bodySize >= 14;
+        return bodySize >= 16;
       }),
       { numRuns: 100 }
     );
@@ -392,15 +392,15 @@ describe('Responsive Typography - Property Tests', () => {
 
   /**
    * **Feature: mobile-responsiveness, Property 8: Font sizes respect mobile scale**
-   * **Validates: Requirements 8.1, 8.2, 8.3**
+   * **Validates: Requirements 18.3, 8.2, 8.3**
    * 
    * Property: All mobile font sizes meet their respective minimums
    */
   it('all mobile font sizes meet their respective minimums', () => {
     const mobileConfig = TYPOGRAPHY_CONFIG.mobile;
     
-    // Body text minimum 14px
-    expect(mobileConfig.body.fontSize).toBeGreaterThanOrEqual(14);
+    // Body text minimum 16px (Requirement 18.3)
+    expect(mobileConfig.body.fontSize).toBeGreaterThanOrEqual(16);
     
     // Labels minimum 12px
     expect(mobileConfig.label.fontSize).toBeGreaterThanOrEqual(12);

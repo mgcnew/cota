@@ -43,6 +43,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
 import { LimitAlert } from "@/components/billing/LimitAlert";
 import { useUserRole } from "@/hooks/useUserRole";
+import { 
+  compressImageForUpload, 
+  needsCompression, 
+  getCompressionInfo 
+} from "@/utils/imageCompression";
 
 const productSchema = z.object({
   name: z.string()
@@ -210,10 +215,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       return;
     }
     
-    if (file.size > 5 * 1024 * 1024) {
+    // Allow larger files since we'll compress them (max 10MB input)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Arquivo muito grande",
-        description: "Tamanho máximo: 5MB",
+        description: "Tamanho máximo: 10MB",
         variant: "destructive",
       });
       return;
@@ -230,13 +236,26 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       
       if (!companyData) throw new Error("Empresa não encontrada");
       
-      const fileExt = file.name.split('.').pop();
+      // Compress image if needed (> 500KB)
+      let processedFile: File = file;
+      if (needsCompression(file)) {
+        const originalSize = file.size;
+        processedFile = await compressImageForUpload(file);
+        const info = getCompressionInfo(originalSize, processedFile.size);
+        
+        toast({
+          title: "Imagem comprimida",
+          description: `${info.originalSizeKB}KB → ${info.compressedSizeKB}KB (${info.savedPercent}% menor)`,
+        });
+      }
+      
+      const fileExt = processedFile.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const filePath = `${companyData.company_id}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from("product-images")
-        .upload(filePath, file);
+        .upload(filePath, processedFile);
       
       if (uploadError) throw uploadError;
       

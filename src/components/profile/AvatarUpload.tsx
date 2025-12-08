@@ -9,6 +9,7 @@ import {
   getCompressionInfo,
   DEFAULT_MAX_FILE_SIZE 
 } from "@/utils/imageCompression";
+import { LazyImage } from "@/components/responsive/LazyImage";
 
 interface AvatarUploadProps {
   currentAvatar?: string | null;
@@ -118,10 +119,13 @@ export function AvatarUpload({
         onDrop={handleDrop}
       >
         {displayImage ? (
-          <img
+          <LazyImage
             src={displayImage}
             alt="Avatar preview"
             className="h-full w-full rounded-full object-cover"
+            containerClassName="h-full w-full rounded-full"
+            showSkeleton={true}
+            enableBlurUp={true}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
