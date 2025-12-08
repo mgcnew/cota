@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 interface PedidoItem {
@@ -35,6 +37,7 @@ interface PedidoDialogProps {
 export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: PedidoDialogProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   
   const [activeTab, setActiveTab] = useState("itens");
   
@@ -191,25 +194,283 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const selectedSupplier = suppliers.find(s => s.id === fornecedor);
 
 
+  // Header content shared between Dialog and Drawer
+  const headerContent = (
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+        <ShoppingCart className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+      </div>
+      <div>
+        <span className="text-base font-semibold text-gray-900 dark:text-white block">
+          Gerenciar Pedido
+        </span>
+        <span className="text-xs text-gray-500 flex items-center gap-2">
+          #{pedido?.id?.substring(0, 8)} • {getStatusBadge(status || pedido?.status || 'pendente')}
+        </span>
+      </div>
+    </div>
+  );
+
+  // Footer content shared between Dialog and Drawer
+  const footerContent = (
+    <div className="flex items-center justify-between w-full">
+      <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={loading} className="touch-target">
+        Fechar
+      </Button>
+      <Button onClick={handleSubmit} size="sm" disabled={loading} className="bg-orange-600 hover:bg-orange-700 text-white touch-target">
+        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+        Salvar Alterações
+      </Button>
+    </div>
+  );
+
+  // Mobile: Render as Drawer (bottom sheet) - Requirements: 5.5
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[85vh] overflow-hidden flex flex-col">
+          <DrawerHeader className="text-left border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
+            {headerContent}
+          </DrawerHeader>
+          
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+            <TabsList className="flex-shrink-0 mx-4 mt-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg grid grid-cols-3">
+              <TabsTrigger value="itens" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 touch-target">
+                <Package className="h-3.5 w-3.5 mr-1.5" />Itens
+              </TabsTrigger>
+              <TabsTrigger value="detalhes" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 touch-target">
+                <FileText className="h-3.5 w-3.5 mr-1.5" />Detalhes
+              </TabsTrigger>
+              <TabsTrigger value="resumo" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 touch-target">
+                <ClipboardList className="h-3.5 w-3.5 mr-1.5" />Resumo
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Tab: Itens (Edição) */}
+            <TabsContent value="itens" className="flex-1 overflow-auto m-0 p-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Produtos do Pedido</span>
+                  <Button onClick={handleAddItem} size="sm" className="h-10 bg-orange-600 hover:bg-orange-700 text-white touch-target">
+                    <Plus className="h-3.5 w-3.5 mr-1.5" />Adicionar
+                  </Button>
+                </div>
+                
+                <ScrollArea className="h-[200px] pr-2">
+                  <div className="space-y-2">
+                    {itens.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+                        <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">Nenhum item</p>
+                        <p className="text-xs">Clique em "Adicionar" para incluir produtos</p>
+                      </div>
+                    ) : itens.map((item, index) => (
+                      <div key={index} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="space-y-3">
+                          {/* Produto */}
+                          <div className="relative">
+                            <Label className="text-[10px] text-gray-500 mb-1 block">Produto</Label>
+                            <div className="relative">
+                              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                              <Input
+                                placeholder="Buscar produto..."
+                                value={item.produto}
+                                onChange={e => { 
+                                  handleItemChange(index, 'produto', e.target.value); 
+                                  setProductSearch(e.target.value);
+                                  setActiveSearchIndex(index);
+                                }}
+                                onFocus={() => setActiveSearchIndex(index)}
+                                className="h-10 text-sm pl-7"
+                              />
+                            </div>
+                            {activeSearchIndex === index && productSearch && filteredProducts.length > 0 && (
+                              <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-32 overflow-auto">
+                                {filteredProducts.map(p => (
+                                  <button 
+                                    key={p.id} 
+                                    onClick={() => { 
+                                      handleItemChange(index, 'produto', p.name); 
+                                      setProductSearch(''); 
+                                      setActiveSearchIndex(null);
+                                    }}
+                                    className="w-full px-2 py-2 text-left text-sm hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2 min-h-[44px]"
+                                  >
+                                    <Package className="h-3 w-3 text-orange-500" />{p.name}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          {/* Quantidade, Unidade, Preço */}
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <Label className="text-[10px] text-gray-500 mb-1 block">Qtd</Label>
+                              <Input 
+                                type="number" 
+                                value={item.quantidade} 
+                                onChange={e => handleItemChange(index, 'quantidade', parseFloat(e.target.value) || 0)} 
+                                className="h-10 text-sm" 
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-[10px] text-gray-500 mb-1 block">Un</Label>
+                              <Select value={item.unidade} onValueChange={v => handleItemChange(index, 'unidade', v)}>
+                                <SelectTrigger className="h-10 text-sm"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="un">un</SelectItem>
+                                  <SelectItem value="kg">kg</SelectItem>
+                                  <SelectItem value="cx">cx</SelectItem>
+                                  <SelectItem value="pc">pc</SelectItem>
+                                  <SelectItem value="L">L</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-[10px] text-gray-500 mb-1 block">Preço</Label>
+                              <Input 
+                                type="number" 
+                                step="0.01"
+                                value={item.valorUnitario} 
+                                onChange={e => handleItemChange(index, 'valorUnitario', parseFloat(e.target.value) || 0)} 
+                                className="h-10 text-sm" 
+                              />
+                            </div>
+                          </div>
+                          {/* Subtotal e Remover */}
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                            <span className="text-xs font-semibold text-emerald-600">
+                              Subtotal: R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
+                            </span>
+                            <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)} className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 touch-target">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+
+                {/* Total */}
+                <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  <span className="font-medium text-emerald-700 dark:text-emerald-400">Total do Pedido</span>
+                  <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Tab: Detalhes (Edição) */}
+            <TabsContent value="detalhes" className="flex-1 overflow-auto m-0 p-4">
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Fornecedor</Label>
+                  <Select value={fornecedor} onValueChange={setFornecedor}>
+                    <SelectTrigger className="h-10 text-sm mt-1"><SelectValue placeholder="Selecione o fornecedor" /></SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Data de Entrega</Label>
+                  <Input type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className="h-10 text-sm mt-1" />
+                </div>
+                
+                <div>
+                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Status do Pedido</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {statusOptions.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setStatus(opt.value)}
+                        className={cn(
+                          "px-3 py-3 rounded-lg text-xs font-medium border-2 transition-all min-h-[44px]",
+                          status === opt.value 
+                            ? `${opt.color} border-current ring-2 ring-offset-1` 
+                            : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300"
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Observações</Label>
+                  <Textarea
+                    placeholder="Adicione observações sobre o pedido..."
+                    value={observacoes}
+                    onChange={e => setObservacoes(e.target.value)}
+                    className="min-h-[100px] resize-none mt-1 text-sm"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Tab: Resumo (Visualização) */}
+            <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-4">
+              <div className="space-y-4">
+                {/* Cards de resumo */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200/50">
+                    <div className="flex items-center gap-1.5 text-orange-600 mb-1">
+                      <Building2 className="h-3.5 w-3.5" />
+                      <span className="text-[10px] font-medium uppercase">Fornecedor</span>
+                    </div>
+                    <p className="font-semibold text-sm truncate">{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
+                  </div>
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200/50">
+                    <div className="flex items-center gap-1.5 text-blue-600 mb-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span className="text-[10px] font-medium uppercase">Entrega</span>
+                    </div>
+                    <p className="font-semibold text-sm">{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
+                  </div>
+                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200/50">
+                    <div className="flex items-center gap-1.5 text-purple-600 mb-1">
+                      <Package className="h-3.5 w-3.5" />
+                      <span className="text-[10px] font-medium uppercase">Itens</span>
+                    </div>
+                    <p className="font-semibold text-sm">{itens.length} produto(s)</p>
+                  </div>
+                  <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 border border-emerald-200/50">
+                    <div className="flex items-center gap-1.5 text-emerald-600 mb-1">
+                      <Truck className="h-3.5 w-3.5" />
+                      <span className="text-[10px] font-medium uppercase">Total</span>
+                    </div>
+                    <p className="font-bold text-sm text-emerald-700">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+
+                {/* Status atual */}
+                <div className="flex items-center justify-center gap-2 py-2">
+                  <CheckCircle className="h-4 w-4 text-gray-400" />
+                  <span className="text-xs text-gray-500">Status atual:</span>
+                  {getStatusBadge(status || pedido?.status || 'pendente')}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <DrawerFooter className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
+            {footerContent}
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // Desktop: Render as Dialog (centered modal)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-[750px] h-[85vh] max-h-[600px] overflow-hidden p-0 gap-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl">
         {/* Header compacto */}
         <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                <ShoppingCart className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <DialogTitle className="text-base font-semibold text-gray-900 dark:text-white">
-                  Gerenciar Pedido
-                </DialogTitle>
-                <DialogDescription className="text-xs text-gray-500 flex items-center gap-2">
-                  #{pedido?.id?.substring(0, 8)} • {getStatusBadge(status || pedido?.status || 'pendente')}
-                </DialogDescription>
-              </div>
-            </div>
+            {headerContent}
             <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8">
               <X className="h-4 w-4" />
             </Button>

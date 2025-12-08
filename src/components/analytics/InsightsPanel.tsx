@@ -1,9 +1,29 @@
+/**
+ * InsightsPanel - AI-powered insights display with mobile carousel
+ * 
+ * Features:
+ * - Swipeable carousel for insight cards on mobile (Requirement 7.2)
+ * - Smooth animations for data updates < 300ms (Requirement 7.5)
+ * - Grouped insights by category
+ * 
+ * @module components/analytics/InsightsPanel
+ */
+
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InsightCard } from "./InsightCard";
 import { Sparkles, RefreshCw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
+import { cn } from "@/lib/utils";
 
 interface Insight {
   id: string;
@@ -21,12 +41,22 @@ interface InsightsPanelProps {
   onGenerate: () => void;
 }
 
+/**
+ * Animation classes for smooth transitions (Requirement 7.5)
+ * All animations use transform/opacity for 60fps performance
+ */
+const ANIMATION_CLASSES = {
+  fadeIn: "animate-in fade-in duration-200",
+  slideUp: "animate-in slide-in-from-bottom-2 duration-200",
+};
+
 export function InsightsPanel({
   insights,
   isGenerating,
   lastGenerated,
   onGenerate,
 }: InsightsPanelProps) {
+  const isMobile = useIsMobile();
   const hasInsights = insights.length > 0;
 
   // Agrupar insights por categoria
@@ -118,22 +148,46 @@ export function InsightsPanel({
       )}
 
       {/* Insights agrupados por categoria */}
+      {/* Mobile: Swipeable carousel (Requirement 7.2), Desktop: Grid */}
       {!isGenerating && hasInsights && (
-        <div className="space-y-8">
+        <div className={cn("space-y-8", ANIMATION_CLASSES.fadeIn)}>
           {Object.entries(categoriaLabels).map(([categoria, label]) => {
             const categoryInsights = groupedInsights[categoria];
             if (!categoryInsights || categoryInsights.length === 0) return null;
 
             return (
-              <div key={categoria} className="space-y-4">
+              <div key={categoria} className={cn("space-y-4", ANIMATION_CLASSES.slideUp)}>
                 <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
                   {label}
                 </h3>
-                <div className="grid gap-4">
-                  {categoryInsights.map((insight) => (
-                    <InsightCard key={insight.id} insight={insight} />
-                  ))}
-                </div>
+                {/* Mobile: Carousel for insights (Requirement 7.2) */}
+                {isMobile && categoryInsights.length > 1 ? (
+                  <Carousel
+                    opts={{
+                      align: "start",
+                      loop: categoryInsights.length > 2,
+                    }}
+                    className="w-full"
+                  >
+                    <CarouselContent className="-ml-2">
+                      {categoryInsights.map((insight) => (
+                        <CarouselItem key={insight.id} className="pl-2 basis-[90%]">
+                          <InsightCard insight={insight} />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <div className="flex justify-center gap-2 mt-3">
+                      <CarouselPrevious className="static translate-y-0 h-8 w-8" />
+                      <CarouselNext className="static translate-y-0 h-8 w-8" />
+                    </div>
+                  </Carousel>
+                ) : (
+                  <div className="grid gap-4">
+                    {categoryInsights.map((insight) => (
+                      <InsightCard key={insight.id} insight={insight} />
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}

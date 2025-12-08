@@ -1,16 +1,28 @@
 /**
  * Utilitários para compressão de imagens em mobile
  * Reduz uso de memória e melhora performance
+ * 
+ * Requirements: 8.5, 17.5
  */
 
 interface CompressionOptions {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
+  /** Maximum file size in bytes. Default: 500KB (512000 bytes) */
+  maxFileSize?: number;
 }
 
+/** Default max file size: 500KB */
+export const DEFAULT_MAX_FILE_SIZE = 500 * 1024; // 500KB
+
 /**
- * Comprime uma imagem para otimizar uso de memória
+ * Compresses an image to a target size with iterative quality reduction
+ * @param file - The image file to compress
+ * @param options - Compression options
+ * @returns Compressed image blob
+ * 
+ * Requirements: 8.5, 17.5
  */
 export async function compressImage(
   file: File,
@@ -20,6 +32,7 @@ export async function compressImage(
     maxWidth = 800,
     maxHeight = 800,
     quality = 0.8,
+    maxFileSize = DEFAULT_MAX_FILE_SIZE,
   } = options;
 
   return new Promise((resolve, reject) => {
@@ -51,18 +64,10 @@ export async function compressImage(
         // Desenhar imagem redimensionada
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Converter para blob
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              resolve(blob);
-            } else {
-              reject(new Error('Failed to compress image'));
-            }
-          },
-          'image/jpeg',
-          quality
-        );
+        // Iteratively reduce quality until file size is under maxFileSize
+        compressToTargetSize(canvas, quality, maxFileSize)
+          .then(resolve)
+          .catch(reject);
       };
 
       img.onerror = () => reject(new Error('Failed to load image'));
@@ -72,6 +77,76 @@ export async function compressImage(
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
+}
+
+/**
+ * Iteratively compresses canvas to target file size
+ * Reduces quality in steps until target size is achieved
+ */
+async function compressToTargetSize(
+  canvas: HTMLCanvasElement,
+  initialQuality: number,
+  maxFileSize: number,
+  minQuality: number = 0.1
+): Promise<Blob> {
+  let quality = initialQuality;
+  let blob: Blob | null = null;
+  
+  // Try up to 10 iterations to reach target size
+  for (let i = 0; i < 10 && quality >= minQuality; i++) {
+    blob = await canvasToBlob(canvas, quality);
+    
+    if (blob.size <= maxFileSize) {
+      return blob;
+    }
+    
+    // Reduce quality by 10% for next iteration
+    quality -= 0.1;
+  }
+  
+  // If still too large, try reducing dimensions
+  if (blob && blob.size > maxFileSize) {
+    const scaledCanvas = scaleCanvas(canvas, 0.75);
+    return compressToTargetSize(scaledCanvas, initialQuality, maxFileSize, minQuality);
+  }
+  
+  // Return best effort result
+  return blob || canvasToBlob(canvas, minQuality);
+}
+
+/**
+ * Converts canvas to blob with specified quality
+ */
+function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to compress image'));
+        }
+      },
+      'image/jpeg',
+      quality
+    );
+  });
+}
+
+/**
+ * Scales a canvas by a given factor
+ */
+function scaleCanvas(canvas: HTMLCanvasElement, scale: number): HTMLCanvasElement {
+  const scaledCanvas = document.createElement('canvas');
+  scaledCanvas.width = Math.floor(canvas.width * scale);
+  scaledCanvas.height = Math.floor(canvas.height * scale);
+  
+  const ctx = scaledCanvas.getContext('2d');
+  if (ctx) {
+    ctx.drawImage(canvas, 0, 0, scaledCanvas.width, scaledCanvas.height);
+  }
+  
+  return scaledCanvas;
 }
 
 /**
@@ -106,4 +181,64 @@ export function revokePreviewUrls(urls: string[]) {
       console.warn('Failed to revoke URL:', error);
     }
   });
+}
+
+/**
+ * Compresses an image for upload, ensuring it's under 500KB
+ * This is the main function to use before uploading images
+ * 
+ * @param file - The image file to compress
+ * @returns Compressed file ready for upload
+ * 
+ * Requirements: 8.5, 17.5
+ */
+export async function compressImageForUpload(file: File): Promise<File> {
+  // If file is already small enough, return as-is
+  if (file.size <= DEFAULT_MAX_FILE_SIZE) {
+    return file;
+  }
+
+  try {
+    const compressed = await compressImage(file, {
+      maxWidth: 1200,
+      maxHeight: 1200,
+      quality: 0.85,
+      maxFileSize: DEFAULT_MAX_FILE_SIZE,
+    });
+
+    // Create a new File from the Blob
+    const compressedFile = new File(
+      [compressed],
+      file.name.replace(/\.[^.]+$/, '.jpg'),
+      { type: 'image/jpeg' }
+    );
+
+    return compressedFile;
+  } catch (error) {
+    console.error('Failed to compress image for upload:', error);
+    // Return original file if compression fails
+    return file;
+  }
+}
+
+/**
+ * Checks if a file needs compression based on size
+ */
+export function needsCompression(file: File): boolean {
+  return file.size > DEFAULT_MAX_FILE_SIZE;
+}
+
+/**
+ * Gets compression info for display to user
+ */
+export function getCompressionInfo(originalSize: number, compressedSize: number): {
+  originalSizeKB: number;
+  compressedSizeKB: number;
+  savedPercent: number;
+} {
+  const originalSizeKB = Math.round(originalSize / 1024);
+  const compressedSizeKB = Math.round(compressedSize / 1024);
+  const savedPercent = Math.round((1 - compressedSize / originalSize) * 100);
+  
+  return { originalSizeKB, compressedSizeKB, savedPercent };
 }

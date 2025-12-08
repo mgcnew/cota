@@ -81,6 +81,9 @@ export function CorporateGroupManager() {
                     value={newGroupName}
                     onChange={(e) => setNewGroupName(e.target.value)}
                     placeholder="Ex: Grupo Empresarial ABC"
+                    inputMode="text"
+                    autoComplete="organization"
+                    className="min-h-[44px]"
                   />
                 </div>
                 <div className="space-y-2">
@@ -90,6 +93,8 @@ export function CorporateGroupManager() {
                     value={newGroupDescription}
                     onChange={(e) => setNewGroupDescription(e.target.value)}
                     placeholder="Descreva seu grupo corporativo..."
+                    inputMode="text"
+                    className="min-h-[88px]"
                   />
                 </div>
                 <Button onClick={handleCreateGroup} disabled={!newGroupName}>
@@ -133,6 +138,9 @@ export function CorporateGroupManager() {
               id="edit-name"
               defaultValue={group.name}
               onChange={(e) => setEditName(e.target.value)}
+              inputMode="text"
+              autoComplete="organization"
+              className="min-h-[44px]"
             />
           </div>
           <div className="space-y-2">
@@ -141,9 +149,11 @@ export function CorporateGroupManager() {
               id="edit-description"
               defaultValue={group.description || ""}
               onChange={(e) => setEditDescription(e.target.value)}
+              inputMode="text"
+              className="min-h-[88px]"
             />
           </div>
-          <Button onClick={handleUpdateGroup}>
+          <Button onClick={handleUpdateGroup} className="min-h-[44px]">
             <Save className="h-4 w-4 mr-2" />
             Salvar Alterações
           </Button>

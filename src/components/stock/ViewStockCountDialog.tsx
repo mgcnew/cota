@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Download, Share2, MapPin, Loader2, Plus, Package, CheckCircle2, FileText, Edit2, Trash2, ClipboardList, Search } from "lucide-react";
+import { Download, Share2, MapPin, Loader2, Plus, Package, CheckCircle2, FileText, Edit2, Trash2, ClipboardList, Search, WifiOff, RefreshCw } from "lucide-react";
 import jsPDF from "jspdf";
 import { useStockCounts } from "@/hooks/useStockCounts";
 import { useStockCountItems } from "@/hooks/useStockCountItems";
 import { useStockSectors } from "@/hooks/useStockSectors";
+import { useOfflineQueue } from "@/hooks/useOfflineQueue";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -39,6 +40,8 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
   const { sectors, activeSectors, createSector } = useStockSectors();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  // Offline queue for unstable connections - Requirements: 15.4
+  const { online, pendingCount, isSyncing, queueAdd, syncPendingOperations } = useOfflineQueue();
 
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([]);
   const [searchResults, setSearchResults] = useState<OrderProduct[]>([]);
@@ -53,6 +56,9 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
   const [newSectorName, setNewSectorName] = useState("");
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editQty, setEditQty] = useState(0);
+  // Loading states for immediate visual feedback - Requirements: 15.3
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const count = stockCountId ? stockCounts.find((c) => c.id === stockCountId) : null;
   const canEdit = count?.status === "pendente" || count?.status === "em_andamento";
@@ -208,6 +214,20 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
       toast({ title: "Preencha todos os campos", variant: "destructive" });
       return;
     }
+    const savedQuantity = quantity; // Save for toast message
+    setIsSaving(true);
+    
+    const itemData = {
+      stock_count_id: stockCountId,
+      order_item_id: selectedProduct.id,
+      product_id: selectedProduct.product_id,
+      product_name: selectedProduct.product_name,
+      sector_id: selectedSector,
+      quantity_ordered: selectedProduct.quantity,
+      quantity_existing: 0,
+      quantity_counted: quantity,
+    };
+    
     try {
       const existing = items.find(
         (i) =>
@@ -215,29 +235,59 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
             i.product_id === selectedProduct.product_id) &&
           i.sector_id === selectedSector
       );
+      
+      // If offline, queue the operation - Requirements: 15.4
+      if (!online) {
+        if (existing) {
+          queueAdd("stock_count_items", {
+            ...itemData,
+            id: existing.id,
+            quantity_counted: (existing.quantity_counted || 0) + quantity,
+          });
+        } else {
+          queueAdd("stock_count_items", itemData);
+        }
+        setQuantity(0);
+        setSelectedSector("");
+        toast({ 
+          title: "📱 Salvo localmente", 
+          description: `${savedQuantity} unidades serão sincronizadas quando online`,
+        });
+        return;
+      }
+      
+      // Online - save directly
       if (existing) {
         await updateItem.mutateAsync({
           id: existing.id,
           quantity_counted: (existing.quantity_counted || 0) + quantity,
         });
       } else {
-        await supabase.from("stock_count_items").insert({
-          stock_count_id: stockCountId,
-          order_item_id: selectedProduct.id,
-          product_id: selectedProduct.product_id,
-          product_name: selectedProduct.product_name,
-          sector_id: selectedSector,
-          quantity_ordered: selectedProduct.quantity,
-          quantity_existing: 0,
-          quantity_counted: quantity,
-        });
+        await supabase.from("stock_count_items").insert(itemData);
         queryClient.invalidateQueries({ queryKey: ["stock-count-items", stockCountId] });
       }
       setQuantity(0);
       setSelectedSector("");
-      toast({ title: "Quantidade adicionada" });
+      // Immediate visual feedback - Requirements: 15.3
+      toast({ 
+        title: "✓ Quantidade adicionada", 
+        description: `${savedQuantity} unidades registradas com sucesso`,
+      });
     } catch (e: any) {
-      toast({ title: "Erro", description: e.message, variant: "destructive" });
+      // If network error, queue for later - Requirements: 15.4
+      if (e.message?.includes('network') || e.message?.includes('fetch')) {
+        queueAdd("stock_count_items", itemData);
+        setQuantity(0);
+        setSelectedSector("");
+        toast({ 
+          title: "📱 Salvo localmente", 
+          description: "Conexão instável. Dados serão sincronizados automaticamente.",
+        });
+      } else {
+        toast({ title: "Erro ao salvar", description: e.message, variant: "destructive" });
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -247,7 +297,11 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
     setSelectedProduct(null);
     setSelectedSector("");
     setQuantity(0);
-    toast({ title: "Produto salvo" });
+    // Immediate visual feedback - Requirements: 15.3
+    toast({ 
+      title: "✓ Produto confirmado", 
+      description: "Contagem do produto salva com sucesso",
+    });
   };
 
   // Criar setor
@@ -269,9 +323,13 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
       await updateItem.mutateAsync({ id: editingItemId, quantity_counted: editQty });
       queryClient.invalidateQueries({ queryKey: ["stock-count-items", stockCountId] });
       setEditingItemId(null);
-      toast({ title: "Atualizado" });
+      // Immediate visual feedback - Requirements: 15.3
+      toast({ 
+        title: "✓ Quantidade atualizada", 
+        description: `Alterado para ${editQty} unidades`,
+      });
     } catch (e: any) {
-      toast({ title: "Erro", description: e.message, variant: "destructive" });
+      toast({ title: "Erro ao atualizar", description: e.message, variant: "destructive" });
     }
   };
 
@@ -281,9 +339,13 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
     try {
       await supabase.from("stock_count_items").delete().eq("id", id);
       queryClient.invalidateQueries({ queryKey: ["stock-count-items", stockCountId] });
-      toast({ title: "Removido" });
+      // Immediate visual feedback - Requirements: 15.3
+      toast({ 
+        title: "✓ Item removido", 
+        description: "Quantidade excluída da contagem",
+      });
     } catch (e: any) {
-      toast({ title: "Erro", description: e.message, variant: "destructive" });
+      toast({ title: "Erro ao remover", description: e.message, variant: "destructive" });
     }
   };
 
@@ -358,13 +420,20 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
             <DialogTitle className="text-white text-lg flex items-center gap-2">
               <ClipboardList className="w-5 h-5" />
               {(count as any)?.order?.supplier_name || "Contagem Livre"}
+              {/* Offline indicator - Requirements: 15.4 */}
+              {!online && (
+                <Badge variant="secondary" className="ml-2 bg-yellow-500/20 text-yellow-100 border-yellow-400/50">
+                  <WifiOff className="w-3 h-3 mr-1" />
+                  Offline
+                </Badge>
+              )}
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-orange-100 mt-1">
             {format(new Date(count.created_at), "dd/MM/yyyy", { locale: ptBR })}
             {count.notes && ` • ${count.notes}`}
           </p>
-          <div className="flex gap-2 mt-3">
+          <div className="flex flex-wrap gap-2 mt-3">
             <Button size="sm" variant="secondary" onClick={() => setShowSummary(true)} disabled={summaryData.length === 0}>
               <FileText className="w-4 h-4 mr-1" /> Resumo
             </Button>
@@ -374,6 +443,23 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
             <Button size="sm" variant="secondary" onClick={handleWhatsApp} disabled={summaryData.length === 0}>
               <Share2 className="w-4 h-4 mr-1" /> WhatsApp
             </Button>
+            {/* Sync button when there are pending operations - Requirements: 15.4 */}
+            {pendingCount > 0 && online && (
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                onClick={syncPendingOperations}
+                disabled={isSyncing}
+                className="bg-green-500/20 hover:bg-green-500/30 text-green-100"
+              >
+                {isSyncing ? (
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-1" />
+                )}
+                Sincronizar ({pendingCount})
+              </Button>
+            )}
           </div>
         </div>
 
@@ -536,16 +622,29 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                             <Plus className="w-4 h-4" />
                           </Button>
                         </div>
+                        {/* Quantity input optimized for scanner/mobile - Requirements: 15.1, 15.2 */}
                         <div className="flex gap-2">
                           <Input
                             type="number"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             placeholder="Quantidade"
                             value={quantity || ""}
                             onChange={(e) => setQuantity(Number(e.target.value))}
-                            className="flex-1"
+                            className="flex-1 h-12 text-lg font-semibold text-center"
+                            autoFocus
+                            disabled={isSaving}
                           />
-                          <Button onClick={handleAddQty} disabled={!selectedSector || quantity <= 0}>
-                            Adicionar
+                          <Button 
+                            onClick={handleAddQty} 
+                            disabled={!selectedSector || quantity <= 0 || isSaving}
+                            className="h-12 min-w-[100px] min-h-[44px] touch-manipulation"
+                          >
+                            {isSaving ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              "Adicionar"
+                            )}
                           </Button>
                         </div>
                       </div>
@@ -572,16 +671,20 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                               <div className="flex items-center gap-2">
                                 {editingItemId === sq.id ? (
                                   <>
+                                    {/* Edit quantity input optimized for mobile - Requirements: 15.1, 15.2 */}
                                     <Input
                                       type="number"
+                                      inputMode="numeric"
+                                      pattern="[0-9]*"
                                       value={editQty}
                                       onChange={(e) => setEditQty(Number(e.target.value))}
-                                      className="w-20 h-8"
+                                      className="w-24 h-10 text-center font-semibold"
+                                      autoFocus
                                     />
-                                    <Button size="sm" onClick={handleSaveEdit}>
+                                    <Button size="sm" onClick={handleSaveEdit} className="h-10 min-h-[44px] touch-manipulation">
                                       Salvar
                                     </Button>
-                                    <Button size="sm" variant="ghost" onClick={() => setEditingItemId(null)}>
+                                    <Button size="sm" variant="ghost" onClick={() => setEditingItemId(null)} className="h-10 min-h-[44px] touch-manipulation">
                                       Cancelar
                                     </Button>
                                   </>
@@ -590,24 +693,25 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                                     <span className="font-medium">{sq.qty} un</span>
                                     {canEdit && (
                                       <>
+                                        {/* Touch-optimized action buttons - min 44x44px - Requirements: 15.2 */}
                                         <Button
                                           size="icon"
                                           variant="ghost"
-                                          className="h-7 w-7"
+                                          className="h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation"
                                           onClick={() => {
                                             setEditingItemId(sq.id);
                                             setEditQty(sq.qty);
                                           }}
                                         >
-                                          <Edit2 className="w-3 h-3" />
+                                          <Edit2 className="w-4 h-4" />
                                         </Button>
                                         <Button
                                           size="icon"
                                           variant="ghost"
-                                          className="h-7 w-7 text-red-500"
+                                          className="h-11 w-11 min-h-[44px] min-w-[44px] text-red-500 touch-manipulation"
                                           onClick={() => handleDeleteItem(sq.id)}
                                         >
-                                          <Trash2 className="w-3 h-3" />
+                                          <Trash2 className="w-4 h-4" />
                                         </Button>
                                       </>
                                     )}

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { usePagination } from "@/hooks/usePagination";
 
 import { 
   ShoppingCart, Plus, Truck, CheckCircle, Clock, XCircle, Trash2, 
-  Loader2, DollarSign, Package, Building2, Calendar, MoreVertical, CircleDot 
+  DollarSign, Package, Building2, Calendar, MoreVertical, CircleDot 
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
@@ -24,10 +24,17 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
+import { InfiniteScroll } from "@/components/responsive/InfiniteScroll";
+import { PedidosSkeleton, MobileOrderCard, OrderData } from "@/components/pedidos";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+// Batch size for infinite scroll (Requirements: 5.3)
+const BATCH_SIZE = 10;
 
 export default function Pedidos() {
+  const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
-  const { paginate } = usePagination<any>({ initialItemsPerPage: 10 });
+  const { paginate } = usePagination<any>({ initialItemsPerPage: BATCH_SIZE });
 
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -37,6 +44,11 @@ export default function Pedidos() {
 
   const hasLoadedOnce = useRef(false);
   const [showLoading, setShowLoading] = useState(true);
+  
+  // Infinite scroll state for mobile
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
 
   useEffect(() => {
     if (!isLoading) {
@@ -48,10 +60,10 @@ export default function Pedidos() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedPedido, setSelectedPedido] = useState<any>(null);
+  const [selectedPedido, setSelectedPedido] = useState<OrderData | null>(null);
 
-  // Formatar os pedidos
-  const pedidos = useMemo(() => {
+  // Format orders data
+  const pedidos = useMemo((): OrderData[] => {
     return pedidosDataArray.map(order => ({
       id: order.id,
       fornecedor: order.supplier_name,
@@ -87,13 +99,12 @@ export default function Pedidos() {
   const handleEditPedido = () => refetch();
   const handleDeletePedido = () => refetch();
 
-
-
   const getStatusIcon = (status: string) => {
     const icons = { pendente: Clock, processando: Clock, confirmado: CheckCircle, entregue: Truck, cancelado: XCircle };
     const Icon = icons[status as keyof typeof icons] || Clock;
     return <Icon className="h-4 w-4" />;
   };
+
 
   const filteredPedidos = useMemo(() => {
     return pedidos.filter(pedido => {
@@ -105,9 +116,33 @@ export default function Pedidos() {
     });
   }, [pedidos, debouncedSearchTerm, statusFilter]);
 
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE);
+  }, [debouncedSearchTerm, statusFilter]);
+
+  // Infinite scroll: visible items for mobile
+  const visiblePedidos = useMemo(() => {
+    return filteredPedidos.slice(0, visibleCount);
+  }, [filteredPedidos, visibleCount]);
+
+  const hasMoreItems = visibleCount < filteredPedidos.length;
+
+  // Load more items for infinite scroll (Requirements: 5.3)
+  const loadMoreItems = useCallback(() => {
+    if (isLoadingMore || !hasMoreItems) return;
+    
+    setIsLoadingMore(true);
+    // Simulate async loading for smooth UX
+    setTimeout(() => {
+      setVisibleCount(prev => Math.min(prev + BATCH_SIZE, filteredPedidos.length));
+      setIsLoadingMore(false);
+    }, 100);
+  }, [isLoadingMore, hasMoreItems, filteredPedidos.length]);
+
   const paginatedData = paginate(filteredPedidos);
 
-  // Estatísticas
+  // Statistics
   const stats = useMemo(() => {
     const pedidosAtivos = pedidos.filter(p => p.status === "pendente" || p.status === "processando");
     const pedidosEntregues = pedidos.filter(p => p.status === "entregue");
@@ -137,168 +172,143 @@ export default function Pedidos() {
     };
   }, [pedidos]);
 
+  // Handlers for MobileOrderCard (memoized to prevent re-renders)
+  const handleManagePedido = useCallback((pedido: OrderData) => {
+    setSelectedPedido(pedido);
+    setPedidoDialogOpen(true);
+  }, []);
+
+  const handleDeletePedidoClick = useCallback((pedido: OrderData) => {
+    setSelectedPedido(pedido);
+    setDeleteDialogOpen(true);
+  }, []);
+
 
   return (
     <PageWrapper>
       <div className="page-container">
-        {/* MetricCards padronizados com ResponsiveGrid */}
-        <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6 overflow-visible">
-          <MetricCard
-            title="Pedidos Ativos"
-            value={stats.pedidosAtivos}
-            icon={Clock}
-            variant="warning"
-            trend={{
-              value: `${stats.percentualAtivos}%`,
-              label: "do total",
-              type: stats.percentualAtivos > 50 ? "positive" : "neutral"
-            }}
-          />
-          <MetricCard
-            title="Entregues"
-            value={stats.pedidosEntregues}
-            icon={Truck}
-            variant="success"
-            trend={{
-              value: `${stats.taxaEntrega}%`,
-              label: "taxa de entrega",
-              type: stats.taxaEntrega > 70 ? "positive" : "neutral"
-            }}
-          />
-          <MetricCard
-            title="Valor Total"
-            value={stats.totalValueFormatado}
-            icon={DollarSign}
-            variant="info"
-            trend={{
-              value: stats.valorMedioFormatado,
-              label: "média por pedido",
-              type: "neutral"
-            }}
-          />
-          <MetricCard
-            title="Total de Itens"
-            value={stats.totalItens}
-            icon={Package}
-            variant="default"
-            trend={{
-              value: `${stats.totalPedidos}`,
-              label: "pedidos",
-              type: "neutral"
-            }}
-          />
-        </ResponsiveGrid>
-
-        {/* PageHeader */}
-        <PageHeader
-          title="Pedidos"
-          description="Gerencie seus pedidos de compra"
-          icon={ShoppingCart}
-          actions={
-            <div className="flex items-center gap-2">
-              <ViewToggle view={viewMode} onViewChange={setViewMode} />
-              <Button
-                onClick={() => setAddDialogOpen(true)}
-                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Pedido
-              </Button>
-            </div>
-          }
-        >
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
-            <div className="flex-shrink-0">
-              <ExpandableSearch
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="Buscar pedidos..."
-                accentColor="orange"
-                expandedWidth="w-64"
-              />
-            </div>
-            <select 
-              value={statusFilter} 
-              onChange={e => setStatusFilter(e.target.value as any)} 
-              className="h-10 bg-white/85 dark:bg-gray-900/60 border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-orange-300/70 focus:border-orange-400 rounded-xl px-3 text-gray-900 dark:text-gray-100"
-            >
-              <option value="all">Todos os Status</option>
-              <option value="pendente">Pendentes</option>
-              <option value="processando">Processando</option>
-              <option value="confirmado">Confirmados</option>
-              <option value="entregue">Entregues</option>
-              <option value="cancelado">Cancelados</option>
-            </select>
-          </div>
-        </PageHeader>
-
+        {/* Show skeleton while loading (Requirements: 5.1) */}
         {showLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
+          <PedidosSkeleton itemCount={6} />
         ) : (
           <>
+            {/* MetricCards with ResponsiveGrid */}
+            <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6 overflow-visible">
+              <MetricCard
+                title="Pedidos Ativos"
+                value={stats.pedidosAtivos}
+                icon={Clock}
+                variant="warning"
+                trend={{
+                  value: `${stats.percentualAtivos}%`,
+                  label: "do total",
+                  type: stats.percentualAtivos > 50 ? "positive" : "neutral"
+                }}
+              />
+              <MetricCard
+                title="Entregues"
+                value={stats.pedidosEntregues}
+                icon={Truck}
+                variant="success"
+                trend={{
+                  value: `${stats.taxaEntrega}%`,
+                  label: "taxa de entrega",
+                  type: stats.taxaEntrega > 70 ? "positive" : "neutral"
+                }}
+              />
+              <MetricCard
+                title="Valor Total"
+                value={stats.totalValueFormatado}
+                icon={DollarSign}
+                variant="info"
+                trend={{
+                  value: stats.valorMedioFormatado,
+                  label: "média por pedido",
+                  type: "neutral"
+                }}
+              />
+              <MetricCard
+                title="Total de Itens"
+                value={stats.totalItens}
+                icon={Package}
+                variant="default"
+                trend={{
+                  value: `${stats.totalPedidos}`,
+                  label: "pedidos",
+                  type: "neutral"
+                }}
+              />
+            </ResponsiveGrid>
+
+            {/* PageHeader */}
+            <PageHeader
+              title="Pedidos"
+              description="Gerencie seus pedidos de compra"
+              icon={ShoppingCart}
+              actions={
+                <div className="flex items-center gap-2">
+                  <ViewToggle view={viewMode} onViewChange={setViewMode} />
+                  <Button
+                    onClick={() => setAddDialogOpen(true)}
+                    className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-10 rounded-xl touch-target"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Pedido
+                  </Button>
+                </div>
+              }
+            >
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
+                <div className="flex-shrink-0">
+                  <ExpandableSearch
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    placeholder="Buscar pedidos..."
+                    accentColor="orange"
+                    expandedWidth="w-64"
+                  />
+                </div>
+                <select 
+                  value={statusFilter} 
+                  onChange={e => setStatusFilter(e.target.value as any)} 
+                  className="h-10 bg-white/85 dark:bg-gray-900/60 border-2 border-gray-200/60 dark:border-gray-700/70 hover:border-orange-300/70 focus:border-orange-400 rounded-xl px-3 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="all">Todos os Status</option>
+                  <option value="pendente">Pendentes</option>
+                  <option value="processando">Processando</option>
+                  <option value="confirmado">Confirmados</option>
+                  <option value="entregue">Entregues</option>
+                  <option value="cancelado">Cancelados</option>
+                </select>
+              </div>
+            </PageHeader>
+
+
             {viewMode === "table" ? (
               <Card className="border-0 bg-transparent">
                 <CardContent className="p-0">
-                  {/* Mobile Cards View */}
-                  <div className="md:hidden space-y-3 p-2">
-                    {paginatedData.items.map((pedido) => (
-                      <div 
-                        key={pedido.id} 
-                        className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm"
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 border border-orange-200/50">
-                              {getStatusIcon(pedido.status)}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{capitalize(abbreviateSupplierName(pedido.fornecedor, 25))}</p>
-                              <p className="text-xs text-muted-foreground font-mono">#{pedido.id.substring(0, 8)}</p>
-                            </div>
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setPedidoDialogOpen(true); }}>
-                                <ShoppingCart className="h-4 w-4 mr-2" /> Gerenciar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setDeleteDialogOpen(true); }} className="text-red-600">
-                                <Trash2 className="h-4 w-4 mr-2" /> Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 mb-3">
-                          <StatusBadge status={pedido.status} />
-                          <span className="text-xs text-muted-foreground">{pedido.dataPedido}</span>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-3 text-xs">
-                          <div className="flex items-center gap-2">
-                            <Package className="h-3.5 w-3.5 text-orange-600" />
-                            <span className="text-gray-500 dark:text-gray-400">Itens:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white">{pedido.itens}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Truck className="h-3.5 w-3.5 text-blue-600" />
-                            <span className="text-gray-500 dark:text-gray-400">Entrega:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white">{pedido.dataEntrega || '-'}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30 flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">Valor Total</span>
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">{pedido.total}</span>
-                        </div>
+                  {/* Mobile Cards View with Infinite Scroll (Requirements: 5.2, 5.3) */}
+                  <div className="md:hidden">
+                    <InfiniteScroll
+                      hasMore={hasMoreItems}
+                      loadMore={loadMoreItems}
+                      isLoading={isLoadingMore}
+                      threshold={200}
+                      loadingText="Carregando mais pedidos..."
+                      showEndMessage={filteredPedidos.length > BATCH_SIZE}
+                      endText="Todos os pedidos carregados"
+                    >
+                      <div className="space-y-3 p-2">
+                        {visiblePedidos.map((pedido) => (
+                          <MobileOrderCard
+                            key={pedido.id}
+                            pedido={pedido}
+                            onManage={handleManagePedido}
+                            onDelete={handleDeletePedidoClick}
+                          />
+                        ))}
                       </div>
-                    ))}
+                    </InfiniteScroll>
                   </div>
 
                   {/* Desktop Table View */}
@@ -346,7 +356,7 @@ export default function Pedidos() {
                         {paginatedData.items.map((pedido) => (
                           <TableRow key={pedido.id} className="group border-none">
                             <TableCell colSpan={7} className="px-1 py-3">
-                              <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:border-orange-300/60 dark:hover:border-orange-700/50">
+                              <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:border-orange-300/60 dark:hover:border-orange-700/50 transition-colors duration-150">
                                 <div className="w-[15%] flex items-center gap-3 pr-4">
                                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center border border-orange-200/50">
                                     <ShoppingCart className="h-4 w-4 text-orange-600" />
@@ -369,7 +379,7 @@ export default function Pedidos() {
                                 </div>
                                 <div className="hidden lg:block w-[18%] px-2">
                                   <div className="text-sm truncate max-w-[150px]">
-                                    {capitalize(pedido.produtos[0])}
+                                    {pedido.produtos[0] ? capitalize(pedido.produtos[0]) : '-'}
                                     {pedido.produtos.length > 1 && <span className="text-muted-foreground"> +{pedido.produtos.length - 1}</span>}
                                   </div>
                                   <div className="text-xs text-muted-foreground mt-1">{pedido.produtos.length} produto{pedido.produtos.length !== 1 ? 's' : ''}</div>
@@ -381,6 +391,7 @@ export default function Pedidos() {
                                   </div>
                                   <div className="text-xs text-muted-foreground">Entrega prevista</div>
                                 </div>
+                                {/* StatusBadge - Requirements: 5.4 */}
                                 <div className="w-[12%] px-2 flex justify-center"><StatusBadge status={pedido.status} /></div>
                                 <div className="w-[12%] px-2 text-center">
                                   <div className="font-bold text-emerald-600 text-base">{pedido.total}</div>
@@ -391,17 +402,17 @@ export default function Pedidos() {
                                       <Button 
                                         variant="ghost" 
                                         size="icon" 
-                                        className="h-8 w-8 text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 group-hover:scale-110"
+                                        className="h-8 w-8 text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-150"
                                       >
                                         <MoreVertical className="h-4 w-4" />
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-40">
-                                      <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setPedidoDialogOpen(true); }} className="cursor-pointer">
+                                      <DropdownMenuItem onClick={() => handleManagePedido(pedido)} className="cursor-pointer">
                                         <ShoppingCart className="h-4 w-4 mr-2" />
                                         Gerenciar Pedido
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setDeleteDialogOpen(true); }} className="cursor-pointer text-destructive">
+                                      <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="cursor-pointer text-destructive">
                                         <Trash2 className="h-4 w-4 mr-2" />
                                         Excluir
                                       </DropdownMenuItem>
@@ -415,8 +426,9 @@ export default function Pedidos() {
                       </tbody>
                     </Table>
                   </div>
-                  {/* Pagination */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
+
+                  {/* Pagination - Desktop only */}
+                  <div className="hidden md:block border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                       <span className="text-xs text-muted-foreground order-2 sm:order-1">
                         {(paginatedData.pagination.startIndex || 0) + 1}-{paginatedData.pagination.endIndex || 0} de {paginatedData.pagination.totalItems}
@@ -425,7 +437,7 @@ export default function Pedidos() {
                         <DataPagination
                           currentPage={paginatedData.pagination.currentPage}
                           totalPages={paginatedData.pagination.totalPages}
-                          itemsPerPage={paginatedData.pagination.itemsPerPage || 10}
+                          itemsPerPage={paginatedData.pagination.itemsPerPage || BATCH_SIZE}
                           totalItems={paginatedData.pagination.totalItems}
                           onPageChange={paginatedData.pagination.goToPage}
                           onItemsPerPageChange={paginatedData.pagination.setItemsPerPage || (() => {})}
@@ -438,6 +450,7 @@ export default function Pedidos() {
                 </CardContent>
               </Card>
             ) : (
+              /* Grid View */
               <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 {paginatedData.items.map((pedido) => {
                   const getStatusColors = (status: string) => {
@@ -466,20 +479,21 @@ export default function Pedidos() {
                               <CardTitle className="text-sm font-bold truncate" title={pedido.fornecedor}>
                                 {capitalize(abbreviateSupplierName(pedido.fornecedor, 25))}
                               </CardTitle>
+                              {/* StatusBadge - Requirements: 5.4 */}
                               <div className="flex items-center gap-2 mt-1"><StatusBadge status={pedido.status} /></div>
                             </div>
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full">
+                              <Button variant="ghost" size="sm" className="h-10 w-10 rounded-full touch-target">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setPedidoDialogOpen(true); }}>
+                              <DropdownMenuItem onClick={() => handleManagePedido(pedido)} className="min-h-[44px]">
                                 <ShoppingCart className="h-4 w-4 mr-2" />Gerenciar Pedido
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => { setSelectedPedido(pedido); setDeleteDialogOpen(true); }} className="text-destructive">
+                              <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="text-destructive min-h-[44px]">
                                 <Trash2 className="h-4 w-4 mr-2" />Excluir
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -529,7 +543,7 @@ export default function Pedidos() {
           </>
         )}
 
-        {/* Dialogs */}
+        {/* Dialogs - Requirements: 5.5 (ResponsiveModal pattern used in PedidoDialog) */}
         <AddPedidoDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={handleAddPedido} />
         {selectedPedido && (
           <PedidoDialog open={pedidoDialogOpen} onOpenChange={setPedidoDialogOpen} pedido={selectedPedido} onEdit={handleEditPedido} />

@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,8 @@ import { usePagination } from "@/hooks/usePagination";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
+import { VirtualList } from "@/components/responsive/VirtualList";
+import { FornecedoresSkeleton, ExpandableSupplierCard } from "@/components/suppliers";
 
 // Import dialogs directly for better UX (no loading delay)
 import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
@@ -60,10 +63,15 @@ type SupplierFormData = {
   status: "active" | "inactive" | "pending";
 };
 
+// Virtualization threshold for supplier list
+const VIRTUALIZATION_THRESHOLD = 15;
+
 export default function Fornecedores() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading } = useAuth();
   const { canViewSensitiveData } = useUserRole();
+  const { isMobile } = useBreakpoint();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
@@ -73,13 +81,25 @@ export default function Fornecedores() {
     initialItemsPerPage: 10
   });
 
-  const [searchQuery, setSearchQuery] = useState("");
+  // Initialize filters from URL params for persistence (Requirement 4.4)
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('search') || "");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "pending">(() => {
+    const status = searchParams.get('status');
+    return (status === 'active' || status === 'inactive' || status === 'pending') ? status : 'all';
+  });
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
   const addSupplierRef = useRef<HTMLButtonElement>(null);
   const importSuppliersRef = useRef<HTMLButtonElement>(null);
+
+  // Persist filters to URL (Requirement 4.4)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedSearchQuery) params.set('search', debouncedSearchQuery);
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    setSearchParams(params, { replace: true });
+  }, [debouncedSearchQuery, statusFilter, setSearchParams]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -106,7 +126,7 @@ export default function Fornecedores() {
     invalidateCache();
   };
 
-  // Função para gerar mensagem personalizada do WhatsApp (memoizada)
+  // Optimized WhatsApp message generator (memoized) - Requirement 4.3
   const generateWhatsAppMessage = useCallback((supplierName: string, contactName: string) => {
     const currentHour = new Date().getHours();
     let greeting = "";
@@ -121,7 +141,7 @@ export default function Fornecedores() {
     return encodeURIComponent(message);
   }, []);
 
-  // Função para abrir WhatsApp (memoizada)
+  // Optimized WhatsApp handler with < 100ms response (Requirement 4.3)
   const openWhatsApp = useCallback((supplier: Supplier) => {
     if (!canViewSensitiveData) {
       toast({
@@ -141,7 +161,7 @@ export default function Fornecedores() {
       return;
     }
 
-    // Remove caracteres não numéricos do telefone
+    // Remove non-numeric characters from phone
     const cleanPhone = supplier.phone.replace(/\D/g, '');
     const message = generateWhatsAppMessage(supplier.name, supplier.contact);
     const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${message}`;
@@ -166,8 +186,6 @@ export default function Fornecedores() {
   }, [suppliers, debouncedSearchQuery, statusFilter]);
 
   const paginatedData = paginate(filteredSuppliers);
-
-
 
   const renderNumericRating = useCallback((rating: number) => (
     <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
@@ -196,32 +214,27 @@ export default function Fornecedores() {
     }, 0);
     const activeQuotesTotal = suppliers.reduce((sum, s) => sum + ((s as any).activeQuotes || 0), 0);
 
-    // Distribuição por status
     const porStatus = {
       active: suppliers.filter(s => s.status === "active").length,
       inactive: suppliers.filter(s => s.status === "inactive").length,
       pending: suppliers.filter(s => s.status === "pending").length
     };
 
-    // Percentual de fornecedores ativos
     const percentualAtivos = suppliers.length > 0
       ? Math.round((porStatus.active / suppliers.length) * 100)
       : 0;
 
-    // Limite médio por fornecedor ativo
     const limiteMedioPorAtivo = porStatus.active > 0
       ? (totalLimit / porStatus.active).toFixed(1)
       : "0.0";
 
-    // Média de cotações por fornecedor
     const fornecedoresComCotacoes = suppliers.filter(s => ((s as any).activeQuotes || 0) > 0 || ((s as any).totalQuotes || 0) > 0);
     const totalQuotes = suppliers.reduce((sum, s) => sum + ((s as any).totalQuotes || 0), 0);
     const mediaCotacoesPorFornecedor = fornecedoresComCotacoes.length > 0
       ? (totalQuotes / fornecedoresComCotacoes.length).toFixed(1)
       : "0.0";
 
-    // Distribuição de cotações por fornecedor (para o mini gráfico)
-    const distribuicaoCotacoes = [0, 0, 0, 0, 0, 0, 0]; // 7 barras
+    const distribuicaoCotacoes = [0, 0, 0, 0, 0, 0, 0];
     suppliers.forEach(s => {
       const quotes = s.activeQuotes;
       if (quotes === 0) distribuicaoCotacoes[0]++;
@@ -247,17 +260,36 @@ export default function Fornecedores() {
     };
   }, [suppliers]);
 
+  // Show skeleton during initial load (Requirement 4.1)
   if (loading || suppliersLoading) {
-    return <div className="flex items-center justify-center h-screen">
-      <div className="text-center">Carregando...</div>
-    </div>;
+    return (
+      <PageWrapper>
+        <div className="page-container">
+          <FornecedoresSkeleton />
+        </div>
+      </PageWrapper>
+    );
   }
+
+  // Render mobile card with VirtualList for lists > 15 items (Requirement 4.5)
+  const renderMobileSupplierCard = (supplier: Supplier, index: number, style: React.CSSProperties) => (
+    <div style={style} className="pb-3">
+      <ExpandableSupplierCard
+        supplier={supplier}
+        onEdit={setEditingSupplier}
+        onDelete={setDeletingSupplier}
+        onWhatsApp={openWhatsApp}
+        renderRating={renderNumericRating}
+      />
+    </div>
+  );
 
   return (
     <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
+          {/* Metrics Grid - Above the fold priority (Requirement 4.1) */}
           <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6">
             <MetricCard
               title="Fornecedores"
@@ -438,68 +470,31 @@ export default function Fornecedores() {
           ) : (
             <Card className="border-0 bg-transparent">
               <CardContent className="p-0">
-                {/* Mobile Cards View */}
-                <div className="md:hidden space-y-3 p-2">
-                  {paginatedData.items.map(supplier => (
-                    <div 
-                      key={supplier.id} 
-                      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm"
-                    >
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <Building2 className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{capitalize(supplier.name)}</p>
-                            <p className="text-xs text-muted-foreground truncate">{capitalize(supplier.contact)}</p>
-                          </div>
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                              <Edit className="h-4 w-4 mr-2" /> Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openWhatsApp(supplier)} className="text-green-600">
-                              <MessageCircle className="h-4 w-4 mr-2" /> WhatsApp
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => setDeletingSupplier(supplier)} className="text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" /> Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 mb-3">
-                        <StatusBadge status={supplier.status} />
-                        {renderNumericRating(supplier.rating)}
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-3 text-xs">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-3.5 w-3.5 text-green-600" />
-                          <span className="text-gray-500 dark:text-gray-400">Limite:</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">{supplier.limit}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-3.5 w-3.5 text-blue-600" />
-                          <span className="text-gray-500 dark:text-gray-400">Cotações:</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">{supplier.activeQuotes}/{supplier.totalQuotes}</span>
-                        </div>
-                        <div className="flex items-center gap-2 col-span-2">
-                          <TrendingUp className="h-3.5 w-3.5 text-purple-600" />
-                          <span className="text-gray-500 dark:text-gray-400">Preço Médio:</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">{supplier.avgPrice}</span>
-                        </div>
-                      </div>
+                {/* Mobile Cards View with Expandable Details and Virtualization (Requirements 4.2, 4.5) */}
+                <div className="md:hidden">
+                  {paginatedData.items.length > VIRTUALIZATION_THRESHOLD ? (
+                    <VirtualList
+                      items={paginatedData.items}
+                      itemHeight={180}
+                      threshold={VIRTUALIZATION_THRESHOLD}
+                      height={600}
+                      renderItem={renderMobileSupplierCard}
+                      className="p-2"
+                    />
+                  ) : (
+                    <div className="space-y-3 p-2">
+                      {paginatedData.items.map(supplier => (
+                        <ExpandableSupplierCard
+                          key={supplier.id}
+                          supplier={supplier}
+                          onEdit={setEditingSupplier}
+                          onDelete={setDeletingSupplier}
+                          onWhatsApp={openWhatsApp}
+                          renderRating={renderNumericRating}
+                        />
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
 
                 {/* Desktop Table View */}
@@ -610,7 +605,7 @@ export default function Fornecedores() {
                     </TableBody>
                   </Table>
                 </div>
-                
+
                 {/* Pagination */}
                 <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3">

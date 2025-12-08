@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { format, isToday, isYesterday, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +20,9 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
-import { History, Search, Filter, Eye, Download, Calendar, TrendingUp, TrendingDown, FileText, ShoppingCart, Building2, X, Loader2, Activity, Clock, DollarSign } from "lucide-react";
+import { InfiniteScroll } from "@/components/responsive/InfiniteScroll";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { History, Search, Filter, Eye, Download, Calendar, TrendingUp, FileText, ShoppingCart, Building2, X, Loader2, DollarSign, ChevronDown, ChevronRight } from "lucide-react";
 
 export default function Historico() {
   const {
@@ -45,6 +48,45 @@ export default function Historico() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [historico, setHistorico] = useState<any[]>([]);
+  // State for collapsible date sections - Requirements: 14.1, 14.2
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  
+  // Infinite scroll state - Requirements: 14.3
+  const [displayedItems, setDisplayedItems] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const ITEMS_PER_BATCH = 10;
+  
+  // Check if mobile for infinite scroll vs pagination
+  const { isMobile } = useBreakpoint();
+
+  // Toggle section collapse state
+  const toggleSection = (dateKey: string) => {
+    setCollapsedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(dateKey)) {
+        newSet.delete(dateKey);
+      } else {
+        newSet.add(dateKey);
+      }
+      return newSet;
+    });
+  };
+
+  // Helper to get relative date label for mobile - Requirements: 14.5
+  const getRelativeDateLabel = (dateStr: string): string => {
+    const [dataPart] = dateStr.split(' ');
+    const [dia, mes, ano] = dataPart.split('/');
+    const date = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+    
+    if (isToday(date)) return "Hoje";
+    if (isYesterday(date)) return "Ontem";
+    
+    const daysDiff = differenceInDays(new Date(), date);
+    if (daysDiff <= 7) return `há ${daysDiff} dias`;
+    
+    return format(date, "dd 'de' MMMM", { locale: ptBR });
+  };
 
   useEffect(() => {
     if (user) {
@@ -336,8 +378,57 @@ export default function Historico() {
     return matchesSearch && matchesTipo && matchesUsuario && matchesValorMin && matchesValorMax && matchesEconomia && matchesDataInicio && matchesDataFim;
   });
 
-  // Aplicar paginação aos dados filtrados
+  // Aplicar paginação aos dados filtrados (for desktop)
   const paginatedData = paginate(filteredHistorico);
+
+  // Load more items for infinite scroll - Requirements: 14.3
+  const loadMoreItems = useCallback(() => {
+    if (isLoadingMore || !hasMore) return;
+    
+    setIsLoadingMore(true);
+    
+    // Simulate async loading for smooth UX
+    setTimeout(() => {
+      const currentLength = displayedItems.length;
+      const nextItems = filteredHistorico.slice(currentLength, currentLength + ITEMS_PER_BATCH);
+      
+      if (nextItems.length > 0) {
+        setDisplayedItems(prev => [...prev, ...nextItems]);
+      }
+      
+      if (currentLength + nextItems.length >= filteredHistorico.length) {
+        setHasMore(false);
+      }
+      
+      setIsLoadingMore(false);
+    }, 300);
+  }, [displayedItems.length, filteredHistorico, hasMore, isLoadingMore]);
+
+  // Reset displayed items when filters change
+  useEffect(() => {
+    if (isMobile) {
+      setDisplayedItems(filteredHistorico.slice(0, ITEMS_PER_BATCH));
+      setHasMore(filteredHistorico.length > ITEMS_PER_BATCH);
+    }
+  }, [filteredHistorico, isMobile]);
+
+  // Items to display - use infinite scroll on mobile, pagination on desktop
+  const itemsToDisplay = isMobile ? displayedItems : paginatedData.items;
+
+  // Group items by date for collapsible sections - Requirements: 14.1, 14.2
+  const groupedByDate = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    
+    itemsToDisplay.forEach(item => {
+      const [dataPart] = item.data.split(' ');
+      if (!groups[dataPart]) {
+        groups[dataPart] = [];
+      }
+      groups[dataPart].push(item);
+    });
+    
+    return groups;
+  }, [itemsToDisplay]);
 
   // Estatísticas do histórico
   const stats = {
@@ -652,64 +743,118 @@ export default function Historico() {
         </CardContent>
       </Card>
 
-      {/* Histórico List com Paginação */}
+      {/* Histórico List com Paginação/Infinite Scroll */}
       <Card className="bg-white dark:bg-[#1C1F26] border border-gray-300/80 dark:border-gray-700/30 shadow-sm dark:shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Atividades Recentes</span>
             <Badge variant="outline" className="text-xs">
-              {filteredHistorico.length > 0 ? `Página ${paginatedData.pagination.currentPage} de ${paginatedData.pagination.totalPages}` : "Sem dados"}
+              {/* Show different info for mobile (infinite scroll) vs desktop (pagination) */}
+              {isMobile 
+                ? `${displayedItems.length} de ${filteredHistorico.length}`
+                : filteredHistorico.length > 0 
+                  ? `Página ${paginatedData.pagination.currentPage} de ${paginatedData.pagination.totalPages}` 
+                  : "Sem dados"
+              }
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {paginatedData.items.map(item => {
-            const iconColorClass = item.tipo === "cotacao" ? "text-info" : item.tipo === "pedido" ? "text-warning" : item.tipo === "fornecedor" ? "text-primary" : "text-success";
-            const bgColorClass = item.tipo === "cotacao" ? "bg-info/10" : item.tipo === "pedido" ? "bg-warning/10" : item.tipo === "fornecedor" ? "bg-primary/10" : "bg-success/10";
-            return <div key={item.id} className="group flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700/30 hover:border-primary/50 dark:hover:border-primary/40 bg-white dark:bg-gray-800/30">
-                <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center mt-0.5 flex-shrink-0", bgColorClass)}>
-                  <div className={iconColorClass}>
-                    {getTipoIcon(item.tipo)}
-                  </div>
-                </div>
-                
-                <div className="flex-1 space-y-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                    <span className="font-medium text-foreground text-sm sm:text-base truncate">{item.acao}</span>
-                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                      {getTipoBadge(item.tipo)}
-                      {item.economia && <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-600 dark:border-green-500 text-xs">
-                          -{item.economia}
-                        </Badge>}
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
-                    {item.detalhes}
-                  </p>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-muted-foreground">
-                    <span className="truncate">{item.data}</span>
-                    <span className="truncate">por {item.usuario}</span>
-                    {item.valor && <span className="font-medium text-foreground text-xs sm:text-sm">{item.valor}</span>}
-                  </div>
-                </div>
-                
-                <Button variant="ghost" size="sm" className="hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary transition-colors h-8 w-8 sm:h-9 sm:w-9 p-0 flex-shrink-0" onClick={() => {
-                setSelectedItem(item);
-                setViewDialogOpen(true);
-              }}>
-                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                </Button>
-              </div>;
-          })}
+          {/* Wrap with InfiniteScroll on mobile - Requirements: 14.3 */}
+          <InfiniteScroll
+            hasMore={isMobile && hasMore}
+            loadMore={loadMoreItems}
+            isLoading={isLoadingMore}
+            threshold={200}
+            loadingText="Carregando mais atividades..."
+            showEndMessage={isMobile && !hasMore && displayedItems.length > 0}
+            endText="Todas as atividades foram carregadas"
+          >
+            {/* Collapsible date groups - Requirements: 14.1, 14.2 */}
+            <div className="space-y-4">
+            {Object.entries(groupedByDate).map(([dateKey, items]) => {
+              const isCollapsed = collapsedSections.has(dateKey);
+              const relativeLabel = getRelativeDateLabel(dateKey);
+              
+              return (
+                <Collapsible key={dateKey} open={!isCollapsed} onOpenChange={() => toggleSection(dateKey)}>
+                  {/* Date section header - touch-friendly 44px min height */}
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-h-[44px] touch-manipulation">
+                      <div className="flex items-center gap-2">
+                        {isCollapsed ? (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        {/* Show relative time on mobile, full date on desktop - Requirements: 14.5 */}
+                        <span className="font-medium text-sm sm:hidden">{relativeLabel}</span>
+                        <span className="font-medium text-sm hidden sm:inline">{dateKey}</span>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {items.length} {items.length === 1 ? 'atividade' : 'atividades'}
+                      </Badge>
+                    </button>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent className="mt-2 space-y-2">
+                    {items.map(item => {
+                      const iconColorClass = item.tipo === "cotacao" ? "text-info" : item.tipo === "pedido" ? "text-warning" : item.tipo === "fornecedor" ? "text-primary" : "text-success";
+                      const bgColorClass = item.tipo === "cotacao" ? "bg-info/10" : item.tipo === "pedido" ? "bg-warning/10" : item.tipo === "fornecedor" ? "bg-primary/10" : "bg-success/10";
+                      
+                      return (
+                        <div key={item.id} className="group flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700/30 hover:border-primary/50 dark:hover:border-primary/40 bg-white dark:bg-gray-800/30">
+                          <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center mt-0.5 flex-shrink-0", bgColorClass)}>
+                            <div className={iconColorClass}>
+                              {getTipoIcon(item.tipo)}
+                            </div>
+                          </div>
+                          
+                          <div className="flex-1 space-y-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                              <span className="font-medium text-foreground text-sm sm:text-base truncate">{item.acao}</span>
+                              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                {getTipoBadge(item.tipo)}
+                                {item.economia && <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-600 dark:border-green-500 text-xs">
+                                    -{item.economia}
+                                  </Badge>}
+                              </div>
+                            </div>
+                            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                              {item.detalhes}
+                            </p>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-muted-foreground">
+                              {/* Show only time on mobile since date is in header - Requirements: 14.5 */}
+                              <span className="truncate sm:hidden">{item.data.split(' ')[1]}</span>
+                              <span className="truncate hidden sm:inline">{item.data}</span>
+                              <span className="truncate">por {item.usuario}</span>
+                              {item.valor && <span className="font-medium text-foreground text-xs sm:text-sm">{item.valor}</span>}
+                            </div>
+                          </div>
+                          
+                          <Button variant="ghost" size="sm" className="hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary transition-colors h-11 w-11 min-h-[44px] min-w-[44px] p-0 flex-shrink-0 touch-manipulation" onClick={() => {
+                            setSelectedItem(item);
+                            setViewDialogOpen(true);
+                          }}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
             
             {filteredHistorico.length === 0 && <div className="text-center py-8 text-muted-foreground">
                 Nenhuma atividade encontrada com os filtros aplicados.
               </div>}
-          </div>
+            </div>
+          </InfiniteScroll>
 
-          {/* Componente de Paginação */}
-          {filteredHistorico.length > 0 && (
+          {/* Componente de Paginação - only show on desktop - Requirements: 14.3 */}
+          {!isMobile && filteredHistorico.length > 0 && (
             <div className="mt-4 sm:mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="text-xs text-muted-foreground order-2 sm:order-1">

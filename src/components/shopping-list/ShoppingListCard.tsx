@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import {
   ArrowUp,
   Zap,
   Calendar,
+  Plus,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ShoppingListItem } from "@/hooks/useShoppingList";
@@ -21,6 +23,7 @@ interface ShoppingListCardProps {
   onToggleSelection: (id: string) => void;
   onDelete: (id: string) => Promise<void>;
   onEdit?: (item: ShoppingListItem) => void;
+  onUpdateQuantity?: (id: string, quantity: number) => Promise<void>;
 }
 
 const priorityConfig = {
@@ -60,9 +63,40 @@ export const ShoppingListCard = memo(function ShoppingListCard({
   onToggleSelection,
   onDelete,
   onEdit,
+  onUpdateQuantity,
 }: ShoppingListCardProps) {
   const config = priorityConfig[item.priority];
   const PriorityIcon = config.icon;
+  const [localQuantity, setLocalQuantity] = useState(item.quantity);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Touch-friendly quantity stepper handlers
+  const handleIncrement = async () => {
+    const newQuantity = localQuantity + 1;
+    setLocalQuantity(newQuantity);
+    if (onUpdateQuantity) {
+      setIsUpdating(true);
+      try {
+        await onUpdateQuantity(item.id, newQuantity);
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+  };
+
+  const handleDecrement = async () => {
+    if (localQuantity <= 1) return;
+    const newQuantity = localQuantity - 1;
+    setLocalQuantity(newQuantity);
+    if (onUpdateQuantity) {
+      setIsUpdating(true);
+      try {
+        await onUpdateQuantity(item.id, newQuantity);
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+  };
 
   return (
     <div
@@ -108,14 +142,39 @@ export const ShoppingListCard = memo(function ShoppingListCard({
               </Badge>
             </div>
 
-            {/* Details Grid */}
+            {/* Details Grid with Touch-Friendly Stepper */}
             <div className="grid grid-cols-2 gap-3 mb-3">
+              {/* Touch-friendly quantity stepper - min 44x44px touch targets */}
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-2.5">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Quantidade</p>
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  {item.quantity}{" "}
-                  <span className="text-gray-400 font-normal text-sm">{item.unit}</span>
-                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Quantidade</p>
+                <div className="flex items-center justify-between gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleDecrement}
+                    disabled={localQuantity <= 1 || isUpdating}
+                    className="h-11 w-11 min-w-[44px] min-h-[44px] rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition-transform touch-manipulation"
+                    aria-label="Diminuir quantidade"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <div className="flex-1 text-center">
+                    <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
+                      {localQuantity}
+                    </span>
+                    <span className="text-gray-400 font-normal text-xs ml-1">{item.unit}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleIncrement}
+                    disabled={isUpdating}
+                    className="h-11 w-11 min-w-[44px] min-h-[44px] rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition-transform touch-manipulation"
+                    aria-label="Aumentar quantidade"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-2.5">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Preço Est.</p>
@@ -141,21 +200,22 @@ export const ShoppingListCard = memo(function ShoppingListCard({
               </div>
             )}
 
-            {/* Footer */}
+            {/* Footer - Touch-optimized with min 44px touch targets */}
             <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700/50">
               <div className="flex items-center gap-1.5 text-xs text-gray-400">
                 <Calendar className="w-3 h-3" />
                 {new Date(item.created_at).toLocaleDateString("pt-BR")}
               </div>
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {/* Always visible on mobile for better touch UX */}
+              <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => onEdit?.(item)}
-                  className="h-8 px-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                  className="h-11 min-h-[44px] px-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 active:scale-95 transition-transform touch-manipulation"
                 >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar
+                  <Edit className="h-4 w-4 mr-1.5" />
+                  <span className="hidden sm:inline">Editar</span>
                 </Button>
                 <Button
                   size="sm"
@@ -165,10 +225,10 @@ export const ShoppingListCard = memo(function ShoppingListCard({
                       onDelete(item.id);
                     }
                   }}
-                  className="h-8 px-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                  className="h-11 min-h-[44px] px-3 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 active:scale-95 transition-transform touch-manipulation"
                 >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Remover
+                  <Trash2 className="h-4 w-4 mr-1.5" />
+                  <span className="hidden sm:inline">Remover</span>
                 </Button>
               </div>
             </div>

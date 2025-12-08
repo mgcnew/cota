@@ -178,9 +178,12 @@ export function CompanyUsersManager() {
                       <Input
                         id="email"
                         type="email"
+                        inputMode="email"
+                        autoComplete="email"
                         placeholder="usuario@exemplo.com"
                         value={inviteEmail}
                         onChange={(e) => setInviteEmail(e.target.value)}
+                        className="min-h-[44px]"
                       />
                     </div>
                     <div className="space-y-2">

@@ -1,7 +1,8 @@
-import { memo } from "react";
+import { memo, lazy, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, BarChart3 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   BarChart,
   Bar,
@@ -19,6 +20,9 @@ import {
   ComposedChart,
   Area,
 } from "recharts";
+
+// Lazy load mobile charts for better code splitting
+const MobileCharts = lazy(() => import("./MobileCharts"));
 
 interface Fornecedor {
   fornecedor: string;
@@ -78,18 +82,26 @@ export const PerformanceCharts = memo(function PerformanceCharts({
   tendenciasMensais,
   isLoading = false,
 }: PerformanceChartsProps) {
-  const isMobile = false; // Removida dependência mobile
+  const isMobile = useIsMobile();
   
-  // Componente para mensagem quando gráficos não estão disponíveis no mobile
-  const MobilePlaceholder = ({ title }: { title: string }) => (
-    <div className="flex items-center justify-center h-[250px] sm:h-[300px] text-slate-500">
-      <div className="text-center">
-        <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Use o desktop para visualizar os gráficos</p>
-      </div>
-    </div>
-  );
+  // Mobile: Render simplified charts optimized for small screens (Requirement 6.2)
+  if (isMobile) {
+    return (
+      <Suspense fallback={
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-[150px] w-full" />
+          <Skeleton className="h-[150px] w-full" />
+        </div>
+      }>
+        <MobileCharts
+          performanceFornecedores={performanceFornecedores}
+          tendenciasMensais={tendenciasMensais}
+          isLoading={isLoading}
+        />
+      </Suspense>
+    );
+  }
 
   // Top 5 fornecedores
   const topFornecedores = performanceFornecedores.slice(0, 5);
@@ -243,8 +255,6 @@ export const PerformanceCharts = memo(function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               </div>
-            ) : isMobile ? (
-              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <BarChart data={topFornecedores} layout="vertical" margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
@@ -298,8 +308,6 @@ export const PerformanceCharts = memo(function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
               </div>
-            ) : isMobile ? (
-              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
               <PieChart>
@@ -357,8 +365,6 @@ export const PerformanceCharts = memo(function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
               </div>
-            ) : isMobile ? (
-              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <ComposedChart data={tendenciasMensais} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
@@ -442,8 +448,6 @@ export const PerformanceCharts = memo(function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-green-500" />
               </div>
-            ) : isMobile ? (
-              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <ComposedChart data={tendenciasMensais} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
@@ -527,8 +531,6 @@ export const PerformanceCharts = memo(function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
               </div>
-            ) : isMobile ? (
-              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <BarChart data={taxaRespostaData} margin={{ top: 10, right: 10, left: 0, bottom: 60 }}>
@@ -589,8 +591,6 @@ export const PerformanceCharts = memo(function PerformanceCharts({
               <div className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
               </div>
-            ) : isMobile ? (
-              <MobilePlaceholder title="Gráficos não disponíveis no mobile" />
             ) : (
               <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                 <BarChart data={economiaData} margin={{ top: 10, right: 10, left: 0, bottom: 60 }}>

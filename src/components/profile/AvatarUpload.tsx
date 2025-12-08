@@ -2,6 +2,13 @@ import { useState, useRef } from "react";
 import { Camera, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { 
+  compressImageForUpload, 
+  needsCompression, 
+  getCompressionInfo,
+  DEFAULT_MAX_FILE_SIZE 
+} from "@/utils/imageCompression";
 
 interface AvatarUploadProps {
   currentAvatar?: string | null;
@@ -20,6 +27,7 @@ export function AvatarUpload({
 }: AvatarUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
@@ -27,30 +35,54 @@ export function AvatarUpload({
     if (!validTypes.includes(file.type)) {
       return "Formato inválido. Use JPG, PNG, WEBP ou GIF.";
     }
-    if (file.size > 5 * 1024 * 1024) {
-      return "Arquivo muito grande. Máximo 5MB.";
+    // Allow larger files since we'll compress them
+    if (file.size > 10 * 1024 * 1024) {
+      return "Arquivo muito grande. Máximo 10MB.";
     }
     return null;
   };
 
-  const handleFileChange = (file: File) => {
+  const handleFileChange = async (file: File) => {
     const error = validateFile(file);
     if (error) {
-      alert(error);
+      toast.error(error);
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-    onUpload(file);
+    try {
+      let processedFile = file;
+      
+      // Compress if needed (> 500KB)
+      if (needsCompression(file)) {
+        setIsCompressing(true);
+        const originalSize = file.size;
+        processedFile = await compressImageForUpload(file);
+        const info = getCompressionInfo(originalSize, processedFile.size);
+        
+        toast.success(
+          `Imagem comprimida: ${info.originalSizeKB}KB → ${info.compressedSizeKB}KB (${info.savedPercent}% menor)`
+        );
+      }
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(processedFile);
+      
+      onUpload(processedFile);
+    } catch (err) {
+      console.error('Error processing image:', err);
+      toast.error('Erro ao processar imagem. Tente novamente.');
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) handleFileChange(file);
+    if (file) await handleFileChange(file);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -62,12 +94,14 @@ export function AvatarUpload({
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) handleFileChange(file);
+    if (file) await handleFileChange(file);
   };
+
+  const isProcessing = isUploading || isCompressing;
 
   const displayImage = preview || currentAvatar;
 
@@ -95,9 +129,12 @@ export function AvatarUpload({
           </div>
         )}
         
-        {isUploading && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+        {isProcessing && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-black/50 gap-1">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
+            {isCompressing && (
+              <span className="text-xs text-white">Comprimindo...</span>
+            )}
           </div>
         )}
       </div>
@@ -108,7 +145,8 @@ export function AvatarUpload({
           variant="outline"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
+          disabled={isProcessing}
+          className="min-h-[44px] touch-target"
         >
           <Camera className="mr-2 h-4 w-4" />
           {currentAvatar ? "Alterar Foto" : "Adicionar Foto"}
@@ -120,7 +158,8 @@ export function AvatarUpload({
             variant="ghost"
             size="sm"
             onClick={onRemove}
-            disabled={isUploading}
+            disabled={isProcessing}
+            className="min-h-[44px] touch-target"
           >
             <X className="mr-2 h-4 w-4" />
             Remover
@@ -134,11 +173,13 @@ export function AvatarUpload({
         accept="image/jpeg,image/png,image/webp,image/gif"
         className="hidden"
         onChange={handleInputChange}
-        disabled={isUploading}
+        disabled={isProcessing}
       />
 
       <p className="text-xs text-muted-foreground text-center">
-        JPG, PNG, WEBP ou GIF. Máximo 5MB.
+        JPG, PNG, WEBP ou GIF. Máximo 10MB.
+        <br />
+        <span className="text-muted-foreground/70">Imagens serão comprimidas para max 500KB</span>
       </p>
     </div>
   );
