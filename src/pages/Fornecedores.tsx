@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense, memo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { TableActionGroup } from "@/components/ui/table-action-group";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, History, MessageCircle, Star, CircleDot } from "lucide-react";
+import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, History, MessageCircle, Star, CircleDot, Loader2 } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,13 +29,20 @@ import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { VirtualList } from "@/components/responsive/VirtualList";
 import { FornecedoresSkeleton, ExpandableSupplierCard } from "@/components/suppliers";
 
-// Import dialogs directly for better UX (no loading delay)
-import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
-import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
-import DeleteSupplierDialog from "@/components/forms/DeleteSupplierDialog";
-import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
-import { ImportSuppliersDialog } from "@/components/forms/ImportSuppliersDialog";
-import { SupplierQuoteHistoryDialog } from "@/components/forms/SupplierQuoteHistoryDialog";
+// Lazy load dialogs for better initial load performance
+const AddSupplierDialog = lazy(() => import("@/components/forms/AddSupplierDialog"));
+const EditSupplierDialog = lazy(() => import("@/components/forms/EditSupplierDialog"));
+const DeleteSupplierDialog = lazy(() => import("@/components/forms/DeleteSupplierDialog"));
+const AddQuoteDialog = lazy(() => import("@/components/forms/AddQuoteDialog"));
+const ImportSuppliersDialog = lazy(() => import("@/components/forms/ImportSuppliersDialog").then(m => ({ default: m.ImportSuppliersDialog })));
+const SupplierQuoteHistoryDialog = lazy(() => import("@/components/forms/SupplierQuoteHistoryDialog").then(m => ({ default: m.SupplierQuoteHistoryDialog })));
+
+// Dialog loading fallback
+const DialogLoader = () => (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <Loader2 className="h-8 w-8 animate-spin text-white" />
+  </div>
+);
 
 interface Supplier {
   id: string;
@@ -66,7 +73,7 @@ type SupplierFormData = {
 // Virtualization threshold for supplier list
 const VIRTUALIZATION_THRESHOLD = 15;
 
-export default function Fornecedores() {
+function Fornecedores() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading } = useAuth();
@@ -641,31 +648,43 @@ export default function Fornecedores() {
             />
           )}
 
+          {/* Lazy loaded dialogs with Suspense for better performance */}
           {editingSupplier && (
-            <EditSupplierDialog
-              supplier={editingSupplier}
-              open={!!editingSupplier}
-              onOpenChange={open => { if (!open) setEditingSupplier(null); }}
-              onEdit={handleEditSupplier}
-            />
+            <Suspense fallback={<DialogLoader />}>
+              <EditSupplierDialog
+                supplier={editingSupplier}
+                open={!!editingSupplier}
+                onOpenChange={open => { if (!open) setEditingSupplier(null); }}
+                onEdit={handleEditSupplier}
+              />
+            </Suspense>
           )}
 
           {deletingSupplier && (
-            <DeleteSupplierDialog
-              supplier={deletingSupplier}
-              open={!!deletingSupplier}
-              onOpenChange={open => { if (!open) setDeletingSupplier(null); }}
-              onDelete={handleDeleteSupplier}
-            />
+            <Suspense fallback={<DialogLoader />}>
+              <DeleteSupplierDialog
+                supplier={deletingSupplier}
+                open={!!deletingSupplier}
+                onOpenChange={open => { if (!open) setDeletingSupplier(null); }}
+                onDelete={handleDeleteSupplier}
+              />
+            </Suspense>
           )}
 
-          {/* Hidden triggers for dialogs */}
+          {/* Hidden triggers for dialogs - lazy loaded */}
           <div className="hidden">
-            <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
-            <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
+            <Suspense fallback={null}>
+              <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
+            </Suspense>
+            <Suspense fallback={null}>
+              <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
+            </Suspense>
           </div>
         </div>
       </PageWrapper>
     </>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+export default memo(Fornecedores);
