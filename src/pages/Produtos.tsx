@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useCallback, startTransition } from "react";
+import { useState, useEffect, useMemo, useCallback, startTransition, memo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProducts } from "@/hooks/useProducts";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
@@ -12,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useExportCSV } from "@/hooks/useExportCSV";
-import { Package, Plus, Filter, MoreVertical, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download } from "lucide-react";
+import { Package, Plus, Filter, MoreVertical, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download, Loader2 } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
@@ -30,17 +31,40 @@ import { ProductsHeroCard } from "@/components/products/ProductsHeroCard";
 import { ProductsStatusSummary } from "@/components/products/ProductsStatusSummary";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
 
-// Import dialogs directly for better UX (no loading delay)
-import { AddProductDialog } from "@/components/forms/AddProductDialog";
-import { EditProductDialog } from "@/components/forms/EditProductDialog";
-import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
-import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
+// Lazy load dialogs for better initial load performance
+const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
+const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
+const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
+const ImportProductsDialog = lazy(() => import("@/components/forms/ImportProductsDialog").then(m => ({ default: m.ImportProductsDialog })));
 
-export default function Produtos() {
+// Dialog loading fallback
+const DialogLoader = () => (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <Loader2 className="h-8 w-8 animate-spin text-white" />
+  </div>
+);
+
+// Shared utility functions to avoid duplication
+const getProductStatus = (product: Product) => {
+  if (product.quotesCount === 0) return "sem_cotacao";
+  if (product.lastQuotePrice === "R$ 0,00") return "pendente";
+  if (product.quotesCount >= 3) return "ativo";
+  return "cotado";
+};
+
+const getTrendIcon = (trend: "up" | "down" | "stable") => {
+  if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
+  if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
+  return <Minus className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />;
+};
+
+function Produtos() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const isMobile = useIsMobile();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const { paginate } = usePagination<Product>({ initialItemsPerPage: 10 });
+  // Use smaller page size on mobile for faster rendering
+  const { paginate } = usePagination<Product>({ initialItemsPerPage: isMobile ? 8 : 10 });
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -170,18 +194,7 @@ export default function Produtos() {
     };
   }, [safeProducts, safeCategories]);
 
-  const getTrendIcon = useCallback((trend: "up" | "down" | "stable") => {
-    if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
-    if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
-    return <Minus className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />;
-  }, []);
 
-  const getProductStatus = useCallback((product: Product) => {
-    if (product.quotesCount === 0) return "sem_cotacao";
-    if (product.lastQuotePrice === "R$ 0,00") return "pendente";
-    if (product.quotesCount >= 3) return "ativo";
-    return "cotado";
-  }, []);
 
 
 
@@ -579,47 +592,60 @@ export default function Produtos() {
             </CardContent>
           </Card>
 
-          <AddProductDialog
-            onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
-            onCategoryAdded={invalidateCache}
-            open={addDialogOpen}
-            onOpenChange={setAddDialogOpen}
-          />
+          {/* Lazy loaded dialogs with Suspense */}
+          <Suspense fallback={addDialogOpen ? <DialogLoader /> : null}>
+            {addDialogOpen && (
+              <AddProductDialog
+                onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
+                onCategoryAdded={invalidateCache}
+                open={addDialogOpen}
+                onOpenChange={setAddDialogOpen}
+              />
+            )}
+          </Suspense>
 
-          <ImportProductsDialog
-            onProductsImported={() => { invalidateCache(); setImportDialogOpen(false); }}
-            onCategoryAdded={invalidateCache}
-            open={importDialogOpen}
-            onOpenChange={setImportDialogOpen}
-          />
+          <Suspense fallback={importDialogOpen ? <DialogLoader /> : null}>
+            {importDialogOpen && (
+              <ImportProductsDialog
+                onProductsImported={() => { invalidateCache(); setImportDialogOpen(false); }}
+                onCategoryAdded={invalidateCache}
+                open={importDialogOpen}
+                onOpenChange={setImportDialogOpen}
+              />
+            )}
+          </Suspense>
 
-          {editingProduct && (
-            <EditProductDialog
-              product={editingProduct}
-              open={!!editingProduct}
-              onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
-              onProductUpdated={(updatedProduct) => {
-                if (typeof updateProduct === 'function') {
-                  updateProduct({ productId: updatedProduct.id, data: { name: updatedProduct.name, category: updatedProduct.category, unit: updatedProduct.unit, barcode: updatedProduct.barcode } });
-                }
-                setEditingProduct(null);
-              }}
-              onCategoryAdded={invalidateCache}
-              categories={safeCategories}
-            />
-          )}
+          <Suspense fallback={editingProduct ? <DialogLoader /> : null}>
+            {editingProduct && (
+              <EditProductDialog
+                product={editingProduct}
+                open={!!editingProduct}
+                onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
+                onProductUpdated={(updatedProduct) => {
+                  if (typeof updateProduct === 'function') {
+                    updateProduct({ productId: updatedProduct.id, data: { name: updatedProduct.name, category: updatedProduct.category, unit: updatedProduct.unit, barcode: updatedProduct.barcode } });
+                  }
+                  setEditingProduct(null);
+                }}
+                onCategoryAdded={invalidateCache}
+                categories={safeCategories}
+              />
+            )}
+          </Suspense>
 
-          {deletingProduct && (
-            <DeleteProductDialog
-              product={deletingProduct}
-              open={!!deletingProduct}
-              onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
-              onProductDeleted={(id) => {
-                if (typeof deleteProduct === 'function') { deleteProduct(id); }
-                setDeletingProduct(null);
-              }}
-            />
-          )}
+          <Suspense fallback={deletingProduct ? <DialogLoader /> : null}>
+            {deletingProduct && (
+              <DeleteProductDialog
+                product={deletingProduct}
+                open={!!deletingProduct}
+                onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
+                onProductDeleted={(id) => {
+                  if (typeof deleteProduct === 'function') { deleteProduct(id); }
+                  setDeletingProduct(null);
+                }}
+              />
+            )}
+          </Suspense>
 
 
         </div>
@@ -627,3 +653,5 @@ export default function Produtos() {
     </>
   );
 }
+
+export default memo(Produtos);
