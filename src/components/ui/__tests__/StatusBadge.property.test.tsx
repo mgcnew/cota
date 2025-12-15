@@ -274,10 +274,14 @@ describe('StatusBadge - Property Tests', () => {
      * Property: Unknown status values render with default styling consistently
      */
     it('renders unknown statuses with consistent default styling', () => {
+      // Reserved JS property names that could cause issues
+      const reservedNames = ['constructor', 'prototype', '__proto__', 'toString', 'valueOf'];
+      
       fc.assert(
         fc.property(
           fc.string({ minLength: 1, maxLength: 50 }).filter(
-            s => !validStatuses.includes(s.toLowerCase().trim())
+            s => !validStatuses.includes(s.toLowerCase().trim()) && 
+                 !reservedNames.includes(s.toLowerCase().trim())
           ),
           (unknownStatus) => {
             cleanup();

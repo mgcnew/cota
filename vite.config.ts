@@ -33,17 +33,22 @@ export default defineConfig(({ mode }) => ({
          * Manual chunk splitting for better code splitting (Requirements 12.4)
          * Separates heavy libraries into their own chunks for lazy loading
          */
-        manualChunks: {
+        manualChunks: (id) => {
+          // Heavy export libraries - only load when needed
+          if (id.includes('xlsx')) return 'vendor-xlsx';
+          if (id.includes('jspdf')) return 'vendor-pdf';
+          if (id.includes('html2canvas')) return 'vendor-canvas';
+          if (id.includes('framer-motion')) return 'vendor-animation';
           // Recharts library in separate chunk for lazy loading
-          'vendor-charts': ['recharts'],
+          if (id.includes('recharts')) return 'vendor-charts';
           // React core libraries
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          // UI component libraries
-          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-popover'],
+          if (id.includes('react-dom') || id.includes('react-router-dom')) return 'vendor-react';
           // Query and state management
-          'vendor-query': ['@tanstack/react-query'],
+          if (id.includes('@tanstack/react-query')) return 'vendor-query';
           // Date utilities
-          'vendor-date': ['date-fns'],
+          if (id.includes('date-fns')) return 'vendor-date';
+          // UI component libraries - group Radix UI
+          if (id.includes('@radix-ui')) return 'vendor-ui';
         },
       },
     },

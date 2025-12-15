@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -281,15 +281,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
         {/* Content */}
         <div className="flex-1 overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
+          <AnimatedTabContent
+            value={String(currentStep)}
+            activeTab={String(currentStep)}
+            className="h-full"
+          >
               {/* Step 0: Produtos */}
               {currentStep === 0 && (
                 <div className="h-full flex flex-col p-4">
@@ -508,8 +504,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   </div>
                 </div>
               )}
-            </motion.div>
-          </AnimatePresence>
+          </AnimatedTabContent>
         </div>
 
         {/* Footer */}

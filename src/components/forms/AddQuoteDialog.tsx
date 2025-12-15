@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
   Dialog,
@@ -690,15 +690,11 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                 {/* Content Area - Now with more space */}
                 <div className="flex-1 overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeTab}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="h-full"
-                    >
+                  <AnimatedTabContent
+                    value={activeTab}
+                    activeTab={activeTab}
+                    className="h-full"
+                  >
                       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
                         {/* Produtos Tab */}
                         <TabsContent value="produtos" className="h-full m-0">
@@ -1487,8 +1483,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           </ScrollArea>
                         </TabsContent>
                       </Tabs>
-                    </motion.div>
-                  </AnimatePresence>
+                  </AnimatedTabContent>
                 </div>
               </form>
             </Form>

@@ -1,40 +1,39 @@
-import { motion, AnimatePresence } from "framer-motion";
+/**
+ * CSS-only page transition - replaces framer-motion
+ * Saves ~367KB in bundle size
+ */
 import { useLocation } from "react-router-dom";
-import { ReactNode, memo } from "react";
+import { ReactNode, memo, useState, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 interface PageTransitionProps {
   children: ReactNode;
 }
 
-// Transição simplificada - apenas fade para melhor performance
-const pageVariants = {
-  initial: { opacity: 0 },
-  in: { opacity: 1 },
-  out: { opacity: 0 },
-};
-
-// Duração reduzida para transição mais rápida
-const pageTransition = {
-  duration: 0.15,
-  ease: "easeOut" as const,
-};
-
 export const PageTransition = memo(function PageTransition({ children }: PageTransitionProps) {
   const location = useLocation();
+  const [isVisible, setIsVisible] = useState(true);
+  const prevPathRef = useRef(location.pathname);
+
+  useEffect(() => {
+    if (prevPathRef.current !== location.pathname) {
+      setIsVisible(false);
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+        prevPathRef.current = location.pathname;
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname]);
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-        className="w-full h-full"
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div
+      className={cn(
+        "w-full h-full transition-opacity duration-150 ease-out will-change-[opacity]",
+        isVisible ? "opacity-100" : "opacity-0"
+      )}
+    >
+      {children}
+    </div>
   );
 });

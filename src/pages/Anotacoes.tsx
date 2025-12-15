@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useCallback, startTransition } from "react";
-import { motion } from "framer-motion";
+import { CSSSlideIn } from "@/components/ui/css-animation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -335,11 +335,11 @@ export default function Anotacoes() {
               const Icon = config.icon;
 
               return (
-                <motion.div
+                <CSSSlideIn
                   key={note.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.03 }}
+                  direction="up"
+                  duration={200}
+                  delay={index * 30}
                 >
                   <Card className={`${config.color} border-l-4`}>
                     <CardContent className="p-4">
@@ -402,7 +402,7 @@ export default function Anotacoes() {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </CSSSlideIn>
               );
             })}
           </div>

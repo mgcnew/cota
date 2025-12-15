@@ -15,7 +15,7 @@ import { PriceConverter } from "@/components/forms/PriceConverter";
 import ConvertToOrderDialog from "@/components/forms/ConvertToOrderDialog";
 import ConvertToMultipleOrdersDialog, { SupplierOrder } from "@/components/forms/ConvertToMultipleOrdersDialog";
 import { SelectSupplierPerProductDialog } from "@/components/forms/SelectSupplierPerProductDialog";
-import { motion } from "framer-motion";
+import { CSSSlideIn } from "@/components/ui/css-animation";
 import { toast } from "@/hooks/use-toast";
 
 interface QuoteEditViewProps {
@@ -399,11 +399,9 @@ export default function QuoteEditView({
   }, [quote]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.3 }}
+    <CSSSlideIn
+      direction="left"
+      duration={200}
       className="bg-card rounded-lg border shadow-sm"
     >
       {/* Header com botão voltar */}
@@ -855,6 +853,6 @@ export default function QuoteEditView({
           onConfirm={handleConfirmMultipleOrders}
         />
       )}
-    </motion.div>
+    </CSSSlideIn>
   );
 }
