@@ -6,17 +6,8 @@ interface GeminiResponse {
   error?: string;
 }
 
-interface LocucaoHistorico {
-  id: string;
-  prompt: string;
-  resposta: string;
-  timestamp: Date;
-  tipo: string;
-}
-
 export const useGemini = () => {
   const [loading, setLoading] = useState(false);
-  const [historico, setHistorico] = useState<LocucaoHistorico[]>([]);
   const { toast } = useToast();
 
   const generateLocucao = useCallback(async (
@@ -89,7 +80,7 @@ export const useGemini = () => {
         console.error('Erro ao parsear resposta JSON:', jsonError);
         const errorMsg = `Erro ao processar resposta da API (Status: ${response.status})`;
         toast({
-          title: "Erro ao gerar locução",
+          title: "Erro ao gerar conteúdo",
           description: errorMsg,
           variant: "destructive"
         });
@@ -100,7 +91,7 @@ export const useGemini = () => {
         const errorMsg = data?.error?.message || data?.error || `Erro ${response.status}: ${response.statusText}` || 'Erro desconhecido';
         console.error('Erro da API:', data);
         toast({
-          title: "Erro ao gerar locução",
+          title: "Erro ao gerar conteúdo",
           description: errorMsg,
           variant: "destructive"
         });
@@ -121,32 +112,17 @@ export const useGemini = () => {
         return { text: '', error: errorMsg };
       }
 
-      // Adicionar ao histórico
-      const novaLocucao: LocucaoHistorico = {
-        id: Date.now().toString(),
-        prompt,
-        resposta: text,
-        timestamp: new Date(),
-        tipo
-      };
-
-      setHistorico(prev => [novaLocucao, ...prev]);
-
-      // Salvar no localStorage
-      const historicoSalvo = JSON.parse(localStorage.getItem('locucoesHistorico') || '[]');
-      localStorage.setItem('locucoesHistorico', JSON.stringify([novaLocucao, ...historicoSalvo].slice(0, 50)));
-
       toast({
-        title: "Locução gerada!",
-        description: "Sua locução foi criada com sucesso"
+        title: "Conteúdo gerado!",
+        description: "Seu conteúdo foi criado com sucesso"
       });
 
       return { text };
     } catch (error: any) {
-      console.error('Erro ao gerar locução:', error);
+      console.error('Erro ao gerar conteúdo:', error);
       const errorMessage = error.message || 'Erro ao processar requisição';
       toast({
-        title: "Erro ao gerar locução",
+        title: "Erro ao gerar conteúdo",
         description: errorMessage,
         variant: "destructive"
       });
@@ -156,25 +132,8 @@ export const useGemini = () => {
     }
   }, [toast]);
 
-  const carregarHistorico = useCallback(() => {
-    const historicoSalvo = JSON.parse(localStorage.getItem('locucoesHistorico') || '[]');
-    setHistorico(historicoSalvo);
-  }, []);
-
-  const limparHistorico = useCallback(() => {
-    localStorage.removeItem('locucoesHistorico');
-    setHistorico([]);
-    toast({
-      title: "Histórico limpo",
-      description: "Todas as locuções foram removidas"
-    });
-  }, [toast]);
-
   return {
     loading,
-    historico,
-    generateLocucao,
-    carregarHistorico,
-    limparHistorico
+    generateLocucao
   };
 };

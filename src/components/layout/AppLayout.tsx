@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
-import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3, Sparkles, Mic, MessageSquare } from "lucide-react";
+import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3, Sparkles } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -29,8 +29,6 @@ const pageTitles: Record<string, string> = {
   "/dashboard/relatorios": "Relatórios",
   "/dashboard/configuracoes": "Configurações",
   "/dashboard/agente-copywriting": "Agente de Copywriting",
-  "/dashboard/locucoes": "Locuções AI",
-  "/dashboard/whatsapp-mensagens": "WhatsApp em Massa",
   "/dashboard/extra": "Funcionalidades Extra"
 };
 
@@ -48,8 +46,6 @@ const pageIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "/dashboard/relatorios": BarChart3,
   "/dashboard/configuracoes": Settings,
   "/dashboard/agente-copywriting": Sparkles,
-  "/dashboard/locucoes": Mic,
-  "/dashboard/whatsapp-mensagens": MessageSquare,
   "/dashboard/extra": Sparkles,
 };
 

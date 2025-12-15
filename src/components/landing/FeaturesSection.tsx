@@ -70,7 +70,7 @@ const FeaturesSection = memo(function FeaturesSection() {
             <Zap className="h-8 w-8 sm:h-10 sm:w-10 text-yellow-500 mb-2" />
             <CardTitle className="text-base sm:text-lg">Automação Completa</CardTitle>
             <CardDescription className="text-sm">
-              Integração com WhatsApp, locuções com IA e muito mais para economizar tempo
+              Copywriting com IA e muito mais para economizar tempo
             </CardDescription>
           </CardHeader>
         </Card>

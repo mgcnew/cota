@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('xlsx')) return 'vendor-xlsx';
           if (id.includes('jspdf')) return 'vendor-pdf';
           if (id.includes('html2canvas')) return 'vendor-canvas';
-          if (id.includes('framer-motion')) return 'vendor-animation';
+          // framer-motion removed - pages using it were deleted
           // Recharts library in separate chunk for lazy loading
           if (id.includes('recharts')) return 'vendor-charts';
           // React core libraries
