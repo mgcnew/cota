@@ -214,7 +214,7 @@ describe('Touch Target Utilities - Property Tests', () => {
           const validClasses = Object.values(touchTargetClasses);
           expect(validClasses).toContain(className);
           
-          return validClasses.includes(className);
+          return (validClasses as string[]).includes(className);
         }
       ),
       { numRuns: 100 }
