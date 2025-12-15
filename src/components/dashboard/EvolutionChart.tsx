@@ -1,6 +1,6 @@
-import { useMemo, memo, useCallback } from 'react';
+import { useMemo, memo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart3, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
@@ -53,22 +53,38 @@ const LABEL_STYLE = { fontWeight: 600, marginBottom: '4px', color: 'hsl(var(--fo
 export const EvolutionChart = memo(function EvolutionChart({ data, period, onPeriodChange, isLoading }: EvolutionChartProps) {
   const isMobile = useIsMobile();
 
-  const stats = useMemo(() => {
-    if (!data?.length) return { avgCotacoes: 0, avgFornecedores: 0, trendCotacoes: 0, trendFornecedores: 0 };
+  // Memoize all computed values together to reduce re-renders
+  const { stats, chartHeight, dataKey, chartData } = useMemo(() => {
+    const chartHeight = isMobile ? 180 : 280;
+    const dataKey = period === '7d' ? 'day' : 'month';
+    
+    // On mobile, limit data points for better performance
+    const chartData = isMobile && data?.length > 7 ? data.slice(-7) : data;
+    
+    if (!chartData?.length) {
+      return { 
+        stats: { avgCotacoes: 0, avgFornecedores: 0, trendCotacoes: 0, trendFornecedores: 0 },
+        chartHeight,
+        dataKey,
+        chartData: []
+      };
+    }
 
-    const cotacoes = data.map(d => d.cotacoes || 0);
-    const fornecedores = data.map(d => d.fornecedores || 0);
+    const cotacoes = chartData.map((d: any) => d.cotacoes || 0);
+    const fornecedores = chartData.map((d: any) => d.fornecedores || 0);
 
     return {
-      avgCotacoes: cotacoes.reduce((a, b) => a + b, 0) / cotacoes.length,
-      avgFornecedores: fornecedores.reduce((a, b) => a + b, 0) / fornecedores.length,
-      trendCotacoes: calcTrend(cotacoes),
-      trendFornecedores: calcTrend(fornecedores),
+      stats: {
+        avgCotacoes: cotacoes.reduce((a: number, b: number) => a + b, 0) / cotacoes.length,
+        avgFornecedores: fornecedores.reduce((a: number, b: number) => a + b, 0) / fornecedores.length,
+        trendCotacoes: calcTrend(cotacoes),
+        trendFornecedores: calcTrend(fornecedores),
+      },
+      chartHeight,
+      dataKey,
+      chartData
     };
-  }, [data]);
-
-  const chartHeight = useMemo(() => isMobile ? 200 : 280, [isMobile]);
-  const dataKey = useMemo(() => period === '7d' ? 'day' : 'month', [period]);
+  }, [data, isMobile, period]);
 
   return (
     <Card className="col-span-1 lg:col-span-2 bg-card border border-subtle shadow-sm rounded-xl">
@@ -119,20 +135,19 @@ export const EvolutionChart = memo(function EvolutionChart({ data, period, onPer
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={chartHeight}>
-            <LineChart data={data} margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
+            <LineChart data={chartData} margin={{ top: 5, right: isMobile ? 10 : 20, left: isMobile ? 0 : 5, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/30" opacity={0.4} vertical={false} />
-              <XAxis dataKey={dataKey} stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} width={35} />
-              <ReferenceLine y={stats.avgCotacoes} stroke="#7C3AED" strokeDasharray="4 4" strokeWidth={1} strokeOpacity={0.5} />
+              <XAxis dataKey={dataKey} stroke="#9ca3af" fontSize={isMobile ? 10 : 11} tickLine={false} axisLine={false} />
+              <YAxis stroke="#9ca3af" fontSize={isMobile ? 10 : 11} tickLine={false} axisLine={false} width={isMobile ? 28 : 35} />
               <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={LABEL_STYLE} />
-              <Line type="monotone" dataKey="cotacoes" name="Cotações" stroke="#7C3AED" strokeWidth={2.5}
-                dot={{ r: 4, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
-                activeDot={{ r: 6, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
+              <Line type="monotone" dataKey="cotacoes" name="Cotações" stroke="#7C3AED" strokeWidth={isMobile ? 2 : 2.5}
+                dot={isMobile ? false : { r: 4, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 5, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
                 isAnimationActive={false}
               />
-              <Line type="monotone" dataKey="fornecedores" name="Fornecedores" stroke="#22C55E" strokeWidth={2.5}
-                dot={{ r: 4, fill: '#22C55E', strokeWidth: 2, stroke: '#fff' }}
-                activeDot={{ r: 6, fill: '#22C55E', strokeWidth: 2, stroke: '#fff' }}
+              <Line type="monotone" dataKey="fornecedores" name="Fornecedores" stroke="#22C55E" strokeWidth={isMobile ? 2 : 2.5}
+                dot={isMobile ? false : { r: 4, fill: '#22C55E', strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 5, fill: '#22C55E', strokeWidth: 2, stroke: '#fff' }}
                 isAnimationActive={false}
               />
             </LineChart>

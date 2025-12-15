@@ -41,22 +41,38 @@ const tooltipFormatter = (value: number): [string, string] => [formatCurrency(va
 export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodChange, isLoading }: EconomyChartProps) {
   const isMobile = useIsMobile();
 
-  const stats = useMemo(() => {
-    if (!data?.length) return { totalEconomia: 0, trendEconomia: 0 };
+  // Memoize all computed values together to reduce re-renders
+  const { stats, chartHeight, dataKey, chartData } = useMemo(() => {
+    const chartHeight = isMobile ? 180 : 280;
+    const dataKey = period === '7d' ? 'day' : 'month';
+    
+    // On mobile, limit data points for better performance
+    const chartData = isMobile && data?.length > 7 ? data.slice(-7) : data;
+    
+    if (!chartData?.length) {
+      return { 
+        stats: { totalEconomia: 0, trendEconomia: 0 },
+        chartHeight,
+        dataKey,
+        chartData: []
+      };
+    }
 
-    const economias = data.map(d => d.economia || 0);
-    const totalEconomia = economias.reduce((a, b) => a + b, 0);
+    const economias = chartData.map((d: any) => d.economia || 0);
+    const totalEconomia = economias.reduce((a: number, b: number) => a + b, 0);
 
-    const sliceSize = Math.max(1, Math.floor(data.length * 0.3));
-    const firstAvg = economias.slice(0, sliceSize).reduce((a, b) => a + b, 0) / sliceSize;
-    const lastAvg = economias.slice(-sliceSize).reduce((a, b) => a + b, 0) / sliceSize;
+    const sliceSize = Math.max(1, Math.floor(chartData.length * 0.3));
+    const firstAvg = economias.slice(0, sliceSize).reduce((a: number, b: number) => a + b, 0) / sliceSize;
+    const lastAvg = economias.slice(-sliceSize).reduce((a: number, b: number) => a + b, 0) / sliceSize;
     const trendEconomia = firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg) * 100 : 0;
 
-    return { totalEconomia, trendEconomia };
-  }, [data]);
-
-  const chartHeight = useMemo(() => isMobile ? 200 : 280, [isMobile]);
-  const dataKey = useMemo(() => period === '7d' ? 'day' : 'month', [period]);
+    return { 
+      stats: { totalEconomia, trendEconomia },
+      chartHeight,
+      dataKey,
+      chartData
+    };
+  }, [data, isMobile, period]);
 
   return (
     <Card className="bg-card border border-subtle shadow-sm rounded-xl sm:hover:shadow-md sm:transition-shadow sm:duration-150">
@@ -104,7 +120,7 @@ export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodC
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={chartHeight}>
-            <AreaChart data={data} margin={{ top: 5, right: 15, left: -10, bottom: 5 }}>
+            <AreaChart data={chartData} margin={{ top: 5, right: isMobile ? 10 : 15, left: isMobile ? -15 : -10, bottom: 5 }}>
               <defs>
                 <linearGradient id="economyGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
@@ -112,13 +128,13 @@ export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodC
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700/30" opacity={0.4} vertical={false} />
-              <XAxis dataKey={dataKey} stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
+              <XAxis dataKey={dataKey} stroke="#9ca3af" fontSize={isMobile ? 10 : 11} tickLine={false} axisLine={false} />
               <YAxis
                 stroke="#9ca3af"
-                fontSize={10}
+                fontSize={isMobile ? 9 : 10}
                 tickLine={false}
                 axisLine={false}
-                width={85}
+                width={isMobile ? 65 : 85}
                 tickFormatter={(v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               />
               <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={LABEL_STYLE} formatter={tooltipFormatter} />
@@ -127,10 +143,10 @@ export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodC
                 dataKey="economia"
                 name="Economia"
                 stroke="#10b981"
-                strokeWidth={2.5}
+                strokeWidth={isMobile ? 2 : 2.5}
                 fill="url(#economyGradient)"
-                dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
-                activeDot={{ r: 6, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                dot={isMobile ? false : { r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 5, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
                 isAnimationActive={false}
               />
             </AreaChart>

@@ -1,4 +1,4 @@
-import { useMemo, useCallback, Suspense, lazy } from 'react';
+import { useMemo, Suspense, lazy, memo } from 'react';
 import { LayoutDashboard, BarChart3, Users, Target, FileText } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
@@ -9,12 +9,10 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { EconomyHeroCard } from '@/components/dashboard/EconomyHeroCard';
 import { ExecutiveSummary } from '@/components/dashboard/ExecutiveSummary';
 
-// Lazy load chart components for performance
+// Lazy load chart components for performance - only load when visible
 const EvolutionChart = lazy(() => import('@/components/dashboard/EvolutionChart').then(m => ({ default: m.EvolutionChart })));
 const EconomyChart = lazy(() => import('@/components/dashboard/EconomyChart').then(m => ({ default: m.EconomyChart })));
 
-const MONTHS_MAP: Record<string, number> = { '1m': 1, '3m': 3, '6m': 6, '1y': 12 };
-const MONTH_NAMES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 const CHART_COLORS = ['#10b981', '#34d399', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'];
 
 const DEFAULT_METRICS = {
@@ -46,37 +44,31 @@ const getTrend = (value: number, label: string): TrendType => ({
 
 
 
-export default function Dashboard() {
+// Memoized chart skeleton for better perceived performance
+const ChartSkeleton = memo(function ChartSkeleton() {
+  return <PageSkeleton variant="dashboard" sections={1} itemsPerSection={1} />;
+});
+
+function Dashboard() {
   const dashboardData = useDashboard();
   const metrics = dashboardData?.metrics ?? DEFAULT_METRICS;
-  const monthlyData = dashboardData?.monthlyData ?? [];
   const dailyData = dashboardData?.dailyData ?? [];
   const isLoading = dashboardData?.isLoading ?? true;
 
-  const filterDataByPeriod = useCallback((period: string) => {
-    if (period === '7d') return dailyData;
-    const months = MONTHS_MAP[period] || 6;
-    let filtered = monthlyData.slice(-months);
-    if (period === '1y') {
-      filtered = filtered.filter((item: any) => MONTH_NAMES.indexOf(item.month) >= 9);
-    }
-    return filtered;
-  }, [dailyData, monthlyData]);
-
-  // Dados dos gráficos - período fixo 7d para simplicidade
-  const evolutionData = useMemo(() => filterDataByPeriod('7d'), [filterDataByPeriod]);
-  const economyData = useMemo(() => 
-    filterDataByPeriod('7d').map((item, i) => ({ ...item, fill: CHART_COLORS[i % 6] })),
-    [filterDataByPeriod]
-  );
-
-  // Memoizar trends para evitar recálculos
-  const trends = useMemo(() => ({
-    cotacoes: getTrend(metrics.crescimentoCotacoes, 'vs mês anterior'),
-    fornecedores: { value: `${metrics.taxaAtividade}%`, label: 'ativos', type: 'neutral' as const },
-    produtos: { value: `${metrics.competitividadeMedia}%`, label: 'competitividade', type: 'neutral' as const },
-    aprovacao: getTrend(metrics.variacaoTaxaAprovacao, 'vs mês anterior'),
-  }), [metrics.crescimentoCotacoes, metrics.taxaAtividade, metrics.competitividadeMedia, metrics.variacaoTaxaAprovacao]);
+  // Simplified: only use 7d data for charts (most relevant for mobile)
+  const { evolutionData, economyData, trends } = useMemo(() => {
+    const evolutionData = dailyData;
+    const economyData = dailyData.map((item: any, i: number) => ({ ...item, fill: CHART_COLORS[i % 6] }));
+    
+    const trends = {
+      cotacoes: getTrend(metrics.crescimentoCotacoes, 'vs mês anterior'),
+      fornecedores: { value: `${metrics.taxaAtividade}%`, label: 'ativos', type: 'neutral' as const },
+      produtos: { value: `${metrics.competitividadeMedia}%`, label: 'competitividade', type: 'neutral' as const },
+      aprovacao: getTrend(metrics.variacaoTaxaAprovacao, 'vs mês anterior'),
+    };
+    
+    return { evolutionData, economyData, trends };
+  }, [dailyData, metrics.crescimentoCotacoes, metrics.taxaAtividade, metrics.competitividadeMedia, metrics.variacaoTaxaAprovacao]);
 
   return (
     <PageWrapper>
@@ -151,7 +143,7 @@ export default function Dashboard() {
             </section>
 
             {/* Charts - Lazy loaded after metrics */}
-            <Suspense fallback={<PageSkeleton variant="dashboard" sections={2} itemsPerSection={2} />}>
+            <Suspense fallback={<ChartSkeleton />}>
               <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 <EvolutionChart
                   data={evolutionData}
@@ -173,3 +165,5 @@ export default function Dashboard() {
     </PageWrapper>
   );
 }
+
+export default memo(Dashboard);
