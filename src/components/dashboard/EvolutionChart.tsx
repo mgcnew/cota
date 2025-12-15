@@ -115,13 +115,13 @@ export const EvolutionChart = memo(function EvolutionChart({ data, period, onPer
                 <div className="w-2 h-2 rounded-full bg-purple-500" />
                 <span className="text-muted-foreground">Cotações:</span>
                 <span className="font-semibold text-foreground">{Math.round(stats.avgCotacoes)}</span>
-                <TrendIndicator value={stats.trendCotacoes} color="purple" />
+                <TrendIndicator value={stats.trendCotacoes} />
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-500" />
                 <span className="text-muted-foreground">Fornec:</span>
                 <span className="font-semibold text-foreground">{Math.round(stats.avgFornecedores)}</span>
-                <TrendIndicator value={stats.trendFornecedores} color="green" />
+                <TrendIndicator value={stats.trendFornecedores} />
               </div>
             </div>
           )}
