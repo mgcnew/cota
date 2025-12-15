@@ -60,8 +60,6 @@ const APPLICATION_PAGES: PageConfig[] = [
   // Secondary pages
   { name: 'Historico', path: '/dashboard/historico', isPublic: false, priority: 'low' },
   { name: 'Analytics', path: '/dashboard/analytics', isPublic: false, priority: 'low' },
-  { name: 'Extra', path: '/dashboard/extra', isPublic: false, priority: 'low' },
-  { name: 'AgenteCopywriting', path: '/dashboard/agente-copywriting', isPublic: false, priority: 'low' },
   { name: 'Configuracoes', path: '/dashboard/configuracoes', isPublic: false, priority: 'low' },
 ];
 

@@ -40,8 +40,6 @@ const Anotacoes = lazy(() => import("./pages/Anotacoes"));
 const Relatorios = lazy(() => import("./pages/Relatorios"));
 
 // Páginas secundárias - lazy load com prioridade baixa
-const Extra = lazy(() => import("./pages/Extra"));
-const AgenteCopywriting = lazy(() => import("./pages/AgenteCopywriting"));
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 
 // Loading fallback component
@@ -119,8 +117,6 @@ const App = () => {
                   <Route path="historico" element={<Navigate to="/dashboard/relatorios?tab=historico" replace />} />
                   <Route path="relatorios" element={<PageWrapper><Relatorios /></PageWrapper>} />
                   <Route path="analytics" element={<Navigate to="/dashboard/relatorios?tab=analytics" replace />} />
-                  <Route path="extra" element={<PageWrapper><Extra /></PageWrapper>} />
-                  <Route path="agente-copywriting" element={<PageWrapper><AgenteCopywriting /></PageWrapper>} />
                   <Route path="contagem-estoque" element={<PageWrapper><ContagemEstoque /></PageWrapper>} />
                   <Route path="anotacoes" element={<PageWrapper><Anotacoes /></PageWrapper>} />
                   <Route path="lista-compras" element={<PageWrapper><ListaCompras /></PageWrapper>} />

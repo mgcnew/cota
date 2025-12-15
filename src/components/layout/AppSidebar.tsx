@@ -13,7 +13,6 @@ import {
   FileText,
   ShoppingCart,
   BarChart3,
-  Star,
   ClipboardList,
   StickyNote,
   ShoppingBasket,
@@ -84,10 +83,6 @@ const menuCategories: MenuCategory[] = [
   {
     title: "Análises",
     items: [{ title: "Relatórios", url: "/dashboard/relatorios", icon: BarChart3 }]
-  },
-  {
-    title: "Outros",
-    items: [{ title: "Extra", url: "/dashboard/extra", icon: Star }]
   }
 ];
 
