@@ -38,11 +38,10 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('xlsx')) return 'vendor-xlsx';
           if (id.includes('jspdf')) return 'vendor-pdf';
           if (id.includes('html2canvas')) return 'vendor-canvas';
-          // framer-motion removed - pages using it were deleted
           // Recharts library in separate chunk for lazy loading
           if (id.includes('recharts')) return 'vendor-charts';
-          // React core libraries
-          if (id.includes('react-dom') || id.includes('react-router-dom')) return 'vendor-react';
+          // React router in separate chunk (react and react-dom stay in main bundle)
+          if (id.includes('react-router-dom')) return 'vendor-router';
           // Query and state management
           if (id.includes('@tanstack/react-query')) return 'vendor-query';
           // Date utilities
