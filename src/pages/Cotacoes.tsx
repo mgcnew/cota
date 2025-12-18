@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, startTransition } from "react";
+import { useState, useMemo, useEffect, useCallback, startTransition, memo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Quote } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -25,15 +26,19 @@ import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { useToast } from "@/hooks/use-toast";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import AddQuoteDialog from "@/components/forms/AddQuoteDialog";
-import DeleteQuoteDialog from "@/components/forms/DeleteQuoteDialog";
-import ResumoCotacaoDialog from "@/components/forms/ResumoCotacaoDialog";
-import GerenciarCotacaoDialog from "@/components/forms/GerenciarCotacaoDialog";
+import {
+  AddQuoteDialogLazy,
+  DeleteQuoteDialogLazy,
+  ResumoCotacaoDialogLazy,
+  GerenciarCotacaoDialogLazy
+} from "@/components/forms/LazyDialogs";
 
-export default function Cotacoes() {
+function Cotacoes() {
   const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
-  const { paginate } = usePagination<Quote>({ initialItemsPerPage: 10 });
+  const { isMobile } = useBreakpoint();
+  // Reduce items per page on mobile for better performance
+  const { paginate } = usePagination<Quote>({ initialItemsPerPage: isMobile ? 8 : 10 });
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -167,7 +172,7 @@ export default function Cotacoes() {
         </PageHeader>
 
         {viewMode === "grid" ? (
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-200">
+          <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:animate-in md:fade-in md:duration-200">
             {paginatedData.items.map((cotacao, index) => {
               const colors: Record<string, string> = { ativa: "border-primary/30 from-card to-primary/5", pendente: "border-warning/30 from-card to-warning/5", concluida: "border-success/30 from-card to-success/5" };
               const color = colors[cotacao.status] || colors.pendente;
@@ -238,17 +243,17 @@ export default function Cotacoes() {
             })}
           </div>
         ) : (
-          <Card className="border-0 bg-transparent animate-in fade-in duration-200">
+          <Card className="border-0 bg-transparent md:animate-in md:fade-in md:duration-200">
             <CardContent className="p-0">
               {/* Mobile Cards View */}
-              <div className="md:hidden space-y-3 p-2">
+              <div className="md:hidden space-y-2 p-1">
                 {paginatedData.items.map((cotacao, index) => {
                   const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
                   const { percentual } = calcularEconomiaCotacao(cotacao);
                   return (
                     <div 
                       key={cotacao.id} 
-                      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm"
+                      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-3 shadow-sm"
                     >
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -507,11 +512,13 @@ export default function Cotacoes() {
           </Card>
         )}
         {filteredCotacoes.length === 0 && !isLoading && <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/80"><CardContent className="p-12 text-center"><FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" /><h3 className="text-lg font-semibold mb-2">Nenhuma cotação encontrada</h3><p className="text-gray-600 mb-4">Tente ajustar os filtros ou crie uma nova cotação</p></CardContent></Card>}
-        {addDialogOpen && <AddQuoteDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={() => { refetch(); setAddDialogOpen(false); }} trigger={<div />} />}
-        {viewDialogOpen && selectedQuote && <ResumoCotacaoDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} quote={selectedQuote} />}
-        {gerenciarDialogOpen && selectedQuote && <GerenciarCotacaoDialog open={gerenciarDialogOpen} onOpenChange={setGerenciarDialogOpen} quote={selectedQuote} onUpdateSupplierProductValue={(params) => updateSupplierProductValue(params)} onConvertToOrder={(quoteId, orders) => convertToOrder({ quoteId, orders })} onAddQuoteItem={addQuoteItem} onRemoveQuoteItem={removeQuoteItem} onAddQuoteSupplier={addQuoteSupplier} onRemoveQuoteSupplier={removeQuoteSupplier} availableProducts={availableProducts} availableSuppliers={availableSuppliers} onRefresh={refetch} isUpdating={isUpdating} />}
-        {deleteDialogOpen && selectedQuote && <DeleteQuoteDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} quote={selectedQuote} onDelete={(id) => { deleteQuote(id); setDeleteDialogOpen(false); }} trigger={<div />} />}
+        <AddQuoteDialogLazy open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={() => { refetch(); setAddDialogOpen(false); }} trigger={<div />} />
+        <ResumoCotacaoDialogLazy open={viewDialogOpen} onOpenChange={setViewDialogOpen} quote={selectedQuote} />
+        <GerenciarCotacaoDialogLazy open={gerenciarDialogOpen} onOpenChange={setGerenciarDialogOpen} quote={selectedQuote} onUpdateSupplierProductValue={(params) => updateSupplierProductValue(params)} onConvertToOrder={(quoteId, orders) => convertToOrder({ quoteId, orders })} onAddQuoteItem={addQuoteItem} onRemoveQuoteItem={removeQuoteItem} onAddQuoteSupplier={addQuoteSupplier} onRemoveQuoteSupplier={removeQuoteSupplier} availableProducts={availableProducts} availableSuppliers={availableSuppliers} onRefresh={refetch} isUpdating={isUpdating} />
+        <DeleteQuoteDialogLazy open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} quote={selectedQuote} onDelete={(id) => { deleteQuote(id); setDeleteDialogOpen(false); }} trigger={<div />} />
       </div>
     </PageWrapper>
   );
 }
+
+export default memo(Cotacoes);
