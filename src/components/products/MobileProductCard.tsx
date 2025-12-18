@@ -4,9 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import { 
-  Package, Edit, Trash2, MoreVertical, History,
-  DollarSign, ClipboardList, CircleDot, Barcode, Building2,
-  TrendingUp, TrendingDown, Minus
+  Package, Edit, Trash2, MoreVertical,
+  ClipboardList, TrendingUp, TrendingDown, Minus
 } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { 
@@ -55,35 +54,37 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
   return (
     <div 
       style={style}
-      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-3 shadow-sm"
+      className="bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/30 p-2.5"
     >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          {/* Product image with LazyImage - touch target 44x44px */}
-          <div className="w-11 h-11 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+      {/* Header compacto */}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {product.image_url ? (
               <LazyImage 
                 src={product.image_url} 
                 alt={product.name} 
-                className="w-11 h-11 rounded-xl object-cover"
+                className="w-9 h-9 rounded-lg object-cover"
                 showSkeleton={true}
-                fallback={<Package className="h-5 w-5 text-orange-600 dark:text-orange-400" />}
+                fallback={<Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />}
               />
             ) : (
-              <Package className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{capitalize(product.name)}</p>
-            <Badge variant="secondary" className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary text-xs mt-1">
-              {capitalize(product.category)}
-            </Badge>
+            <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{capitalize(product.name)}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px] px-1.5 py-0">
+                {capitalize(product.category)}
+              </Badge>
+              <StatusBadge status={getProductStatus(product)} />
+            </div>
           </div>
         </div>
-        {/* Dropdown menu with 44x44px touch target */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-11 w-11 flex-shrink-0 touch-target">
+            <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0">
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -94,47 +95,24 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
             <DropdownMenuItem onClick={handleDelete} className="text-red-600 min-h-[44px]">
               <Trash2 className="h-4 w-4 mr-2" /> Excluir
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="min-h-[44px]">
-              <History className="h-4 w-4 mr-2" /> Histórico
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
       
-      {/* Product details grid with touch-optimized spacing */}
-      <div className="grid grid-cols-2 gap-3 text-xs">
-        <div className="flex items-center gap-2 min-h-[28px]">
-          <DollarSign className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-          <span className="text-gray-500 dark:text-gray-400">Preço:</span>
+      {/* Info compacta em linha */}
+      <div className="flex items-center justify-between text-xs px-1">
+        <div className="flex items-center gap-1">
           <span className="font-semibold text-green-700 dark:text-green-400">{product.lastQuotePrice}</span>
           {getTrendIcon(product.trend)}
         </div>
-        <div className="flex items-center gap-2 min-h-[28px]">
-          <ClipboardList className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />
-          <span className="text-gray-500 dark:text-gray-400">Cotações:</span>
-          <span className="font-semibold text-blue-700 dark:text-blue-400">{product.quotesCount || 0}</span>
+        <div className="flex items-center gap-1 text-gray-500">
+          <ClipboardList className="h-3 w-3" />
+          <span>{product.quotesCount || 0} cotações</span>
         </div>
-        <div className="flex items-center gap-2 min-h-[28px]">
-          <CircleDot className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
-          <span className="text-gray-500 dark:text-gray-400">Status:</span>
-          <StatusBadge status={getProductStatus(product)} />
-        </div>
-        <div className="flex items-center gap-2 min-h-[28px]">
-          <Barcode className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
-          <span className="text-gray-500 dark:text-gray-400">Código:</span>
-          <span className="text-gray-700 dark:text-gray-300 truncate">{product.barcode || "N/A"}</span>
-        </div>
+        {product.bestSupplier && (
+          <span className="text-gray-600 dark:text-gray-400 truncate max-w-[80px]">{capitalize(product.bestSupplier)}</span>
+        )}
       </div>
-      
-      {/* Supplier info */}
-      {product.bestSupplier && (
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30 flex items-center gap-2 text-xs min-h-[28px]">
-          <Building2 className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
-          <span className="text-gray-500 dark:text-gray-400">Fornecedor:</span>
-          <span className="text-gray-700 dark:text-gray-300 truncate">{capitalize(product.bestSupplier)}</span>
-        </div>
-      )}
     </div>
   );
 }, (prevProps, nextProps) => {

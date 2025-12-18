@@ -279,8 +279,8 @@ function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Hero Section - Destaque Executivo */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+          {/* Hero Section - Simplificado no mobile */}
+          <section className="hidden md:grid md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
             <ProductsHeroCard
               totalProducts={stats.totalProducts}
               productsWithPrice={stats.productsWithPrices}
@@ -297,21 +297,21 @@ function Produtos() {
             />
           </section>
 
-          {/* Cards de Métricas Secundárias */}
-          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6">
+          {/* Mobile: Métricas compactas essenciais */}
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-3 md:mb-6">
             <MetricCard
-              title="Categorias"
-              value={stats.totalCategories}
-              icon={Filter}
+              title="Produtos"
+              value={stats.totalProducts}
+              icon={Package}
               variant="warning"
               trend={{
-                value: stats.topCategoria ? stats.topCategoria.count.toString() : "0",
-                label: stats.topCategoria ? `em ${capitalize(stats.topCategoria.nome)}` : "produtos",
+                value: `${stats.percentualComCotacao}%`,
+                label: "cotados",
                 type: "neutral"
               }}
             />
             <MetricCard
-              title="Cotações Ativas"
+              title="Cotações"
               value={typeof stats.activeQuotes === 'number' ? stats.activeQuotes.toLocaleString('pt-BR') : 0}
               icon={FileText}
               variant="info"
@@ -326,22 +326,14 @@ function Produtos() {
               value={stats.averageValue}
               icon={Scale}
               variant="success"
-              trend={{
-                value: stats.productsWithPrices.toString(),
-                label: "com preço",
-                type: "neutral"
-              }}
+              className="hidden md:block"
             />
             <MetricCard
-              title="Economia Potencial"
+              title="Economia"
               value={`${stats.percentualEconomiaMedia}%`}
               icon={TrendingUp}
               variant="success"
-              trend={{
-                value: `R$ ${stats.economiaMediaPorProduto}`,
-                label: "por produto",
-                type: "positive"
-              }}
+              className="hidden md:block"
             />
           </ResponsiveGrid>
 
