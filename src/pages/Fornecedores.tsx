@@ -85,7 +85,7 @@ function Fornecedores() {
   const { suppliers, isLoading: suppliersLoading, error: suppliersError, deleteSupplier, updateSupplier, refetch: invalidateCache } = useSuppliers();
 
   const { paginate } = usePagination<Supplier>({
-    initialItemsPerPage: 10
+    initialItemsPerPage: isMobile ? 8 : 10
   });
 
   // Initialize filters from URL params for persistence (Requirement 4.4)
@@ -387,7 +387,7 @@ function Fornecedores() {
                     <div className="flex items-start justify-between">
                       <div className="space-y-2 sm:space-y-3 flex-1">
                         <div className="flex items-center gap-2 sm:gap-3">
-                          <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                          <div className="p-2 rounded-lg bg-primary/10 md:group-hover:bg-primary/20 md:transition-colors">
                             <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">

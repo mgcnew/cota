@@ -144,7 +144,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
       {/* Expand/Collapse Button */}
       <button
         onClick={toggleExpanded}
-        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors touch-target min-h-[44px]"
+        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[44px]"
         aria-expanded={isExpanded}
         aria-controls={`supplier-details-${supplier.id}`}
       >
@@ -165,8 +165,8 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
       <div
         id={`supplier-details-${supplier.id}`}
         className={cn(
-          "overflow-hidden transition-all duration-200 ease-out",
-          isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          "overflow-hidden",
+          isExpanded ? "block" : "hidden"
         )}
       >
         <div className="p-4 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30">
