@@ -43,11 +43,11 @@ export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodC
 
   // Memoize all computed values together to reduce re-renders
   const { stats, chartHeight, dataKey, chartData } = useMemo(() => {
-    const chartHeight = isMobile ? 180 : 280;
+    const chartHeight = isMobile ? 160 : 280;
     const dataKey = period === '7d' ? 'day' : 'month';
     
-    // On mobile, limit data points for better performance
-    const chartData = isMobile && data?.length > 7 ? data.slice(-7) : data;
+    // On mobile, limit data points for better performance (max 5 for fluidity)
+    const chartData = isMobile && data?.length > 5 ? data.slice(-5) : data;
     
     if (!chartData?.length) {
       return { 
@@ -75,7 +75,7 @@ export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodC
   }, [data, isMobile, period]);
 
   return (
-    <Card className="bg-card border border-subtle shadow-sm rounded-xl sm:hover:shadow-md sm:transition-shadow sm:duration-150">
+    <Card className="bg-card border border-subtle shadow-sm rounded-xl md:hover:shadow-md md:transition-shadow md:duration-150">
       <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-muted">
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center justify-between gap-2">

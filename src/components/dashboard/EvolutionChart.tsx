@@ -55,11 +55,11 @@ export const EvolutionChart = memo(function EvolutionChart({ data, period, onPer
 
   // Memoize all computed values together to reduce re-renders
   const { stats, chartHeight, dataKey, chartData } = useMemo(() => {
-    const chartHeight = isMobile ? 180 : 280;
+    const chartHeight = isMobile ? 160 : 280;
     const dataKey = period === '7d' ? 'day' : 'month';
     
-    // On mobile, limit data points for better performance
-    const chartData = isMobile && data?.length > 7 ? data.slice(-7) : data;
+    // On mobile, limit data points for better performance (max 5 for fluidity)
+    const chartData = isMobile && data?.length > 5 ? data.slice(-5) : data;
     
     if (!chartData?.length) {
       return { 

@@ -331,8 +331,8 @@ export function AppSidebar() {
       {/* Desktop Sidebar */}
       <div
         className={cn(
-          "hidden md:flex fixed z-50 left-1 top-1 bottom-1 transition-all duration-300 ease-in-out",
-          isSidebarExpanded ? "w-64" : "w-[72px]"
+          "hidden md:flex fixed z-50 left-0.5 top-0.5 bottom-0.5 transition-all duration-300 ease-in-out",
+          isSidebarExpanded ? "w-64" : "w-20"
         )}
       >
         <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg shadow-black/10 dark:shadow-black/30 border border-subtle bg-card">
