@@ -421,7 +421,7 @@ function Produtos() {
               ) : (
                 <>
                   {/* Mobile Cards View - Paginated for better UX */}
-                  <div className="md:hidden px-3 py-4 space-y-3">
+                  <div className="md:hidden px-2 py-3 space-y-2">
                     {paginatedData.items.map((product) => (
                       <MobileProductCard
                         key={product.id}
