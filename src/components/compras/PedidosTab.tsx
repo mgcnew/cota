@@ -7,7 +7,8 @@ import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { Table, TableCell, TableRow } from "@/components/ui/table";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, Building2, CircleDot } from "lucide-react";
+import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, Building2, CircleDot, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";
@@ -196,7 +197,7 @@ function PedidosTab() {
                     <span className="uppercase text-[11px] font-semibold text-orange-900 dark:text-orange-100">Valor</span>
                   </div>
                   <div className="w-[12%] pl-2 flex items-center gap-1.5">
-                    <Package className="h-3.5 w-3.5 text-orange-600/70" />
+                    <Info className="h-3.5 w-3.5 text-orange-600/70" />
                     <span className="uppercase text-[11px] font-semibold text-orange-900 dark:text-orange-100">Itens</span>
                   </div>
                   <div className="w-[15%] pl-2 flex items-center gap-1.5">
@@ -234,10 +235,27 @@ function PedidosTab() {
                     <div className="w-[15%] pl-2">
                       <span className="font-bold text-green-600">{pedido.total}</span>
                     </div>
-                    <div className="w-[12%] pl-2">
+                    <div className="w-[12%] pl-2 flex items-center gap-1">
                       <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200">
                         <Package className="h-3 w-3 mr-1" />{pedido.itens}
                       </Badge>
+                      {pedido.produtos && pedido.produtos.length > 0 && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-3.5 w-3.5 text-orange-500 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-[250px]">
+                              <p className="font-semibold text-xs mb-1">Produtos do pedido:</p>
+                              <ul className="text-xs space-y-0.5">
+                                {pedido.detalhesItens.map((item, idx) => (
+                                  <li key={idx}>• {item.produto} ({item.quantidade}x R$ {item.valorUnitario.toFixed(2)})</li>
+                                ))}
+                              </ul>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </div>
                     <div className="w-[15%] pl-2 text-sm">
                       <div className="flex items-center gap-1">

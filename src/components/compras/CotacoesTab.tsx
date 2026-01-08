@@ -9,7 +9,8 @@ import type { Quote } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
-import { FileText, Plus, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ClipboardList, Eye, Package, CircleDot } from "lucide-react";
+import { FileText, Plus, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ClipboardList, Eye, Package, CircleDot, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -196,27 +197,31 @@ function CotacoesTab() {
             <tr>
               <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
                 <div className="flex items-center bg-card/95 border border-teal-200/60 dark:border-teal-900/40 rounded-lg shadow-sm px-4 py-3">
-                  <div className="w-[20%] flex items-center gap-2">
+                  <div className="w-[15%] flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-600">
                       <ClipboardList className="h-4 w-4" />
                     </div>
                     <span className="uppercase text-[11px] font-semibold text-teal-900 dark:text-teal-100">Cotação</span>
                   </div>
-                  <div className="w-[20%] pl-2 flex items-center gap-1.5">
+                  <div className="w-[18%] pl-2 flex items-center gap-1.5">
                     <Package className="h-3.5 w-3.5 text-teal-600/70" />
                     <span className="uppercase text-[11px] font-semibold text-teal-900 dark:text-teal-100">Produto</span>
                   </div>
-                  <div className="w-[12%] pl-2 flex justify-center items-center gap-1.5">
+                  <div className="w-[10%] pl-2 flex justify-center items-center gap-1.5">
                     <CircleDot className="h-3.5 w-3.5 text-teal-600/70" />
                     <span className="uppercase text-[11px] font-semibold text-teal-900 dark:text-teal-100">Status</span>
                   </div>
-                  <div className="w-[15%] pl-2 flex items-center gap-1.5">
+                  <div className="w-[14%] pl-2 flex items-center gap-1.5">
                     <DollarSign className="h-3.5 w-3.5 text-teal-600/70" />
                     <span className="uppercase text-[11px] font-semibold text-teal-900 dark:text-teal-100">Melhor Preço</span>
                   </div>
-                  <div className="w-[15%] pl-2 flex items-center gap-1.5">
+                  <div className="w-[12%] pl-2 flex items-center gap-1.5">
                     <Building2 className="h-3.5 w-3.5 text-teal-600/70" />
                     <span className="uppercase text-[11px] font-semibold text-teal-900 dark:text-teal-100">Fornecedores</span>
+                  </div>
+                  <div className="w-[8%] pl-2 flex items-center gap-1.5">
+                    <Info className="h-3.5 w-3.5 text-teal-600/70" />
+                    <span className="uppercase text-[11px] font-semibold text-teal-900 dark:text-teal-100">Itens</span>
                   </div>
                   <div className="w-[10%] pl-2 flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 text-teal-600/70" />
@@ -237,28 +242,48 @@ function CotacoesTab() {
                 <TableRow key={cotacao.id} className="group border-none">
                   <TableCell colSpan={7} className="px-1 py-2">
                     <div className="flex items-center px-3 py-2.5 bg-card/90 rounded-lg border border-border hover:border-teal-300/50 transition-colors">
-                      <div className="w-[20%] flex items-center gap-3">
+                      <div className="w-[15%] flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center border border-teal-200/50">
                           <ClipboardList className="h-4 w-4 text-teal-600" />
                         </div>
                         <span className="font-semibold text-sm">#{cotacaoNumero.toString().padStart(4, '0')}</span>
                       </div>
-                      <div className="w-[20%] pl-2">
+                      <div className="w-[18%] pl-2">
                         <CapitalizedText className="font-medium text-sm truncate block max-w-[150px]">
                           {cotacao.produtoResumo || cotacao.produto}
                         </CapitalizedText>
                       </div>
-                      <div className="w-[12%] pl-2 flex justify-center">
+                      <div className="w-[10%] pl-2 flex justify-center">
                         <StatusBadge status={cotacao.statusReal} />
                       </div>
-                      <div className="w-[15%] pl-2">
+                      <div className="w-[14%] pl-2">
                         <span className="font-bold text-green-600">{cotacao.melhorPreco || 'R$ 0,00'}</span>
                         <p className="text-xs text-muted-foreground truncate max-w-[100px]">{cotacao.melhorFornecedor || '-'}</p>
                       </div>
-                      <div className="w-[15%] pl-2">
+                      <div className="w-[12%] pl-2">
                         <Badge variant="outline" className="bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border-teal-200">
                           <Building2 className="h-3 w-3 mr-1" />{cotacao.fornecedores}
                         </Badge>
+                      </div>
+                      <div className="w-[8%] pl-2 flex items-center gap-1">
+                        <span className="text-sm font-medium">{cotacao.produtosLista?.length || 0}</span>
+                        {cotacao.produtosLista && cotacao.produtosLista.length > 0 && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3.5 w-3.5 text-teal-500 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-[250px]">
+                                <p className="font-semibold text-xs mb-1">Produtos cotados:</p>
+                                <ul className="text-xs space-y-0.5">
+                                  {cotacao.produtosLista.map((produto, idx) => (
+                                    <li key={idx}>• {produto}</li>
+                                  ))}
+                                </ul>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                       </div>
                       <div className="w-[10%] pl-2 text-sm text-muted-foreground">
                         {cotacao.dataFim || '-'}
