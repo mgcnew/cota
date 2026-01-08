@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   Package,
   Building2,
-  FileText,
   ShoppingCart,
   BarChart3,
   ClipboardList,
@@ -67,8 +66,7 @@ const menuCategories: MenuCategory[] = [
   {
     title: "Operações",
     items: [
-      { title: "Cotações", url: "/dashboard/cotacoes", icon: FileText },
-      { title: "Pedidos", url: "/dashboard/pedidos", icon: ShoppingCart },
+      { title: "Compras", url: "/dashboard/compras", icon: ShoppingCart },
       { title: "Lista de Compras", url: "/dashboard/lista-compras", icon: ShoppingBasket }
     ]
   },

@@ -32,8 +32,7 @@ const prefetchDashboard = () => import("./pages/Dashboard");
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Produtos = lazy(() => import("./pages/Produtos"));
 const Fornecedores = lazy(() => import("./pages/Fornecedores"));
-const Cotacoes = lazy(() => import("./pages/Cotacoes"));
-const Pedidos = lazy(() => import("./pages/Pedidos"));
+const Compras = lazy(() => import("./pages/Compras"));
 const ListaCompras = lazy(() => import("./pages/ListaCompras"));
 const ContagemEstoque = lazy(() => import("./pages/ContagemEstoque"));
 const Anotacoes = lazy(() => import("./pages/Anotacoes"));
@@ -112,8 +111,9 @@ const App = () => {
                   <Route index element={<PageWrapper><Dashboard /></PageWrapper>} />
                   <Route path="produtos" element={<PageWrapper><Produtos /></PageWrapper>} />
                   <Route path="fornecedores" element={<PageWrapper><Fornecedores /></PageWrapper>} />
-                  <Route path="cotacoes" element={<PageWrapper><Cotacoes /></PageWrapper>} />
-                  <Route path="pedidos" element={<PageWrapper><Pedidos /></PageWrapper>} />
+                  <Route path="compras" element={<PageWrapper><Compras /></PageWrapper>} />
+                  <Route path="cotacoes" element={<Navigate to="/dashboard/compras?tab=cotacoes" replace />} />
+                  <Route path="pedidos" element={<Navigate to="/dashboard/compras?tab=pedidos" replace />} />
                   <Route path="historico" element={<Navigate to="/dashboard/relatorios?tab=historico" replace />} />
                   <Route path="relatorios" element={<PageWrapper><Relatorios /></PageWrapper>} />
                   <Route path="analytics" element={<Navigate to="/dashboard/relatorios?tab=analytics" replace />} />
