@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Package, Building2, X, DollarSign, Edit2, TrendingDown, FileText, Calendar, Check, ClipboardList, Users, ShoppingCart, AlertCircle, Award, Plus, Trash2, Settings, Trophy, Star } from "lucide-react";
+import { ProductPriceInfoTooltip } from "@/components/forms/ProductPriceInfoTooltip";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { Quote } from "@/hooks/useCotacoes";
@@ -881,9 +882,15 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                               return (
                                 <tr key={product.product_id} className={cn("hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors", isBestPrice && "bg-green-50/50 dark:bg-green-900/10")}>
                                   <td className="px-3 sm:px-4 py-3">
-                                    <p className="font-medium text-sm text-gray-900 dark:text-white truncate" style={{ maxWidth: '180px' }} title={safeStr(product.product_name)}>
-                                      {safeStr(product.product_name)}
-                                    </p>
+                                    <div className="flex items-center gap-1">
+                                      <p className="font-medium text-sm text-gray-900 dark:text-white truncate" style={{ maxWidth: '160px' }} title={safeStr(product.product_name)}>
+                                        {safeStr(product.product_name)}
+                                      </p>
+                                      <ProductPriceInfoTooltip 
+                                        productId={product.product_id} 
+                                        productName={safeStr(product.product_name)} 
+                                      />
+                                    </div>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 sm:hidden mt-0.5">
                                       {safeStr(product.quantidade)} {safeStr(product.unidade)}
                                     </p>
