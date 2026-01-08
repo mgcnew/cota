@@ -72,6 +72,7 @@ function Produtos() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -527,22 +528,23 @@ function Produtos() {
                                   <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount || 0}</span>
                                 </div>
 
-                                <div className="w-[10%] flex justify-end items-center px-2 gap-1">
-                                  <ProductPriceHistoryDialog
-                                    productId={product.id}
-                                    productName={product.name}
-                                    trigger={
-                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                        <History className="h-3.5 w-3.5" />
-                                      </Button>
-                                    }
-                                  />
+                                <div className="w-[10%] flex justify-end items-center px-2">
                                   <TableActionGroup
                                     showView={false}
                                     onEdit={() => handleEditProduct(product)}
                                     onDelete={() => handleDeleteProduct(product)}
-                                    dropdownItems={[]}
-                                    dropdownLabel="Mais Opções"
+                                    additionalActions={[
+                                      {
+                                        icon: <History className="h-4 w-4" />,
+                                        label: "Histórico de Preços",
+                                        onClick: () => {
+                                          // O histórico será aberto via estado
+                                          setHistoryProduct(product);
+                                        },
+                                        variant: "default" as const,
+                                      }
+                                    ]}
+                                    dropdownLabel="Ações"
                                   />
                                 </div>
                               </div>
@@ -636,6 +638,13 @@ function Produtos() {
             )}
           </Suspense>
 
+          {/* Product Price History Dialog - controlled by state */}
+          <ProductPriceHistoryDialog
+            productId={historyProduct?.id || ''}
+            productName={historyProduct?.name || ''}
+            open={!!historyProduct}
+            onOpenChange={(open) => { if (!open) setHistoryProduct(null); }}
+          />
 
         </div>
       </PageWrapper>
