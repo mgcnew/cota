@@ -31,6 +31,8 @@ import { ProductsHeroCard } from "@/components/products/ProductsHeroCard";
 import { ProductsStatusSummary } from "@/components/products/ProductsStatusSummary";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
 
+import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
+
 // Lazy load dialogs for better initial load performance
 const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
 const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
@@ -70,6 +72,7 @@ function Produtos() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -532,20 +535,16 @@ function Produtos() {
                                     onDelete={() => handleDeleteProduct(product)}
                                     additionalActions={[
                                       {
-                                        icon: <History className="h-3.5 w-3.5" />,
-                                        label: "Histórico",
-                                        onClick: () => {},
+                                        icon: <History className="h-4 w-4" />,
+                                        label: "Histórico de Preços",
+                                        onClick: () => {
+                                          // O histórico será aberto via estado
+                                          setHistoryProduct(product);
+                                        },
                                         variant: "default" as const,
                                       }
                                     ]}
-                                    dropdownItems={[
-                                      {
-                                        icon: <History className="h-4 w-4" />,
-                                        label: "Ver Histórico de Preços",
-                                        onClick: () => {},
-                                      }
-                                    ]}
-                                    dropdownLabel="Mais Opções"
+                                    dropdownLabel="Ações"
                                   />
                                 </div>
                               </div>
@@ -639,6 +638,13 @@ function Produtos() {
             )}
           </Suspense>
 
+          {/* Product Price History Dialog - controlled by state */}
+          <ProductPriceHistoryDialog
+            productId={historyProduct?.id || ''}
+            productName={historyProduct?.name || ''}
+            open={!!historyProduct}
+            onOpenChange={(open) => { if (!open) setHistoryProduct(null); }}
+          />
 
         </div>
       </PageWrapper>

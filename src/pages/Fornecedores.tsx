@@ -592,17 +592,16 @@ function Fornecedores() {
                                       icon: <MessageCircle className="h-3.5 w-3.5" />,
                                       label: "WhatsApp",
                                       onClick: () => openWhatsApp(supplier),
-                                      variant: "success" as const,
-                                    }
-                                  ]}
-                                  dropdownItems={[
+                                      variant: "default" as const,
+                                    },
                                     {
                                       icon: <Eye className="h-4 w-4" />,
                                       label: "Ver Histórico",
                                       onClick: () => {},
+                                      variant: "default" as const,
                                     }
                                   ]}
-                                  dropdownLabel="Mais Opções"
+                                  dropdownLabel="Ações"
                                 />
                               </div>
                             </div>
