@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { Eye, Edit, Trash2, CheckCircle, MoreVertical, Download, History, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ExpandableActionButton } from "./expandable-action-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,15 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-
-interface ActionItem {
-  icon: ReactNode;
-  label: string;
-  onClick: () => void;
-  variant?: "view" | "edit" | "delete" | "success" | "default";
-  hidden?: boolean;
-  disabled?: boolean;
-}
 
 interface DropdownItem {
   icon: ReactNode;
@@ -35,7 +25,7 @@ interface TableActionGroupProps {
   onEdit?: () => void;
   onDelete?: () => void;
   onFinalize?: () => void;
-  additionalActions?: ActionItem[];
+  additionalActions?: DropdownItem[];
   dropdownItems?: DropdownItem[];
   dropdownLabel?: string;
   className?: string;
@@ -56,7 +46,7 @@ export function TableActionGroup({
   onFinalize,
   additionalActions = [],
   dropdownItems = [],
-  dropdownLabel = "Mais Ações",
+  dropdownLabel = "Ações",
   className,
   showView = true,
   showEdit = true,
@@ -67,105 +57,100 @@ export function TableActionGroup({
   deleteLabel = "Excluir",
   finalizeLabel = "Finalizar",
 }: TableActionGroupProps) {
-  const hasDropdownItems = dropdownItems.filter(item => !item.hidden).length > 0;
+  // Construir lista de ações do dropdown
+  const allActions: DropdownItem[] = [];
+
+  if (showView && onView) {
+    allActions.push({
+      icon: <Eye className="h-4 w-4" />,
+      label: viewLabel,
+      onClick: onView,
+      variant: "default",
+    });
+  }
+
+  if (showEdit && onEdit) {
+    allActions.push({
+      icon: <Edit className="h-4 w-4" />,
+      label: editLabel,
+      onClick: onEdit,
+      variant: "default",
+    });
+  }
+
+  if (showFinalize && onFinalize) {
+    allActions.push({
+      icon: <CheckCircle className="h-4 w-4" />,
+      label: finalizeLabel,
+      onClick: onFinalize,
+      variant: "default",
+    });
+  }
+
+  // Adicionar ações adicionais
+  additionalActions.forEach((action) => {
+    if (!action.hidden) {
+      allActions.push(action);
+    }
+  });
+
+  // Adicionar itens do dropdown
+  dropdownItems.forEach((item) => {
+    if (!item.hidden) {
+      allActions.push(item);
+    }
+  });
+
+  // Adicionar delete por último (destrutivo)
+  if (showDelete && onDelete) {
+    allActions.push({
+      icon: <Trash2 className="h-4 w-4" />,
+      label: deleteLabel,
+      onClick: onDelete,
+      variant: "destructive",
+    });
+  }
+
+  if (allActions.length === 0) return null;
 
   return (
-    <div className={cn("group/actions flex items-center justify-end gap-1.5", className)}>
-      {/* Action Buttons - Hidden by default, visible on row hover */}
-      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        {/* View Button */}
-        {showView && onView && (
-          <ExpandableActionButton
-            icon={<Eye className="h-3.5 w-3.5" />}
-            label={viewLabel}
-            onClick={onView}
-            variant="view"
-          />
-        )}
-
-        {/* Edit Button */}
-        {showEdit && onEdit && (
-          <ExpandableActionButton
-            icon={<Edit className="h-3.5 w-3.5" />}
-            label={editLabel}
-            onClick={onEdit}
-            variant="edit"
-          />
-        )}
-
-        {/* Finalize Button */}
-        {showFinalize && onFinalize && (
-          <ExpandableActionButton
-            icon={<CheckCircle className="h-3.5 w-3.5" />}
-            label={finalizeLabel}
-            onClick={onFinalize}
-            variant="success"
-          />
-        )}
-
-        {/* Delete Button */}
-        {showDelete && onDelete && (
-          <ExpandableActionButton
-            icon={<Trash2 className="h-3.5 w-3.5" />}
-            label={deleteLabel}
-            onClick={onDelete}
-            variant="delete"
-          />
-        )}
-
-        {/* Additional Actions */}
-        {additionalActions.map((action, index) => (
-          !action.hidden && (
-            <ExpandableActionButton
+    <div className={cn("flex items-center justify-end", className)}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          >
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          align="end" 
+          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50 w-48 shadow-lg"
+        >
+          <DropdownMenuLabel className="text-gray-600 dark:text-gray-300 font-medium text-xs">
+            {dropdownLabel}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
+          {allActions.map((item, index) => (
+            <DropdownMenuItem
               key={index}
-              icon={action.icon}
-              label={action.label}
-              onClick={action.onClick}
-              variant={action.variant || "default"}
-              disabled={action.disabled}
-            />
-          )
-        ))}
-      </div>
-
-      {/* Dropdown Menu - Always visible */}
-      {hasDropdownItems && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
+              onClick={item.onClick}
+              disabled={item.disabled}
+              className={cn(
+                "cursor-pointer transition-colors flex items-center gap-2 min-h-[40px]",
+                item.variant === "destructive"
+                  ? "text-red-600 dark:text-red-400 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/30 dark:hover:text-red-300"
+                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              )}
             >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-background border z-50 w-48 shadow-lg">
-            <DropdownMenuLabel className="text-gray-600 dark:text-gray-400 font-medium">
-              {dropdownLabel}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {dropdownItems.map((item, index) => (
-              !item.hidden && (
-                <DropdownMenuItem
-                  key={index}
-                  onClick={item.onClick}
-                  disabled={item.disabled}
-                  className={cn(
-                    "cursor-pointer transition-colors",
-                    item.variant === "destructive"
-                      ? "text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-800"
-                  )}
-                >
-                  {item.icon}
-                  <span className="ml-2">{item.label}</span>
-                </DropdownMenuItem>
-              )
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+              {item.icon}
+              <span>{item.label}</span>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
@@ -180,4 +165,3 @@ export const ActionIcons = {
   history: <History className="h-4 w-4" />,
   message: <MessageCircle className="h-4 w-4" />,
 };
-

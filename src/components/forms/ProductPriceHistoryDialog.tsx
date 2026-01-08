@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +11,24 @@ interface ProductPriceHistoryDialogProps {
   productName: string;
   productId: string;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function ProductPriceHistoryDialog({ productName, productId, trigger }: ProductPriceHistoryDialogProps) {
-  const [open, setOpen] = useState(false);
+export function ProductPriceHistoryDialog({ 
+  productName, 
+  productId, 
+  trigger,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
+}: ProductPriceHistoryDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  
+  // Support both controlled and uncontrolled modes
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? (controlledOnOpenChange || (() => {})) : setInternalOpen;
+  
   const isMobile = false; // Removida dependência mobile
   
   // Buscar dados reais do histórico de preços
@@ -227,9 +241,11 @@ export function ProductPriceHistoryDialog({ productName, productId, trigger }: P
   // Desktop: Usar Dialog (mantém layout original)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden bg-white dark:bg-[#10141f]">
         <DialogHeader className="pb-3 border-b border-gray-100/80 dark:border-gray-700/60">
           <div className="flex items-center gap-2.5">
