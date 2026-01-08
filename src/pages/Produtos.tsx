@@ -31,6 +31,8 @@ import { ProductsHeroCard } from "@/components/products/ProductsHeroCard";
 import { ProductsStatusSummary } from "@/components/products/ProductsStatusSummary";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
 
+import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
+
 // Lazy load dialogs for better initial load performance
 const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
 const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
@@ -525,26 +527,21 @@ function Produtos() {
                                   <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount || 0}</span>
                                 </div>
 
-                                <div className="w-[10%] flex justify-end items-center px-2">
+                                <div className="w-[10%] flex justify-end items-center px-2 gap-1">
+                                  <ProductPriceHistoryDialog
+                                    productId={product.id}
+                                    productName={product.name}
+                                    trigger={
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                        <History className="h-3.5 w-3.5" />
+                                      </Button>
+                                    }
+                                  />
                                   <TableActionGroup
                                     showView={false}
                                     onEdit={() => handleEditProduct(product)}
                                     onDelete={() => handleDeleteProduct(product)}
-                                    additionalActions={[
-                                      {
-                                        icon: <History className="h-3.5 w-3.5" />,
-                                        label: "Histórico",
-                                        onClick: () => {},
-                                        variant: "default" as const,
-                                      }
-                                    ]}
-                                    dropdownItems={[
-                                      {
-                                        icon: <History className="h-4 w-4" />,
-                                        label: "Ver Histórico de Preços",
-                                        onClick: () => {},
-                                      }
-                                    ]}
+                                    dropdownItems={[]}
                                     dropdownLabel="Mais Opções"
                                   />
                                 </div>
