@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense, memo, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard } from "lucide-react";
+import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { useKeyboardShortcuts, formatShortcut } from "@/hooks/useKeyboardShortcuts";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 // Lazy load tab contents for better performance
 const CotacoesTab = lazy(() => import("@/components/compras/CotacoesTab"));
 const PedidosTab = lazy(() => import("@/components/compras/PedidosTab"));
+const AnaliseTab = lazy(() => import("@/components/compras/AnaliseTab"));
 
 const TabLoader = () => (
   <div className="flex items-center justify-center py-12">
@@ -27,7 +28,7 @@ function Compras() {
   // Sync tab with URL
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && (tab === "cotacoes" || tab === "pedidos")) {
+    if (tab && (tab === "cotacoes" || tab === "pedidos" || tab === "analise")) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -48,6 +49,11 @@ function Compras() {
       key: '2',
       action: () => handleTabChange('pedidos'),
       description: 'Ir para Pedidos'
+    },
+    {
+      key: '3',
+      action: () => handleTabChange('analise'),
+      description: 'Ir para Análise'
     },
     {
       key: 'n',
@@ -126,6 +132,13 @@ function Compras() {
                 <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
                 Pedidos
               </TabsTrigger>
+              <TabsTrigger 
+                value="analise"
+                className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
+              >
+                <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
+                Análise
+              </TabsTrigger>
             </TabsList>
             </div>
           </div>
@@ -139,6 +152,12 @@ function Compras() {
           <TabsContent value="pedidos" className="mt-0">
             <Suspense fallback={<TabLoader />}>
               <PedidosTab />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="analise" className="mt-0">
+            <Suspense fallback={<TabLoader />}>
+              <AnaliseTab />
             </Suspense>
           </TabsContent>
         </Tabs>
