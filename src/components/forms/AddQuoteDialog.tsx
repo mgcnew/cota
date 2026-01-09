@@ -95,8 +95,8 @@ const quoteSchema = z.object({
   dataPlanejada: z.date().optional(),
   fornecedoresIds: z.array(z.string()).min(1, "Selecione pelo menos um fornecedor"),
   observacoes: z.string().optional(),
-}).refine((data) => data.dataFim > data.dataInicio, {
-  message: "Data de fim deve ser posterior à data de início",
+}).refine((data) => data.dataFim >= data.dataInicio, {
+  message: "Data de fim deve ser igual ou posterior à data de início",
   path: ["dataFim"],
 }).refine((data) => {
   if (data.dataPlanejada && data.dataInicio) {
@@ -965,7 +965,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           onSelect={field.onChange}
                                           disabled={(date) => {
                                             const startDate = form.getValues("dataInicio");
-                                            return startDate ? date <= startDate : date < new Date();
+                                            return startDate ? date < startDate : date < new Date();
                                           }}
                                           initialFocus
                                         />
@@ -998,7 +998,22 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 <Zap className="h-3 w-3" />
                                 <span className="font-medium">Atalhos Rápidos:</span>
                               </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const hoje = new Date();
+                                    form.setValue("dataInicio", hoje);
+                                    form.setValue("dataFim", hoje);
+                                    toast({ title: "✅ Período definido", description: "Hoje (início e fim no mesmo dia)", duration: 1500 });
+                                  }}
+                                  className="h-10 text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                                >
+                                  <Zap className="h-3 w-3 mr-1" />
+                                  Hoje
+                                </Button>
                                 <Button
                                   type="button"
                                   variant="outline"
