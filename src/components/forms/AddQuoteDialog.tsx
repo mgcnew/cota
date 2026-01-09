@@ -157,6 +157,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   // Refs para auto-foco
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const productSearchRef = useRef<HTMLInputElement>(null);
+  const unitSelectRef = useRef<HTMLButtonElement>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
@@ -190,25 +192,69 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       // Limpar o formulário após adicionar
       setSelectedProduct(null);
       setNewProductQuantity("");
+      setProductSearch("");
       
-      // Auto-foco no campo de busca de produto
+      // Auto-foco no campo de busca de produto para continuar adicionando
       setTimeout(() => {
         setProductPopoverOpen(true);
-      }, 100);
+      }, 50);
       
       toast({
         title: "✅ Produto adicionado",
         description: `${selectedProduct.name} foi adicionado à cotação`,
-        duration: 2000,
+        duration: 1500,
       });
     }
   };
   
-  // Handler para Enter key
+  // Handler para Enter key no campo de quantidade
+  const handleQuantityKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedProduct && newProductQuantity && newProductUnit) {
+        handleAddNewProduct();
+      } else if (selectedProduct && newProductQuantity && !newProductUnit) {
+        // Focar no select de unidade
+        unitSelectRef.current?.click();
+      }
+    } else if (e.key === 'Tab' && !e.shiftKey) {
+      // Tab vai para o select de unidade naturalmente
+    }
+  };
+  
+  // Handler para Enter key - legado
   const handleProductKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && selectedProduct && newProductQuantity && newProductUnit) {
       e.preventDefault();
       handleAddNewProduct();
+    }
+  };
+  
+  // Handler para atalhos globais do modal
+  const handleModalKeyDown = (e: React.KeyboardEvent) => {
+    // Ctrl+Enter para criar cotação
+    if (e.ctrlKey && e.key === 'Enter' && activeTab === 'detalhes') {
+      e.preventDefault();
+      form.handleSubmit((data) => onSubmit(data, false))();
+    }
+    
+    // Alt+Setas para navegar entre abas
+    if (e.altKey && e.key === 'ArrowRight') {
+      e.preventDefault();
+      handleNext();
+    }
+    if (e.altKey && e.key === 'ArrowLeft') {
+      e.preventDefault();
+      handlePrevious();
+    }
+    
+    // Números 1-5 com Alt para ir direto para a aba
+    if (e.altKey && ['1', '2', '3', '4', '5'].includes(e.key)) {
+      e.preventDefault();
+      const tabIndex = parseInt(e.key) - 1;
+      if (tabs[tabIndex]) {
+        setActiveTab(tabs[tabIndex].id);
+      }
     }
   };
 
@@ -219,6 +265,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       if (!newProductUnit) {
         setNewProductUnit(lastUsedUnit);
       }
+      // Auto-foco no seletor de produto ao abrir
+      setTimeout(() => {
+        if (activeTab === 'produtos') {
+          setProductPopoverOpen(true);
+        }
+      }, 300);
     } else {
       // Reset ao fechar
       setActiveTab("produtos");
@@ -538,7 +590,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+      <DialogContent 
+        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden"
+        onKeyDown={handleModalKeyDown}
+      >
         <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -746,6 +801,11 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                     setSelectedProduct(product);
                                                     setProductSearch("");
                                                     setProductPopoverOpen(false);
+                                                    // Auto-foco no campo de quantidade após selecionar produto
+                                                    setTimeout(() => {
+                                                      quantityInputRef.current?.focus();
+                                                      quantityInputRef.current?.select();
+                                                    }, 50);
                                                   }}
                                                 >
                                                   <Check
@@ -774,14 +834,27 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         type="number" 
                                         value={newProductQuantity}
                                         onChange={(e) => setNewProductQuantity(e.target.value)}
-                                        onKeyDown={handleProductKeyDown}
+                                        onKeyDown={handleQuantityKeyDown}
                                         className="border-teal-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-teal-500 focus:ring-teal-500/20"
+                                        tabIndex={0}
                                       />
                                     </div>
                                     <div>
                                       <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2 block">Unidade *</label>
-                                      <Select value={newProductUnit} onValueChange={setNewProductUnit}>
-                                        <SelectTrigger className="border-teal-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                                      <Select value={newProductUnit} onValueChange={(value) => {
+                                        setNewProductUnit(value);
+                                        // Auto-foco no botão adicionar após selecionar unidade
+                                        setTimeout(() => {
+                                          if (selectedProduct && newProductQuantity) {
+                                            addButtonRef.current?.focus();
+                                          }
+                                        }, 50);
+                                      }}>
+                                        <SelectTrigger 
+                                          ref={unitSelectRef}
+                                          className="border-teal-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                          tabIndex={0}
+                                        >
                                           <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
                                         <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
@@ -799,21 +872,30 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                                   {/* Botão Adicionar */}
                                   <Button
+                                    ref={addButtonRef}
                                     type="button"
                                     onClick={handleAddNewProduct}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleAddNewProduct();
+                                      }
+                                    }}
                                     disabled={!selectedProduct || !newProductQuantity || !newProductUnit}
                                     className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg disabled:opacity-50"
+                                    tabIndex={0}
                                   >
                                     <Plus className="h-4 w-4 mr-2" />
-                                    Adicionar à Lista
+                                    Adicionar à Lista (Enter)
                                   </Button>
                                   
-                                  {/* Dica de atalho */}
-                                  {selectedProduct && newProductQuantity && newProductUnit && (
-                                    <p className="text-xs text-center text-teal-600 dark:text-teal-400 animate-pulse">
-                                      ⏎ Pressione Enter para adicionar rapidamente
-                                    </p>
-                                  )}
+                                  {/* Dica de atalhos */}
+                                  <div className="text-xs text-center text-gray-500 dark:text-gray-400 space-y-1 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                    <p className="font-medium text-teal-600 dark:text-teal-400">⌨️ Atalhos de Teclado</p>
+                                    <p><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">Tab</kbd> Navegar campos</p>
+                                    <p><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">Enter</kbd> Adicionar produto</p>
+                                    <p><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">Alt+→</kbd> Próxima aba</p>
+                                  </div>
                                 </CardContent>
                               </Card>
 

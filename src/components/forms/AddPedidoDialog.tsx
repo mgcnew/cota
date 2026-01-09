@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -53,6 +53,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   // Search states
   const [productSearch, setProductSearch] = useState("");
   const [supplierSearch, setSupplierSearch] = useState("");
+  const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
   const debouncedProductSearch = useDebounce(productSearch, 300);
   const debouncedSupplierSearch = useDebounce(supplierSearch, 300);
 
@@ -63,6 +64,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const [newProductUnit, setNewProductUnit] = useState("un");
   const [newProductPrice, setNewProductPrice] = useState("");
   const [lastUsedPrices, setLastUsedPrices] = useState<Record<string, number>>({});
+
+  // Refs para navegação por teclado
+  const productSearchRef = useRef<HTMLInputElement>(null);
+  const quantityInputRef = useRef<HTMLInputElement>(null);
+  const priceInputRef = useRef<HTMLInputElement>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const supplierSearchRef = useRef<HTMLInputElement>(null);
+  const productListRef = useRef<HTMLDivElement>(null);
 
   const steps = [
     { id: 0, title: "Produtos", icon: Package, description: "Adicione os produtos do pedido" },
@@ -85,9 +94,27 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         }));
         setItens(preSelectedItems);
         setCurrentStep(1);
+      } else {
+        // Auto-foco no campo de busca de produto
+        setTimeout(() => {
+          productSearchRef.current?.focus();
+        }, 300);
       }
     }
   }, [open]);
+
+  // Auto-foco quando muda de step
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        if (currentStep === 0) {
+          productSearchRef.current?.focus();
+        } else if (currentStep === 1) {
+          supplierSearchRef.current?.focus();
+        }
+      }, 100);
+    }
+  }, [currentStep, open]);
 
   useEffect(() => {
     if (open && products.length === 0 && !productsLoading) {
@@ -148,6 +175,22 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     return products.filter(p => p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase())).slice(0, 30);
   }, [products, debouncedProductSearch]);
 
+  // Reset highlighted index when search changes
+  useEffect(() => {
+    setHighlightedProductIndex(-1);
+  }, [debouncedProductSearch]);
+
+  // Scroll para o item destacado quando navegar com setas
+  useEffect(() => {
+    if (highlightedProductIndex >= 0 && productListRef.current) {
+      const listElement = productListRef.current;
+      const highlightedElement = listElement.children[highlightedProductIndex] as HTMLElement;
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [highlightedProductIndex]);
+
   const filteredSuppliers = useMemo(() => {
     if (!debouncedSupplierSearch) return suppliers;
     return suppliers.filter(s => s.name.toLowerCase().includes(debouncedSupplierSearch.toLowerCase()));
@@ -172,7 +215,82 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     setNewProductPrice("");
     setProductSearch("");
     toast({ title: "Produto adicionado", duration: 1500 });
+    
+    // Auto-foco no campo de busca para continuar adicionando
+    setTimeout(() => {
+      productSearchRef.current?.focus();
+    }, 50);
   };
+
+  // Função para selecionar produto da lista
+  const selectProductFromList = (product: any) => {
+    setSelectedProduct(product);
+    setProductSearch("");
+    setHighlightedProductIndex(-1);
+    if (lastUsedPrices[product.id]) {
+      setNewProductPrice(lastUsedPrices[product.id].toString());
+    }
+    // Auto-foco no campo de quantidade
+    setTimeout(() => {
+      quantityInputRef.current?.focus();
+      quantityInputRef.current?.select();
+    }, 50);
+  };
+
+  // Handler para navegação por teclado nos campos de produto
+  const handleProductKeyDown = useCallback((e: React.KeyboardEvent, field: 'search' | 'quantity' | 'price') => {
+    if (field === 'search' && filteredProducts.length > 0 && !selectedProduct) {
+      // Navegação por setas na lista de produtos
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedProductIndex(prev => 
+          prev < filteredProducts.length - 1 ? prev + 1 : 0
+        );
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedProductIndex(prev => 
+          prev > 0 ? prev - 1 : filteredProducts.length - 1
+        );
+        return;
+      }
+      // Enter seleciona o produto destacado
+      if (e.key === 'Enter' && highlightedProductIndex >= 0) {
+        e.preventDefault();
+        selectProductFromList(filteredProducts[highlightedProductIndex]);
+        return;
+      }
+      // Escape fecha a lista
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setProductSearch("");
+        setHighlightedProductIndex(-1);
+        return;
+      }
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      
+      if (field === 'search') {
+        // Se tem produto selecionado, vai para quantidade
+        if (selectedProduct) {
+          quantityInputRef.current?.focus();
+          quantityInputRef.current?.select();
+        }
+      } else if (field === 'quantity') {
+        // Vai para preço
+        priceInputRef.current?.focus();
+        priceInputRef.current?.select();
+      } else if (field === 'price') {
+        // Tenta adicionar o produto
+        if (selectedProduct && newProductQuantity && newProductPrice) {
+          handleAddProduct();
+        }
+      }
+    }
+  }, [selectedProduct, newProductQuantity, newProductPrice, filteredProducts, highlightedProductIndex]);
 
   const handleRemoveItem = (index: number) => setItens(itens.filter((_, i) => i !== index));
   const handleDuplicateItem = (index: number) => { setItens([...itens, { ...itens[index] }]); toast({ title: "Produto duplicado", duration: 1500 }); };
@@ -232,10 +350,47 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     }
   };
 
+  // Handler para atalhos globais do modal
+  const handleModalKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Ctrl+Enter para criar pedido (no último step)
+    if (e.ctrlKey && e.key === 'Enter' && currentStep === 2) {
+      e.preventDefault();
+      handleSubmit();
+    }
+    
+    // Alt+Setas para navegar entre steps
+    if (e.altKey && e.key === 'ArrowRight' && canProceed() && currentStep < 2) {
+      e.preventDefault();
+      setCurrentStep(currentStep + 1);
+    }
+    if (e.altKey && e.key === 'ArrowLeft' && currentStep > 0) {
+      e.preventDefault();
+      setCurrentStep(currentStep - 1);
+    }
+    
+    // Alt+N para focar no campo de produto (step 0)
+    if (e.altKey && e.key === 'n' && currentStep === 0) {
+      e.preventDefault();
+      productSearchRef.current?.focus();
+    }
+    
+    // Números 1-3 com Alt para ir direto para o step
+    if (e.altKey && ['1', '2', '3'].includes(e.key)) {
+      e.preventDefault();
+      const stepIndex = parseInt(e.key) - 1;
+      if (stepIndex <= currentStep || (stepIndex === currentStep + 1 && canProceed())) {
+        setCurrentStep(stepIndex);
+      }
+    }
+  }, [currentStep]);
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-[800px] h-[90vh] max-h-[700px] overflow-hidden p-0 gap-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl">
+      <DialogContent 
+        className="w-[95vw] max-w-[800px] h-[90vh] max-h-[700px] overflow-hidden p-0 gap-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl"
+        onKeyDown={handleModalKeyDown}
+      >
         {/* Header compacto */}
         <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center justify-between mb-3">
@@ -297,23 +452,41 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
+                            ref={productSearchRef}
                             placeholder="Digite para buscar..."
                             value={selectedProduct ? selectedProduct.name : productSearch}
                             onChange={(e) => { setProductSearch(e.target.value); setSelectedProduct(null); }}
+                            onKeyDown={(e) => handleProductKeyDown(e, 'search')}
                             className="pl-9 h-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                            tabIndex={0}
                           />
                           {filteredProducts.length > 0 && !selectedProduct && (
-                            <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-auto">
-                              {filteredProducts.map(p => (
+                            <div 
+                              ref={productListRef}
+                              className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-auto"
+                            >
+                              {filteredProducts.map((p, index) => (
                                 <button
                                   key={p.id}
-                                  onClick={() => { setSelectedProduct(p); setProductSearch(""); if (lastUsedPrices[p.id]) setNewProductPrice(lastUsedPrices[p.id].toString()); }}
-                                  className="w-full px-3 py-2 text-left text-sm hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                                  onClick={() => selectProductFromList(p)}
+                                  onMouseEnter={() => setHighlightedProductIndex(index)}
+                                  className={cn(
+                                    "w-full px-3 py-2 text-left text-sm flex items-center gap-2 transition-colors",
+                                    highlightedProductIndex === index 
+                                      ? "bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300" 
+                                      : "hover:bg-orange-50 dark:hover:bg-gray-700"
+                                  )}
                                 >
-                                  <Package className="h-4 w-4 text-orange-500" />
+                                  <Package className={cn(
+                                    "h-4 w-4",
+                                    highlightedProductIndex === index ? "text-orange-600" : "text-orange-500"
+                                  )} />
                                   {p.name}
                                 </button>
                               ))}
+                              <div className="px-3 py-1.5 text-[10px] text-gray-400 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                                <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">↑↓</kbd> Navegar • <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">Enter</kbd> Selecionar • <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-600 rounded">Esc</kbd> Fechar
+                              </div>
                             </div>
                           )}
                         </div>
@@ -321,11 +494,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       <div>
                         <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Quantidade</Label>
                         <Input
+                          ref={quantityInputRef}
                           type="number"
                           placeholder="0"
                           value={newProductQuantity}
                           onChange={(e) => setNewProductQuantity(e.target.value)}
+                          onKeyDown={(e) => handleProductKeyDown(e, 'quantity')}
                           className="h-10 bg-white dark:bg-gray-900"
+                          tabIndex={0}
                         />
                       </div>
                       <div>
@@ -333,18 +509,27 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">R$</span>
                           <Input
+                            ref={priceInputRef}
                             type="text"
                             placeholder="0,00"
                             value={newProductPrice}
                             onChange={(e) => setNewProductPrice(e.target.value)}
+                            onKeyDown={(e) => handleProductKeyDown(e, 'price')}
                             className="pl-9 h-10 bg-white dark:bg-gray-900"
+                            tabIndex={0}
                           />
                         </div>
                       </div>
                     </div>
-                    <Button onClick={handleAddProduct} disabled={!selectedProduct} className="mt-3 w-full bg-orange-600 hover:bg-orange-700 text-white">
-                      <Plus className="h-4 w-4 mr-2" />Adicionar Produto
+                    <Button ref={addButtonRef} onClick={handleAddProduct} disabled={!selectedProduct} className="mt-3 w-full bg-orange-600 hover:bg-orange-700 text-white">
+                      <Plus className="h-4 w-4 mr-2" />Adicionar Produto (Enter)
                     </Button>
+                    
+                    {/* Dicas de atalhos */}
+                    <div className="mt-2 text-xs text-center text-gray-400 space-y-0.5">
+                      <p><kbd className="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px]">Enter</kbd> Avançar campo / Adicionar</p>
+                      <p><kbd className="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-[10px]">Alt+→</kbd> Próximo passo</p>
+                    </div>
                   </div>
 
                   {/* Lista de itens */}
@@ -402,10 +587,12 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       <div className="relative mb-2">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
+                          ref={supplierSearchRef}
                           placeholder="Buscar fornecedor..."
                           value={supplierSearch}
                           onChange={(e) => setSupplierSearch(e.target.value)}
                           className="pl-9"
+                          tabIndex={0}
                         />
                       </div>
                       <ScrollArea className="h-48 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -510,19 +697,25 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         {/* Footer */}
         <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center justify-between">
-            <Button variant="outline" onClick={() => currentStep > 0 ? setCurrentStep(currentStep - 1) : onOpenChange(false)} disabled={loading}>
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              {currentStep === 0 ? 'Cancelar' : 'Voltar'}
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" onClick={() => currentStep > 0 ? setCurrentStep(currentStep - 1) : onOpenChange(false)} disabled={loading}>
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                {currentStep === 0 ? 'Cancelar' : 'Voltar'}
+              </Button>
+              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
+                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Alt+←→</kbd> Navegar</span>
+                {currentStep === 2 && <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Ctrl+Enter</kbd> Criar</span>}
+              </div>
+            </div>
             
             {currentStep < 2 ? (
               <Button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} className="bg-orange-600 hover:bg-orange-700 text-white">
-                Próximo
+                Próximo (Alt+→)
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
               <Button onClick={handleSubmit} disabled={loading || !canProceed()} className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white min-w-[140px]">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShoppingCart className="h-4 w-4 mr-2" />Criar Pedido</>}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShoppingCart className="h-4 w-4 mr-2" />Criar (Ctrl+Enter)</>}
               </Button>
             )}
           </div>

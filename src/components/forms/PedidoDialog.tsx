@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,6 +56,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
   const debouncedProductSearch = useDebounce(productSearch, 300);
 
+  // Refs para navegação por teclado
+  const productInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const quantityInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const priceInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+
+  const tabs = ["itens", "detalhes", "resumo"];
+
   const statusOptions = [
     { value: "pendente", label: "Pendente", color: "bg-amber-100 text-amber-700 border-amber-200" },
     { value: "processando", label: "Processando", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -69,6 +77,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       loadSuppliers();
       loadProducts();
       setActiveTab("itens");
+      
+      // Auto-foco no primeiro campo ou botão adicionar
+      setTimeout(() => {
+        if (itens.length > 0) {
+          productInputRefs.current[0]?.focus();
+        } else {
+          addButtonRef.current?.focus();
+        }
+      }, 300);
     }
     if (pedido && open) {
       setFornecedor(pedido.supplier_id || "");
@@ -116,12 +133,65 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   }, [products, debouncedProductSearch]);
 
   const handleAddItem = () => {
+    const newIndex = itens.length;
     setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0, unidade: "un" }]);
+    
+    // Auto-foco no campo de produto do novo item
+    setTimeout(() => {
+      productInputRefs.current[newIndex]?.focus();
+    }, 50);
   };
   
   const handleRemoveItem = (index: number) => {
     setItens(itens.filter((_, i) => i !== index));
+    // Focar no item anterior ou no botão adicionar
+    setTimeout(() => {
+      if (index > 0) {
+        productInputRefs.current[index - 1]?.focus();
+      } else if (itens.length > 1) {
+        productInputRefs.current[0]?.focus();
+      } else {
+        addButtonRef.current?.focus();
+      }
+    }, 50);
   };
+
+  // Handler para navegação por teclado nos campos de item
+  const handleItemKeyDown = useCallback((e: React.KeyboardEvent, index: number, field: 'produto' | 'quantidade' | 'preco') => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      
+      if (field === 'produto') {
+        // Se tem sugestões abertas, não faz nada (deixa o autocomplete funcionar)
+        if (activeSearchIndex === index && filteredProducts.length > 0) return;
+        // Vai para quantidade
+        quantityInputRefs.current[index]?.focus();
+        quantityInputRefs.current[index]?.select();
+      } else if (field === 'quantidade') {
+        // Vai para preço
+        priceInputRefs.current[index]?.focus();
+        priceInputRefs.current[index]?.select();
+      } else if (field === 'preco') {
+        // Se é o último item e está preenchido, adiciona novo
+        const item = itens[index];
+        if (item.produto && item.quantidade > 0) {
+          if (index === itens.length - 1) {
+            handleAddItem();
+          } else {
+            // Vai para o próximo item
+            productInputRefs.current[index + 1]?.focus();
+          }
+        }
+      }
+    } else if (e.key === 'Tab' && !e.shiftKey && field === 'preco' && index === itens.length - 1) {
+      // Tab no último campo do último item -> adiciona novo item
+      const item = itens[index];
+      if (item.produto && item.quantidade > 0) {
+        e.preventDefault();
+        handleAddItem();
+      }
+    }
+  }, [itens, activeSearchIndex, filteredProducts.length]);
   
   const handleItemChange = (index: number, field: keyof PedidoItem, value: any) => {
     const newItens = [...itens];
@@ -179,6 +249,46 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       setLoading(false);
     }
   };
+
+  // Handler para atalhos globais do modal
+  const handleModalKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Ctrl+Enter para salvar
+    if (e.ctrlKey && e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
+    }
+    
+    // Alt+Setas para navegar entre abas
+    if (e.altKey && e.key === 'ArrowRight') {
+      e.preventDefault();
+      const currentIndex = tabs.indexOf(activeTab);
+      if (currentIndex < tabs.length - 1) {
+        setActiveTab(tabs[currentIndex + 1]);
+      }
+    }
+    if (e.altKey && e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const currentIndex = tabs.indexOf(activeTab);
+      if (currentIndex > 0) {
+        setActiveTab(tabs[currentIndex - 1]);
+      }
+    }
+    
+    // Alt+N para adicionar novo item (quando na aba itens)
+    if (e.altKey && e.key === 'n' && activeTab === 'itens') {
+      e.preventDefault();
+      handleAddItem();
+    }
+    
+    // Números 1-3 com Alt para ir direto para a aba
+    if (e.altKey && ['1', '2', '3'].includes(e.key)) {
+      e.preventDefault();
+      const tabIndex = parseInt(e.key) - 1;
+      if (tabs[tabIndex]) {
+        setActiveTab(tabs[tabIndex]);
+      }
+    }
+  }, [activeTab]);
 
   const getStatusBadge = (statusValue: string) => {
     const config = statusOptions.find(s => s.value === statusValue) || statusOptions[0];
@@ -252,7 +362,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Produtos do Pedido</span>
-                  <Button onClick={handleAddItem} size="sm" className="h-10 bg-orange-600 hover:bg-orange-700 text-white touch-target">
+                  <Button ref={addButtonRef} onClick={handleAddItem} size="sm" className="h-10 bg-orange-600 hover:bg-orange-700 text-white touch-target">
                     <Plus className="h-3.5 w-3.5 mr-1.5" />Adicionar
                   </Button>
                 </div>
@@ -466,7 +576,10 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   // Desktop: Render as Dialog (centered modal)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-[750px] h-[85vh] max-h-[600px] overflow-hidden p-0 gap-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl">
+      <DialogContent 
+        className="w-[95vw] max-w-[750px] h-[85vh] max-h-[600px] overflow-hidden p-0 gap-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl"
+        onKeyDown={handleModalKeyDown}
+      >
         {/* Header compacto */}
         <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center justify-between">
@@ -496,8 +609,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Produtos do Pedido</span>
-                <Button onClick={handleAddItem} size="sm" className="h-8 bg-orange-600 hover:bg-orange-700 text-white">
-                  <Plus className="h-3.5 w-3.5 mr-1.5" />Adicionar
+                <Button ref={addButtonRef} onClick={handleAddItem} size="sm" className="h-8 bg-orange-600 hover:bg-orange-700 text-white">
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />Adicionar (Alt+N)
                 </Button>
               </div>
               
@@ -518,6 +631,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           <div className="relative">
                             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                             <Input
+                              ref={el => productInputRefs.current[index] = el}
                               placeholder="Buscar produto..."
                               value={item.produto}
                               onChange={e => { 
@@ -526,18 +640,35 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                 setActiveSearchIndex(index);
                               }}
                               onFocus={() => setActiveSearchIndex(index)}
+                              onKeyDown={e => handleItemKeyDown(e, index, 'produto')}
                               className="h-8 text-xs pl-7"
+                              tabIndex={0}
                             />
                           </div>
                           {activeSearchIndex === index && productSearch && filteredProducts.length > 0 && (
                             <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-32 overflow-auto">
-                              {filteredProducts.map(p => (
+                              {filteredProducts.map((p, pIndex) => (
                                 <button 
                                   key={p.id} 
                                   onClick={() => { 
                                     handleItemChange(index, 'produto', p.name); 
                                     setProductSearch(''); 
                                     setActiveSearchIndex(null);
+                                    // Auto-foco no campo de quantidade
+                                    setTimeout(() => {
+                                      quantityInputRefs.current[index]?.focus();
+                                      quantityInputRefs.current[index]?.select();
+                                    }, 50);
+                                  }}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                      handleItemChange(index, 'produto', p.name); 
+                                      setProductSearch(''); 
+                                      setActiveSearchIndex(null);
+                                      setTimeout(() => {
+                                        quantityInputRefs.current[index]?.focus();
+                                      }, 50);
+                                    }
                                   }}
                                   className="w-full px-2 py-1.5 text-left text-xs hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2"
                                 >
@@ -551,17 +682,20 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         <div className="col-span-4 sm:col-span-2">
                           <Label className="text-[10px] text-gray-500 mb-1 block">Qtd</Label>
                           <Input 
+                            ref={el => quantityInputRefs.current[index] = el}
                             type="number" 
                             value={item.quantidade} 
                             onChange={e => handleItemChange(index, 'quantidade', parseFloat(e.target.value) || 0)} 
+                            onKeyDown={e => handleItemKeyDown(e, index, 'quantidade')}
                             className="h-8 text-xs" 
+                            tabIndex={0}
                           />
                         </div>
                         {/* Unidade */}
                         <div className="col-span-4 sm:col-span-2">
                           <Label className="text-[10px] text-gray-500 mb-1 block">Un</Label>
                           <Select value={item.unidade} onValueChange={v => handleItemChange(index, 'unidade', v)}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 text-xs" tabIndex={0}><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="un">un</SelectItem>
                               <SelectItem value="kg">kg</SelectItem>
@@ -575,11 +709,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         <div className="col-span-4 sm:col-span-2">
                           <Label className="text-[10px] text-gray-500 mb-1 block">Preço</Label>
                           <Input 
+                            ref={el => priceInputRefs.current[index] = el}
                             type="number" 
                             step="0.01"
                             value={item.valorUnitario} 
                             onChange={e => handleItemChange(index, 'valorUnitario', parseFloat(e.target.value) || 0)} 
+                            onKeyDown={e => handleItemKeyDown(e, index, 'preco')}
                             className="h-8 text-xs" 
+                            tabIndex={0}
                           />
                         </div>
                         {/* Ações */}
@@ -743,12 +880,19 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         {/* Footer */}
         <div className="flex-shrink-0 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center justify-between">
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={loading}>
-              Fechar
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={loading}>
+                Fechar
+              </Button>
+              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
+                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Alt+←→</kbd> Abas</span>
+                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Alt+N</kbd> Novo item</span>
+                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Ctrl+Enter</kbd> Salvar</span>
+              </div>
+            </div>
             <Button onClick={handleSubmit} size="sm" disabled={loading} className="bg-orange-600 hover:bg-orange-700 text-white">
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-              Salvar Alterações
+              Salvar (Ctrl+Enter)
             </Button>
           </div>
         </div>

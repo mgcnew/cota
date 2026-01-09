@@ -146,11 +146,13 @@ export function useProducts() {
         let lastQuotePrice = "R$ 0,00";
         let bestSupplier = "-";
         let trend: "up" | "down" | "stable" = "stable";
+        let lastOrderTimestamp: number | null = null;
 
         if (orderPrices.length > 0) {
           const latestOrderPrice = orderPrices[0];
           lastQuotePrice = `R$ ${latestOrderPrice.price.toFixed(2)}`;
           bestSupplier = latestOrderPrice.supplierName;
+          lastOrderTimestamp = new Date(latestOrderPrice.created_at).getTime();
 
           // Calculate trend if we have at least 2 orders
           if (orderPrices.length >= 2) {
@@ -178,18 +180,40 @@ export function useProducts() {
           quotesCount,
           lastUpdate,
           trend,
+          _lastOrderTimestamp: lastOrderTimestamp, // Internal field for sorting
         };
       });
 
-      console.log('[PRODUCTS DEBUG] Total formatted products:', formattedProducts.length);
-      console.log('[PRODUCTS DEBUG] Sample formatted products:', formattedProducts.slice(0, 3).map(p => ({ 
+      // Sort products: those with recent orders first, then by created_at
+      formattedProducts.sort((a, b) => {
+        const aTimestamp = (a as any)._lastOrderTimestamp;
+        const bTimestamp = (b as any)._lastOrderTimestamp;
+        
+        // Products with orders come first
+        if (aTimestamp && !bTimestamp) return -1;
+        if (!aTimestamp && bTimestamp) return 1;
+        
+        // Both have orders: sort by most recent order
+        if (aTimestamp && bTimestamp) {
+          return bTimestamp - aTimestamp;
+        }
+        
+        // Neither has orders: maintain original order (by created_at)
+        return 0;
+      });
+
+      // Remove internal sorting field before returning
+      const cleanedProducts = formattedProducts.map(({ _lastOrderTimestamp, ...rest }: any) => rest as Product);
+
+      console.log('[PRODUCTS DEBUG] Total formatted products:', cleanedProducts.length);
+      console.log('[PRODUCTS DEBUG] Sample formatted products:', cleanedProducts.slice(0, 3).map(p => ({ 
         id: p.id, 
         name: p.name, 
         category: p.category,
         quotesCount: p.quotesCount 
       })));
 
-      return formattedProducts;
+      return cleanedProducts;
     },
   });
 

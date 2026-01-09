@@ -174,6 +174,14 @@ export function useSuppliers() {
 
         // Mask sensitive data for non-admin users (SECURITY: LGPD compliance)
         const maskSensitiveData = !canViewSensitiveData;
+
+        // Get last completed order timestamp for sorting
+        const completedOrdersList = supplierOrders.filter(o => 
+          o.status === 'entregue' || o.status === 'concluido' || o.status === 'completed'
+        );
+        const lastCompletedOrderTimestamp = completedOrdersList.length > 0
+          ? new Date(completedOrdersList[0].order_date).getTime()
+          : null;
         
         return {
           id: s.id,
@@ -189,10 +197,32 @@ export function useSuppliers() {
           phone: maskSensitiveData ? undefined : (s.phone || undefined),
           email: maskSensitiveData ? undefined : (s.email || undefined),
           address: maskSensitiveData ? undefined : (s.address || undefined),
+          _lastCompletedOrderTimestamp: lastCompletedOrderTimestamp, // Internal field for sorting
         };
       });
 
-      return formattedSuppliers;
+      // Sort suppliers: those with recent completed orders first
+      formattedSuppliers.sort((a, b) => {
+        const aTimestamp = (a as any)._lastCompletedOrderTimestamp;
+        const bTimestamp = (b as any)._lastCompletedOrderTimestamp;
+        
+        // Suppliers with completed orders come first
+        if (aTimestamp && !bTimestamp) return -1;
+        if (!aTimestamp && bTimestamp) return 1;
+        
+        // Both have completed orders: sort by most recent
+        if (aTimestamp && bTimestamp) {
+          return bTimestamp - aTimestamp;
+        }
+        
+        // Neither has completed orders: maintain original order
+        return 0;
+      });
+
+      // Remove internal sorting field before returning
+      const cleanedSuppliers = formattedSuppliers.map(({ _lastCompletedOrderTimestamp, ...rest }: any) => rest as Supplier);
+
+      return cleanedSuppliers;
     },
   });
 

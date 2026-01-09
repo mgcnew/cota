@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Package, Award, Search, DollarSign, ClipboardList, X } from "lucide-react";
+import { Calendar, Package, Award, Search, DollarSign, ClipboardList, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSupplierQuoteHistory } from "@/hooks/useSupplierQuoteHistory";
 import { useSupplierOrderHistory } from "@/hooks/useSupplierOrderHistory";
@@ -14,14 +14,20 @@ interface SupplierQuoteHistoryDialogProps {
   supplierName: string;
   supplierId: string;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }: SupplierQuoteHistoryDialogProps) {
+export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange }: SupplierQuoteHistoryDialogProps) {
   const isMobile = false; // Removida dependência mobile
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("quotes");
   const [searchTerm, setSearchTerm] = useState("");
   const scrollPositionRef = useRef<number>(0);
+  
+  // Support both controlled and uncontrolled modes
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
   
   const { data: quoteHistory = [], isLoading: quotesLoading, error: quotesError } = useSupplierQuoteHistory(supplierId);
   const { data: orderHistory = [], isLoading: ordersLoading, error: ordersError } = useSupplierOrderHistory(isOpen && activeTab === "orders" ? supplierId : "");
@@ -35,7 +41,12 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
         window.scrollTo(0, scrollPositionRef.current);
       }, 100);
     }
-    setIsOpen(newOpen);
+    
+    if (isControlled && controlledOnOpenChange) {
+      controlledOnOpenChange(newOpen);
+    } else {
+      setInternalOpen(newOpen);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -73,6 +84,33 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
     lastOrderDate: null,
     deliveredOrders: 0
   };
+
+  // Calculate price trend for each order (compare with previous order)
+  const ordersWithTrend = useMemo(() => {
+    if (orderHistory.length === 0) return [];
+    
+    // Orders are already sorted by date descending
+    return orderHistory.map((order, index) => {
+      const previousOrder = orderHistory[index + 1]; // Next in array = previous in time
+      let trend: 'up' | 'down' | 'same' | null = null;
+      let trendPercent: number | null = null;
+      
+      if (previousOrder && previousOrder.totalValue > 0) {
+        const diff = order.totalValue - previousOrder.totalValue;
+        trendPercent = (diff / previousOrder.totalValue) * 100;
+        
+        if (Math.abs(trendPercent) < 1) {
+          trend = 'same';
+        } else if (diff > 0) {
+          trend = 'up';
+        } else {
+          trend = 'down';
+        }
+      }
+      
+      return { ...order, trend, trendPercent };
+    });
+  }, [orderHistory]);
 
   const baseUniqueProducts = useMemo(() => {
     if (quoteHistory.length === 0) return [];
@@ -257,8 +295,8 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                                 className={cn(
                                   "font-medium text-xs",
                                   quote.isWinner 
-                                    ? "bg-green-100 text-green-700 border-green-200" 
-                                    : "bg-gray-100 text-gray-700 border-gray-200"
+                                    ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800" 
+                                    : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                                 )}
                               >
                                 {quote.isWinner ? "Ganha" : "Não ganha"}
@@ -274,38 +312,38 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                     })}
                   </div>
                 ) : (
-                  <div className="overflow-hidden rounded-lg border border-gray-200">
+                  <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gradient-to-r from-blue-50/80 to-purple-50/80 border-b border-blue-100">
+                      <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-900/30 dark:to-purple-900/30 border-b border-blue-100 dark:border-blue-800">
                           <tr>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                Data
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 dark:text-blue-100 uppercase tracking-wider w-[100px]">
+                              <div className="flex items-center gap-1.5">
+                                <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                                <span>Data</span>
                               </div>
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">
-                              <div className="flex items-center gap-2">
-                                <Package className="h-4 w-4" />
-                                Nome do Produto
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 dark:text-blue-100 uppercase tracking-wider">
+                              <div className="flex items-center gap-1.5">
+                                <Package className="h-3.5 w-3.5 flex-shrink-0" />
+                                <span>Produto</span>
                               </div>
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">
-                              <div className="flex items-center gap-2">
-                                <DollarSign className="h-4 w-4" />
-                                Preço
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 dark:text-blue-100 uppercase tracking-wider w-[90px]">
+                              <div className="flex items-center gap-1.5">
+                                <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
+                                <span>Preço</span>
                               </div>
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">
-                              <div className="flex items-center gap-2">
-                                <Award className="h-4 w-4" />
-                                Status da Cotação
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 dark:text-blue-100 uppercase tracking-wider w-[90px]">
+                              <div className="flex items-center gap-1.5">
+                                <Award className="h-3.5 w-3.5 flex-shrink-0" />
+                                <span>Status</span>
                               </div>
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                           {filteredAndSortedProducts.map((product, index) => {
                             const productQuotes = quoteHistory.filter(q => q.product === product.name);
                             
@@ -313,34 +351,36 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                               <tr 
                                 key={`${product.name}-${quoteIndex}`}
                                 className={cn(
-                                  "hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/30 transition-all duration-200",
-                                  (index + quoteIndex) % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                                  "hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/30 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 transition-all duration-200",
+                                  (index + quoteIndex) % 2 === 0 ? "bg-white dark:bg-gray-800" : "bg-gray-50/30 dark:bg-gray-800/50"
                                 )}
                               >
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="font-medium text-gray-900">
+                                <td className="px-3 py-3 text-sm">
+                                  <div className="font-medium text-gray-900 dark:text-gray-100">
                                     {formatDate(String(quote.date))}
                                   </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="font-medium text-gray-900">{quote.product}</div>
+                                <td className="px-3 py-3 text-sm">
+                                  <div className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px]" title={quote.product}>
+                                    {quote.product}
+                                  </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="font-medium text-gray-900">
+                                <td className="px-3 py-3 text-sm">
+                                  <div className="font-medium text-gray-900 dark:text-gray-100">
                                     R$ {quote.price.toFixed(2)}
                                   </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-3 py-3 text-sm">
                                   <Badge 
                                     variant={quote.isWinner ? "default" : "secondary"}
                                     className={cn(
-                                      "font-medium",
+                                      "font-medium text-xs",
                                       quote.isWinner 
-                                        ? "bg-green-100 text-green-700 border-green-200" 
-                                        : "bg-gray-100 text-gray-700 border-gray-200"
+                                        ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800" 
+                                        : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                                     )}
                                   >
-                                    {quote.isWinner ? "Ganha" : "Não ganha"}
+                                    {quote.isWinner ? "Ganha" : "Não"}
                                   </Badge>
                                 </td>
                               </tr>
@@ -429,13 +469,33 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
                   </div>
                 ) : (
                   <div className={isMobile ? 'space-y-3' : 'space-y-4'}>
-                    {orderHistory.map((order) => (
+                    {ordersWithTrend.map((order) => (
                       <div key={order.id} className={`border border-gray-200 dark:border-gray-700 rounded-xl ${isMobile ? 'p-3' : 'p-4'} bg-white dark:bg-gray-800/60`}>
                         <div className={`flex flex-col ${isMobile ? '' : 'md:flex-row md:justify-between md:items-start'} gap-4`}>
-                          <div className="space-y-2">
-                            <div className={`flex items-center gap-2 ${isMobile ? 'text-base' : 'text-sm'} font-semibold text-gray-900 dark:text-white`}>
-                              <span className={`uppercase ${isMobile ? 'text-xs' : 'text-xs'} tracking-wide text-gray-500 dark:text-gray-400`}>Pedido</span>
-                              <span>#{order.id.substring(0, 8)}</span>
+                          <div className="space-y-2 flex-1">
+                            <div className={`flex items-center justify-between gap-2 ${isMobile ? 'text-base' : 'text-sm'} font-semibold text-gray-900 dark:text-white`}>
+                              <div className="flex items-center gap-2">
+                                <span className={`uppercase ${isMobile ? 'text-xs' : 'text-xs'} tracking-wide text-gray-500 dark:text-gray-400`}>Pedido</span>
+                                <span>#{order.id.substring(0, 8)}</span>
+                              </div>
+                              {/* Price Trend Indicator */}
+                              {order.trend && (
+                                <div className={cn(
+                                  "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
+                                  order.trend === 'up' && "bg-red-50 text-red-600 border border-red-200",
+                                  order.trend === 'down' && "bg-green-50 text-green-600 border border-green-200",
+                                  order.trend === 'same' && "bg-gray-50 text-gray-600 border border-gray-200"
+                                )}>
+                                  {order.trend === 'up' && <TrendingUp className="h-3 w-3" />}
+                                  {order.trend === 'down' && <TrendingDown className="h-3 w-3" />}
+                                  {order.trend === 'same' && <Minus className="h-3 w-3" />}
+                                  <span>
+                                    {order.trend === 'up' && `+${order.trendPercent?.toFixed(1)}%`}
+                                    {order.trend === 'down' && `${order.trendPercent?.toFixed(1)}%`}
+                                    {order.trend === 'same' && 'Estável'}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                             <div className={`grid ${isMobile ? 'grid-cols-2 gap-2' : 'grid-cols-2 md:grid-cols-4 gap-3'} ${isMobile ? 'text-xs' : 'text-xs'} text-gray-600 dark:text-gray-300`}>
                               <div>
@@ -513,13 +573,16 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-        <SheetTrigger asChild>
-          {trigger || (
-            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              Ver Histórico
-            </button>
-          )}
-        </SheetTrigger>
+        {/* Only render trigger when not in controlled mode or when trigger is provided */}
+        {(!isControlled || trigger) && (
+          <SheetTrigger asChild>
+            {trigger || (
+              <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                Ver Histórico
+              </button>
+            )}
+          </SheetTrigger>
+        )}
         <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
           <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
@@ -558,16 +621,19 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger }
   // Desktop: Usar Dialog
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-            Ver Histórico
-          </button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 border-b border-gray-100 pb-4">
-          <DialogTitle className="flex items-center justify-between gap-3 text-xl font-bold text-gray-900">
+      {/* Only render trigger when not in controlled mode or when trigger is provided */}
+      {(!isControlled || trigger) && (
+        <DialogTrigger asChild>
+          {trigger || (
+            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              Ver Histórico
+            </button>
+          )}
+        </DialogTrigger>
+      )}
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col [&>button]:hidden bg-white dark:bg-gray-900">
+        <DialogHeader className="flex-shrink-0 border-b border-gray-100 dark:border-gray-700 pb-4">
+          <DialogTitle className="flex items-center justify-between gap-3 text-xl font-bold text-gray-900 dark:text-white">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
                 <Package className="h-5 w-5 text-white" />

@@ -97,6 +97,7 @@ function Fornecedores() {
   });
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
+  const [historySupplier, setHistorySupplier] = useState<Supplier | null>(null);
   const addSupplierRef = useRef<HTMLButtonElement>(null);
   const importSuppliersRef = useRef<HTMLButtonElement>(null);
 
@@ -595,9 +596,9 @@ function Fornecedores() {
                                       variant: "default" as const,
                                     },
                                     {
-                                      icon: <Eye className="h-4 w-4" />,
+                                      icon: <History className="h-4 w-4" />,
                                       label: "Ver Histórico",
-                                      onClick: () => {},
+                                      onClick: () => setHistorySupplier(supplier),
                                       variant: "default" as const,
                                     }
                                   ]}
@@ -666,6 +667,18 @@ function Fornecedores() {
                 open={!!deletingSupplier}
                 onOpenChange={open => { if (!open) setDeletingSupplier(null); }}
                 onDelete={handleDeleteSupplier}
+              />
+            </Suspense>
+          )}
+
+          {/* Supplier History Dialog */}
+          {historySupplier && (
+            <Suspense fallback={<DialogLoader />}>
+              <SupplierQuoteHistoryDialog
+                supplierName={historySupplier.name}
+                supplierId={historySupplier.id}
+                open={!!historySupplier}
+                onOpenChange={(open) => { if (!open) setHistorySupplier(null); }}
               />
             </Suspense>
           )}
