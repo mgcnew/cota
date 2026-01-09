@@ -15,6 +15,7 @@ interface MetricCardProps {
   };
   variant?: "default" | "success" | "warning" | "error" | "info";
   className?: string;
+  onClick?: () => void;
 }
 
 // Modo claro: cores vibrantes com hierarquia | Modo escuro: fundo neutro escuro
@@ -69,6 +70,7 @@ export const MetricCard = memo(function MetricCard({
   trend,
   variant = "default",
   className,
+  onClick,
 }: MetricCardProps) {
   const styles = VARIANT_STYLES[variant];
 
@@ -76,14 +78,16 @@ export const MetricCard = memo(function MetricCard({
     <ResponsiveCard
       size="default"
       padding="sm"
-      interactive={false}
+      interactive={!!onClick}
       className={cn(
         "relative overflow-hidden border",
         styles.border,
         styles.glow,
         styles.cardBg,
+        onClick && "cursor-pointer",
         className
       )}
+      onClick={onClick}
     >
       <div className="flex flex-row items-center justify-between gap-2">
         <CardTitle className={cn("text-xs sm:text-sm font-bold truncate flex-1", styles.titleColor)}>

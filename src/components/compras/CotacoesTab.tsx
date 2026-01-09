@@ -9,7 +9,7 @@ import type { Quote } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
-import { FileText, Plus, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ClipboardList, Eye, Package, CircleDot, Info } from "lucide-react";
+import { FileText, Plus, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ClipboardList, Eye, Package, CircleDot, Info, CheckCircle2, AlertTriangle, ShoppingCart } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -61,9 +61,38 @@ function CotacoesTab() {
     startTransition(() => { setSelectedQuote(quote); setDeleteDialogOpen(true); });
   }, []);
 
+  // Helper para verificar status especial da cotação
+  const getQuoteSpecialStatus = useCallback((cotacao: Quote) => {
+    const fornecedoresRespondidos = cotacao.fornecedoresParticipantes?.filter(f => f.status === "respondido").length || 0;
+    const totalFornecedores = cotacao.fornecedoresParticipantes?.length || 0;
+    const isProntaParaDecisao = cotacao.statusReal === "ativa" && totalFornecedores > 0 && fornecedoresRespondidos === totalFornecedores;
+    
+    const hoje = new Date();
+    const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
+    const dataFim = new Date(cotacao.dataFim.split('/').reverse().join('-'));
+    const isVencendo = cotacao.statusReal === "ativa" && dataFim <= em48h && dataFim >= hoje;
+    
+    return { isProntaParaDecisao, isVencendo, fornecedoresRespondidos, totalFornecedores };
+  }, []);
+
   const filteredCotacoes = useMemo(() => {
     return cotacoes.filter(c => {
       const matchesSearch = c.produto.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || c.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      
+      // Filtros especiais
+      if (statusFilter === "prontas") {
+        const fornecedoresRespondidos = c.fornecedoresParticipantes?.filter(f => f.status === "respondido").length || 0;
+        const totalFornecedores = c.fornecedoresParticipantes?.length || 0;
+        return matchesSearch && c.statusReal === "ativa" && totalFornecedores > 0 && fornecedoresRespondidos === totalFornecedores;
+      }
+      
+      if (statusFilter === "vencendo") {
+        const hoje = new Date();
+        const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
+        const dataFim = new Date(c.dataFim.split('/').reverse().join('-'));
+        return matchesSearch && c.statusReal === "ativa" && dataFim <= em48h && dataFim >= hoje;
+      }
+      
       const matchesStatus = statusFilter === "all" || c.statusReal === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -93,6 +122,24 @@ function CotacoesTab() {
   const stats = useMemo(() => {
     const ativas = cotacoes.filter(c => c.statusReal === "ativa").length;
     const pendentes = cotacoes.filter(c => c.status === "pendente").length;
+    
+    // Cotações prontas para decisão (todos fornecedores responderam)
+    const prontasParaDecisao = cotacoes.filter(c => {
+      if (c.statusReal !== "ativa") return false;
+      const fornecedoresRespondidos = c.fornecedoresParticipantes?.filter(f => f.status === "respondido").length || 0;
+      const totalFornecedores = c.fornecedoresParticipantes?.length || 0;
+      return totalFornecedores > 0 && fornecedoresRespondidos === totalFornecedores;
+    }).length;
+    
+    // Cotações vencendo em 48h
+    const hoje = new Date();
+    const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
+    const vencendo = cotacoes.filter(c => {
+      if (c.statusReal !== "ativa") return false;
+      const dataFim = new Date(c.dataFim.split('/').reverse().join('-'));
+      return dataFim <= em48h && dataFim >= hoje;
+    }).length;
+    
     let economiaTotal = 0;
     cotacoes.forEach(c => { 
       if (c.fornecedoresParticipantes?.length >= 2) { 
@@ -102,7 +149,9 @@ function CotacoesTab() {
     });
     return { 
       ativas, 
-      pendentes, 
+      pendentes,
+      prontasParaDecisao,
+      vencendo,
       economiaFormatada: economiaTotal > 0 ? `R$ ${economiaTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : "R$ 0"
     };
   }, [cotacoes]);
@@ -114,9 +163,24 @@ function CotacoesTab() {
   return (
     <div className="space-y-4">
       {/* Metrics */}
-      <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 3 }}>
+      <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
         <MetricCard title="Ativas" value={stats.ativas} icon={FileText} variant="info" />
-        <MetricCard title="Pendentes" value={stats.pendentes} icon={Calendar} variant="warning" />
+        <MetricCard 
+          title="Prontas" 
+          value={stats.prontasParaDecisao} 
+          icon={CheckCircle2} 
+          variant="success"
+          onClick={() => setStatusFilter("prontas")}
+          className="cursor-pointer hover:ring-2 hover:ring-emerald-300"
+        />
+        <MetricCard 
+          title="Vencendo" 
+          value={stats.vencendo} 
+          icon={AlertTriangle} 
+          variant="warning"
+          onClick={() => setStatusFilter("vencendo")}
+          className="cursor-pointer hover:ring-2 hover:ring-amber-300"
+        />
         <MetricCard title="Economia" value={stats.economiaFormatada} icon={DollarSign} variant="success" className="hidden md:block" />
       </ResponsiveGrid>
 
@@ -124,13 +188,15 @@ function CotacoesTab() {
       <div className="flex flex-col sm:flex-row items-stretch gap-2">
         <ExpandableSearch value={searchTerm} onChange={setSearchTerm} placeholder="Buscar..." accentColor="teal" expandedWidth="w-full sm:w-48" />
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[140px] h-10 rounded-xl">
+          <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-xl">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="ativa">Ativas</SelectItem>
             <SelectItem value="pendente">Pendentes</SelectItem>
+            <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
+            <SelectItem value="vencendo">⚠️ Vencendo em 48h</SelectItem>
             <SelectItem value="concluida">Concluídas</SelectItem>
           </SelectContent>
         </Select>
@@ -144,16 +210,91 @@ function CotacoesTab() {
         </div>
       </div>
 
+      {/* Alert: Cotações prontas para decisão */}
+      {stats.prontasParaDecisao > 0 && (
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-3 flex items-center gap-3">
+          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
+              {stats.prontasParaDecisao} cotação(ões) pronta(s) para decisão
+            </p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400">Todos os fornecedores já responderam</p>
+          </div>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="border-emerald-300 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-300"
+            onClick={() => setStatusFilter("prontas")}
+          >
+            Ver
+          </Button>
+        </div>
+      )}
+
+      {/* Alert: Cotações vencendo */}
+      {stats.vencendo > 0 && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              {stats.vencendo} cotação(ões) vencendo em 48h
+            </p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">Prazo expirando em breve</p>
+          </div>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300"
+            onClick={() => setStatusFilter("vencendo")}
+          >
+            Ver
+          </Button>
+        </div>
+      )}
+
       {/* Mobile Cards View */}
       <div className="md:hidden space-y-2">
         {paginatedData.items.map((cotacao, index) => {
           const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
+          const { isProntaParaDecisao, isVencendo, fornecedoresRespondidos, totalFornecedores } = getQuoteSpecialStatus(cotacao);
+          
           return (
-            <div key={cotacao.id} className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-3 shadow-sm">
+            <div 
+              key={cotacao.id} 
+              className={`bg-white dark:bg-gray-800/50 rounded-xl border p-3 shadow-sm ${
+                isProntaParaDecisao 
+                  ? 'border-emerald-300 dark:border-emerald-700 ring-1 ring-emerald-200 dark:ring-emerald-800' 
+                  : isVencendo 
+                    ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800'
+                    : 'border-gray-200 dark:border-gray-700/30'
+              }`}
+            >
+              {/* Indicador de status especial */}
+              {isProntaParaDecisao && (
+                <div className="flex items-center gap-1.5 mb-2 text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-semibold uppercase">Pronta para decisão</span>
+                </div>
+              )}
+              {isVencendo && !isProntaParaDecisao && (
+                <div className="flex items-center gap-1.5 mb-2 text-amber-600 dark:text-amber-400">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-semibold uppercase">Vencendo em breve</span>
+                </div>
+              )}
+              
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center flex-shrink-0">
-                    <ClipboardList className="h-5 w-5 text-teal-600" />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    isProntaParaDecisao 
+                      ? 'bg-emerald-100 dark:bg-emerald-900/30' 
+                      : 'bg-teal-100 dark:bg-teal-900/30'
+                  }`}>
+                    {isProntaParaDecisao ? (
+                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                    ) : (
+                      <ClipboardList className="h-5 w-5 text-teal-600" />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm truncate"><CapitalizedText>{cotacao.produtoResumo || cotacao.produto}</CapitalizedText></p>
@@ -170,6 +311,11 @@ function CotacoesTab() {
                     ) : (
                       <>
                         <DropdownMenuItem onClick={() => handleGerenciarQuote(cotacao)}><ClipboardList className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
+                        {isProntaParaDecisao && (
+                          <DropdownMenuItem onClick={() => handleGerenciarQuote(cotacao)} className="text-emerald-600">
+                            <ShoppingCart className="h-4 w-4 mr-2" />Converter em Pedido
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleDeleteQuote(cotacao)} className="text-red-600"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
                       </>
@@ -179,11 +325,19 @@ function CotacoesTab() {
               </div>
               <div className="flex items-center gap-2 mb-2">
                 <StatusBadge status={cotacao.statusReal} />
-                <Badge variant="outline" className="text-xs"><Building2 className="h-3 w-3 mr-1" />{cotacao.fornecedores}</Badge>
+                <Badge variant="outline" className={`text-xs ${
+                  fornecedoresRespondidos === totalFornecedores && totalFornecedores > 0
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700'
+                    : ''
+                }`}>
+                  <Building2 className="h-3 w-3 mr-1" />{fornecedoresRespondidos}/{totalFornecedores}
+                </Badge>
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Melhor: <span className="font-semibold text-green-600">{cotacao.melhorPreco || 'R$ 0,00'}</span></span>
-                <span className="text-muted-foreground">Fim: {cotacao.dataFim || '-'}</span>
+                <span className={`${isVencendo ? 'text-amber-600 font-semibold' : 'text-muted-foreground'}`}>
+                  Fim: {cotacao.dataFim || '-'}
+                </span>
               </div>
             </div>
           );
