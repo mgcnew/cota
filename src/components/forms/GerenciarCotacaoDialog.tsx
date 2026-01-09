@@ -1068,6 +1068,58 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                   </Card>
                 </div>
 
+                {/* Botões de ação rápida */}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      // Auto-selecionar melhor fornecedor para cada produto
+                      const bestSelections: Record<string, string> = {};
+                      products.forEach((product: any) => {
+                        const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
+                        if (bestSupplierId) bestSelections[product.product_id] = bestSupplierId;
+                      });
+                      setProductSelections(bestSelections);
+                      toast({ title: "✅ Melhores preços selecionados!", description: `Total: R$ ${melhorTotal.toFixed(2)}` });
+                    }}
+                    className="flex-1 border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
+                  >
+                    <Award className="h-4 w-4 mr-2" />
+                    Selecionar Melhores Preços
+                  </Button>
+                  {supplierGroups.length > 1 && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        // Selecionar fornecedor com menor total geral
+                        const supplierTotalsArray = fornecedores.map(f => {
+                          const total = products.reduce((sum: number, p: any) => {
+                            const value = getSupplierProductValue(f.id, p.product_id);
+                            return sum + (value > 0 ? value : Infinity);
+                          }, 0);
+                          return { id: f.id, total, hasAllProducts: !products.some((p: any) => getSupplierProductValue(f.id, p.product_id) === 0) };
+                        }).filter(s => s.hasAllProducts).sort((a, b) => a.total - b.total);
+                        
+                        if (supplierTotalsArray.length > 0) {
+                          const bestSingleSupplier = supplierTotalsArray[0].id;
+                          const singleSelections: Record<string, string> = {};
+                          products.forEach((product: any) => {
+                            singleSelections[product.product_id] = bestSingleSupplier;
+                          });
+                          setProductSelections(singleSelections);
+                          toast({ title: "✅ Fornecedor único selecionado!", description: "Todos os produtos com o mesmo fornecedor" });
+                        } else {
+                          toast({ title: "⚠️ Nenhum fornecedor tem todos os produtos", variant: "destructive" });
+                        }
+                      }}
+                      className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                    >
+                      <Building2 className="h-4 w-4 mr-2" />
+                      Fornecedor Único
+                    </Button>
+                  )}
+                </div>
+
                 {totalSelecao > melhorTotal && (
                   <Card className="p-3 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                     <div className="flex items-center gap-2">
