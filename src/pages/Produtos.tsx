@@ -27,8 +27,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { LazyImage } from "@/components/responsive/LazyImage";
-import { ProductsHeroCard } from "@/components/products/ProductsHeroCard";
-import { ProductsStatusSummary } from "@/components/products/ProductsStatusSummary";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 
@@ -285,61 +283,31 @@ function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Hero Section - Simplificado no mobile */}
-          <section className="hidden md:grid md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
-            <ProductsHeroCard
-              totalProducts={stats.totalProducts}
-              productsWithPrice={stats.productsWithPrices}
-              averagePrice={stats.averageValueNumeric}
-              economyPotential={stats.economiaPotencial}
-              percentWithQuotes={stats.percentualComCotacao}
-            />
-            <ProductsStatusSummary
-              ativos={stats.produtosPorStatus.ativos}
-              cotados={stats.produtosPorStatus.cotados}
-              pendentes={stats.produtosPorStatus.pendentes}
-              semCotacao={stats.produtosPorStatus.semCotacao}
-              topCategoria={stats.topCategoria}
-            />
-          </section>
-
-          {/* Mobile: Métricas compactas essenciais */}
-          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-3 md:mb-6">
+          {/* Métricas essenciais - compactas */}
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }} className="mb-4">
             <MetricCard
               title="Produtos"
               value={stats.totalProducts}
               icon={Package}
               variant="warning"
-              trend={{
-                value: `${stats.percentualComCotacao}%`,
-                label: "cotados",
-                type: "neutral"
-              }}
+            />
+            <MetricCard
+              title="Categorias"
+              value={stats.totalCategories}
+              icon={Tags}
+              variant="info"
             />
             <MetricCard
               title="Cotações"
-              value={typeof stats.activeQuotes === 'number' ? stats.activeQuotes.toLocaleString('pt-BR') : 0}
-              icon={FileText}
-              variant="info"
-              trend={{
-                value: stats.mediaCotacoesPorProduto,
-                label: "por produto",
-                type: "positive"
-              }}
+              value={stats.activeQuotes}
+              icon={ClipboardList}
+              variant="success"
             />
             <MetricCard
               title="Valor Médio"
               value={stats.averageValue}
-              icon={Scale}
-              variant="success"
-              className="hidden md:block"
-            />
-            <MetricCard
-              title="Economia"
-              value={`${stats.percentualEconomiaMedia}%`}
-              icon={TrendingUp}
-              variant="success"
-              className="hidden md:block"
+              icon={DollarSign}
+              variant="default"
             />
           </ResponsiveGrid>
 
