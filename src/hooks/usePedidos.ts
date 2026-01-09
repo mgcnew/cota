@@ -94,11 +94,39 @@ export function usePedidos() {
     },
   });
 
+  // Mutation para atualizar status do pedido
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ pedidoId, status }: { pedidoId: string; status: string }) => {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', pedidoId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      toast({
+        title: "Status atualizado",
+        description: "O status do pedido foi atualizado",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status",
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     pedidos,
     isLoading,
     error,
     deletePedido: deleteMutation.mutate,
+    updatePedidoStatus: updateStatusMutation.mutate,
+    isUpdating: updateStatusMutation.isPending,
     refetch: async () => {
       await refetch();
     },

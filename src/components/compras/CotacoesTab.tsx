@@ -8,6 +8,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Quote } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusSelect, QUOTE_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { FileText, Plus, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ClipboardList, Eye, Package, CircleDot, Info, CheckCircle2, AlertTriangle, ShoppingCart } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -42,7 +43,7 @@ function CotacoesTab() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
 
-  const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, convertToOrder, addQuoteItem, removeQuoteItem, addQuoteSupplier, removeQuoteSupplier, isUpdating } = useCotacoes();
+  const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, convertToOrder, addQuoteItem, removeQuoteItem, addQuoteSupplier, removeQuoteSupplier, updateQuoteStatus, isUpdating } = useCotacoes();
   const { products: allProducts } = useProducts();
   const { suppliers: allSuppliers } = useSuppliers();
   
@@ -335,7 +336,12 @@ function CotacoesTab() {
                 </DropdownMenu>
               </div>
               <div className="flex items-center gap-2 mb-2">
-                <StatusBadge status={cotacao.statusReal} />
+                <StatusSelect
+                  value={cotacao.status}
+                  options={QUOTE_STATUS_OPTIONS}
+                  onChange={(newStatus) => updateQuoteStatus({ quoteId: cotacao.id, status: newStatus })}
+                  isLoading={isUpdating}
+                />
                 <Badge variant="outline" className={`text-xs ${
                   fornecedoresRespondidos === totalFornecedores && totalFornecedores > 0
                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700'
@@ -419,7 +425,12 @@ function CotacoesTab() {
                         </CapitalizedText>
                       </div>
                       <div className="w-[10%] pl-2 flex justify-center">
-                        <StatusBadge status={cotacao.statusReal} />
+                        <StatusSelect
+                          value={cotacao.status}
+                          options={QUOTE_STATUS_OPTIONS}
+                          onChange={(newStatus) => updateQuoteStatus({ quoteId: cotacao.id, status: newStatus })}
+                          isLoading={isUpdating}
+                        />
                       </div>
                       <div className="w-[14%] pl-2">
                         <span className="font-bold text-green-600">{cotacao.melhorPreco || 'R$ 0,00'}</span>

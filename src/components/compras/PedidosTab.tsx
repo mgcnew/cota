@@ -3,6 +3,7 @@ import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusSelect, ORDER_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { Table, TableCell, TableRow } from "@/components/ui/table";
 import { DataPagination } from "@/components/ui/data-pagination";
@@ -41,7 +42,7 @@ function PedidosTab() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { pedidos: pedidosDataArray, isLoading, refetch } = usePedidos();
+  const { pedidos: pedidosDataArray, isLoading, refetch, updatePedidoStatus, isUpdating } = usePedidos();
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
@@ -171,7 +172,12 @@ function PedidosTab() {
               </DropdownMenu>
             </div>
             <div className="flex items-center gap-2 mb-2">
-              <StatusBadge status={pedido.status} />
+              <StatusSelect
+                value={pedido.status}
+                options={ORDER_STATUS_OPTIONS}
+                onChange={(newStatus) => updatePedidoStatus({ pedidoId: pedido.id, status: newStatus })}
+                isLoading={isUpdating}
+              />
               <Badge variant="outline" className="text-xs"><Package className="h-3 w-3 mr-1" />{pedido.itens} itens</Badge>
             </div>
             <div className="flex justify-between text-xs">
@@ -241,7 +247,12 @@ function PedidosTab() {
                       <span className="font-medium text-sm truncate block max-w-[150px]">{capitalize(pedido.fornecedor)}</span>
                     </div>
                     <div className="w-[12%] pl-2 flex justify-center">
-                      <StatusBadge status={pedido.status} />
+                      <StatusSelect
+                        value={pedido.status}
+                        options={ORDER_STATUS_OPTIONS}
+                        onChange={(newStatus) => updatePedidoStatus({ pedidoId: pedido.id, status: newStatus })}
+                        isLoading={isUpdating}
+                      />
                     </div>
                     <div className="w-[15%] pl-2">
                       <span className="font-bold text-green-600">{pedido.total}</span>
