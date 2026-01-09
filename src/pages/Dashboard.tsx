@@ -333,8 +333,8 @@ function Dashboard() {
 
           {/* Card de Últimas Atividades (1/3 da largura) */}
           <div className="lg:col-span-1">
-            <Card className="h-full border border-border bg-card shadow-sm">
-              <div className="p-4 border-b border-border">
+            <Card className="h-full border border-border bg-card shadow-sm flex flex-col">
+              <div className="p-4 border-b border-border flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
                     <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-sm">
@@ -351,7 +351,7 @@ function Dashboard() {
                 </div>
               </div>
 
-              <div className="p-4 space-y-3 max-h-[600px] overflow-y-auto">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {/* Seção de Cotações */}
                 <div>
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
@@ -360,12 +360,12 @@ function Dashboard() {
                   <div className="space-y-2">
                     {recentQuotes.slice(0, 4).map((quote: any) => (
                       <div key={`q-${quote.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/40">
+                        <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/40 flex-shrink-0">
                           <ClipboardList className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{quote.product}</p>
-                          <p className="text-xs text-muted-foreground truncate">{quote.supplier} • {quote.bestPrice}</p>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-sm font-medium text-foreground truncate" title={quote.product}>{quote.product}</p>
+                          <p className="text-xs text-muted-foreground truncate" title={`${quote.supplier} • ${quote.bestPrice}`}>{quote.supplier} • {quote.bestPrice}</p>
                         </div>
                         <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", statusColors[quote.status] || 'bg-muted-foreground')} />
                       </div>
@@ -387,12 +387,12 @@ function Dashboard() {
                   <div className="space-y-2">
                     {recentOrders.slice(0, 4).map((order) => (
                       <div key={`o-${order.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/40">
+                        <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/40 flex-shrink-0">
                           <ShoppingCart className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{order.supplier}</p>
-                          <p className="text-xs text-muted-foreground truncate">{order.items} itens • {order.total}</p>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-sm font-medium text-foreground truncate" title={order.supplier}>{order.supplier}</p>
+                          <p className="text-xs text-muted-foreground truncate" title={`${order.items} itens • ${order.total}`}>{order.items} itens • {order.total}</p>
                         </div>
                         <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", statusColors[order.status] || 'bg-muted-foreground')} />
                       </div>

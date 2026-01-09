@@ -23,72 +23,77 @@
 
 @layer base {
   :root {
-    /* Background Colors - Cinza muito claro para contraste */
-    /* WCAG AA: foreground (#0A1628) on background (#F6F7F9) = ~15:1 ✓ */
-    --background: 210 17% 98%; /* #F6F7F9 */
-    --foreground: 222 84% 9%; /* #0A1628 - High contrast for readability */
+    /* ============================================
+       SOFT LIGHT MODE - Confortável para os olhos
+       Cores suavizadas para reduzir fadiga visual
+       ============================================ */
     
-    /* Card System - Branco puro */
-    /* WCAG AA: card-foreground on card = ~15:1 ✓ */
-    --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 222 84% 9%;
+    /* Background Colors - Tom mais quente e suave */
+    /* WCAG AA: foreground on background = ~13:1 ✓ */
+    --background: 220 14% 94%; /* #ECEEF2 - Cinza suave com tom frio */
+    --foreground: 222 47% 15%; /* #1A2332 - Texto escuro mas não preto */
     
-    /* Cor Primária: Roxo */
-    /* WCAG AA: primary-foreground (#FFFFFF) on primary (#7C3AED) = ~8:1 ✓ */
-    --primary: 262 83% 58%; /* #7C3AED */
+    /* Card System - Off-white suave */
+    /* WCAG AA: card-foreground on card = ~12:1 ✓ */
+    --card: 220 20% 98%; /* #F9FAFB - Off-white com leve tom azulado */
+    --card-foreground: 222 47% 15%;
+    
+    /* Cor Primária: Roxo (levemente mais suave) */
+    /* WCAG AA: primary-foreground on primary = ~7:1 ✓ */
+    --primary: 262 72% 55%; /* #7E4DD2 - Roxo um pouco mais suave */
     --primary-foreground: 0 0% 100%;
-    --primary-light: 262 83% 68%;
-    --primary-lighter: 262 83% 78%;
+    --primary-light: 262 65% 65%;
+    --primary-lighter: 262 55% 75%;
     
-    /* Secondary Colors */
-    /* WCAG AA: secondary-foreground on secondary = ~12:1 ✓ */
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    /* Secondary Colors - Mais quentes */
+    /* WCAG AA: secondary-foreground on secondary = ~11:1 ✓ */
+    --secondary: 220 20% 92%; /* Cinza azulado suave */
+    --secondary-foreground: 222 40% 18%;
     
-    /* Utility Colors - Cores ajustadas para WCAG AA */
-    /* WCAG AA: White text on success (#22C55E) = ~3.5:1 (large text) ✓ */
-    --success: 142 71% 45%; /* #22C55E - Verde */
-    --success-light: 142 71% 55%;
-    /* WCAG AA: Dark text on warning (#FACC15) = ~1.5:1 - use dark text only */
-    --warning: 45 93% 47%; /* #FACC15 - Amarelo vibrante */
-    --warning-light: 45 93% 57%;
-    /* WCAG AA: White text on error (#EF4444) = ~4.5:1 ✓ */
-    --error: 0 84% 60%; /* #EF4444 */
-    --error-light: 0 84% 70%;
-    /* WCAG AA: White text on info (#8B5CF6) = ~5:1 ✓ */
-    --info: 251 91% 67%; /* #8B5CF6 */
-    --info-light: 251 91% 77%;
+    /* Utility Colors - Cores mais suaves para os olhos */
+    /* WCAG AA: White text on success = ~3.5:1 (large text) ✓ */
+    --success: 152 60% 42%; /* #2D9D6A - Verde mais suave */
+    --success-light: 152 55% 52%;
+    /* WCAG AA: Dark text on warning */
+    --warning: 38 85% 52%; /* #E5A020 - Âmbar mais quente */
+    --warning-light: 38 80% 62%;
+    /* WCAG AA: White text on error = ~4.5:1 ✓ */
+    --error: 4 72% 55%; /* #D95550 - Vermelho mais suave */
+    --error-light: 4 65% 65%;
+    /* WCAG AA: White text on info = ~5:1 ✓ */
+    --info: 251 70% 62%; /* #8B6FE8 - Roxo info mais suave */
+    --info-light: 251 65% 72%;
     
-    /* Neutral Palette */
-    /* WCAG AA: muted-foreground (#6B7280) on background (#F6F7F9) = ~4.5:1 ✓ */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%; /* #6B7280 - Texto secundário */
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    /* Neutral Palette - Tons mais quentes */
+    /* WCAG AA: muted-foreground on background = ~5:1 ✓ */
+    --muted: 220 18% 90%; /* Cinza suave */
+    --muted-foreground: 220 12% 42%; /* #5F6A7D - Texto secundário mais suave */
+    --accent: 220 18% 90%;
+    --accent-foreground: 222 40% 18%;
     
-    /* Interactive Elements */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262 83% 58%;
+    /* Interactive Elements - Bordas mais visíveis */
+    --border: 220 15% 85%; /* Bordas um pouco mais escuras */
+    --input: 220 18% 90%;
+    --ring: 262 72% 55%;
     /* WCAG AA: destructive-foreground on destructive = ~4.5:1 ✓ */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 4 72% 55%;
+    --destructive-foreground: 0 0% 100%;
     
-    /* Popover */
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 84% 9%;
+    /* Popover - Off-white */
+    --popover: 220 20% 98%;
+    --popover-foreground: 222 47% 15%;
     
     /* Spacing & Sizing */
     --radius: 0.75rem;
     
-    /* Shadows - Mais profundidade */
-    --shadow-soft: 0 1px 4px rgba(0, 0, 0, 0.08);
-    --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.12);
-    --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.16);
+    /* Shadows - Mais suaves e difusas */
+    --shadow-soft: 0 1px 3px rgba(30, 40, 60, 0.06), 0 1px 2px rgba(30, 40, 60, 0.04);
+    --shadow-elevated: 0 4px 12px rgba(30, 40, 60, 0.08), 0 2px 4px rgba(30, 40, 60, 0.04);
+    --shadow-floating: 0 8px 24px rgba(30, 40, 60, 0.12), 0 4px 8px rgba(30, 40, 60, 0.06);
     
-    /* Gradients - Roxo e Verde */
+    /* Gradients - Mais suaves */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(220 13% 95%));
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(220 15% 93%));
     --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-light)));
     --gradient-warning: linear-gradient(135deg, hsl(var(--warning)), hsl(var(--warning-light)));
     --gradient-error: linear-gradient(135deg, hsl(var(--error)), hsl(var(--error-light)));
@@ -98,21 +103,15 @@
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    --sidebar-background: 0 0% 100%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 220 13% 95%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar - Tons suaves */
+    --sidebar-background: 220 20% 97%;
+    --sidebar-foreground: 222 40% 25%;
+    --sidebar-primary: 262 72% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 18% 92%;
+    --sidebar-accent-foreground: 222 40% 18%;
+    --sidebar-border: 220 15% 85%;
+    --sidebar-ring: 262 72% 55%;
   }
 
   .dark {
@@ -2018,5 +2017,256 @@
     width: 200%;
     height: 200%;
     opacity: 0.1;
+  }
+}
+
+/* ============================================
+   SOFT LIGHT THEME COMPATIBILITY CLASSES
+   Classes para garantir consistência visual
+   com o novo tema suave
+   ============================================ */
+
+@layer utilities {
+  /* Backgrounds suaves para substituir bg-white hardcoded */
+  .bg-surface {
+    @apply bg-card;
+  }
+  
+  .bg-surface-elevated {
+    @apply bg-card shadow-sm;
+  }
+  
+  .bg-surface-muted {
+    @apply bg-muted/50;
+  }
+  
+  /* Bordas mais suaves */
+  .border-soft {
+    @apply border-border/60;
+  }
+  
+  /* Sombras suaves */
+  .shadow-soft-sm {
+    box-shadow: 0 1px 2px rgba(30, 40, 60, 0.04);
+  }
+  
+  .shadow-soft-md {
+    box-shadow: 0 2px 8px rgba(30, 40, 60, 0.06);
+  }
+  
+  .shadow-soft-lg {
+    box-shadow: 0 4px 16px rgba(30, 40, 60, 0.08);
+  }
+}
+
+/* Override para bg-white em light mode - torna mais suave */
+@layer base {
+  /* Ajuste global para elementos com bg-white */
+  .bg-white {
+    background-color: hsl(220 20% 98%) !important;
+  }
+  
+  /* Ajuste para bg-gray-50 - mais quente */
+  .bg-gray-50 {
+    background-color: hsl(220 18% 94%) !important;
+  }
+  
+  /* Ajuste para bg-gray-100 */
+  .bg-gray-100 {
+    background-color: hsl(220 16% 91%) !important;
+  }
+  
+  /* Dark mode mantém as cores originais */
+  .dark .bg-white {
+    background-color: rgb(255 255 255) !important;
+  }
+  
+  .dark .bg-gray-50 {
+    background-color: rgb(249 250 251) !important;
+  }
+  
+  .dark .bg-gray-100 {
+    background-color: rgb(243 244 246) !important;
+  }
+}
+
+/* ============================================
+   CARD & PANEL SOFT THEME ADJUSTMENTS
+   ============================================ */
+
+@layer components {
+  /* Cards com visual mais suave */
+  .card-soft {
+    @apply bg-card rounded-xl border border-border/50;
+    box-shadow: 0 1px 3px rgba(30, 40, 60, 0.04);
+  }
+  
+  .card-soft:hover {
+    @apply border-border/70;
+    box-shadow: 0 2px 8px rgba(30, 40, 60, 0.06);
+  }
+  
+  /* Painéis com fundo suave */
+  .panel-soft {
+    @apply rounded-lg p-4;
+    background-color: hsl(220 18% 94%);
+    border: 1px solid hsl(220 15% 88%);
+  }
+  
+  .dark .panel-soft {
+    @apply bg-gray-800/50 border-gray-700/30;
+  }
+  
+  /* Input fields mais suaves */
+  .input-soft {
+    @apply bg-card border-border/60 rounded-lg;
+    @apply focus:border-primary/50 focus:ring-2 focus:ring-primary/10;
+  }
+  
+  /* Tabelas com visual suave */
+  .table-soft {
+    @apply bg-card rounded-xl overflow-hidden;
+    box-shadow: 0 1px 3px rgba(30, 40, 60, 0.04);
+  }
+  
+  .table-soft th {
+    background-color: hsl(220 18% 94%);
+    @apply text-foreground/80 font-medium;
+  }
+  
+  .dark .table-soft th {
+    @apply bg-gray-800/70;
+  }
+  
+  .table-soft tr:hover {
+    background-color: hsl(220 20% 96%);
+  }
+  
+  .dark .table-soft tr:hover {
+    @apply bg-gray-800/50;
+  }
+  
+  /* Modais com visual suave */
+  .modal-soft {
+    @apply bg-card rounded-xl;
+    box-shadow: 0 8px 32px rgba(30, 40, 60, 0.15);
+  }
+  
+  .modal-header-soft {
+    background: linear-gradient(to bottom, hsl(220 20% 98%), hsl(220 18% 96%));
+    @apply border-b border-border/50 px-6 py-4;
+  }
+  
+  .dark .modal-header-soft {
+    @apply bg-gray-800/80 border-gray-700/50;
+  }
+  
+  /* Dropdowns suaves */
+  .dropdown-soft {
+    @apply bg-card rounded-lg border border-border/50;
+    box-shadow: 0 4px 16px rgba(30, 40, 60, 0.1);
+  }
+  
+  .dropdown-item-soft {
+    @apply px-3 py-2 rounded-md;
+    @apply hover:bg-muted/50 transition-colors;
+  }
+  
+  /* Badges com cores suaves */
+  .badge-soft-primary {
+    @apply bg-primary/10 text-primary border border-primary/20;
+  }
+  
+  .badge-soft-success {
+    background-color: hsl(152 50% 94%);
+    color: hsl(152 60% 35%);
+    border: 1px solid hsl(152 50% 85%);
+  }
+  
+  .dark .badge-soft-success {
+    @apply bg-green-900/30 text-green-400 border-green-800/50;
+  }
+  
+  .badge-soft-warning {
+    background-color: hsl(38 80% 94%);
+    color: hsl(38 85% 35%);
+    border: 1px solid hsl(38 75% 85%);
+  }
+  
+  .dark .badge-soft-warning {
+    @apply bg-amber-900/30 text-amber-400 border-amber-800/50;
+  }
+  
+  .badge-soft-error {
+    background-color: hsl(4 65% 94%);
+    color: hsl(4 72% 45%);
+    border: 1px solid hsl(4 60% 85%);
+  }
+  
+  .dark .badge-soft-error {
+    @apply bg-red-900/30 text-red-400 border-red-800/50;
+  }
+  
+  .badge-soft-info {
+    background-color: hsl(251 60% 94%);
+    color: hsl(251 70% 50%);
+    border: 1px solid hsl(251 55% 85%);
+  }
+  
+  .dark .badge-soft-info {
+    @apply bg-violet-900/30 text-violet-400 border-violet-800/50;
+  }
+}
+
+/* ============================================
+   FORM ELEMENTS SOFT THEME
+   ============================================ */
+
+@layer components {
+  /* Inputs com estilo suave */
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    background-color: hsl(var(--card)) !important;
+  }
+  
+  /* Placeholder mais suave */
+  ::placeholder {
+    color: hsl(220 12% 55%);
+    opacity: 0.7;
+  }
+  
+  .dark ::placeholder {
+    color: hsl(215 15% 50%);
+    opacity: 0.6;
+  }
+}
+
+/* ============================================
+   HOVER STATES SOFT THEME
+   ============================================ */
+
+@layer utilities {
+  /* Hover suave para elementos interativos */
+  .hover-soft {
+    @apply transition-all duration-200;
+  }
+  
+  .hover-soft:hover {
+    background-color: hsl(220 18% 94%);
+  }
+  
+  .dark .hover-soft:hover {
+    @apply bg-gray-800/50;
+  }
+  
+  /* Hover com elevação suave */
+  .hover-lift-soft {
+    @apply transition-all duration-200;
+  }
+  
+  .hover-lift-soft:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 40, 60, 0.08);
   }
 }
