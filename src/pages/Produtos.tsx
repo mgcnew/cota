@@ -317,6 +317,14 @@ function Produtos() {
             icon={Package}
             actions={
               <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleExportProducts}
+                  className="h-10 hidden sm:flex"
+                >
+                  <Download className="h-4 w-4 mr-2" /> Exportar
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button className="h-11 sm:h-10 min-w-[44px] px-3 sm:px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm touch-target">
@@ -324,27 +332,12 @@ function Produtos() {
                       <span className="hidden sm:inline">Adicionar</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[200px]">
-                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                  <DropdownMenuContent align="end" className="w-[180px]">
                     <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
-                      <Plus className="h-4 w-4 mr-2" /> Adicionar Produto
+                      <Plus className="h-4 w-4 mr-2" /> Novo Produto
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                      <FileUp className="h-4 w-4 mr-2" /> Importar Produtos
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }} className="min-h-[44px]">
-                      <Download className="h-4 w-4 mr-2" /> Exportar Produtos
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/contagem-estoque")} className="min-h-[44px]">
-                      <ClipboardList className="h-4 w-4 mr-2" /> Contagem de Estoque
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/relatorios?tab=produtos")} className="min-h-[44px]">
-                      <FileText className="h-4 w-4 mr-2" /> Relatórios
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/dashboard/analytics")} className="min-h-[44px]">
-                      <TrendingUp className="h-4 w-4 mr-2" /> Analytics
+                      <FileUp className="h-4 w-4 mr-2" /> Importar CSV
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
