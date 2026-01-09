@@ -1,4 +1,5 @@
 import { useState, useMemo, memo, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -8,16 +9,21 @@ import {
   Package,
   Clock,
   ShoppingCart,
-  ClipboardList
+  ClipboardList,
+  CheckCircle2,
+  AlertTriangle,
+  ArrowRight
 } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
 import { usePedidos } from '@/hooks/usePedidos';
+import { useCotacoes } from '@/hooks/useCotacoes';
 import { formatCurrency } from '@/utils/formatters';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 // Lazy load charts
 const EvolutionChart = lazy(() => import('@/components/dashboard/EvolutionChart').then(m => ({ default: m.EvolutionChart })));
@@ -29,15 +35,38 @@ const ChartSkeleton = () => (
 );
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [activityOpen, setActivityOpen] = useState(false);
   const [chartPeriod, setChartPeriod] = useState('7d');
   
   const dashboardData = useDashboard();
   const { pedidos } = usePedidos();
+  const { cotacoes } = useCotacoes();
   const metrics = dashboardData?.metrics;
   const recentQuotes = dashboardData?.recentQuotes ?? [];
   const dailyData = dashboardData?.dailyData ?? [];
   const isLoading = dashboardData?.isLoading ?? true;
+
+  // Cotações prontas para decisão e vencendo
+  const quotesStats = useMemo(() => {
+    const hoje = new Date();
+    const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
+    
+    const prontasParaDecisao = cotacoes.filter(c => {
+      if (c.statusReal !== "ativa") return false;
+      const fornecedoresRespondidos = c.fornecedoresParticipantes?.filter(f => f.status === "respondido").length || 0;
+      const totalFornecedores = c.fornecedoresParticipantes?.length || 0;
+      return totalFornecedores > 0 && fornecedoresRespondidos === totalFornecedores;
+    });
+    
+    const vencendo = cotacoes.filter(c => {
+      if (c.statusReal !== "ativa") return false;
+      const dataFim = new Date(c.dataFim.split('/').reverse().join('-'));
+      return dataFim <= em48h && dataFim >= hoje;
+    });
+    
+    return { prontasParaDecisao, vencendo };
+  }, [cotacoes]);
 
   // Últimos pedidos formatados
   const recentOrders = useMemo(() => {
@@ -211,6 +240,83 @@ function Dashboard() {
             );
           })}
         </div>
+
+        {/* Alertas de Cotações */}
+        {(quotesStats.prontasParaDecisao.length > 0 || quotesStats.vencendo.length > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Cotações Prontas para Decisão */}
+            {quotesStats.prontasParaDecisao.length > 0 && (
+              <Card className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 border-emerald-200 dark:border-emerald-800">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-500 shadow-sm">
+                    <CheckCircle2 className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-emerald-800 dark:text-emerald-200">
+                      {quotesStats.prontasParaDecisao.length} cotação(ões) pronta(s) para decisão
+                    </h3>
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-0.5">
+                      Todos os fornecedores já responderam
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {quotesStats.prontasParaDecisao.slice(0, 3).map(q => (
+                        <span key={q.id} className="text-xs bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-2 py-1 rounded-full">
+                          #{q.id.substring(0, 6)}
+                        </span>
+                      ))}
+                      {quotesStats.prontasParaDecisao.length > 3 && (
+                        <span className="text-xs text-emerald-600 dark:text-emerald-400">
+                          +{quotesStats.prontasParaDecisao.length - 3} mais
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
+                  >
+                    Ver <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </div>
+              </Card>
+            )}
+
+            {/* Cotações Vencendo */}
+            {quotesStats.vencendo.length > 0 && (
+              <Card className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 border-amber-200 dark:border-amber-800">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-amber-500 shadow-sm">
+                    <AlertTriangle className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-amber-800 dark:text-amber-200">
+                      {quotesStats.vencendo.length} cotação(ões) vencendo em 48h
+                    </h3>
+                    <p className="text-sm text-amber-600 dark:text-amber-400 mt-0.5">
+                      Prazo expirando em breve
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {quotesStats.vencendo.slice(0, 3).map(q => (
+                        <span key={q.id} className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-full">
+                          #{q.id.substring(0, 6)} • {q.dataFim}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300"
+                    onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
+                  >
+                    Ver <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
 
         {/* Layout Principal: Gráficos + Atividades */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
