@@ -41,27 +41,16 @@ const Relatorios = lazy(() => import("./pages/Relatorios"));
 // Páginas secundárias - lazy load com prioridade baixa
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 
-// Loading fallback component
+// Loading fallback minimalista - rápido e leve
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="flex flex-col items-center gap-3">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="text-sm text-muted-foreground">Carregando...</p>
-    </div>
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
   </div>
 );
 
-/**
- * PageWrapper - Wraps lazy-loaded pages with ErrorBoundary and Suspense
- * Provides consistent error handling and loading states across all pages
- * Requirements: 10.5, 12.1, 12.2
- */
+// PageWrapper leve - apenas ErrorBoundary, Suspense fica no AppLayout
 const PageWrapper = ({ children }: { children: ReactNode }) => (
-  <ErrorBoundary>
-    <Suspense fallback={<PageLoader />}>
-      {children}
-    </Suspense>
-  </ErrorBoundary>
+  <ErrorBoundary>{children}</ErrorBoundary>
 );
 
 // QueryClient configuração padrão

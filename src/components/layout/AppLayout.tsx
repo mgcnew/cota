@@ -181,21 +181,16 @@ export function AppLayout() {
           </div>
         </header>
 
-        {/* Main Content */}
+        {/* Main Content - Simplificado */}
         <main
           className={cn(
-            "flex-1 w-full pb-20 md:pb-0 relative pt-[3.75rem] transition-all duration-300 ease-in-out overflow-x-hidden overflow-y-auto",
+            "flex-1 w-full pb-20 md:pb-0 pt-[3.75rem] overflow-x-hidden",
             isSidebarExpanded ? "md:pl-[16.5rem]" : "md:pl-[5.5rem]"
           )}
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          <div className="min-h-full w-full max-w-full page-content-wrapper overflow-x-hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <div className="w-full max-w-full overflow-x-hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              <SmoothPageTransition>
-                <Outlet />
-              </SmoothPageTransition>
-            </div>
-          </div>
+          <SmoothPageTransition>
+            <Outlet />
+          </SmoothPageTransition>
         </main>
       </div>
 
