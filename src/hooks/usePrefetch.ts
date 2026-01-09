@@ -15,8 +15,8 @@ export const prefetchProdutos = () => import('../pages/Produtos');
 // Suppliers prefetch - commonly accessed from dashboard
 export const prefetchFornecedores = () => import('../pages/Fornecedores');
 
-// Quotes prefetch - commonly accessed from dashboard
-export const prefetchCotacoes = () => import('../pages/Cotacoes');
+// Compras prefetch - unified page for quotes and orders
+export const prefetchCompras = () => import('../pages/Compras');
 
 /**
  * Hook to prefetch pages on mount or after a delay

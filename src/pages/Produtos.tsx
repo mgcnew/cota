@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useExportCSV } from "@/hooks/useExportCSV";
-import { Package, Plus, Filter, MoreVertical, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download, Loader2 } from "lucide-react";
+import { Package, Plus, MoreVertical, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download, Loader2 } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
@@ -30,6 +30,7 @@ import { LazyImage } from "@/components/responsive/LazyImage";
 import { ProductsHeroCard } from "@/components/products/ProductsHeroCard";
 import { ProductsStatusSummary } from "@/components/products/ProductsStatusSummary";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
+import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
 
@@ -271,9 +272,11 @@ function Produtos() {
 
   if (loading || productsLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">Carregando...</div>
-      </div>
+      <PageWrapper>
+        <div className="page-container">
+          <ProductsSkeleton />
+        </div>
+      </PageWrapper>
     );
   }
 
