@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, startTransition, memo } from "react";
+import { useState, useMemo, useCallback, startTransition, memo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
@@ -48,6 +48,17 @@ function CotacoesTab() {
   
   const availableProducts = useMemo(() => allProducts.map(p => ({ id: p.id, name: p.name, unit: p.unit || 'un' })), [allProducts]);
   const availableSuppliers = useMemo(() => allSuppliers.map(s => ({ id: s.id, name: s.name })), [allSuppliers]);
+
+  // Ouvir evento de atalho de teclado para nova cotação
+  useEffect(() => {
+    const handleNovaEvent = (e: CustomEvent) => {
+      if (e.detail?.tab === 'cotacoes') {
+        setAddDialogOpen(true);
+      }
+    };
+    window.addEventListener('compras:nova', handleNovaEvent as EventListener);
+    return () => window.removeEventListener('compras:nova', handleNovaEvent as EventListener);
+  }, []);
 
   const handleViewQuote = useCallback((quote: Quote) => {
     startTransition(() => { setSelectedQuote(quote); setViewDialogOpen(true); });
@@ -186,7 +197,7 @@ function CotacoesTab() {
 
       {/* Filters & Actions */}
       <div className="flex flex-col sm:flex-row items-stretch gap-2">
-        <ExpandableSearch value={searchTerm} onChange={setSearchTerm} placeholder="Buscar..." accentColor="teal" expandedWidth="w-full sm:w-48" />
+        <ExpandableSearch value={searchTerm} onChange={setSearchTerm} placeholder="Buscar..." accentColor="teal" expandedWidth="w-full sm:w-48" data-search-input />
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-xl">
             <SelectValue placeholder="Status" />

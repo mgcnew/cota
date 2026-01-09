@@ -1,9 +1,12 @@
-import { useState, useEffect, lazy, Suspense, memo } from "react";
+import { useState, useEffect, lazy, Suspense, memo, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingBag, FileText, ShoppingCart, Loader2 } from "lucide-react";
+import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
+import { useKeyboardShortcuts, formatShortcut } from "@/hooks/useKeyboardShortcuts";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 // Lazy load tab contents for better performance
 const CotacoesTab = lazy(() => import("@/components/compras/CotacoesTab"));
@@ -34,6 +37,42 @@ function Compras() {
     setSearchParams({ tab: value });
   };
 
+  // Atalhos de teclado
+  const shortcuts = useMemo(() => [
+    {
+      key: '1',
+      action: () => handleTabChange('cotacoes'),
+      description: 'Ir para Cotações'
+    },
+    {
+      key: '2',
+      action: () => handleTabChange('pedidos'),
+      description: 'Ir para Pedidos'
+    },
+    {
+      key: 'n',
+      ctrl: true,
+      action: () => {
+        // Dispara evento customizado para abrir dialog de nova cotação/pedido
+        const event = new CustomEvent('compras:nova', { detail: { tab: activeTab } });
+        window.dispatchEvent(event);
+      },
+      description: 'Nova cotação/pedido'
+    },
+    {
+      key: 'f',
+      ctrl: true,
+      action: () => {
+        // Foca no campo de busca
+        const searchInput = document.querySelector('[data-search-input]') as HTMLInputElement;
+        if (searchInput) searchInput.focus();
+      },
+      description: 'Buscar'
+    }
+  ], [activeTab]);
+
+  useKeyboardShortcuts({ shortcuts });
+
   return (
     <PageWrapper>
       <div className="page-container">
@@ -49,7 +88,30 @@ function Compras() {
               </div>
             </div>
             
-            <TabsList className="h-9 p-0.5 bg-muted/60 rounded-lg">
+            <div className="flex items-center gap-2">
+              {/* Indicador de atalhos */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hidden sm:flex">
+                      <Keyboard className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[200px]">
+                    <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
+                    <ul className="text-xs space-y-1">
+                      {shortcuts.map((s, i) => (
+                        <li key={i} className="flex justify-between gap-3">
+                          <span className="text-muted-foreground">{s.description}</span>
+                          <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
+                        </li>
+                      ))}
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TabsList className="h-9 p-0.5 bg-muted/60 rounded-lg">
               <TabsTrigger 
                 value="cotacoes" 
                 className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
@@ -65,6 +127,7 @@ function Compras() {
                 Pedidos
               </TabsTrigger>
             </TabsList>
+            </div>
           </div>
 
           <TabsContent value="cotacoes" className="mt-0">

@@ -52,6 +52,7 @@ interface ExpandableSearchProps {
   accentColor?: keyof typeof accentColors;
   className?: string;
   expandedWidth?: string;
+  "data-search-input"?: boolean;
 }
 
 export const ExpandableSearch = memo(function ExpandableSearch({
@@ -61,6 +62,7 @@ export const ExpandableSearch = memo(function ExpandableSearch({
   accentColor = "teal",
   className,
   expandedWidth = "w-64",
+  "data-search-input": dataSearchInput,
 }: ExpandableSearchProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -150,6 +152,7 @@ export const ExpandableSearch = memo(function ExpandableSearch({
             onFocus={handleFocus}
             onBlur={handleBlur}
             placeholder={placeholder}
+            data-search-input={dataSearchInput || undefined}
             className={cn(
               "w-full h-full pl-10 pr-8 bg-transparent",
               "text-sm text-gray-900 dark:text-white",

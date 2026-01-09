@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, memo } from "react";
+import { useState, useMemo, useCallback, memo, useEffect } from "react";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +47,17 @@ function PedidosTab() {
   const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState<OrderData | null>(null);
+
+  // Ouvir evento de atalho de teclado para novo pedido
+  useEffect(() => {
+    const handleNovaEvent = (e: CustomEvent) => {
+      if (e.detail?.tab === 'pedidos') {
+        setAddDialogOpen(true);
+      }
+    };
+    window.addEventListener('compras:nova', handleNovaEvent as EventListener);
+    return () => window.removeEventListener('compras:nova', handleNovaEvent as EventListener);
+  }, []);
 
   const pedidos = useMemo((): OrderData[] => {
     return pedidosDataArray.map(order => ({
