@@ -14,7 +14,6 @@ import {
   BarChart3,
   ClipboardList,
   StickyNote,
-  ShoppingBasket,
   ChevronDown,
   ChevronRight,
   PanelLeftClose,
@@ -66,8 +65,7 @@ const menuCategories: MenuCategory[] = [
   {
     title: "Operações",
     items: [
-      { title: "Compras", url: "/dashboard/compras", icon: ShoppingCart },
-      { title: "Lista de Compras", url: "/dashboard/lista-compras", icon: ShoppingBasket }
+      { title: "Compras", url: "/dashboard/compras", icon: ShoppingCart }
     ]
   },
   {

@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense, memo, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3 } from "lucide-react";
+import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3, ShoppingBasket } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { useKeyboardShortcuts, formatShortcut } from "@/hooks/useKeyboardShortcuts";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 const CotacoesTab = lazy(() => import("@/components/compras/CotacoesTab"));
 const PedidosTab = lazy(() => import("@/components/compras/PedidosTab"));
 const AnaliseTab = lazy(() => import("@/components/compras/AnaliseTab"));
+const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"));
 
 const TabLoader = () => (
   <div className="flex items-center justify-center py-12">
@@ -28,7 +29,7 @@ function Compras() {
   // Sync tab with URL
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && (tab === "cotacoes" || tab === "pedidos" || tab === "analise")) {
+    if (tab && (tab === "cotacoes" || tab === "pedidos" || tab === "analise" || tab === "lista")) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -52,6 +53,11 @@ function Compras() {
     },
     {
       key: '3',
+      action: () => handleTabChange('lista'),
+      description: 'Ir para Lista'
+    },
+    {
+      key: '4',
       action: () => handleTabChange('analise'),
       description: 'Ir para Análise'
     },
@@ -133,6 +139,13 @@ function Compras() {
                 Pedidos
               </TabsTrigger>
               <TabsTrigger 
+                value="lista"
+                className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
+              >
+                <ShoppingBasket className="h-3.5 w-3.5 mr-1.5" />
+                Lista
+              </TabsTrigger>
+              <TabsTrigger 
                 value="analise"
                 className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
               >
@@ -158,6 +171,12 @@ function Compras() {
           <TabsContent value="analise" className="mt-0">
             <Suspense fallback={<TabLoader />}>
               <AnaliseTab />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="lista" className="mt-0">
+            <Suspense fallback={<TabLoader />}>
+              <ListaComprasTab />
             </Suspense>
           </TabsContent>
         </Tabs>

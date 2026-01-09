@@ -33,7 +33,6 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Produtos = lazy(() => import("./pages/Produtos"));
 const Fornecedores = lazy(() => import("./pages/Fornecedores"));
 const Compras = lazy(() => import("./pages/Compras"));
-const ListaCompras = lazy(() => import("./pages/ListaCompras"));
 const ContagemEstoque = lazy(() => import("./pages/ContagemEstoque"));
 const Anotacoes = lazy(() => import("./pages/Anotacoes"));
 const Relatorios = lazy(() => import("./pages/Relatorios"));
@@ -103,12 +102,12 @@ const App = () => {
                   <Route path="compras" element={<PageWrapper><Compras /></PageWrapper>} />
                   <Route path="cotacoes" element={<Navigate to="/dashboard/compras?tab=cotacoes" replace />} />
                   <Route path="pedidos" element={<Navigate to="/dashboard/compras?tab=pedidos" replace />} />
+                  <Route path="lista-compras" element={<Navigate to="/dashboard/compras?tab=lista" replace />} />
                   <Route path="historico" element={<Navigate to="/dashboard/relatorios?tab=historico" replace />} />
                   <Route path="relatorios" element={<PageWrapper><Relatorios /></PageWrapper>} />
                   <Route path="analytics" element={<Navigate to="/dashboard/relatorios?tab=analytics" replace />} />
                   <Route path="contagem-estoque" element={<PageWrapper><ContagemEstoque /></PageWrapper>} />
                   <Route path="anotacoes" element={<PageWrapper><Anotacoes /></PageWrapper>} />
-                  <Route path="lista-compras" element={<PageWrapper><ListaCompras /></PageWrapper>} />
                   <Route path="configuracoes" element={<PageWrapper><Configuracoes /></PageWrapper>} />
                 </Route>
 
