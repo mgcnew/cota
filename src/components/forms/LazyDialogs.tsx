@@ -78,36 +78,38 @@ function createLazyDialog(
 /**
  * Creates a lazy-loaded dialog that only imports when `open` prop becomes true
  * This provides even better performance by deferring the import until needed
+ * 
+ * Fixed: Removed intermediate loader to prevent "flash" effect
  */
 function createDeferredLazyDialog(
   importFn: () => Promise<{ default: ComponentType<AnyProps> } | Record<string, ComponentType<AnyProps>>>,
   exportName?: string
 ): FC<AnyProps> {
   return function DeferredLazyDialog(props: AnyProps) {
-    const [hasBeenOpened, setHasBeenOpened] = useState(false);
     const [LazyComponent, setLazyComponent] = useState<ComponentType<AnyProps> | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-      if (props.open && !hasBeenOpened) {
-        setHasBeenOpened(true);
+      // Only start loading when dialog opens and component isn't loaded yet
+      if (props.open && !LazyComponent && !isLoading) {
+        setIsLoading(true);
         importFn().then((module) => {
           if (exportName && exportName in module) {
             setLazyComponent(() => (module as Record<string, ComponentType<AnyProps>>)[exportName]);
           } else {
             setLazyComponent(() => (module as { default: ComponentType<AnyProps> }).default);
           }
+          setIsLoading(false);
+        }).catch(() => {
+          setIsLoading(false);
         });
       }
-    }, [props.open, hasBeenOpened]);
+    }, [props.open, LazyComponent, isLoading]);
 
-    // Don't render anything until the dialog has been opened at least once
-    if (!hasBeenOpened) {
-      return null;
-    }
-
-    // Show loader while component is loading
+    // Don't render anything until component is loaded
+    // This prevents the "flash" of the loader dialog
     if (!LazyComponent) {
-      return <DialogLoader />;
+      return null;
     }
 
     return <LazyComponent {...props} />;
