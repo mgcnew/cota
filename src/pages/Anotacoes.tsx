@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Plus,
   StickyNote,
@@ -20,42 +21,58 @@ import {
   AlertTriangle,
   Flame,
   Clock,
-  Search
+  Search,
+  ChevronDown,
+  ChevronUp,
+  MessageSquare
 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { useNotes, type Importance, type Note } from "@/hooks/useNotes";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const importanceConfig = {
   low: {
     label: "Baixa",
-    color: "border-l-blue-400 bg-blue-50/50 dark:bg-blue-950/20",
-    badgeColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+    color: "from-blue-500/10 to-cyan-500/10 dark:from-blue-900/30 dark:to-cyan-900/30",
+    borderColor: "border-blue-400/50",
+    badgeColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300",
+    iconBg: "bg-blue-100 dark:bg-blue-900/40",
     icon: Info,
     iconColor: "text-blue-600 dark:text-blue-400",
+    glowColor: "shadow-blue-500/20",
   },
   medium: {
     label: "Média",
-    color: "border-l-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20",
-    badgeColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+    color: "from-indigo-500/10 to-purple-500/10 dark:from-indigo-900/30 dark:to-purple-900/30",
+    borderColor: "border-indigo-400/50",
+    badgeColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300",
+    iconBg: "bg-indigo-100 dark:bg-indigo-900/40",
     icon: AlertCircle,
     iconColor: "text-indigo-600 dark:text-indigo-400",
+    glowColor: "shadow-indigo-500/20",
   },
   high: {
     label: "Alta",
-    color: "border-l-orange-400 bg-orange-50/50 dark:bg-orange-950/20",
-    badgeColor: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+    color: "from-orange-500/10 to-amber-500/10 dark:from-orange-900/30 dark:to-amber-900/30",
+    borderColor: "border-orange-400/50",
+    badgeColor: "bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-300",
+    iconBg: "bg-orange-100 dark:bg-orange-900/40",
     icon: AlertTriangle,
     iconColor: "text-orange-600 dark:text-orange-400",
+    glowColor: "shadow-orange-500/20",
   },
   urgent: {
     label: "Urgente",
-    color: "border-l-red-400 bg-red-50/50 dark:bg-red-950/20",
-    badgeColor: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+    color: "from-red-500/10 to-rose-500/10 dark:from-red-900/30 dark:to-rose-900/30",
+    borderColor: "border-red-400/50",
+    badgeColor: "bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-300",
+    iconBg: "bg-red-100 dark:bg-red-900/40",
     icon: Flame,
     iconColor: "text-red-600 dark:text-red-400",
+    glowColor: "shadow-red-500/20",
   },
 };
 
@@ -327,91 +344,28 @@ export default function Anotacoes() {
           </div>
         </PageHeader>
 
-        {/* Notas Ativas */}
+        {/* Notas Ativas - Grid Layout */}
         {filteredNotes && Array.isArray(filteredNotes) && filteredNotes.length > 0 && (
-          <div className="space-y-3">
-            {filteredNotes.map((note, index) => {
-              const config = importanceConfig[note.importance];
-              const Icon = config.icon;
-
-              return (
-                <CSSSlideIn
-                  key={note.id}
-                  direction="up"
-                  duration={200}
-                  delay={index * 30}
-                >
-                  <Card className={`${config.color} border-l-4`}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Icon className={`h-4 w-4 ${config.iconColor}`} />
-                            <Badge className={config.badgeColor}>
-                              {config.label}
-                            </Badge>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {new Date(note.created_at).toLocaleDateString('pt-BR')}
-                            </div>
-                          </div>
-
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {note.title}
-                          </h3>
-
-                          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                            {note.content}
-                          </p>
-
-                          {note.observation && (
-                            <div className="pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
-                              <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                                {note.observation}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditNote(note as any)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleResolveNote(note.id)}
-                            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                          >
-                            <CheckCircle2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteNote(note.id)}
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CSSSlideIn>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredNotes.map((note, index) => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                index={index}
+                onEdit={handleEditNote}
+                onResolve={handleResolveNote}
+                onDelete={handleDeleteNote}
+              />
+            ))}
           </div>
         )}
 
         {/* Empty State */}
         {filteredNotes.length === 0 && !isLoading && (
           <div className="text-center py-12">
-            <StickyNote className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center">
+              <StickyNote className="h-10 w-10 text-indigo-500" />
+            </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               Nenhuma anotação encontrada
             </h3>
@@ -421,33 +375,30 @@ export default function Anotacoes() {
           </div>
         )}
 
-        {/* Notas Resolvidas */}
+        {/* Notas Resolvidas - Grid Layout */}
         {resolvedNotes && Array.isArray(resolvedNotes) && resolvedNotes.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-300">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
-              Anotações Resolvidas ({resolvedNotes.length})
+              Resolvidas ({resolvedNotes.length})
             </h2>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {resolvedNotes.map((note) => {
                 const config = importanceConfig[note.importance];
                 const Icon = config.icon;
 
                 return (
-                  <Card key={note.id} className="bg-gray-50 dark:bg-gray-900 opacity-60">
+                  <Card key={note.id} className="bg-gray-50/80 dark:bg-gray-900/50 opacity-70 hover:opacity-90 transition-opacity">
                     <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4 text-muted-foreground" />
-                            <Badge variant="outline" className="text-muted-foreground">
-                              {config.label}
-                            </Badge>
-                          </div>
-                          <h3 className="text-base font-semibold line-through text-muted-foreground">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-gray-200/50 dark:bg-gray-700/50">
+                          <Icon className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium line-through text-muted-foreground truncate">
                             {note.title}
                           </h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                             {note.content}
                           </p>
                         </div>
@@ -455,9 +406,9 @@ export default function Anotacoes() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteNote(note.id)}
-                          className="h-8 w-8 p-0"
+                          className="h-7 w-7 p-0 shrink-0"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </CardContent>
@@ -469,5 +420,142 @@ export default function Anotacoes() {
         )}
       </div>
     </PageWrapper>
+  );
+}
+
+// Componente de Card de Nota
+interface NoteCardProps {
+  note: Note;
+  index: number;
+  onEdit: (note: Note) => void;
+  onResolve: (noteId: string) => void;
+  onDelete: (noteId: string) => void;
+}
+
+function NoteCard({ note, index, onEdit, onResolve, onDelete }: NoteCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const config = importanceConfig[note.importance];
+  const Icon = config.icon;
+  
+  const hasMoreContent = note.content.length > 100 || note.observation;
+  const truncatedContent = note.content.length > 100 ? note.content.slice(0, 100) + "..." : note.content;
+
+  return (
+    <CSSSlideIn
+      direction="up"
+      duration={200}
+      delay={index * 30}
+    >
+      <Card 
+        className={cn(
+          "group relative overflow-hidden border transition-all duration-300 hover:shadow-lg",
+          config.borderColor,
+          config.glowColor,
+          "hover:shadow-md"
+        )}
+      >
+        {/* Gradient Background */}
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-br opacity-60",
+          config.color
+        )} />
+        
+        <CardContent className="relative p-4">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-2 mb-3">
+            <div className={cn("p-2 rounded-lg shrink-0", config.iconBg)}>
+              <Icon className={cn("h-4 w-4", config.iconColor)} />
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(note as any)}
+                className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onResolve(note.id)}
+                className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(note.id)}
+                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Title */}
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+            {note.title}
+          </h3>
+
+          {/* Content */}
+          <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+              {isExpanded ? note.content : truncatedContent}
+            </p>
+            
+            {hasMoreContent && (
+              <>
+                <CollapsibleContent className="mt-2 space-y-2">
+                  {note.observation && (
+                    <div className="pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <MessageSquare className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Observação</span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                        {note.observation}
+                      </p>
+                    </div>
+                  )}
+                </CollapsibleContent>
+                
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full mt-2 h-7 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    {isExpanded ? (
+                      <>
+                        <ChevronUp className="h-3 w-3 mr-1" />
+                        Recolher
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-3 w-3 mr-1" />
+                        Expandir
+                      </>
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+              </>
+            )}
+          </Collapsible>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200/30 dark:border-gray-700/30">
+            <Badge className={cn("text-[10px] px-2 py-0.5", config.badgeColor)}>
+              {config.label}
+            </Badge>
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              {new Date(note.created_at).toLocaleDateString('pt-BR')}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </CSSSlideIn>
   );
 }
