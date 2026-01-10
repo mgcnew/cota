@@ -29,21 +29,85 @@ export default function AnaliseTab({}: AnaliseTabProps) {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  // Buscar produtos
+  // Buscar produtos (com paginação para carregar todos)
   const { data: products = [] } = useQuery({
     queryKey: ["analysis-products"],
     queryFn: async () => {
-      const { data } = await supabase.from("products").select("id, name").order("name");
-      return data || [];
+      // Primeiro, obter a contagem total
+      const { count: totalCount } = await supabase
+        .from("products")
+        .select("*", { count: "exact", head: true });
+
+      if (!totalCount || totalCount === 0) return [];
+
+      // Se tiver menos de 1000, busca normal
+      if (totalCount <= 1000) {
+        const { data } = await supabase.from("products").select("id, name").order("name");
+        return data || [];
+      }
+
+      // Implementar paginação para carregar todos os produtos
+      const pageSize = 1000;
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const allProducts: Array<{ id: string; name: string }> = [];
+
+      for (let page = 0; page < totalPages; page++) {
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data: pageData } = await supabase
+          .from("products")
+          .select("id, name")
+          .order("name")
+          .range(from, to);
+
+        if (pageData && pageData.length > 0) {
+          allProducts.push(...pageData);
+        }
+      }
+
+      return allProducts;
     },
   });
 
-  // Buscar fornecedores
+  // Buscar fornecedores (com paginação para carregar todos)
   const { data: suppliers = [] } = useQuery({
     queryKey: ["analysis-suppliers"],
     queryFn: async () => {
-      const { data } = await supabase.from("suppliers").select("id, name, contact").order("name");
-      return data || [];
+      // Primeiro, obter a contagem total
+      const { count: totalCount } = await supabase
+        .from("suppliers")
+        .select("*", { count: "exact", head: true });
+
+      if (!totalCount || totalCount === 0) return [];
+
+      // Se tiver menos de 1000, busca normal
+      if (totalCount <= 1000) {
+        const { data } = await supabase.from("suppliers").select("id, name, contact").order("name");
+        return data || [];
+      }
+
+      // Implementar paginação para carregar todos os fornecedores
+      const pageSize = 1000;
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const allSuppliers: Array<{ id: string; name: string; contact: string | null }> = [];
+
+      for (let page = 0; page < totalPages; page++) {
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data: pageData } = await supabase
+          .from("suppliers")
+          .select("id, name, contact")
+          .order("name")
+          .range(from, to);
+
+        if (pageData && pageData.length > 0) {
+          allSuppliers.push(...pageData);
+        }
+      }
+
+      return allSuppliers;
     },
   });
 
