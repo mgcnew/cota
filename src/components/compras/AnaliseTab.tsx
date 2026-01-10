@@ -111,7 +111,7 @@ export default function AnaliseTab({}: AnaliseTabProps) {
     },
   });
 
-  // Filtrar resultados da busca
+  // Filtrar resultados da busca (inclui nome do fornecedor e nome do vendedor/contato)
   const searchResults = useMemo(() => {
     if (!debouncedSearch || debouncedSearch.length < 2) return [];
     
@@ -119,12 +119,23 @@ export default function AnaliseTab({}: AnaliseTabProps) {
     const productResults = products
       .filter(p => p.name.toLowerCase().includes(term))
       .slice(0, 5)
-      .map(p => ({ type: "product" as SearchType, id: p.id, name: p.name }));
+      .map(p => ({ type: "product" as SearchType, id: p.id, name: p.name, contact: null as string | null }));
     
+    // Busca por nome do fornecedor OU nome do vendedor (contact)
     const supplierResults = suppliers
-      .filter(s => s.name.toLowerCase().includes(term))
+      .filter(s => 
+        s.name.toLowerCase().includes(term) || 
+        (s.contact && s.contact.toLowerCase().includes(term))
+      )
       .slice(0, 5)
-      .map(s => ({ type: "supplier" as SearchType, id: s.id, name: s.name }));
+      .map(s => ({ 
+        type: "supplier" as SearchType, 
+        id: s.id, 
+        name: s.name,
+        contact: s.contact,
+        // Flag para indicar se foi encontrado pelo vendedor
+        matchedByContact: s.contact && s.contact.toLowerCase().includes(term) && !s.name.toLowerCase().includes(term)
+      }));
     
     return [...productResults, ...supplierResults];
   }, [debouncedSearch, products, suppliers]);
@@ -164,14 +175,14 @@ export default function AnaliseTab({}: AnaliseTabProps) {
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-violet-900 dark:text-violet-100">Central de Análise</p>
-            <p className="text-xs text-violet-600 dark:text-violet-400">Busque um produto ou fornecedor para análise detalhada</p>
+            <p className="text-xs text-violet-600 dark:text-violet-400">Busque por produto, fornecedor ou vendedor</p>
           </div>
         </div>
         
         <div className="mt-3 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <Input
-            placeholder="Digite o nome do produto ou fornecedor..."
+            placeholder="Digite o nome do produto, fornecedor ou vendedor..."
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setHighlightedIndex(-1); }}
             onKeyDown={handleSearchKeyDown}
@@ -208,7 +219,16 @@ export default function AnaliseTab({}: AnaliseTabProps) {
                   <div className="flex-1">
                     <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
                     <p className="text-xs text-gray-500">
-                      {item.type === "product" ? "Produto" : "Fornecedor"}
+                      {item.type === "product" ? "Produto" : (
+                        <>
+                          Fornecedor
+                          {item.contact && (
+                            <span className="ml-1 text-blue-500">
+                              • Vendedor: {item.contact}
+                            </span>
+                          )}
+                        </>
+                      )}
                     </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-gray-400" />
