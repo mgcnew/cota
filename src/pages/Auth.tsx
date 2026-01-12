@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, startTransition } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,9 @@ export default function Auth() {
   useEffect(() => {
     if (user) {
       const redirectTo = searchParams.get("redirect") || "/dashboard";
-      navigate(redirectTo, { replace: true });
+      startTransition(() => {
+        navigate(redirectTo, { replace: true });
+      });
     }
   }, [user, navigate, searchParams]);
 
