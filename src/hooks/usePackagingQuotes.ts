@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { 
-  PackagingQuote, 
   PackagingQuoteDisplay, 
   PackagingSupplierDisplay,
   PackagingComparison 
@@ -19,14 +18,14 @@ export function usePackagingQuotes() {
       if (!user) throw new Error('Usuário não autenticado');
 
       // Buscar cotações com itens e fornecedores
-      const { data: quotesData, error: quotesError } = await supabase
-        .from('packaging_quotes')
+      const { data: quotesData, error: quotesError } = await (supabase
+        .from('packaging_quotes' as any)
         .select(`
           *,
           packaging_quote_items(*),
           packaging_quote_suppliers(*)
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any);
 
       if (quotesError) {
         console.error('Erro ao buscar cotações de embalagens:', quotesError);
@@ -38,9 +37,9 @@ export function usePackagingQuotes() {
       }
 
       // Buscar todos os supplier_items
-      const { data: supplierItems, error: siError } = await supabase
-        .from('packaging_supplier_items')
-        .select('*');
+      const { data: supplierItems, error: siError } = await (supabase
+        .from('packaging_supplier_items' as any)
+        .select('*') as any);
 
       if (siError) {
         console.warn('Erro ao buscar itens de fornecedores:', siError);
@@ -131,33 +130,34 @@ export function usePackagingQuotes() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data: profile } = await supabase
-        .from('profiles')
+      // Buscar company_id do usuário via company_users
+      const { data: companyUser } = await supabase
+        .from('company_users')
         .select('company_id')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .single();
 
-      if (!profile?.company_id) throw new Error('Empresa não encontrada');
+      if (!companyUser?.company_id) throw new Error('Empresa não encontrada');
 
       // Criar cotação
-      const { data: quote, error: quoteError } = await supabase
-        .from('packaging_quotes')
+      const { data: quote, error: quoteError } = await (supabase
+        .from('packaging_quotes' as any)
         .insert({
-          company_id: profile.company_id,
+          company_id: companyUser.company_id,
           status: 'ativa',
           data_inicio: data.dataInicio.toISOString().split('T')[0],
           data_fim: data.dataFim.toISOString().split('T')[0],
           observacoes: data.observacoes || null,
         })
         .select()
-        .single();
+        .single() as any);
 
       if (quoteError) throw quoteError;
 
       // Criar itens da cotação
       if (data.itens.length > 0) {
-        const { error: itemsError } = await supabase
-          .from('packaging_quote_items')
+        const { error: itemsError } = await (supabase
+          .from('packaging_quote_items' as any)
           .insert(
             data.itens.map(item => ({
               quote_id: quote.id,
@@ -165,15 +165,15 @@ export function usePackagingQuotes() {
               packaging_name: item.packagingName,
               quantidade_necessaria: item.quantidadeNecessaria || null,
             }))
-          );
+          ) as any);
 
         if (itemsError) throw itemsError;
       }
 
       // Criar fornecedores da cotação
       if (data.fornecedoresIds.length > 0) {
-        const { error: suppliersError } = await supabase
-          .from('packaging_quote_suppliers')
+        const { error: suppliersError } = await (supabase
+          .from('packaging_quote_suppliers' as any)
           .insert(
             data.fornecedoresIds.map(supplierId => ({
               quote_id: quote.id,
@@ -181,7 +181,7 @@ export function usePackagingQuotes() {
               supplier_name: data.fornecedoresNomes[supplierId] || 'Fornecedor',
               status: 'pendente',
             }))
-          );
+          ) as any);
 
         if (suppliersError) throw suppliersError;
 
@@ -199,9 +199,9 @@ export function usePackagingQuotes() {
         }
 
         if (supplierItemsToInsert.length > 0) {
-          const { error: siError } = await supabase
-            .from('packaging_supplier_items')
-            .insert(supplierItemsToInsert);
+          const { error: siError } = await (supabase
+            .from('packaging_supplier_items' as any)
+            .insert(supplierItemsToInsert) as any);
 
           if (siError) console.warn('Erro ao criar supplier_items:', siError);
         }
@@ -239,8 +239,8 @@ export function usePackagingQuotes() {
         ? data.valorTotal / data.quantidadeUnidadesEstimada 
         : null;
 
-      const { error } = await supabase
-        .from('packaging_supplier_items')
+      const { error } = await (supabase
+        .from('packaging_supplier_items' as any)
         .update({
           valor_total: data.valorTotal,
           unidade_venda: data.unidadeVenda,
@@ -253,19 +253,19 @@ export function usePackagingQuotes() {
         })
         .eq('quote_id', data.quoteId)
         .eq('supplier_id', data.supplierId)
-        .eq('packaging_id', data.packagingId);
+        .eq('packaging_id', data.packagingId) as any);
 
       if (error) throw error;
 
       // Atualizar status do fornecedor para "respondido"
-      await supabase
-        .from('packaging_quote_suppliers')
+      await (supabase
+        .from('packaging_quote_suppliers' as any)
         .update({
           status: 'respondido',
           data_resposta: new Date().toISOString(),
         })
         .eq('quote_id', data.quoteId)
-        .eq('supplier_id', data.supplierId);
+        .eq('supplier_id', data.supplierId) as any);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
@@ -282,10 +282,10 @@ export function usePackagingQuotes() {
 
   const updateQuoteStatus = useMutation({
     mutationFn: async ({ quoteId, status }: { quoteId: string; status: string }) => {
-      const { error } = await supabase
-        .from('packaging_quotes')
+      const { error } = await (supabase
+        .from('packaging_quotes' as any)
         .update({ status, updated_at: new Date().toISOString() })
-        .eq('id', quoteId);
+        .eq('id', quoteId) as any);
 
       if (error) throw error;
     },
@@ -296,10 +296,10 @@ export function usePackagingQuotes() {
 
   const deleteQuote = useMutation({
     mutationFn: async (quoteId: string) => {
-      const { error } = await supabase
-        .from('packaging_quotes')
+      const { error } = await (supabase
+        .from('packaging_quotes' as any)
         .delete()
-        .eq('id', quoteId);
+        .eq('id', quoteId) as any);
 
       if (error) throw error;
     },

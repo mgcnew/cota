@@ -13,10 +13,10 @@ export function usePackagingItems() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data, error } = await supabase
-        .from('packaging_items')
+      const { data, error } = await (supabase
+        .from('packaging_items' as any)
         .select('*')
-        .order('name', { ascending: true });
+        .order('name', { ascending: true }) as any);
 
       if (error) {
         console.error('Erro ao buscar embalagens:', error);
@@ -32,23 +32,23 @@ export function usePackagingItems() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Buscar company_id do usuário
-      const { data: profile } = await supabase
-        .from('profiles')
+      // Buscar company_id do usuário via company_users
+      const { data: companyUser } = await supabase
+        .from('company_users')
         .select('company_id')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .single();
 
-      if (!profile?.company_id) throw new Error('Empresa não encontrada');
+      if (!companyUser?.company_id) throw new Error('Empresa não encontrada');
 
-      const { data, error } = await supabase
-        .from('packaging_items')
+      const { data, error } = await (supabase
+        .from('packaging_items' as any)
         .insert({
           ...item,
-          company_id: profile.company_id,
+          company_id: companyUser.company_id,
         })
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data;
@@ -68,12 +68,12 @@ export function usePackagingItems() {
 
   const updateItem = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<PackagingItem> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('packaging_items')
+      const { data, error } = await (supabase
+        .from('packaging_items' as any)
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data;
@@ -93,10 +93,10 @@ export function usePackagingItems() {
 
   const deleteItem = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('packaging_items')
+      const { error } = await (supabase
+        .from('packaging_items' as any)
         .delete()
-        .eq('id', id);
+        .eq('id', id) as any);
 
       if (error) throw error;
     },

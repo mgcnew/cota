@@ -369,6 +369,251 @@ export type Database = {
           },
         ]
       }
+      packaging_items: {
+        Row: {
+          category: string | null
+          company_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          reference_unit: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          reference_unit?: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          reference_unit?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packaging_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packaging_quote_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          packaging_id: string
+          packaging_name: string
+          quantidade_necessaria: number | null
+          quote_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          packaging_id: string
+          packaging_name: string
+          quantidade_necessaria?: number | null
+          quote_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          packaging_id?: string
+          packaging_name?: string
+          quantidade_necessaria?: number | null
+          quote_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packaging_quote_items_packaging_id_fkey"
+            columns: ["packaging_id"]
+            isOneToOne: false
+            referencedRelation: "packaging_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "packaging_quote_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "packaging_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packaging_quote_suppliers: {
+        Row: {
+          created_at: string | null
+          data_resposta: string | null
+          id: string
+          observacoes: string | null
+          quote_id: string
+          status: string | null
+          supplier_id: string
+          supplier_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          data_resposta?: string | null
+          id?: string
+          observacoes?: string | null
+          quote_id: string
+          status?: string | null
+          supplier_id: string
+          supplier_name: string
+        }
+        Update: {
+          created_at?: string | null
+          data_resposta?: string | null
+          id?: string
+          observacoes?: string | null
+          quote_id?: string
+          status?: string | null
+          supplier_id?: string
+          supplier_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packaging_quote_suppliers_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "packaging_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "packaging_quote_suppliers_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packaging_quotes: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          data_fim: string
+          data_inicio: string
+          id: string
+          observacoes: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          data_fim: string
+          data_inicio: string
+          id?: string
+          observacoes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          data_fim?: string
+          data_inicio?: string
+          id?: string
+          observacoes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packaging_quotes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packaging_supplier_items: {
+        Row: {
+          created_at: string | null
+          custo_por_unidade: number | null
+          dimensoes: string | null
+          gramatura: number | null
+          id: string
+          packaging_id: string
+          packaging_name: string
+          quantidade_unidades_estimada: number | null
+          quantidade_venda: number | null
+          quote_id: string
+          supplier_id: string
+          unidade_venda: string | null
+          updated_at: string | null
+          valor_total: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          custo_por_unidade?: number | null
+          dimensoes?: string | null
+          gramatura?: number | null
+          id?: string
+          packaging_id: string
+          packaging_name: string
+          quantidade_unidades_estimada?: number | null
+          quantidade_venda?: number | null
+          quote_id: string
+          supplier_id: string
+          unidade_venda?: string | null
+          updated_at?: string | null
+          valor_total?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          custo_por_unidade?: number | null
+          dimensoes?: string | null
+          gramatura?: number | null
+          id?: string
+          packaging_id?: string
+          packaging_name?: string
+          quantidade_unidades_estimada?: number | null
+          quantidade_venda?: number | null
+          quote_id?: string
+          supplier_id?: string
+          unidade_venda?: string | null
+          updated_at?: string | null
+          valor_total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packaging_supplier_items_packaging_id_fkey"
+            columns: ["packaging_id"]
+            isOneToOne: false
+            referencedRelation: "packaging_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "packaging_supplier_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "packaging_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "packaging_supplier_items_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_features: {
         Row: {
           advanced_analytics: boolean | null
