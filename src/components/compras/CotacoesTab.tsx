@@ -41,9 +41,15 @@ function CotacoesTab() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [gerenciarDialogOpen, setGerenciarDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
   const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, convertToOrder, addQuoteItem, removeQuoteItem, addQuoteSupplier, removeQuoteSupplier, updateQuoteStatus, isUpdating } = useCotacoes();
+  
+  // Derive selectedQuote from cotacoes to ensure real-time updates
+  const selectedQuote = useMemo(() => {
+    if (!selectedQuoteId) return null;
+    return cotacoes.find(c => c.id === selectedQuoteId) || null;
+  }, [cotacoes, selectedQuoteId]);
   const { products: allProducts } = useProducts();
   const { suppliers: allSuppliers } = useSuppliers();
   
@@ -62,15 +68,15 @@ function CotacoesTab() {
   }, []);
 
   const handleViewQuote = useCallback((quote: Quote) => {
-    startTransition(() => { setSelectedQuote(quote); setViewDialogOpen(true); });
+    startTransition(() => { setSelectedQuoteId(quote.id); setViewDialogOpen(true); });
   }, []);
 
   const handleGerenciarQuote = useCallback((quote: Quote) => {
-    startTransition(() => { setSelectedQuote(quote); setGerenciarDialogOpen(true); });
+    startTransition(() => { setSelectedQuoteId(quote.id); setGerenciarDialogOpen(true); });
   }, []);
 
   const handleDeleteQuote = useCallback((quote: Quote) => {
-    startTransition(() => { setSelectedQuote(quote); setDeleteDialogOpen(true); });
+    startTransition(() => { setSelectedQuoteId(quote.id); setDeleteDialogOpen(true); });
   }, []);
 
   // Helper para verificar status especial da cotação
