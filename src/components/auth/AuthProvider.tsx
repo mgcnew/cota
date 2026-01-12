@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, startTransition } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -43,8 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           (_event, session) => {
             if (mounted) {
               console.log("🔐 Auth state changed:", _event, session?.user?.id);
-              setSession(session);
-              setUser(session?.user ?? null);
+              startTransition(() => {
+                setSession(session);
+                setUser(session?.user ?? null);
+              });
             }
           }
         );
@@ -58,13 +60,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           console.log("✅ Session loaded:", session?.user?.id || "no user");
           if (mounted) {
-            setSession(session);
-            setUser(session?.user ?? null);
+            startTransition(() => {
+              setSession(session);
+              setUser(session?.user ?? null);
+            });
           }
         }
         
         if (mounted) {
-          setLoading(false);
+          startTransition(() => {
+            setLoading(false);
+          });
         }
 
         return () => {
@@ -75,7 +81,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error("❌ Auth initialization error:", err);
         if (mounted) {
           setError(err instanceof Error ? err.message : "Failed to initialize auth");
-          setLoading(false);
+          startTransition(() => {
+            setLoading(false);
+          });
         }
       }
     };

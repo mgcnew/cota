@@ -1,0 +1,381 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import type { 
+  PackagingQuote, 
+  PackagingQuoteDisplay, 
+  PackagingSupplierDisplay,
+  PackagingComparison 
+} from '@/types/packaging';
+
+export function usePackagingQuotes() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: quotes = [], isLoading, error } = useQuery({
+    queryKey: ['packaging-quotes'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Buscar cotações com itens e fornecedores
+      const { data: quotesData, error: quotesError } = await supabase
+        .from('packaging_quotes')
+        .select(`
+          *,
+          packaging_quote_items(*),
+          packaging_quote_suppliers(*)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (quotesError) {
+        console.error('Erro ao buscar cotações de embalagens:', quotesError);
+        throw quotesError;
+      }
+
+      if (!quotesData || quotesData.length === 0) {
+        return [];
+      }
+
+      // Buscar todos os supplier_items
+      const { data: supplierItems, error: siError } = await supabase
+        .from('packaging_supplier_items')
+        .select('*');
+
+      if (siError) {
+        console.warn('Erro ao buscar itens de fornecedores:', siError);
+      }
+
+      // Transformar para formato de exibição
+      const quotesDisplay: PackagingQuoteDisplay[] = quotesData.map((quote: any) => {
+        const items = quote.packaging_quote_items || [];
+        const suppliers = quote.packaging_quote_suppliers || [];
+        const quoteSupplierItems = (supplierItems || []).filter((si: any) => si.quote_id === quote.id);
+
+        // Mapear fornecedores com seus itens
+        const fornecedores: PackagingSupplierDisplay[] = suppliers.map((s: any) => {
+          const supplierItemsList = quoteSupplierItems.filter((si: any) => si.supplier_id === s.supplier_id);
+          const custoTotal = supplierItemsList.reduce((sum: number, si: any) => sum + (si.valor_total || 0), 0);
+
+          return {
+            id: s.id,
+            supplierId: s.supplier_id,
+            supplierName: s.supplier_name,
+            status: s.status as "pendente" | "respondido",
+            dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString('pt-BR') : null,
+            observacoes: s.observacoes,
+            itens: supplierItemsList.map((si: any) => ({
+              id: si.id,
+              packagingId: si.packaging_id,
+              packagingName: si.packaging_name,
+              valorTotal: si.valor_total,
+              unidadeVenda: si.unidade_venda,
+              quantidadeVenda: si.quantidade_venda,
+              quantidadeUnidadesEstimada: si.quantidade_unidades_estimada,
+              gramatura: si.gramatura,
+              dimensoes: si.dimensoes,
+              custoPorUnidade: si.custo_por_unidade,
+            })),
+            custoTotalEstimado: custoTotal,
+          };
+        });
+
+        // Calcular melhor preço
+        const fornecedoresComPreco = fornecedores.filter(f => f.custoTotalEstimado > 0);
+        const melhorValor = fornecedoresComPreco.length > 0 
+          ? Math.min(...fornecedoresComPreco.map(f => f.custoTotalEstimado))
+          : 0;
+        const melhorFornecedor = fornecedores.find(f => f.custoTotalEstimado === melhorValor);
+
+        // Calcular economia
+        let economia = "0%";
+        if (fornecedoresComPreco.length >= 2) {
+          const valores = fornecedoresComPreco.map(f => f.custoTotalEstimado);
+          const max = Math.max(...valores);
+          const min = Math.min(...valores);
+          economia = max > 0 ? `${(((max - min) / max) * 100).toFixed(1)}%` : "0%";
+        }
+
+        return {
+          id: quote.id,
+          status: quote.status,
+          dataInicio: new Date(quote.data_inicio).toLocaleDateString('pt-BR'),
+          dataFim: new Date(quote.data_fim).toLocaleDateString('pt-BR'),
+          observacoes: quote.observacoes,
+          itens: items.map((item: any) => ({
+            id: item.id,
+            packagingId: item.packaging_id,
+            packagingName: item.packaging_name,
+            quantidadeNecessaria: item.quantidade_necessaria,
+          })),
+          fornecedores,
+          melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : '-',
+          melhorFornecedor: melhorFornecedor?.supplierName || '-',
+          economia,
+        };
+      });
+
+      return quotesDisplay;
+    },
+  });
+
+  const addQuote = useMutation({
+    mutationFn: async (data: {
+      dataInicio: Date;
+      dataFim: Date;
+      observacoes?: string;
+      itens: { packagingId: string; packagingName: string; quantidadeNecessaria?: number }[];
+      fornecedoresIds: string[];
+      fornecedoresNomes: { [id: string]: string };
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.company_id) throw new Error('Empresa não encontrada');
+
+      // Criar cotação
+      const { data: quote, error: quoteError } = await supabase
+        .from('packaging_quotes')
+        .insert({
+          company_id: profile.company_id,
+          status: 'ativa',
+          data_inicio: data.dataInicio.toISOString().split('T')[0],
+          data_fim: data.dataFim.toISOString().split('T')[0],
+          observacoes: data.observacoes || null,
+        })
+        .select()
+        .single();
+
+      if (quoteError) throw quoteError;
+
+      // Criar itens da cotação
+      if (data.itens.length > 0) {
+        const { error: itemsError } = await supabase
+          .from('packaging_quote_items')
+          .insert(
+            data.itens.map(item => ({
+              quote_id: quote.id,
+              packaging_id: item.packagingId,
+              packaging_name: item.packagingName,
+              quantidade_necessaria: item.quantidadeNecessaria || null,
+            }))
+          );
+
+        if (itemsError) throw itemsError;
+      }
+
+      // Criar fornecedores da cotação
+      if (data.fornecedoresIds.length > 0) {
+        const { error: suppliersError } = await supabase
+          .from('packaging_quote_suppliers')
+          .insert(
+            data.fornecedoresIds.map(supplierId => ({
+              quote_id: quote.id,
+              supplier_id: supplierId,
+              supplier_name: data.fornecedoresNomes[supplierId] || 'Fornecedor',
+              status: 'pendente',
+            }))
+          );
+
+        if (suppliersError) throw suppliersError;
+
+        // Criar registros de supplier_items para cada combinação
+        const supplierItemsToInsert = [];
+        for (const supplierId of data.fornecedoresIds) {
+          for (const item of data.itens) {
+            supplierItemsToInsert.push({
+              quote_id: quote.id,
+              supplier_id: supplierId,
+              packaging_id: item.packagingId,
+              packaging_name: item.packagingName,
+            });
+          }
+        }
+
+        if (supplierItemsToInsert.length > 0) {
+          const { error: siError } = await supabase
+            .from('packaging_supplier_items')
+            .insert(supplierItemsToInsert);
+
+          if (siError) console.warn('Erro ao criar supplier_items:', siError);
+        }
+      }
+
+      return quote;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      toast({ title: 'Cotação de embalagem criada com sucesso!' });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao criar cotação',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const updateSupplierItem = useMutation({
+    mutationFn: async (data: {
+      quoteId: string;
+      supplierId: string;
+      packagingId: string;
+      valorTotal: number;
+      unidadeVenda: string;
+      quantidadeVenda: number;
+      quantidadeUnidadesEstimada: number;
+      gramatura?: number;
+      dimensoes?: string;
+    }) => {
+      // Calcular custo por unidade
+      const custoPorUnidade = data.quantidadeUnidadesEstimada > 0 
+        ? data.valorTotal / data.quantidadeUnidadesEstimada 
+        : null;
+
+      const { error } = await supabase
+        .from('packaging_supplier_items')
+        .update({
+          valor_total: data.valorTotal,
+          unidade_venda: data.unidadeVenda,
+          quantidade_venda: data.quantidadeVenda,
+          quantidade_unidades_estimada: data.quantidadeUnidadesEstimada,
+          gramatura: data.gramatura || null,
+          dimensoes: data.dimensoes || null,
+          custo_por_unidade: custoPorUnidade,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('quote_id', data.quoteId)
+        .eq('supplier_id', data.supplierId)
+        .eq('packaging_id', data.packagingId);
+
+      if (error) throw error;
+
+      // Atualizar status do fornecedor para "respondido"
+      await supabase
+        .from('packaging_quote_suppliers')
+        .update({
+          status: 'respondido',
+          data_resposta: new Date().toISOString(),
+        })
+        .eq('quote_id', data.quoteId)
+        .eq('supplier_id', data.supplierId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      toast({ title: 'Valor atualizado com sucesso!' });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao atualizar valor',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const updateQuoteStatus = useMutation({
+    mutationFn: async ({ quoteId, status }: { quoteId: string; status: string }) => {
+      const { error } = await supabase
+        .from('packaging_quotes')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', quoteId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+    },
+  });
+
+  const deleteQuote = useMutation({
+    mutationFn: async (quoteId: string) => {
+      const { error } = await supabase
+        .from('packaging_quotes')
+        .delete()
+        .eq('id', quoteId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      toast({ title: 'Cotação excluída com sucesso!' });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao excluir cotação',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Função para gerar comparativo de preços
+  const getComparison = (quote: PackagingQuoteDisplay): PackagingComparison[] => {
+    const comparisons: PackagingComparison[] = [];
+
+    for (const item of quote.itens) {
+      const fornecedoresComPreco: PackagingComparison['fornecedores'] = [];
+
+      for (const fornecedor of quote.fornecedores) {
+        const supplierItem = fornecedor.itens.find(si => si.packagingId === item.packagingId);
+        
+        if (supplierItem && supplierItem.custoPorUnidade && supplierItem.custoPorUnidade > 0) {
+          fornecedoresComPreco.push({
+            supplierId: fornecedor.supplierId,
+            supplierName: fornecedor.supplierName,
+            valorTotal: supplierItem.valorTotal || 0,
+            unidadeVenda: supplierItem.unidadeVenda || '',
+            quantidadeVenda: supplierItem.quantidadeVenda || 0,
+            quantidadeUnidades: supplierItem.quantidadeUnidadesEstimada || 0,
+            custoPorUnidade: supplierItem.custoPorUnidade,
+            gramatura: supplierItem.gramatura,
+            dimensoes: supplierItem.dimensoes,
+            isMelhorPreco: false,
+            diferencaPercentual: 0,
+          });
+        }
+      }
+
+      // Calcular melhor preço e diferenças
+      if (fornecedoresComPreco.length > 0) {
+        const menorCusto = Math.min(...fornecedoresComPreco.map(f => f.custoPorUnidade));
+        
+        fornecedoresComPreco.forEach(f => {
+          f.isMelhorPreco = f.custoPorUnidade === menorCusto;
+          f.diferencaPercentual = menorCusto > 0 
+            ? ((f.custoPorUnidade - menorCusto) / menorCusto) * 100 
+            : 0;
+        });
+
+        // Ordenar por custo
+        fornecedoresComPreco.sort((a, b) => a.custoPorUnidade - b.custoPorUnidade);
+      }
+
+      comparisons.push({
+        packagingId: item.packagingId,
+        packagingName: item.packagingName,
+        fornecedores: fornecedoresComPreco,
+      });
+    }
+
+    return comparisons;
+  };
+
+  return {
+    quotes,
+    isLoading,
+    error,
+    addQuote,
+    updateSupplierItem,
+    updateQuoteStatus,
+    deleteQuote,
+    getComparison,
+  };
+}

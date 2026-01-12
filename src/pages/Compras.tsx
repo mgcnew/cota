@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense, memo, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3, ShoppingBasket } from "lucide-react";
+import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3, ShoppingBasket, Package } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/ui/page-header";
 import { useKeyboardShortcuts, formatShortcut } from "@/hooks/useKeyboardShortcuts";
@@ -13,6 +13,7 @@ const CotacoesTab = lazy(() => import("@/components/compras/CotacoesTab"));
 const PedidosTab = lazy(() => import("@/components/compras/PedidosTab"));
 const AnaliseTab = lazy(() => import("@/components/compras/AnaliseTab"));
 const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"));
+const EmbalagensTab = lazy(() => import("@/components/compras/EmbalagensTab"));
 
 const TabLoader = () => (
   <div className="flex items-center justify-center py-12">
@@ -29,7 +30,7 @@ function Compras() {
   // Sync tab with URL
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && (tab === "cotacoes" || tab === "pedidos" || tab === "analise" || tab === "lista")) {
+    if (tab && (tab === "cotacoes" || tab === "pedidos" || tab === "analise" || tab === "lista" || tab === "embalagens")) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -58,6 +59,11 @@ function Compras() {
     },
     {
       key: '4',
+      action: () => handleTabChange('embalagens'),
+      description: 'Ir para Embalagens'
+    },
+    {
+      key: '5',
       action: () => handleTabChange('analise'),
       description: 'Ir para Análise'
     },
@@ -146,6 +152,13 @@ function Compras() {
                 Lista
               </TabsTrigger>
               <TabsTrigger 
+                value="embalagens"
+                className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
+              >
+                <Package className="h-3.5 w-3.5 mr-1.5" />
+                Embalagens
+              </TabsTrigger>
+              <TabsTrigger 
                 value="analise"
                 className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
               >
@@ -177,6 +190,12 @@ function Compras() {
           <TabsContent value="lista" className="mt-0">
             <Suspense fallback={<TabLoader />}>
               <ListaComprasTab />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="embalagens" className="mt-0">
+            <Suspense fallback={<TabLoader />}>
+              <EmbalagensTab />
             </Suspense>
           </TabsContent>
         </Tabs>

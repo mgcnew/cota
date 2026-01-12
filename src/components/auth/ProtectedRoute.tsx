@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
@@ -17,7 +17,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   useEffect(() => {
     if (!loading && !user) {
-      setShouldRedirect(true);
+      startTransition(() => {
+        setShouldRedirect(true);
+      });
     }
   }, [loading, user]);
 
