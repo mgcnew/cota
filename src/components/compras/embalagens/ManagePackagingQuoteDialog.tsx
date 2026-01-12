@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,13 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
 
   if (!quote) return null;
 
-  const comparison = getComparison(quote);
+  const comparison = useMemo(() => getComparison(quote), [quote, getComparison]);
+
+  const handleStatusChange = useCallback((status: string) => {
+    if (status !== quote.status) {
+      updateQuoteStatus.mutate({ quoteId: quote.id, status });
+    }
+  }, [quote.id, quote.status, updateQuoteStatus]);
 
   const handleEditItem = (supplierId: string, packagingId: string) => {
     const fornecedor = quote.fornecedores.find(f => f.supplierId === supplierId);
@@ -381,7 +387,7 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
         <div className="flex justify-between items-center pt-4 border-t">
           <Select 
             value={quote.status} 
-            onValueChange={(status) => updateQuoteStatus.mutate({ quoteId: quote.id, status })}
+            onValueChange={handleStatusChange}
           >
             <SelectTrigger className="w-40">
               <SelectValue />

@@ -43,11 +43,17 @@ function EmbalagensTab() {
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
-  const [selectedQuote, setSelectedQuote] = useState<PackagingQuoteDisplay | null>(null);
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
   const { quotes, isLoading, deleteQuote, updateQuoteStatus } = usePackagingQuotes();
   const { items: packagingItems } = usePackagingItems();
   const { suppliers } = useSuppliers();
+
+  // Derive selectedQuote from quotes to ensure real-time updates
+  const selectedQuote = useMemo(() => {
+    if (!selectedQuoteId) return null;
+    return quotes.find(q => q.id === selectedQuoteId) || null;
+  }, [quotes, selectedQuoteId]);
 
   // Ouvir evento de atalho de teclado
   useEffect(() => {
@@ -62,14 +68,14 @@ function EmbalagensTab() {
 
   const handleManageQuote = useCallback((quote: PackagingQuoteDisplay) => {
     startTransition(() => { 
-      setSelectedQuote(quote); 
+      setSelectedQuoteId(quote.id); 
       setManageDialogOpen(true); 
     });
   }, []);
 
   const handleDeleteQuote = useCallback((quote: PackagingQuoteDisplay) => {
     startTransition(() => { 
-      setSelectedQuote(quote); 
+      setSelectedQuoteId(quote.id); 
       setDeleteDialogOpen(true); 
     });
   }, []);
