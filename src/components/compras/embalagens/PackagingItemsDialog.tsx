@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePackagingItems } from "@/hooks/usePackagingItems";
 import { Package, Plus, Trash2, Loader2, Edit2, X, Check } from "lucide-react";
-import { PACKAGING_CATEGORIES, PACKAGING_REFERENCE_UNITS } from "@/types/packaging";
+import { PACKAGING_CATEGORIES, PACKAGING_REFERENCE_UNITS, PACKAGE_SUB_UNITS } from "@/types/packaging";
 
 interface Props {
   open: boolean;
@@ -29,6 +29,8 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
     category: "",
     description: "",
     reference_unit: "un",
+    package_sub_unit: "", // kg ou quantidade quando reference_unit é pacote
+    package_quantity: "", // quantidade do pacote
   });
 
   const resetForm = () => {
@@ -37,6 +39,8 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
       category: "",
       description: "",
       reference_unit: "un",
+      package_sub_unit: "",
+      package_quantity: "",
     });
     setShowForm(false);
     setEditingId(null);
@@ -44,6 +48,18 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
 
   const handleSubmit = async () => {
     if (!formData.name.trim()) return;
+    
+    // Se for pacote, precisa ter a subunidade e quantidade
+    if (formData.reference_unit === "pacote" && !formData.package_sub_unit) return;
+    if (formData.reference_unit === "pacote" && !formData.package_quantity) return;
+
+    // Monta a unidade de referência final
+    let finalReferenceUnit = formData.reference_unit;
+    if (formData.reference_unit === "pacote" && formData.package_sub_unit) {
+      finalReferenceUnit = `pacote_${formData.package_sub_unit}`; // pacote_kg ou pacote_quantidade
+    }
+
+    const packageQty = formData.package_quantity ? parseFloat(formData.package_quantity) : null;
 
     if (editingId) {
       await updateItem.mutateAsync({
@@ -51,14 +67,16 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
         name: formData.name,
         category: formData.category || null,
         description: formData.description || null,
-        reference_unit: formData.reference_unit,
+        reference_unit: finalReferenceUnit,
+        package_quantity: packageQty,
       });
     } else {
       await addItem.mutateAsync({
         name: formData.name,
         category: formData.category || null,
         description: formData.description || null,
-        reference_unit: formData.reference_unit,
+        reference_unit: finalReferenceUnit,
+        package_quantity: packageQty,
       });
     }
 
@@ -66,11 +84,22 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
   };
 
   const handleEdit = (item: typeof items[0]) => {
+    // Parsear a unidade de referência
+    let refUnit = item.reference_unit;
+    let subUnit = "";
+    
+    if (item.reference_unit.startsWith("pacote_")) {
+      refUnit = "pacote";
+      subUnit = item.reference_unit.replace("pacote_", "");
+    }
+
     setFormData({
       name: item.name,
       category: item.category || "",
       description: item.description || "",
-      reference_unit: item.reference_unit,
+      reference_unit: refUnit,
+      package_sub_unit: subUnit,
+      package_quantity: item.package_quantity?.toString() || "",
     });
     setEditingId(item.id);
     setShowForm(true);
@@ -80,6 +109,17 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
     if (confirm("Tem certeza que deseja excluir esta embalagem?")) {
       await deleteItem.mutateAsync(id);
     }
+  };
+
+  const formatReferenceUnit = (unit: string, quantity?: number | null) => {
+    if (unit === "pacote_kg") {
+      return quantity ? `Pacote de ${quantity}kg` : "Pacote (por kg)";
+    }
+    if (unit === "pacote_quantidade") {
+      return quantity ? `Pacote c/ ${quantity} un` : "Pacote (por quantidade)";
+    }
+    const found = PACKAGING_REFERENCE_UNITS.find(u => u.value === unit);
+    return found?.label || unit;
   };
 
   return (
@@ -127,7 +167,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                   <Label>Unidade de Referência</Label>
                   <Select 
                     value={formData.reference_unit} 
-                    onValueChange={(v) => setFormData(prev => ({ ...prev, reference_unit: v }))}
+                    onValueChange={(v) => setFormData(prev => ({ ...prev, reference_unit: v, package_sub_unit: "" }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -140,6 +180,50 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                   </Select>
                 </div>
               </div>
+
+              {/* Campo adicional quando pacote é selecionado */}
+              {formData.reference_unit === "pacote" && (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Como o pacote é medido? *</Label>
+                    <Select 
+                      value={formData.package_sub_unit} 
+                      onValueChange={(v) => setFormData(prev => ({ ...prev, package_sub_unit: v, package_quantity: "" }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione como o pacote é medido" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PACKAGE_SUB_UNITS.map(u => (
+                          <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {formData.package_sub_unit && (
+                    <div className="space-y-2">
+                      <Label>
+                        {formData.package_sub_unit === "kg" 
+                          ? "Peso do pacote (kg) *" 
+                          : "Quantidade de unidades no pacote *"}
+                      </Label>
+                      <Input
+                        type="number"
+                        step={formData.package_sub_unit === "kg" ? "0.01" : "1"}
+                        value={formData.package_quantity}
+                        onChange={(e) => setFormData(prev => ({ ...prev, package_quantity: e.target.value }))}
+                        placeholder={formData.package_sub_unit === "kg" ? "Ex: 5 (para 5kg)" : "Ex: 100 (para 100 unidades)"}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {formData.package_sub_unit === "kg" 
+                          ? `O pacote tem ${formData.package_quantity || '?'} kg`
+                          : `O pacote tem ${formData.package_quantity || '?'} unidades`}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Descrição</Label>
@@ -158,7 +242,13 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                 </Button>
                 <Button 
                   onClick={handleSubmit}
-                  disabled={!formData.name.trim() || addItem.isPending || updateItem.isPending}
+                  disabled={
+                    !formData.name.trim() || 
+                    (formData.reference_unit === "pacote" && !formData.package_sub_unit) ||
+                    (formData.reference_unit === "pacote" && !formData.package_quantity) ||
+                    addItem.isPending || 
+                    updateItem.isPending
+                  }
                   className="flex-1 bg-purple-600 hover:bg-purple-700"
                 >
                   {(addItem.isPending || updateItem.isPending) ? (
@@ -205,7 +295,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{item.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {item.category || "Sem categoria"} • Ref: {item.reference_unit}
+                        {item.category || "Sem categoria"} • {formatReferenceUnit(item.reference_unit, item.package_quantity)}
                       </p>
                     </div>
                     <div className="flex gap-1">

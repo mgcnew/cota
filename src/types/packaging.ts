@@ -6,7 +6,8 @@ export interface PackagingItem {
   name: string;
   category: string | null;
   description: string | null;
-  reference_unit: string; // "un", "m", "m2"
+  reference_unit: string; // "un", "m", "m2", "pacote_kg", "pacote_quantidade"
+  package_quantity: number | null; // quantidade do pacote (ex: 100 un ou 5 kg)
   created_at: string;
   updated_at: string;
 }
@@ -152,6 +153,13 @@ export const PACKAGING_SALE_UNITS = [
 // Unidades de referência para comparação
 export const PACKAGING_REFERENCE_UNITS = [
   { value: "un", label: "Unidade" },
+  { value: "pacote", label: "Pacote" },
   { value: "m", label: "Metro" },
   { value: "m2", label: "Metro quadrado" },
+] as const;
+
+// Subunidades para pacote (como o pacote é medido)
+export const PACKAGE_SUB_UNITS = [
+  { value: "kg", label: "Por peso (kg)" },
+  { value: "quantidade", label: "Por quantidade (unidades)" },
 ] as const;
