@@ -377,6 +377,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          package_quantity: number | null
           reference_unit: string
           updated_at: string | null
         }
@@ -387,6 +388,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          package_quantity?: number | null
           reference_unit?: string
           updated_at?: string | null
         }
@@ -397,6 +399,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          package_quantity?: number | null
           reference_unit?: string
           updated_at?: string | null
         }
