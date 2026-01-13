@@ -18,7 +18,7 @@ import {
   TrendingDown, Award, Loader2, Save
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { PackagingQuoteDisplay, PackagingComparison } from "@/types/packaging";
+import type { PackagingQuoteDisplay } from "@/types/packaging";
 import { PACKAGING_SALE_UNITS } from "@/types/packaging";
 
 interface Props {
@@ -43,17 +43,26 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
     dimensoes: "",
   });
 
-  if (!quote) return null;
-
-  const comparison = useMemo(() => getComparison(quote), [quote, getComparison]);
+  // Todos os hooks devem vir ANTES de qualquer return condicional
+  const comparison = useMemo(() => quote ? getComparison(quote) : [], [quote, getComparison]);
 
   const handleStatusChange = useCallback((status: string) => {
-    if (status !== quote.status) {
+    if (quote && status !== quote.status) {
       updateQuoteStatus.mutate({ quoteId: quote.id, status });
     }
-  }, [quote.id, quote.status, updateQuoteStatus]);
+  }, [quote, updateQuoteStatus]);
 
-  const handleEditItem = (supplierId: string, packagingId: string) => {
+  const custoPorUnidadePreview = useMemo(() => {
+    const valor = parseFloat(formData.valorTotal) || 0;
+    const unidades = parseInt(formData.quantidadeUnidadesEstimada) || 0;
+    if (valor > 0 && unidades > 0) {
+      return (valor / unidades).toFixed(4);
+    }
+    return null;
+  }, [formData.valorTotal, formData.quantidadeUnidadesEstimada]);
+
+  const handleEditItem = useCallback((supplierId: string, packagingId: string) => {
+    if (!quote) return;
     const fornecedor = quote.fornecedores.find(f => f.supplierId === supplierId);
     const item = fornecedor?.itens.find(i => i.packagingId === packagingId);
 
@@ -66,10 +75,10 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
       dimensoes: item?.dimensoes || "",
     });
     setEditingItem({ supplierId, packagingId });
-  };
+  }, [quote]);
 
-  const handleSaveItem = async () => {
-    if (!editingItem) return;
+  const handleSaveItem = useCallback(async () => {
+    if (!editingItem || !quote) return;
 
     await updateSupplierItem.mutateAsync({
       quoteId: quote.id,
@@ -84,16 +93,10 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
     });
 
     setEditingItem(null);
-  };
+  }, [editingItem, quote, formData, updateSupplierItem]);
 
-  const custoPorUnidadePreview = useMemo(() => {
-    const valor = parseFloat(formData.valorTotal) || 0;
-    const unidades = parseInt(formData.quantidadeUnidadesEstimada) || 0;
-    if (valor > 0 && unidades > 0) {
-      return (valor / unidades).toFixed(4);
-    }
-    return null;
-  }, [formData.valorTotal, formData.quantidadeUnidadesEstimada]);
+  // Return condicional DEPOIS de todos os hooks
+  if (!quote) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -42,13 +42,16 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
   const [observations, setObservations] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-  if (!quote) return null;
-  
   // Fornecedores que responderam
-  const respondedSuppliers = quote.fornecedores.filter(f => f.status === "respondido");
+  const respondedSuppliers = useMemo(() => {
+    if (!quote) return [];
+    return quote.fornecedores.filter(f => f.status === "respondido");
+  }, [quote]);
   
   // Dados do fornecedor selecionado
-  const selectedSupplier = respondedSuppliers.find(f => f.supplierId === selectedSupplierId);
+  const selectedSupplier = useMemo(() => {
+    return respondedSuppliers.find(f => f.supplierId === selectedSupplierId);
+  }, [respondedSuppliers, selectedSupplierId]);
 
   // Calcular total do pedido
   const orderTotal = useMemo(() => {
@@ -60,13 +63,33 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     }, 0);
   }, [selectedSupplier, quantities]);
 
+  // Encontrar melhor fornecedor por custo total
+  const bestSupplierId = useMemo(() => {
+    if (respondedSuppliers.length === 0) return null;
+    
+    let best = respondedSuppliers[0];
+    respondedSuppliers.forEach(s => {
+      if (s.custoTotalEstimado < best.custoTotalEstimado && s.custoTotalEstimado > 0) {
+        best = s;
+      }
+    });
+    return best.supplierId;
+  }, [respondedSuppliers]);
+
   const handleQuantityChange = (packagingId: string, value: string) => {
     const qty = parseInt(value) || 1;
     setQuantities(prev => ({ ...prev, [packagingId]: qty }));
   };
 
+  const resetForm = () => {
+    setSelectedSupplierId("");
+    setDeliveryDate("");
+    setObservations("");
+    setQuantities({});
+  };
+
   const handleSubmit = async () => {
-    if (!selectedSupplier || !deliveryDate) return;
+    if (!selectedSupplier || !deliveryDate || !quote) return;
 
     const itens: OrderItem[] = selectedSupplier.itens
       .filter(item => item.valorTotal && item.valorTotal > 0)
@@ -92,25 +115,8 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     resetForm();
   };
 
-  const resetForm = () => {
-    setSelectedSupplierId("");
-    setDeliveryDate("");
-    setObservations("");
-    setQuantities({});
-  };
-
-  // Encontrar melhor fornecedor por custo total
-  const bestSupplierId = useMemo(() => {
-    if (respondedSuppliers.length === 0) return null;
-    
-    let best = respondedSuppliers[0];
-    respondedSuppliers.forEach(s => {
-      if (s.custoTotalEstimado < best.custoTotalEstimado && s.custoTotalEstimado > 0) {
-        best = s;
-      }
-    });
-    return best.supplierId;
-  }, [respondedSuppliers]);
+  // Return condicional DEPOIS de todos os hooks
+  if (!quote) return null;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen); }}>

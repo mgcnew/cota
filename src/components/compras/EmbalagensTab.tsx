@@ -16,9 +16,9 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { 
-  Package, Plus, Trash2, Calendar, DollarSign, 
-  Building2, MoreVertical, Eye, CheckCircle2, AlertTriangle,
-  PackageOpen, Loader2, ClipboardList, ShoppingCart
+  Package, Plus, Trash2, DollarSign, 
+  Building2, MoreVertical, Eye, CheckCircle2,
+  PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3
 } from "lucide-react";
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
@@ -26,14 +26,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 
-// Dialogs
+// Dialogs e componentes
 import { 
   AddPackagingQuoteDialog, 
   ManagePackagingQuoteDialog, 
   DeletePackagingQuoteDialog, 
   PackagingItemsDialog,
   ConvertToPackagingOrderDialog,
-  PackagingOrdersTab
+  PackagingQuotesTable,
+  PackagingOrdersTab,
+  PackagingAnalysisTab
 } from "./embalagens";
 
 function EmbalagensTab() {
@@ -51,8 +53,8 @@ function EmbalagensTab() {
   const [convertDialogOpen, setConvertDialogOpen] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
-  const { quotes, isLoading: quotesLoading, deleteQuote, updateQuoteStatus } = usePackagingQuotes();
-  const { orders, isLoading: ordersLoading } = usePackagingOrders();
+  const { quotes, isLoading: quotesLoading, deleteQuote } = usePackagingQuotes();
+  const { orders } = usePackagingOrders();
   const { items: packagingItems } = usePackagingItems();
   const { suppliers } = useSuppliers();
 
@@ -94,9 +96,17 @@ function EmbalagensTab() {
     });
   }, []);
 
-  // Filtrar cotações
+  // IDs de cotações que já foram convertidas em pedidos
+  const convertedQuoteIds = useMemo(() => {
+    return new Set(orders.filter(o => o.quoteId).map(o => o.quoteId));
+  }, [orders]);
+
+  // Filtrar cotações (excluindo as que já foram convertidas em pedidos)
   const filteredQuotes = useMemo(() => {
     return quotes.filter(q => {
+      // Excluir cotações já convertidas em pedidos
+      if (convertedQuoteIds.has(q.id)) return false;
+      
       const itemNames = q.itens.map(i => i.packagingName.toLowerCase()).join(' ');
       const matchesSearch = itemNames.includes(debouncedSearchTerm.toLowerCase()) || 
                            q.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
@@ -108,22 +118,23 @@ function EmbalagensTab() {
       }
       return matchesSearch && q.status === statusFilter;
     });
-  }, [quotes, debouncedSearchTerm, statusFilter]);
+  }, [quotes, debouncedSearchTerm, statusFilter, convertedQuoteIds]);
 
   const paginatedData = paginate(filteredQuotes);
 
-  // Estatísticas
+  // Estatísticas (excluindo cotações já convertidas)
   const stats = useMemo(() => {
-    const ativas = quotes.filter(q => q.status === "ativa").length;
-    const concluidas = quotes.filter(q => q.status === "concluida").length;
-    const prontasParaDecisao = quotes.filter(q => {
+    const quotesNaoConvertidas = quotes.filter(q => !convertedQuoteIds.has(q.id));
+    const ativas = quotesNaoConvertidas.filter(q => q.status === "ativa").length;
+    const concluidas = quotesNaoConvertidas.filter(q => q.status === "concluida").length;
+    const prontasParaDecisao = quotesNaoConvertidas.filter(q => {
       const respondidos = q.fornecedores.filter(f => f.status === "respondido").length;
       return q.status === "ativa" && respondidos === q.fornecedores.length && q.fornecedores.length > 0;
     }).length;
     const totalPedidos = orders.length;
     
-    return { total: quotes.length, ativas, concluidas, prontasParaDecisao, totalPedidos };
-  }, [quotes, orders]);
+    return { total: quotesNaoConvertidas.length, ativas, concluidas, prontasParaDecisao, totalPedidos };
+  }, [quotes, orders, convertedQuoteIds]);
 
   const getQuoteStatus = (quote: PackagingQuoteDisplay) => {
     const respondidos = quote.fornecedores.filter(f => f.status === "respondido").length;
@@ -163,6 +174,10 @@ function EmbalagensTab() {
                   {stats.totalPedidos}
                 </Badge>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="analise" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Análise
             </TabsTrigger>
           </TabsList>
 
@@ -251,7 +266,8 @@ function EmbalagensTab() {
                 <Plus className="h-4 w-4 mr-1" />Criar primeira cotação
               </Button>
             </div>
-          ) : (
+          ) : isMobile ? (
+            /* Mobile: Cards */
             <div className="space-y-2">
               {paginatedData.items.map((quote, index) => {
                 const { respondidos, total, isPronta } = getQuoteStatus(quote);
@@ -342,6 +358,17 @@ function EmbalagensTab() {
                 );
               })}
             </div>
+          ) : (
+            /* Desktop: Tabela */
+            <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 shadow-sm overflow-hidden">
+              <PackagingQuotesTable
+                quotes={paginatedData.items}
+                startIndex={paginatedData.pagination.startIndex}
+                onManage={handleManageQuote}
+                onDelete={handleDeleteQuote}
+                onConvertToOrder={handleConvertToOrder}
+              />
+            </div>
           )}
 
           {/* Paginação */}
@@ -363,6 +390,13 @@ function EmbalagensTab() {
         <TabsContent value="pedidos" className="mt-4" forceMount>
           <div className={activeSubTab !== "pedidos" ? "hidden" : ""}>
             <PackagingOrdersTab onCreateOrder={() => setAddDialogOpen(true)} />
+          </div>
+        </TabsContent>
+
+        {/* Tab: Análise */}
+        <TabsContent value="analise" className="mt-4" forceMount>
+          <div className={activeSubTab !== "analise" ? "hidden" : ""}>
+            <PackagingAnalysisTab />
           </div>
         </TabsContent>
       </Tabs>
