@@ -20,26 +20,26 @@ export function formatPhoneNumber(phone: string): string {
 
 // Buscar configuração do WhatsApp da empresa
 export async function getWhatsAppConfig(companyId: string): Promise<WhatsAppConfig | null> {
-  const { data, error } = await supabase
-    .from('whatsapp_config')
+  const { data, error } = await (supabase
+    .from('whatsapp_config' as any)
     .select('*')
     .eq('company_id', companyId)
     .eq('is_active', true)
-    .single();
+    .single() as any);
 
   if (error) {
     console.error('Erro ao buscar config WhatsApp:', error);
     return null;
   }
 
-  return data;
+  return data as WhatsAppConfig;
 }
 
 // Salvar ou atualizar configuração do WhatsApp
 export async function saveWhatsAppConfig(config: Partial<WhatsAppConfig>): Promise<boolean> {
-  const { error } = await supabase
-    .from('whatsapp_config')
-    .upsert(config, { onConflict: 'company_id' });
+  const { error } = await (supabase
+    .from('whatsapp_config' as any)
+    .upsert(config as any, { onConflict: 'company_id' }) as any);
 
   if (error) {
     console.error('Erro ao salvar config WhatsApp:', error);
@@ -97,8 +97,8 @@ export async function generateQuoteMessage(
       *,
       quote_items (
         product_name,
-        quantity,
-        unit
+        quantidade,
+        unidade
       )
     `)
     .eq('id', quoteId)
@@ -123,32 +123,32 @@ export async function generateQuoteMessage(
   // Buscar template
   let template = '';
   if (templateId) {
-    const { data: templateData } = await supabase
-      .from('whatsapp_templates')
+    const { data: templateData } = await (supabase
+      .from('whatsapp_templates' as any)
       .select('template_text')
       .eq('id', templateId)
-      .single();
+      .single() as any);
     
-    template = templateData?.template_text || '';
+    template = (templateData as any)?.template_text || '';
   }
 
   // Se não tiver template, usa o padrão
   if (!template) {
-    const { data: defaultTemplate } = await supabase
-      .from('whatsapp_templates')
+    const { data: defaultTemplate } = await (supabase
+      .from('whatsapp_templates' as any)
       .select('template_text')
       .eq('company_id', quote.company_id)
       .eq('is_default', true)
-      .single();
+      .single() as any);
     
-    template = defaultTemplate?.template_text || 
+    template = (defaultTemplate as any)?.template_text || 
       `Bom dia! 👋\n\nSomos da {company_name} e estamos solicitando uma cotação.\n\n📋 *Produtos:*\n{products_list}\n\n⏰ *Prazo para resposta:* {deadline}\n\nPor favor, nos envie os preços dos produtos acima.\n\nObrigado!`;
   }
 
   // Montar lista de produtos
   const productsList = quote.quote_items
     .map((item: any, index: number) => 
-      `${index + 1}. ${item.product_name} - ${item.quantity} ${item.unit || 'un'}`
+      `${index + 1}. ${item.product_name} - ${item.quantidade} ${item.unidade || 'un'}`
     )
     .join('\n');
 
@@ -156,7 +156,7 @@ export async function generateQuoteMessage(
   let message = template
     .replace('{company_name}', company?.name || 'Nossa empresa')
     .replace('{products_list}', productsList)
-    .replace('{deadline}', deadline || quote.deadline || 'o mais breve possível');
+    .replace('{deadline}', deadline || quote.data_fim || 'o mais breve possível');
 
   return message;
 }
@@ -224,7 +224,7 @@ export async function sendQuoteViaWhatsApp(
       sent_at: result.success ? new Date().toISOString() : null,
     };
 
-    await supabase.from('whatsapp_messages').insert(messageRecord);
+    await (supabase.from('whatsapp_messages' as any).insert(messageRecord as any) as any);
 
     if (result.success) {
       sent++;
@@ -264,14 +264,14 @@ export async function processWhatsAppResponse(
     }
 
     // Buscar última mensagem enviada para este fornecedor
-    const { data: lastMessage } = await supabase
-      .from('whatsapp_messages')
+    const { data: lastMessage } = await (supabase
+      .from('whatsapp_messages' as any)
       .select('id, quote_id, packaging_quote_id')
       .eq('supplier_id', supplier.id)
       .eq('company_id', companyId)
       .order('sent_at', { ascending: false })
       .limit(1)
-      .single();
+      .single() as any);
 
     if (!lastMessage) {
       console.log('Nenhuma mensagem anterior encontrada');
@@ -282,17 +282,17 @@ export async function processWhatsAppResponse(
     const parsedData = parseQuoteResponse(messageText);
 
     // Salvar resposta
-    await supabase.from('whatsapp_responses').insert({
+    await (supabase.from('whatsapp_responses' as any).insert({
       company_id: companyId,
-      whatsapp_message_id: lastMessage.id,
-      quote_id: lastMessage.quote_id,
-      packaging_quote_id: lastMessage.packaging_quote_id,
+      whatsapp_message_id: (lastMessage as any).id,
+      quote_id: (lastMessage as any).quote_id,
+      packaging_quote_id: (lastMessage as any).packaging_quote_id,
       supplier_id: supplier.id,
       phone_number: phoneNumber,
       response_text: messageText,
       parsed_data: parsedData,
       is_processed: false,
-    });
+    } as any) as any);
 
     return { success: true, parsed: parsedData };
   } catch (error) {

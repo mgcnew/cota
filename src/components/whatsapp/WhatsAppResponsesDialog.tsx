@@ -49,15 +49,15 @@ export function WhatsAppResponsesDialog({
     if (!company) return;
 
     setLoading(true);
-    const { data, error } = await supabase
-      .from('whatsapp_responses')
+    const { data, error } = await (supabase
+      .from('whatsapp_responses' as any)
       .select(`
         *,
         supplier:suppliers(name)
       `)
       .eq('company_id', company.id)
       .eq('quote_id', quoteId)
-      .order('received_at', { ascending: false });
+      .order('received_at', { ascending: false }) as any);
 
     if (error) {
       console.error('Erro ao carregar respostas:', error);
@@ -67,7 +67,7 @@ export function WhatsAppResponsesDialog({
         variant: "destructive",
       });
     } else {
-      setResponses(data || []);
+      setResponses((data || []) as Response[]);
     }
     setLoading(false);
   };
@@ -90,10 +90,10 @@ export function WhatsAppResponsesDialog({
   };
 
   const handleMarkAsProcessed = async (responseId: string) => {
-    const { error } = await supabase
-      .from('whatsapp_responses')
-      .update({ is_processed: true, processed_at: new Date().toISOString() })
-      .eq('id', responseId);
+    const { error } = await (supabase
+      .from('whatsapp_responses' as any)
+      .update({ is_processed: true, processed_at: new Date().toISOString() } as any)
+      .eq('id', responseId) as any);
 
     if (error) {
       toast({
