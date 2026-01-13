@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { GlobalSearch, GlobalSearchTrigger } from "./GlobalSearch";
+import { AIGlobalSearch, AIGlobalSearchTrigger } from "./AIGlobalSearch";
 import { CompanySelector } from "./CompanySelector";
 
 // Mapeamento de títulos por rota
@@ -51,6 +52,7 @@ export function AppLayout() {
   const { signOut } = useAuth();
   const { toast } = useToast();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [aiSearchOpen, setAiSearchOpen] = useState(false);
   const pageTitle = pageTitles[location.pathname] || "";
   const PageIcon = pageIcons[location.pathname] || Package;
 
@@ -116,10 +118,10 @@ export function AppLayout() {
             {/* Mobile: Espaço para menu hamburger (esquerda) */}
             <div className="md:hidden w-10 flex-shrink-0" />
 
-            {/* Global Search - Centralizada e responsiva */}
+            {/* AI Search - Centralizada e responsiva */}
             <div className="flex-1 flex items-center justify-center min-w-0">
               <div className="w-full max-w-md md:max-w-xl lg:max-w-2xl">
-                <GlobalSearchTrigger onClick={() => setSearchOpen(true)} />
+                <AIGlobalSearchTrigger onClick={() => setAiSearchOpen(true)} />
               </div>
             </div>
 
@@ -194,7 +196,10 @@ export function AppLayout() {
         </main>
       </div>
 
-      {/* Global Search Dialog */}
+      {/* AI Search Dialog */}
+      <AIGlobalSearch open={aiSearchOpen} onOpenChange={setAiSearchOpen} />
+      
+      {/* Global Search Dialog (fallback) */}
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
