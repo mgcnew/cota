@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Calendar, Package, Users, TrendingDown, Edit2, Edit3, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus, Edit, Plus, Trash2, Check, ChevronsUpDown, Loader2, Calendar as CalendarIcon, BarChart3, AlertCircle, Eye, Info } from "lucide-react";
+import { Calendar, Package, Users, TrendingDown, Edit2, Edit3, Save, X, DollarSign, ShoppingCart, FileText, Download, Share2, Clock, Building2, Star, Minus, Edit, Plus, Trash2, Check, ChevronsUpDown, Loader2, Calendar as CalendarIcon, BarChart3, AlertCircle, Eye, Info, MessageSquare } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -45,6 +45,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import ConvertToOrderDialog from "./ConvertToOrderDialog";
 import ConvertToMultipleOrdersDialog, { SupplierOrder } from "./ConvertToMultipleOrdersDialog";
+import { WhatsAppConfigDialog, SendQuoteWhatsAppDialog, WhatsAppResponsesDialog } from "../whatsapp";
 
 import { SelectSupplierPerProductDialog } from "./SelectSupplierPerProductDialog";
 import { QuoteDetailsTab } from "../cotacoes/view-dialog/QuoteDetailsTab";
@@ -101,6 +102,11 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const [convertDialogOpen, setConvertDialogOpen] = useState(false);
   const [selectedSupplierForConversion, setSelectedSupplierForConversion] = useState<{ id: string; name: string } | null>(null);
   const [showSelectSupplierDialog, setShowSelectSupplierDialog] = useState(false);
+  
+  // Estados para WhatsApp
+  const [whatsappConfigOpen, setWhatsappConfigOpen] = useState(false);
+  const [whatsappSendOpen, setWhatsappSendOpen] = useState(false);
+  const [whatsappResponsesOpen, setWhatsappResponsesOpen] = useState(false);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Map<string, { supplierId: string; supplierName: string }>>(new Map());
   const [showMultipleOrdersDialog, setShowMultipleOrdersDialog] = useState(false);
   const [supplierOrdersForConversion, setSupplierOrdersForConversion] = useState<SupplierOrder[]>([]);
@@ -782,17 +788,40 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {!isEditMode && onEdit && currentQuote && currentQuote.status !== "concluida" && !readOnly && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsEditMode(true)}
-                      className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'}`}
-                    >
-                      <Edit3 className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5`} />
-                      Editar
-                    </Button>
+                  {!isEditMode && currentQuote && currentQuote.status !== "concluida" && !readOnly && (
+                    <>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setWhatsappSendOpen(true)}
+                              className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'} bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900 border-green-200 dark:border-green-800`}
+                            >
+                              <MessageSquare className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5 text-green-600 dark:text-green-400`} />
+                              WhatsApp
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Enviar cotação via WhatsApp</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      {onEdit && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditMode(true)}
+                          className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'}`}
+                        >
+                          <Edit3 className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5`} />
+                          Editar
+                        </Button>
+                      )}
+                    </>
                   )}
                   <Button
                     type="button"
@@ -1591,6 +1620,33 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
               onConfirm={handleConfirmMultipleOrders}
               isLoading={isUpdating}
             />
+
+            {/* WhatsApp Dialogs */}
+            <WhatsAppConfigDialog
+              open={whatsappConfigOpen}
+              onOpenChange={setWhatsappConfigOpen}
+            />
+
+            {currentQuote && (
+              <>
+                <SendQuoteWhatsAppDialog
+                  open={whatsappSendOpen}
+                  onOpenChange={setWhatsappSendOpen}
+                  quoteId={currentQuote.id}
+                  suppliers={currentQuote.suppliers || []}
+                  onConfigClick={() => {
+                    setWhatsappSendOpen(false);
+                    setWhatsappConfigOpen(true);
+                  }}
+                />
+
+                <WhatsAppResponsesDialog
+                  open={whatsappResponsesOpen}
+                  onOpenChange={setWhatsappResponsesOpen}
+                  quoteId={currentQuote.id}
+                />
+              </>
+            )}
           </>
         )}
       </DialogContent>
