@@ -16,13 +16,14 @@ import { Card } from "@/components/ui/card";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { 
   Package, Building2, DollarSign, CheckCircle2, Clock, 
-  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings
+  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 import type { PackagingItem } from "@/types/packaging";
 import type { Supplier } from "@/hooks/useSuppliers";
 import { PACKAGING_SALE_UNITS } from "@/types/packaging";
+import jsPDF from "jspdf";
 
 interface Props {
   open: boolean;
@@ -200,6 +201,177 @@ export function ManagePackagingQuoteDialog({
     }
   }, [editingItem, formData.valorTotal, handleSaveItem]);
 
+  // Função para gerar PDF comparativo
+  const handleGeneratePDF = useCallback(() => {
+    if (!quote || !comparison.length) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    let y = 20;
+
+    // Cores
+    const purple = [139, 92, 246]; // purple-500
+    const green = [34, 197, 94]; // green-500
+    const gray = [107, 114, 128]; // gray-500
+
+    // Header com fundo roxo
+    doc.setFillColor(purple[0], purple[1], purple[2]);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("COMPARATIVO DE COTAÇÃO", pageWidth / 2, 15, { align: "center" });
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text("Embalagens", pageWidth / 2, 23, { align: "center" });
+    doc.setFontSize(9);
+    doc.text(`Período: ${quote.dataInicio} a ${quote.dataFim}`, pageWidth / 2, 30, { align: "center" });
+
+    y = 45;
+
+    // Info da cotação
+    doc.setTextColor(gray[0], gray[1], gray[2]);
+    doc.setFontSize(9);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, margin, y);
+    doc.text(`Total: ${quote.itens.length} embalagens | ${quote.fornecedores.length} fornecedores`, pageWidth - margin, y, { align: "right" });
+    
+    y += 15;
+
+    // Para cada embalagem
+    comparison.forEach((comp, idx) => {
+      // Verificar se precisa de nova página
+      if (y > 250) {
+        doc.addPage();
+        y = 20;
+      }
+
+      // Título da embalagem com fundo
+      doc.setFillColor(245, 243, 255); // purple-50
+      doc.rect(margin, y - 5, pageWidth - margin * 2, 10, 'F');
+      
+      doc.setTextColor(88, 28, 135); // purple-900
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${idx + 1}. ${comp.packagingName}`, margin + 3, y + 2);
+      
+      y += 12;
+
+      if (comp.fornecedores.length === 0) {
+        doc.setTextColor(gray[0], gray[1], gray[2]);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "italic");
+        doc.text("Nenhum fornecedor respondeu", margin + 5, y);
+        y += 15;
+        return;
+      }
+
+      // Cabeçalho da tabela
+      doc.setFillColor(249, 250, 251); // gray-50
+      doc.rect(margin, y - 4, pageWidth - margin * 2, 8, 'F');
+      doc.setTextColor(gray[0], gray[1], gray[2]);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text("FORNECEDOR", margin + 3, y);
+      doc.text("VALOR", margin + 70, y);
+      doc.text("CUSTO/UN", margin + 100, y);
+      doc.text("STATUS", margin + 140, y);
+      
+      y += 8;
+
+      // Linhas dos fornecedores
+      comp.fornecedores.forEach((f, fIdx) => {
+        const isWinner = f.isMelhorPreco;
+        
+        if (isWinner) {
+          doc.setFillColor(220, 252, 231); // green-100
+          doc.rect(margin, y - 4, pageWidth - margin * 2, 8, 'F');
+        }
+
+        doc.setFont("helvetica", isWinner ? "bold" : "normal");
+        doc.setFontSize(9);
+        
+        // Nome do fornecedor
+        doc.setTextColor(31, 41, 55); // gray-800
+        const supplierName = f.supplierName.length > 25 ? f.supplierName.substring(0, 22) + "..." : f.supplierName;
+        doc.text(supplierName, margin + 3, y);
+        
+        // Valor
+        doc.text(`R$ ${f.valorTotal.toFixed(2)}`, margin + 70, y);
+        
+        // Custo por unidade
+        if (isWinner) {
+          doc.setTextColor(green[0], green[1], green[2]);
+        } else {
+          doc.setTextColor(gray[0], gray[1], gray[2]);
+        }
+        doc.text(`R$ ${f.custoPorUnidade.toFixed(4)}`, margin + 100, y);
+        
+        // Status
+        if (isWinner) {
+          doc.setTextColor(green[0], green[1], green[2]);
+          doc.text("🏆 MELHOR PREÇO", margin + 140, y);
+        } else {
+          doc.setTextColor(239, 68, 68); // red-500
+          doc.text(`+${f.diferencaPercentual.toFixed(1)}%`, margin + 140, y);
+        }
+        
+        y += 8;
+      });
+
+      y += 10;
+    });
+
+    // Resumo final
+    if (y > 230) {
+      doc.addPage();
+      y = 20;
+    }
+
+    y += 5;
+    doc.setFillColor(purple[0], purple[1], purple[2]);
+    doc.rect(margin, y - 5, pageWidth - margin * 2, 25, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("RESUMO DOS VENCEDORES", margin + 5, y + 3);
+    
+    y += 10;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    
+    // Contar vitórias por fornecedor
+    const winsPerSupplier: Record<string, { name: string; wins: number }> = {};
+    comparison.forEach(comp => {
+      const winner = comp.fornecedores.find(f => f.isMelhorPreco);
+      if (winner) {
+        if (!winsPerSupplier[winner.supplierId]) {
+          winsPerSupplier[winner.supplierId] = { name: winner.supplierName, wins: 0 };
+        }
+        winsPerSupplier[winner.supplierId].wins++;
+      }
+    });
+
+    const sortedWinners = Object.values(winsPerSupplier).sort((a, b) => b.wins - a.wins);
+    const winnersText = sortedWinners.map(w => `${w.name}: ${w.wins} item(s)`).join(" | ");
+    doc.text(winnersText || "Nenhum vencedor definido", margin + 5, y + 5);
+
+    // Rodapé
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(gray[0], gray[1], gray[2]);
+      doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, 290, { align: "center" });
+      doc.text("Sistema CotaJá - Comparativo de Embalagens", margin, 290);
+    }
+
+    // Salvar
+    doc.save(`cotacao-embalagens-${quote.dataInicio.replace(/\//g, '-')}.pdf`);
+  }, [quote, comparison]);
+
   if (!quote) return null;
 
   const stats = {
@@ -256,6 +428,7 @@ export function ManagePackagingQuoteDialog({
             <TabsTrigger value="editar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm"><Settings className="h-4 w-4 mr-2" />Editar Cotação</TabsTrigger>
             <TabsTrigger value="valores" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm"><DollarSign className="h-4 w-4 mr-2" />Valores</TabsTrigger>
             <TabsTrigger value="comparativo" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm"><TrendingDown className="h-4 w-4 mr-2" />Comparativo</TabsTrigger>
+            <TabsTrigger value="exportar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm"><FileDown className="h-4 w-4 mr-2" />Exportar</TabsTrigger>
           </TabsList>
 
           {/* Tab Resumo */}
@@ -491,6 +664,120 @@ export function ManagePackagingQuoteDialog({
                     )}
                   </Card>
                 ))}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          {/* Tab Exportar PDF */}
+          <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0">
+            <ScrollArea className="h-full">
+              <div className="p-5 space-y-6">
+                <div className="text-center py-8">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                    <FileDown className="h-10 w-10 text-purple-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Exportar Comparativo em PDF</h3>
+                  <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                    Gere um relatório PDF profissional com o comparativo de preços de todos os fornecedores, 
+                    destacando os vencedores de cada embalagem.
+                  </p>
+                </div>
+
+                {/* Preview do que será exportado */}
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Package className="h-4 w-4 text-purple-600" />
+                      Conteúdo do Relatório
+                    </h4>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>Período da cotação: {quote.dataInicio} a {quote.dataFim}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>{quote.itens.length} embalagens comparadas</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>{quote.fornecedores.length} fornecedores participantes</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>Tabela comparativa com preços e custo por unidade</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>Destaque do melhor preço (🏆) em cada embalagem</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span>Resumo dos vencedores por fornecedor</span>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Resumo dos vencedores */}
+                <Card className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
+                  <div className="p-4">
+                    <h4 className="font-semibold text-green-800 dark:text-green-300 flex items-center gap-2 mb-3">
+                      <Trophy className="h-4 w-4" />
+                      Prévia dos Vencedores
+                    </h4>
+                    <div className="space-y-2">
+                      {(() => {
+                        const winsPerSupplier: Record<string, { name: string; wins: number }> = {};
+                        comparison.forEach(comp => {
+                          const winner = comp.fornecedores.find(f => f.isMelhorPreco);
+                          if (winner) {
+                            if (!winsPerSupplier[winner.supplierId]) {
+                              winsPerSupplier[winner.supplierId] = { name: winner.supplierName, wins: 0 };
+                            }
+                            winsPerSupplier[winner.supplierId].wins++;
+                          }
+                        });
+                        const sorted = Object.values(winsPerSupplier).sort((a, b) => b.wins - a.wins);
+                        
+                        if (sorted.length === 0) {
+                          return <p className="text-sm text-gray-500">Nenhum vencedor definido ainda</p>;
+                        }
+                        
+                        return sorted.map((w, idx) => (
+                          <div key={idx} className="flex items-center justify-between text-sm">
+                            <span className="flex items-center gap-2">
+                              {idx === 0 && <Award className="h-4 w-4 text-amber-500" />}
+                              <span className={idx === 0 ? "font-bold" : ""}>{w.name}</span>
+                            </span>
+                            <Badge variant={idx === 0 ? "default" : "outline"} className={idx === 0 ? "bg-green-600" : ""}>
+                              {w.wins} {w.wins === 1 ? "item" : "itens"}
+                            </Badge>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Botão de download */}
+                <div className="flex justify-center pt-4">
+                  <Button 
+                    size="lg" 
+                    onClick={handleGeneratePDF}
+                    disabled={comparison.every(c => c.fornecedores.length === 0)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-8"
+                  >
+                    <Download className="h-5 w-5 mr-2" />
+                    Baixar PDF Comparativo
+                  </Button>
+                </div>
+
+                {comparison.every(c => c.fornecedores.length === 0) && (
+                  <p className="text-center text-sm text-amber-600 dark:text-amber-400">
+                    ⚠️ Adicione valores dos fornecedores na aba "Valores" antes de exportar
+                  </p>
+                )}
               </div>
             </ScrollArea>
           </TabsContent>
