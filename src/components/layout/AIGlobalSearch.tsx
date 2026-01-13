@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { Search, Sparkles, X, Loader2, Send } from "lucide-react";
@@ -29,6 +29,7 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [aiResponse, setAiResponse] = useState("");
   const [conversationHistory, setConversationHistory] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const { products } = useProducts();
   const { suppliers } = useSuppliers();
@@ -47,6 +48,18 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
       return data || [];
     },
   });
+
+  // Scroll automático para a última mensagem
+  useEffect(() => {
+    if (conversationHistory.length > 0 && scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        setTimeout(() => {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }, 100);
+      }
+    }
+  }, [conversationHistory]);
 
   // Atalho de teclado
   useEffect(() => {
@@ -109,7 +122,7 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <div className="relative h-full flex flex-col overflow-hidden">
+      <div className="relative flex flex-col h-[80vh] max-h-[600px] overflow-hidden">
         {/* Header */}
         <div className="relative border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
           <div className="relative flex items-center px-3 sm:px-4 py-3 sm:py-3.5 gap-2 sm:gap-3">
@@ -129,9 +142,10 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
         </div>
 
         {/* Conversation Area */}
-        <ScrollArea className="flex-1 min-h-0 p-4">
+        <ScrollArea ref={scrollAreaRef} className="flex-1 overflow-y-auto">
+          <div className="p-4">
           {conversationHistory.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full py-8 text-center">
+            <div className="flex flex-col items-center justify-center min-h-[300px] py-8 text-center">
               <div className="relative mb-6">
                 <div className="p-4 rounded-full bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-400/20 dark:to-purple-400/20 w-20 h-20 mx-auto flex items-center justify-center">
                   <Sparkles className="h-8 w-8 text-violet-600 dark:text-violet-400" />
@@ -159,7 +173,7 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 pb-4">
               {conversationHistory.map((msg, i) => (
                 <div key={i} className={cn("flex gap-3", msg.role === "user" ? "justify-end" : "justify-start")}>
                   {msg.role === "assistant" && (
@@ -184,6 +198,7 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
               )}
             </div>
           )}
+          </div>
         </ScrollArea>
 
         {/* Input Area */}
