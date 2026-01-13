@@ -12,10 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { 
   Package, Building2, DollarSign, CheckCircle2, Clock, 
-  TrendingDown, Award, Loader2, Save
+  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
@@ -29,7 +30,8 @@ interface Props {
 
 export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props) {
   const { updateSupplierItem, getComparison, updateQuoteStatus } = usePackagingQuotes();
-  const [activeTab, setActiveTab] = useState("valores");
+  const [activeTab, setActiveTab] = useState("resumo");
+  const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingItem, setEditingItem] = useState<{
     supplierId: string;
     packagingId: string;
@@ -54,8 +56,61 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
     }
   }, [editingItem, open]);
 
-  // Todos os hooks devem vir ANTES de qualquer return condicional
+  // Inicializar fornecedor selecionado
+  useEffect(() => {
+    if (open && quote && quote.fornecedores.length > 0 && !selectedSupplier) {
+      setSelectedSupplier(quote.fornecedores[0].supplierId);
+    }
+    if (!open) {
+      setSelectedSupplier("");
+      setEditingItem(null);
+    }
+  }, [open, quote]);
+
   const comparison = useMemo(() => quote ? getComparison(quote) : [], [quote, getComparison]);
+
+  // Dados de melhor preço por embalagem
+  const bestPricesData = useMemo(() => {
+    if (!quote) return [];
+    
+    return quote.itens.map(item => {
+      let bestPrice = Infinity;
+      let bestSupplierId: string | null = null;
+      let bestSupplierName = "";
+      const allPrices: { supplierId: string; supplierName: string; custoPorUnidade: number; valorTotal: number }[] = [];
+
+      quote.fornecedores.forEach(fornecedor => {
+        const supplierItem = fornecedor.itens.find(si => si.packagingId === item.packagingId);
+        if (supplierItem?.custoPorUnidade && supplierItem.custoPorUnidade > 0) {
+          allPrices.push({
+            supplierId: fornecedor.supplierId,
+            supplierName: fornecedor.supplierName,
+            custoPorUnidade: supplierItem.custoPorUnidade,
+            valorTotal: supplierItem.valorTotal || 0
+          });
+          if (supplierItem.custoPorUnidade < bestPrice) {
+            bestPrice = supplierItem.custoPorUnidade;
+            bestSupplierId = fornecedor.supplierId;
+            bestSupplierName = fornecedor.supplierName;
+          }
+        }
+      });
+
+      allPrices.sort((a, b) => a.custoPorUnidade - b.custoPorUnidade);
+      const worstPrice = allPrices.length > 0 ? allPrices[allPrices.length - 1].custoPorUnidade : 0;
+      const savings = worstPrice > 0 && bestPrice < Infinity ? worstPrice - bestPrice : 0;
+
+      return {
+        packagingId: item.packagingId,
+        packagingName: item.packagingName,
+        bestPrice: bestPrice === Infinity ? 0 : bestPrice,
+        bestSupplierId,
+        bestSupplierName,
+        allPrices,
+        savings
+      };
+    });
+  }, [quote]);
 
   const handleStatusChange = useCallback((status: string) => {
     if (quote && status !== quote.status) {
@@ -86,6 +141,8 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
       dimensoes: item?.dimensoes || "",
     });
     setEditingItem({ supplierId, packagingId });
+    setSelectedSupplier(supplierId);
+    setActiveTab("valores");
   }, [quote]);
 
   const handleSaveItem = useCallback(async () => {
@@ -106,7 +163,6 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
     setEditingItem(null);
   }, [editingItem, quote, formData, updateSupplierItem]);
 
-  // Atalhos de teclado: Ctrl+Enter para salvar, Esc para cancelar
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
@@ -116,99 +172,239 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
     } else if (e.key === "Escape" && editingItem) {
       e.preventDefault();
       setEditingItem(null);
-    } else if (e.key === "Tab" && e.shiftKey && activeTab === "comparativo") {
-      e.preventDefault();
-      setActiveTab("valores");
-    } else if (e.key === "Tab" && !e.shiftKey && activeTab === "valores") {
-      e.preventDefault();
-      setActiveTab("comparativo");
     }
-  }, [editingItem, formData.valorTotal, handleSaveItem, activeTab]);
+  }, [editingItem, formData.valorTotal, handleSaveItem]);
 
-  // Return condicional DEPOIS de todos os hooks
   if (!quote) return null;
+
+  const stats = {
+    totalEmbalagens: quote.itens.length,
+    totalFornecedores: quote.fornecedores.length,
+    fornecedoresRespondidos: quote.fornecedores.filter(f => f.status === "respondido").length,
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-purple-600" />
-            Gerenciar Cotação de Embalagens
-          </DialogTitle>
-          <div className="flex items-center gap-2 mt-2">
-            <Badge variant={quote.status === "ativa" ? "default" : "secondary"}>
-              {quote.status}
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              {quote.dataInicio} - {quote.dataFim}
-            </span>
+      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] max-h-[850px] p-0 overflow-hidden bg-white dark:bg-gray-900 flex flex-col">
+        {/* Header */}
+        <DialogHeader className="flex-shrink-0 px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-gray-800 dark:to-gray-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-purple-100 dark:bg-purple-900/30">
+                <Package className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
+                  Gerenciar Cotação de Embalagens
+                </DialogTitle>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className="text-xs">
+                    {quote.status}
+                  </Badge>
+                  <span className="text-xs text-gray-500">{quote.dataInicio} - {quote.dataFim}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select value={quote.status} onValueChange={handleStatusChange}>
+                <SelectTrigger className="w-32 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ativa">Ativa</SelectItem>
+                  <SelectItem value="concluida">Concluída</SelectItem>
+                  <SelectItem value="cancelada">Cancelada</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="valores">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Valores
+        {/* Stats Cards */}
+        <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-purple-500" />
+              <span className="text-sm"><strong>{stats.totalEmbalagens}</strong> embalagens</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-blue-500" />
+              <span className="text-sm"><strong>{stats.totalFornecedores}</strong> fornecedores</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <span className="text-sm"><strong>{stats.fornecedoresRespondidos}</strong> responderam</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="flex-shrink-0 w-full justify-start rounded-none border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-0 h-auto">
+            <TabsTrigger value="resumo" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm">
+              <Trophy className="h-4 w-4 mr-2" />Resumo
             </TabsTrigger>
-            <TabsTrigger value="comparativo">
-              <TrendingDown className="h-4 w-4 mr-2" />
-              Comparativo
+            <TabsTrigger value="valores" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm">
+              <DollarSign className="h-4 w-4 mr-2" />Editar Valores
+            </TabsTrigger>
+            <TabsTrigger value="comparativo" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm">
+              <TrendingDown className="h-4 w-4 mr-2" />Comparativo
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 mt-4">
-            <TabsContent value="valores" className="mt-0 space-y-4">
-              {quote.itens.map((item) => (
-                <div key={item.packagingId} className="border rounded-lg p-4">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Package className="h-4 w-4 text-purple-600" />
-                    {item.packagingName}
-                  </h4>
+          {/* Tab Resumo */}
+          <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0">
+            <ScrollArea className="h-full">
+              <div className="p-5 space-y-4">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Star className="h-4 w-4 text-amber-500" />
+                  Melhor Preço por Embalagem
+                </h3>
+                <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
+                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {bestPricesData.map((item) => (
+                      <div key={item.packagingId} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 dark:text-white">{item.packagingName}</p>
+                            {item.allPrices.length > 1 && (
+                              <div className="mt-2 flex flex-wrap gap-1.5">
+                                {item.allPrices.map((price, idx) => (
+                                  <Badge
+                                    key={price.supplierId}
+                                    variant={idx === 0 ? "default" : "outline"}
+                                    className={cn(
+                                      "text-[10px] cursor-pointer",
+                                      idx === 0 ? "bg-green-600 hover:bg-green-700" : "text-gray-500 hover:bg-gray-100"
+                                    )}
+                                    onClick={() => handleEditItem(price.supplierId, item.packagingId)}
+                                  >
+                                    {price.supplierName}: R$ {price.custoPorUnidade.toFixed(4)}/un
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            {item.bestPrice > 0 ? (
+                              <>
+                                <div className="flex items-center gap-2 justify-end">
+                                  <Award className="h-4 w-4 text-amber-500" />
+                                  <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                                    R$ {item.bestPrice.toFixed(4)}/un
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-0.5">{item.bestSupplierName}</p>
+                                {item.savings > 0 && (
+                                  <Badge className="mt-1 bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 text-[10px]">
+                                    <TrendingDown className="h-2.5 w-2.5 mr-0.5" />
+                                    Economia: R$ {item.savings.toFixed(4)}/un
+                                  </Badge>
+                                )}
+                              </>
+                            ) : (
+                              <Badge variant="outline" className="text-gray-400">Sem preço</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+            </ScrollArea>
+          </TabsContent>
 
-                  <div className="space-y-3">
-                    {quote.fornecedores.map((fornecedor) => {
-                      const supplierItem = fornecedor.itens.find(
-                        si => si.packagingId === item.packagingId
-                      );
-                      const isEditing = editingItem?.supplierId === fornecedor.supplierId && 
-                                       editingItem?.packagingId === item.packagingId;
+          {/* Tab Editar Valores */}
+          <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0">
+            <div className="h-full flex">
+              {/* Sidebar de Fornecedores */}
+              <div className="w-48 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase">Fornecedores</h4>
+                </div>
+                <ScrollArea className="h-[calc(100%-44px)]">
+                  <div className="p-2 space-y-1">
+                    {quote.fornecedores.map((fornecedor) => (
+                      <button
+                        key={fornecedor.supplierId}
+                        onClick={() => setSelectedSupplier(fornecedor.supplierId)}
+                        className={cn(
+                          "w-full p-2.5 rounded-lg text-left transition-all text-sm",
+                          selectedSupplier === fornecedor.supplierId
+                            ? "bg-purple-100 dark:bg-purple-900/30 border border-purple-400 text-purple-900 dark:text-purple-100"
+                            : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-200"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span className="truncate font-medium">{fornecedor.supplierName}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1">
+                          {fornecedor.status === "respondido" ? (
+                            <Badge className="text-[9px] bg-green-100 text-green-700 px-1.5 py-0">
+                              <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />Respondido
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                              <Clock className="h-2.5 w-2.5 mr-0.5" />Pendente
+                            </Badge>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              {/* Área de Edição */}
+              <div className="flex-1 overflow-hidden">
+                <ScrollArea className="h-full">
+                  <div className="p-4 space-y-3" onKeyDown={handleKeyDown}>
+                    {selectedSupplier && quote.itens.map((item) => {
+                      const fornecedor = quote.fornecedores.find(f => f.supplierId === selectedSupplier);
+                      const supplierItem = fornecedor?.itens.find(si => si.packagingId === item.packagingId);
+                      const isEditing = editingItem?.supplierId === selectedSupplier && editingItem?.packagingId === item.packagingId;
+                      const bestData = bestPricesData.find(b => b.packagingId === item.packagingId);
+                      const isBestPrice = bestData?.bestSupplierId === selectedSupplier;
 
                       return (
-                        <div 
-                          key={fornecedor.supplierId}
+                        <Card 
+                          key={item.packagingId} 
                           className={cn(
-                            "p-3 rounded-lg border",
-                            fornecedor.status === "respondido" 
-                              ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
-                              : "bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700"
+                            "p-4 transition-all",
+                            isBestPrice && "ring-2 ring-green-500 bg-green-50/50 dark:bg-green-900/10",
+                            isEditing && "ring-2 ring-purple-500"
                           )}
                         >
-                          <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">{fornecedor.supplierName}</span>
-                              {fornecedor.status === "respondido" ? (
-                                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <Clock className="h-4 w-4 text-amber-500" />
+                              <Package className="h-4 w-4 text-purple-600" />
+                              <span className="font-semibold">{item.packagingName}</span>
+                              {isBestPrice && (
+                                <Badge className="bg-green-600 text-[10px]">
+                                  <Award className="h-3 w-3 mr-0.5" />Melhor
+                                </Badge>
                               )}
                             </div>
                             {!isEditing && (
                               <Button 
                                 size="sm" 
                                 variant="outline"
-                                onClick={() => handleEditItem(fornecedor.supplierId, item.packagingId)}
+                                onClick={() => handleEditItem(selectedSupplier, item.packagingId)}
+                                className="h-7 text-xs"
                               >
-                                Editar
+                                <Edit2 className="h-3 w-3 mr-1" />Editar
                               </Button>
                             )}
                           </div>
 
                           {isEditing ? (
-                            <div className="space-y-3 mt-3" onKeyDown={handleKeyDown}>
-                              <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 <div>
                                   <Label className="text-xs">Valor Total (R$) *</Label>
                                   <Input
@@ -218,6 +414,7 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
                                     value={formData.valorTotal}
                                     onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))}
                                     placeholder="0,00"
+                                    className="h-9"
                                   />
                                 </div>
                                 <div>
@@ -226,7 +423,7 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
                                     value={formData.unidadeVenda} 
                                     onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}
                                   >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="h-9">
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -236,17 +433,15 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
                                     </SelectContent>
                                   </Select>
                                 </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <Label className="text-xs">Quantidade na Unidade *</Label>
+                                  <Label className="text-xs">Qtd. na Unidade *</Label>
                                   <Input
                                     type="number"
                                     step="0.01"
                                     value={formData.quantidadeVenda}
                                     onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))}
-                                    placeholder="Ex: 5 (kg)"
+                                    placeholder="Ex: 5"
+                                    className="h-9"
                                   />
                                 </div>
                                 <div>
@@ -255,28 +450,28 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
                                     type="number"
                                     value={formData.quantidadeUnidadesEstimada}
                                     onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))}
-                                    placeholder="Ex: 500 sacolas"
+                                    placeholder="Ex: 500"
+                                    className="h-9"
                                   />
                                 </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <Label className="text-xs">Gramatura (opcional)</Label>
+                                  <Label className="text-xs">Gramatura</Label>
                                   <Input
                                     type="number"
                                     step="0.01"
                                     value={formData.gramatura}
                                     onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))}
-                                    placeholder="Ex: 0.08 (micras)"
+                                    placeholder="Ex: 0.08"
+                                    className="h-9"
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-xs">Dimensões (opcional)</Label>
+                                  <Label className="text-xs">Dimensões</Label>
                                   <Input
                                     value={formData.dimensoes}
                                     onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))}
                                     placeholder="Ex: 30x40cm"
+                                    className="h-9"
                                   />
                                 </div>
                               </div>
@@ -289,159 +484,143 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
                                 </div>
                               )}
 
-                              <div className="flex flex-col gap-2">
+                              <div className="flex items-center justify-between pt-2 border-t">
+                                <p className="text-xs text-muted-foreground">
+                                  <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl+Enter</kbd> salvar
+                                  <span className="mx-2">•</span>
+                                  <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> cancelar
+                                </p>
                                 <div className="flex gap-2">
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => setEditingItem(null)}
-                                  >
+                                  <Button size="sm" variant="outline" onClick={() => setEditingItem(null)} className="h-8">
                                     Cancelar
                                   </Button>
                                   <Button 
                                     size="sm"
                                     onClick={handleSaveItem}
                                     disabled={updateSupplierItem.isPending || !formData.valorTotal}
-                                    className="bg-purple-600 hover:bg-purple-700"
+                                    className="h-8 bg-purple-600 hover:bg-purple-700"
                                   >
                                     {updateSupplierItem.isPending ? (
-                                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
                                     ) : (
-                                      <Save className="h-4 w-4 mr-2" />
+                                      <Save className="h-3 w-3 mr-1" />
                                     )}
                                     Salvar
                                   </Button>
                                 </div>
-                                <p className="text-xs text-center text-muted-foreground">
-                                  <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl+Enter</kbd> para salvar • <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> para cancelar
-                                </p>
                               </div>
                             </div>
                           ) : supplierItem?.valorTotal ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                               <div>
-                                <span className="text-muted-foreground">Valor:</span>
-                                <p className="font-medium">R$ {supplierItem.valorTotal.toFixed(2)}</p>
+                                <span className="text-xs text-muted-foreground block">Valor</span>
+                                <p className="font-semibold">R$ {supplierItem.valorTotal.toFixed(2)}</p>
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Venda:</span>
+                                <span className="text-xs text-muted-foreground block">Venda</span>
                                 <p className="font-medium">{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</p>
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Unidades:</span>
+                                <span className="text-xs text-muted-foreground block">Unidades</span>
                                 <p className="font-medium">{supplierItem.quantidadeUnidadesEstimada}</p>
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Custo/un:</span>
-                                <p className="font-medium text-purple-600">
+                                <span className="text-xs text-muted-foreground block">Custo/un</span>
+                                <p className={cn("font-bold", isBestPrice ? "text-green-600" : "text-purple-600")}>
                                   R$ {supplierItem.custoPorUnidade?.toFixed(4) || '-'}
                                 </p>
                               </div>
                             </div>
                           ) : (
-                            <p className="text-sm text-muted-foreground">Aguardando valores...</p>
+                            <p className="text-sm text-muted-foreground italic">Clique em "Editar" para adicionar valores</p>
                           )}
-                        </div>
+                        </Card>
                       );
                     })}
                   </div>
-                </div>
-              ))}
-            </TabsContent>
+                </ScrollArea>
+              </div>
+            </div>
+          </TabsContent>
 
-            <TabsContent value="comparativo" className="mt-0 space-y-4">
-              {comparison.map((comp) => (
-                <div key={comp.packagingId} className="border rounded-lg overflow-hidden">
-                  <div className="bg-purple-50 dark:bg-purple-900/20 p-3 border-b">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <Package className="h-4 w-4 text-purple-600" />
-                      {comp.packagingName}
-                    </h4>
+          {/* Tab Comparativo */}
+          <TabsContent value="comparativo" className="flex-1 overflow-hidden m-0 p-0">
+            <ScrollArea className="h-full">
+              <div className="p-5 space-y-4">
+                {comparison.length === 0 || comparison.every(c => c.fornecedores.length === 0) ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <TrendingDown className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p className="font-medium">Nenhum fornecedor respondeu ainda</p>
+                    <p className="text-sm">Adicione os valores na aba "Editar Valores"</p>
                   </div>
+                ) : (
+                  comparison.map((comp) => (
+                    <Card key={comp.packagingId} className="overflow-hidden border-gray-200 dark:border-gray-700">
+                      <div className="bg-purple-50 dark:bg-purple-900/20 p-3 border-b border-gray-200 dark:border-gray-700">
+                        <h4 className="font-semibold flex items-center gap-2">
+                          <Package className="h-4 w-4 text-purple-600" />
+                          {comp.packagingName}
+                        </h4>
+                      </div>
 
-                  {comp.fornecedores.length === 0 ? (
-                    <div className="p-4 text-center text-muted-foreground">
-                      Nenhum fornecedor respondeu ainda
-                    </div>
-                  ) : (
-                    <div className="divide-y">
-                      {comp.fornecedores.map((f, index) => (
-                        <div 
-                          key={f.supplierId}
-                          className={cn(
-                            "p-3 flex items-center gap-4",
-                            f.isMelhorPreco && "bg-green-50 dark:bg-green-900/20"
-                          )}
-                        >
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 font-bold text-sm">
-                            {f.isMelhorPreco ? (
-                              <Award className="h-5 w-5 text-amber-500" />
-                            ) : (
-                              index + 1
-                            )}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium">{f.supplierName}</p>
-                            <p className="text-xs text-muted-foreground">
-                              R$ {f.valorTotal.toFixed(2)} por {f.quantidadeVenda} {f.unidadeVenda} 
-                              ({f.quantidadeUnidades} un)
-                            </p>
-                          </div>
-
-                          <div className="text-right">
-                            <p className={cn(
-                              "font-bold",
-                              f.isMelhorPreco ? "text-green-600" : "text-gray-700 dark:text-gray-300"
-                            )}>
-                              R$ {f.custoPorUnidade.toFixed(4)}/un
-                            </p>
-                            {!f.isMelhorPreco && (
-                              <p className="text-xs text-red-500">
-                                +{f.diferencaPercentual.toFixed(1)}%
-                              </p>
-                            )}
-                            {f.isMelhorPreco && (
-                              <Badge className="bg-green-600 text-xs">Melhor preço</Badge>
-                            )}
-                          </div>
+                      {comp.fornecedores.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground text-sm">
+                          Nenhum fornecedor respondeu ainda
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                      ) : (
+                        <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                          {comp.fornecedores.map((f, index) => (
+                            <div 
+                              key={f.supplierId}
+                              className={cn(
+                                "p-3 flex items-center gap-4 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                                f.isMelhorPreco && "bg-green-50 dark:bg-green-900/20"
+                              )}
+                              onClick={() => handleEditItem(f.supplierId, comp.packagingId)}
+                            >
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 font-bold text-sm flex-shrink-0">
+                                {f.isMelhorPreco ? (
+                                  <Award className="h-5 w-5 text-amber-500" />
+                                ) : (
+                                  index + 1
+                                )}
+                              </div>
 
-              {comparison.every(c => c.fornecedores.length === 0) && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <TrendingDown className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>Nenhum fornecedor respondeu ainda</p>
-                  <p className="text-sm">Adicione os valores na aba "Valores"</p>
-                </div>
-              )}
-            </TabsContent>
-          </ScrollArea>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium">{f.supplierName}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  R$ {f.valorTotal.toFixed(2)} por {f.quantidadeVenda} {f.unidadeVenda} 
+                                  ({f.quantidadeUnidades} un)
+                                </p>
+                              </div>
+
+                              <div className="text-right flex-shrink-0">
+                                <p className={cn(
+                                  "font-bold text-lg",
+                                  f.isMelhorPreco ? "text-green-600" : "text-gray-700 dark:text-gray-300"
+                                )}>
+                                  R$ {f.custoPorUnidade.toFixed(4)}/un
+                                </p>
+                                {!f.isMelhorPreco && (
+                                  <p className="text-xs text-red-500">
+                                    +{f.diferencaPercentual.toFixed(1)}% mais caro
+                                  </p>
+                                )}
+                                {f.isMelhorPreco && (
+                                  <Badge className="bg-green-600 text-xs">Melhor preço</Badge>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
         </Tabs>
-
-        <div className="flex justify-between items-center pt-4 border-t">
-          <Select 
-            value={quote.status} 
-            onValueChange={handleStatusChange}
-          >
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ativa">Ativa</SelectItem>
-              <SelectItem value="concluida">Concluída</SelectItem>
-              <SelectItem value="cancelada">Cancelada</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fechar
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   );
