@@ -139,6 +139,70 @@ CREATE INDEX idx_packaging_supplier_items_quote ON packaging_supplier_items(quot
 CREATE INDEX idx_packaging_supplier_items_supplier ON packaging_supplier_items(supplier_id);
 ```
 
+## Tabelas de Pedidos
+
+```sql
+-- Pedidos de embalagens
+CREATE TABLE packaging_orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  quote_id UUID REFERENCES packaging_quotes(id) ON DELETE SET NULL,
+  supplier_id UUID NOT NULL REFERENCES suppliers(id),
+  supplier_name VARCHAR(255) NOT NULL,
+  total_value DECIMAL(12,2) DEFAULT 0,
+  status VARCHAR(50) DEFAULT 'pendente',
+  order_date DATE NOT NULL,
+  delivery_date DATE,
+  observations TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Itens do pedido de embalagem
+CREATE TABLE packaging_order_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES packaging_orders(id) ON DELETE CASCADE,
+  packaging_id UUID NOT NULL REFERENCES packaging_items(id),
+  packaging_name VARCHAR(255) NOT NULL,
+  quantidade DECIMAL(10,2) NOT NULL,
+  unidade_compra VARCHAR(20),
+  quantidade_por_unidade INT,
+  valor_unitario DECIMAL(10,4),
+  valor_total DECIMAL(12,2),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS para pedidos
+ALTER TABLE packaging_orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE packaging_order_items ENABLE ROW LEVEL SECURITY;
+
+-- Policies para packaging_orders
+CREATE POLICY "Users can view own company packaging_orders" ON packaging_orders
+  FOR SELECT USING (company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid()));
+
+CREATE POLICY "Users can insert own company packaging_orders" ON packaging_orders
+  FOR INSERT WITH CHECK (company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid()));
+
+CREATE POLICY "Users can update own company packaging_orders" ON packaging_orders
+  FOR UPDATE USING (company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid()));
+
+CREATE POLICY "Users can delete own company packaging_orders" ON packaging_orders
+  FOR DELETE USING (company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid()));
+
+-- Policies para packaging_order_items
+CREATE POLICY "Users can manage packaging_order_items" ON packaging_order_items
+  FOR ALL USING (order_id IN (
+    SELECT id FROM packaging_orders WHERE company_id IN (
+      SELECT company_id FROM profiles WHERE id = auth.uid()
+    )
+  ));
+
+-- Índices para pedidos
+CREATE INDEX idx_packaging_orders_company ON packaging_orders(company_id);
+CREATE INDEX idx_packaging_orders_status ON packaging_orders(status);
+CREATE INDEX idx_packaging_order_items_order ON packaging_order_items(order_id);
+```
+
 ## Campos Importantes
 
 ### packaging_supplier_items

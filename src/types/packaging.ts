@@ -163,3 +163,68 @@ export const PACKAGE_SUB_UNITS = [
   { value: "kg", label: "Por peso (kg)" },
   { value: "quantidade", label: "Por quantidade (unidades)" },
 ] as const;
+
+// ==========================================
+// TIPOS PARA PEDIDOS DE EMBALAGENS
+// ==========================================
+
+export interface PackagingOrder {
+  id: string;
+  company_id: string;
+  quote_id: string | null;
+  supplier_id: string;
+  supplier_name: string;
+  total_value: number;
+  status: "pendente" | "confirmado" | "entregue" | "cancelado";
+  order_date: string;
+  delivery_date: string | null;
+  observations: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PackagingOrderItem {
+  id: string;
+  order_id: string;
+  packaging_id: string;
+  packaging_name: string;
+  quantidade: number;
+  unidade_compra: string;
+  quantidade_por_unidade: number | null;
+  valor_unitario: number;
+  valor_total: number;
+  created_at: string;
+}
+
+// Tipos para exibição no frontend
+export interface PackagingOrderDisplay {
+  id: string;
+  quoteId: string | null;
+  supplierId: string;
+  supplierName: string;
+  totalValue: number;
+  status: "pendente" | "confirmado" | "entregue" | "cancelado";
+  orderDate: string;
+  deliveryDate: string | null;
+  observations: string | null;
+  itens: PackagingOrderItemDisplay[];
+}
+
+export interface PackagingOrderItemDisplay {
+  id: string;
+  packagingId: string;
+  packagingName: string;
+  quantidade: number;
+  unidadeCompra: string;
+  quantidadePorUnidade: number | null;
+  valorUnitario: number;
+  valorTotal: number;
+}
+
+// Status de pedidos de embalagens
+export const PACKAGING_ORDER_STATUS = [
+  { value: "pendente", label: "Pendente", color: "amber" },
+  { value: "confirmado", label: "Confirmado", color: "blue" },
+  { value: "entregue", label: "Entregue", color: "green" },
+  { value: "cancelado", label: "Cancelado", color: "red" },
+] as const;
