@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,17 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
     gramatura: "",
     dimensoes: "",
   });
+  const valorTotalInputRef = useRef<HTMLInputElement>(null);
+
+  // Foco automático no campo valor quando começar a editar
+  useEffect(() => {
+    if (editingItem && open) {
+      setTimeout(() => {
+        valorTotalInputRef.current?.focus();
+        valorTotalInputRef.current?.select();
+      }, 100);
+    }
+  }, [editingItem, open]);
 
   // Todos os hooks devem vir ANTES de qualquer return condicional
   const comparison = useMemo(() => quote ? getComparison(quote) : [], [quote, getComparison]);
@@ -94,6 +105,25 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
 
     setEditingItem(null);
   }, [editingItem, quote, formData, updateSupplierItem]);
+
+  // Atalhos de teclado: Ctrl+Enter para salvar, Esc para cancelar
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (editingItem && formData.valorTotal) {
+        handleSaveItem();
+      }
+    } else if (e.key === "Escape" && editingItem) {
+      e.preventDefault();
+      setEditingItem(null);
+    } else if (e.key === "Tab" && e.shiftKey && activeTab === "comparativo") {
+      e.preventDefault();
+      setActiveTab("valores");
+    } else if (e.key === "Tab" && !e.shiftKey && activeTab === "valores") {
+      e.preventDefault();
+      setActiveTab("comparativo");
+    }
+  }, [editingItem, formData.valorTotal, handleSaveItem, activeTab]);
 
   // Return condicional DEPOIS de todos os hooks
   if (!quote) return null;
@@ -177,11 +207,12 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
                           </div>
 
                           {isEditing ? (
-                            <div className="space-y-3 mt-3">
+                            <div className="space-y-3 mt-3" onKeyDown={handleKeyDown}>
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <Label className="text-xs">Valor Total (R$)</Label>
+                                  <Label className="text-xs">Valor Total (R$) *</Label>
                                   <Input
+                                    ref={valorTotalInputRef}
                                     type="number"
                                     step="0.01"
                                     value={formData.valorTotal}
@@ -190,7 +221,7 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-xs">Unidade de Venda</Label>
+                                  <Label className="text-xs">Unidade de Venda *</Label>
                                   <Select 
                                     value={formData.unidadeVenda} 
                                     onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}
@@ -209,7 +240,7 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
 
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                  <Label className="text-xs">Quantidade na Unidade</Label>
+                                  <Label className="text-xs">Quantidade na Unidade *</Label>
                                   <Input
                                     type="number"
                                     step="0.01"
@@ -219,7 +250,7 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
                                   />
                                 </div>
                                 <div>
-                                  <Label className="text-xs">Qtd. Unidades Estimada</Label>
+                                  <Label className="text-xs">Qtd. Unidades Estimada *</Label>
                                   <Input
                                     type="number"
                                     value={formData.quantidadeUnidadesEstimada}
@@ -258,27 +289,32 @@ export function ManagePackagingQuoteDialog({ open, onOpenChange, quote }: Props)
                                 </div>
                               )}
 
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => setEditingItem(null)}
-                                >
-                                  Cancelar
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={handleSaveItem}
-                                  disabled={updateSupplierItem.isPending}
-                                  className="bg-purple-600 hover:bg-purple-700"
-                                >
-                                  {updateSupplierItem.isPending ? (
-                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                  ) : (
-                                    <Save className="h-4 w-4 mr-2" />
-                                  )}
-                                  Salvar
-                                </Button>
+                              <div className="flex flex-col gap-2">
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => setEditingItem(null)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                  <Button 
+                                    size="sm"
+                                    onClick={handleSaveItem}
+                                    disabled={updateSupplierItem.isPending || !formData.valorTotal}
+                                    className="bg-purple-600 hover:bg-purple-700"
+                                  >
+                                    {updateSupplierItem.isPending ? (
+                                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    ) : (
+                                      <Save className="h-4 w-4 mr-2" />
+                                    )}
+                                    Salvar
+                                  </Button>
+                                </div>
+                                <p className="text-xs text-center text-muted-foreground">
+                                  <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl+Enter</kbd> para salvar • <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> para cancelar
+                                </p>
                               </div>
                             </div>
                           ) : supplierItem?.valorTotal ? (

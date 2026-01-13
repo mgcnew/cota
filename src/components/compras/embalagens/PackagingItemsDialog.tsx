@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,16 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
     description: "",
     reference_unit: "un",
   });
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  // Foco automático no campo nome quando abrir o formulário
+  useEffect(() => {
+    if (step === "form" && open) {
+      setTimeout(() => {
+        nameInputRef.current?.focus();
+      }, 100);
+    }
+  }, [step, open]);
 
   const resetForm = () => {
     setFormData({
@@ -44,7 +54,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
     setEditingId(null);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (createMore: boolean = false) => {
     if (!formData.name.trim()) return;
 
     if (editingId) {
@@ -55,6 +65,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
         description: formData.description || null,
         reference_unit: formData.reference_unit,
       });
+      resetForm();
     } else {
       await addItem.mutateAsync({
         name: formData.name,
@@ -62,9 +73,36 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
         description: formData.description || null,
         reference_unit: formData.reference_unit,
       });
+      
+      if (createMore) {
+        // Limpa apenas o formulário, mantém na tela de criação
+        setFormData({
+          name: "",
+          category: "",
+          description: "",
+          reference_unit: "un",
+        });
+        // Foca no campo nome novamente
+        setTimeout(() => {
+          nameInputRef.current?.focus();
+        }, 100);
+      } else {
+        resetForm();
+      }
     }
+  };
 
-    resetForm();
+  // Atalho de teclado: Enter para salvar, Esc para cancelar
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (canSubmit) {
+        handleSubmit(false);
+      }
+    } else if (e.key === "Escape" && step === "form") {
+      e.preventDefault();
+      resetForm();
+    }
   };
 
   const handleEdit = (item: typeof items[0]) => {
@@ -149,10 +187,11 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
 
       case "form":
         return (
-          <div className="space-y-4">
+          <div className="space-y-4" onKeyDown={handleKeyDown}>
             <div className="space-y-2">
               <Label>Nome da Embalagem *</Label>
               <Input
+                ref={nameInputRef}
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Ex: Sacola Plástica 30x40"
@@ -203,22 +242,41 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
               />
             </div>
 
-            <div className="flex gap-2 pt-2">
-              <Button variant="outline" onClick={resetForm} className="flex-1">
-                <ArrowLeft className="h-4 w-4 mr-2" />Voltar
-              </Button>
-              <Button 
-                onClick={handleSubmit} 
-                disabled={!canSubmit || addItem.isPending || updateItem.isPending}
-                className="flex-1 bg-purple-600 hover:bg-purple-700"
-              >
-                {(addItem.isPending || updateItem.isPending) ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Check className="h-4 w-4 mr-2" />
-                )}
-                {editingId ? "Atualizar" : "Cadastrar"}
-              </Button>
+            <div className="flex flex-col gap-2 pt-2">
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={resetForm} className="flex-1">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Voltar
+                </Button>
+                <Button 
+                  onClick={() => handleSubmit(false)} 
+                  disabled={!canSubmit || addItem.isPending || updateItem.isPending}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                >
+                  {(addItem.isPending || updateItem.isPending) ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-2" />
+                  )}
+                  {editingId ? "Atualizar" : "Salvar"}
+                </Button>
+              </div>
+              
+              {!editingId && (
+                <Button 
+                  onClick={() => handleSubmit(true)} 
+                  disabled={!canSubmit || addItem.isPending || updateItem.isPending}
+                  variant="outline"
+                  className="w-full border-purple-200 hover:bg-purple-50 dark:border-purple-800 dark:hover:bg-purple-950"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Salvar e Criar Mais
+                </Button>
+              )}
+              
+              <p className="text-xs text-center text-muted-foreground">
+                Atalhos: <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl+Enter</kbd> para salvar • <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> para cancelar
+              </p>
             </div>
           </div>
         );
