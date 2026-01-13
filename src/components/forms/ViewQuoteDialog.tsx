@@ -1633,7 +1633,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                   open={whatsappSendOpen}
                   onOpenChange={setWhatsappSendOpen}
                   quoteId={currentQuote.id}
-                  suppliers={currentQuote.suppliers || []}
+                  suppliers={currentQuote.fornecedoresParticipantes?.map(f => ({ id: f.id, name: f.nome, phone: '' })) || []}
                   onConfigClick={() => {
                     setWhatsappSendOpen(false);
                     setWhatsappConfigOpen(true);

@@ -1336,6 +1336,249 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_config: {
+        Row: {
+          api_key: string
+          api_url: string
+          company_id: string
+          created_at: string | null
+          id: string
+          instance_name: string
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          api_key: string
+          api_url: string
+          company_id: string
+          created_at?: string | null
+          id?: string
+          instance_name: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          api_key?: string
+          api_url?: string
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          instance_name?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_messages: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          delivered_at: string | null
+          id: string
+          message_id: string | null
+          message_text: string
+          packaging_quote_id: string | null
+          phone_number: string
+          quote_id: string | null
+          read_at: string | null
+          sent_at: string | null
+          status: string | null
+          supplier_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          delivered_at?: string | null
+          id?: string
+          message_id?: string | null
+          message_text: string
+          packaging_quote_id?: string | null
+          phone_number: string
+          quote_id?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          supplier_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          delivered_at?: string | null
+          id?: string
+          message_id?: string | null
+          message_text?: string
+          packaging_quote_id?: string | null
+          phone_number?: string
+          quote_id?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          supplier_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_packaging_quote_id_fkey"
+            columns: ["packaging_quote_id"]
+            isOneToOne: false
+            referencedRelation: "packaging_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_responses: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          is_processed: boolean | null
+          packaging_quote_id: string | null
+          parsed_data: Json | null
+          phone_number: string
+          processed_at: string | null
+          quote_id: string | null
+          received_at: string | null
+          response_text: string
+          supplier_id: string
+          whatsapp_message_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_processed?: boolean | null
+          packaging_quote_id?: string | null
+          parsed_data?: Json | null
+          phone_number: string
+          processed_at?: string | null
+          quote_id?: string | null
+          received_at?: string | null
+          response_text: string
+          supplier_id: string
+          whatsapp_message_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_processed?: boolean | null
+          packaging_quote_id?: string | null
+          parsed_data?: Json | null
+          phone_number?: string
+          processed_at?: string | null
+          quote_id?: string | null
+          received_at?: string | null
+          response_text?: string
+          supplier_id?: string
+          whatsapp_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_responses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_responses_packaging_quote_id_fkey"
+            columns: ["packaging_quote_id"]
+            isOneToOne: false
+            referencedRelation: "packaging_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_responses_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_responses_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_responses_whatsapp_message_id_fkey"
+            columns: ["whatsapp_message_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_templates: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          template_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          template_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          template_text?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
