@@ -368,6 +368,147 @@ export function usePackagingQuotes() {
     return comparisons;
   };
 
+  // Adicionar fornecedor à cotação
+  const addQuoteSupplier = useMutation({
+    mutationFn: async (data: { quoteId: string; supplierId: string; supplierName: string }) => {
+      // Adicionar fornecedor
+      const { error: supplierError } = await (supabase
+        .from('packaging_quote_suppliers' as any)
+        .insert({
+          quote_id: data.quoteId,
+          supplier_id: data.supplierId,
+          supplier_name: data.supplierName,
+          status: 'pendente',
+        }) as any);
+
+      if (supplierError) throw supplierError;
+
+      // Buscar itens da cotação para criar supplier_items
+      const { data: quoteItems } = await (supabase
+        .from('packaging_quote_items' as any)
+        .select('packaging_id, packaging_name')
+        .eq('quote_id', data.quoteId) as any);
+
+      if (quoteItems && quoteItems.length > 0) {
+        const supplierItemsToInsert = quoteItems.map((item: any) => ({
+          quote_id: data.quoteId,
+          supplier_id: data.supplierId,
+          packaging_id: item.packaging_id,
+          packaging_name: item.packaging_name,
+        }));
+
+        await (supabase
+          .from('packaging_supplier_items' as any)
+          .insert(supplierItemsToInsert) as any);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      toast({ title: 'Fornecedor adicionado!' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Erro ao adicionar fornecedor', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Remover fornecedor da cotação
+  const removeQuoteSupplier = useMutation({
+    mutationFn: async (data: { quoteId: string; supplierId: string }) => {
+      // Remover supplier_items primeiro
+      await (supabase
+        .from('packaging_supplier_items' as any)
+        .delete()
+        .eq('quote_id', data.quoteId)
+        .eq('supplier_id', data.supplierId) as any);
+
+      // Remover fornecedor
+      const { error } = await (supabase
+        .from('packaging_quote_suppliers' as any)
+        .delete()
+        .eq('quote_id', data.quoteId)
+        .eq('supplier_id', data.supplierId) as any);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      toast({ title: 'Fornecedor removido!' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Erro ao remover fornecedor', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Adicionar embalagem à cotação
+  const addQuoteItem = useMutation({
+    mutationFn: async (data: { quoteId: string; packagingId: string; packagingName: string }) => {
+      // Adicionar item
+      const { error: itemError } = await (supabase
+        .from('packaging_quote_items' as any)
+        .insert({
+          quote_id: data.quoteId,
+          packaging_id: data.packagingId,
+          packaging_name: data.packagingName,
+        }) as any);
+
+      if (itemError) throw itemError;
+
+      // Buscar fornecedores da cotação para criar supplier_items
+      const { data: quoteSuppliers } = await (supabase
+        .from('packaging_quote_suppliers' as any)
+        .select('supplier_id')
+        .eq('quote_id', data.quoteId) as any);
+
+      if (quoteSuppliers && quoteSuppliers.length > 0) {
+        const supplierItemsToInsert = quoteSuppliers.map((s: any) => ({
+          quote_id: data.quoteId,
+          supplier_id: s.supplier_id,
+          packaging_id: data.packagingId,
+          packaging_name: data.packagingName,
+        }));
+
+        await (supabase
+          .from('packaging_supplier_items' as any)
+          .insert(supplierItemsToInsert) as any);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      toast({ title: 'Embalagem adicionada!' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Erro ao adicionar embalagem', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Remover embalagem da cotação
+  const removeQuoteItem = useMutation({
+    mutationFn: async (data: { quoteId: string; packagingId: string }) => {
+      // Remover supplier_items primeiro
+      await (supabase
+        .from('packaging_supplier_items' as any)
+        .delete()
+        .eq('quote_id', data.quoteId)
+        .eq('packaging_id', data.packagingId) as any);
+
+      // Remover item
+      const { error } = await (supabase
+        .from('packaging_quote_items' as any)
+        .delete()
+        .eq('quote_id', data.quoteId)
+        .eq('packaging_id', data.packagingId) as any);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      toast({ title: 'Embalagem removida!' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Erro ao remover embalagem', description: error.message, variant: 'destructive' });
+    },
+  });
+
   return {
     quotes,
     isLoading,
@@ -377,5 +518,9 @@ export function usePackagingQuotes() {
     updateQuoteStatus,
     deleteQuote,
     getComparison,
+    addQuoteSupplier,
+    removeQuoteSupplier,
+    addQuoteItem,
+    removeQuoteItem,
   };
 }

@@ -413,6 +413,8 @@ function EmbalagensTab() {
         open={manageDialogOpen}
         onOpenChange={setManageDialogOpen}
         quote={selectedQuote}
+        availablePackagingItems={packagingItems}
+        availableSuppliers={suppliers}
       />
 
       <DeletePackagingQuoteDialog
