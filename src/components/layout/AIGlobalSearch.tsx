@@ -36,13 +36,73 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
   const { cotacoes } = useCotacoes();
   const { pedidos } = usePedidos();
 
-  // Buscar itens de pedidos para análise de preços
+  // Buscar TODOS os dados financeiros do sistema
   const { data: orderItems = [] } = useQuery({
     queryKey: ["order-items-for-ai"],
     queryFn: async () => {
       const { data } = await supabase
         .from("order_items")
-        .select("product_name, unit_price, quantity, total_price")
+        .select("*, created_at")
+        .order("created_at", { ascending: false })
+        .limit(2000);
+      return data || [];
+    },
+  });
+
+  const { data: quoteSupplierItems = [] } = useQuery({
+    queryKey: ["quote-supplier-items-for-ai"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("quote_supplier_items")
+        .select("*, created_at")
+        .order("created_at", { ascending: false })
+        .limit(2000);
+      return data || [];
+    },
+  });
+
+  const { data: packagingQuotes = [] } = useQuery({
+    queryKey: ["packaging-quotes-for-ai"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("packaging_quotes")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      return data || [];
+    },
+  });
+
+  const { data: packagingOrders = [] } = useQuery({
+    queryKey: ["packaging-orders-for-ai"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("packaging_orders")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      return data || [];
+    },
+  });
+
+  const { data: packagingOrderItems = [] } = useQuery({
+    queryKey: ["packaging-order-items-for-ai"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("packaging_order_items")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1000);
+      return data || [];
+    },
+  });
+
+  const { data: packagingSupplierItems = [] } = useQuery({
+    queryKey: ["packaging-supplier-items-for-ai"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("packaging_supplier_items")
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(1000);
       return data || [];
@@ -98,6 +158,11 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
         quotes: cotacoes || [],
         orders: pedidos || [],
         orderItems: orderItems || [],
+        quoteSupplierItems: quoteSupplierItems || [],
+        packagingQuotes: packagingQuotes || [],
+        packagingOrders: packagingOrders || [],
+        packagingOrderItems: packagingOrderItems || [],
+        packagingSupplierItems: packagingSupplierItems || [],
       });
 
       setAiResponse(response);
