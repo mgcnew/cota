@@ -124,15 +124,15 @@
        ============================================ */
     
     /* Background - Cinza escuro neutro com leve tom azulado */
-    --background: 225 15% 10%; /* #161A1F - Base escura suave */
+    --background: 222 14% 11%; /* #181B20 - Base escura suave */
     --foreground: 220 15% 85%; /* #D1D5DB - Texto principal suave, não branco puro */
     
     /* Cards - Elevação sutil sobre o background */
-    --card: 225 14% 13%; /* #1E2228 - Cards com leve elevação */
+    --card: 222 13% 14%; /* #1F2328 - Cards com leve elevação */
     --card-foreground: 220 15% 85%;
     
     /* Popovers/Dropdowns */
-    --popover: 225 14% 14%; /* #202530 - Levemente mais claro que cards */
+    --popover: 222 13% 16%; /* #252A30 - Levemente mais claro que cards */
     --popover-foreground: 220 15% 85%;
     
     /* Cor Primária - Roxo suave e agradável */
@@ -142,20 +142,20 @@
     --primary-lighter: 262 50% 80%;
     
     /* Secondary - Para elementos de suporte */
-    --secondary: 225 14% 18%; /* #282D36 - Fundo secundário */
+    --secondary: 222 13% 18%; /* #2A2F36 - Fundo secundário */
     --secondary-foreground: 220 15% 82%;
     
     /* Muted - Texto secundário e elementos desabilitados */
-    --muted: 225 14% 18%;
+    --muted: 222 13% 18%;
     --muted-foreground: 220 12% 55%; /* #7E8694 - Texto secundário legível */
     
     /* Accent - Para hover e estados ativos */
-    --accent: 225 14% 20%; /* #2E3440 - Hover suave */
+    --accent: 222 13% 20%; /* #2E343C - Hover suave */
     --accent-foreground: 220 15% 85%;
     
     /* Bordas - Sutis mas visíveis */
-    --border: 225 12% 22%; /* #353B45 - Bordas discretas */
-    --input: 225 14% 16%; /* #252A32 - Fundo de inputs */
+    --border: 222 12% 22%; /* #353B42 - Bordas discretas */
+    --input: 222 13% 16%; /* #252A30 - Fundo de inputs */
     --ring: 262 55% 58%; /* Foco roxo suave */
     
     /* Destructive - Vermelho suave */
@@ -179,16 +179,16 @@
     
     /* Gradientes suaves */
     --gradient-primary: linear-gradient(135deg, hsl(262 60% 60%), hsl(262 55% 70%));
-    --gradient-card: linear-gradient(145deg, hsl(225 14% 13%), hsl(225 14% 15%));
+    --gradient-card: linear-gradient(145deg, hsl(222 13% 14%), hsl(222 13% 16%));
     
-    /* Sidebar - Consistente com o tema */
-    --sidebar-background: 225 15% 11%; /* #181C22 - Sidebar escura */
+    /* Sidebar - Consistente com o tema (mesmo tom do card) */
+    --sidebar-background: 222 13% 14%; /* Mesmo tom do card */
     --sidebar-foreground: 220 15% 82%;
     --sidebar-primary: 262 60% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 225 14% 16%;
+    --sidebar-accent: 222 13% 18%;
     --sidebar-accent-foreground: 220 15% 85%;
-    --sidebar-border: 225 12% 20%;
+    --sidebar-border: 222 12% 20%;
     --sidebar-ring: 262 55% 58%;
   }
 }
@@ -2075,33 +2075,33 @@
   .dark .card-elevated,
   .dark [class*="Card"],
   .dark .bg-card {
-    background-color: hsl(225 14% 13%);
-    border-color: hsl(225 12% 20%);
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
   }
   
   .dark .card-elevated:hover {
-    background-color: hsl(225 14% 15%);
-    border-color: hsl(225 12% 24%);
+    background-color: hsl(var(--accent));
+    border-color: hsl(var(--border));
   }
   
   /* Cards com status - cores suavizadas */
   .dark .card-gradient-primary {
-    background: linear-gradient(135deg, hsl(262 40% 18%), hsl(225 14% 13%));
+    background: linear-gradient(135deg, hsl(262 40% 18%), hsl(var(--card)));
     border-color: hsl(262 40% 30%);
   }
   
   .dark .card-gradient-success {
-    background: linear-gradient(135deg, hsl(152 30% 16%), hsl(225 14% 13%));
+    background: linear-gradient(135deg, hsl(152 30% 16%), hsl(var(--card)));
     border-color: hsl(152 35% 28%);
   }
   
   .dark .card-gradient-warning {
-    background: linear-gradient(135deg, hsl(38 35% 16%), hsl(225 14% 13%));
+    background: linear-gradient(135deg, hsl(38 35% 16%), hsl(var(--card)));
     border-color: hsl(38 40% 30%);
   }
   
   .dark .card-gradient-info {
-    background: linear-gradient(135deg, hsl(251 35% 18%), hsl(225 14% 13%));
+    background: linear-gradient(135deg, hsl(251 35% 18%), hsl(var(--card)));
     border-color: hsl(251 35% 30%);
   }
   
@@ -2109,55 +2109,86 @@
   .dark [role="dialog"],
   .dark [data-radix-dialog-content],
   .dark .DialogContent {
-    background-color: hsl(225 14% 12%);
-    border-color: hsl(225 12% 20%);
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
   
   /* Header de modal */
   .dark [class*="DialogHeader"],
   .dark .modal-header-soft {
-    background-color: hsl(225 14% 14%);
-    border-bottom-color: hsl(225 12% 20%);
+    background-color: hsl(var(--secondary));
+    border-bottom-color: hsl(var(--border));
   }
   
   /* Footer de modal */
   .dark [class*="DialogFooter"],
   .dark .bg-white.dark\:bg-gray-900 {
-    background-color: hsl(225 14% 11%) !important;
-    border-top-color: hsl(225 12% 20%);
+    background-color: hsl(var(--background)) !important;
+    border-top-color: hsl(var(--border));
   }
   
   /* === TABELAS DARK MODE === */
+  /* Container da tabela */
   .dark table,
   .dark .table-modern,
   .dark [class*="Table"] {
-    background-color: hsl(225 14% 13%);
+    background-color: transparent;
   }
   
+  /* Wrapper de tabela com borda */
+  .dark .bg-white.dark\:bg-gray-800\/50,
+  .dark [class*="rounded-xl"][class*="border"] {
+    background-color: hsl(var(--card)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+  
+  /* Header da tabela */
   .dark th,
   .dark .table-modern th,
   .dark thead {
-    background-color: hsl(225 14% 15%) !important;
+    background-color: hsl(var(--secondary)) !important;
     color: hsl(220 15% 75%);
     font-weight: 500;
-    border-bottom-color: hsl(225 12% 22%);
+    border-bottom-color: hsl(var(--border));
   }
   
+  /* Células da tabela */
   .dark td,
   .dark .table-modern td {
-    border-bottom-color: hsl(225 12% 18%);
+    border-bottom-color: hsl(var(--border) / 0.5);
     color: hsl(220 15% 82%);
   }
   
+  /* Hover nas linhas */
   .dark tbody tr:hover,
   .dark .table-modern tbody tr:hover {
-    background-color: hsl(225 14% 16%);
+    background-color: hsl(var(--accent));
   }
   
-  /* Linhas alternadas */
-  .dark tbody tr:nth-child(even) {
-    background-color: hsl(225 14% 12%);
+  /* Linhas como cards (novo padrão visual) */
+  .dark .bg-card\/90,
+  .dark [class*="bg-card"] {
+    background-color: hsl(var(--card)) !important;
+  }
+  
+  /* Linhas alternadas - REMOVIDO para manter consistência */
+  /* Todas as linhas usam o mesmo background */
+  
+  /* Header customizado das tabelas (novo padrão) */
+  .dark .bg-card\/95 {
+    background-color: hsl(var(--card)) !important;
+  }
+  
+  /* Bordas das linhas de tabela */
+  .dark .border-border {
+    border-color: hsl(var(--border)) !important;
+  }
+  
+  /* Hover nas linhas de tabela (cards) */
+  .dark .hover\:border-purple-300\/50:hover,
+  .dark .hover\:border-teal-300\/50:hover {
+    border-color: hsl(262 40% 35%) !important;
   }
   
   /* === INPUTS E FORMS DARK MODE === */
@@ -2166,9 +2197,9 @@
   .dark select,
   .dark [class*="Input"],
   .dark [class*="Select"] {
-    background-color: hsl(225 14% 14%) !important;
-    border-color: hsl(225 12% 22%) !important;
-    color: hsl(220 15% 85%);
+    background-color: hsl(var(--input)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--foreground));
   }
   
   .dark input:focus,
@@ -2180,7 +2211,7 @@
   
   .dark input::placeholder,
   .dark textarea::placeholder {
-    color: hsl(220 12% 45%);
+    color: hsl(var(--muted-foreground) / 0.7);
   }
   
   /* === BOTÕES DARK MODE === */
@@ -2188,7 +2219,7 @@
   .dark .bg-purple-600,
   .dark .bg-primary,
   .dark [class*="btn-primary"] {
-    background-color: hsl(262 55% 55%) !important;
+    background-color: hsl(var(--primary)) !important;
   }
   
   .dark .bg-purple-600:hover,
@@ -2200,39 +2231,39 @@
   /* Botão outline/secondary */
   .dark .border-gray-200,
   .dark .border-border {
-    border-color: hsl(225 12% 24%) !important;
+    border-color: hsl(var(--border)) !important;
   }
   
   .dark button[class*="outline"],
   .dark .btn-outline-enhanced {
-    background-color: hsl(225 14% 14%);
-    border-color: hsl(225 12% 26%);
-    color: hsl(220 15% 82%);
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
   }
   
   .dark button[class*="outline"]:hover,
   .dark .btn-outline-enhanced:hover {
-    background-color: hsl(225 14% 18%);
+    background-color: hsl(var(--accent));
     border-color: hsl(262 40% 40%);
   }
   
   /* Botão ghost */
   .dark button[class*="ghost"]:hover,
   .dark .btn-ghost-enhanced:hover {
-    background-color: hsl(225 14% 18%);
+    background-color: hsl(var(--accent));
   }
   
   /* === SIDEBAR DARK MODE === */
   .dark aside,
   .dark [class*="Sidebar"],
   .dark nav {
-    background-color: hsl(225 15% 11%);
-    border-color: hsl(225 12% 18%);
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
   }
   
   .dark [class*="SidebarMenuItem"]:hover,
   .dark nav a:hover {
-    background-color: hsl(225 14% 16%);
+    background-color: hsl(var(--accent));
   }
   
   .dark [class*="SidebarMenuItem"][data-active="true"],
@@ -2245,8 +2276,13 @@
   .dark header,
   .dark [class*="Topbar"],
   .dark [class*="Header"] {
-    background-color: hsl(225 15% 11%);
-    border-bottom-color: hsl(225 12% 18%);
+    background-color: hsl(var(--card) / 0.8);
+    border-color: hsl(var(--border));
+  }
+  
+  /* Header com backdrop blur */
+  .dark .bg-card\/80 {
+    background-color: hsl(var(--card) / 0.85) !important;
   }
   
   /* === BADGES DARK MODE === */
@@ -2305,91 +2341,111 @@
   }
   
   .dark [class*="ScrollBar"] {
-    background-color: hsl(225 14% 16%);
+    background-color: hsl(var(--secondary));
   }
   
   .dark [class*="ScrollBar"] > div {
-    background-color: hsl(225 12% 30%);
+    background-color: hsl(var(--muted-foreground) / 0.3);
   }
   
   /* === DROPDOWNS/POPOVERS DARK MODE === */
   .dark [class*="DropdownMenu"],
   .dark [class*="Popover"],
   .dark [class*="Select"][data-state="open"] {
-    background-color: hsl(225 14% 14%);
-    border-color: hsl(225 12% 22%);
+    background-color: hsl(var(--popover));
+    border-color: hsl(var(--border));
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
   }
   
   .dark [class*="DropdownMenuItem"]:hover,
   .dark [class*="SelectItem"]:hover {
-    background-color: hsl(225 14% 18%);
+    background-color: hsl(var(--accent));
   }
   
   /* === TABS DARK MODE === */
   .dark [class*="TabsList"] {
-    background-color: hsl(225 14% 14%);
-    border-color: hsl(225 12% 20%);
+    background-color: hsl(var(--secondary));
+    border-color: hsl(var(--border));
   }
   
   .dark [class*="TabsTrigger"] {
-    color: hsl(220 12% 55%);
+    color: hsl(var(--muted-foreground));
   }
   
   .dark [class*="TabsTrigger"][data-state="active"] {
-    background-color: hsl(225 14% 18%);
-    color: hsl(220 15% 90%);
+    background-color: hsl(var(--card));
+    color: hsl(var(--foreground));
   }
   
   .dark [class*="TabsTrigger"]:hover:not([data-state="active"]) {
-    color: hsl(220 15% 75%);
-    background-color: hsl(225 14% 16%);
+    color: hsl(var(--foreground) / 0.8);
+    background-color: hsl(var(--accent));
   }
   
   /* === TOOLTIPS DARK MODE === */
   .dark [class*="Tooltip"] {
-    background-color: hsl(225 14% 18%);
-    color: hsl(220 15% 85%);
-    border-color: hsl(225 12% 24%);
+    background-color: hsl(var(--popover));
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--border));
   }
   
   /* === SEPARADORES/DIVIDERS === */
   .dark hr,
   .dark [class*="Separator"] {
-    border-color: hsl(225 12% 20%);
-    background-color: hsl(225 12% 20%);
+    border-color: hsl(var(--border));
+    background-color: hsl(var(--border));
   }
   
   /* === COLLAPSIBLE DARK MODE === */
   .dark [class*="Collapsible"] button {
-    background-color: hsl(225 14% 14%);
-    border-color: hsl(225 12% 20%);
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
   }
   
   .dark [class*="Collapsible"] button:hover {
-    background-color: hsl(225 14% 17%);
+    background-color: hsl(var(--accent));
   }
   
   /* === SKELETON/LOADING DARK MODE === */
   .dark [class*="Skeleton"],
   .dark .animate-pulse {
-    background-color: hsl(225 14% 18%);
+    background-color: hsl(var(--secondary));
   }
   
   /* === ALERT/TOAST DARK MODE === */
   .dark [class*="Alert"],
   .dark [class*="Toast"] {
-    background-color: hsl(225 14% 14%);
-    border-color: hsl(225 12% 22%);
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
   }
   
   /* === PROGRESS BAR DARK MODE === */
   .dark [class*="Progress"] {
-    background-color: hsl(225 14% 18%);
+    background-color: hsl(var(--secondary));
   }
   
   .dark [class*="Progress"] > div {
-    background-color: hsl(262 55% 55%);
+    background-color: hsl(var(--primary));
+  }
+  
+  /* === GRAY BACKGROUNDS DARK MODE === */
+  /* Corrigir backgrounds cinza que ficam diferentes */
+  .dark .bg-gray-50,
+  .dark .bg-gray-100 {
+    background-color: hsl(var(--secondary)) !important;
+  }
+  
+  .dark .bg-gray-800\/50,
+  .dark .dark\:bg-gray-800\/50 {
+    background-color: hsl(var(--card)) !important;
+  }
+  
+  .dark .dark\:bg-gray-700\/50 {
+    background-color: hsl(var(--accent)) !important;
+  }
+  
+  .dark .dark\:bg-gray-700\/30 {
+    background-color: hsl(var(--border)) !important;
   }
 }
 
