@@ -143,6 +143,19 @@ export function usePackagingOrders() {
 
       if (itemsError) throw itemsError;
 
+      // IMPORTANTE: Atualizar status da cotação para "concluida"
+      const { error: quoteUpdateError } = await (supabase
+        .from('packaging_quotes' as any)
+        .update({ 
+          status: 'concluida', 
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', data.quoteId) as any);
+
+      if (quoteUpdateError) {
+        console.warn('Erro ao atualizar status da cotação:', quoteUpdateError);
+      }
+
       return order;
     },
     onSuccess: () => {
