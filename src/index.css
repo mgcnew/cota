@@ -116,60 +116,80 @@
 
   .dark {
     /* ============================================
-       Dark Mode - WCAG AA Compliant
-       Requirements: 18.4
+       DARK MODE APRIMORADO - Confortável para os olhos
        
-       All dark mode color combinations meet WCAG AA:
-       - foreground (#E8EAED) on background (#16181D) = ~12:1 ✓
-       - muted-foreground on background = ~5:1 ✓
+       Paleta baseada em tons neutros com leve tom azulado
+       Contraste equilibrado: não muito forte, não muito fraco
+       Cores harmoniosas que não cansam a vista
        ============================================ */
-    --background: 220 13% 9%; /* #16181D - Cinza escuro profundo */
-    --foreground: 210 20% 92%; /* #E8EAED - High contrast text */
     
-    /* WCAG AA: card-foreground on card = ~11:1 ✓ */
-    --card: 220 13% 12%; /* #1C1F26 - Cards levemente mais claros que o fundo */
-    --card-foreground: 210 20% 92%;
+    /* Background - Cinza escuro neutro com leve tom azulado */
+    --background: 225 15% 10%; /* #161A1F - Base escura suave */
+    --foreground: 220 15% 85%; /* #D1D5DB - Texto principal suave, não branco puro */
     
-    --popover: 220 13% 12%;
-    --popover-foreground: 210 20% 92%;
+    /* Cards - Elevação sutil sobre o background */
+    --card: 225 14% 13%; /* #1E2228 - Cards com leve elevação */
+    --card-foreground: 220 15% 85%;
     
-    /* WCAG AA: primary-foreground on primary = ~7:1 ✓ */
-    --primary: 262 80% 65%; /* Roxo suave */
-    --primary-foreground: 210 20% 98%;
-    --primary-light: 262 75% 75%;
-    --primary-lighter: 262 70% 85%;
+    /* Popovers/Dropdowns */
+    --popover: 225 14% 14%; /* #202530 - Levemente mais claro que cards */
+    --popover-foreground: 220 15% 85%;
     
-    /* WCAG AA: secondary-foreground on secondary = ~10:1 ✓ */
-    --secondary: 220 13% 16%;
-    --secondary-foreground: 210 20% 92%;
+    /* Cor Primária - Roxo suave e agradável */
+    --primary: 262 60% 60%; /* #9B7BD4 - Roxo mais suave, menos saturado */
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 262 55% 70%;
+    --primary-lighter: 262 50% 80%;
     
-    /* WCAG AA: muted-foreground on background = ~5:1 ✓ */
-    --muted: 220 13% 16%;
-    --muted-foreground: 215 15% 60%; /* Texto secundário - meets AA for normal text */
+    /* Secondary - Para elementos de suporte */
+    --secondary: 225 14% 18%; /* #282D36 - Fundo secundário */
+    --secondary-foreground: 220 15% 82%;
     
-    --accent: 220 13% 16%;
-    --accent-foreground: 210 20% 92%;
+    /* Muted - Texto secundário e elementos desabilitados */
+    --muted: 225 14% 18%;
+    --muted-foreground: 220 12% 55%; /* #7E8694 - Texto secundário legível */
     
-    --border: 220 13% 20%; /* Bordas sutis - 3:1 contrast for UI components ✓ */
-    --input: 220 13% 16%;
-    --ring: 262 80% 65%;
-    /* WCAG AA: destructive-foreground on destructive = ~6:1 ✓ */
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 210 20% 98%;
+    /* Accent - Para hover e estados ativos */
+    --accent: 225 14% 20%; /* #2E3440 - Hover suave */
+    --accent-foreground: 220 15% 85%;
     
-    /* Sombras minimalistas - mais sutis */
-    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.5);
-    --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.6);
+    /* Bordas - Sutis mas visíveis */
+    --border: 225 12% 22%; /* #353B45 - Bordas discretas */
+    --input: 225 14% 16%; /* #252A32 - Fundo de inputs */
+    --ring: 262 55% 58%; /* Foco roxo suave */
     
-    --sidebar-background: 220 13% 10%;
-    --sidebar-foreground: 210 20% 92%;
-    --sidebar-primary: 262 80% 65%;
-    --sidebar-primary-foreground: 210 20% 98%;
-    --sidebar-accent: 220 13% 14%;
-    --sidebar-accent-foreground: 210 20% 92%;
-    --sidebar-border: 220 13% 18%;
-    --sidebar-ring: 262 80% 65%;
+    /* Destructive - Vermelho suave */
+    --destructive: 0 55% 50%; /* #C45050 - Vermelho menos agressivo */
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Cores de Status - Suavizadas para dark mode */
+    --success: 152 45% 45%; /* #4A9D7A - Verde suave */
+    --success-light: 152 40% 55%;
+    --warning: 38 65% 55%; /* #D4A84A - Âmbar suave */
+    --warning-light: 38 60% 65%;
+    --error: 4 55% 55%; /* #C96060 - Vermelho suave */
+    --error-light: 4 50% 65%;
+    --info: 251 50% 60%; /* #8B7BD4 - Roxo info suave */
+    --info-light: 251 45% 70%;
+    
+    /* Sombras - Mais sutis no dark mode */
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.25);
+    --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --shadow-floating: 0 8px 32px rgba(0, 0, 0, 0.45);
+    
+    /* Gradientes suaves */
+    --gradient-primary: linear-gradient(135deg, hsl(262 60% 60%), hsl(262 55% 70%));
+    --gradient-card: linear-gradient(145deg, hsl(225 14% 13%), hsl(225 14% 15%));
+    
+    /* Sidebar - Consistente com o tema */
+    --sidebar-background: 225 15% 11%; /* #181C22 - Sidebar escura */
+    --sidebar-foreground: 220 15% 82%;
+    --sidebar-primary: 262 60% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 225 14% 16%;
+    --sidebar-accent-foreground: 220 15% 85%;
+    --sidebar-border: 225 12% 20%;
+    --sidebar-ring: 262 55% 58%;
   }
 }
 
@@ -2017,6 +2037,370 @@
     width: 200%;
     height: 200%;
     opacity: 0.1;
+  }
+}
+
+/* ============================================
+   DARK MODE APRIMORADO - Estilos Específicos
+   Tipografia, Cards, Modais, Tabelas, Botões
+   ============================================ */
+
+@layer components {
+  /* === TIPOGRAFIA DARK MODE === */
+  /* Pesos de fonte otimizados para dark mode */
+  .dark {
+    /* Texto principal ligeiramente mais leve para melhor legibilidade */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Títulos no dark mode - peso ajustado */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+  .dark .page-title, .dark .section-title, .dark .card-title {
+    font-weight: 600; /* Semibold ao invés de bold para menos contraste */
+    letter-spacing: -0.01em;
+  }
+  
+  /* Texto de corpo no dark mode */
+  .dark p, .dark span, .dark div {
+    font-weight: 400;
+  }
+  
+  /* Labels e texto pequeno - ligeiramente mais pesado para legibilidade */
+  .dark label, .dark .text-sm, .dark .text-xs {
+    font-weight: 450;
+  }
+  
+  /* === CARDS DARK MODE === */
+  .dark .card-elevated,
+  .dark [class*="Card"],
+  .dark .bg-card {
+    background-color: hsl(225 14% 13%);
+    border-color: hsl(225 12% 20%);
+  }
+  
+  .dark .card-elevated:hover {
+    background-color: hsl(225 14% 15%);
+    border-color: hsl(225 12% 24%);
+  }
+  
+  /* Cards com status - cores suavizadas */
+  .dark .card-gradient-primary {
+    background: linear-gradient(135deg, hsl(262 40% 18%), hsl(225 14% 13%));
+    border-color: hsl(262 40% 30%);
+  }
+  
+  .dark .card-gradient-success {
+    background: linear-gradient(135deg, hsl(152 30% 16%), hsl(225 14% 13%));
+    border-color: hsl(152 35% 28%);
+  }
+  
+  .dark .card-gradient-warning {
+    background: linear-gradient(135deg, hsl(38 35% 16%), hsl(225 14% 13%));
+    border-color: hsl(38 40% 30%);
+  }
+  
+  .dark .card-gradient-info {
+    background: linear-gradient(135deg, hsl(251 35% 18%), hsl(225 14% 13%));
+    border-color: hsl(251 35% 30%);
+  }
+  
+  /* === MODAIS DARK MODE === */
+  .dark [role="dialog"],
+  .dark [data-radix-dialog-content],
+  .dark .DialogContent {
+    background-color: hsl(225 14% 12%);
+    border-color: hsl(225 12% 20%);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Header de modal */
+  .dark [class*="DialogHeader"],
+  .dark .modal-header-soft {
+    background-color: hsl(225 14% 14%);
+    border-bottom-color: hsl(225 12% 20%);
+  }
+  
+  /* Footer de modal */
+  .dark [class*="DialogFooter"],
+  .dark .bg-white.dark\:bg-gray-900 {
+    background-color: hsl(225 14% 11%) !important;
+    border-top-color: hsl(225 12% 20%);
+  }
+  
+  /* === TABELAS DARK MODE === */
+  .dark table,
+  .dark .table-modern,
+  .dark [class*="Table"] {
+    background-color: hsl(225 14% 13%);
+  }
+  
+  .dark th,
+  .dark .table-modern th,
+  .dark thead {
+    background-color: hsl(225 14% 15%) !important;
+    color: hsl(220 15% 75%);
+    font-weight: 500;
+    border-bottom-color: hsl(225 12% 22%);
+  }
+  
+  .dark td,
+  .dark .table-modern td {
+    border-bottom-color: hsl(225 12% 18%);
+    color: hsl(220 15% 82%);
+  }
+  
+  .dark tbody tr:hover,
+  .dark .table-modern tbody tr:hover {
+    background-color: hsl(225 14% 16%);
+  }
+  
+  /* Linhas alternadas */
+  .dark tbody tr:nth-child(even) {
+    background-color: hsl(225 14% 12%);
+  }
+  
+  /* === INPUTS E FORMS DARK MODE === */
+  .dark input:not([type="checkbox"]):not([type="radio"]),
+  .dark textarea,
+  .dark select,
+  .dark [class*="Input"],
+  .dark [class*="Select"] {
+    background-color: hsl(225 14% 14%) !important;
+    border-color: hsl(225 12% 22%) !important;
+    color: hsl(220 15% 85%);
+  }
+  
+  .dark input:focus,
+  .dark textarea:focus,
+  .dark select:focus {
+    border-color: hsl(262 50% 50%) !important;
+    box-shadow: 0 0 0 2px hsl(262 50% 50% / 0.15) !important;
+  }
+  
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: hsl(220 12% 45%);
+  }
+  
+  /* === BOTÕES DARK MODE === */
+  /* Botão primário */
+  .dark .bg-purple-600,
+  .dark .bg-primary,
+  .dark [class*="btn-primary"] {
+    background-color: hsl(262 55% 55%) !important;
+  }
+  
+  .dark .bg-purple-600:hover,
+  .dark .bg-primary:hover,
+  .dark [class*="btn-primary"]:hover {
+    background-color: hsl(262 55% 50%) !important;
+  }
+  
+  /* Botão outline/secondary */
+  .dark .border-gray-200,
+  .dark .border-border {
+    border-color: hsl(225 12% 24%) !important;
+  }
+  
+  .dark button[class*="outline"],
+  .dark .btn-outline-enhanced {
+    background-color: hsl(225 14% 14%);
+    border-color: hsl(225 12% 26%);
+    color: hsl(220 15% 82%);
+  }
+  
+  .dark button[class*="outline"]:hover,
+  .dark .btn-outline-enhanced:hover {
+    background-color: hsl(225 14% 18%);
+    border-color: hsl(262 40% 40%);
+  }
+  
+  /* Botão ghost */
+  .dark button[class*="ghost"]:hover,
+  .dark .btn-ghost-enhanced:hover {
+    background-color: hsl(225 14% 18%);
+  }
+  
+  /* === SIDEBAR DARK MODE === */
+  .dark aside,
+  .dark [class*="Sidebar"],
+  .dark nav {
+    background-color: hsl(225 15% 11%);
+    border-color: hsl(225 12% 18%);
+  }
+  
+  .dark [class*="SidebarMenuItem"]:hover,
+  .dark nav a:hover {
+    background-color: hsl(225 14% 16%);
+  }
+  
+  .dark [class*="SidebarMenuItem"][data-active="true"],
+  .dark nav a[data-active="true"] {
+    background-color: hsl(262 40% 20%);
+    color: hsl(262 60% 70%);
+  }
+  
+  /* === TOPBAR/HEADER DARK MODE === */
+  .dark header,
+  .dark [class*="Topbar"],
+  .dark [class*="Header"] {
+    background-color: hsl(225 15% 11%);
+    border-bottom-color: hsl(225 12% 18%);
+  }
+  
+  /* === BADGES DARK MODE === */
+  .dark .badge,
+  .dark [class*="Badge"] {
+    font-weight: 500;
+  }
+  
+  /* Badge success */
+  .dark .bg-green-100,
+  .dark .bg-green-50 {
+    background-color: hsl(152 35% 18%) !important;
+    color: hsl(152 50% 60%) !important;
+    border-color: hsl(152 35% 28%) !important;
+  }
+  
+  /* Badge warning */
+  .dark .bg-amber-100,
+  .dark .bg-amber-50,
+  .dark .bg-yellow-100,
+  .dark .bg-yellow-50 {
+    background-color: hsl(38 35% 18%) !important;
+    color: hsl(38 55% 60%) !important;
+    border-color: hsl(38 35% 28%) !important;
+  }
+  
+  /* Badge error/destructive */
+  .dark .bg-red-100,
+  .dark .bg-red-50 {
+    background-color: hsl(4 35% 18%) !important;
+    color: hsl(4 55% 60%) !important;
+    border-color: hsl(4 35% 28%) !important;
+  }
+  
+  /* Badge info/purple */
+  .dark .bg-purple-100,
+  .dark .bg-purple-50,
+  .dark .bg-violet-100,
+  .dark .bg-violet-50 {
+    background-color: hsl(262 35% 18%) !important;
+    color: hsl(262 55% 65%) !important;
+    border-color: hsl(262 35% 28%) !important;
+  }
+  
+  /* Badge neutral */
+  .dark .bg-gray-100,
+  .dark .bg-gray-50 {
+    background-color: hsl(225 14% 18%) !important;
+    color: hsl(220 15% 70%) !important;
+    border-color: hsl(225 12% 24%) !important;
+  }
+  
+  /* === SCROLLAREA DARK MODE === */
+  .dark [class*="ScrollArea"] {
+    background-color: transparent;
+  }
+  
+  .dark [class*="ScrollBar"] {
+    background-color: hsl(225 14% 16%);
+  }
+  
+  .dark [class*="ScrollBar"] > div {
+    background-color: hsl(225 12% 30%);
+  }
+  
+  /* === DROPDOWNS/POPOVERS DARK MODE === */
+  .dark [class*="DropdownMenu"],
+  .dark [class*="Popover"],
+  .dark [class*="Select"][data-state="open"] {
+    background-color: hsl(225 14% 14%);
+    border-color: hsl(225 12% 22%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  }
+  
+  .dark [class*="DropdownMenuItem"]:hover,
+  .dark [class*="SelectItem"]:hover {
+    background-color: hsl(225 14% 18%);
+  }
+  
+  /* === TABS DARK MODE === */
+  .dark [class*="TabsList"] {
+    background-color: hsl(225 14% 14%);
+    border-color: hsl(225 12% 20%);
+  }
+  
+  .dark [class*="TabsTrigger"] {
+    color: hsl(220 12% 55%);
+  }
+  
+  .dark [class*="TabsTrigger"][data-state="active"] {
+    background-color: hsl(225 14% 18%);
+    color: hsl(220 15% 90%);
+  }
+  
+  .dark [class*="TabsTrigger"]:hover:not([data-state="active"]) {
+    color: hsl(220 15% 75%);
+    background-color: hsl(225 14% 16%);
+  }
+  
+  /* === TOOLTIPS DARK MODE === */
+  .dark [class*="Tooltip"] {
+    background-color: hsl(225 14% 18%);
+    color: hsl(220 15% 85%);
+    border-color: hsl(225 12% 24%);
+  }
+  
+  /* === SEPARADORES/DIVIDERS === */
+  .dark hr,
+  .dark [class*="Separator"] {
+    border-color: hsl(225 12% 20%);
+    background-color: hsl(225 12% 20%);
+  }
+  
+  /* === COLLAPSIBLE DARK MODE === */
+  .dark [class*="Collapsible"] button {
+    background-color: hsl(225 14% 14%);
+    border-color: hsl(225 12% 20%);
+  }
+  
+  .dark [class*="Collapsible"] button:hover {
+    background-color: hsl(225 14% 17%);
+  }
+  
+  /* === SKELETON/LOADING DARK MODE === */
+  .dark [class*="Skeleton"],
+  .dark .animate-pulse {
+    background-color: hsl(225 14% 18%);
+  }
+  
+  /* === ALERT/TOAST DARK MODE === */
+  .dark [class*="Alert"],
+  .dark [class*="Toast"] {
+    background-color: hsl(225 14% 14%);
+    border-color: hsl(225 12% 22%);
+  }
+  
+  /* === PROGRESS BAR DARK MODE === */
+  .dark [class*="Progress"] {
+    background-color: hsl(225 14% 18%);
+  }
+  
+  .dark [class*="Progress"] > div {
+    background-color: hsl(262 55% 55%);
+  }
+}
+
+/* === HOVER STATES DARK MODE === */
+@layer utilities {
+  .dark .hover-soft:hover {
+    background-color: hsl(225 14% 17%);
+  }
+  
+  .dark .hover-lift-soft:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   }
 }
 
