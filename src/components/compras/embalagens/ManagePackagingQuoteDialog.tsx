@@ -16,7 +16,7 @@ import { Card } from "@/components/ui/card";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { 
   Package, Building2, DollarSign, CheckCircle2, Clock, 
-  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download
+  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
@@ -53,6 +53,7 @@ export function ManagePackagingQuoteDialog({
   const [activeTab, setActiveTab] = useState("resumo");
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingItem, setEditingItem] = useState<{ supplierId: string; packagingId: string } | null>(null);
+  const [showHtmlPreview, setShowHtmlPreview] = useState(false);
   const [formData, setFormData] = useState({
     valorTotal: "", unidadeVenda: "kg", quantidadeVenda: "",
     quantidadeUnidadesEstimada: "", gramatura: "", dimensoes: "",
@@ -371,6 +372,178 @@ export function ManagePackagingQuoteDialog({
     // Salvar
     doc.save(`cotacao-embalagens-${quote.dataInicio.replace(/\//g, '-')}.pdf`);
   }, [quote, comparison]);
+
+  // Função para gerar HTML comparativo
+  const generateHtmlComparative = useCallback(() => {
+    if (!quote || !comparison.length) return "";
+
+    const winsPerSupplier: Record<string, { name: string; wins: number }> = {};
+    comparison.forEach(comp => {
+      const winner = comp.fornecedores.find(f => f.isMelhorPreco);
+      if (winner) {
+        if (!winsPerSupplier[winner.supplierId]) {
+          winsPerSupplier[winner.supplierId] = { name: winner.supplierName, wins: 0 };
+        }
+        winsPerSupplier[winner.supplierId].wins++;
+      }
+    });
+
+    const sortedWinners = Object.values(winsPerSupplier).sort((a, b) => b.wins - a.wins);
+
+    const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comparativo de Cotação - Embalagens</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1f2937; line-height: 1.6; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 40px 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
+    .header h1 { font-size: 28px; margin-bottom: 10px; }
+    .header p { font-size: 14px; opacity: 0.9; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .info-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .info-card strong { display: block; color: #8b5cf6; margin-bottom: 5px; }
+    .info-card span { font-size: 14px; color: #6b7280; }
+    .winners-section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .winners-section h2 { color: #8b5cf6; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+    .winners-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+    .winner-card { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); padding: 15px; border-radius: 8px; border: 1px solid #86efac; }
+    .winner-card .rank { display: inline-block; background: #22c55e; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+    .winner-card .name { font-weight: 600; color: #166534; margin-bottom: 5px; }
+    .winner-card .wins { font-size: 14px; color: #15803d; }
+    .comparatives { display: grid; gap: 20px; }
+    .comparative-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .comparative-header { background: #f3e8ff; padding: 15px; border-bottom: 2px solid #8b5cf6; }
+    .comparative-header h3 { color: #6b21a8; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .comparative-table { width: 100%; border-collapse: collapse; }
+    .comparative-table th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 600; font-size: 13px; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+    .comparative-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+    .comparative-table tr:hover { background: #f9fafb; }
+    .winner-row { background: #dcfce7 !important; }
+    .winner-row td { font-weight: 600; color: #166534; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+    .badge-winner { background: #22c55e; color: white; }
+    .badge-difference { background: #fee2e2; color: #991b1b; }
+    .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; margin-top: 40px; border-top: 1px solid #e5e7eb; }
+    @media (max-width: 768px) {
+      .header h1 { font-size: 22px; }
+      .info-grid { grid-template-columns: 1fr; }
+      .winners-list { grid-template-columns: 1fr; }
+      .comparative-table { font-size: 12px; }
+      .comparative-table th, .comparative-table td { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏆 COMPARATIVO DE COTAÇÃO</h1>
+      <p>Embalagens</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <strong>Período</strong>
+        <span>${quote.dataInicio} a ${quote.dataFim}</span>
+      </div>
+      <div class="info-card">
+        <strong>Embalagens</strong>
+        <span>${quote.itens.length} itens</span>
+      </div>
+      <div class="info-card">
+        <strong>Fornecedores</strong>
+        <span>${quote.fornecedores.length} participantes</span>
+      </div>
+      <div class="info-card">
+        <strong>Gerado em</strong>
+        <span>${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</span>
+      </div>
+    </div>
+
+    ${sortedWinners.length > 0 ? `
+    <div class="winners-section">
+      <h2>🎯 Vencedores por Fornecedor</h2>
+      <div class="winners-list">
+        ${sortedWinners.map((w, idx) => `
+          <div class="winner-card">
+            <div class="rank">#${idx + 1} - ${w.wins} ${w.wins === 1 ? 'item' : 'itens'}</div>
+            <div class="name">${w.name}</div>
+            <div class="wins">Melhor preço em ${w.wins} ${w.wins === 1 ? 'embalagem' : 'embalagens'}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    <div class="comparatives">
+      ${comparison.map((comp, idx) => `
+        <div class="comparative-card">
+          <div class="comparative-header">
+            <h3>${idx + 1}. ${comp.packagingName}</h3>
+          </div>
+          ${comp.fornecedores.length === 0 ? `
+            <div style="padding: 20px; text-align: center; color: #9ca3af;">
+              Nenhum fornecedor respondeu
+            </div>
+          ` : `
+            <table class="comparative-table">
+              <thead>
+                <tr>
+                  <th>Fornecedor</th>
+                  <th>Valor</th>
+                  <th>Custo/Un</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${comp.fornecedores.map((f, fIdx) => `
+                  <tr class="${f.isMelhorPreco ? 'winner-row' : ''}">
+                    <td>${f.supplierName}</td>
+                    <td>R$ ${f.valorTotal.toFixed(2)}</td>
+                    <td><strong>R$ ${f.custoPorUnidade.toFixed(4)}</strong></td>
+                    <td>
+                      ${f.isMelhorPreco 
+                        ? '<span class="badge badge-winner">🏆 MELHOR PREÇO</span>' 
+                        : '<span class="badge badge-difference">+' + f.diferencaPercentual.toFixed(1) + '%</span>'
+                      }
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `}
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="footer">
+      <p>Sistema CotaJá - Comparativo de Embalagens</p>
+      <p>Este documento foi gerado automaticamente e contém informações confidenciais.</p>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
+    return html;
+  }, [quote, comparison]);
+
+  // Função para baixar HTML
+  const handleDownloadHtml = useCallback(() => {
+    const html = generateHtmlComparative();
+    if (!html || !quote) return;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `cotacao-embalagens-${quote.dataInicio.replace(/\//g, '-')}.html`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, [generateHtmlComparative, quote]);
 
   if (!quote) return null;
 
@@ -761,7 +934,7 @@ export function ManagePackagingQuoteDialog({
                 </Card>
 
                 {/* Botão de download */}
-                <div className="flex justify-center pt-4">
+                <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4">
                   <Button 
                     size="lg" 
                     onClick={handleGeneratePDF}
@@ -769,7 +942,27 @@ export function ManagePackagingQuoteDialog({
                     className="bg-purple-600 hover:bg-purple-700 text-white px-8"
                   >
                     <Download className="h-5 w-5 mr-2" />
-                    Baixar PDF Comparativo
+                    Baixar PDF
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    onClick={() => setShowHtmlPreview(!showHtmlPreview)}
+                    disabled={comparison.every(c => c.fornecedores.length === 0)}
+                    variant="outline"
+                    className="px-8"
+                  >
+                    <Eye className="h-5 w-5 mr-2" />
+                    {showHtmlPreview ? "Fechar" : "Visualizar"} HTML
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    onClick={handleDownloadHtml}
+                    disabled={comparison.every(c => c.fornecedores.length === 0)}
+                    variant="outline"
+                    className="px-8"
+                  >
+                    <Download className="h-5 w-5 mr-2" />
+                    Baixar HTML
                   </Button>
                 </div>
 
@@ -777,6 +970,20 @@ export function ManagePackagingQuoteDialog({
                   <p className="text-center text-sm text-amber-600 dark:text-amber-400">
                     ⚠️ Adicione valores dos fornecedores na aba "Valores" antes de exportar
                   </p>
+                )}
+
+                {/* Preview HTML */}
+                {showHtmlPreview && (
+                  <div className="mt-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Prévia do Comparativo HTML</p>
+                    </div>
+                    <iframe
+                      srcDoc={generateHtmlComparative()}
+                      className="w-full h-[600px] border-0"
+                      title="HTML Preview"
+                    />
+                  </div>
                 )}
               </div>
             </ScrollArea>
