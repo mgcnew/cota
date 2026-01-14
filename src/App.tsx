@@ -48,9 +48,13 @@ const PageLoader = () => (
   </div>
 );
 
-// PageWrapper leve - apenas ErrorBoundary, Suspense fica no AppLayout
+// PageWrapper com Suspense obrigatório para lazy-loaded pages
 const PageWrapper = ({ children }: { children: ReactNode }) => (
-  <ErrorBoundary>{children}</ErrorBoundary>
+  <ErrorBoundary>
+    <Suspense fallback={<PageLoader />}>
+      {children}
+    </Suspense>
+  </ErrorBoundary>
 );
 
 const App = () => {
