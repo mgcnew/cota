@@ -1,7 +1,7 @@
 import { useState, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePagination } from "@/hooks/usePagination";
@@ -16,7 +16,7 @@ import { PackagingOrderDetailsDialog } from "./PackagingOrderDetailsDialog";
 import {
   ShoppingCart, Plus, Trash2, Calendar, DollarSign,
   Building2, MoreVertical, CheckCircle2, Clock,
-  Loader2, Package, Truck, Eye
+  Loader2, Package, Truck, Eye, CircleDot
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -183,78 +183,158 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
           })}
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-muted dark:bg-accent/20 border-b border-border dark:border-primary/50">
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="table-header py-4 px-6"><div className="flex items-center gap-2"><ShoppingCart className="h-4 w-4" />Pedido</div></TableHead>
-                  <TableHead className="table-header py-4"><div className="flex items-center gap-2"><Building2 className="h-4 w-4" />Fornecedor</div></TableHead>
-                  <TableHead className="hidden md:table-cell table-header py-4"><div className="flex items-center gap-2"><Package className="h-4 w-4" />Itens</div></TableHead>
-                  <TableHead className="hidden lg:table-cell table-header py-4"><div className="flex items-center gap-2"><Calendar className="h-4 w-4" />Entrega</div></TableHead>
-                  <TableHead className="table-header py-4">Status</TableHead>
-                  <TableHead className="text-right table-header py-4"><div className="flex items-center justify-end gap-2"><DollarSign className="h-4 w-4" />Valor</div></TableHead>
-                  <TableHead className="text-right table-header py-4 px-6">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.items.map((order, index) => {
-                  const numero = paginatedData.pagination.startIndex + index + 1;
-                  return (
-                    <TableRow key={order.id} className={cn("sm:hover:bg-accent/50 border-b border-border", index % 2 === 0 ? "bg-card" : "bg-muted/30")}>
-                      <TableCell className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20"><ShoppingCart className="h-4 w-4 text-primary" /></div>
-                          <div className="min-w-0">
-                            <div className="table-cell-primary font-mono truncate">#{numero.toString().padStart(4, '0')}</div>
-                            <div className="table-cell-secondary mt-1 flex items-center gap-1"><Calendar className="h-3 w-3" />{order.orderDate}</div>
-                          </div>
+        <Table>
+          <thead>
+            <tr>
+              <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
+                <div className="flex items-center bg-card/95 border border-purple-200/60 dark:border-purple-900/40 rounded-lg shadow-sm px-4 py-3">
+                  <div className="w-[14%] flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-600">
+                      <ShoppingCart className="h-4 w-4" />
+                    </div>
+                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Pedido</span>
+                  </div>
+                  <div className="w-[18%] pl-2 flex items-center gap-1.5">
+                    <Building2 className="h-3.5 w-3.5 text-purple-600/70" />
+                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Fornecedor</span>
+                  </div>
+                  <div className="w-[20%] pl-2 flex items-center gap-1.5">
+                    <Package className="h-3.5 w-3.5 text-purple-600/70" />
+                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Itens</span>
+                  </div>
+                  <div className="w-[12%] pl-2 flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5 text-purple-600/70" />
+                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Entrega</span>
+                  </div>
+                  <div className="w-[12%] pl-2 flex justify-center items-center gap-1.5">
+                    <CircleDot className="h-3.5 w-3.5 text-purple-600/70" />
+                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Status</span>
+                  </div>
+                  <div className="w-[12%] pl-2 flex items-center gap-1.5">
+                    <DollarSign className="h-3.5 w-3.5 text-purple-600/70" />
+                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Valor</span>
+                  </div>
+                  <div className="w-[12%] pl-2 flex justify-end items-center gap-1.5">
+                    <MoreVertical className="h-3.5 w-3.5 text-purple-600/70" />
+                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Ações</span>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </thead>
+          <TableBody>
+            {paginatedData.items.map((order, index) => {
+              const numero = paginatedData.pagination.startIndex + index + 1;
+              const isEntregue = order.status === "entregue";
+              
+              return (
+                <TableRow key={order.id} className="group border-none">
+                  <TableCell colSpan={7} className="px-1 py-2">
+                    <div className={cn(
+                      "flex items-center px-3 py-2.5 bg-card/90 rounded-lg border transition-colors",
+                      isEntregue 
+                        ? "border-emerald-300/50 hover:border-emerald-400/70 dark:border-emerald-700/50" 
+                        : "border-border hover:border-purple-300/50"
+                    )}>
+                      {/* Pedido */}
+                      <div className="w-[14%] flex items-center gap-3">
+                        <div className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center border",
+                          isEntregue 
+                            ? "bg-emerald-500/10 border-emerald-200/50" 
+                            : "bg-purple-500/10 border-purple-200/50"
+                        )}>
+                          {isEntregue ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          ) : (
+                            <ShoppingCart className="h-4 w-4 text-purple-600" />
+                          )}
                         </div>
-                      </TableCell>
-                      <TableCell className="py-4">
-                        <div className="min-w-0">
-                          <CapitalizedText className="table-cell-primary truncate block">{order.supplierName}</CapitalizedText>
-                          <div className="table-cell-secondary mt-1"><span className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-md"><Package className="h-3 w-3" />{order.itens.length} itens</span></div>
+                        <div>
+                          <span className="font-semibold text-sm">#{numero.toString().padStart(4, '0')}</span>
+                          <p className="text-xs text-muted-foreground">{order.orderDate}</p>
                         </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell py-4">
-                        <div className="min-w-0">
-                          <div className="table-cell-primary truncate max-w-[200px]">{order.itens.slice(0, 2).map(i => i.packagingName).join(', ')}{order.itens.length > 2 && <span className="table-cell-secondary"> +{order.itens.length - 2} mais</span>}</div>
-                          <div className="table-cell-secondary mt-1">{order.itens.reduce((sum, i) => sum + i.quantidade, 0)} unidades</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell py-4">
+                      </div>
+
+                      {/* Fornecedor */}
+                      <div className="w-[18%] pl-2">
+                        <CapitalizedText className="font-medium text-sm truncate block max-w-[140px]">
+                          {order.supplierName}
+                        </CapitalizedText>
+                        <p className="text-xs text-muted-foreground">{order.itens.length} item(ns)</p>
+                      </div>
+                      
+                      {/* Itens */}
+                      <div className="w-[20%] pl-2">
+                        <CapitalizedText className="font-medium text-sm truncate block max-w-[160px]">
+                          {order.itens.slice(0, 2).map(i => i.packagingName).join(', ')}
+                        </CapitalizedText>
+                        {order.itens.length > 2 && (
+                          <p className="text-xs text-muted-foreground">+{order.itens.length - 2} mais</p>
+                        )}
+                      </div>
+                      
+                      {/* Entrega */}
+                      <div className="w-[12%] pl-2 text-sm text-muted-foreground">
                         {order.deliveryDate ? (
-                          <div className="text-sm space-y-1">
-                            <div className="flex items-center gap-1 text-foreground"><Truck className="h-3 w-3 text-primary" />{order.deliveryDate}</div>
-                            <div className="text-xs text-muted-foreground">Entrega prevista</div>
+                          <div className="flex items-center gap-1">
+                            <Truck className="h-3 w-3 text-purple-500" />
+                            <span>{order.deliveryDate}</span>
                           </div>
-                        ) : <span className="text-muted-foreground text-sm">-</span>}
-                      </TableCell>
-                      <TableCell className="py-4">{getStatusBadge(order.status)}</TableCell>
-                      <TableCell className="text-right py-4"><div className="font-bold text-success text-base">R$ {order.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div></TableCell>
-                      <TableCell className="py-4 px-4">
-                        <div className="flex justify-end">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-accent"><MoreVertical className="h-4 w-4" /><span className="sr-only">Abrir menu</span></Button></DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => handleViewDetails(order)} className="cursor-pointer"><Eye className="h-4 w-4 mr-2 text-blue-600" /><span>Ver Detalhes</span></DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              {order.status === "pendente" && <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'confirmado')} className="cursor-pointer"><CheckCircle2 className="h-4 w-4 mr-2 text-blue-600" /><span>Confirmar</span></DropdownMenuItem>}
-                              {(order.status === "pendente" || order.status === "confirmado") && <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'entregue')} className="cursor-pointer text-emerald-600"><Truck className="h-4 w-4 mr-2" /><span>Marcar Entregue</span></DropdownMenuItem>}
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleDelete(order.id)} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"><Trash2 className="h-4 w-4 mr-2" /><span>Excluir</span></DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+                        ) : (
+                          <span>-</span>
+                        )}
+                      </div>
+                      
+                      {/* Status */}
+                      <div className="w-[12%] pl-2 flex justify-center">
+                        {getStatusBadge(order.status)}
+                      </div>
+                      
+                      {/* Valor */}
+                      <div className="w-[12%] pl-2">
+                        <span className="font-bold text-green-600">
+                          R$ {order.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      
+                      {/* Ações */}
+                      <div className="w-[12%] pl-2 flex justify-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewDetails(order)}>
+                              <Eye className="h-4 w-4 mr-2" />Ver Detalhes
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {order.status === "pendente" && (
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'confirmado')}>
+                                <CheckCircle2 className="h-4 w-4 mr-2 text-blue-600" />Confirmar
+                              </DropdownMenuItem>
+                            )}
+                            {(order.status === "pendente" || order.status === "confirmado") && (
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'entregue')} className="text-emerald-600">
+                                <Truck className="h-4 w-4 mr-2" />Marcar Entregue
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleDelete(order.id)} className="text-red-600">
+                              <Trash2 className="h-4 w-4 mr-2" />Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       )}
 
       {paginatedData.pagination.totalPages > 1 && (
