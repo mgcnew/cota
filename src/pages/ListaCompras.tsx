@@ -124,57 +124,55 @@ export default function ListaCompras() {
   return (
     <PageWrapper>
       <div className="page-container space-y-6">
-        {/* Stats Cards */}
+        {/* Stats Cards - Cores Sólidas */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
+          {/* Total de Itens - Azul (informação) */}
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <Package className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {stats.total}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Itens na lista</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-xs text-white/80">Itens na lista</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
+          {/* Urgentes - Vermelho (alerta crítico) */}
+          <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                <span className="text-lg font-bold text-red-600 dark:text-red-400">!</span>
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <span className="text-lg font-bold">!</span>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {stats.urgent}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Urgentes</p>
+                <p className="text-2xl font-bold">{stats.urgent}</p>
+                <p className="text-xs text-white/80">Urgentes</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
+          {/* Alta Prioridade - Âmbar (atenção) */}
+          <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                <span className="text-lg font-bold text-orange-600 dark:text-orange-400">↑</span>
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <span className="text-lg font-bold">↑</span>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {stats.high}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Alta prioridade</p>
+                <p className="text-2xl font-bold">{stats.high}</p>
+                <p className="text-xs text-white/80">Alta prioridade</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 p-4">
+          {/* Total Estimado - Verde (dinheiro) */}
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <span className="text-sm font-bold text-green-600 dark:text-green-400">R$</span>
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <span className="text-sm font-bold">R$</span>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <p className="text-2xl font-bold">
                   {stats.estimatedTotal.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
@@ -182,7 +180,7 @@ export default function ListaCompras() {
                     maximumFractionDigits: 0,
                   })}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Total estimado</p>
+                <p className="text-xs text-white/80">Total estimado</p>
               </div>
             </div>
           </div>

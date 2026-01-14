@@ -18,49 +18,49 @@ interface MetricCardProps {
   onClick?: () => void;
 }
 
-// Modo claro: cores vibrantes com hierarquia | Modo escuro: fundo neutro escuro
+// Cores sólidas com significado lógico:
+// default (purple) = padrão/geral
+// success (emerald) = sucesso/dinheiro/positivo
+// warning (amber) = atenção/alertas
+// error (red) = problemas/urgente
+// info (blue) = informação/documentos
 const VARIANT_STYLES = {
   default: {
-    cardBg: "bg-gradient-to-br from-purple-100 to-violet-50 dark:from-gray-900 dark:to-gray-900",
-    iconBg: "bg-purple-600 dark:bg-purple-600",
-    border: "border-purple-200/70 dark:border-purple-500/20",
-    glow: "shadow-md md:hover:shadow-lg md:transition-shadow md:duration-150",
-    titleColor: "text-purple-800 dark:text-purple-400",
+    cardBg: "bg-gradient-to-br from-purple-500 to-purple-600",
+    iconBg: "bg-white/20",
+    textColor: "text-white",
+    subtitleColor: "text-white/80",
   },
   success: {
-    cardBg: "bg-gradient-to-br from-emerald-100 to-teal-50 dark:from-gray-900 dark:to-gray-900",
-    iconBg: "bg-emerald-600 dark:bg-emerald-600",
-    border: "border-emerald-200/70 dark:border-emerald-500/20",
-    glow: "shadow-md md:hover:shadow-lg md:transition-shadow md:duration-150",
-    titleColor: "text-emerald-800 dark:text-emerald-400",
+    cardBg: "bg-gradient-to-br from-emerald-500 to-emerald-600",
+    iconBg: "bg-white/20",
+    textColor: "text-white",
+    subtitleColor: "text-white/80",
   },
   warning: {
-    cardBg: "bg-gradient-to-br from-amber-100 to-yellow-50 dark:from-gray-900 dark:to-gray-900",
-    iconBg: "bg-amber-600 dark:bg-amber-600",
-    border: "border-amber-200/70 dark:border-amber-500/20",
-    glow: "shadow-md md:hover:shadow-lg md:transition-shadow md:duration-150",
-    titleColor: "text-amber-800 dark:text-amber-400",
+    cardBg: "bg-gradient-to-br from-amber-500 to-amber-600",
+    iconBg: "bg-white/20",
+    textColor: "text-white",
+    subtitleColor: "text-white/80",
   },
   error: {
-    cardBg: "bg-gradient-to-br from-red-100 to-rose-50 dark:from-gray-900 dark:to-gray-900",
-    iconBg: "bg-red-600 dark:bg-red-600",
-    border: "border-red-200/70 dark:border-red-500/20",
-    glow: "shadow-md md:hover:shadow-lg md:transition-shadow md:duration-150",
-    titleColor: "text-red-800 dark:text-red-400",
+    cardBg: "bg-gradient-to-br from-red-500 to-red-600",
+    iconBg: "bg-white/20",
+    textColor: "text-white",
+    subtitleColor: "text-white/80",
   },
   info: {
-    cardBg: "bg-gradient-to-br from-blue-100 to-indigo-50 dark:from-gray-900 dark:to-gray-900",
-    iconBg: "bg-blue-600 dark:bg-blue-600",
-    border: "border-blue-200/70 dark:border-blue-500/20",
-    glow: "shadow-md md:hover:shadow-lg md:transition-shadow md:duration-150",
-    titleColor: "text-blue-800 dark:text-blue-400",
+    cardBg: "bg-gradient-to-br from-blue-500 to-blue-600",
+    iconBg: "bg-white/20",
+    textColor: "text-white",
+    subtitleColor: "text-white/80",
   },
 } as const;
 
 const TREND_COLORS = {
-  positive: "text-emerald-700 dark:text-emerald-400",
-  negative: "text-red-700 dark:text-red-400",
-  neutral: "text-gray-600 dark:text-gray-400",
+  positive: "bg-white/20 text-white",
+  negative: "bg-red-400/30 text-white",
+  neutral: "bg-white/15 text-white/80",
 } as const;
 
 export const MetricCard = memo(function MetricCard({
@@ -75,45 +75,40 @@ export const MetricCard = memo(function MetricCard({
   const styles = VARIANT_STYLES[variant];
 
   return (
-    <ResponsiveCard
-      size="default"
-      padding="sm"
-      interactive={!!onClick}
+    <div
       className={cn(
-        "relative overflow-hidden border",
-        styles.border,
-        styles.glow,
+        "relative overflow-hidden rounded-xl p-4",
         styles.cardBg,
-        onClick && "cursor-pointer",
+        onClick && "cursor-pointer hover:opacity-95 transition-opacity",
         className
       )}
       onClick={onClick}
     >
       <div className="flex flex-row items-center justify-between gap-2">
-        <CardTitle className={cn("text-xs sm:text-sm font-bold truncate flex-1", styles.titleColor)}>
+        <CardTitle className={cn("text-xs sm:text-sm font-semibold truncate flex-1", styles.subtitleColor)}>
           {title}
         </CardTitle>
-        {/* Icon with 44x44px minimum touch target on mobile */}
-        <div className={cn("p-2 sm:p-2.5 rounded-lg sm:rounded-xl shadow-md flex-shrink-0 min-h-11 min-w-11 sm:min-h-auto sm:min-w-auto flex items-center justify-center", styles.iconBg)}>
-          <Icon className="h-4 w-4 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
+        {/* Icon with background */}
+        <div className={cn("p-2 sm:p-2.5 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center", styles.iconBg)}>
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
         </div>
       </div>
 
       <div className="mt-2 sm:mt-3">
-        <div className="text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white truncate">
+        <div className={cn("text-xl sm:text-2xl md:text-3xl font-bold truncate", styles.textColor)}>
           {value}
         </div>
         {trend && (
-          <div className="flex items-center gap-1 mt-1 sm:mt-2 flex-wrap">
-            <span className={cn("text-[10px] sm:text-xs font-bold", TREND_COLORS[trend.type])}>
+          <div className="flex items-center gap-2 mt-2">
+            <span className={cn("text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full", TREND_COLORS[trend.type])}>
               {trend.value}
             </span>
-            <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+            <span className={cn("text-[10px] sm:text-xs font-medium truncate", styles.subtitleColor)}>
               {trend.label}
             </span>
           </div>
         )}
       </div>
-    </ResponsiveCard>
+    </div>
   );
 });

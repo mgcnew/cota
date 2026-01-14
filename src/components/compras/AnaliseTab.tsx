@@ -757,7 +757,7 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
 }
 
 
-// Componentes auxiliares
+// Componentes auxiliares - Cards com cores sólidas
 function MetricCard({ icon, label, value, subtitle, color }: { 
   icon: React.ReactNode; 
   label: string; 
@@ -765,24 +765,32 @@ function MetricCard({ icon, label, value, subtitle, color }: {
   subtitle?: string;
   color: "blue" | "green" | "violet" | "amber" | "red" | "gray" | "emerald";
 }) {
+  // Cores sólidas com significado lógico:
+  // blue = informação/documentos
+  // green/emerald = sucesso/dinheiro
+  // violet = análise/insights
+  // amber = alertas/itens
+  // red = problemas/tendência negativa
   const colors = {
-    blue: "bg-blue-50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400",
-    green: "bg-green-50 dark:bg-green-900/20 border-green-200/50 dark:border-green-800/50 text-green-600 dark:text-green-400",
-    violet: "bg-violet-50 dark:bg-violet-900/20 border-violet-200/50 dark:border-violet-800/50 text-violet-600 dark:text-violet-400",
-    amber: "bg-amber-50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/50 text-amber-600 dark:text-amber-400",
-    red: "bg-red-50 dark:bg-red-900/20 border-red-200/50 dark:border-red-800/50 text-red-600 dark:text-red-400",
-    gray: "bg-gray-50 dark:bg-gray-900/20 border-gray-200/50 dark:border-gray-800/50 text-gray-600 dark:text-gray-400",
-    emerald: "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200/50 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400",
+    blue: "bg-gradient-to-br from-blue-500 to-blue-600",
+    green: "bg-gradient-to-br from-green-500 to-green-600",
+    violet: "bg-gradient-to-br from-violet-500 to-violet-600",
+    amber: "bg-gradient-to-br from-amber-500 to-amber-600",
+    red: "bg-gradient-to-br from-red-500 to-red-600",
+    gray: "bg-gradient-to-br from-gray-500 to-gray-600",
+    emerald: "bg-gradient-to-br from-emerald-500 to-emerald-600",
   };
 
   return (
-    <div className={cn("p-3 rounded-xl border", colors[color])}>
+    <div className={cn("p-3 rounded-xl text-white", colors[color])}>
       <div className="flex items-center gap-2 mb-1">
-        {icon}
-        <span className="text-xs font-medium opacity-80">{label}</span>
+        <div className="p-1.5 rounded-lg bg-white/20">
+          {icon}
+        </div>
+        <span className="text-xs font-medium text-white/80">{label}</span>
       </div>
-      <p className="text-lg font-bold text-gray-900 dark:text-white">{value}</p>
-      {subtitle && <p className="text-xs opacity-70 mt-0.5">{subtitle}</p>}
+      <p className="text-lg font-bold">{value}</p>
+      {subtitle && <p className="text-xs text-white/70 mt-0.5">{subtitle}</p>}
     </div>
   );
 }
@@ -794,25 +802,20 @@ function InsightCard({ icon, title, value, subtitle, color }: {
   subtitle: string;
   color: "emerald" | "amber" | "blue" | "red";
 }) {
+  // Cores sólidas para insights
   const colors = {
-    emerald: "from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200/50 dark:border-emerald-800/50",
-    amber: "from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-200/50 dark:border-amber-800/50",
-    blue: "from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50",
-    red: "from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200/50 dark:border-red-800/50",
-  };
-  const iconColors = {
-    emerald: "text-emerald-600 dark:text-emerald-400",
-    amber: "text-amber-600 dark:text-amber-400",
-    blue: "text-blue-600 dark:text-blue-400",
-    red: "text-red-600 dark:text-red-400",
+    emerald: "bg-gradient-to-br from-emerald-500 to-teal-600",
+    amber: "bg-gradient-to-br from-amber-500 to-orange-600",
+    blue: "bg-gradient-to-br from-blue-500 to-indigo-600",
+    red: "bg-gradient-to-br from-red-500 to-rose-600",
   };
 
   return (
-    <div className={cn("p-4 rounded-xl border bg-gradient-to-br", colors[color])}>
-      <div className={cn("mb-2", iconColors[color])}>{icon}</div>
-      <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{title}</p>
-      <p className="text-lg font-bold text-gray-900 dark:text-white">{value}</p>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>
+    <div className={cn("p-4 rounded-xl text-white", colors[color])}>
+      <div className="mb-2 p-2 rounded-lg bg-white/20 w-fit">{icon}</div>
+      <p className="text-xs font-medium text-white/80">{title}</p>
+      <p className="text-lg font-bold">{value}</p>
+      <p className="text-xs text-white/70 mt-1">{subtitle}</p>
     </div>
   );
 }

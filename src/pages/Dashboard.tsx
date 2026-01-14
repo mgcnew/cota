@@ -107,7 +107,11 @@ function Dashboard() {
     );
   }
 
-  // 4 Cards principais
+  // 4 Cards principais - Cores sólidas com significado lógico
+  // Emerald = Dinheiro/Economia (verde = positivo financeiro)
+  // Blue = Cotações (azul = informação/documentos)
+  // Purple = Fornecedores (roxo = relacionamentos/parcerias)
+  // Amber = Produtos (âmbar = itens/estoque)
   const cards = [
     {
       title: 'Economia Gerada',
@@ -143,38 +147,23 @@ function Dashboard() {
     }
   ];
 
-  const colorMap: Record<string, { bg: string; iconBg: string; iconText: string; border: string; trendUp: string; trendDown: string }> = {
+  // Cores sólidas para cards - mesmo padrão da ContagemEstoque
+  const colorMap: Record<string, { bg: string; iconBg: string }> = {
     emerald: { 
-      bg: 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30', 
-      iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-600', 
-      iconText: 'text-white',
-      border: 'border-emerald-200/60 dark:border-emerald-800/40',
-      trendUp: 'text-emerald-600 dark:text-emerald-400',
-      trendDown: 'text-red-600 dark:text-red-400'
+      bg: 'bg-gradient-to-br from-emerald-500 to-emerald-600', 
+      iconBg: 'bg-white/20'
     },
     blue: { 
-      bg: 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30', 
-      iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600', 
-      iconText: 'text-white',
-      border: 'border-blue-200/60 dark:border-blue-800/40',
-      trendUp: 'text-emerald-600 dark:text-emerald-400',
-      trendDown: 'text-red-600 dark:text-red-400'
+      bg: 'bg-gradient-to-br from-blue-500 to-blue-600', 
+      iconBg: 'bg-white/20'
     },
     purple: { 
-      bg: 'bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/40 dark:to-violet-950/30', 
-      iconBg: 'bg-gradient-to-br from-purple-500 to-violet-600', 
-      iconText: 'text-white',
-      border: 'border-purple-200/60 dark:border-purple-800/40',
-      trendUp: 'text-emerald-600 dark:text-emerald-400',
-      trendDown: 'text-red-600 dark:text-red-400'
+      bg: 'bg-gradient-to-br from-purple-500 to-purple-600', 
+      iconBg: 'bg-white/20'
     },
     amber: { 
-      bg: 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30', 
-      iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600', 
-      iconText: 'text-white',
-      border: 'border-amber-200/60 dark:border-amber-800/40',
-      trendUp: 'text-emerald-600 dark:text-emerald-400',
-      trendDown: 'text-red-600 dark:text-red-400'
+      bg: 'bg-gradient-to-br from-amber-500 to-amber-600', 
+      iconBg: 'bg-white/20'
     },
   };
 
@@ -203,40 +192,39 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* 4 Cards Lado a Lado */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 4 Cards Lado a Lado - Cores Sólidas */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {cards.map((card) => {
             const colors = colorMap[card.color];
             const isPositive = card.trend >= 0;
             return (
-              <Card 
+              <div 
                 key={card.title} 
                 className={cn(
-                  "relative overflow-hidden p-4 border shadow-sm hover:shadow-md transition-shadow",
-                  colors.bg, 
-                  colors.border
+                  "relative overflow-hidden rounded-xl p-4 text-white",
+                  colors.bg
                 )}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className={cn("p-2.5 rounded-xl shadow-sm", colors.iconBg)}>
-                    <card.icon className={cn("w-5 h-5", colors.iconText)} />
+                  <div className={cn("p-2.5 rounded-xl", colors.iconBg)}>
+                    <card.icon className="w-5 h-5" />
                   </div>
                   <div className={cn(
                     "flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full",
                     isPositive 
-                      ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" 
-                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                      ? "bg-white/20" 
+                      : "bg-red-400/30"
                   )}>
                     {isPositive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                     {Math.abs(card.trend).toFixed(1)}%
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">{card.value}</p>
-                  <p className="text-sm font-medium text-foreground/80">{card.title}</p>
-                  <p className="text-xs text-muted-foreground">{card.sub}</p>
+                  <p className="text-2xl lg:text-3xl font-bold tracking-tight">{card.value}</p>
+                  <p className="text-sm font-medium text-white/90">{card.title}</p>
+                  <p className="text-xs text-white/70">{card.sub}</p>
                 </div>
-              </Card>
+              </div>
             );
           })}
         </div>
