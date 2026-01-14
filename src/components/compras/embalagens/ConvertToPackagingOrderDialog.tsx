@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Collapsible,
   CollapsibleContent,
@@ -19,7 +21,8 @@ import {
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { 
   ShoppingCart, Package, Building2, DollarSign, Calendar, 
-  Check, Loader2, Award, AlertCircle, ChevronDown, FileText
+  Check, Loader2, Award, AlertCircle, ChevronDown, FileText,
+  Zap, Settings2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
@@ -29,6 +32,8 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   quote: PackagingQuoteDisplay | null;
 }
+
+type ConversionMode = "auto" | "custom";
 
 interface OrderItem {
   packagingId: string;
@@ -41,143 +46,183 @@ interface OrderItem {
 
 export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Props) {
   const { createOrderFromQuote } = usePackagingOrders();
-  const [selectedSupplierId, setSelectedSupplierId] = useState<string>("");
+  const [conversionMode, setConversionMode] = useState<ConversionMode>("auto");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [observations, setObservations] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [productsOpen, setProductsOpen] = useState(true);
+  const [customSelections, setCustomSelections] = useState<Record<string, string>>({}); // packagingId -> supplierId
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fornecedores que responderam
   const respondedSuppliers = useMemo(() => {
     if (!quote) return [];
     return quote.fornecedores.filter(f => f.status === "respondido");
   }, [quote]);
-  
-  // Dados do fornecedor selecionado
-  const selectedSupplier = useMemo(() => {
-    return respondedSuppliers.find(f => f.supplierId === selectedSupplierId);
-  }, [respondedSuppliers, selectedSupplierId]);
 
-  // Calcular itens ganhos por fornecedor baseado no custo por unidade
-  const winningItemsBySupplier = useMemo(() => {
+  // Calcular melhor fornecedor por item (baseado no custo por unidade)
+  const bestSupplierByItem = useMemo(() => {
     if (!quote) return {};
     
-    const wins: Record<string, string[]> = {}; // supplierId -> [packagingId, ...]
+    const best: Record<string, { supplierId: string; supplierName: string; costPerUnit: number; item: any }> = {};
     
-    // Para cada item da cotação, encontrar o fornecedor com menor custo por unidade
     quote.itens.forEach(item => {
       let bestSupplierId: string | null = null;
+      let bestSupplierName: string = "";
       let bestCostPerUnit = Infinity;
+      let bestItem: any = null;
       
       respondedSuppliers.forEach(fornecedor => {
-        const supplierItem = fornecedor.itens.find(
-          si => si.packagingId === item.packagingId
-        );
+        const supplierItem = fornecedor.itens.find(si => si.packagingId === item.packagingId);
         
         if (!supplierItem || !supplierItem.valorTotal || supplierItem.valorTotal <= 0) return;
         
-        // Usar custoPorUnidade se disponível, senão calcular
         const costPerUnit = supplierItem.custoPorUnidade && supplierItem.custoPorUnidade > 0
           ? supplierItem.custoPorUnidade
           : (supplierItem.quantidadeUnidadesEstimada && supplierItem.quantidadeUnidadesEstimada > 0
               ? supplierItem.valorTotal / supplierItem.quantidadeUnidadesEstimada
-              : supplierItem.valorTotal); // Se não tem quantidade, usa o valor total como fallback
+              : supplierItem.valorTotal);
         
         if (costPerUnit > 0 && costPerUnit < bestCostPerUnit) {
           bestCostPerUnit = costPerUnit;
           bestSupplierId = fornecedor.supplierId;
+          bestSupplierName = fornecedor.supplierName;
+          bestItem = supplierItem;
         }
       });
       
-      if (bestSupplierId) {
-        if (!wins[bestSupplierId]) wins[bestSupplierId] = [];
-        wins[bestSupplierId].push(item.packagingId);
+      if (bestSupplierId && bestItem) {
+        best[item.packagingId] = {
+          supplierId: bestSupplierId,
+          supplierName: bestSupplierName,
+          costPerUnit: bestCostPerUnit,
+          item: bestItem
+        };
       }
     });
     
-    return wins;
+    return best;
   }, [quote, respondedSuppliers]);
 
-  // Itens que o fornecedor selecionado ganhou
-  const supplierWinningItems = useMemo(() => {
-    if (!selectedSupplier) return [];
+  // Agrupar itens por fornecedor (modo automático)
+  const ordersBySupplier = useMemo(() => {
+    if (!quote) return {};
     
-    const winningPackagingIds = winningItemsBySupplier[selectedSupplier.supplierId] || [];
+    const orders: Record<string, { supplierName: string; items: any[] }> = {};
     
-    return selectedSupplier.itens.filter(item => 
-      winningPackagingIds.includes(item.packagingId) &&
-      item.valorTotal && item.valorTotal > 0
-    );
-  }, [selectedSupplier, winningItemsBySupplier]);
+    if (conversionMode === "auto") {
+      // Modo automático: usar melhor preço
+      Object.entries(bestSupplierByItem).forEach(([packagingId, data]) => {
+        if (!orders[data.supplierId]) {
+          orders[data.supplierId] = { supplierName: data.supplierName, items: [] };
+        }
+        orders[data.supplierId].items.push({
+          ...data.item,
+          packagingId,
+          packagingName: quote.itens.find(i => i.packagingId === packagingId)?.packagingName || ''
+        });
+      });
+    } else {
+      // Modo personalizado: usar seleções do usuário
+      Object.entries(customSelections).forEach(([packagingId, supplierId]) => {
+        const fornecedor = respondedSuppliers.find(f => f.supplierId === supplierId);
+        if (!fornecedor) return;
+        
+        const supplierItem = fornecedor.itens.find(si => si.packagingId === packagingId);
+        if (!supplierItem || !supplierItem.valorTotal) return;
+        
+        if (!orders[supplierId]) {
+          orders[supplierId] = { supplierName: fornecedor.supplierName, items: [] };
+        }
+        orders[supplierId].items.push({
+          ...supplierItem,
+          packagingId,
+          packagingName: quote.itens.find(i => i.packagingId === packagingId)?.packagingName || ''
+        });
+      });
+    }
+    
+    return orders;
+  }, [quote, conversionMode, bestSupplierByItem, customSelections, respondedSuppliers]);
 
-  // Calcular total do pedido baseado apenas nos itens ganhos
-  const orderTotal = useMemo(() => {
-    if (!selectedSupplier) return 0;
-    
-    return supplierWinningItems.reduce((sum, item) => {
-      const qty = quantities[item.packagingId] || 1;
-      return sum + (qty * (item.valorTotal || 0));
+  // Total geral
+  const totalGeral = useMemo(() => {
+    return Object.values(ordersBySupplier).reduce((sum, order) => {
+      return sum + order.items.reduce((itemSum, item) => {
+        const qty = quantities[item.packagingId] || 1;
+        return itemSum + (qty * (item.valorTotal || 0));
+      }, 0);
     }, 0);
-  }, [supplierWinningItems, quantities]);
+  }, [ordersBySupplier, quantities]);
 
-  // Encontrar fornecedor com mais itens ganhos
-  const bestSupplierId = useMemo(() => {
-    if (respondedSuppliers.length === 0) return null;
-    
-    let bestId: string | null = null;
-    let maxWins = 0;
-    
-    Object.entries(winningItemsBySupplier).forEach(([supplierId, items]) => {
-      if (items.length > maxWins) {
-        maxWins = items.length;
-        bestId = supplierId;
-      }
+  // Inicializar seleções personalizadas com melhor preço
+  const initCustomSelections = () => {
+    const selections: Record<string, string> = {};
+    Object.entries(bestSupplierByItem).forEach(([packagingId, data]) => {
+      selections[packagingId] = data.supplierId;
     });
-    
-    return bestId;
-  }, [respondedSuppliers, winningItemsBySupplier]);
+    setCustomSelections(selections);
+  };
 
   const handleQuantityChange = (packagingId: string, value: string) => {
     const qty = parseInt(value) || 1;
     setQuantities(prev => ({ ...prev, [packagingId]: qty }));
   };
 
+  const handleCustomSelectionChange = (packagingId: string, supplierId: string) => {
+    setCustomSelections(prev => ({ ...prev, [packagingId]: supplierId }));
+  };
+
   const resetForm = () => {
-    setSelectedSupplierId("");
+    setConversionMode("auto");
     setDeliveryDate("");
     setObservations("");
     setQuantities({});
+    setCustomSelections({});
+    setDetailsOpen(false);
+    setIsSubmitting(false);
   };
 
   const handleSubmit = async () => {
-    if (!selectedSupplier || !deliveryDate || !quote || supplierWinningItems.length === 0) return;
+    if (!deliveryDate || !quote || Object.keys(ordersBySupplier).length === 0) return;
 
-    // Criar pedido apenas com os itens que o fornecedor ganhou
-    const itens: OrderItem[] = supplierWinningItems.map(item => ({
-      packagingId: item.packagingId,
-      packagingName: item.packagingName,
-      quantidade: quantities[item.packagingId] || 1,
-      unidadeCompra: item.unidadeVenda || 'un',
-      quantidadePorUnidade: item.quantidadeVenda || undefined,
-      valorUnitario: item.valorTotal || 0,
-    }));
+    setIsSubmitting(true);
 
-    await createOrderFromQuote.mutateAsync({
-      quoteId: quote.id,
-      supplierId: selectedSupplier.supplierId,
-      supplierName: selectedSupplier.supplierName,
-      deliveryDate,
-      observations: observations || undefined,
-      itens,
-    });
+    try {
+      // Criar um pedido para cada fornecedor
+      for (const [supplierId, orderData] of Object.entries(ordersBySupplier)) {
+        const itens: OrderItem[] = orderData.items.map(item => ({
+          packagingId: item.packagingId,
+          packagingName: item.packagingName,
+          quantidade: quantities[item.packagingId] || 1,
+          unidadeCompra: item.unidadeVenda || 'un',
+          quantidadePorUnidade: item.quantidadeVenda || undefined,
+          valorUnitario: item.valorTotal || 0,
+        }));
 
-    onOpenChange(false);
-    resetForm();
+        await createOrderFromQuote.mutateAsync({
+          quoteId: quote.id,
+          supplierId,
+          supplierName: orderData.supplierName,
+          deliveryDate,
+          observations: observations || undefined,
+          itens,
+        });
+      }
+
+      onOpenChange(false);
+      resetForm();
+    } catch (error) {
+      console.error('Erro ao criar pedidos:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // Return condicional DEPOIS de todos os hooks
   if (!quote) return null;
+
+  const suppliersCount = Object.keys(ordersBySupplier).length;
+  const itemsCount = Object.values(ordersBySupplier).reduce((sum, o) => sum + o.items.length, 0);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen); }}>
@@ -185,212 +230,268 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
         <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
           <DialogTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5 text-purple-600" />
-            Converter Cotação em Pedido
+            Converter Cotação em Pedido(s)
           </DialogTitle>
           <DialogDescription>
-            Selecione o fornecedor e confira os itens ganhos
+            {suppliersCount > 1 
+              ? `Serão criados ${suppliersCount} pedidos para fornecedores diferentes`
+              : "Selecione o modo de conversão e confirme os itens"
+            }
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
           <div className="space-y-4 pb-4 hide-scrollbar">
-            {/* Seleção de Fornecedor - Compacto */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Fornecedor</Label>
-              
-              {respondedSuppliers.length === 0 ? (
-                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
-                  <div className="flex items-center gap-2 text-amber-700">
-                    <AlertCircle className="h-4 w-4" />
-                    <span className="text-sm">Nenhum fornecedor respondeu ainda</span>
+            
+            {/* Modo de Conversão */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Modo de Conversão</Label>
+              <RadioGroup 
+                value={conversionMode} 
+                onValueChange={(v) => {
+                  setConversionMode(v as ConversionMode);
+                  if (v === "custom") initCustomSelections();
+                }}
+                className="grid grid-cols-2 gap-3"
+              >
+                <Label
+                  htmlFor="auto"
+                  className={cn(
+                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                    conversionMode === "auto"
+                      ? "bg-purple-100 dark:bg-purple-900/30 border-purple-500 ring-1 ring-purple-500"
+                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-300"
+                  )}
+                >
+                  <RadioGroupItem value="auto" id="auto" className="sr-only" />
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center",
+                    conversionMode === "auto" ? "bg-purple-500 text-white" : "bg-gray-100 dark:bg-gray-700"
+                  )}>
+                    <Zap className="h-4 w-4" />
                   </div>
-                </div>
-              ) : (
-                <div className="grid gap-2">
-                  {respondedSuppliers.map((fornecedor) => {
-                    const isBest = fornecedor.supplierId === bestSupplierId;
-                    const isSelected = selectedSupplierId === fornecedor.supplierId;
-                    const winsCount = winningItemsBySupplier[fornecedor.supplierId]?.length || 0;
-                    
-                    return (
-                      <button
-                        key={fornecedor.supplierId}
-                        type="button"
-                        onClick={() => setSelectedSupplierId(fornecedor.supplierId)}
-                        className={cn(
-                          "w-full p-2.5 rounded-lg border text-left transition-all flex items-center gap-2",
-                          isSelected
-                            ? "bg-purple-100 dark:bg-purple-900/30 border-purple-500 ring-1 ring-purple-500"
-                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-300"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                          isSelected ? "bg-purple-500 text-white" : "bg-gray-100 dark:bg-gray-700"
-                        )}>
-                          <Building2 className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm truncate">{fornecedor.supplierName}</p>
-                            {isBest && (
-                              <Badge className="bg-green-100 text-green-700 border-green-200 text-[10px] px-1.5">
-                                <Award className="h-3 w-3 mr-0.5" />Melhor
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {winsCount} de {quote.itens.length} itens ganhos
-                          </p>
-                        </div>
-                        {isSelected && <Check className="h-4 w-4 text-purple-600 flex-shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                  <div>
+                    <p className="font-medium text-sm">Melhor Preço</p>
+                    <p className="text-xs text-muted-foreground">Automático por item</p>
+                  </div>
+                </Label>
+                
+                <Label
+                  htmlFor="custom"
+                  className={cn(
+                    "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
+                    conversionMode === "custom"
+                      ? "bg-purple-100 dark:bg-purple-900/30 border-purple-500 ring-1 ring-purple-500"
+                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-300"
+                  )}
+                >
+                  <RadioGroupItem value="custom" id="custom" className="sr-only" />
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center",
+                    conversionMode === "custom" ? "bg-purple-500 text-white" : "bg-gray-100 dark:bg-gray-700"
+                  )}>
+                    <Settings2 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Personalizado</p>
+                    <p className="text-xs text-muted-foreground">Escolher por item</p>
+                  </div>
+                </Label>
+              </RadioGroup>
             </div>
 
-            {/* Seção Produtos - Colapsável */}
-            {selectedSupplier && (
-              <Collapsible open={productsOpen} onOpenChange={setProductsOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <Package className="h-4 w-4 text-purple-600" />
-                      <span className="font-medium text-sm">Produtos ({supplierWinningItems.length})</span>
-                    </div>
-                    <ChevronDown className={cn(
-                      "h-4 w-4 text-muted-foreground transition-transform",
-                      productsOpen && "rotate-180"
-                    )} />
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  {supplierWinningItems.length === 0 ? (
-                    <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
-                      <div className="flex items-center gap-2 text-amber-700">
-                        <AlertCircle className="h-4 w-4" />
-                        <span className="text-sm">Este fornecedor não ganhou nenhum item</span>
-                      </div>
-                    </div>
-                  ) : (
+            {respondedSuppliers.length === 0 ? (
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
+                <div className="flex items-center gap-2 text-amber-700">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm">Nenhum fornecedor respondeu ainda</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Modo Personalizado - Seleção por Item */}
+                {conversionMode === "custom" && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Selecionar Fornecedor por Item</Label>
                     <div 
-                      className="mt-2 max-h-[280px] overflow-y-auto space-y-2 pr-1"
+                      className="max-h-[200px] overflow-y-auto space-y-2 pr-1"
                       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
-                      {supplierWinningItems.map((item) => {
-                        const costPerUnit = item.custoPorUnidade && item.custoPorUnidade > 0
-                          ? item.custoPorUnidade
-                          : (item.quantidadeUnidadesEstimada && item.quantidadeUnidadesEstimada > 0
-                              ? (item.valorTotal || 0) / item.quantidadeUnidadesEstimada
-                              : null);
-
+                      {quote.itens.map((item) => {
+                        const best = bestSupplierByItem[item.packagingId];
+                        const availableSuppliers = respondedSuppliers.filter(f => 
+                          f.itens.some(si => si.packagingId === item.packagingId && si.valorTotal && si.valorTotal > 0)
+                        );
+                        
                         return (
-                          <Card key={item.id} className="overflow-hidden">
+                          <Card key={item.packagingId} className="overflow-hidden">
                             <CardContent className="p-2.5">
                               <div className="flex items-center justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium text-sm truncate">{item.packagingName}</p>
-                                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-                                    <span>R$ {item.valorTotal?.toFixed(2)}</span>
-                                    {item.unidadeVenda && <span>/ {item.unidadeVenda}</span>}
-                                    {costPerUnit && (
-                                      <Badge variant="outline" className="text-[10px] px-1 bg-green-50 text-green-700 border-green-200">
-                                        R$ {costPerUnit.toFixed(4)}/un
-                                      </Badge>
-                                    )}
-                                  </div>
+                                  {best && (
+                                    <p className="text-xs text-muted-foreground">
+                                      Melhor: {best.supplierName} (R$ {best.costPerUnit.toFixed(4)}/un)
+                                    </p>
+                                  )}
                                 </div>
-                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                  <span className="text-xs text-muted-foreground">Qtd:</span>
-                                  <Input
-                                    type="number"
-                                    min="1"
-                                    value={quantities[item.packagingId] || 1}
-                                    onChange={(e) => handleQuantityChange(item.packagingId, e.target.value)}
-                                    className="w-16 h-7 text-center text-sm"
-                                  />
-                                </div>
+                                <Select
+                                  value={customSelections[item.packagingId] || ""}
+                                  onValueChange={(v) => handleCustomSelectionChange(item.packagingId, v)}
+                                >
+                                  <SelectTrigger className="w-[140px] h-8 text-xs">
+                                    <SelectValue placeholder="Fornecedor" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {availableSuppliers.map(f => {
+                                      const supplierItem = f.itens.find(si => si.packagingId === item.packagingId);
+                                      const isBest = best?.supplierId === f.supplierId;
+                                      return (
+                                        <SelectItem key={f.supplierId} value={f.supplierId}>
+                                          <div className="flex items-center gap-1">
+                                            {isBest && <Award className="h-3 w-3 text-green-600" />}
+                                            <span className="truncate">{f.supplierName}</span>
+                                            <span className="text-muted-foreground ml-1">
+                                              R$ {supplierItem?.valorTotal?.toFixed(2)}
+                                            </span>
+                                          </div>
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
                               </div>
                             </CardContent>
                           </Card>
                         );
                       })}
                     </div>
-                  )}
-                </CollapsibleContent>
-              </Collapsible>
-            )}
+                  </div>
+                )}
 
-            {/* Seção Detalhes - Colapsável */}
-            {selectedSupplier && (
-              <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                {/* Resumo dos Pedidos */}
+                {Object.keys(ordersBySupplier).length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">
+                      Pedidos a Criar ({suppliersCount} fornecedor{suppliersCount > 1 ? 'es' : ''})
+                    </Label>
+                    <div className="space-y-2">
+                      {Object.entries(ordersBySupplier).map(([supplierId, orderData]) => {
+                        const orderTotal = orderData.items.reduce((sum, item) => {
+                          const qty = quantities[item.packagingId] || 1;
+                          return sum + (qty * (item.valorTotal || 0));
+                        }, 0);
+                        
+                        return (
+                          <Card key={supplierId} className="overflow-hidden border-purple-200 dark:border-purple-800">
+                            <CardContent className="p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                    <Building2 className="h-3.5 w-3.5 text-purple-600" />
+                                  </div>
+                                  <span className="font-medium text-sm">{orderData.supplierName}</span>
+                                </div>
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                  R$ {orderTotal.toFixed(2)}
+                                </Badge>
+                              </div>
+                              <div className="space-y-1">
+                                {orderData.items.map(item => (
+                                  <div key={item.packagingId} className="flex items-center justify-between text-xs">
+                                    <span className="text-muted-foreground truncate flex-1">{item.packagingName}</span>
+                                    <div className="flex items-center gap-2">
+                                      <Input
+                                        type="number"
+                                        min="1"
+                                        value={quantities[item.packagingId] || 1}
+                                        onChange={(e) => handleQuantityChange(item.packagingId, e.target.value)}
+                                        className="w-14 h-6 text-center text-xs"
+                                      />
+                                      <span className="text-muted-foreground w-20 text-right">
+                                        R$ {item.valorTotal?.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Detalhes do Pedido */}
+                <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-purple-600" />
+                        <span className="font-medium text-sm">Detalhes</span>
+                        {!deliveryDate && (
+                          <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-300">
+                            Preencher data
+                          </Badge>
+                        )}
+                      </div>
+                      <ChevronDown className={cn(
+                        "h-4 w-4 text-muted-foreground transition-transform",
+                        detailsOpen && "rotate-180"
+                      )} />
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="mt-2 space-y-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          Data de Entrega Prevista *
+                        </Label>
+                        <Input
+                          type="date"
+                          value={deliveryDate}
+                          onChange={(e) => setDeliveryDate(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          className="h-8"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium">Observações (opcional)</Label>
+                        <Input
+                          placeholder="Observações sobre o pedido..."
+                          value={observations}
+                          onChange={(e) => setObservations(e.target.value)}
+                          className="h-8"
+                        />
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Total Geral */}
+                <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-purple-600" />
-                      <span className="font-medium text-sm">Detalhes do Pedido</span>
-                      {!deliveryDate && (
-                        <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-300">
-                          Preencher data
-                        </Badge>
-                      )}
+                      <DollarSign className="h-4 w-4 text-purple-600" />
+                      <span className="font-medium text-sm">Total Geral</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({itemsCount} itens em {suppliersCount} pedido{suppliersCount > 1 ? 's' : ''})
+                      </span>
                     </div>
-                    <ChevronDown className={cn(
-                      "h-4 w-4 text-muted-foreground transition-transform",
-                      detailsOpen && "rotate-180"
-                    )} />
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="mt-2 space-y-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-medium flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" />
-                        Data de Entrega Prevista *
-                      </Label>
-                      <Input
-                        type="date"
-                        value={deliveryDate}
-                        onChange={(e) => setDeliveryDate(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                        className="h-8"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-medium">Observações (opcional)</Label>
-                      <Input
-                        placeholder="Observações sobre o pedido..."
-                        value={observations}
-                        onChange={(e) => setObservations(e.target.value)}
-                        className="h-8"
-                      />
-                    </div>
+                    <span className="text-lg font-bold text-purple-600">
+                      R$ {totalGeral.toFixed(2)}
+                    </span>
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-            )}
-
-            {/* Resumo do Pedido - Sempre visível */}
-            {selectedSupplier && (
-              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-purple-600" />
-                    <span className="font-medium text-sm">Total do Pedido</span>
-                  </div>
-                  <span className="text-lg font-bold text-purple-600">
-                    R$ {orderTotal.toFixed(2)}
-                  </span>
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>
 
-        {/* Footer com botões */}
+        {/* Footer */}
         <div className="flex-shrink-0 flex justify-end gap-2 px-6 py-3 border-t bg-white dark:bg-gray-900">
           <Button
             variant="outline"
@@ -402,10 +503,10 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
           <Button
             size="sm"
             onClick={handleSubmit}
-            disabled={!selectedSupplierId || !deliveryDate || supplierWinningItems.length === 0 || createOrderFromQuote.isPending}
+            disabled={!deliveryDate || Object.keys(ordersBySupplier).length === 0 || isSubmitting}
             className="bg-purple-600 hover:bg-purple-700"
           >
-            {createOrderFromQuote.isPending ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
                 Criando...
@@ -413,7 +514,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
             ) : (
               <>
                 <ShoppingCart className="h-4 w-4 mr-1.5" />
-                Criar Pedido
+                Criar {suppliersCount > 1 ? `${suppliersCount} Pedidos` : 'Pedido'}
               </>
             )}
           </Button>

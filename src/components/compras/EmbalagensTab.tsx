@@ -101,12 +101,9 @@ function EmbalagensTab() {
     return new Set(orders.filter(o => o.quoteId).map(o => o.quoteId));
   }, [orders]);
 
-  // Filtrar cotações (excluindo as que já foram convertidas em pedidos)
+  // Filtrar cotações (INCLUINDO as concluídas para histórico)
   const filteredQuotes = useMemo(() => {
     return quotes.filter(q => {
-      // Excluir cotações já convertidas em pedidos
-      if (convertedQuoteIds.has(q.id)) return false;
-      
       const itemNames = q.itens.map(i => i.packagingName.toLowerCase()).join(' ');
       const matchesSearch = itemNames.includes(debouncedSearchTerm.toLowerCase()) || 
                            q.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
@@ -115,6 +112,9 @@ function EmbalagensTab() {
       if (statusFilter === "prontas") {
         const respondidos = q.fornecedores.filter(f => f.status === "respondido").length;
         return matchesSearch && q.status === "ativa" && respondidos === q.fornecedores.length && q.fornecedores.length > 0;
+      }
+      if (statusFilter === "concluida") {
+        return matchesSearch && (q.status === "concluida" || convertedQuoteIds.has(q.id));
       }
       return matchesSearch && q.status === statusFilter;
     });
