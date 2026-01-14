@@ -10,12 +10,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { 
   ShoppingCart, Package, Building2, DollarSign, Calendar, 
-  Check, Loader2, Award, AlertCircle
+  Check, Loader2, Award, AlertCircle, ChevronDown, FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
@@ -41,6 +45,8 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
   const [deliveryDate, setDeliveryDate] = useState("");
   const [observations, setObservations] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [productsOpen, setProductsOpen] = useState(true);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Fornecedores que responderam
   const respondedSuppliers = useMemo(() => {
@@ -175,25 +181,26 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen); }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
           <DialogTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5 text-purple-600" />
             Converter Cotação em Pedido
           </DialogTitle>
           <DialogDescription>
-            Selecione o fornecedor e informe as quantidades para criar o pedido
+            Selecione o fornecedor e confira os itens ganhos
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4">
-          <div className="space-y-6 pb-4">
-            {/* Seleção de Fornecedor */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Selecione o Fornecedor</Label>
+        <div className="flex-1 overflow-y-auto px-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+          <div className="space-y-4 pb-4 hide-scrollbar">
+            {/* Seleção de Fornecedor - Compacto */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Fornecedor</Label>
               
               {respondedSuppliers.length === 0 ? (
-                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
                   <div className="flex items-center gap-2 text-amber-700">
                     <AlertCircle className="h-4 w-4" />
                     <span className="text-sm">Nenhum fornecedor respondeu ainda</span>
@@ -204,6 +211,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                   {respondedSuppliers.map((fornecedor) => {
                     const isBest = fornecedor.supplierId === bestSupplierId;
                     const isSelected = selectedSupplierId === fornecedor.supplierId;
+                    const winsCount = winningItemsBySupplier[fornecedor.supplierId]?.length || 0;
                     
                     return (
                       <button
@@ -211,32 +219,32 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                         type="button"
                         onClick={() => setSelectedSupplierId(fornecedor.supplierId)}
                         className={cn(
-                          "w-full p-3 rounded-lg border text-left transition-all flex items-center gap-3",
+                          "w-full p-2.5 rounded-lg border text-left transition-all flex items-center gap-2",
                           isSelected
                             ? "bg-purple-100 dark:bg-purple-900/30 border-purple-500 ring-1 ring-purple-500"
                             : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-300"
                         )}
                       >
                         <div className={cn(
-                          "w-10 h-10 rounded-full flex items-center justify-center",
+                          "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
                           isSelected ? "bg-purple-500 text-white" : "bg-gray-100 dark:bg-gray-700"
                         )}>
-                          <Building2 className="h-5 w-5" />
+                          <Building2 className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center gap-2">
                             <p className="font-medium text-sm truncate">{fornecedor.supplierName}</p>
                             {isBest && (
-                              <Badge className="bg-green-100 text-green-700 border-green-200 text-[10px]">
+                              <Badge className="bg-green-100 text-green-700 border-green-200 text-[10px] px-1.5">
                                 <Award className="h-3 w-3 mr-0.5" />Melhor
                               </Badge>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            Ganhou {winningItemsBySupplier[fornecedor.supplierId]?.length || 0} de {quote.itens.length} itens
+                            {winsCount} de {quote.itens.length} itens ganhos
                           </p>
                         </div>
-                        {isSelected && <Check className="h-5 w-5 text-purple-600" />}
+                        {isSelected && <Check className="h-4 w-4 text-purple-600 flex-shrink-0" />}
                       </button>
                     );
                   })}
@@ -244,28 +252,35 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
               )}
             </div>
 
-            {/* Itens e Quantidades (apenas itens ganhos) */}
+            {/* Seção Produtos - Colapsável */}
             {selectedSupplier && (
-              <div className="space-y-3">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <Package className="h-4 w-4" />
-                  Itens Ganhos ({supplierWinningItems.length})
-                </Label>
-                
-                {supplierWinningItems.length === 0 ? (
-                  <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
-                    <div className="flex items-center gap-2 text-amber-700">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-sm">
-                        Este fornecedor não tem o melhor preço por unidade em nenhum item desta cotação.
-                      </span>
+              <Collapsible open={productsOpen} onOpenChange={setProductsOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <Package className="h-4 w-4 text-purple-600" />
+                      <span className="font-medium text-sm">Produtos ({supplierWinningItems.length})</span>
                     </div>
-                  </div>
-                ) : (
-                  <ScrollArea className="max-h-[200px]">
-                    <div className="space-y-2 pr-2">
+                    <ChevronDown className={cn(
+                      "h-4 w-4 text-muted-foreground transition-transform",
+                      productsOpen && "rotate-180"
+                    )} />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  {supplierWinningItems.length === 0 ? (
+                    <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
+                      <div className="flex items-center gap-2 text-amber-700">
+                        <AlertCircle className="h-4 w-4" />
+                        <span className="text-sm">Este fornecedor não ganhou nenhum item</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      className="mt-2 max-h-[280px] overflow-y-auto space-y-2 pr-1"
+                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
                       {supplierWinningItems.map((item) => {
-                        // Calcular custo por unidade para exibição
                         const costPerUnit = item.custoPorUnidade && item.custoPorUnidade > 0
                           ? item.custoPorUnidade
                           : (item.quantidadeUnidadesEstimada && item.quantidadeUnidadesEstimada > 0
@@ -274,30 +289,28 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
 
                         return (
                           <Card key={item.id} className="overflow-hidden">
-                            <CardContent className="p-3">
-                              <div className="flex items-center justify-between gap-3">
+                            <CardContent className="p-2.5">
+                              <div className="flex items-center justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium text-sm truncate">{item.packagingName}</p>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
                                     <span>R$ {item.valorTotal?.toFixed(2)}</span>
-                                    {item.unidadeVenda && (
-                                      <span>/ {item.unidadeVenda}</span>
-                                    )}
+                                    {item.unidadeVenda && <span>/ {item.unidadeVenda}</span>}
                                     {costPerUnit && (
-                                      <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200">
+                                      <Badge variant="outline" className="text-[10px] px-1 bg-green-50 text-green-700 border-green-200">
                                         R$ {costPerUnit.toFixed(4)}/un
                                       </Badge>
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Label className="text-xs text-muted-foreground">Qtd:</Label>
+                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                  <span className="text-xs text-muted-foreground">Qtd:</span>
                                   <Input
                                     type="number"
                                     min="1"
                                     value={quantities[item.packagingId] || 1}
                                     onChange={(e) => handleQuantityChange(item.packagingId, e.target.value)}
-                                    className="w-20 h-8 text-center"
+                                    className="w-16 h-7 text-center text-sm"
                                   />
                                 </div>
                               </div>
@@ -306,73 +319,100 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                         );
                       })}
                     </div>
-                  </ScrollArea>
-                )}
-              </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
             )}
 
-            {/* Data de Entrega */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Data de Entrega Prevista
-              </Label>
-              <Input
-                type="date"
-                value={deliveryDate}
-                onChange={(e) => setDeliveryDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-
-            {/* Observações */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Observações (opcional)</Label>
-              <Input
-                placeholder="Observações sobre o pedido..."
-                value={observations}
-                onChange={(e) => setObservations(e.target.value)}
-              />
-            </div>
-
-            {/* Resumo do Pedido */}
+            {/* Seção Detalhes - Colapsável */}
             {selectedSupplier && (
-              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200">
+              <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-purple-600" />
+                      <span className="font-medium text-sm">Detalhes do Pedido</span>
+                      {!deliveryDate && (
+                        <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-300">
+                          Preencher data
+                        </Badge>
+                      )}
+                    </div>
+                    <ChevronDown className={cn(
+                      "h-4 w-4 text-muted-foreground transition-transform",
+                      detailsOpen && "rotate-180"
+                    )} />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="mt-2 space-y-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" />
+                        Data de Entrega Prevista *
+                      </Label>
+                      <Input
+                        type="date"
+                        value={deliveryDate}
+                        onChange={(e) => setDeliveryDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="h-8"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Observações (opcional)</Label>
+                      <Input
+                        placeholder="Observações sobre o pedido..."
+                        value={observations}
+                        onChange={(e) => setObservations(e.target.value)}
+                        className="h-8"
+                      />
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+
+            {/* Resumo do Pedido - Sempre visível */}
+            {selectedSupplier && (
+              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium">Total do Pedido</span>
+                    <DollarSign className="h-4 w-4 text-purple-600" />
+                    <span className="font-medium text-sm">Total do Pedido</span>
                   </div>
-                  <span className="text-xl font-bold text-purple-600">
+                  <span className="text-lg font-bold text-purple-600">
                     R$ {orderTotal.toFixed(2)}
                   </span>
                 </div>
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer com botões */}
-        <div className="flex justify-end gap-2 pt-4 border-t">
+        <div className="flex-shrink-0 flex justify-end gap-2 px-6 py-3 border-t bg-white dark:bg-gray-900">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => { resetForm(); onOpenChange(false); }}
           >
             Cancelar
           </Button>
           <Button
+            size="sm"
             onClick={handleSubmit}
             disabled={!selectedSupplierId || !deliveryDate || supplierWinningItems.length === 0 || createOrderFromQuote.isPending}
             className="bg-purple-600 hover:bg-purple-700"
           >
             {createOrderFromQuote.isPending ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
                 Criando...
               </>
             ) : (
               <>
-                <ShoppingCart className="h-4 w-4 mr-2" />
+                <ShoppingCart className="h-4 w-4 mr-1.5" />
                 Criar Pedido
               </>
             )}
