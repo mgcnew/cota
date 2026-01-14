@@ -60,17 +60,23 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     return quote.fornecedores.filter(f => f.status === "respondido");
   }, [quote]);
 
-  // Calcular melhor fornecedor por item (baseado no custo por unidade)
-  const bestSupplierByItem = useMemo(() => {
-    if (!quote) return {};
+  // Calcular melhor e pior fornecedor por item (baseado no custo por unidade)
+  const supplierDataByItem = useMemo(() => {
+    if (!quote) return { best: {}, worst: {} };
     
     const best: Record<string, { supplierId: string; supplierName: string; costPerUnit: number; item: any }> = {};
+    const worst: Record<string, { supplierId: string; supplierName: string; costPerUnit: number; item: any }> = {};
     
     quote.itens.forEach(item => {
       let bestSupplierId: string | null = null;
       let bestSupplierName: string = "";
       let bestCostPerUnit = Infinity;
       let bestItem: any = null;
+      
+      let worstSupplierId: string | null = null;
+      let worstSupplierName: string = "";
+      let worstCostPerUnit = 0;
+      let worstItem: any = null;
       
       respondedSuppliers.forEach(fornecedor => {
         const supplierItem = fornecedor.itens.find(si => si.packagingId === item.packagingId);
@@ -83,11 +89,20 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
               ? supplierItem.valorTotal / supplierItem.quantidadeUnidadesEstimada
               : supplierItem.valorTotal);
         
+        // Melhor preço (menor)
         if (costPerUnit > 0 && costPerUnit < bestCostPerUnit) {
           bestCostPerUnit = costPerUnit;
           bestSupplierId = fornecedor.supplierId;
           bestSupplierName = fornecedor.supplierName;
           bestItem = supplierItem;
+        }
+        
+        // Pior preço (maior) - para cálculo de economia
+        if (costPerUnit > worstCostPerUnit) {
+          worstCostPerUnit = costPerUnit;
+          worstSupplierId = fornecedor.supplierId;
+          worstSupplierName = fornecedor.supplierName;
+          worstItem = supplierItem;
         }
       });
       
@@ -99,10 +114,22 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
           item: bestItem
         };
       }
+      
+      if (worstSupplierId && worstItem) {
+        worst[item.packagingId] = {
+          supplierId: worstSupplierId,
+          supplierName: worstSupplierName,
+          costPerUnit: worstCostPerUnit,
+          item: worstItem
+        };
+      }
     });
     
-    return best;
+    return { best, worst };
   }, [quote, respondedSuppliers]);
+
+  const bestSupplierByItem = supplierDataByItem.best;
+  const worstSupplierByItem = supplierDataByItem.worst;
 
   // Agrupar itens por fornecedor (modo automático)
   const ordersBySupplier = useMemo(() => {
@@ -155,6 +182,39 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     }, 0);
   }, [ordersBySupplier, quantities]);
 
+  // Calcular economia estimada: (Maior preço - Preço escolhido) × Quantidade
+  const economiaBySupplier = useMemo(() => {
+    const economia: Record<string, number> = {};
+    
+    Object.entries(ordersBySupplier).forEach(([supplierId, orderData]) => {
+      let supplierEconomia = 0;
+      
+      orderData.items.forEach(item => {
+        const qty = quantities[item.packagingId] || 1;
+        const worst = worstSupplierByItem[item.packagingId];
+        
+        if (worst && worst.item?.valorTotal) {
+          const precoEscolhido = item.valorTotal || 0;
+          const maiorPreco = worst.item.valorTotal;
+          
+          // Economia = (Maior preço - Preço escolhido) × Quantidade
+          if (maiorPreco > precoEscolhido) {
+            supplierEconomia += (maiorPreco - precoEscolhido) * qty;
+          }
+        }
+      });
+      
+      economia[supplierId] = supplierEconomia;
+    });
+    
+    return economia;
+  }, [ordersBySupplier, quantities, worstSupplierByItem]);
+
+  // Economia total
+  const economiaTotal = useMemo(() => {
+    return Object.values(economiaBySupplier).reduce((sum, val) => sum + val, 0);
+  }, [economiaBySupplier]);
+
   // Inicializar seleções personalizadas com melhor preço
   const initCustomSelections = () => {
     const selections: Record<string, string> = {};
@@ -206,6 +266,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
           supplierName: orderData.supplierName,
           deliveryDate,
           observations: observations || undefined,
+          economiaEstimada: economiaBySupplier[supplierId] || 0,
           itens,
         });
       }
@@ -471,7 +532,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                   </CollapsibleContent>
                 </Collapsible>
 
-                {/* Total Geral */}
+                {/* Total Geral e Economia */}
                 <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -485,6 +546,21 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                       R$ {totalGeral.toFixed(2)}
                     </span>
                   </div>
+                  
+                  {economiaTotal > 0 && (
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-purple-200">
+                      <div className="flex items-center gap-2">
+                        <Award className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-sm text-green-700">Economia Estimada</span>
+                        <span className="text-xs text-muted-foreground">
+                          (vs maior preço cotado)
+                        </span>
+                      </div>
+                      <span className="text-lg font-bold text-green-600">
+                        R$ {economiaTotal.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </>
             )}

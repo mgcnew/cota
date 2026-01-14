@@ -60,6 +60,7 @@ export function usePackagingOrders() {
           supplierId: order.supplier_id,
           supplierName: order.supplier_name,
           totalValue: order.total_value || 0,
+          economiaEstimada: order.economia_estimada || 0,
           status: order.status,
           orderDate: new Date(order.order_date).toLocaleDateString('pt-BR'),
           deliveryDate: order.delivery_date 
@@ -82,6 +83,7 @@ export function usePackagingOrders() {
       supplierName: string;
       deliveryDate: string;
       observations?: string;
+      economiaEstimada?: number;
       itens: {
         packagingId: string;
         packagingName: string;
@@ -115,6 +117,7 @@ export function usePackagingOrders() {
           supplier_id: data.supplierId,
           supplier_name: data.supplierName,
           total_value: totalValue,
+          economia_estimada: data.economiaEstimada || 0,
           status: 'pendente',
           order_date: new Date().toISOString().split('T')[0],
           delivery_date: data.deliveryDate,

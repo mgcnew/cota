@@ -185,6 +185,7 @@ export interface PackagingOrder {
   supplier_id: string;
   supplier_name: string;
   total_value: number;
+  economia_estimada: number; // Economia ao escolher este fornecedor vs maior preço
   status: "pendente" | "confirmado" | "entregue" | "cancelado";
   order_date: string;
   delivery_date: string | null;
@@ -213,6 +214,7 @@ export interface PackagingOrderDisplay {
   supplierId: string;
   supplierName: string;
   totalValue: number;
+  economiaEstimada: number; // Economia calculada
   status: "pendente" | "confirmado" | "entregue" | "cancelado";
   orderDate: string;
   deliveryDate: string | null;

@@ -18,7 +18,7 @@ import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { 
   Package, Plus, Trash2, DollarSign, 
   Building2, MoreVertical, Eye, CheckCircle2,
-  PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3
+  PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3, TrendingDown
 } from "lucide-react";
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
@@ -133,7 +133,10 @@ function EmbalagensTab() {
     }).length;
     const totalPedidos = orders.length;
     
-    return { total: quotesNaoConvertidas.length, ativas, concluidas, prontasParaDecisao, totalPedidos };
+    // Calcular economia total dos pedidos
+    const economiaTotal = orders.reduce((sum, order) => sum + (order.economiaEstimada || 0), 0);
+    
+    return { total: quotesNaoConvertidas.length, ativas, concluidas, prontasParaDecisao, totalPedidos, economiaTotal };
   }, [quotes, orders, convertedQuoteIds]);
 
   const getQuoteStatus = (quote: PackagingQuoteDisplay) => {
@@ -195,7 +198,7 @@ function EmbalagensTab() {
         {/* Tab: Cotações */}
         <TabsContent value="cotacoes" className="mt-4 space-y-4">
           {/* Métricas */}
-          <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
+          <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 5 }} gap="sm">
             <MetricCard title="Total" value={stats.total.toString()} icon={Package} variant="default" />
             <MetricCard title="Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
             <MetricCard 
@@ -207,6 +210,13 @@ function EmbalagensTab() {
               className="cursor-pointer hover:ring-2 hover:ring-emerald-300"
             />
             <MetricCard title="Concluídas" value={stats.concluidas.toString()} icon={DollarSign} variant="success" />
+            <MetricCard 
+              title="Economia" 
+              value={`R$ ${stats.economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
+              icon={TrendingDown} 
+              variant="success"
+              className="col-span-2 sm:col-span-1"
+            />
           </ResponsiveGrid>
 
           {/* Filtros e ações */}
