@@ -541,8 +541,17 @@ export function useCotacoes() {
 
       if (quoteError) throw quoteError;
 
+      // Buscar TODOS os valores cotados por todos os fornecedores para calcular economia
+      const { data: allSupplierItems, error: allItemsError } = await supabase
+        .from("quote_supplier_items")
+        .select("*")
+        .eq("quote_id", quoteId);
+
+      if (allItemsError) throw allItemsError;
+
       const createdOrderIds: string[] = [];
       let totalValueAllOrders = 0;
+      let totalEconomiaEstimada = 0;
 
       // Loop through each supplier order
       for (const order of orders) {
@@ -567,14 +576,60 @@ export function useCotacoes() {
 
         if (supplierItemsError) throw supplierItemsError;
 
-        // Calculate total value based on supplier items for these specific products
-        const totalValue = supplierItems.reduce((sum, item) => {
-          return sum + (item.valor_oferecido || 0);
-        }, 0);
+        // Calculate total value and economia for this order
+        let totalValue = 0;
+        let economiaEstimada = 0;
+        let diferencaPrecoTotal = 0;
+
+        // Preparar itens com dados de economia
+        const orderItemsWithEconomia = quoteData.quote_items
+          .filter((item: any) => productIds.includes(item.product_id))
+          .map((item: any) => {
+            const supplierItem = supplierItems.find((si: any) => si.product_id === item.product_id);
+            const valorEscolhido = supplierItem?.valor_oferecido || 0;
+            
+            // Encontrar o MAIOR valor cotado para este produto entre todos os fornecedores
+            const valoresParaProduto = (allSupplierItems || [])
+              .filter((si: any) => si.product_id === item.product_id && si.valor_oferecido > 0)
+              .map((si: any) => Number(si.valor_oferecido));
+            
+            const maiorValor = valoresParaProduto.length > 0 ? Math.max(...valoresParaProduto) : valorEscolhido;
+            const diferencaPorUnidade = maiorValor - valorEscolhido;
+            const quantidade = parseInt(item.quantidade) || 1;
+            
+            // Economia estimada = diferença × quantidade pedida
+            const economiaItem = diferencaPorUnidade * quantidade;
+            economiaEstimada += economiaItem;
+            diferencaPrecoTotal += diferencaPorUnidade;
+            totalValue += valorEscolhido * quantidade;
+            
+            return {
+              order_id: '', // será preenchido depois
+              product_id: item.product_id,
+              product_name: item.product_name,
+              quantity: quantidade,
+              unit: item.unidade || 'un',
+              unit_price: valorEscolhido,
+              total_price: valorEscolhido * quantidade,
+              // Novos campos para economia
+              quantidade_pedida: quantidade,
+              unidade_pedida: item.unidade || 'un',
+              quantidade_entregue: null, // será preenchido na entrega
+              unidade_entregue: null,
+              valor_unitario_cotado: valorEscolhido,
+              maior_valor_cotado: maiorValor,
+            };
+          });
 
         totalValueAllOrders += totalValue;
+        totalEconomiaEstimada += economiaEstimada;
 
-        // Create the order
+        // Calcular diferença média por kg/un
+        const diferencaMedia = orderItemsWithEconomia.length > 0 
+          ? diferencaPrecoTotal / orderItemsWithEconomia.length 
+          : 0;
+
+        // Create the order with quote_id and economia
         const { data: orderData, error: orderError } = await supabase
           .from("orders")
           .insert({
@@ -585,7 +640,12 @@ export function useCotacoes() {
             order_date: new Date().toISOString().split('T')[0],
             delivery_date: deliveryDate,
             status: "pendente",
-            observations: observations || null
+            observations: observations || null,
+            // Novos campos
+            quote_id: quoteId,
+            economia_estimada: economiaEstimada,
+            economia_real: 0, // será calculado na entrega
+            diferenca_preco_kg: diferencaMedia,
           })
           .select()
           .single();
@@ -594,22 +654,11 @@ export function useCotacoes() {
 
         createdOrderIds.push(orderData.id);
 
-        // Create order items only for the selected products
-        const orderItems = quoteData.quote_items
-          .filter((item: any) => productIds.includes(item.product_id))
-          .map((item: any) => {
-            const supplierItem = supplierItems.find((si: any) => si.product_id === item.product_id);
-            
-            return {
-              order_id: orderData.id,
-              product_id: item.product_id,
-              product_name: item.product_name,
-              quantity: parseInt(item.quantidade) || 1,
-              unit: item.unidade || 'un',
-              unit_price: supplierItem?.valor_oferecido || 0,
-              total_price: (supplierItem?.valor_oferecido || 0) * (parseInt(item.quantidade) || 1)
-            };
-          });
+        // Create order items with economia data
+        const orderItems = orderItemsWithEconomia.map(item => ({
+          ...item,
+          order_id: orderData.id,
+        }));
 
         const { error: orderItemsError } = await supabase
           .from("order_items")
@@ -626,17 +675,20 @@ export function useCotacoes() {
 
       if (updateError) throw updateError;
 
-      return { orderIds: createdOrderIds, totalValue: totalValueAllOrders };
+      return { orderIds: createdOrderIds, totalValue: totalValueAllOrders, economiaEstimada: totalEconomiaEstimada };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["cotacoes"] });
       queryClient.invalidateQueries({ queryKey: ["pedidos"] });
       const count = data.orderIds.length;
+      const economiaMsg = data.economiaEstimada > 0 
+        ? ` | Economia estimada: R$ ${data.economiaEstimada.toFixed(2)}`
+        : '';
       toast({
         title: count > 1 ? "Pedidos criados!" : "Pedido criado!",
         description: count > 1 
-          ? `${count} pedidos foram criados com sucesso no valor total de R$ ${data.totalValue.toFixed(2)}`
-          : `A cotação foi convertida em pedido com sucesso no valor de R$ ${data.totalValue.toFixed(2)}`
+          ? `${count} pedidos criados - Total: R$ ${data.totalValue.toFixed(2)}${economiaMsg}`
+          : `Pedido criado - R$ ${data.totalValue.toFixed(2)}${economiaMsg}`
       });
     },
     onError: (error) => {

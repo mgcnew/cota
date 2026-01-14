@@ -2,6 +2,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+export interface PedidoItem {
+  id?: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  quantidade_pedida?: number | null;
+  unidade_pedida?: string | null;
+  quantidade_entregue?: number | null;
+  unidade_entregue?: string | null;
+  valor_unitario_cotado?: number | null;
+  maior_valor_cotado?: number | null;
+}
+
 export interface Pedido {
   id: string;
   supplier_name: string;
@@ -11,12 +25,11 @@ export interface Pedido {
   status: string;
   total_value: number;
   observations?: string;
-  items?: Array<{
-    product_name: string;
-    quantity: number;
-    unit_price: number;
-    total_price: number;
-  }>;
+  quote_id?: string | null; // NULL = pedido direto, preenchido = veio de cotação
+  economia_estimada?: number;
+  economia_real?: number;
+  diferenca_preco_kg?: number;
+  items?: PedidoItem[];
 }
 
 export function usePedidos() {
@@ -34,10 +47,17 @@ export function usePedidos() {
         .select(`
           *,
           order_items(
+            id,
             product_name,
             quantity,
             unit_price,
-            total_price
+            total_price,
+            quantidade_pedida,
+            unidade_pedida,
+            quantidade_entregue,
+            unidade_entregue,
+            valor_unitario_cotado,
+            maior_valor_cotado
           )
         `)
         .order('created_at', { ascending: false });
@@ -53,11 +73,22 @@ export function usePedidos() {
         status: o.status,
         total_value: Number(o.total_value),
         observations: o.observations || undefined,
+        quote_id: o.quote_id || null,
+        economia_estimada: Number(o.economia_estimada) || 0,
+        economia_real: Number(o.economia_real) || 0,
+        diferenca_preco_kg: Number(o.diferenca_preco_kg) || 0,
         items: o.order_items?.map((item: any) => ({
+          id: item.id,
           product_name: item.product_name,
           quantity: item.quantity,
           unit_price: Number(item.unit_price),
           total_price: Number(item.total_price),
+          quantidade_pedida: item.quantidade_pedida ? Number(item.quantidade_pedida) : null,
+          unidade_pedida: item.unidade_pedida || null,
+          quantidade_entregue: item.quantidade_entregue ? Number(item.quantidade_entregue) : null,
+          unidade_entregue: item.unidade_entregue || null,
+          valor_unitario_cotado: item.valor_unitario_cotado ? Number(item.valor_unitario_cotado) : null,
+          maior_valor_cotado: item.maior_valor_cotado ? Number(item.maior_valor_cotado) : null,
         })) || [],
       }));
 
@@ -120,13 +151,84 @@ export function usePedidos() {
     },
   });
 
+  // Mutation para atualizar quantidade entregue (quando nota chega)
+  const updateQuantidadeEntregueMutation = useMutation({
+    mutationFn: async ({ 
+      pedidoId, 
+      itens 
+    }: { 
+      pedidoId: string; 
+      itens: Array<{ itemId: string; quantidadeEntregue: number; unidadeEntregue?: string }>;
+    }) => {
+      // Atualizar cada item com a quantidade entregue
+      for (const item of itens) {
+        const { error } = await supabase
+          .from('order_items')
+          .update({ 
+            quantidade_entregue: item.quantidadeEntregue,
+            unidade_entregue: item.unidadeEntregue || 'kg'
+          })
+          .eq('id', item.itemId);
+
+        if (error) throw error;
+      }
+
+      // Buscar os itens atualizados para calcular economia real
+      const { data: orderItems, error: itemsError } = await supabase
+        .from('order_items')
+        .select('quantidade_entregue, valor_unitario_cotado, maior_valor_cotado')
+        .eq('order_id', pedidoId);
+
+      if (itemsError) throw itemsError;
+
+      // Calcular economia real
+      let economiaReal = 0;
+      for (const item of orderItems || []) {
+        if (item.quantidade_entregue && item.valor_unitario_cotado && item.maior_valor_cotado) {
+          const diferenca = Number(item.maior_valor_cotado) - Number(item.valor_unitario_cotado);
+          economiaReal += diferenca * Number(item.quantidade_entregue);
+        }
+      }
+
+      // Atualizar pedido com economia real e status entregue
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update({ 
+          economia_real: economiaReal,
+          status: 'entregue'
+        })
+        .eq('id', pedidoId);
+
+      if (orderError) throw orderError;
+
+      return { economiaReal };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      toast({
+        title: "Entrega registrada!",
+        description: data.economiaReal > 0 
+          ? `Economia real calculada: R$ ${data.economiaReal.toFixed(2)}`
+          : "Quantidades atualizadas com sucesso",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível registrar a entrega",
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     pedidos,
     isLoading,
     error,
     deletePedido: deleteMutation.mutate,
     updatePedidoStatus: updateStatusMutation.mutate,
-    isUpdating: updateStatusMutation.isPending,
+    updateQuantidadeEntregue: updateQuantidadeEntregueMutation.mutateAsync,
+    isUpdating: updateStatusMutation.isPending || updateQuantidadeEntregueMutation.isPending,
     refetch: async () => {
       await refetch();
     },

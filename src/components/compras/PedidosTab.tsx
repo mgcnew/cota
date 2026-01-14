@@ -8,13 +8,14 @@ import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { Table, TableCell, TableRow } from "@/components/ui/table";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, Building2, CircleDot, Info } from "lucide-react";
+import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, Building2, CircleDot, Info, TrendingDown, ClipboardCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
-import { usePedidos } from "@/hooks/usePedidos";
+import { RegistrarEntregaDialog } from "@/components/forms/RegistrarEntregaDialog";
+import { usePedidos, type Pedido } from "@/hooks/usePedidos";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -33,6 +34,10 @@ interface OrderData {
   detalhesItens: Array<{ produto: string; quantidade: number; valorUnitario: number }>;
   supplier_id: string | null;
   delivery_date: string | null;
+  quote_id: string | null;
+  economia_estimada: number;
+  economia_real: number;
+  _raw?: Pedido; // Referência ao pedido original
 }
 
 function PedidosTab() {
@@ -47,7 +52,9 @@ function PedidosTab() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [pedidoDialogOpen, setPedidoDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entregaDialogOpen, setEntregaDialogOpen] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState<OrderData | null>(null);
+  const [selectedPedidoRaw, setSelectedPedidoRaw] = useState<Pedido | null>(null);
 
   // Ouvir evento de atalho de teclado para novo pedido
   useEffect(() => {
@@ -77,7 +84,11 @@ function PedidosTab() {
         valorUnitario: Number(item.unit_price)
       })) || [],
       supplier_id: order.supplier_id || null,
-      delivery_date: order.delivery_date
+      delivery_date: order.delivery_date,
+      quote_id: order.quote_id || null,
+      economia_estimada: order.economia_estimada || 0,
+      economia_real: order.economia_real || 0,
+      _raw: order,
     }));
   }, [pedidosDataArray]);
 
@@ -100,10 +111,18 @@ function PedidosTab() {
       const cleanValue = p.total.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
       return acc + (parseFloat(cleanValue) || 0);
     }, 0);
+    
+    // Economia real (pedidos entregues que vieram de cotação)
+    const economiaReal = pedidos
+      .filter(p => p.status === "entregue" && p.quote_id)
+      .reduce((sum, p) => sum + (p.economia_real || 0), 0);
+    
     return {
       pedidosAtivos,
       pedidosEntregues,
-      totalValueFormatado: totalValue > 0 ? totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'
+      totalValueFormatado: totalValue > 0 ? totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
+      economiaReal,
+      economiaRealFormatada: economiaReal > 0 ? `R$ ${economiaReal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : 'R$ 0'
     };
   }, [pedidos]);
 
@@ -117,15 +136,22 @@ function PedidosTab() {
     setDeleteDialogOpen(true);
   }, []);
 
+  const handleRegistrarEntrega = useCallback((pedido: OrderData) => {
+    setSelectedPedido(pedido);
+    setSelectedPedidoRaw(pedido._raw || null);
+    setEntregaDialogOpen(true);
+  }, []);
+
   if (isLoading) return <div className="flex items-center justify-center py-12"><p className="text-muted-foreground">Carregando...</p></div>;
 
   return (
     <div className="space-y-4">
       {/* Metrics */}
-      <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 3 }}>
+      <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
         <MetricCard title="Ativos" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
         <MetricCard title="Entregues" value={stats.pedidosEntregues} icon={Truck} variant="success" />
         <MetricCard title="Total" value={stats.totalValueFormatado} icon={DollarSign} variant="info" className="hidden md:block" />
+        <MetricCard title="Economia Real" value={stats.economiaRealFormatada} icon={TrendingDown} variant="success" className="hidden md:block" />
       </ResponsiveGrid>
 
       {/* Filters & Actions */}
@@ -166,6 +192,11 @@ function PedidosTab() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => handleManagePedido(pedido)}><ShoppingCart className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
+                  {pedido.status !== "entregue" && pedido.status !== "cancelado" && (
+                    <DropdownMenuItem onClick={() => handleRegistrarEntrega(pedido)} className="text-emerald-600">
+                      <ClipboardCheck className="h-4 w-4 mr-2" />Registrar Entrega
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="text-red-600"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
                 </DropdownMenuContent>
@@ -294,6 +325,11 @@ function PedidosTab() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleManagePedido(pedido)}><ShoppingCart className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
+                          {pedido.status !== "entregue" && pedido.status !== "cancelado" && (
+                            <DropdownMenuItem onClick={() => handleRegistrarEntrega(pedido)} className="text-emerald-600">
+                              <ClipboardCheck className="h-4 w-4 mr-2" />Registrar Entrega
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="text-red-600"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
                         </DropdownMenuContent>
@@ -331,6 +367,11 @@ function PedidosTab() {
           <DeletePedidoDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} pedido={selectedPedido} onDelete={() => { refetch(); setDeleteDialogOpen(false); }} />
         </>
       )}
+      <RegistrarEntregaDialog 
+        open={entregaDialogOpen} 
+        onOpenChange={setEntregaDialogOpen} 
+        pedido={selectedPedidoRaw} 
+      />
     </div>
   );
 }

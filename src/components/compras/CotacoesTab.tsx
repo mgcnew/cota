@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, startTransition, memo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
+import { usePedidos } from "@/hooks/usePedidos";
 import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -10,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusSelect, QUOTE_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
-import { FileText, Plus, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ClipboardList, Eye, Package, CircleDot, Info, CheckCircle2, AlertTriangle, ShoppingCart } from "lucide-react";
+import { FileText, Plus, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ClipboardList, Eye, Package, CircleDot, Info, CheckCircle2, AlertTriangle, ShoppingCart, TrendingDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -44,6 +45,7 @@ function CotacoesTab() {
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
   const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, convertToOrder, addQuoteItem, removeQuoteItem, addQuoteSupplier, removeQuoteSupplier, updateQuoteStatus, isUpdating } = useCotacoes();
+  const { pedidos } = usePedidos();
   
   // Derive selectedQuote from cotacoes to ensure real-time updates
   const selectedQuote = useMemo(() => {
@@ -158,21 +160,29 @@ function CotacoesTab() {
       return dataFim <= em48h && dataFim >= hoje;
     }).length;
     
-    let economiaTotal = 0;
-    cotacoes.forEach(c => { 
-      if (c.fornecedoresParticipantes?.length >= 2) { 
-        const vals = c.fornecedoresParticipantes.map(f => f.valorOferecido || 0).filter(v => v > 0); 
-        if (vals.length >= 2) economiaTotal += Math.max(...vals) - Math.min(...vals); 
-      } 
-    });
+    // Calcular economia dos pedidos que vieram de cotações
+    const pedidosDeCotacao = pedidos.filter(p => p.quote_id);
+    
+    // Economia REAL = soma de economia_real dos pedidos entregues
+    const economiaReal = pedidosDeCotacao
+      .filter(p => p.status === 'entregue')
+      .reduce((sum, p) => sum + (p.economia_real || 0), 0);
+    
+    // Economia ESTIMADA = soma de economia_estimada de todos os pedidos de cotação
+    const economiaEstimada = pedidosDeCotacao
+      .reduce((sum, p) => sum + (p.economia_estimada || 0), 0);
+    
     return { 
       ativas, 
       pendentes,
       prontasParaDecisao,
       vencendo,
-      economiaFormatada: economiaTotal > 0 ? `R$ ${economiaTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : "R$ 0"
+      economiaReal,
+      economiaEstimada,
+      economiaRealFormatada: economiaReal > 0 ? `R$ ${economiaReal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : "R$ 0",
+      economiaEstimadaFormatada: economiaEstimada > 0 ? `R$ ${economiaEstimada.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : "R$ 0"
     };
-  }, [cotacoes]);
+  }, [cotacoes, pedidos]);
 
   if (isLoading) return <div className="flex items-center justify-center py-12"><p className="text-muted-foreground">Carregando...</p></div>;
   
@@ -199,7 +209,17 @@ function CotacoesTab() {
           onClick={() => setStatusFilter("vencendo")}
           className="cursor-pointer hover:ring-2 hover:ring-amber-300"
         />
-        <MetricCard title="Economia" value={stats.economiaFormatada} icon={DollarSign} variant="success" className="hidden md:block" />
+        <MetricCard 
+          title="Economia Real" 
+          value={stats.economiaRealFormatada} 
+          icon={TrendingDown} 
+          variant="success"
+          trend={{
+            value: stats.economiaEstimadaFormatada,
+            label: "estimada",
+            type: "neutral"
+          }}
+        />
       </ResponsiveGrid>
 
       {/* Filters & Actions */}
