@@ -2143,11 +2143,11 @@
     border-color: hsl(var(--border)) !important;
   }
   
-  /* Header da tabela */
+  /* Header da tabela - MESMO tom das linhas para efeito flutuante */
   .dark th,
   .dark .table-modern th,
   .dark thead {
-    background-color: hsl(var(--secondary)) !important;
+    background-color: transparent !important;
     color: hsl(220 15% 75%);
     font-weight: 500;
     border-bottom-color: hsl(var(--border));
@@ -2160,23 +2160,31 @@
     color: hsl(220 15% 82%);
   }
   
-  /* Hover nas linhas */
-  .dark tbody tr:hover,
-  .dark .table-modern tbody tr:hover {
+  /* IMPORTANTE: Remover hover da TableRow para tabelas com cards flutuantes */
+  /* O hover deve ser aplicado apenas no card interno (div), não na linha */
+  .dark tbody tr.border-none:hover,
+  .dark .table-modern tbody tr.border-none:hover {
+    background-color: transparent !important;
+  }
+  
+  /* Hover apenas para tabelas tradicionais (sem cards flutuantes) */
+  .dark tbody tr:not(.border-none):hover,
+  .dark .table-modern tbody tr:not(.border-none):hover {
     background-color: hsl(var(--accent));
   }
   
-  /* Linhas como cards (novo padrão visual) */
-  .dark .bg-card\/90,
-  .dark [class*="bg-card"] {
+  /* Header customizado das tabelas (card flutuante) - MESMO tom das linhas */
+  .dark .bg-card\/95 {
     background-color: hsl(var(--card)) !important;
   }
   
-  /* Linhas alternadas - REMOVIDO para manter consistência */
-  /* Todas as linhas usam o mesmo background */
+  /* Cards flutuantes dentro das linhas */
+  .dark .bg-card\/90 {
+    background-color: hsl(var(--card)) !important;
+  }
   
-  /* Header customizado das tabelas (novo padrão) */
-  .dark .bg-card\/95 {
+  /* Hover nos cards flutuantes - muda apenas a borda */
+  .dark .bg-card\/90:hover {
     background-color: hsl(var(--card)) !important;
   }
   
@@ -2185,10 +2193,10 @@
     border-color: hsl(var(--border)) !important;
   }
   
-  /* Hover nas linhas de tabela (cards) */
+  /* Hover nas bordas dos cards flutuantes */
   .dark .hover\:border-purple-300\/50:hover,
   .dark .hover\:border-teal-300\/50:hover {
-    border-color: hsl(262 40% 35%) !important;
+    border-color: hsl(262 40% 40%) !important;
   }
   
   /* === INPUTS E FORMS DARK MODE === */
@@ -2426,26 +2434,6 @@
   
   .dark [class*="Progress"] > div {
     background-color: hsl(var(--primary));
-  }
-  
-  /* === GRAY BACKGROUNDS DARK MODE === */
-  /* Corrigir backgrounds cinza que ficam diferentes */
-  .dark .bg-gray-50,
-  .dark .bg-gray-100 {
-    background-color: hsl(var(--secondary)) !important;
-  }
-  
-  .dark .bg-gray-800\/50,
-  .dark .dark\:bg-gray-800\/50 {
-    background-color: hsl(var(--card)) !important;
-  }
-  
-  .dark .dark\:bg-gray-700\/50 {
-    background-color: hsl(var(--accent)) !important;
-  }
-  
-  .dark .dark\:bg-gray-700\/30 {
-    background-color: hsl(var(--border)) !important;
   }
 }
 

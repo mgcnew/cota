@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
@@ -75,7 +75,7 @@ export function AppLayout() {
   }, []);
 
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await signOut();
       toast({
@@ -90,7 +90,7 @@ export function AppLayout() {
         variant: "destructive",
       });
     }
-  };
+  }, [signOut, toast, navigate]);
 
   return (
     <div className="min-h-screen w-full bg-background overflow-x-hidden">

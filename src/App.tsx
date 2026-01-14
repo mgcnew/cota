@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { useEffect, lazy, Suspense, ReactNode } from "react";
@@ -12,6 +12,7 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import { initScrollbarFix } from "./utils/scrollbar-fix";
+import { queryClient } from "./lib/queryClient";
 
 /**
  * All pages are lazy loaded for code splitting (Requirements 12.1, 12.2)
@@ -51,19 +52,6 @@ const PageLoader = () => (
 const PageWrapper = ({ children }: { children: ReactNode }) => (
   <ErrorBoundary>{children}</ErrorBoundary>
 );
-
-// QueryClient configuração padrão
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60000,
-      gcTime: 600000,
-      retry: 3,
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-    },
-  },
-});
 
 const App = () => {
   useEffect(() => {
