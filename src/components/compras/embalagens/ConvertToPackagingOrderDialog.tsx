@@ -53,28 +53,84 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     return respondedSuppliers.find(f => f.supplierId === selectedSupplierId);
   }, [respondedSuppliers, selectedSupplierId]);
 
-  // Calcular total do pedido
+  // Calcular itens ganhos por fornecedor baseado no custo por unidade
+  const winningItemsBySupplier = useMemo(() => {
+    if (!quote) return {};
+    
+    const wins: Record<string, string[]> = {}; // supplierId -> [packagingId, ...]
+    
+    // Para cada item da cotação, encontrar o fornecedor com menor custo por unidade
+    quote.itens.forEach(item => {
+      let bestSupplierId: string | null = null;
+      let bestCostPerUnit = Infinity;
+      
+      respondedSuppliers.forEach(fornecedor => {
+        const supplierItem = fornecedor.itens.find(
+          si => si.packagingId === item.packagingId
+        );
+        
+        if (!supplierItem || !supplierItem.valorTotal || supplierItem.valorTotal <= 0) return;
+        
+        // Usar custoPorUnidade se disponível, senão calcular
+        const costPerUnit = supplierItem.custoPorUnidade && supplierItem.custoPorUnidade > 0
+          ? supplierItem.custoPorUnidade
+          : (supplierItem.quantidadeUnidadesEstimada && supplierItem.quantidadeUnidadesEstimada > 0
+              ? supplierItem.valorTotal / supplierItem.quantidadeUnidadesEstimada
+              : supplierItem.valorTotal); // Se não tem quantidade, usa o valor total como fallback
+        
+        if (costPerUnit > 0 && costPerUnit < bestCostPerUnit) {
+          bestCostPerUnit = costPerUnit;
+          bestSupplierId = fornecedor.supplierId;
+        }
+      });
+      
+      if (bestSupplierId) {
+        if (!wins[bestSupplierId]) wins[bestSupplierId] = [];
+        wins[bestSupplierId].push(item.packagingId);
+      }
+    });
+    
+    return wins;
+  }, [quote, respondedSuppliers]);
+
+  // Itens que o fornecedor selecionado ganhou
+  const supplierWinningItems = useMemo(() => {
+    if (!selectedSupplier) return [];
+    
+    const winningPackagingIds = winningItemsBySupplier[selectedSupplier.supplierId] || [];
+    
+    return selectedSupplier.itens.filter(item => 
+      winningPackagingIds.includes(item.packagingId) &&
+      item.valorTotal && item.valorTotal > 0
+    );
+  }, [selectedSupplier, winningItemsBySupplier]);
+
+  // Calcular total do pedido baseado apenas nos itens ganhos
   const orderTotal = useMemo(() => {
     if (!selectedSupplier) return 0;
     
-    return selectedSupplier.itens.reduce((sum, item) => {
+    return supplierWinningItems.reduce((sum, item) => {
       const qty = quantities[item.packagingId] || 1;
       return sum + (qty * (item.valorTotal || 0));
     }, 0);
-  }, [selectedSupplier, quantities]);
+  }, [supplierWinningItems, quantities]);
 
-  // Encontrar melhor fornecedor por custo total
+  // Encontrar fornecedor com mais itens ganhos
   const bestSupplierId = useMemo(() => {
     if (respondedSuppliers.length === 0) return null;
     
-    let best = respondedSuppliers[0];
-    respondedSuppliers.forEach(s => {
-      if (s.custoTotalEstimado < best.custoTotalEstimado && s.custoTotalEstimado > 0) {
-        best = s;
+    let bestId: string | null = null;
+    let maxWins = 0;
+    
+    Object.entries(winningItemsBySupplier).forEach(([supplierId, items]) => {
+      if (items.length > maxWins) {
+        maxWins = items.length;
+        bestId = supplierId;
       }
     });
-    return best.supplierId;
-  }, [respondedSuppliers]);
+    
+    return bestId;
+  }, [respondedSuppliers, winningItemsBySupplier]);
 
   const handleQuantityChange = (packagingId: string, value: string) => {
     const qty = parseInt(value) || 1;
@@ -89,18 +145,17 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
   };
 
   const handleSubmit = async () => {
-    if (!selectedSupplier || !deliveryDate || !quote) return;
+    if (!selectedSupplier || !deliveryDate || !quote || supplierWinningItems.length === 0) return;
 
-    const itens: OrderItem[] = selectedSupplier.itens
-      .filter(item => item.valorTotal && item.valorTotal > 0)
-      .map(item => ({
-        packagingId: item.packagingId,
-        packagingName: item.packagingName,
-        quantidade: quantities[item.packagingId] || 1,
-        unidadeCompra: item.unidadeVenda || 'un',
-        quantidadePorUnidade: item.quantidadeVenda || undefined,
-        valorUnitario: item.valorTotal || 0,
-      }));
+    // Criar pedido apenas com os itens que o fornecedor ganhou
+    const itens: OrderItem[] = supplierWinningItems.map(item => ({
+      packagingId: item.packagingId,
+      packagingName: item.packagingName,
+      quantidade: quantities[item.packagingId] || 1,
+      unidadeCompra: item.unidadeVenda || 'un',
+      quantidadePorUnidade: item.quantidadeVenda || undefined,
+      valorUnitario: item.valorTotal || 0,
+    }));
 
     await createOrderFromQuote.mutateAsync({
       quoteId: quote.id,
@@ -169,7 +224,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                           <Building2 className="h-5 w-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium text-sm truncate">{fornecedor.supplierName}</p>
                             {isBest && (
                               <Badge className="bg-green-100 text-green-700 border-green-200 text-[10px]">
@@ -178,7 +233,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            Total estimado: R$ {fornecedor.custoTotalEstimado.toFixed(2)}
+                            Ganhou {winningItemsBySupplier[fornecedor.supplierId]?.length || 0} de {quote.itens.length} itens
                           </p>
                         </div>
                         {isSelected && <Check className="h-5 w-5 text-purple-600" />}
@@ -189,48 +244,70 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
               )}
             </div>
 
-            {/* Itens e Quantidades */}
+            {/* Itens e Quantidades (apenas itens ganhos) */}
             {selectedSupplier && (
               <div className="space-y-3">
                 <Label className="text-sm font-medium flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Itens e Quantidades
+                  Itens Ganhos ({supplierWinningItems.length})
                 </Label>
                 
-                <div className="space-y-2">
-                  {selectedSupplier.itens
-                    .filter(item => item.valorTotal && item.valorTotal > 0)
-                    .map((item) => (
-                      <Card key={item.id} className="overflow-hidden">
-                        <CardContent className="p-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">{item.packagingName}</p>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <span>R$ {item.valorTotal?.toFixed(2)}</span>
-                                {item.unidadeVenda && (
-                                  <span>/ {item.unidadeVenda}</span>
-                                )}
-                                {item.quantidadeVenda && (
-                                  <span>({item.quantidadeVenda} un)</span>
-                                )}
+                {supplierWinningItems.length === 0 ? (
+                  <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
+                    <div className="flex items-center gap-2 text-amber-700">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-sm">
+                        Este fornecedor não tem o melhor preço por unidade em nenhum item desta cotação.
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <ScrollArea className="max-h-[200px]">
+                    <div className="space-y-2 pr-2">
+                      {supplierWinningItems.map((item) => {
+                        // Calcular custo por unidade para exibição
+                        const costPerUnit = item.custoPorUnidade && item.custoPorUnidade > 0
+                          ? item.custoPorUnidade
+                          : (item.quantidadeUnidadesEstimada && item.quantidadeUnidadesEstimada > 0
+                              ? (item.valorTotal || 0) / item.quantidadeUnidadesEstimada
+                              : null);
+
+                        return (
+                          <Card key={item.id} className="overflow-hidden">
+                            <CardContent className="p-3">
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{item.packagingName}</p>
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                                    <span>R$ {item.valorTotal?.toFixed(2)}</span>
+                                    {item.unidadeVenda && (
+                                      <span>/ {item.unidadeVenda}</span>
+                                    )}
+                                    {costPerUnit && (
+                                      <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200">
+                                        R$ {costPerUnit.toFixed(4)}/un
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Label className="text-xs text-muted-foreground">Qtd:</Label>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={quantities[item.packagingId] || 1}
+                                    onChange={(e) => handleQuantityChange(item.packagingId, e.target.value)}
+                                    className="w-20 h-8 text-center"
+                                  />
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Label className="text-xs text-muted-foreground">Qtd:</Label>
-                              <Input
-                                type="number"
-                                min="1"
-                                value={quantities[item.packagingId] || 1}
-                                onChange={(e) => handleQuantityChange(item.packagingId, e.target.value)}
-                                className="w-20 h-8 text-center"
-                              />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
+                )}
               </div>
             )}
 
@@ -285,7 +362,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!selectedSupplierId || !deliveryDate || createOrderFromQuote.isPending}
+            disabled={!selectedSupplierId || !deliveryDate || supplierWinningItems.length === 0 || createOrderFromQuote.isPending}
             className="bg-purple-600 hover:bg-purple-700"
           >
             {createOrderFromQuote.isPending ? (
