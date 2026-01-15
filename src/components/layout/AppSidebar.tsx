@@ -342,7 +342,7 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden fixed top-3 left-3 z-50 h-11 w-11 rounded-lg bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 shadow-sm active:scale-95 transition-transform duration-100"
+            className="md:hidden fixed top-2 left-2.5 z-50 h-10 w-10 rounded-lg bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 shadow-sm active:scale-95 transition-transform duration-100"
           >
             <Menu className="h-5 w-5" />
           </Button>

@@ -116,7 +116,7 @@ export function AppLayout() {
 
           <div className="relative z-10 flex items-center h-full px-2 sm:px-4 md:px-6 w-full max-w-full gap-2 sm:gap-3 md:gap-4 transition-opacity duration-150 md:transition-all md:duration-150">
             {/* Mobile: Espaço para menu hamburger (esquerda) */}
-            <div className="md:hidden w-10 flex-shrink-0" />
+            <div className="md:hidden w-12 flex-shrink-0" />
 
             {/* AI Search - Centralizada no desktop, escondida no mobile */}
             <div className="flex-1 hidden md:flex items-center justify-center min-w-0">
