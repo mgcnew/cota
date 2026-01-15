@@ -28,6 +28,21 @@ Após análise minuciosa do código, identifiquei os seguintes problemas crític
 - Touch targets mínimos de 44px
 - GPU acceleration para elementos animados
 
+### 5. **TRAVAMENTO DO SCROLL NO MOBILE** - CORRIGIDO (15/01/2026)
+**Problema**: Páginas de Produtos, Fornecedores, Cotações e Pedidos travavam durante scroll rápido. Só destravava ao clicar no menu hamburguer. Página de Anotações NÃO travava.
+
+**Causa Raiz**: Componentes do Radix UI (DropdownMenu, Select) usavam `modal={true}` por padrão, o que bloqueava o scroll do body quando abertos. Durante scroll rápido, o dedo podia passar por cima de um botão de dropdown e abrir brevemente, bloqueando o scroll.
+
+**Correções**:
+- `DropdownMenu`: Agora usa `modal={false}` no mobile para não bloquear scroll
+- `Select`: Wrapper para não bloquear scroll no mobile
+- `ExpandableSearch`: Event listeners agora usam `passive: true`
+- `useInactivityDetector`: Event listeners agora usam `passive: true`
+- CSS: Regras mais agressivas para garantir scroll no mobile:
+  - `touch-action: pan-y pinch-zoom` para html/body
+  - Regras específicas para Radix UI popovers
+  - Prevenir `data-scroll-locked` de bloquear scroll
+
 ---
 
 ## 🟡 OTIMIZAÇÕES JÁ EXISTENTES NO CÓDIGO
@@ -67,7 +82,7 @@ Após análise minuciosa do código, identifiquei os seguintes problemas crític
 ## Arquivos Modificados
 
 1. ✅ `src/index.css` - CSS de performance mobile
-2. ✅ `src/components/ui/sheet.tsx` - Animações otimizadas
+2. ✅ `src/components/ui/sheet.tsx` - Animações otimizadas, modal=false no mobile
 3. ✅ `src/components/ui/dialog.tsx` - Sem backdrop-blur, animações rápidas
 4. ✅ `src/components/ui/drawer.tsx` - GPU acceleration
 5. ✅ `src/components/layout/AppLayout.tsx` - Sem blur no mobile
@@ -75,6 +90,10 @@ Após análise minuciosa do código, identifiquei os seguintes problemas crític
 7. ✅ `src/components/responsive/ResponsiveModal.tsx` - Scroll otimizado
 8. ✅ `src/pages/Dashboard.tsx` - Usa ResponsiveModal
 9. ✅ `src/components/ui/responsive-dialog.tsx` - NOVO componente
+10. ✅ `src/components/ui/dropdown-menu.tsx` - modal=false no mobile
+11. ✅ `src/components/ui/select.tsx` - Wrapper para não bloquear scroll
+12. ✅ `src/components/ui/expandable-search.tsx` - Event listeners passivos
+13. ✅ `src/hooks/useInactivityDetector.ts` - Event listeners passivos
 
 ---
 
@@ -85,3 +104,4 @@ Após análise minuciosa do código, identifiquei os seguintes problemas crític
 - [x] Modais com drawer no mobile (Dashboard)
 - [x] Touch targets de 44px
 - [x] Animações mais rápidas no mobile
+- [x] Scroll não trava mais durante scroll rápido
