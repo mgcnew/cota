@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
@@ -11,11 +12,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -72,7 +73,7 @@ export default function EditSupplierDialog({
   onOpenChange,
   onEdit,
 }: EditSupplierDialogProps) {
-  const isMobile = false; // Removida dependência mobile
+  const isMobile = useIsMobile();
   const scrollPositionRef = useRef<number>(0);
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
@@ -286,20 +287,20 @@ export default function EditSupplierDialog({
     </Form>
   );
 
-  // Mobile: Usar Sheet (bottom sheet)
+  // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
-          <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0">
+          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
                   <Building2 className="h-5 w-5" />
                 </div>
-                <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
                   Editar Fornecedor
-                </SheetTitle>
+                </DrawerTitle>
               </div>
               <Button
                 type="button"
@@ -311,12 +312,12 @@ export default function EditSupplierDialog({
                 <X className="h-5 w-5" />
               </Button>
             </div>
-          </SheetHeader>
+          </DrawerHeader>
           <div className="flex flex-col flex-1 overflow-hidden">
             {formContent}
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 

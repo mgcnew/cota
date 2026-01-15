@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
@@ -13,12 +14,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -61,7 +62,7 @@ interface AddSupplierDialogProps {
 }
 
 export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogProps) {
-  const isMobile = false; // Removida dependência mobile
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const scrollPositionRef = useRef<number>(0);
   const { logActivity } = useActivityLog();
@@ -381,28 +382,28 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
     </Form>
   );
 
-  // Mobile: Usar Sheet (bottom sheet)
+  // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetTrigger asChild>
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerTrigger asChild>
           {trigger || (
             <Button className="gradient-primary">
               <Plus className="h-4 w-4 mr-2" />
               Novo Fornecedor
             </Button>
           )}
-        </SheetTrigger>
-        <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
-          <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+        </DrawerTrigger>
+        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0">
+          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
                   <Plus className="h-5 w-5" />
                 </div>
-                <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
                   Novo Fornecedor
-                </SheetTitle>
+                </DrawerTitle>
               </div>
               <Button
                 type="button"
@@ -414,12 +415,12 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                 <X className="h-5 w-5" />
               </Button>
             </div>
-          </SheetHeader>
+          </DrawerHeader>
           <div className="flex flex-col flex-1 overflow-hidden">
             {formContent}
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
