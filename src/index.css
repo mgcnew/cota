@@ -211,11 +211,15 @@
   }
   
   html {
-    scroll-behavior: smooth;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -ms-overflow-style: none !important;
     scrollbar-width: none !important;
+  }
+  
+  /* Smooth scroll apenas para navegação por âncoras, não para scroll normal */
+  html:focus-within {
+    scroll-behavior: smooth;
   }
   
   /* ============================================
@@ -230,11 +234,6 @@
     .backdrop-blur-md {
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
-    }
-    
-    /* Faster transitions on mobile */
-    * {
-      transition-duration: 150ms !important;
     }
     
     /* Disable hover effects on touch devices */
@@ -254,11 +253,11 @@
       }
     }
     
-    /* Optimize scroll containers */
+    /* Optimize scroll containers - CRITICAL for mobile scroll */
     .overflow-y-auto,
     .overflow-auto {
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
+      overscroll-behavior-y: contain;
     }
     
     /* GPU layer for sidebar/sheet */
@@ -278,6 +277,24 @@
     
     button:not(.btn-icon):not([class*="h-6"]):not([class*="h-7"]):not([class*="w-6"]):not([class*="w-7"]) {
       min-height: 44px;
+    }
+  }
+  
+  /* Fix para scroll travando no mobile - garantir que body nunca trave */
+  @media (max-width: 767px) {
+    html, body {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      height: auto !important;
+      position: relative !important;
+      touch-action: pan-y !important;
+    }
+    
+    /* Prevenir que modais travem o scroll do body */
+    body[data-scroll-locked="true"],
+    body[style*="overflow: hidden"] {
+      overflow-y: auto !important;
+      position: relative !important;
     }
   }
 

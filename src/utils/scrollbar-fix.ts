@@ -1,10 +1,22 @@
 /**
- * Scrollbar Layout Shift Fix
- * Prevents layout shift when dropdowns/modals open and hide the scrollbar
+ * Scrollbar Layout Shift Fix - Simplified Version
+ * 
+ * Versão simplificada que não usa MutationObserver para evitar
+ * problemas de performance no mobile.
  */
 
 export function initScrollbarFix() {
-  // Calculate scrollbar width
+  // No mobile, não precisamos de fix de scrollbar
+  if (typeof window === 'undefined') return () => {};
+  
+  const isMobile = window.innerWidth < 768;
+  if (isMobile) {
+    // No mobile, apenas garantir que não há padding-right indesejado
+    document.body.style.paddingRight = '';
+    return () => {};
+  }
+
+  // Calculate scrollbar width apenas no desktop
   const getScrollbarWidth = () => {
     const outer = document.createElement('div');
     outer.style.visibility = 'hidden';
@@ -22,56 +34,9 @@ export function initScrollbarFix() {
     return scrollbarWidth;
   };
 
-  // Check if scrollbars are forced to always be visible
-  const forceScrollbars = () => {
-    const htmlStyle = getComputedStyle(document.documentElement);
-    const bodyStyle = getComputedStyle(document.body);
-    return (htmlStyle.overflowY === 'scroll' || htmlStyle.overflow === 'scroll') &&
-           (bodyStyle.overflowY === 'scroll' || bodyStyle.overflow === 'scroll');
-  };
-
   // Set CSS variable with scrollbar width
   const scrollbarWidth = getScrollbarWidth();
   document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
 
-  // Observer to watch for scroll-lock changes
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === 'style' || mutation.attributeName === 'data-scroll-locked') {
-        const body = document.body;
-        const html = document.documentElement;
-        
-        // Check if body scroll is locked (by Radix UI or other libraries)
-        const isLocked = 
-          body.style.overflow === 'hidden' || 
-          body.style.overflowY === 'hidden' ||
-          html.style.overflow === 'hidden' ||
-          body.hasAttribute('data-scroll-locked');
-
-        if (isLocked) {
-          // Só aplicar padding se scrollbar não estiver forçado a sempre visível
-          if (!forceScrollbars()) {
-            body.style.paddingRight = `${scrollbarWidth}px`;
-          } else {
-            body.style.paddingRight = '';
-          }
-        } else {
-          body.style.paddingRight = '';
-        }
-      }
-    });
-  });
-
-  // Start observing
-  observer.observe(document.body, {
-    attributes: true,
-    attributeFilter: ['style', 'data-scroll-locked', 'class']
-  });
-
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['style', 'class']
-  });
-
-  return () => observer.disconnect();
+  return () => {};
 }

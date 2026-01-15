@@ -2,10 +2,21 @@ import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
-);
+// Drawer wrapper que não bloqueia scroll no mobile
+const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
+  const isMobile = useIsMobile();
+  
+  return (
+    <DrawerPrimitive.Root 
+      shouldScaleBackground={shouldScaleBackground}
+      // No mobile, usar modal=false para não bloquear scroll do body
+      modal={!isMobile}
+      {...props} 
+    />
+  );
+};
 Drawer.displayName = "Drawer";
 
 const DrawerTrigger = DrawerPrimitive.Trigger;

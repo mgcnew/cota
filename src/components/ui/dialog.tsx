@@ -3,8 +3,26 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const Dialog = DialogPrimitive.Root;
+// Dialog wrapper que não bloqueia scroll no mobile
+const Dialog = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>
+>(({ children, ...props }, ref) => {
+  const isMobile = useIsMobile();
+  
+  return (
+    <DialogPrimitive.Root 
+      // No mobile, usar modal=false para não bloquear scroll do body
+      modal={!isMobile}
+      {...props}
+    >
+      {children}
+    </DialogPrimitive.Root>
+  );
+});
+Dialog.displayName = "Dialog";
 
 const DialogTrigger = DialogPrimitive.Trigger;
 

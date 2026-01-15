@@ -4,8 +4,26 @@ import { X } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const Sheet = SheetPrimitive.Root;
+// Sheet wrapper que não bloqueia scroll no mobile
+const Sheet = React.forwardRef<
+  React.ElementRef<typeof SheetPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Root>
+>(({ children, ...props }, ref) => {
+  const isMobile = useIsMobile();
+  
+  return (
+    <SheetPrimitive.Root 
+      // No mobile, usar modal=false para não bloquear scroll do body
+      modal={!isMobile}
+      {...props}
+    >
+      {children}
+    </SheetPrimitive.Root>
+  );
+});
+Sheet.displayName = "Sheet";
 
 const SheetTrigger = SheetPrimitive.Trigger;
 
