@@ -18,7 +18,7 @@ import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { 
   Package, Plus, Trash2, DollarSign, 
   Building2, MoreVertical, Eye, CheckCircle2,
-  PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3, TrendingDown
+  PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3, TrendingDown, Calculator
 } from "lucide-react";
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
@@ -35,7 +35,8 @@ import {
   ConvertToPackagingOrderDialog,
   PackagingQuotesTable,
   PackagingOrdersTab,
-  PackagingAnalysisTab
+  PackagingAnalysisTab,
+  PackagingEconomyTab
 } from "./embalagens";
 
 function EmbalagensTab() {
@@ -181,6 +182,10 @@ function EmbalagensTab() {
             <TabsTrigger value="analise" className="gap-2">
               <BarChart3 className="h-4 w-4" />
               Análise
+            </TabsTrigger>
+            <TabsTrigger value="economia" className="gap-2">
+              <Calculator className="h-4 w-4" />
+              Economia
             </TabsTrigger>
           </TabsList>
 
@@ -407,6 +412,13 @@ function EmbalagensTab() {
         <TabsContent value="analise" className="mt-4" forceMount>
           <div className={activeSubTab !== "analise" ? "hidden" : ""}>
             <PackagingAnalysisTab />
+          </div>
+        </TabsContent>
+
+        {/* Tab: Economia */}
+        <TabsContent value="economia" className="mt-4" forceMount>
+          <div className={activeSubTab !== "economia" ? "hidden" : ""}>
+            <PackagingEconomyTab />
           </div>
         </TabsContent>
       </Tabs>

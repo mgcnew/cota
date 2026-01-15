@@ -123,56 +123,56 @@ export default function ListaCompras() {
 
   return (
     <PageWrapper>
-      <div className="page-container space-y-6">
+      <div className="page-container space-y-4 sm:space-y-6">
         {/* Stats Cards - Cores Sólidas */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {/* Total de Itens - Azul (informação) */}
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <Package className="w-5 h-5" />
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Package className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.total}</p>
-                <p className="text-xs text-white/80">Itens na lista</p>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold">{stats.total}</p>
+                <p className="text-[10px] sm:text-xs text-white/80">Itens</p>
               </div>
             </div>
           </div>
 
           {/* Urgentes - Vermelho (alerta crítico) */}
-          <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <span className="text-lg font-bold">!</span>
+          <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-base sm:text-lg font-bold">!</span>
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.urgent}</p>
-                <p className="text-xs text-white/80">Urgentes</p>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold">{stats.urgent}</p>
+                <p className="text-[10px] sm:text-xs text-white/80">Urgentes</p>
               </div>
             </div>
           </div>
 
           {/* Alta Prioridade - Âmbar (atenção) */}
-          <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <span className="text-lg font-bold">↑</span>
+          <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-base sm:text-lg font-bold">↑</span>
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.high}</p>
-                <p className="text-xs text-white/80">Alta prioridade</p>
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold">{stats.high}</p>
+                <p className="text-[10px] sm:text-xs text-white/80">Alta</p>
               </div>
             </div>
           </div>
 
           {/* Total Estimado - Verde (dinheiro) */}
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <span className="text-sm font-bold">R$</span>
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg sm:rounded-xl p-3 sm:p-4 text-white">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs sm:text-sm font-bold">R$</span>
               </div>
-              <div>
-                <p className="text-2xl font-bold">
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold truncate">
                   {stats.estimatedTotal.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
@@ -180,7 +180,7 @@ export default function ListaCompras() {
                     maximumFractionDigits: 0,
                   })}
                 </p>
-                <p className="text-xs text-white/80">Total estimado</p>
+                <p className="text-[10px] sm:text-xs text-white/80">Total</p>
               </div>
             </div>
           </div>
@@ -194,23 +194,24 @@ export default function ListaCompras() {
           actions={
             <Button
               onClick={() => setShowAddDialog(true)}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 h-10 text-sm"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Adicionar Produto
+              <span className="hidden sm:inline">Adicionar Produto</span>
+              <span className="sm:hidden">Adicionar</span>
             </Button>
           }
         />
 
         {/* Search and Controls */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="flex flex-col gap-3 items-stretch sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Buscar produtos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white dark:bg-gray-800/50"
+              className="pl-10 h-10 text-sm"
             />
             {searchQuery && (
               <button
@@ -222,7 +223,7 @@ export default function ListaCompras() {
             )}
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
             {filteredItems.length > 0 && (
               <Badge variant="secondary" className="text-xs">
                 {filteredItems.length} {filteredItems.length === 1 ? "item" : "itens"}
@@ -236,44 +237,45 @@ export default function ListaCompras() {
         {selectedItems.size > 0 && (
           <div
             className={cn(
-              "p-4 rounded-xl border animate-in fade-in slide-in-from-top-2",
+              "p-3 sm:p-4 rounded-lg sm:rounded-xl border animate-in fade-in slide-in-from-top-2",
               "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800"
             )}
           >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">
                     {selectedItems.size}
                   </span>
                 </div>
-                <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                <span className="text-xs sm:text-sm font-medium text-blue-900 dark:text-blue-100">
                   {selectedItems.size === 1 ? "item selecionado" : "itens selecionados"}
                 </span>
                 <button
                   onClick={clearSelection}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline ml-auto sm:ml-0"
                 >
-                  Limpar seleção
+                  Limpar
                 </button>
               </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-2 w-full">
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={handleDeleteSelected}
-                  className="flex-1 sm:flex-none border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                  className="flex-1 border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 h-9 text-xs"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Remover
+                  <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                  <span className="hidden sm:inline">Remover</span>
                 </Button>
                 <Button
                   size="sm"
                   onClick={handleCreateOrder}
-                  className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 h-9 text-xs"
                 >
-                  <PackagePlus className="h-4 w-4 mr-2" />
-                  Criar Pedido
+                  <PackagePlus className="h-3.5 w-3.5 mr-1.5" />
+                  <span className="hidden sm:inline">Criar Pedido</span>
+                  <span className="sm:hidden">Pedido</span>
                 </Button>
               </div>
             </div>
