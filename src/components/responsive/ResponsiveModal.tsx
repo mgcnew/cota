@@ -77,6 +77,7 @@ const maxWidthClasses = {
  * - Applies max-height of 85vh on mobile to avoid status bar overlap
  * - Includes drag indicator on mobile Drawer
  * - Supports internal scroll for extensive content
+ * - GPU-accelerated animations for smooth performance
  * 
  * @example
  * ```tsx
@@ -115,14 +116,14 @@ export function ResponsiveModal({
           className={cn(
             // Max height of 85vh to avoid status bar overlap (Requirement 1.3)
             mobileFullHeight ? "max-h-[85vh]" : "max-h-[85vh]",
-            "overflow-hidden flex flex-col",
+            "overflow-hidden flex flex-col will-change-transform",
             className
           )}
         >
           {/* Drag indicator is included by default in DrawerContent */}
           {/* The DrawerContent already has a drag indicator built-in */}
           
-          <DrawerHeader className="text-left">
+          <DrawerHeader className="text-left flex-shrink-0">
             <DrawerTitle>{title}</DrawerTitle>
             {description && (
               <DrawerDescription>{description}</DrawerDescription>
@@ -130,12 +131,12 @@ export function ResponsiveModal({
           </DrawerHeader>
           
           {/* Scrollable content area (Requirement 1.4) */}
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
             {children}
           </div>
           
           {footer && (
-            <DrawerFooter className="pt-2">
+            <DrawerFooter className="pt-2 flex-shrink-0 border-t border-border">
               {footer}
             </DrawerFooter>
           )}
@@ -160,7 +161,7 @@ export function ResponsiveModal({
           )}
         </DialogHeader>
         
-        <div className="overflow-y-auto">
+        <div className="overflow-y-auto overscroll-contain">
           {children}
         </div>
         

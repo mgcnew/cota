@@ -102,7 +102,7 @@ export function AppLayout() {
         {/* Header Fixo Minimalista */}
         <header
           className={cn(
-            "fixed top-0.5 right-0.5 left-0.5 md:right-0.5 z-40 h-14 bg-card/80 backdrop-blur-xl border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-300 ease-in-out",
+            "fixed top-0.5 right-0.5 left-0.5 md:right-0.5 z-40 h-14 bg-card/95 md:bg-card/80 md:backdrop-blur-xl border border-sidebar-border shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 rounded-xl transition-all duration-150 md:duration-300 ease-in-out",
             isSidebarExpanded ? "md:left-[16.5rem]" : "md:left-[5.5rem]"
           )}
         >

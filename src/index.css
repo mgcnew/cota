@@ -206,6 +206,8 @@
     overflow-x: hidden !important;
     -ms-overflow-style: none !important;
     scrollbar-width: none !important;
+    /* Mobile performance: prevent layout thrashing */
+    -webkit-overflow-scrolling: touch;
   }
   
   html {
@@ -214,6 +216,69 @@
     overflow-x: hidden !important;
     -ms-overflow-style: none !important;
     scrollbar-width: none !important;
+  }
+  
+  /* ============================================
+     MOBILE PERFORMANCE OPTIMIZATIONS
+     ============================================ */
+  
+  /* GPU acceleration for animated elements */
+  @media (max-width: 767px) {
+    /* Disable heavy effects on mobile */
+    .backdrop-blur-xl,
+    .backdrop-blur-lg,
+    .backdrop-blur-md {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    
+    /* Faster transitions on mobile */
+    * {
+      transition-duration: 150ms !important;
+    }
+    
+    /* Disable hover effects on touch devices */
+    @media (hover: none) {
+      .hover\:scale-102:hover,
+      .hover\:scale-105:hover,
+      .hover\:-translate-y-1:hover,
+      .hover\:-translate-y-0\.5:hover,
+      .hover\:translate-x-0\.5:hover {
+        transform: none !important;
+      }
+      
+      .hover\:shadow-lg:hover,
+      .hover\:shadow-xl:hover,
+      .hover\:shadow-md:hover {
+        box-shadow: var(--shadow-soft) !important;
+      }
+    }
+    
+    /* Optimize scroll containers */
+    .overflow-y-auto,
+    .overflow-auto {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    
+    /* GPU layer for sidebar/sheet */
+    [data-state="open"],
+    [data-state="closed"] {
+      will-change: transform, opacity;
+      transform: translateZ(0);
+    }
+  }
+  
+  /* Touch target minimum size (44px) */
+  @media (max-width: 767px) {
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    button:not(.btn-icon):not([class*="h-6"]):not([class*="h-7"]):not([class*="w-6"]):not([class*="w-7"]) {
+      min-height: 44px;
+    }
   }
 
   body::-webkit-scrollbar,

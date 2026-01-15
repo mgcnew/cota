@@ -342,14 +342,14 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden fixed top-3 left-3 z-50 h-10 w-10 rounded-lg bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 shadow-sm active:scale-95 transition-transform"
+            className="md:hidden fixed top-3 left-3 z-50 h-11 w-11 rounded-lg bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 shadow-sm active:scale-95 transition-transform duration-100"
           >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="p-0 w-[280px] border-r border-subtle bg-card"
+          className="p-0 w-[280px] border-r border-subtle bg-card will-change-transform"
         >
           <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
           <SheetDescription className="sr-only">
