@@ -12,7 +12,9 @@ import {
   ClipboardList,
   CheckCircle2,
   AlertTriangle,
-  ArrowRight
+  ArrowRight,
+  Calendar,
+  Bell
 } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
@@ -24,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/responsive/ResponsiveModal';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Lazy load charts
 const EvolutionChart = lazy(() => import('@/components/dashboard/EvolutionChart').then(m => ({ default: m.EvolutionChart })));
@@ -36,6 +39,7 @@ const ChartSkeleton = () => (
 
 function Dashboard() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [activityOpen, setActivityOpen] = useState(false);
   const [chartPeriod, setChartPeriod] = useState('7d');
   
@@ -307,93 +311,222 @@ function Dashboard() {
         )}
 
         {/* Layout Principal: Gráficos + Atividades */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna dos Gráficos (2/3 da largura) */}
-          <div className="lg:col-span-2 space-y-6">
-            <Suspense fallback={<ChartSkeleton />}>
-              <EvolutionChart data={dailyData} period={chartPeriod} onPeriodChange={setChartPeriod} isLoading={false} />
-            </Suspense>
+        {/* Desktop: Gráficos + Atividades lado a lado */}
+        {/* Mobile: Apenas Atividades e Ações Rápidas (sem gráficos) */}
+        
+        {isMobile ? (
+          /* ========== MOBILE LAYOUT ========== */
+          <div className="space-y-4">
+            {/* Ações Rápidas Mobile */}
+            <Card className="p-4 border border-border bg-card">
+              <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                <Bell className="w-4 h-4 text-primary" />
+                Ações Rápidas
+              </h2>
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+                  onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
+                >
+                  <ClipboardList className="h-5 w-5 text-teal-600" />
+                  <span>Nova Cotação</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+                  onClick={() => navigate('/dashboard/compras?tab=pedidos')}
+                >
+                  <ShoppingCart className="h-5 w-5 text-orange-600" />
+                  <span>Novo Pedido</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+                  onClick={() => navigate('/dashboard/produtos')}
+                >
+                  <Package className="h-5 w-5 text-amber-600" />
+                  <span>Produtos</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+                  onClick={() => navigate('/dashboard/fornecedores')}
+                >
+                  <Users className="h-5 w-5 text-purple-600" />
+                  <span>Fornecedores</span>
+                </Button>
+              </div>
+            </Card>
 
-            <Suspense fallback={<ChartSkeleton />}>
-              <EconomyChart data={economyData} period={chartPeriod} onPeriodChange={setChartPeriod} isLoading={false} />
-            </Suspense>
-          </div>
-
-          {/* Card de Últimas Atividades (1/3 da largura) */}
-          <div className="lg:col-span-1">
-            <Card className="h-full border border-border bg-card shadow-sm flex flex-col">
-              <div className="p-4 border-b border-border flex-shrink-0">
+            {/* Atividades Recentes Mobile */}
+            <Card className="border border-border bg-card">
+              <div className="p-4 border-b border-border">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-                    <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-sm">
-                      <Clock className="w-4 h-4 text-white" />
-                    </div>
-                    Últimas Atividades
+                  <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-violet-600" />
+                    Atividades Recentes
                   </h2>
                   <button 
                     onClick={() => setActivityOpen(true)}
-                    className="text-xs text-primary font-medium hover:underline"
+                    className="text-xs text-primary font-medium"
                   >
                     Ver todas
                   </button>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {/* Seção de Cotações */}
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                    <ClipboardList className="w-3.5 h-3.5" /> Cotações Recentes
-                  </h3>
-                  <div className="space-y-2">
-                    {recentQuotes.slice(0, 4).map((quote: any) => (
-                      <div key={`q-${quote.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/40 flex-shrink-0">
-                          <ClipboardList className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                        </div>
-                        <div className="flex-1 min-w-0 overflow-hidden">
-                          <p className="text-sm font-medium text-foreground truncate" title={quote.product}>{quote.product}</p>
-                          <p className="text-xs text-muted-foreground truncate" title={`${quote.supplier} • ${quote.bestPrice}`}>{quote.supplier} • {quote.bestPrice}</p>
-                        </div>
-                        <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", statusColors[quote.status] || 'bg-muted-foreground')} />
-                      </div>
-                    ))}
-                    {recentQuotes.length === 0 && (
-                      <p className="text-xs text-muted-foreground text-center py-3">Nenhuma cotação recente</p>
-                    )}
+              <div className="p-3 space-y-2">
+                {/* Cotações Recentes */}
+                {recentQuotes.slice(0, 3).map((quote: any) => (
+                  <div key={`q-${quote.id}`} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 active:bg-muted">
+                    <div className="p-1.5 rounded-lg bg-teal-100 dark:bg-teal-900/40">
+                      <ClipboardList className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{quote.product}</p>
+                      <p className="text-xs text-muted-foreground truncate">{quote.supplier} • {quote.bestPrice}</p>
+                    </div>
+                    <div className={cn("w-2 h-2 rounded-full", statusColors[quote.status] || 'bg-muted-foreground')} />
                   </div>
+                ))}
+
+                {/* Pedidos Recentes */}
+                {recentOrders.slice(0, 3).map((order) => (
+                  <div key={`o-${order.id}`} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 active:bg-muted">
+                    <div className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/40">
+                      <ShoppingCart className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{order.supplier}</p>
+                      <p className="text-xs text-muted-foreground truncate">{order.items} itens • {order.total}</p>
+                    </div>
+                    <div className={cn("w-2 h-2 rounded-full", statusColors[order.status] || 'bg-muted-foreground')} />
+                  </div>
+                ))}
+
+                {recentQuotes.length === 0 && recentOrders.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">Nenhuma atividade recente</p>
+                )}
+              </div>
+            </Card>
+
+            {/* Resumo do Período Mobile */}
+            <Card className="p-4 border border-border bg-card">
+              <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-blue-600" />
+                Resumo do Período
+              </h2>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b border-border/50">
+                  <span className="text-sm text-muted-foreground">Total em Cotações</span>
+                  <span className="text-sm font-semibold text-foreground">{metrics.cotacoesAtivas} ativas</span>
                 </div>
-
-                {/* Divider */}
-                <div className="border-t border-border my-3" />
-
-                {/* Seção de Pedidos */}
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                    <ShoppingCart className="w-3.5 h-3.5" /> Pedidos Recentes
-                  </h3>
-                  <div className="space-y-2">
-                    {recentOrders.slice(0, 4).map((order) => (
-                      <div key={`o-${order.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/40 flex-shrink-0">
-                          <ShoppingCart className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                        </div>
-                        <div className="flex-1 min-w-0 overflow-hidden">
-                          <p className="text-sm font-medium text-foreground truncate" title={order.supplier}>{order.supplier}</p>
-                          <p className="text-xs text-muted-foreground truncate" title={`${order.items} itens • ${order.total}`}>{order.items} itens • {order.total}</p>
-                        </div>
-                        <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", statusColors[order.status] || 'bg-muted-foreground')} />
-                      </div>
-                    ))}
-                    {recentOrders.length === 0 && (
-                      <p className="text-xs text-muted-foreground text-center py-3">Nenhum pedido recente</p>
-                    )}
-                  </div>
+                <div className="flex items-center justify-between py-2 border-b border-border/50">
+                  <span className="text-sm text-muted-foreground">Aprovações</span>
+                  <span className="text-sm font-semibold text-emerald-600">{metrics.aprovacoesTotal} no período</span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-border/50">
+                  <span className="text-sm text-muted-foreground">Economia Gerada</span>
+                  <span className="text-sm font-semibold text-emerald-600">{formatCurrency(metrics.economiaGerada)}</span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-muted-foreground">Economia Potencial</span>
+                  <span className="text-sm font-semibold text-blue-600">{formatCurrency(metrics.economiaPotencial)}</span>
                 </div>
               </div>
             </Card>
           </div>
-        </div>
+        ) : (
+          /* ========== DESKTOP LAYOUT ========== */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Coluna dos Gráficos (2/3 da largura) */}
+            <div className="lg:col-span-2 space-y-6">
+              <Suspense fallback={<ChartSkeleton />}>
+                <EvolutionChart data={dailyData} period={chartPeriod} onPeriodChange={setChartPeriod} isLoading={false} />
+              </Suspense>
+
+              <Suspense fallback={<ChartSkeleton />}>
+                <EconomyChart data={economyData} period={chartPeriod} onPeriodChange={setChartPeriod} isLoading={false} />
+              </Suspense>
+            </div>
+
+            {/* Card de Últimas Atividades (1/3 da largura) */}
+            <div className="lg:col-span-1">
+              <Card className="h-full border border-border bg-card shadow-sm flex flex-col">
+                <div className="p-4 border-b border-border flex-shrink-0">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                      <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-sm">
+                        <Clock className="w-4 h-4 text-white" />
+                      </div>
+                      Últimas Atividades
+                    </h2>
+                    <button 
+                      onClick={() => setActivityOpen(true)}
+                      className="text-xs text-primary font-medium hover:underline"
+                    >
+                      Ver todas
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {/* Seção de Cotações */}
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                      <ClipboardList className="w-3.5 h-3.5" /> Cotações Recentes
+                    </h3>
+                    <div className="space-y-2">
+                      {recentQuotes.slice(0, 4).map((quote: any) => (
+                        <div key={`q-${quote.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                          <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/40 flex-shrink-0">
+                            <ClipboardList className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                          </div>
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <p className="text-sm font-medium text-foreground truncate" title={quote.product}>{quote.product}</p>
+                            <p className="text-xs text-muted-foreground truncate" title={`${quote.supplier} • ${quote.bestPrice}`}>{quote.supplier} • {quote.bestPrice}</p>
+                          </div>
+                          <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", statusColors[quote.status] || 'bg-muted-foreground')} />
+                        </div>
+                      ))}
+                      {recentQuotes.length === 0 && (
+                        <p className="text-xs text-muted-foreground text-center py-3">Nenhuma cotação recente</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-border my-3" />
+
+                  {/* Seção de Pedidos */}
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                      <ShoppingCart className="w-3.5 h-3.5" /> Pedidos Recentes
+                    </h3>
+                    <div className="space-y-2">
+                      {recentOrders.slice(0, 4).map((order) => (
+                        <div key={`o-${order.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                          <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/40 flex-shrink-0">
+                            <ShoppingCart className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                          </div>
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <p className="text-sm font-medium text-foreground truncate" title={order.supplier}>{order.supplier}</p>
+                            <p className="text-xs text-muted-foreground truncate" title={`${order.items} itens • ${order.total}`}>{order.items} itens • {order.total}</p>
+                          </div>
+                          <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", statusColors[order.status] || 'bg-muted-foreground')} />
+                        </div>
+                      ))}
+                      {recentOrders.length === 0 && (
+                        <p className="text-xs text-muted-foreground text-center py-3">Nenhum pedido recente</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
 
         {/* Modal de Atividades Completo - Usa Drawer no mobile */}
         <ResponsiveModal 

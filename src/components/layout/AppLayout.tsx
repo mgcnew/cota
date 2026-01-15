@@ -2,7 +2,7 @@ import { useState, useEffect, memo, useCallback } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
-import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3 } from "lucide-react";
+import { Settings, LogOut, Package, Building2, FileText, ShoppingCart, ClipboardList, BookOpen, History, TrendingUp, BarChart3, MessageSquareText } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -118,12 +118,15 @@ export function AppLayout() {
             {/* Mobile: Espaço para menu hamburger (esquerda) */}
             <div className="md:hidden w-10 flex-shrink-0" />
 
-            {/* AI Search - Centralizada e responsiva */}
-            <div className="flex-1 flex items-center justify-center min-w-0">
+            {/* AI Search - Centralizada no desktop, escondida no mobile */}
+            <div className="flex-1 hidden md:flex items-center justify-center min-w-0">
               <div className="w-full max-w-md md:max-w-xl lg:max-w-2xl">
                 <AIGlobalSearchTrigger onClick={() => setAiSearchOpen(true)} />
               </div>
             </div>
+            
+            {/* Mobile: Espaço central vazio para manter layout */}
+            <div className="flex-1 md:hidden" />
 
             {/* Action Buttons - Sempre à direita */}
             <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 flex-shrink-0">
@@ -143,6 +146,23 @@ export function AppLayout() {
                     </TooltipTrigger>
                     <TooltipContent side="bottom">
                       <p>Alternar tema</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  {/* Mobile: Botão de IA compacto ao lado do tema */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setAiSearchOpen(true)}
+                        className="md:hidden p-0 rounded-lg h-9 w-9 hover:bg-violet-50 dark:hover:bg-violet-950/20 transition-all duration-200 text-violet-600 dark:text-violet-400"
+                      >
+                        <MessageSquareText className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Assistente IA</p>
                     </TooltipContent>
                   </Tooltip>
 
