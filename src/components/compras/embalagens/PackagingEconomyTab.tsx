@@ -227,94 +227,84 @@ export function PackagingEconomyTab() {
       {selectedQuoteData && (
         <>
           {/* Resumo Geral */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Card do Vencedor */}
             <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Award className="h-5 w-5 text-green-600" />
-                    <CardTitle className="text-sm">Vencedor</CardTitle>
+                    <CardTitle className="text-sm">🏆 Fornecedor Vencedor</CardTitle>
                   </div>
-                  <Badge className="bg-green-600 text-white">1º</Badge>
+                  <Badge className="bg-green-600 text-white">Melhor Escolha</Badge>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="font-semibold text-green-900 dark:text-green-100 truncate">
+                <p className="font-semibold text-green-900 dark:text-green-100 text-lg truncate">
                   {selectedQuoteData.winner.name}
                 </p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">
-                  R$ {selectedQuoteData.winner.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {selectedQuoteData.winner.items} itens cotados
-                </p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Custo Total:</span>
+                    <span className="text-xl font-bold text-green-600 dark:text-green-400">
+                      R$ {selectedQuoteData.winner.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Itens cotados:</span>
+                    <span className="text-sm font-medium">{selectedQuoteData.winner.items} itens</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="border-orange-200 dark:border-orange-800 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20">
+            {/* Card de Economia Total */}
+            <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <TrendingDown className="h-5 w-5 text-orange-600" />
-                    <CardTitle className="text-sm">Economia vs 2º</CardTitle>
-                  </div>
-                  {selectedQuoteData.secondPlace && (
-                    <Badge variant="secondary">2º</Badge>
-                  )}
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="h-5 w-5 text-purple-600" />
+                  <CardTitle className="text-sm">💰 Economia Total Obtida</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
-                {selectedQuoteData.secondPlace ? (
-                  <>
-                    <p className="font-semibold text-orange-900 dark:text-orange-100 truncate">
-                      {selectedQuoteData.secondPlace.name}
-                    </p>
-                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-2">
-                      R$ {selectedQuoteData.economyVsSecond.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs text-muted-foreground mb-3">
+                  Ao escolher {selectedQuoteData.winner.name}, você economizou:
+                </p>
+                
+                {selectedQuoteData.secondPlace && (
+                  <div className="mb-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-orange-700 dark:text-orange-400">
+                        vs {selectedQuoteData.secondPlace.name} (2º lugar)
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                        R$ {selectedQuoteData.economyVsSecond.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
                       <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
                         {selectedQuoteData.economyPercentVsSecond.toFixed(1)}%
                       </Badge>
-                      <span className="text-xs text-muted-foreground">de economia</span>
                     </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Apenas 1 fornecedor cotou</p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-200 dark:border-red-800 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Percent className="h-5 w-5 text-red-600" />
-                    <CardTitle className="text-sm">Economia Total</CardTitle>
                   </div>
-                  {selectedQuoteData.worstPrice && (
-                    <Badge variant="destructive">Pior</Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {selectedQuoteData.worstPrice && selectedQuoteData.allSuppliers.length > 1 ? (
-                  <>
-                    <p className="font-semibold text-red-900 dark:text-red-100 truncate">
-                      vs {selectedQuoteData.worstPrice.name}
-                    </p>
-                    <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-2">
-                      R$ {selectedQuoteData.economyVsWorst.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
+                )}
+
+                {selectedQuoteData.worstPrice && selectedQuoteData.allSuppliers.length > 1 && (
+                  <div className="p-3 bg-white dark:bg-gray-800/50 rounded-lg">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-red-700 dark:text-red-400">
+                        vs {selectedQuoteData.worstPrice.name} (pior preço)
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-red-600 dark:text-red-400">
+                        R$ {selectedQuoteData.economyVsWorst.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
                       <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
                         {selectedQuoteData.economyPercentVsWorst.toFixed(1)}%
                       </Badge>
-                      <span className="text-xs text-muted-foreground">de economia</span>
                     </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Apenas 1 fornecedor cotou</p>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -401,22 +391,37 @@ export function PackagingEconomyTab() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-blue-600" />
-                Insights de Economia
+                📊 Resumo da Análise
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
+                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium">✅ Melhor Escolha</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    <span className="font-semibold text-green-600">{selectedQuoteData.winner.name}</span> ofereceu 
+                    o melhor custo por unidade na maioria dos itens, resultando no menor custo total de{" "}
+                    <span className="font-semibold">
+                      R$ {selectedQuoteData.winner.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>.
+                  </p>
+                </div>
+              </div>
+
               {selectedQuoteData.secondPlace && (
                 <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
-                  <CheckCircle2 className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <TrendingDown className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium">Economia Inteligente</p>
+                    <p className="text-sm font-medium">💡 Comparação com 2º Lugar</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Ao escolher {selectedQuoteData.winner.name} em vez do segundo colocado (
-                      {selectedQuoteData.secondPlace.name}), você economizou{" "}
+                      Se você tivesse escolhido <span className="font-semibold">{selectedQuoteData.secondPlace.name}</span>, 
+                      gastaria <span className="font-semibold">
+                        R$ {selectedQuoteData.secondPlace.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>. Ao escolher {selectedQuoteData.winner.name}, você economizou{" "}
                       <span className="font-semibold text-orange-600">
                         R$ {selectedQuoteData.economyVsSecond.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                      {" "}({selectedQuoteData.economyPercentVsSecond.toFixed(1)}%).
+                      </span> ({selectedQuoteData.economyPercentVsSecond.toFixed(1)}%).
                     </p>
                   </div>
                 </div>
@@ -424,15 +429,17 @@ export function PackagingEconomyTab() {
 
               {selectedQuoteData.worstPrice && selectedQuoteData.allSuppliers.length > 2 && (
                 <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
-                  <TrendingDown className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <Percent className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium">Máxima Economia</p>
+                    <p className="text-sm font-medium">🎯 Economia Máxima</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Comparado com a pior oferta ({selectedQuoteData.worstPrice.name}), você economizou{" "}
+                      A pior oferta foi de <span className="font-semibold">{selectedQuoteData.worstPrice.name}</span> com 
+                      custo total de <span className="font-semibold">
+                        R$ {selectedQuoteData.worstPrice.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>. Comparado a ela, você economizou{" "}
                       <span className="font-semibold text-red-600">
                         R$ {selectedQuoteData.economyVsWorst.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                      {" "}({selectedQuoteData.economyPercentVsWorst.toFixed(1)}%).
+                      </span> ({selectedQuoteData.economyPercentVsWorst.toFixed(1)}%).
                     </p>
                   </div>
                 </div>
@@ -441,10 +448,11 @@ export function PackagingEconomyTab() {
               <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
                 <Package className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Competitividade</p>
+                  <p className="text-sm font-medium">📦 Metodologia</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Esta cotação teve {selectedQuoteData.allSuppliers.length} fornecedor(es) participante(s), 
-                    garantindo preços competitivos através da concorrência.
+                    Os valores são calculados com base no <span className="font-semibold">custo por unidade</span> de 
+                    cada item multiplicado pela quantidade necessária, garantindo comparação justa independente 
+                    da quantidade por pacote oferecida por cada fornecedor.
                   </p>
                 </div>
               </div>
