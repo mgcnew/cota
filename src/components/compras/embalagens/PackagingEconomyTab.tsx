@@ -86,19 +86,38 @@ export function PackagingEconomyTab() {
       }
     });
 
-    // Calcular totais por fornecedor (soma dos valores totais dos itens)
+    // Calcular totais por fornecedor baseado no CUSTO POR UNIDADE (não no valor do pacote)
+    // Isso garante comparação justa independente da quantidade por pacote
     const supplierTotals = new Map<string, { name: string; total: number; items: number }>();
     
-    Object.values(itemAnalysis).forEach(analysis => {
-      const best = analysis.best;
-      const current = supplierTotals.get(best.supplierId) || { 
-        name: best.supplierName, 
-        total: 0, 
-        items: 0 
-      };
-      current.total += best.valorTotal;
-      current.items += 1;
-      supplierTotals.set(best.supplierId, current);
+    // Para cada fornecedor, somar o custo real baseado no melhor preço por unidade de cada item
+    respondedSuppliers.forEach(fornecedor => {
+      let totalCost = 0;
+      let itemCount = 0;
+
+      quote.itens.forEach(item => {
+        const analysis = itemAnalysis[item.packagingId];
+        if (!analysis) return;
+
+        // Encontrar o preço deste fornecedor para este item
+        const supplierPrice = analysis.allPrices.find(p => p.supplierId === fornecedor.supplierId);
+        if (!supplierPrice) return;
+
+        // Usar a quantidade necessária (se disponível) ou 1 como padrão
+        const quantidadeNecessaria = item.quantidadeNecessaria || 1;
+        
+        // Calcular custo real: custo por unidade × quantidade necessária
+        totalCost += supplierPrice.costPerUnit * quantidadeNecessaria;
+        itemCount += 1;
+      });
+
+      if (itemCount > 0) {
+        supplierTotals.set(fornecedor.supplierId, {
+          name: fornecedor.supplierName,
+          total: totalCost,
+          items: itemCount
+        });
+      }
     });
 
     // Ordenar fornecedores por total (menor para maior)
@@ -112,17 +131,24 @@ export function PackagingEconomyTab() {
     const secondPlace = sortedSuppliers[1];
     const worstPrice = sortedSuppliers[sortedSuppliers.length - 1];
 
-    // Calcular economia: soma das economias de cada item
+    // Calcular economia: soma das economias de cada item baseado no custo por unidade
     let economyVsSecond = 0;
     let economyVsWorst = 0;
 
-    Object.values(itemAnalysis).forEach(analysis => {
-      // Economia vs segundo melhor
+    Object.entries(itemAnalysis).forEach(([packagingId, analysis]) => {
+      // Encontrar a quantidade necessária para este item
+      const item = quote.itens.find(i => i.packagingId === packagingId);
+      const quantidadeNecessaria = item?.quantidadeNecessaria || 1;
+
+      // Economia vs segundo melhor (baseado no custo por unidade)
       if (analysis.second) {
-        economyVsSecond += analysis.second.valorTotal - analysis.best.valorTotal;
+        const diffPerUnit = analysis.second.costPerUnit - analysis.best.costPerUnit;
+        economyVsSecond += diffPerUnit * quantidadeNecessaria;
       }
-      // Economia vs pior
-      economyVsWorst += analysis.worst.valorTotal - analysis.best.valorTotal;
+      
+      // Economia vs pior (baseado no custo por unidade)
+      const diffPerUnit = analysis.worst.costPerUnit - analysis.best.costPerUnit;
+      economyVsWorst += diffPerUnit * quantidadeNecessaria;
     });
 
     return {
@@ -343,6 +369,9 @@ export function PackagingEconomyTab() {
                         )}>
                           R$ {supplier.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </p>
+                        <p className="text-xs text-muted-foreground">
+                          Custo total (baseado em custo/unidade)
+                        </p>
                         {!isWinner && diffFromWinner > 0 && (
                           <div className="flex items-center gap-1 justify-end mt-1">
                             <Badge variant="secondary" className="text-xs">
@@ -356,7 +385,7 @@ export function PackagingEconomyTab() {
                         {isWinner && (
                           <Badge className="bg-green-600 text-white mt-1">
                             <Award className="h-3 w-3 mr-1" />
-                            Melhor Preço
+                            Melhor Custo/Unidade
                           </Badge>
                         )}
                       </div>
@@ -500,16 +529,16 @@ export function PackagingEconomyTab() {
                     {analysis.allPrices.length > 1 && (
                       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Economia vs pior preço:</span>
+                          <span className="text-muted-foreground">Economia/unidade vs pior:</span>
                           <span className="font-semibold text-green-600">
-                            R$ {(analysis.worst.valorTotal - analysis.best.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            R$ {(analysis.worst.costPerUnit - analysis.best.costPerUnit).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un
                           </span>
                         </div>
                         {analysis.second && (
                           <div className="flex items-center justify-between text-xs mt-1">
-                            <span className="text-muted-foreground">Economia vs 2º lugar:</span>
+                            <span className="text-muted-foreground">Economia/unidade vs 2º:</span>
                             <span className="font-semibold text-orange-600">
-                              R$ {(analysis.second.valorTotal - analysis.best.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              R$ {(analysis.second.costPerUnit - analysis.best.costPerUnit).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un
                             </span>
                           </div>
                         )}
