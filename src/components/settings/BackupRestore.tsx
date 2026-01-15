@@ -230,46 +230,103 @@ export function BackupRestore() {
 
       let imported = 0;
       let errors = 0;
+      const errorDetails: { table: string; error: string }[] = [];
 
       for (let i = 0; i < importOrder.length; i++) {
         const tableName = importOrder[i];
         const tableData = (backupData.data as any)[tableName];
         const tableInfo = tables.find(t => t.name === tableName);
 
-        if (!tableData || tableData.length === 0) continue;
+        if (!tableData || tableData.length === 0) {
+          console.log(`[IMPORT] Tabela ${tableName} vazia, pulando...`);
+          continue;
+        }
 
         setCurrentStep(`Importando ${tableInfo?.label || tableName}...`);
         setProgress(10 + Math.round(((i + 1) / importOrder.length) * 85));
 
-        // Atualizar company_id para a empresa atual
-        const dataToImport = tableData.map((item: any) => {
-          const newItem = { ...item };
-          if (newItem.company_id) {
-            newItem.company_id = company.id;
-          }
-          // Remover campos que podem causar conflito
-          delete newItem.created_at;
-          delete newItem.updated_at;
-          return newItem;
-        });
+        // Atualizar company_id para a empresa atual e validar dados
+        const dataToImport = tableData
+          .map((item: any) => {
+            const newItem = { ...item };
+            
+            // Garantir que company_id está correto
+            if (newItem.company_id !== undefined) {
+              newItem.company_id = company.id;
+            }
+            
+            // Remover campos que podem causar conflito
+            delete newItem.created_at;
+            delete newItem.updated_at;
+            
+            return newItem;
+          })
+          .filter((item: any) => {
+            // Filtrar itens sem ID (não podem ser inseridos)
+            if (!item.id) {
+              console.warn(`[IMPORT] Item sem ID em ${tableName}, removendo:`, item);
+              return false;
+            }
+            return true;
+          });
+
+        if (dataToImport.length === 0) {
+          console.log(`[IMPORT] Nenhum item válido em ${tableName}`);
+          continue;
+        }
 
         try {
-          // Usar upsert para evitar duplicatas
-          const { error } = await supabase
-            .from(tableName as any)
-            .upsert(dataToImport, { 
-              onConflict: "id",
-              ignoreDuplicates: false 
-            });
+          console.log(`[IMPORT] Iniciando importação de ${tableName} com ${dataToImport.length} registros`);
+          
+          // Dividir em batches de 100 registros para evitar timeout
+          const batchSize = 100;
+          let successCount = 0;
+          
+          for (let batchIndex = 0; batchIndex < dataToImport.length; batchIndex += batchSize) {
+            const batch = dataToImport.slice(batchIndex, batchIndex + batchSize);
+            console.log(`[IMPORT] Processando batch ${Math.floor(batchIndex / batchSize) + 1}/${Math.ceil(dataToImport.length / batchSize)} de ${tableName}`);
+            
+            // Tentar insert primeiro (mais rápido)
+            const { error: insertError, data: insertData } = await supabase
+              .from(tableName as any)
+              .insert(batch, { 
+                ignoreDuplicates: true 
+              });
 
-          if (error) {
-            console.warn(`Erro ao importar ${tableName}:`, error);
-            errors++;
-          } else {
-            imported += dataToImport.length;
+            if (insertError) {
+              console.warn(`[IMPORT] Insert falhou para batch de ${tableName}, tentando upsert:`, insertError);
+              
+              // Se insert falhar, tentar upsert
+              const { error: upsertError, data: upsertData } = await supabase
+                .from(tableName as any)
+                .upsert(batch, { 
+                  onConflict: "id"
+                });
+
+              if (upsertError) {
+                console.error(`[IMPORT] Erro ao importar batch de ${tableName}:`, upsertError);
+                errorDetails.push({ 
+                  table: `${tableName} (batch ${Math.floor(batchIndex / batchSize) + 1})`, 
+                  error: upsertError.message || JSON.stringify(upsertError) 
+                });
+                errors++;
+              } else {
+                console.log(`[IMPORT] Upsert bem-sucedido para batch de ${tableName}: ${upsertData?.length || 0} registros`);
+                successCount += batch.length;
+              }
+            } else {
+              console.log(`[IMPORT] Insert bem-sucedido para batch de ${tableName}: ${insertData?.length || 0} registros`);
+              successCount += batch.length;
+            }
           }
+          
+          imported += successCount;
         } catch (err) {
-          console.warn(`Erro ao importar ${tableName}:`, err);
+          console.error(`[IMPORT] Erro ao importar ${tableName}:`, err);
+          errorDetails.push({ 
+            table: tableName, 
+            error: err instanceof Error ? err.message : JSON.stringify(err) 
+          });
           errors++;
         }
       }
@@ -278,6 +335,7 @@ export function BackupRestore() {
       setCurrentStep("Importação concluída!");
 
       if (errors > 0) {
+        console.error("[IMPORT] Detalhes dos erros:", errorDetails);
         toast.warning(`Importação concluída com ${errors} erros. ${imported} registros importados.`);
       } else {
         toast.success(`Backup restaurado! ${imported} registros importados.`);
