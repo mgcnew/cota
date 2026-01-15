@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { useKeyboardShortcuts, formatShortcut } from "@/hooks/useKeyboardShortcuts";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Lazy load tab contents for better performance
 const CotacoesTab = lazy(() => import("@/components/compras/CotacoesTab"));
@@ -23,6 +24,7 @@ const TabLoader = () => (
 
 function Compras() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState(() => {
     return searchParams.get("tab") || "cotacoes";
   });
@@ -96,7 +98,8 @@ function Compras() {
       <div className="page-container">
         {/* Tabs minimalistas */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <div className="flex items-center justify-between mb-4">
+          {/* Header - Mobile: empilhado, Desktop: lado a lado */}
+          <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'} mb-4`}>
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg">
                 <ShoppingBag className="h-5 w-5 text-white" />
@@ -107,65 +110,70 @@ function Compras() {
             </div>
             
             <div className="flex items-center gap-2">
-              {/* Indicador de atalhos */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hidden sm:flex">
-                      <Keyboard className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-[200px]">
-                    <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
-                    <ul className="text-xs space-y-1">
-                      {shortcuts.map((s, i) => (
-                        <li key={i} className="flex justify-between gap-3">
-                          <span className="text-muted-foreground">{s.description}</span>
-                          <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
-                        </li>
-                      ))}
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {/* Indicador de atalhos - apenas desktop */}
+              {!isMobile && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                        <Keyboard className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-[200px]">
+                      <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
+                      <ul className="text-xs space-y-1">
+                        {shortcuts.map((s, i) => (
+                          <li key={i} className="flex justify-between gap-3">
+                            <span className="text-muted-foreground">{s.description}</span>
+                            <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
+                          </li>
+                        ))}
+                      </ul>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
               
-              <TabsList className="h-9 p-0.5 bg-muted/60 rounded-lg">
-              <TabsTrigger 
-                value="cotacoes" 
-                className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
-              >
-                <FileText className="h-3.5 w-3.5 mr-1.5" />
-                Cotações
-              </TabsTrigger>
-              <TabsTrigger 
-                value="pedidos"
-                className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
-              >
-                <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-                Pedidos
-              </TabsTrigger>
-              <TabsTrigger 
-                value="lista"
-                className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
-              >
-                <ShoppingBasket className="h-3.5 w-3.5 mr-1.5" />
-                Lista
-              </TabsTrigger>
-              <TabsTrigger 
-                value="embalagens"
-                className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
-              >
-                <Package className="h-3.5 w-3.5 mr-1.5" />
-                Embalagens
-              </TabsTrigger>
-              <TabsTrigger 
-                value="analise"
-                className="h-8 px-3 text-xs font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md"
-              >
-                <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
-                Análise
-              </TabsTrigger>
-            </TabsList>
+              {/* Tabs - Mobile: scroll horizontal, Desktop: inline */}
+              <div className={isMobile ? 'w-full overflow-x-auto scrollbar-hide -mx-1 px-1' : ''}>
+                <TabsList className={`h-9 p-0.5 bg-muted/60 rounded-lg ${isMobile ? 'w-max' : ''}`}>
+                  <TabsTrigger 
+                    value="cotacoes" 
+                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                  >
+                    <FileText className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                    Cotações
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="pedidos"
+                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                  >
+                    <ShoppingCart className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                    Pedidos
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="lista"
+                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                  >
+                    <ShoppingBasket className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                    Lista
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="embalagens"
+                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                  >
+                    <Package className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                    Embalagens
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="analise"
+                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                  >
+                    <BarChart3 className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                    Análise
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </div>
           </div>
 
