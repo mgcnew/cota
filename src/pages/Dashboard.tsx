@@ -21,7 +21,7 @@ import { usePedidos } from '@/hooks/usePedidos';
 import { useCotacoes } from '@/hooks/useCotacoes';
 import { formatCurrency } from '@/utils/formatters';
 import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveModal } from '@/components/responsive/ResponsiveModal';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -395,67 +395,61 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Modal de Atividades Completo */}
-        <Dialog open={activityOpen} onOpenChange={setActivityOpen}>
-          <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
-            <DialogHeader className="pb-3 border-b border-border">
-              <DialogTitle className="flex items-center gap-2 text-lg">
-                <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg">
-                  <Clock className="w-4 h-4 text-white" />
-                </div>
-                Todas as Atividades
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="flex-1 overflow-y-auto py-4 space-y-6">
-              {/* Cotações */}
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                  <ClipboardList className="w-4 h-4" /> Cotações
-                </h3>
-                <div className="space-y-2">
-                  {recentQuotes.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-3 text-center">Nenhuma cotação</p>
-                  ) : (
-                    recentQuotes.map((quote: any) => (
-                      <div key={quote.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", statusColors[quote.status] || 'bg-muted-foreground')} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground">{quote.product}</p>
-                          <p className="text-xs text-muted-foreground">{quote.supplier} • {quote.bestPrice}</p>
-                          <p className="text-xs text-muted-foreground/70 mt-1">{quote.date} • {quote.status}</p>
-                        </div>
+        {/* Modal de Atividades Completo - Usa Drawer no mobile */}
+        <ResponsiveModal 
+          open={activityOpen} 
+          onOpenChange={setActivityOpen}
+          title="Todas as Atividades"
+          desktopMaxWidth="lg"
+        >
+          <div className="space-y-6">
+            {/* Cotações */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                <ClipboardList className="w-4 h-4" /> Cotações
+              </h3>
+              <div className="space-y-2">
+                {recentQuotes.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-3 text-center">Nenhuma cotação</p>
+                ) : (
+                  recentQuotes.map((quote: any) => (
+                    <div key={quote.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 active:bg-muted transition-colors">
+                      <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", statusColors[quote.status] || 'bg-muted-foreground')} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">{quote.product}</p>
+                        <p className="text-xs text-muted-foreground">{quote.supplier} • {quote.bestPrice}</p>
+                        <p className="text-xs text-muted-foreground/70 mt-1">{quote.date} • {quote.status}</p>
                       </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* Pedidos */}
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                  <ShoppingCart className="w-4 h-4" /> Pedidos
-                </h3>
-                <div className="space-y-2">
-                  {recentOrders.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-3 text-center">Nenhum pedido</p>
-                  ) : (
-                    recentOrders.map((order) => (
-                      <div key={order.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                        <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", statusColors[order.status] || 'bg-muted-foreground')} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground">{order.supplier}</p>
-                          <p className="text-xs text-muted-foreground">{order.items} itens • {order.total}</p>
-                          <p className="text-xs text-muted-foreground/70 mt-1">{order.date} • {order.status}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+
+            {/* Pedidos */}
+            <div>
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4" /> Pedidos
+              </h3>
+              <div className="space-y-2">
+                {recentOrders.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-3 text-center">Nenhum pedido</p>
+                ) : (
+                  recentOrders.map((order) => (
+                    <div key={order.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 active:bg-muted transition-colors">
+                      <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", statusColors[order.status] || 'bg-muted-foreground')} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">{order.supplier}</p>
+                        <p className="text-xs text-muted-foreground">{order.items} itens • {order.total}</p>
+                        <p className="text-xs text-muted-foreground/70 mt-1">{order.date} • {order.status}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </ResponsiveModal>
       </div>
     </PageWrapper>
   );
