@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -129,6 +135,7 @@ interface AddQuoteDialogProps {
 }
 
 export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddQuoteDialogProps) {
+  const isMobile = useIsMobile();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
@@ -583,86 +590,79 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     return "pending";
   };
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {trigger && (
-        <DialogTrigger asChild>
-          {trigger}
-        </DialogTrigger>
-      )}
-      <DialogContent 
-        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden"
-        onKeyDown={handleModalKeyDown}
-      >
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center text-white flex-shrink-0">
-                <FileText className="h-4 w-4" />
+  // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
+  const modalInnerContent = (
+    <>
+      <div className={`flex-shrink-0 px-4 ${isMobile ? 'py-4' : 'sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center text-white flex-shrink-0`}>
+              <FileText className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <div className={`${isMobile ? 'text-lg font-bold' : 'text-base sm:text-lg font-semibold'} text-gray-900 dark:text-white truncate`}>
+                Nova Cotação
               </div>
-              
-              <div className="flex-1 min-w-0">
-                <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-                  Nova Cotação
-                </DialogTitle>
-                <DialogDescription className="text-gray-500 dark:text-gray-400 text-xs truncate">
-                  Etapa {currentTabIndex + 1}/{tabs.length}
-                </DialogDescription>
+              <div className="text-gray-500 dark:text-gray-400 text-xs truncate">
+                Etapa {currentTabIndex + 1}/{tabs.length}
               </div>
             </div>
+          </div>
 
-            {/* Navigation Controls */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {currentTabIndex > 0 && (
+          {/* Navigation Controls */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {currentTabIndex > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handlePrevious}
+                className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200 h-8 px-3"
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" />
+                <span className="hidden sm:inline">Voltar</span>
+              </Button>
+            )}
+            
+            {currentTabIndex < tabs.length - 1 ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleNext}
+                disabled={!canProceedToNext()}
+                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
+              >
+                <span className="hidden sm:inline">Próximo</span>
+                <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            ) : (
+              <>
                 <Button
                   type="button"
-                  variant="outline"
                   size="sm"
-                  onClick={handlePrevious}
-                  className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200 h-8 px-3"
-                >
-                  <ChevronLeft className="h-3 w-3 mr-1" />
-                  <span className="hidden sm:inline">Voltar</span>
-                </Button>
-              )}
-              
-              {currentTabIndex < tabs.length - 1 ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleNext}
-                  disabled={!canProceedToNext()}
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    const formElement = document.getElementById('quote-form') as HTMLFormElement;
+                    if (formElement) {
+                      formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    }
+                  }}
                   className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
                 >
-                  <span className="hidden sm:inline">Próximo</span>
-                  <ChevronRight className="h-3 w-3 ml-1" />
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
+                      <span className="hidden sm:inline">Criando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-3 w-3 mr-1" />
+                      <span className="hidden sm:inline">Criar</span>
+                    </>
+                  )}
                 </Button>
-              ) : (
-                <>
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={isSubmitting}
-                    onClick={() => {
-                      const formElement = document.getElementById('quote-form') as HTMLFormElement;
-                      if (formElement) {
-                        formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                      }
-                    }}
-                    className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
-                        <span className="hidden sm:inline">Criando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Check className="h-3 w-3 mr-1" />
-                        <span className="hidden sm:inline">Criar</span>
-                      </>
-                    )}
-                  </Button>
+                {!isMobile && (
                   <Button
                     type="button"
                     size="sm"
@@ -674,80 +674,81 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     <Plus className="h-3 w-3 mr-1" />
                     <span className="hidden sm:inline">Criar Mais</span>
                   </Button>
-                </>
-              )}
-            </div>
-            
-            {/* Close Button */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setOpen(false)}
-              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+                )}
+              </>
+            )}
           </div>
-            
-          {/* Minimal Progress Bar */}
-          <div className="mt-2">
-            <Progress 
-              value={progress} 
-              className="h-1 bg-gray-100 dark:bg-gray-800 [&>div]:bg-teal-600"
-            />
+          
+          {/* Close Button */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setOpen(false)}
+            className={`${isMobile ? 'h-9 w-9 rounded-lg' : 'h-8 w-8'} p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700`}
+          >
+            <X className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
+          </Button>
+        </div>
+          
+        {/* Minimal Progress Bar */}
+        <div className="mt-2">
+          <Progress 
+            value={progress} 
+            className="h-1 bg-gray-100 dark:bg-gray-800 [&>div]:bg-teal-600"
+          />
+        </div>
+      </div>
+      
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin h-12 w-12 border-4 border-teal-200 dark:border-gray-700 border-t-teal-600 dark:border-t-teal-400 rounded-full mx-auto mb-4"></div>
+            <p className="text-sm font-medium text-teal-900 dark:text-teal-100">Carregando dados...</p>
           </div>
-        </DialogHeader>
-        
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin h-12 w-12 border-4 border-teal-200 dark:border-gray-700 border-t-teal-600 dark:border-t-teal-400 rounded-full mx-auto mb-4"></div>
-              <p className="text-sm font-medium text-teal-900 dark:text-teal-100">Carregando dados...</p>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col h-full overflow-hidden">
-            <Form {...form}>
-              <form id="quote-form" onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden">
-                {/* Compact Tab Navigation */}
-                <div className="flex-shrink-0 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                  <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
-                    {tabs.map((tab) => {
-                      const Icon = tab.icon;
-                      const status = getTabStatus(tab.id);
-                      return (
-                        <button
-                          key={tab.id}
-                          type="button"
-                          onClick={() => setActiveTab(tab.id)}
-                          className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap flex-shrink-0",
-                            status === "current" && "bg-teal-600 text-white",
-                            status === "completed" && "bg-green-600 text-white",
-                            status === "pending" && "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+        </div>
+      ) : (
+        <div className="flex flex-col h-full overflow-hidden">
+          <Form {...form}>
+            <form id="quote-form" onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden">
+              {/* Compact Tab Navigation */}
+              <div className="flex-shrink-0 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const status = getTabStatus(tab.id);
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveTab(tab.id)}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap flex-shrink-0",
+                          status === "current" && "bg-teal-600 text-white",
+                          status === "completed" && "bg-green-600 text-white",
+                          status === "pending" && "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                        )}
+                      >
+                        <div className="flex items-center justify-center w-4 h-4">
+                          {status === "completed" ? (
+                            <Check className="h-3 w-3" />
+                          ) : (
+                            <Icon className="h-3 w-3" />
                           )}
-                        >
-                          <div className="flex items-center justify-center w-4 h-4">
-                            {status === "completed" ? (
-                              <Check className="h-3 w-3" />
-                            ) : (
-                              <Icon className="h-3 w-3" />
-                            )}
-                          </div>
-                          
-                          <span className="hidden sm:inline">{tab.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                        </div>
+                        
+                        <span className={isMobile ? '' : 'hidden sm:inline'}>{tab.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
 
-                {/* Content Area - Now with more space */}
-                <div className="flex-1 overflow-hidden">
-                  <AnimatedTabContent
-                    value={activeTab}
-                    activeTab={activeTab}
+              {/* Content Area - Now with more space */}
+              <div className="flex-1 overflow-hidden">
+                <AnimatedTabContent
+                  value={activeTab}
+                  activeTab={activeTab}
                     className="h-full"
                   >
                       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
@@ -1595,6 +1596,38 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             </div>
           </div>
         )}
+      </>
+    );
+
+  // Mobile: Usar Drawer
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        {trigger && (
+          <DrawerTrigger asChild>
+            {trigger}
+          </DrawerTrigger>
+        )}
+        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-900">
+          {modalInnerContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // Desktop: Usar Dialog
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
+      <DialogContent 
+        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden"
+        onKeyDown={handleModalKeyDown}
+      >
+        {modalInnerContent}
       </DialogContent>
     </Dialog>
   );
