@@ -67,6 +67,7 @@ Tooltips não funcionam bem em touch devices e adicionam overhead.
 2. ✅ Remover backdrop-blur no mobile
 3. ✅ Converter Dialog → ResponsiveModal nos componentes principais
 4. ✅ Adicionar CSS de performance mobile
+5. ✅ Criar ResponsiveDialog wrapper para conversão automática
 
 ### Fase 2: Otimizações de Lista
 5. Implementar VirtualList em Produtos
