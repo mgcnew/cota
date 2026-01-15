@@ -10,11 +10,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Form,
@@ -505,20 +505,20 @@ function EditProductDialogInternal({
     </div>
   );
 
-  // Mobile: Usar Sheet (bottom sheet)
+  // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
-          <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0">
+          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
                   <Package className="h-5 w-5" />
                 </div>
-                <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
                   {isLoading ? 'Carregando...' : 'Editar Produto'}
-                </SheetTitle>
+                </DrawerTitle>
               </div>
               <Button
                 type="button"
@@ -530,7 +530,7 @@ function EditProductDialogInternal({
                 <X className="h-5 w-5" />
               </Button>
             </div>
-          </SheetHeader>
+          </DrawerHeader>
           <div className="flex flex-col flex-1 overflow-hidden">
             {isLoading ? (
               <div className="flex items-center justify-center py-12 flex-1">
@@ -540,8 +540,8 @@ function EditProductDialogInternal({
               formContent
             )}
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
