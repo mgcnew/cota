@@ -1,4 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,7 +68,7 @@ import { normalizePrice, PriceMetadata } from "@/utils/priceNormalization";
 
 export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab, readOnly = false, open: externalOpen, onOpenChange: externalOnOpenChange }: ViewQuoteDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const isMobile = false; // Removida dependência mobile
+  const isMobile = useIsMobile();
 
   // Usar controle externo se fornecido, senão usar interno
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -749,103 +751,98 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     });
   };
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {trigger && (
-        <DialogTrigger asChild onClick={() => setOpen(true)}>
-          {trigger}
-        </DialogTrigger>
-      )}
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        {isLoadingQuote ? (
-          <div className="flex flex-col items-center justify-center h-full min-h-[400px] space-y-4">
-            <Loader2 className="h-10 w-10 animate-spin text-teal-600 dark:text-teal-400" />
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Carregando detalhes da cotação...</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Aguarde um momento</p>
-          </div>
-        ) : !currentQuote ? (
-          <div className="flex flex-col items-center justify-center h-full min-h-[400px] space-y-4">
-            <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-400" />
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Erro ao carregar cotação</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Não foi possível carregar os detalhes</p>
-          </div>
-        ) : (
-          <>
-            <DialogHeader className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`${isMobile ? 'w-10 h-10' : 'w-9 h-9'} rounded-lg bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0`}>
-                    {isEditMode ? <Edit3 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} /> : <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />}
-                  </div>
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <DialogTitle className={`${isMobile ? 'text-lg' : 'text-base sm:text-lg'} font-semibold text-gray-900 dark:text-white truncate`}>
-                      {isEditMode ? `Editar Cotação #${currentQuote?.id?.substring(0, 8) || '...'}` : `Cotação #${currentQuote?.id?.substring(0, 8) || '...'}`}
-                    </DialogTitle>
-                    <div className="hidden sm:block">
-                      {currentQuote && getStatusBadge(currentQuote.status)}
-                    </div>
-                  </div>
+  // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
+  const modalInnerContent = (
+    <>
+      {isLoadingQuote ? (
+        <div className="flex flex-col items-center justify-center h-full min-h-[400px] space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-teal-600 dark:text-teal-400" />
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Carregando detalhes da cotação...</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Aguarde um momento</p>
+        </div>
+      ) : !currentQuote ? (
+        <div className="flex flex-col items-center justify-center h-full min-h-[400px] space-y-4">
+          <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-400" />
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Erro ao carregar cotação</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Não foi possível carregar os detalhes</p>
+        </div>
+      ) : (
+        <>
+          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0`}>
+                  {isEditMode ? <Edit3 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} /> : <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />}
                 </div>
-
-                <div className="flex items-center gap-2">
-                  {!isEditMode && currentQuote && currentQuote.status !== "concluida" && !readOnly && (
-                    <>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setWhatsappSendOpen(true)}
-                              className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'} bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900 border-green-200 dark:border-green-800`}
-                            >
-                              <MessageSquare className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5 text-green-600 dark:text-green-400`} />
-                              WhatsApp
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Enviar cotação via WhatsApp</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      {onEdit && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsEditMode(true)}
-                          className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'}`}
-                        >
-                          <Edit3 className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5`} />
-                          Editar
-                        </Button>
-                      )}
-                    </>
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setIsEditMode(false);
-                      setOpen(false);
-                    }}
-                    className={`${isMobile ? 'h-9 w-9' : 'h-8 w-8'} p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700`}
-                  >
-                    <X className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
-                  </Button>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className={`${isMobile ? 'text-lg font-bold' : 'text-base sm:text-lg font-semibold'} text-gray-900 dark:text-white truncate`}>
+                    {isEditMode ? `Editar Cotação #${currentQuote?.id?.substring(0, 8) || '...'}` : `Cotação #${currentQuote?.id?.substring(0, 8) || '...'}`}
+                  </div>
+                  <div className="hidden sm:block">
+                    {currentQuote && getStatusBadge(currentQuote.status)}
+                  </div>
                 </div>
               </div>
-            </DialogHeader>
 
-            <div className="flex flex-col flex-1 overflow-hidden min-h-0">
-              {!currentQuote ? (
-                <div className="flex items-center justify-center h-full">
-                  <Loader2 className="h-8 w-8 animate-spin text-teal-600 dark:text-teal-400" />
-                </div>
-              ) : isEditMode ? (
-                // Modo de Edição (similar ao PedidoDialog)
+              <div className="flex items-center gap-2">
+                {!isEditMode && currentQuote && currentQuote.status !== "concluida" && !readOnly && (
+                  <>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setWhatsappSendOpen(true)}
+                            className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'} bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900 border-green-200 dark:border-green-800`}
+                          >
+                            <MessageSquare className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5 text-green-600 dark:text-green-400`} />
+                            {!isMobile && 'WhatsApp'}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Enviar cotação via WhatsApp</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    {onEdit && !isMobile && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditMode(true)}
+                        className="h-8 px-3 text-xs"
+                      >
+                        <Edit3 className="h-3.5 w-3.5 mr-1.5" />
+                        Editar
+                      </Button>
+                    )}
+                  </>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsEditMode(false);
+                    setOpen(false);
+                  }}
+                  className={`${isMobile ? 'h-9 w-9 rounded-lg' : 'h-8 w-8'} p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700`}
+                >
+                  <X className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col flex-1 overflow-hidden min-h-0">
+            {!currentQuote ? (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-teal-600 dark:text-teal-400" />
+              </div>
+            ) : isEditMode ? (
+              // Modo de Edição (similar ao PedidoDialog)
                 <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 overflow-hidden`}>
                   {/* Menu Lateral Esquerdo - Desktop | Tabs - Mobile */}
                   {isMobile ? (
@@ -1649,6 +1646,30 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
             )}
           </>
         )}
+      </>
+    );
+
+  // Mobile: Usar Drawer
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-900">
+          {modalInnerContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // Desktop: Usar Dialog
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger && (
+        <DialogTrigger asChild onClick={() => setOpen(true)}>
+          {trigger}
+        </DialogTrigger>
+      )}
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+        {modalInnerContent}
       </DialogContent>
     </Dialog>
   );
