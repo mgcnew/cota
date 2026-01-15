@@ -84,7 +84,7 @@ export function ReAuthDialog({ open, reason, onSuccess, timeRemaining }: ReAuthD
         return {
           icon: <Clock className="h-5 w-5 text-amber-500" />,
           title: "Sessão Expirada por Inatividade",
-          description: "Por segurança, sua sessão expirou após 2 horas de inatividade. Por favor, faça login novamente para continuar.",
+          description: "Por segurança, sua sessão expirou após 24 horas de inatividade. Por favor, faça login novamente para continuar.",
           alertVariant: "default" as const
         };
       case 'update':

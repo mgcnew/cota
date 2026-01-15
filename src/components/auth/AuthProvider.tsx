@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   // Constantes de configuração
-  const INACTIVITY_TIMEOUT = 2 * 60 * 60 * 1000; // 2 horas em milissegundos
+  const INACTIVITY_TIMEOUT = 24 * 60 * 60 * 1000; // 24 horas em milissegundos
 
   useEffect(() => {
     let mounted = true;
@@ -187,7 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         forceReAuth('update');
       }
     },
-    enabled: !!user && !!session && !reAuthRequired
+    enabled: false // Desabilitado para evitar re-autenticação desnecessária
   });
 
   if (loading) {
