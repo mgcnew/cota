@@ -289,9 +289,7 @@ export function BackupRestore() {
             // Tentar insert primeiro (mais rápido)
             const { error: insertError, data: insertData } = await supabase
               .from(tableName as any)
-              .insert(batch, { 
-                ignoreDuplicates: true 
-              });
+              .insert(batch);
 
             if (insertError) {
               console.warn(`[IMPORT] Insert falhou para batch de ${tableName}, tentando upsert:`, insertError);
@@ -311,11 +309,11 @@ export function BackupRestore() {
                 });
                 errors++;
               } else {
-                console.log(`[IMPORT] Upsert bem-sucedido para batch de ${tableName}: ${upsertData?.length || 0} registros`);
+                console.log(`[IMPORT] Upsert bem-sucedido para batch de ${tableName}`);
                 successCount += batch.length;
               }
             } else {
-              console.log(`[IMPORT] Insert bem-sucedido para batch de ${tableName}: ${insertData?.length || 0} registros`);
+              console.log(`[IMPORT] Insert bem-sucedido para batch de ${tableName}`);
               successCount += batch.length;
             }
           }
