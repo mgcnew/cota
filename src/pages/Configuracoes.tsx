@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sun, Moon, Monitor, Bell, Palette, Globe, Info, RotateCcw, Settings, Building2, Users, Loader2 } from "lucide-react";
+import { Sun, Moon, Monitor, Bell, Palette, Globe, Info, RotateCcw, Settings, Building2, Users, Loader2, Database } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Shield, CreditCard } from "lucide-react";
@@ -23,8 +23,9 @@ const CompanyUsersManager = lazy(() => import("@/components/settings/CompanyUser
 const SuperAdminDashboard = lazy(() => import("@/components/settings/SuperAdminDashboard").then(m => ({ default: m.SuperAdminDashboard })));
 const CorporateGroupManager = lazy(() => import("@/components/settings/CorporateGroupManager").then(m => ({ default: m.CorporateGroupManager })));
 const BillingSection = lazy(() => import("@/components/settings/BillingSection").then(m => ({ default: m.BillingSection })));
+const BackupRestore = lazy(() => import("@/components/settings/BackupRestore").then(m => ({ default: m.BackupRestore })));
 
-type SettingsSection = "empresa" | "usuarios" | "grupo" | "superadmin" | "assinatura" | "aparencia" | "notificacoes" | "sistema" | "sobre";
+type SettingsSection = "empresa" | "usuarios" | "grupo" | "superadmin" | "assinatura" | "backup" | "aparencia" | "notificacoes" | "sistema" | "sobre";
 
 const menuItems: Array<{ id: SettingsSection; label: string; icon: typeof Building2 }> = [
   { id: "empresa", label: "Empresa", icon: Building2 },
@@ -32,6 +33,7 @@ const menuItems: Array<{ id: SettingsSection; label: string; icon: typeof Buildi
   { id: "grupo", label: "Grupo Corporativo", icon: Building2 },
   { id: "superadmin", label: "Super Admin", icon: Shield },
   { id: "assinatura", label: "Assinatura", icon: CreditCard },
+  { id: "backup", label: "Backup", icon: Database },
   { id: "aparencia", label: "Aparência", icon: Palette },
   { id: "notificacoes", label: "Notificações", icon: Bell },
   { id: "sistema", label: "Sistema", icon: Globe },
@@ -142,6 +144,12 @@ export default function Configuracoes() {
         return (
           <Suspense fallback={<SectionSkeleton />}>
             <BillingSection />
+          </Suspense>
+        );
+      case "backup":
+        return (
+          <Suspense fallback={<SectionSkeleton />}>
+            <BackupRestore />
           </Suspense>
         );
       case "aparencia":
