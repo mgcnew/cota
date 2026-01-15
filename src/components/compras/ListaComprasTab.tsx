@@ -1,7 +1,8 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Plus,
   ShoppingBasket,
@@ -25,9 +26,17 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 
 export default function ListaComprasTab() {
+  const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const { toast } = useToast();
   const { refetch: refetchPedidos } = usePedidos();
+
+  // No mobile, sempre usar cards
+  useEffect(() => {
+    if (isMobile) {
+      setViewMode('grid');
+    }
+  }, [isMobile]);
 
   const { items, isLoading, deleteItem, deleteMultipleItems, updateItem } =
     useShoppingList();
@@ -193,7 +202,7 @@ export default function ListaComprasTab() {
               {filteredItems.length} {filteredItems.length === 1 ? "item" : "itens"}
             </Badge>
           )}
-          <ViewToggle view={viewMode} onViewChange={setViewMode} />
+          {!isMobile && <ViewToggle view={viewMode} onViewChange={setViewMode} />}
         </div>
       </div>
 
