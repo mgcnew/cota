@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +36,7 @@ interface AddPedidoDialogProps {
 }
 
 export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelectedProducts = [] }: AddPedidoDialogProps) {
+  const isMobile = useIsMobile();
   const { toast } = useToast();
   const { user } = useAuth();
   const { logActivity } = useActivityLog();
@@ -385,62 +388,59 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   }, [currentStep]);
 
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="w-[95vw] max-w-[800px] h-[90vh] max-h-[700px] overflow-hidden p-0 gap-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl"
-        onKeyDown={handleModalKeyDown}
-      >
-        {/* Header compacto */}
-        <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                <ShoppingCart className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <DialogTitle className="text-base font-semibold text-gray-900 dark:text-white">Novo Pedido</DialogTitle>
-                <DialogDescription className="text-xs text-gray-500 dark:text-gray-400">{steps[currentStep].description}</DialogDescription>
-              </div>
+  // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
+  const modalInnerContent = (
+    <>
+      {/* Header compacto */}
+      <div className={`flex-shrink-0 px-4 ${isMobile ? 'py-4' : 'py-3'} border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50`}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center`}>
+              <ShoppingCart className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-orange-600 dark:text-orange-400`} />
             </div>
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-              <X className="h-4 w-4" />
-            </Button>
+            <div>
+              <div className={`${isMobile ? 'text-lg font-bold' : 'text-base font-semibold'} text-gray-900 dark:text-white`}>Novo Pedido</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{steps[currentStep].description}</div>
+            </div>
           </div>
-          
-          {/* Steps indicator compacto */}
-          <div className="flex items-center gap-1">
-            {steps.map((step, index) => (
-              <div key={step.id} className="flex items-center flex-1">
-                <button
-                  onClick={() => index < currentStep && setCurrentStep(index)}
-                  disabled={index > currentStep}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all w-full",
-                    index < currentStep ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 cursor-pointer hover:bg-green-200" :
-                    index === currentStep ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400" :
-                    "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                  )}
-                >
-                  {index < currentStep ? <CheckCircle className="h-3.5 w-3.5" /> : <step.icon className="h-3.5 w-3.5" />}
-                  <span className="hidden sm:inline">{step.title}</span>
-                  <span className="sm:hidden">{index + 1}</span>
-                </button>
-                {index < steps.length - 1 && (
-                  <ChevronRight className={cn("h-4 w-4 mx-1 flex-shrink-0", index < currentStep ? "text-green-400" : "text-gray-300 dark:text-gray-600")} />
-                )}
-              </div>
-            ))}
-          </div>
+          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className={`${isMobile ? 'h-9 w-9 rounded-lg' : 'h-8 w-8'} text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200`}>
+            <X className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
+          </Button>
         </div>
+        
+        {/* Steps indicator compacto */}
+        <div className="flex items-center gap-1">
+          {steps.map((step, index) => (
+            <div key={step.id} className="flex items-center flex-1">
+              <button
+                onClick={() => index < currentStep && setCurrentStep(index)}
+                disabled={index > currentStep}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all w-full",
+                  index < currentStep ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 cursor-pointer hover:bg-green-200" :
+                  index === currentStep ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400" :
+                  "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                )}
+              >
+                {index < currentStep ? <CheckCircle className="h-3.5 w-3.5" /> : <step.icon className="h-3.5 w-3.5" />}
+                <span className={isMobile ? '' : 'hidden sm:inline'}>{step.title}</span>
+                {!isMobile && <span className="sm:hidden">{index + 1}</span>}
+              </button>
+              {index < steps.length - 1 && (
+                <ChevronRight className={cn("h-4 w-4 mx-1 flex-shrink-0", index < currentStep ? "text-green-400" : "text-gray-300 dark:text-gray-600")} />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-hidden">
-          <AnimatedTabContent
-            value={String(currentStep)}
-            activeTab={String(currentStep)}
-            className="h-full"
-          >
+      {/* Content */}
+      <div className="flex-1 overflow-hidden">
+        <AnimatedTabContent
+          value={String(currentStep)}
+          activeTab={String(currentStep)}
+          className="h-full"
+        >
               {/* Step 0: Produtos */}
               {currentStep === 0 && (
                 <div className="h-full flex flex-col p-4">
@@ -702,24 +702,48 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 {currentStep === 0 ? 'Cancelar' : 'Voltar'}
               </Button>
-              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
-                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Alt+←→</kbd> Navegar</span>
-                {currentStep === 2 && <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Ctrl+Enter</kbd> Criar</span>}
-              </div>
+              {!isMobile && (
+                <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
+                  <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Alt+←→</kbd> Navegar</span>
+                  {currentStep === 2 && <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Ctrl+Enter</kbd> Criar</span>}
+                </div>
+              )}
             </div>
             
             {currentStep < 2 ? (
               <Button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} className="bg-orange-600 hover:bg-orange-700 text-white">
-                Próximo (Alt+→)
+                {isMobile ? 'Próximo' : 'Próximo (Alt+→)'}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
               <Button onClick={handleSubmit} disabled={loading || !canProceed()} className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white min-w-[140px]">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShoppingCart className="h-4 w-4 mr-2" />Criar (Ctrl+Enter)</>}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShoppingCart className="h-4 w-4 mr-2" />{isMobile ? 'Criar' : 'Criar (Ctrl+Enter)'}</>}
               </Button>
             )}
           </div>
         </div>
+      </>
+    );
+
+  // Mobile: Usar Drawer
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-900">
+          {modalInnerContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // Desktop: Usar Dialog
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        className="w-[95vw] max-w-[800px] h-[90vh] max-h-[700px] overflow-hidden p-0 gap-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl [&>button]:hidden"
+        onKeyDown={handleModalKeyDown}
+      >
+        {modalInnerContent}
       </DialogContent>
     </Dialog>
   );
