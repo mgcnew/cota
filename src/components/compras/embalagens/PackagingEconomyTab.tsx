@@ -34,29 +34,96 @@ export function PackagingEconomyTab() {
     const order = orders.find(o => o.quoteId === quote.id);
     if (!order) return null;
 
-    // Calcular preços por fornecedor
-    const supplierPrices = new Map<string, { name: string; total: number; items: number }>();
-    
-    // Iterar pelos fornecedores e seus itens
-    quote.fornecedores?.forEach((fornecedor) => {
-      const total = fornecedor.custoTotalEstimado || 0;
-      const itemsCount = fornecedor.itens?.length || 0;
-      
-      supplierPrices.set(fornecedor.supplierId, {
-        name: fornecedor.supplierName,
-        total: total,
-        items: itemsCount
+    // Fornecedores que responderam
+    const respondedSuppliers = quote.fornecedores.filter(f => f.status === "respondido");
+    if (respondedSuppliers.length === 0) return null;
+
+    // Calcular melhor e pior preço POR ITEM (baseado no custo por unidade)
+    const itemAnalysis: Record<string, {
+      packagingName: string;
+      best: { supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number };
+      worst: { supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number };
+      second?: { supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number };
+      allPrices: Array<{ supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number }>;
+    }> = {};
+
+    quote.itens.forEach(item => {
+      const prices: Array<{ supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number }> = [];
+
+      respondedSuppliers.forEach(fornecedor => {
+        const supplierItem = fornecedor.itens.find(si => si.packagingId === item.packagingId);
+        
+        if (!supplierItem || !supplierItem.valorTotal || supplierItem.valorTotal <= 0) return;
+        
+        // Calcular custo por unidade
+        const costPerUnit = supplierItem.custoPorUnidade && supplierItem.custoPorUnidade > 0
+          ? supplierItem.custoPorUnidade
+          : (supplierItem.quantidadeUnidadesEstimada && supplierItem.quantidadeUnidadesEstimada > 0
+              ? supplierItem.valorTotal / supplierItem.quantidadeUnidadesEstimada
+              : supplierItem.valorTotal);
+        
+        if (costPerUnit > 0) {
+          prices.push({
+            supplierId: fornecedor.supplierId,
+            supplierName: fornecedor.supplierName,
+            costPerUnit,
+            valorTotal: supplierItem.valorTotal
+          });
+        }
       });
+
+      // Ordenar por custo por unidade (menor para maior)
+      prices.sort((a, b) => a.costPerUnit - b.costPerUnit);
+
+      if (prices.length > 0) {
+        itemAnalysis[item.packagingId] = {
+          packagingName: item.packagingName,
+          best: prices[0],
+          worst: prices[prices.length - 1],
+          second: prices.length > 1 ? prices[1] : undefined,
+          allPrices: prices
+        };
+      }
     });
 
-    // Ordenar por preço (menor para maior)
-    const sortedSuppliers = Array.from(supplierPrices.entries())
+    // Calcular totais por fornecedor (soma dos valores totais dos itens)
+    const supplierTotals = new Map<string, { name: string; total: number; items: number }>();
+    
+    Object.values(itemAnalysis).forEach(analysis => {
+      const best = analysis.best;
+      const current = supplierTotals.get(best.supplierId) || { 
+        name: best.supplierName, 
+        total: 0, 
+        items: 0 
+      };
+      current.total += best.valorTotal;
+      current.items += 1;
+      supplierTotals.set(best.supplierId, current);
+    });
+
+    // Ordenar fornecedores por total (menor para maior)
+    const sortedSuppliers = Array.from(supplierTotals.entries())
       .map(([id, data]) => ({ id, ...data }))
       .sort((a, b) => a.total - b.total);
+
+    if (sortedSuppliers.length === 0) return null;
 
     const winner = sortedSuppliers[0];
     const secondPlace = sortedSuppliers[1];
     const worstPrice = sortedSuppliers[sortedSuppliers.length - 1];
+
+    // Calcular economia: soma das economias de cada item
+    let economyVsSecond = 0;
+    let economyVsWorst = 0;
+
+    Object.values(itemAnalysis).forEach(analysis => {
+      // Economia vs segundo melhor
+      if (analysis.second) {
+        economyVsSecond += analysis.second.valorTotal - analysis.best.valorTotal;
+      }
+      // Economia vs pior
+      economyVsWorst += analysis.worst.valorTotal - analysis.best.valorTotal;
+    });
 
     return {
       quote,
@@ -65,10 +132,11 @@ export function PackagingEconomyTab() {
       secondPlace,
       worstPrice,
       allSuppliers: sortedSuppliers,
-      economyVsSecond: secondPlace ? secondPlace.total - winner.total : 0,
-      economyVsWorst: worstPrice ? worstPrice.total - winner.total : 0,
-      economyPercentVsSecond: secondPlace ? ((secondPlace.total - winner.total) / secondPlace.total) * 100 : 0,
-      economyPercentVsWorst: worstPrice ? ((worstPrice.total - winner.total) / worstPrice.total) * 100 : 0,
+      itemAnalysis,
+      economyVsSecond,
+      economyVsWorst,
+      economyPercentVsSecond: secondPlace ? (economyVsSecond / secondPlace.total) * 100 : 0,
+      economyPercentVsWorst: worstPrice ? (economyVsWorst / worstPrice.total) * 100 : 0,
     };
   }, [selectedQuoteId, quotes, orders]);
 
@@ -350,6 +418,105 @@ export function PackagingEconomyTab() {
                     garantindo preços competitivos através da concorrência.
                   </p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Análise Detalhada por Item */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Package className="h-4 w-4 text-indigo-600" />
+                Análise Detalhada por Item
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {Object.entries(selectedQuoteData.itemAnalysis).map(([packagingId, analysis]) => (
+                  <div key={packagingId} className="border rounded-xl p-4 bg-gray-50 dark:bg-gray-800/30">
+                    <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                      <Package className="h-4 w-4 text-indigo-600" />
+                      {analysis.packagingName}
+                    </h4>
+                    
+                    <div className="space-y-2">
+                      {analysis.allPrices.map((price, index) => {
+                        const isBest = index === 0;
+                        const isWorst = index === analysis.allPrices.length - 1;
+                        const diffFromBest = price.valorTotal - analysis.best.valorTotal;
+                        const percentDiff = analysis.best.valorTotal > 0 
+                          ? (diffFromBest / analysis.best.valorTotal) * 100 
+                          : 0;
+
+                        return (
+                          <div
+                            key={price.supplierId}
+                            className={cn(
+                              "flex items-center justify-between p-3 rounded-lg border",
+                              isBest 
+                                ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/20" 
+                                : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
+                            )}
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <div className={cn(
+                                "w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold",
+                                isBest 
+                                  ? "bg-green-600 text-white" 
+                                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                              )}>
+                                {index + 1}
+                              </div>
+                              <span className="text-sm font-medium truncate">{price.supplierName}</span>
+                            </div>
+
+                            <div className="text-right">
+                              <p className={cn(
+                                "text-sm font-bold",
+                                isBest ? "text-green-600 dark:text-green-400" : ""
+                              )}>
+                                R$ {price.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                R$ {price.costPerUnit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un
+                              </p>
+                              {!isBest && diffFromBest > 0 && (
+                                <Badge variant="outline" className="text-[10px] mt-1">
+                                  +{percentDiff.toFixed(1)}%
+                                </Badge>
+                              )}
+                              {isBest && (
+                                <Badge className="bg-green-600 text-white text-[10px] mt-1">
+                                  Melhor
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Economia deste item */}
+                    {analysis.allPrices.length > 1 && (
+                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Economia vs pior preço:</span>
+                          <span className="font-semibold text-green-600">
+                            R$ {(analysis.worst.valorTotal - analysis.best.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        {analysis.second && (
+                          <div className="flex items-center justify-between text-xs mt-1">
+                            <span className="text-muted-foreground">Economia vs 2º lugar:</span>
+                            <span className="font-semibold text-orange-600">
+                              R$ {(analysis.second.valorTotal - analysis.best.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
