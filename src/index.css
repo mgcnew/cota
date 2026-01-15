@@ -287,14 +287,32 @@
       overflow-x: hidden !important;
       height: auto !important;
       position: relative !important;
-      touch-action: pan-y !important;
+      touch-action: pan-y pinch-zoom !important;
     }
     
     /* Prevenir que modais travem o scroll do body */
     body[data-scroll-locked="true"],
-    body[style*="overflow: hidden"] {
+    body[data-scroll-locked],
+    body[style*="overflow: hidden"],
+    body[style*="overflow:hidden"] {
       overflow-y: auto !important;
+      overflow-x: hidden !important;
       position: relative !important;
+      touch-action: pan-y pinch-zoom !important;
+    }
+    
+    /* Garantir que Radix UI não bloqueie scroll */
+    [data-radix-popper-content-wrapper],
+    [data-radix-menu-content],
+    [data-radix-select-content],
+    [data-radix-dropdown-menu-content] {
+      touch-action: auto !important;
+    }
+    
+    /* Overlay do Radix não deve bloquear touch */
+    [data-radix-dialog-overlay],
+    [data-radix-alert-dialog-overlay] {
+      touch-action: pan-y pinch-zoom !important;
     }
   }
 

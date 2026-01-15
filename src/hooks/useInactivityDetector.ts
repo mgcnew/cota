@@ -63,13 +63,13 @@ export function useInactivityDetector({
     // Inicializar timer
     resetTimer();
 
-    // Adicionar listeners de atividade
+    // Adicionar listeners de atividade com passive: true para não bloquear scroll
     const handleActivity = () => {
       resetTimer();
     };
 
     activityEvents.forEach(event => {
-      document.addEventListener(event, handleActivity, true);
+      document.addEventListener(event, handleActivity, { capture: true, passive: true });
     });
 
     // Listener para mudança de visibilidade da página

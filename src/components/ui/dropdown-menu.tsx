@@ -3,8 +3,26 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const DropdownMenu = DropdownMenuPrimitive.Root;
+// DropdownMenu wrapper que não bloqueia scroll no mobile
+const DropdownMenu = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>
+>(({ children, ...props }, ref) => {
+  const isMobile = useIsMobile();
+  
+  return (
+    <DropdownMenuPrimitive.Root 
+      // No mobile, usar modal=false para não bloquear scroll do body
+      modal={!isMobile}
+      {...props}
+    >
+      {children}
+    </DropdownMenuPrimitive.Root>
+  );
+});
+DropdownMenu.displayName = "DropdownMenu";
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 
