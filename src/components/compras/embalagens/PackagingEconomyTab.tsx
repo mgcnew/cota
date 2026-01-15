@@ -38,9 +38,16 @@ export function PackagingEconomyTab() {
     const respondedSuppliers = quote.fornecedores.filter(f => f.status === "respondido");
     if (respondedSuppliers.length === 0) return null;
 
+    // Criar mapa de quantidades reais do pedido
+    const orderQuantities: Record<string, number> = {};
+    order.itens.forEach(item => {
+      orderQuantities[item.packagingId] = item.quantidade;
+    });
+
     // Calcular melhor e pior preço POR ITEM (baseado no custo por unidade)
     const itemAnalysis: Record<string, {
       packagingName: string;
+      quantidadePedido: number;
       best: { supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number };
       worst: { supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number };
       second?: { supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number };
@@ -78,6 +85,7 @@ export function PackagingEconomyTab() {
       if (prices.length > 0) {
         itemAnalysis[item.packagingId] = {
           packagingName: item.packagingName,
+          quantidadePedido: orderQuantities[item.packagingId] || item.quantidadeNecessaria || 1,
           best: prices[0],
           worst: prices[prices.length - 1],
           second: prices.length > 1 ? prices[1] : undefined,
@@ -86,28 +94,24 @@ export function PackagingEconomyTab() {
       }
     });
 
-    // Calcular totais por fornecedor baseado no CUSTO POR UNIDADE (não no valor do pacote)
-    // Isso garante comparação justa independente da quantidade por pacote
+    // Calcular totais por fornecedor baseado no CUSTO POR UNIDADE e QUANTIDADE DO PEDIDO
     const supplierTotals = new Map<string, { name: string; total: number; items: number }>();
     
-    // Para cada fornecedor, somar o custo real baseado no melhor preço por unidade de cada item
+    // Para cada fornecedor, somar o custo real baseado nas quantidades do pedido
     respondedSuppliers.forEach(fornecedor => {
       let totalCost = 0;
       let itemCount = 0;
 
-      quote.itens.forEach(item => {
-        const analysis = itemAnalysis[item.packagingId];
-        if (!analysis) return;
-
+      Object.entries(itemAnalysis).forEach(([packagingId, analysis]) => {
         // Encontrar o preço deste fornecedor para este item
         const supplierPrice = analysis.allPrices.find(p => p.supplierId === fornecedor.supplierId);
         if (!supplierPrice) return;
 
-        // Usar a quantidade necessária (se disponível) ou 1 como padrão
-        const quantidadeNecessaria = item.quantidadeNecessaria || 1;
+        // Usar a quantidade REAL do pedido
+        const quantidadePedido = analysis.quantidadePedido;
         
-        // Calcular custo real: custo por unidade × quantidade necessária
-        totalCost += supplierPrice.costPerUnit * quantidadeNecessaria;
+        // Calcular custo real: custo por unidade × quantidade do pedido
+        totalCost += supplierPrice.costPerUnit * quantidadePedido;
         itemCount += 1;
       });
 
@@ -131,24 +135,23 @@ export function PackagingEconomyTab() {
     const secondPlace = sortedSuppliers[1];
     const worstPrice = sortedSuppliers[sortedSuppliers.length - 1];
 
-    // Calcular economia: soma das economias de cada item baseado no custo por unidade
+    // Calcular economia: soma das economias de cada item baseado no custo por unidade e QUANTIDADE DO PEDIDO
     let economyVsSecond = 0;
     let economyVsWorst = 0;
 
-    Object.entries(itemAnalysis).forEach(([packagingId, analysis]) => {
-      // Encontrar a quantidade necessária para este item
-      const item = quote.itens.find(i => i.packagingId === packagingId);
-      const quantidadeNecessaria = item?.quantidadeNecessaria || 1;
+    Object.values(itemAnalysis).forEach(analysis => {
+      // Usar a quantidade REAL do pedido
+      const quantidadePedido = analysis.quantidadePedido;
 
-      // Economia vs segundo melhor (baseado no custo por unidade)
+      // Economia vs segundo melhor (baseado no custo por unidade × quantidade do pedido)
       if (analysis.second) {
         const diffPerUnit = analysis.second.costPerUnit - analysis.best.costPerUnit;
-        economyVsSecond += diffPerUnit * quantidadeNecessaria;
+        economyVsSecond += diffPerUnit * quantidadePedido;
       }
       
-      // Economia vs pior (baseado no custo por unidade)
+      // Economia vs pior (baseado no custo por unidade × quantidade do pedido)
       const diffPerUnit = analysis.worst.costPerUnit - analysis.best.costPerUnit;
-      economyVsWorst += diffPerUnit * quantidadeNecessaria;
+      economyVsWorst += diffPerUnit * quantidadePedido;
     });
 
     return {
@@ -471,10 +474,15 @@ export function PackagingEconomyTab() {
               <div className="space-y-4">
                 {Object.entries(selectedQuoteData.itemAnalysis).map(([packagingId, analysis]) => (
                   <div key={packagingId} className="border rounded-xl p-4 bg-gray-50 dark:bg-gray-800/30">
-                    <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                      <Package className="h-4 w-4 text-indigo-600" />
-                      {analysis.packagingName}
-                    </h4>
+                    <div className="flex items-start justify-between mb-3">
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <Package className="h-4 w-4 text-indigo-600" />
+                        {analysis.packagingName}
+                      </h4>
+                      <Badge variant="outline" className="text-xs">
+                        Qtd: {analysis.quantidadePedido}
+                      </Badge>
+                    </div>
                     
                     <div className="space-y-2">
                       {analysis.allPrices.map((price, index) => {
@@ -536,19 +544,33 @@ export function PackagingEconomyTab() {
                     {/* Economia deste item */}
                     {analysis.allPrices.length > 1 && (
                       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Economia/unidade vs pior:</span>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-muted-foreground">Custo/unidade vs pior:</span>
                           <span className="font-semibold text-green-600">
                             R$ {(analysis.worst.costPerUnit - analysis.best.costPerUnit).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un
                           </span>
                         </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Economia total (× {analysis.quantidadePedido}):</span>
+                          <span className="font-semibold text-green-600">
+                            R$ {((analysis.worst.costPerUnit - analysis.best.costPerUnit) * analysis.quantidadePedido).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
                         {analysis.second && (
-                          <div className="flex items-center justify-between text-xs mt-1">
-                            <span className="text-muted-foreground">Economia/unidade vs 2º:</span>
-                            <span className="font-semibold text-orange-600">
-                              R$ {(analysis.second.costPerUnit - analysis.best.costPerUnit).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un
-                            </span>
-                          </div>
+                          <>
+                            <div className="flex items-center justify-between text-xs mt-2">
+                              <span className="text-muted-foreground">Custo/unidade vs 2º:</span>
+                              <span className="font-semibold text-orange-600">
+                                R$ {(analysis.second.costPerUnit - analysis.best.costPerUnit).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-muted-foreground">Economia total (× {analysis.quantidadePedido}):</span>
+                              <span className="font-semibold text-orange-600">
+                                R$ {((analysis.second.costPerUnit - analysis.best.costPerUnit) * analysis.quantidadePedido).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                          </>
                         )}
                       </div>
                     )}
