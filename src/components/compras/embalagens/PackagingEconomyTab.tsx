@@ -37,16 +37,15 @@ export function PackagingEconomyTab() {
     // Calcular preços por fornecedor
     const supplierPrices = new Map<string, { name: string; total: number; items: number }>();
     
-    quote.itens?.forEach((item: any) => {
-      item.precosFornecedores?.forEach((sp: any) => {
-        const current = supplierPrices.get(sp.fornecedorId) || { 
-          name: sp.fornecedorNome || "Fornecedor", 
-          total: 0, 
-          items: 0 
-        };
-        current.total += (sp.preco || 0) * item.quantidade;
-        current.items += 1;
-        supplierPrices.set(sp.fornecedorId, current);
+    // Iterar pelos fornecedores e seus itens
+    quote.fornecedores?.forEach((fornecedor) => {
+      const total = fornecedor.custoTotalEstimado || 0;
+      const itemsCount = fornecedor.itens?.length || 0;
+      
+      supplierPrices.set(fornecedor.supplierId, {
+        name: fornecedor.supplierName,
+        total: total,
+        items: itemsCount
       });
     });
 
