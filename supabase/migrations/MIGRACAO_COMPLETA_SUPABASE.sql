@@ -1157,7 +1157,7 @@ ON companies FOR UPDATE
 TO authenticated
 USING (
     id IN (
-        SELECT company_id 
+        SELECT cu.company_id 
         FROM company_users cu
         JOIN user_roles ur ON ur.user_id = cu.user_id AND ur.company_id = cu.company_id
         WHERE cu.user_id = auth.uid() AND ur.role = 'owner'
@@ -1179,17 +1179,18 @@ WITH CHECK (is_system_admin(auth.uid()));
 CREATE POLICY "Users can view company members"
 ON company_users FOR SELECT
 TO authenticated
-USING (company_id = get_user_company_id(auth.uid()));
+USING (company_users.company_id = get_user_company_id(auth.uid()));
 
 CREATE POLICY "Owners and admins can add members"
 ON company_users FOR INSERT
 TO authenticated
 WITH CHECK (
-    company_id IN (
-        SELECT cu.company_id 
+    EXISTS (
+        SELECT 1 
         FROM company_users cu
         JOIN user_roles ur ON ur.user_id = cu.user_id AND ur.company_id = cu.company_id
         WHERE cu.user_id = auth.uid() 
+        AND cu.company_id = company_users.company_id
         AND ur.role IN ('owner', 'admin')
     )
 );
@@ -1198,11 +1199,12 @@ CREATE POLICY "Owners and admins can update members"
 ON company_users FOR UPDATE
 TO authenticated
 USING (
-    company_id IN (
-        SELECT cu.company_id 
+    EXISTS (
+        SELECT 1 
         FROM company_users cu
         JOIN user_roles ur ON ur.user_id = cu.user_id AND ur.company_id = cu.company_id
         WHERE cu.user_id = auth.uid() 
+        AND cu.company_id = company_users.company_id
         AND ur.role IN ('owner', 'admin')
     )
 );
@@ -1211,32 +1213,34 @@ CREATE POLICY "Owners and admins can remove members"
 ON company_users FOR DELETE
 TO authenticated
 USING (
-    company_id IN (
-        SELECT cu.company_id 
+    EXISTS (
+        SELECT 1 
         FROM company_users cu
         JOIN user_roles ur ON ur.user_id = cu.user_id AND ur.company_id = cu.company_id
         WHERE cu.user_id = auth.uid() 
+        AND cu.company_id = company_users.company_id
         AND ur.role IN ('owner', 'admin')
     )
-    AND user_id != auth.uid()
+    AND company_users.user_id != auth.uid()
 );
 
 -- 7.4 USER_ROLES
 CREATE POLICY "Users can view company roles"
 ON user_roles FOR SELECT
 TO authenticated
-USING (company_id = get_user_company_id(auth.uid()));
+USING (user_roles.company_id = get_user_company_id(auth.uid()));
 
 CREATE POLICY "Owners can manage roles"
 ON user_roles FOR ALL
 TO authenticated
 USING (
-    company_id IN (
-        SELECT cu.company_id 
+    EXISTS (
+        SELECT 1 
         FROM company_users cu
-        JOIN user_roles ur ON ur.user_id = cu.user_id AND ur.company_id = cu.company_id
+        JOIN user_roles ur2 ON ur2.user_id = cu.user_id AND ur2.company_id = cu.company_id
         WHERE cu.user_id = auth.uid() 
-        AND ur.role = 'owner'
+        AND cu.company_id = user_roles.company_id
+        AND ur2.role = 'owner'
     )
 );
 
@@ -1916,17 +1920,18 @@ USING (company_id = get_user_company_id(auth.uid()));
 CREATE POLICY "Users can view company invitations"
 ON company_invitations FOR SELECT
 TO authenticated
-USING (company_id = get_user_company_id(auth.uid()));
+USING (company_invitations.company_id = get_user_company_id(auth.uid()));
 
 CREATE POLICY "Owners and admins can create invitations"
 ON company_invitations FOR INSERT
 TO authenticated
 WITH CHECK (
-    company_id IN (
-        SELECT cu.company_id 
+    EXISTS (
+        SELECT 1 
         FROM company_users cu
         JOIN user_roles ur ON ur.user_id = cu.user_id AND ur.company_id = cu.company_id
         WHERE cu.user_id = auth.uid() 
+        AND cu.company_id = company_invitations.company_id
         AND ur.role IN ('owner', 'admin')
     )
 );
@@ -1935,11 +1940,12 @@ CREATE POLICY "Owners and admins can update invitations"
 ON company_invitations FOR UPDATE
 TO authenticated
 USING (
-    company_id IN (
-        SELECT cu.company_id 
+    EXISTS (
+        SELECT 1 
         FROM company_users cu
         JOIN user_roles ur ON ur.user_id = cu.user_id AND ur.company_id = cu.company_id
         WHERE cu.user_id = auth.uid() 
+        AND cu.company_id = company_invitations.company_id
         AND ur.role IN ('owner', 'admin')
     )
 );
@@ -1948,11 +1954,12 @@ CREATE POLICY "Owners and admins can delete invitations"
 ON company_invitations FOR DELETE
 TO authenticated
 USING (
-    company_id IN (
-        SELECT cu.company_id 
+    EXISTS (
+        SELECT 1 
         FROM company_users cu
         JOIN user_roles ur ON ur.user_id = cu.user_id AND ur.company_id = cu.company_id
         WHERE cu.user_id = auth.uid() 
+        AND cu.company_id = company_invitations.company_id
         AND ur.role IN ('owner', 'admin')
     )
 );
