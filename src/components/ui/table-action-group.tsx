@@ -15,7 +15,7 @@ interface DropdownItem {
   icon: ReactNode;
   label: string;
   onClick: () => void;
-  variant?: "default" | "destructive";
+  variant?: "default" | "destructive" | "view" | "edit" | "success";
   hidden?: boolean;
   disabled?: boolean;
 }
@@ -38,6 +38,15 @@ interface TableActionGroupProps {
   deleteLabel?: string;
   finalizeLabel?: string;
 }
+
+// Consistent color styles for action items
+const actionVariantStyles = {
+  default: "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/70 hover:text-gray-800 dark:hover:text-gray-100",
+  view: "text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300",
+  edit: "text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300",
+  success: "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-300",
+  destructive: "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300",
+};
 
 export function TableActionGroup({
   onView,
@@ -65,7 +74,7 @@ export function TableActionGroup({
       icon: <Eye className="h-4 w-4" />,
       label: viewLabel,
       onClick: onView,
-      variant: "default",
+      variant: "view",
     });
   }
 
@@ -74,7 +83,7 @@ export function TableActionGroup({
       icon: <Edit className="h-4 w-4" />,
       label: editLabel,
       onClick: onEdit,
-      variant: "default",
+      variant: "edit",
     });
   }
 
@@ -83,7 +92,7 @@ export function TableActionGroup({
       icon: <CheckCircle className="h-4 w-4" />,
       label: finalizeLabel,
       onClick: onFinalize,
-      variant: "default",
+      variant: "success",
     });
   }
 
@@ -120,33 +129,31 @@ export function TableActionGroup({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-lg transition-colors"
           >
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50 w-48 shadow-lg"
+          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50 w-48 shadow-lg rounded-xl"
         >
-          <DropdownMenuLabel className="text-gray-600 dark:text-gray-300 font-medium text-xs">
+          <DropdownMenuLabel className="text-gray-500 dark:text-gray-400 font-medium text-xs px-3 py-2">
             {dropdownLabel}
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
+          <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
           {allActions.map((item, index) => (
             <DropdownMenuItem
               key={index}
               onClick={item.onClick}
               disabled={item.disabled}
               className={cn(
-                "cursor-pointer transition-colors flex items-center gap-2 min-h-[40px]",
-                item.variant === "destructive"
-                  ? "text-red-600 dark:text-red-400 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/30 dark:hover:text-red-300"
-                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                "cursor-pointer transition-colors flex items-center gap-2.5 min-h-[40px] mx-1 rounded-lg",
+                actionVariantStyles[item.variant || "default"]
               )}
             >
               {item.icon}
-              <span>{item.label}</span>
+              <span className="font-medium text-sm">{item.label}</span>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -165,3 +172,6 @@ export const ActionIcons = {
   history: <History className="h-4 w-4" />,
   message: <MessageCircle className="h-4 w-4" />,
 };
+
+// Export variant styles for external use
+export { actionVariantStyles };

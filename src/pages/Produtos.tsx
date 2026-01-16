@@ -397,40 +397,39 @@ function Produtos() {
                       <TableHeader>
                         <TableRow>
                           <TableCell colSpan={8} className="px-1 pb-3 pt-0 border-none">
-                            <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-orange-200/60 dark:border-orange-900/40 rounded-lg shadow-sm px-4 py-3">
+                            <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
                               <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                                  <Package className="h-4 w-4" />
+                                <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
+                                  <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                 </div>
-                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Produto</span>
+                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</span>
                               </div>
-                              <div className="w-[15%] px-2 flex justify-center items-center gap-1.5">
-                                <Tags className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
-                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Categoria</span>
+                              <div className="w-[15%] px-2 flex justify-center items-center gap-2">
+                                <Tags className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Categoria</span>
                               </div>
-                              <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-1.5">
-                                <Barcode className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
-                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Código</span>
+                              <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
+                                <Barcode className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Código</span>
                               </div>
-                              <div className="w-[13%] px-2 flex justify-center items-center gap-1.5">
-                                <CircleDot className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
-                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Status</span>
+                              <div className="w-[13%] px-2 flex justify-center items-center gap-2">
+                                <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
                               </div>
-                              <div className="w-[12%] px-2 flex justify-center items-center gap-1.5">
-                                <DollarSign className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
-                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Preço</span>
+                              <div className="w-[12%] px-2 flex justify-center items-center gap-2">
+                                <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Preço</span>
                               </div>
-                              <div className="hidden lg:flex w-[15%] px-2 justify-center items-center gap-1.5">
-                                <Building2 className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
-                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Fornecedor</span>
+                              <div className="hidden lg:flex w-[15%] px-2 justify-center items-center gap-2">
+                                <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
                               </div>
-                              <div className="w-[8%] px-2 flex justify-center items-center gap-1.5">
-                                <ClipboardList className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
-                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Cotações</span>
+                              <div className="w-[8%] px-2 flex justify-center items-center gap-2">
+                                <ClipboardList className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Cot.</span>
                               </div>
-                              <div className="w-[10%] flex justify-end items-center gap-1.5 px-2">
-                                <MoreVertical className="h-3.5 w-3.5 text-orange-600/70 dark:text-orange-400/70" />
-                                <span className="uppercase tracking-wide text-[11px] font-semibold text-orange-900 dark:text-orange-100">Ações</span>
+                              <div className="w-[10%] flex justify-end items-center gap-2 px-2">
+                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
                               </div>
                             </div>
                           </TableCell>
@@ -439,57 +438,57 @@ function Produtos() {
                       <TableBody>
                         {paginatedData.items.map((product) => (
                           <TableRow key={product.id} className="group border-none">
-                            <TableCell colSpan={8} className="px-1 py-2">
-                              <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:border-orange-300/60 dark:hover:border-orange-700/50">
+                            <TableCell colSpan={8} className="px-1 py-1.5">
+                              <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800/70">
                                 <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                                  <div className="w-8 h-8 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden">
+                                  <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-200 dark:border-gray-600/30">
                                     {product.image_url ? (
                                       <LazyImage 
                                         src={product.image_url} 
                                         alt={product.name} 
-                                        className="w-8 h-8 rounded-lg object-cover"
+                                        className="w-9 h-9 rounded-xl object-cover"
                                         showSkeleton={true}
-                                        fallback={<Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />}
+                                        fallback={<Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />}
                                       />
                                     ) : (
-                                      <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                                      <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                     )}
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <div className="font-medium text-sm text-gray-900 dark:text-white truncate">{capitalize(product.name)}</div>
+                                    <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{capitalize(product.name)}</div>
                                   </div>
                                 </div>
 
                                 <div className="w-[15%] px-2 flex justify-center items-center">
-                                  <Badge variant="secondary" className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary">
+                                  <Badge variant="secondary" className="bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 border-0 font-medium">
                                     {capitalize(product.category)}
                                   </Badge>
                                 </div>
 
                                 <div className="hidden lg:flex w-[12%] px-2 justify-center items-center">
-                                  <Badge variant="outline" className="text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600">
-                                    {product.barcode || "N/A"}
-                                  </Badge>
+                                  <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                                    {product.barcode || "—"}
+                                  </span>
                                 </div>
 
                                 <div className="w-[13%] px-2 flex justify-center items-center">
                                   <StatusBadge status={getProductStatus(product)} />
                                 </div>
 
-                                <div className="w-[12%] px-2 flex justify-center items-center gap-1">
-                                  <span className="font-semibold text-green-700 dark:text-green-400 text-sm">{product.lastQuotePrice}</span>
+                                <div className="w-[12%] px-2 flex justify-center items-center gap-1.5">
+                                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">{product.lastQuotePrice}</span>
                                   {getTrendIcon(product.trend)}
                                 </div>
 
                                 <div className="hidden lg:flex w-[15%] px-2 justify-center items-center">
-                                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{capitalize(product.bestSupplier || "N/A")}</span>
+                                  <span className="text-sm text-gray-600 dark:text-gray-400 truncate">{capitalize(product.bestSupplier || "—")}</span>
                                 </div>
 
-                                <div className="w-[8%] px-2 flex justify-center items-center gap-1">
-                                  <div className="p-1 bg-blue-100 dark:bg-blue-900/20 rounded-full">
-                                    <ClipboardList className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                                <div className="w-[8%] px-2 flex justify-center items-center gap-1.5">
+                                  <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
+                                    <ClipboardList className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                                    <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{product.quotesCount || 0}</span>
                                   </div>
-                                  <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">{product.quotesCount || 0}</span>
                                 </div>
 
                                 <div className="w-[10%] flex justify-end items-center px-2">
@@ -502,7 +501,6 @@ function Produtos() {
                                         icon: <History className="h-4 w-4" />,
                                         label: "Histórico de Preços",
                                         onClick: () => {
-                                          // O histórico será aberto via estado
                                           setHistoryProduct(product);
                                         },
                                         variant: "default" as const,

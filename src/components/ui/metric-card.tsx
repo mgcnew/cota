@@ -77,9 +77,11 @@ export const MetricCard = memo(function MetricCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl p-4",
+        "relative overflow-hidden rounded-xl p-4 py-6 transition-all duration-200",
         styles.cardBg,
-        onClick && "cursor-pointer hover:opacity-95 transition-opacity",
+        // Hover effect only on desktop - brightness change
+        "md:hover:brightness-110 md:hover:shadow-md",
+        onClick && "cursor-pointer",
         className
       )}
       onClick={onClick}

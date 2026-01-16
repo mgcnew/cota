@@ -25,17 +25,17 @@ export function PageHeader({
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3 md:gap-4">
                     {Icon && (
-                        <div className="relative p-2.5 md:p-3 rounded-xl bg-gradient-to-br from-primary/90 to-primary shadow-lg shadow-primary/25 dark:shadow-primary/20 text-white transition-transform hover:scale-105 duration-200">
+                        <div className="relative p-3 md:p-3.5 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-700 dark:to-gray-800 shadow-lg shadow-gray-900/20 dark:shadow-black/30 text-white">
                             <Icon className="h-6 w-6 md:h-7 md:w-7" />
-                            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
                         </div>
                     )}
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
                             {title}
                         </h1>
                         {description && (
-                            <p className="text-sm md:text-base text-muted-foreground mt-1.5 font-medium">
+                            <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 mt-1 font-medium">
                                 {description}
                             </p>
                         )}
@@ -50,7 +50,7 @@ export function PageHeader({
 
             {/* Área de filtros e busca com card elevado */}
             {children && (
-                <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200/60 dark:border-gray-700/50 shadow-sm p-4 md:p-5">
+                <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 shadow-sm p-4 md:p-5">
                     <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-start md:items-center justify-between">
                         {children}
                     </div>
