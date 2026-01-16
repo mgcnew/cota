@@ -175,30 +175,30 @@ function PedidosTab() {
       {/* Mobile Cards View */}
       <div className="md:hidden space-y-2">
         {paginatedData.items.map((pedido) => (
-          <div key={pedido.id} className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-3 shadow-sm">
+          <div key={pedido.id} className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 p-3 shadow-sm">
             <div className="flex items-start justify-between gap-3 mb-2">
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-                  <ShoppingCart className="h-5 w-5 text-orange-600" />
+                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-600/30">
+                  <ShoppingCart className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-sm truncate">{capitalize(pedido.fornecedor)}</p>
-                  <p className="text-xs text-muted-foreground">#{pedido.id.substring(0, 8)}</p>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{capitalize(pedido.fornecedor)}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">#{pedido.id.substring(0, 8)}</p>
                 </div>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><MoreVertical className="h-4 w-4" /></Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleManagePedido(pedido)}><ShoppingCart className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
+                <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+                  <DropdownMenuItem onClick={() => handleManagePedido(pedido)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70"><ShoppingCart className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
                   {pedido.status !== "entregue" && pedido.status !== "cancelado" && (
-                    <DropdownMenuItem onClick={() => handleRegistrarEntrega(pedido)} className="text-emerald-600">
+                    <DropdownMenuItem onClick={() => handleRegistrarEntrega(pedido)} className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
                       <ClipboardCheck className="h-4 w-4 mr-2" />Registrar Entrega
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="text-red-600"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
+                  <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -209,11 +209,11 @@ function PedidosTab() {
                 onChange={(newStatus) => updatePedidoStatus({ pedidoId: pedido.id, status: newStatus })}
                 isLoading={isUpdating}
               />
-              <Badge variant="outline" className="text-xs"><Package className="h-3 w-3 mr-1" />{pedido.itens} itens</Badge>
+              <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"><Package className="h-3 w-3 mr-1" />{pedido.itens} itens</Badge>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Total: <span className="font-semibold text-green-600">{pedido.total}</span></span>
-              <span className="text-muted-foreground">Entrega: {pedido.dataEntrega || '-'}</span>
+              <span className="text-gray-500 dark:text-gray-400">Total: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{pedido.total}</span></span>
+              <span className="text-gray-500 dark:text-gray-400">Entrega: {pedido.dataEntrega || '-'}</span>
             </div>
           </div>
         ))}
@@ -225,36 +225,35 @@ function PedidosTab() {
           <thead>
             <tr>
               <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                <div className="flex items-center bg-card/95 border border-orange-200/60 dark:border-orange-900/40 rounded-lg shadow-sm px-4 py-3">
-                  <div className="w-[15%] flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-600">
-                      <ShoppingCart className="h-4 w-4" />
+                <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
+                  <div className="w-[15%] flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
+                      <ShoppingCart className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                     </div>
-                    <span className="uppercase text-[11px] font-semibold text-orange-900 dark:text-orange-100">Pedido</span>
+                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Pedido</span>
                   </div>
-                  <div className="w-[20%] pl-2 flex items-center gap-1.5">
-                    <Building2 className="h-3.5 w-3.5 text-orange-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-orange-900 dark:text-orange-100">Fornecedor</span>
+                  <div className="w-[20%] pl-2 flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
                   </div>
-                  <div className="w-[12%] pl-2 flex justify-center items-center gap-1.5">
-                    <CircleDot className="h-3.5 w-3.5 text-orange-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-orange-900 dark:text-orange-100">Status</span>
+                  <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
+                    <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
                   </div>
-                  <div className="w-[15%] pl-2 flex items-center gap-1.5">
-                    <DollarSign className="h-3.5 w-3.5 text-orange-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-orange-900 dark:text-orange-100">Valor</span>
+                  <div className="w-[15%] pl-2 flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Valor</span>
                   </div>
-                  <div className="w-[12%] pl-2 flex items-center gap-1.5">
-                    <Info className="h-3.5 w-3.5 text-orange-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-orange-900 dark:text-orange-100">Itens</span>
+                  <div className="w-[12%] pl-2 flex items-center gap-2">
+                    <Info className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Itens</span>
                   </div>
-                  <div className="w-[15%] pl-2 flex items-center gap-1.5">
-                    <Truck className="h-3.5 w-3.5 text-orange-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-orange-900 dark:text-orange-100">Entrega</span>
+                  <div className="w-[15%] pl-2 flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Entrega</span>
                   </div>
-                  <div className="w-[11%] pl-2 flex justify-end items-center gap-1.5">
-                    <MoreVertical className="h-3.5 w-3.5 text-orange-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-orange-900 dark:text-orange-100">Ações</span>
+                  <div className="w-[11%] pl-2 flex justify-end items-center">
+                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
                   </div>
                 </div>
               </td>
@@ -263,19 +262,19 @@ function PedidosTab() {
           <tbody>
             {paginatedData.items.map((pedido) => (
               <TableRow key={pedido.id} className="group border-none">
-                <TableCell colSpan={7} className="px-1 py-2">
-                  <div className="flex items-center px-3 py-2.5 bg-card/90 rounded-lg border border-border hover:border-orange-300/50 transition-colors">
+                <TableCell colSpan={7} className="px-1 py-1.5">
+                  <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800/70">
                     <div className="w-[15%] flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-200/50">
-                        <ShoppingCart className="h-4 w-4 text-orange-600" />
+                      <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center border border-gray-200 dark:border-gray-600/30">
+                        <ShoppingCart className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       </div>
                       <div>
-                        <span className="font-semibold text-sm font-mono">#{pedido.id.substring(0, 8)}</span>
-                        <p className="text-xs text-muted-foreground">{pedido.dataPedido}</p>
+                        <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">#{pedido.id.substring(0, 8)}</span>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{pedido.dataPedido}</p>
                       </div>
                     </div>
                     <div className="w-[20%] pl-2">
-                      <span className="font-medium text-sm truncate block max-w-[150px]">{capitalize(pedido.fornecedor)}</span>
+                      <span className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate block max-w-[150px]">{capitalize(pedido.fornecedor)}</span>
                     </div>
                     <div className="w-[12%] pl-2 flex justify-center">
                       <StatusSelect
@@ -286,17 +285,18 @@ function PedidosTab() {
                       />
                     </div>
                     <div className="w-[15%] pl-2">
-                      <span className="font-bold text-green-600">{pedido.total}</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{pedido.total}</span>
                     </div>
                     <div className="w-[12%] pl-2 flex items-center gap-1">
-                      <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200">
-                        <Package className="h-3 w-3 mr-1" />{pedido.itens}
-                      </Badge>
+                      <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
+                        <Package className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                        <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{pedido.itens}</span>
+                      </div>
                       {pedido.produtos && pedido.produtos.length > 0 && (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Info className="h-3.5 w-3.5 text-orange-500 cursor-help" />
+                              <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
                             </TooltipTrigger>
                             <TooltipContent side="top" className="max-w-[250px]">
                               <p className="font-semibold text-xs mb-1">Produtos do pedido:</p>
@@ -310,28 +310,25 @@ function PedidosTab() {
                         </TooltipProvider>
                       )}
                     </div>
-                    <div className="w-[15%] pl-2 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Truck className="h-3.5 w-3.5 text-orange-600" />
-                        {pedido.dataEntrega || '-'}
-                      </div>
+                    <div className="w-[15%] pl-2 text-sm text-gray-500 dark:text-gray-400">
+                      {pedido.dataEntrega || '-'}
                     </div>
                     <div className="w-[11%] pl-2 flex justify-end">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-orange-50 dark:hover:bg-orange-900/20">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/70 rounded-lg">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleManagePedido(pedido)}><ShoppingCart className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
+                        <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+                          <DropdownMenuItem onClick={() => handleManagePedido(pedido)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70"><ShoppingCart className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
                           {pedido.status !== "entregue" && pedido.status !== "cancelado" && (
-                            <DropdownMenuItem onClick={() => handleRegistrarEntrega(pedido)} className="text-emerald-600">
+                            <DropdownMenuItem onClick={() => handleRegistrarEntrega(pedido)} className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
                               <ClipboardCheck className="h-4 w-4 mr-2" />Registrar Entrega
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="text-red-600"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
+                          <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>

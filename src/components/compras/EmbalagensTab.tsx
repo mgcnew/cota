@@ -293,12 +293,12 @@ function EmbalagensTab() {
                     key={quote.id}
                     className={`bg-white dark:bg-gray-800/50 rounded-xl border p-4 shadow-sm ${
                       isPronta 
-                        ? 'border-emerald-300 dark:border-emerald-700 ring-1 ring-emerald-200' 
-                        : 'border-gray-200 dark:border-gray-700/30'
+                        ? 'border-emerald-300 dark:border-emerald-700 ring-1 ring-emerald-200 dark:ring-emerald-800' 
+                        : 'border-gray-200 dark:border-gray-700/50'
                     }`}
                   >
                     {isPronta && (
-                      <div className="flex items-center gap-1.5 mb-2 text-emerald-600">
+                      <div className="flex items-center gap-1.5 mb-2 text-emerald-600 dark:text-emerald-400">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         <span className="text-[10px] font-semibold uppercase">Pronta para decisão</span>
                       </div>
@@ -306,22 +306,24 @@ function EmbalagensTab() {
 
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                          isPronta ? 'bg-emerald-100' : 'bg-purple-100 dark:bg-purple-900/30'
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border ${
+                          isPronta 
+                            ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700' 
+                            : 'bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600/30'
                         }`}>
                           {isPronta ? (
-                            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                            <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                           ) : (
-                            <Package className="h-5 w-5 text-purple-600" />
+                            <Package className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-sm truncate">
+                          <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
                             <CapitalizedText>
                               {quote.itens.map(i => i.packagingName).join(', ') || 'Sem itens'}
                             </CapitalizedText>
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             #{numero.toString().padStart(4, '0')} • {quote.dataInicio} - {quote.dataFim}
                           </p>
                         </div>
@@ -329,21 +331,21 @@ function EmbalagensTab() {
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleManageQuote(quote)}>
+                        <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+                          <DropdownMenuItem onClick={() => handleManageQuote(quote)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70">
                             <Eye className="h-4 w-4 mr-2" />Gerenciar
                           </DropdownMenuItem>
                           {isPronta && (
-                            <DropdownMenuItem onClick={() => handleConvertToOrder(quote)} className="text-emerald-600">
+                            <DropdownMenuItem onClick={() => handleConvertToOrder(quote)} className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
                               <ShoppingCart className="h-4 w-4 mr-2" />Converter em Pedido
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleDeleteQuote(quote)} className="text-red-600">
+                          <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
+                          <DropdownMenuItem onClick={() => handleDeleteQuote(quote)} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
                             <Trash2 className="h-4 w-4 mr-2" />Excluir
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -354,16 +356,26 @@ function EmbalagensTab() {
                       <Badge variant={quote.status === "ativa" ? "default" : "secondary"}>
                         {quote.status}
                       </Badge>
-                      <Badge variant="outline" className={
+                      <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${
                         respondidos === total && total > 0
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          : ''
-                      }>
-                        <Building2 className="h-3 w-3 mr-1" />
-                        {respondidos}/{total}
-                      </Badge>
+                          ? 'bg-emerald-50 dark:bg-emerald-900/20'
+                          : 'bg-blue-50 dark:bg-blue-900/20'
+                      }`}>
+                        <Building2 className={`h-3 w-3 ${
+                          respondidos === total && total > 0
+                            ? 'text-emerald-500 dark:text-emerald-400'
+                            : 'text-blue-500 dark:text-blue-400'
+                        }`} />
+                        <span className={`font-semibold text-xs ${
+                          respondidos === total && total > 0
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-blue-600 dark:text-blue-400'
+                        }`}>
+                          {respondidos}/{total}
+                        </span>
+                      </div>
                       {quote.melhorPreco !== '-' && (
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-700">
                           <DollarSign className="h-3 w-3 mr-1" />
                           {quote.melhorPreco}
                         </Badge>
