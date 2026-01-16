@@ -100,7 +100,11 @@ export function useCotacoes() {
         let supplierItemsData: any[] | null = null;
         let supplierItemsError: any = null;
 
+        // Get quote IDs to filter supplier items
+        const quoteIds = quotesData.map(q => q.id);
+
         try {
+          // Buscar supplier_items apenas das cotações carregadas, ordenados por updated_at
           const result = await supabase
             .from("quote_supplier_items")
             .select(`
@@ -115,7 +119,9 @@ export function useCotacoes() {
               quantidade_por_embalagem,
               created_at,
               updated_at
-            `);
+            `)
+            .in('quote_id', quoteIds)
+            .order('updated_at', { ascending: false });
           supplierItemsData = result.data;
           supplierItemsError = result.error;
         } catch (e) {
@@ -136,7 +142,9 @@ export function useCotacoes() {
               valor_oferecido,
               created_at,
               updated_at
-            `);
+            `)
+            .in('quote_id', quoteIds)
+            .order('updated_at', { ascending: false });
           
           if (fallbackResult.error) {
             console.error("❌ Error fetching supplier items (fallback):", fallbackResult.error);
