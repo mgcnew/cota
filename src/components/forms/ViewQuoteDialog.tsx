@@ -53,6 +53,7 @@ import { SelectSupplierPerProductDialog } from "./SelectSupplierPerProductDialog
 import { QuoteDetailsTab } from "../cotacoes/view-dialog/QuoteDetailsTab";
 import { QuoteValuesTab } from "../cotacoes/view-dialog/QuoteValuesTab";
 import { QuoteComparisonTab } from "../cotacoes/view-dialog/QuoteComparisonTab";
+import { QuoteExportTab } from "../cotacoes/view-dialog/QuoteExportTab";
 import { ProductEconomyBreakdown } from "../cotacoes/view-dialog/ProductEconomyBreakdown";
 import {
   Quote,
@@ -1433,7 +1434,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                   <div className={`${isMobile ? 'p-4 space-y-4' : 'p-4 sm:p-6 space-y-6'} pb-8`}>
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                       <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-gray-200/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm flex-shrink-0">
-                        <TabsList className={`grid w-full ${!readOnly ? "grid-cols-4" : "grid-cols-3"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
+                        <TabsList className={`grid w-full ${!readOnly ? "grid-cols-5" : "grid-cols-4"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
                           <TabsTrigger
                             value="detalhes"
                             className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-primary/10 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-primary/90 dark:data-[state=active]:hover:bg-primary/90 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
@@ -1452,6 +1453,13 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                           >
                             <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                             <span className="hidden xs:inline">Comparativo</span>
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="exportar"
+                            className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-orange-600 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-orange-700 dark:data-[state=active]:hover:bg-orange-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
+                          >
+                            <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                            <span className="hidden xs:inline">Exportar</span>
                           </TabsTrigger>
                           {currentQuote && currentQuote.status === "finalizada" && (
                             <TabsTrigger
@@ -1522,6 +1530,15 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                           isUpdating={isUpdating}
                           getNormalizedUnitPrice={getNormalizedUnitPrice}
                           getSupplierItemPricingMetadata={getSupplierItemPricingMetadata}
+                        />
+                      </TabsContent>
+
+                      <TabsContent value="exportar" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0 mt-0">
+                        <QuoteExportTab
+                          quote={currentQuote}
+                          products={products}
+                          getSupplierProductValue={getSupplierProductValue}
+                          getNormalizedUnitPrice={getNormalizedUnitPrice}
                         />
                       </TabsContent>
 
