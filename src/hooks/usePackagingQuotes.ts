@@ -209,8 +209,8 @@ export function usePackagingQuotes() {
 
       return quote;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Cotação de embalagem criada com sucesso!' });
     },
     onError: (error: any) => {
@@ -267,8 +267,9 @@ export function usePackagingQuotes() {
         .eq('quote_id', data.quoteId)
         .eq('supplier_id', data.supplierId) as any);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: async () => {
+      // Usar refetchQueries para forçar atualização imediata
+      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Valor atualizado com sucesso!' });
     },
     onError: (error: any) => {
@@ -289,8 +290,8 @@ export function usePackagingQuotes() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
     },
   });
 
@@ -303,8 +304,8 @@ export function usePackagingQuotes() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Cotação excluída com sucesso!' });
     },
     onError: (error: any) => {
@@ -402,8 +403,8 @@ export function usePackagingQuotes() {
           .insert(supplierItemsToInsert) as any);
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Fornecedor adicionado!' });
     },
     onError: (error: any) => {
@@ -430,8 +431,8 @@ export function usePackagingQuotes() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Fornecedor removido!' });
     },
     onError: (error: any) => {
@@ -472,8 +473,8 @@ export function usePackagingQuotes() {
           .insert(supplierItemsToInsert) as any);
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Embalagem adicionada!' });
     },
     onError: (error: any) => {
@@ -500,8 +501,8 @@ export function usePackagingQuotes() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Embalagem removida!' });
     },
     onError: (error: any) => {
