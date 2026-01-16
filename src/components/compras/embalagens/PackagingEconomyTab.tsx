@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  TrendingDown, DollarSign, Award, Target, 
-  Package, Building2, CheckCircle2, AlertCircle,
-  Percent, Calculator
+  TrendingDown, Award, Target, 
+  Package, Building2, CheckCircle2, AlertCircle, Calculator
 } from "lucide-react";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
@@ -25,7 +24,7 @@ export function PackagingEconomyTab() {
   }, [quotes, orders]);
 
   // Dados da cotação selecionada
-  const selectedQuoteData = useMemo(() => {
+  const analysisData = useMemo(() => {
     if (!selectedQuoteId) return null;
 
     const quote = quotes.find(q => q.id === selectedQuoteId);
@@ -44,128 +43,72 @@ export function PackagingEconomyTab() {
       orderQuantities[item.packagingId] = item.quantidade;
     });
 
-    // Calcular melhor e pior preço POR ITEM (baseado no custo por unidade)
-    const itemAnalysis: Record<string, {
-      packagingName: string;
-      quantidadePedido: number;
-      best: { supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number };
-      worst: { supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number };
-      second?: { supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number };
-      allPrices: Array<{ supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number }>;
+    // Estrutura: { fornecedorId: { nome, itens: [{ nome, custoUn, qtd, total }], totalGeral } }
+    const supplierData: Record<string, {
+      id: string;
+      nome: string;
+      itens: Array<{ nome: string; custoUnitario: number; quantidade: number; total: number }>;
+      totalGeral: number;
     }> = {};
 
+    // Inicializar estrutura para cada fornecedor
+    respondedSuppliers.forEach(fornecedor => {
+      supplierData[fornecedor.supplierId] = {
+        id: fornecedor.supplierId,
+        nome: fornecedor.supplierName,
+        itens: [],
+        totalGeral: 0
+      };
+    });
+
+    // Preencher dados de cada item
     quote.itens.forEach(item => {
-      const prices: Array<{ supplierId: string; supplierName: string; costPerUnit: number; valorTotal: number }> = [];
+      const quantidadePedido = orderQuantities[item.packagingId] || 0;
+      if (quantidadePedido === 0) return;
 
       respondedSuppliers.forEach(fornecedor => {
         const supplierItem = fornecedor.itens.find(si => si.packagingId === item.packagingId);
-        
-        if (!supplierItem || !supplierItem.valorTotal || supplierItem.valorTotal <= 0) return;
-        
+        if (!supplierItem) return;
+
         // Calcular custo por unidade
-        const costPerUnit = supplierItem.custoPorUnidade && supplierItem.custoPorUnidade > 0
+        const custoUnitario = supplierItem.custoPorUnidade && supplierItem.custoPorUnidade > 0
           ? supplierItem.custoPorUnidade
           : (supplierItem.quantidadeUnidadesEstimada && supplierItem.quantidadeUnidadesEstimada > 0
-              ? supplierItem.valorTotal / supplierItem.quantidadeUnidadesEstimada
-              : supplierItem.valorTotal);
-        
-        if (costPerUnit > 0) {
-          prices.push({
-            supplierId: fornecedor.supplierId,
-            supplierName: fornecedor.supplierName,
-            costPerUnit,
-            valorTotal: supplierItem.valorTotal
-          });
-        }
-      });
+              ? supplierItem.valorTotal! / supplierItem.quantidadeUnidadesEstimada
+              : supplierItem.valorTotal || 0);
 
-      // Ordenar por custo por unidade (menor para maior)
-      prices.sort((a, b) => a.costPerUnit - b.costPerUnit);
+        const total = custoUnitario * quantidadePedido;
 
-      if (prices.length > 0) {
-        itemAnalysis[item.packagingId] = {
-          packagingName: item.packagingName,
-          quantidadePedido: orderQuantities[item.packagingId] || item.quantidadeNecessaria || 1,
-          best: prices[0],
-          worst: prices[prices.length - 1],
-          second: prices.length > 1 ? prices[1] : undefined,
-          allPrices: prices
-        };
-      }
-    });
-
-    // Calcular totais por fornecedor baseado no CUSTO POR UNIDADE e QUANTIDADE DO PEDIDO
-    const supplierTotals = new Map<string, { name: string; total: number; items: number }>();
-    
-    // Para cada fornecedor, somar o custo real baseado nas quantidades do pedido
-    respondedSuppliers.forEach(fornecedor => {
-      let totalCost = 0;
-      let itemCount = 0;
-
-      Object.entries(itemAnalysis).forEach(([packagingId, analysis]) => {
-        // Encontrar o preço deste fornecedor para este item
-        const supplierPrice = analysis.allPrices.find(p => p.supplierId === fornecedor.supplierId);
-        if (!supplierPrice) return;
-
-        // Usar a quantidade REAL do pedido
-        const quantidadePedido = analysis.quantidadePedido;
-        
-        // Calcular custo real: custo por unidade × quantidade do pedido
-        totalCost += supplierPrice.costPerUnit * quantidadePedido;
-        itemCount += 1;
-      });
-
-      if (itemCount > 0) {
-        supplierTotals.set(fornecedor.supplierId, {
-          name: fornecedor.supplierName,
-          total: totalCost,
-          items: itemCount
+        supplierData[fornecedor.supplierId].itens.push({
+          nome: item.packagingName,
+          custoUnitario,
+          quantidade: quantidadePedido,
+          total
         });
-      }
+
+        supplierData[fornecedor.supplierId].totalGeral += total;
+      });
     });
 
     // Ordenar fornecedores por total (menor para maior)
-    const sortedSuppliers = Array.from(supplierTotals.entries())
-      .map(([id, data]) => ({ id, ...data }))
-      .sort((a, b) => a.total - b.total);
+    const sortedSuppliers = Object.values(supplierData).sort((a, b) => a.totalGeral - b.totalGeral);
 
-    if (sortedSuppliers.length === 0) return null;
-
-    const winner = sortedSuppliers[0];
-    const secondPlace = sortedSuppliers[1];
-    const worstPrice = sortedSuppliers[sortedSuppliers.length - 1];
-
-    // Calcular economia: soma das economias de cada item baseado no custo por unidade e QUANTIDADE DO PEDIDO
-    let economyVsSecond = 0;
-    let economyVsWorst = 0;
-
-    Object.values(itemAnalysis).forEach(analysis => {
-      // Usar a quantidade REAL do pedido
-      const quantidadePedido = analysis.quantidadePedido;
-
-      // Economia vs segundo melhor (baseado no custo por unidade × quantidade do pedido)
-      if (analysis.second) {
-        const diffPerUnit = analysis.second.costPerUnit - analysis.best.costPerUnit;
-        economyVsSecond += diffPerUnit * quantidadePedido;
-      }
-      
-      // Economia vs pior (baseado no custo por unidade × quantidade do pedido)
-      const diffPerUnit = analysis.worst.costPerUnit - analysis.best.costPerUnit;
-      economyVsWorst += diffPerUnit * quantidadePedido;
-    });
+    // Calcular economia em relação ao vencedor
+    const vencedor = sortedSuppliers[0];
+    const suppliersComEconomia = sortedSuppliers.map(supplier => ({
+      ...supplier,
+      economia: supplier.totalGeral - vencedor.totalGeral,
+      economiaPercent: vencedor.totalGeral > 0 
+        ? ((supplier.totalGeral - vencedor.totalGeral) / vencedor.totalGeral) * 100 
+        : 0,
+      isVencedor: supplier.id === vencedor.id
+    }));
 
     return {
       quote,
       order,
-      winner,
-      secondPlace,
-      worstPrice,
-      allSuppliers: sortedSuppliers,
-      itemAnalysis,
-      economyVsSecond,
-      economyVsWorst,
-      economyPercentVsSecond: secondPlace ? (economyVsSecond / secondPlace.total) * 100 : 0,
-      economyPercentVsWorst: worstPrice ? (economyVsWorst / worstPrice.total) * 100 : 0,
+      suppliers: suppliersComEconomia,
+      vencedor
     };
   }, [selectedQuoteId, quotes, orders]);
 
@@ -227,356 +170,171 @@ export function PackagingEconomyTab() {
       </Card>
 
       {/* Análise de Economia */}
-      {selectedQuoteData && (
+      {analysisData && (
         <>
-          {/* Resumo Geral */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Card do Vencedor */}
-            <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Award className="h-5 w-5 text-green-600" />
-                    <CardTitle className="text-sm">🏆 Fornecedor Vencedor</CardTitle>
-                  </div>
-                  <Badge className="bg-green-600 text-white">Melhor Escolha</Badge>
+          {/* Card do Vencedor */}
+          <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-green-600" />
+                <CardTitle className="text-base">🏆 Fornecedor Vencedor</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <p className="font-bold text-lg text-green-900 dark:text-green-100">
+                    {analysisData.vencedor.nome}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {analysisData.vencedor.itens.length} itens cotados
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="font-semibold text-green-900 dark:text-green-100 text-lg truncate">
-                  {selectedQuoteData.winner.name}
-                </p>
-                <div className="mt-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Custo Total:</span>
-                    <span className="text-xl font-bold text-green-600 dark:text-green-400">
-                      R$ {selectedQuoteData.winner.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Itens cotados:</span>
-                    <span className="text-sm font-medium">{selectedQuoteData.winner.items} itens</span>
-                  </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    R$ {analysisData.vencedor.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                  <Badge className="bg-green-600 text-white mt-1">Melhor Preço</Badge>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Card de Economia Total */}
-            <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-purple-600" />
-                  <CardTitle className="text-sm">💰 Economia Total Obtida</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Ao escolher {selectedQuoteData.winner.name}, você economizou:
-                </p>
-                
-                {selectedQuoteData.secondPlace && (
-                  <div className="mb-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-orange-700 dark:text-orange-400">
-                        vs {selectedQuoteData.secondPlace.name} (2º lugar)
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                        R$ {selectedQuoteData.economyVsSecond.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                      <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
-                        {selectedQuoteData.economyPercentVsSecond.toFixed(1)}%
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-
-                {selectedQuoteData.worstPrice && selectedQuoteData.allSuppliers.length > 1 && (
-                  <div className="p-3 bg-white dark:bg-gray-800/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-red-700 dark:text-red-400">
-                        vs {selectedQuoteData.worstPrice.name} (pior preço)
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-red-600 dark:text-red-400">
-                        R$ {selectedQuoteData.economyVsWorst.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                      <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
-                        {selectedQuoteData.economyPercentVsWorst.toFixed(1)}%
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Comparação Detalhada */}
+          {/* Comparação por Fornecedor */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-purple-600" />
-                Ranking de Fornecedores
+                Comparação Detalhada
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {selectedQuoteData.allSuppliers.map((supplier, index) => {
-                  const isWinner = index === 0;
-                  const diffFromWinner = supplier.total - selectedQuoteData.winner.total;
-                  const percentDiff = selectedQuoteData.winner.total > 0 
-                    ? (diffFromWinner / selectedQuoteData.winner.total) * 100 
-                    : 0;
-
-                  return (
-                    <div
-                      key={supplier.id}
-                      className={cn(
-                        "flex items-center justify-between p-4 rounded-xl border-2 transition-all",
-                        isWinner 
-                          ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/20" 
-                          : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
-                      )}
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
+            <CardContent className="space-y-4">
+              {analysisData.suppliers.map((supplier, index) => (
+                <div
+                  key={supplier.id}
+                  className={cn(
+                    "rounded-xl border-2 overflow-hidden",
+                    supplier.isVencedor
+                      ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/20"
+                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
+                  )}
+                >
+                  {/* Header do Fornecedor */}
+                  <div className={cn(
+                    "p-3 sm:p-4",
+                    supplier.isVencedor
+                      ? "bg-green-100 dark:bg-green-900/30"
+                      : "bg-gray-50 dark:bg-gray-800/70"
+                  )}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                         <div className={cn(
-                          "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm",
-                          isWinner 
-                            ? "bg-green-600 text-white" 
-                            : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                          "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0",
+                          supplier.isVencedor
+                            ? "bg-green-600 text-white"
+                            : "bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                         )}>
                           {index + 1}º
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold truncate">{supplier.name}</p>
-                          <p className="text-xs text-muted-foreground">{supplier.items} itens cotados</p>
+                          <p className="font-bold text-sm sm:text-base truncate">{supplier.nome}</p>
+                          <p className="text-xs text-muted-foreground">{supplier.itens.length} itens</p>
                         </div>
                       </div>
-
                       <div className="text-right">
                         <p className={cn(
-                          "text-lg font-bold",
-                          isWinner ? "text-green-600 dark:text-green-400" : ""
+                          "text-lg sm:text-xl font-bold",
+                          supplier.isVencedor ? "text-green-600 dark:text-green-400" : ""
                         )}>
-                          R$ {supplier.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          R$ {supplier.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          Custo total (baseado em custo/unidade)
-                        </p>
-                        {!isWinner && diffFromWinner > 0 && (
-                          <div className="flex items-center gap-1 justify-end mt-1">
-                            <Badge variant="secondary" className="text-xs">
-                              +R$ {diffFromWinner.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              +{percentDiff.toFixed(1)}%
-                            </Badge>
-                          </div>
+                        {!supplier.isVencedor && supplier.economia > 0 && (
+                          <Badge variant="destructive" className="mt-1 text-xs">
+                            +R$ {supplier.economia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </Badge>
                         )}
-                        {isWinner && (
-                          <Badge className="bg-green-600 text-white mt-1">
+                        {supplier.isVencedor && (
+                          <Badge className="bg-green-600 text-white mt-1 text-xs">
                             <Award className="h-3 w-3 mr-1" />
-                            Melhor Custo/Unidade
+                            Vencedor
                           </Badge>
                         )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+
+                  {/* Itens do Fornecedor */}
+                  <div className="p-3 sm:p-4 space-y-2">
+                    {supplier.itens.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-sm py-2 border-b border-gray-100 dark:border-gray-700/50 last:border-0 gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate text-xs sm:text-sm">{item.nome}</p>
+                          <p className="text-xs text-muted-foreground">
+                            R$ {item.custoUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un × {item.quantidade}
+                          </p>
+                        </div>
+                        <p className="font-semibold whitespace-nowrap text-xs sm:text-sm">
+                          R$ {item.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Economia */}
+                  {!supplier.isVencedor && supplier.economia > 0 && (
+                    <div className="px-3 sm:px-4 pb-3 sm:pb-4">
+                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                        <div className="flex items-start sm:items-center justify-between gap-2 flex-col sm:flex-row">
+                          <div className="flex items-center gap-2">
+                            <TrendingDown className="h-4 w-4 text-red-600 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm font-medium text-red-900 dark:text-red-100">
+                              Economia ao escolher {analysisData.vencedor.nome}:
+                            </span>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <p className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400">
+                              R$ {supplier.economia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-xs text-red-600 dark:text-red-400">
+                              ({supplier.economiaPercent.toFixed(1)}%)
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </CardContent>
           </Card>
 
-          {/* Insights */}
+          {/* Resumo Final */}
           <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-blue-600" />
-                📊 Resumo da Análise
+                <Package className="h-4 w-4 text-blue-600" />
+                📊 Resumo da Economia
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
-                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium">✅ Melhor Escolha</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    <span className="font-semibold text-green-600">{selectedQuoteData.winner.name}</span> ofereceu 
-                    o melhor custo por unidade na maioria dos itens, resultando no menor custo total de{" "}
-                    <span className="font-semibold">
-                      R$ {selectedQuoteData.winner.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>.
-                  </p>
-                </div>
-              </div>
-
-              {selectedQuoteData.secondPlace && (
-                <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
-                  <TrendingDown className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">💡 Comparação com 2º Lugar</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Se você tivesse escolhido <span className="font-semibold">{selectedQuoteData.secondPlace.name}</span>, 
-                      gastaria <span className="font-semibold">
-                        R$ {selectedQuoteData.secondPlace.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>. Ao escolher {selectedQuoteData.winner.name}, você economizou{" "}
-                      <span className="font-semibold text-orange-600">
-                        R$ {selectedQuoteData.economyVsSecond.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span> ({selectedQuoteData.economyPercentVsSecond.toFixed(1)}%).
+              {analysisData.suppliers.filter(s => !s.isVencedor && s.economia > 0).map(supplier => (
+                <div key={supplier.id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800/50 rounded-lg gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">vs {supplier.nome}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Custaria R$ {supplier.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
                   </div>
-                </div>
-              )}
-
-              {selectedQuoteData.worstPrice && selectedQuoteData.allSuppliers.length > 2 && (
-                <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
-                  <Percent className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">🎯 Economia Máxima</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      A pior oferta foi de <span className="font-semibold">{selectedQuoteData.worstPrice.name}</span> com 
-                      custo total de <span className="font-semibold">
-                        R$ {selectedQuoteData.worstPrice.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>. Comparado a ela, você economizou{" "}
-                      <span className="font-semibold text-red-600">
-                        R$ {selectedQuoteData.economyVsWorst.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span> ({selectedQuoteData.economyPercentVsWorst.toFixed(1)}%).
+                  <div className="text-right">
+                    <p className="text-base sm:text-lg font-bold text-green-600 whitespace-nowrap">
+                      -R$ {supplier.economia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
+                    <Badge variant="outline" className="text-xs mt-1">
+                      {supplier.economiaPercent.toFixed(1)}%
+                    </Badge>
                   </div>
                 </div>
-              )}
-
-              <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg">
-                <Package className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium">📦 Metodologia</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Os valores são calculados com base no <span className="font-semibold">custo por unidade</span> de 
-                    cada item multiplicado pela quantidade necessária, garantindo comparação justa independente 
-                    da quantidade por pacote oferecida por cada fornecedor.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Análise Detalhada por Item */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Package className="h-4 w-4 text-indigo-600" />
-                Análise Detalhada por Item
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {Object.entries(selectedQuoteData.itemAnalysis).map(([packagingId, analysis]) => (
-                  <div key={packagingId} className="border rounded-xl p-4 bg-gray-50 dark:bg-gray-800/30">
-                    <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <Package className="h-4 w-4 text-indigo-600" />
-                        {analysis.packagingName}
-                      </h4>
-                      <Badge variant="outline" className="text-xs">
-                        Qtd: {analysis.quantidadePedido}
-                      </Badge>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      {analysis.allPrices.map((price, index) => {
-                        const isBest = index === 0;
-                        const isWorst = index === analysis.allPrices.length - 1;
-                        const diffFromBest = price.valorTotal - analysis.best.valorTotal;
-                        const percentDiff = analysis.best.valorTotal > 0 
-                          ? (diffFromBest / analysis.best.valorTotal) * 100 
-                          : 0;
-
-                        return (
-                          <div
-                            key={price.supplierId}
-                            className={cn(
-                              "flex items-center justify-between p-3 rounded-lg border",
-                              isBest 
-                                ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/20" 
-                                : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
-                            )}
-                          >
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <div className={cn(
-                                "w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold",
-                                isBest 
-                                  ? "bg-green-600 text-white" 
-                                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                              )}>
-                                {index + 1}
-                              </div>
-                              <span className="text-sm font-medium truncate">{price.supplierName}</span>
-                            </div>
-
-                            <div className="text-right">
-                              <p className={cn(
-                                "text-sm font-bold",
-                                isBest ? "text-green-600 dark:text-green-400" : ""
-                              )}>
-                                R$ {price.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                R$ {price.costPerUnit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un
-                              </p>
-                              {!isBest && diffFromBest > 0 && (
-                                <Badge variant="outline" className="text-[10px] mt-1">
-                                  +{percentDiff.toFixed(1)}%
-                                </Badge>
-                              )}
-                              {isBest && (
-                                <Badge className="bg-green-600 text-white text-[10px] mt-1">
-                                  Melhor
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Economia deste item */}
-                    {analysis.allPrices.length > 1 && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-muted-foreground">Custo/unidade vs pior:</span>
-                          <span className="font-semibold text-green-600">
-                            R$ {(analysis.worst.costPerUnit - analysis.best.costPerUnit).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Economia total (× {analysis.quantidadePedido}):</span>
-                          <span className="font-semibold text-green-600">
-                            R$ {((analysis.worst.costPerUnit - analysis.best.costPerUnit) * analysis.quantidadePedido).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </span>
-                        </div>
-                        {analysis.second && (
-                          <>
-                            <div className="flex items-center justify-between text-xs mt-2">
-                              <span className="text-muted-foreground">Custo/unidade vs 2º:</span>
-                              <span className="font-semibold text-orange-600">
-                                R$ {(analysis.second.costPerUnit - analysis.best.costPerUnit).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-muted-foreground">Economia total (× {analysis.quantidadePedido}):</span>
-                              <span className="font-semibold text-orange-600">
-                                R$ {((analysis.second.costPerUnit - analysis.best.costPerUnit) * analysis.quantidadePedido).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                              </span>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              ))}
             </CardContent>
           </Card>
         </>
