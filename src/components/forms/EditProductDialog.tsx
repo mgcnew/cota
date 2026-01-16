@@ -513,7 +513,7 @@ function EditProductDialogInternal({
           <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
                   <Package className="h-5 w-5" />
                 </div>
                 <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
@@ -552,7 +552,7 @@ function EditProductDialogInternal({
         <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
                 <Package className="h-4 w-4" />
               </div>
               <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">

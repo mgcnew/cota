@@ -541,7 +541,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           {/* Seção: Informações Básicas */}
           <div className="space-y-3">
             <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-              <span className="w-1 h-4 bg-gradient-to-b from-orange-500 to-amber-600 rounded-full"></span>
+              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
               Informações do Produto
             </h3>
             
@@ -621,7 +621,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           {/* Seção de Foto do Produto */}
           <div className="space-y-3">
             <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-              <span className="w-1 h-4 bg-gradient-to-b from-blue-500 to-cyan-600 rounded-full"></span>
+              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
               Foto do Produto
             </h3>
             
@@ -693,7 +693,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           {/* Seção: Categorização */}
           <div className="space-y-3">
             <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-              <span className="w-1 h-4 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></span>
+              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
               Categorização
             </h3>
 
@@ -857,8 +857,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           <DrawerHeader className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 dark:border-gray-700/40">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
-                  <Plus className="h-4 w-4" />
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                  <Package className="h-4 w-4" />
                 </div>
                 <DrawerTitle className="text-base font-bold text-gray-900 dark:text-white truncate">
                   Novo Produto
@@ -895,8 +895,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center text-white flex-shrink-0">
-                <Plus className="h-4 w-4" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
+                <Package className="h-4 w-4" />
               </div>
               <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                 Novo Produto
