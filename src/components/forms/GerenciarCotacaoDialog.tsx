@@ -441,110 +441,110 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[95vw] sm:w-[90vw] h-[90vh] max-h-[850px] p-0 overflow-hidden bg-white dark:bg-gray-900 flex flex-col">
+      <DialogContent className="max-w-5xl w-[95vw] sm:w-[90vw] h-[90vh] max-h-[850px] p-0 overflow-hidden bg-background flex flex-col">
         {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+        <DialogHeader className="flex-shrink-0 px-5 py-4 border-b border-border bg-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
-                <ClipboardList className="h-4 w-4 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                <ClipboardList className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <DialogTitle className="text-base font-semibold text-gray-900 dark:text-white">
+                <DialogTitle className="text-lg font-semibold text-foreground">
                   Gerenciar Cotação
                 </DialogTitle>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[350px]">
+                <p className="text-sm text-muted-foreground truncate max-w-[350px]">
                   #{safeStr(quote.id).substring(0, 8)} • {safeStr(quote.produto)}
                 </p>
               </div>
             </div>
-            <Button type="button" variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-              <X className="h-4 w-4" />
+            <Button type="button" variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent">
+              <X className="h-5 w-5" />
             </Button>
           </div>
         </DialogHeader>
 
-        {/* Tabs - Ordem por produtividade: Resumo → Valores → Converter → Exportar → Editar → Detalhes */}
+        {/* Tabs - Ordem por produtividade */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="flex-shrink-0 mx-3 mt-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg grid grid-cols-6 h-9">
-            <TabsTrigger value="resumo" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
-              <Trophy className="h-3.5 w-3.5 mr-1" />Resumo
+          <TabsList className="flex-shrink-0 mx-4 mt-3 bg-muted p-1 rounded-lg grid grid-cols-6 h-10">
+            <TabsTrigger value="resumo" className="text-xs font-medium text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-2 py-1.5">
+              <Trophy className="h-4 w-4 mr-1.5" />Resumo
             </TabsTrigger>
-            <TabsTrigger value="valores" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
-              <DollarSign className="h-3.5 w-3.5 mr-1" />Valores
+            <TabsTrigger value="valores" className="text-xs font-medium text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-2 py-1.5">
+              <DollarSign className="h-4 w-4 mr-1.5" />Valores
             </TabsTrigger>
-            <TabsTrigger value="converter" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
-              <ShoppingCart className="h-3.5 w-3.5 mr-1" />Pedido
+            <TabsTrigger value="converter" className="text-xs font-medium text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-2 py-1.5">
+              <ShoppingCart className="h-4 w-4 mr-1.5" />Pedido
             </TabsTrigger>
-            <TabsTrigger value="exportar" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
-              <Download className="h-3.5 w-3.5 mr-1" />Export
+            <TabsTrigger value="exportar" className="text-xs font-medium text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-2 py-1.5">
+              <Download className="h-4 w-4 mr-1.5" />Export
             </TabsTrigger>
-            <TabsTrigger value="editar" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
-              <Settings className="h-3.5 w-3.5 mr-1" />Editar
+            <TabsTrigger value="editar" className="text-xs font-medium text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-2 py-1.5">
+              <Settings className="h-4 w-4 mr-1.5" />Editar
             </TabsTrigger>
-            <TabsTrigger value="detalhes" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
-              <FileText className="h-3.5 w-3.5 mr-1" />Info
+            <TabsTrigger value="detalhes" className="text-xs font-medium text-muted-foreground data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-md px-2 py-1.5">
+              <FileText className="h-4 w-4 mr-1.5" />Info
             </TabsTrigger>
           </TabsList>
 
           {/* Tab Resumo Geral */}
           <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-0">
             <ScrollArea className="h-full">
-              <div className="p-4 sm:p-5 space-y-4">
+              <div className="p-5 space-y-5">
                 {/* Tabela de Preços por Produto */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
-                    <Package className="h-4 w-4 text-orange-500" />
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Package className="h-4 w-4 text-primary" />
                     Melhor Preço por Produto
                   </h3>
-                  <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
-                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <Card className="overflow-hidden border-border">
+                    <div className="divide-y divide-border">
                       {productPricesData.map((item) => (
-                        <div key={item.productId} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                          <div className="flex items-start justify-between gap-3">
+                        <div key={item.productId} className="p-4 hover:bg-accent/50 transition-colors">
+                          <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 dark:text-white truncate text-sm">
+                              <p className="font-medium text-sm text-foreground truncate">
                                 {safeStr(item.productName)}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                              <p className="text-xs text-muted-foreground mt-1">
                                 {safeStr(item.quantidade)} {safeStr(item.unidade)}
                               </p>
                             </div>
                             <div className="text-right flex-shrink-0">
                               {item.bestPrice > 0 ? (
                                 <>
-                                  <div className="flex items-center gap-1.5 justify-end">
-                                    <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-                                    <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
+                                  <div className="flex items-center gap-2 justify-end">
+                                    <Star className="h-4 w-4 text-warning fill-warning" />
+                                    <span className="text-lg font-bold text-success">
                                       R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                   </div>
-                                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
+                                  <p className="text-sm text-muted-foreground mt-1">
                                     {safeStr(item.bestSupplierName)}
                                   </p>
                                   {item.savings > 0 && (
-                                    <Badge className="mt-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-[10px]">
-                                      <TrendingDown className="h-2.5 w-2.5 mr-0.5" />
+                                    <Badge className="mt-2 bg-success/10 text-success border-success/20">
+                                      <TrendingDown className="h-3 w-3 mr-1" />
                                       Economia: R$ {item.savings.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </Badge>
                                   )}
                                 </>
                               ) : (
-                                <Badge variant="outline" className="text-gray-400 dark:text-gray-500">Sem preço</Badge>
+                                <Badge variant="outline" className="text-muted-foreground">Sem preço</Badge>
                                 )}
                               </div>
                             </div>
                             {item.allPrices.length > 1 && (
-                              <div className="mt-2 flex flex-wrap gap-1">
+                              <div className="mt-3 flex flex-wrap gap-2">
                                 {item.allPrices.map((price, idx) => (
                                   <Badge
                                     key={idx}
                                     variant={idx === 0 ? "default" : "outline"}
                                     className={cn(
-                                      "text-[10px]",
+                                      "text-xs",
                                       idx === 0
-                                        ? "bg-emerald-600 hover:bg-emerald-600 text-white"
-                                        : "text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"
+                                        ? "bg-success text-white"
+                                        : "text-muted-foreground border-border"
                                     )}
                                   >
                                     {safeStr(price.nome)}: R$ {price.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -574,22 +574,22 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
           {/* Tab Editar Cotação */}
           <TabsContent value="editar" className="flex-1 overflow-auto m-0 p-0">
             <ScrollArea className="h-full">
-              <div className="p-4 sm:p-5 space-y-4">
+              <div className="p-5 space-y-5">
                 {/* Seção Produtos */}
-                <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
-                      <Package className="h-4 w-4 text-orange-500" />
+                <Card className="border-border">
+                  <div className="p-4 border-b border-border bg-muted/50">
+                    <h3 className="font-semibold text-foreground flex items-center gap-2">
+                      <Package className="h-4 w-4 text-primary" />
                       Produtos ({products.length})
                     </h3>
                   </div>
                   
                   {/* Adicionar Produto */}
                   {productsNotInQuote.length > 0 && onAddQuoteItem && (
-                    <div className="p-3 border-b border-gray-100 dark:border-gray-700 bg-orange-50/50 dark:bg-orange-900/10">
-                      <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="p-4 border-b border-border bg-primary/5">
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedProductToAdd} onValueChange={setSelectedProductToAdd}>
-                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800 h-9 text-sm">
+                          <SelectTrigger className="flex-1 bg-card">
                             <SelectValue placeholder="Selecione um produto..." />
                           </SelectTrigger>
                           <SelectContent>
@@ -604,10 +604,10 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           value={productQuantity} 
                           onChange={(e) => setProductQuantity(e.target.value)}
                           placeholder="Qtd"
-                          className="w-16 bg-white dark:bg-gray-800 h-9 text-sm"
+                          className="w-20 bg-card"
                         />
                         <Select value={productUnit} onValueChange={setProductUnit}>
-                          <SelectTrigger className="w-[90px] bg-white dark:bg-gray-800 h-9 text-sm">
+                          <SelectTrigger className="w-[100px] bg-card">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -619,31 +619,31 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                         <Button 
                           onClick={handleAddProduct} 
                           disabled={!selectedProductToAdd}
-                          className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white h-9 text-sm"
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
                         >
-                          <Plus className="h-4 w-4 mr-1" />Adicionar
+                          <Plus className="h-4 w-4 mr-2" />Adicionar
                         </Button>
                       </div>
                     </div>
                   )}
                   
                   {/* Lista de Produtos */}
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                  <div className="divide-y divide-border">
                     {products.length === 0 ? (
-                      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-                        <Package className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                        <p className="text-sm">Nenhum produto na cotação</p>
+                      <div className="p-8 text-center text-muted-foreground">
+                        <Package className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p>Nenhum produto na cotação</p>
                       </div>
                     ) : (
                       products.map((product: any, index: number) => (
-                        <div key={product.product_id} className="p-2.5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <span className="text-xs text-gray-400 dark:text-gray-500 w-5 flex-shrink-0">{index + 1}.</span>
+                        <div key={product.product_id} className="p-3 flex items-center justify-between hover:bg-accent/50 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <span className="text-xs text-muted-foreground w-6 flex-shrink-0">{index + 1}.</span>
                             <div className="min-w-0 flex-1">
-                              <span className="font-medium text-gray-900 dark:text-white truncate block text-sm" title={safeStr(product.product_name)}>
+                              <span className="font-medium text-sm text-foreground truncate block" title={safeStr(product.product_name)}>
                                 {safeStr(product.product_name)}
                               </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
+                              <span className="text-xs text-muted-foreground">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
                             </div>
                           </div>
                           {onRemoveQuoteItem && products.length > 1 && (
@@ -651,9 +651,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                               variant="ghost" 
                               size="sm" 
                               onClick={() => handleRemoveProduct(product.product_id)}
-                              className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
@@ -663,20 +663,20 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 </Card>
 
                 {/* Seção Fornecedores */}
-                <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
-                      <Building2 className="h-4 w-4 text-blue-500" />
+                <Card className="border-border">
+                  <div className="p-4 border-b border-border bg-muted/50">
+                    <h3 className="font-semibold text-foreground flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-info" />
                       Fornecedores ({fornecedores.length})
                     </h3>
                   </div>
                   
                   {/* Adicionar Fornecedor */}
                   {suppliersNotInQuote.length > 0 && onAddQuoteSupplier && (
-                    <div className="p-3 border-b border-gray-100 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/10">
-                      <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="p-4 border-b border-border bg-info/5">
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800 h-9 text-sm">
+                          <SelectTrigger className="flex-1 bg-card">
                             <SelectValue placeholder="Selecione um fornecedor..." />
                           </SelectTrigger>
                           <SelectContent>
@@ -688,40 +688,40 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                         <Button 
                           onClick={handleAddSupplier} 
                           disabled={!selectedSupplierToAdd}
-                          className="bg-blue-600 hover:bg-blue-700 text-white h-9 text-sm"
+                          className="bg-info hover:bg-info/90 text-white"
                         >
-                          <Plus className="h-4 w-4 mr-1" />Adicionar
+                          <Plus className="h-4 w-4 mr-2" />Adicionar
                         </Button>
                       </div>
                     </div>
                   )}
                   
                   {/* Lista de Fornecedores */}
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                  <div className="divide-y divide-border">
                     {fornecedores.length === 0 ? (
-                      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-                        <Building2 className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                        <p className="text-sm">Nenhum fornecedor na cotação</p>
+                      <div className="p-8 text-center text-muted-foreground">
+                        <Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p>Nenhum fornecedor na cotação</p>
                       </div>
                     ) : (
                       fornecedores.map((fornecedor) => (
-                        <div key={fornecedor.id} className="p-2.5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className={cn("w-2 h-2 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
+                        <div key={fornecedor.id} className="p-3 flex items-center justify-between hover:bg-accent/50 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-success" : "bg-warning")} />
                             <div className="min-w-0 flex-1">
-                              <span className="font-medium text-gray-900 dark:text-white truncate block text-sm" title={safeStr(fornecedor.nome)}>
+                              <span className="font-medium text-sm text-foreground truncate block" title={safeStr(fornecedor.nome)}>
                                 {safeStr(fornecedor.nome)}
                               </span>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", 
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className={cn("text-xs", 
                                   fornecedor.status === 'respondido' 
-                                    ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700" 
-                                    : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700"
+                                    ? "bg-success/10 text-success border-success/20" 
+                                    : "bg-warning/10 text-warning border-warning/20"
                                 )}>
                                   {fornecedor.status === 'respondido' ? 'Respondido' : 'Pendente'}
                                 </Badge>
                                 {fornecedor.valorOferecido > 0 && (
-                                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                  <span className="text-sm text-success font-medium">R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 )}
                               </div>
                             </div>
@@ -731,9 +731,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                               variant="ghost" 
                               size="sm" 
                               onClick={() => handleRemoveSupplier(fornecedor.id)}
-                              className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
@@ -743,12 +743,12 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 </Card>
 
                 {/* Aviso */}
-                <Card className="p-3 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <Card className="p-4 bg-warning/10 border-warning/20">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-medium text-amber-800 dark:text-amber-200">Atenção</p>
-                      <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                      <p className="text-sm font-medium text-foreground">Atenção</p>
+                      <p className="text-sm text-muted-foreground mt-1">
                         Ao remover um produto ou fornecedor, os valores já cadastrados serão perdidos.
                       </p>
                     </div>
@@ -761,59 +761,59 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
           {/* Tab Detalhes */}
           <TabsContent value="detalhes" className="flex-1 overflow-auto m-0 p-0">
             <ScrollArea className="h-full">
-              <div className="p-4 sm:p-5 space-y-4">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                  <Card className="p-3 bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700">
-                    <div className="flex items-center gap-1.5 mb-1"><Package className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" /><span className="text-[10px] text-orange-700 dark:text-orange-300 uppercase font-medium">Produtos</span></div>
-                    <p className="text-xl font-bold text-orange-800 dark:text-orange-200">{stats.totalProdutos}</p>
+              <div className="p-5 space-y-5">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <Card className="p-4 bg-primary/10 border-primary/20">
+                    <div className="flex items-center gap-2 mb-2"><Package className="h-4 w-4 text-primary" /><span className="text-xs font-medium text-muted-foreground uppercase">Produtos</span></div>
+                    <p className="text-2xl font-bold text-foreground">{stats.totalProdutos}</p>
                   </Card>
-                  <Card className="p-3 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
-                    <div className="flex items-center gap-1.5 mb-1"><Users className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" /><span className="text-[10px] text-blue-700 dark:text-blue-300 uppercase font-medium">Fornecedores</span></div>
-                    <p className="text-xl font-bold text-blue-800 dark:text-blue-200">{stats.fornecedoresRespondidos}/{stats.totalFornecedores}</p>
+                  <Card className="p-4 bg-info/10 border-info/20">
+                    <div className="flex items-center gap-2 mb-2"><Users className="h-4 w-4 text-info" /><span className="text-xs font-medium text-muted-foreground uppercase">Fornecedores</span></div>
+                    <p className="text-2xl font-bold text-foreground">{stats.fornecedoresRespondidos}/{stats.totalFornecedores}</p>
                   </Card>
-                  <Card className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700">
-                    <div className="flex items-center gap-1.5 mb-1"><DollarSign className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /><span className="text-[10px] text-emerald-700 dark:text-emerald-300 uppercase font-medium">Melhor Valor</span></div>
-                    <p className="text-xl font-bold text-emerald-800 dark:text-emerald-200">R$ {stats.melhorValor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <Card className="p-4 bg-success/10 border-success/20">
+                    <div className="flex items-center gap-2 mb-2"><DollarSign className="h-4 w-4 text-success" /><span className="text-xs font-medium text-muted-foreground uppercase">Melhor Valor</span></div>
+                    <p className="text-2xl font-bold text-success">R$ {stats.melhorValor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </Card>
-                  <Card className="p-3 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700">
-                    <div className="flex items-center gap-1.5 mb-1"><Calendar className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" /><span className="text-[10px] text-purple-700 dark:text-purple-300 uppercase font-medium">Período</span></div>
-                    <p className="text-sm font-bold text-purple-800 dark:text-purple-200">{safeStr(quote.dataInicio)}</p>
-                    <p className="text-[10px] text-purple-600 dark:text-purple-400">até {safeStr(quote.dataFim)}</p>
+                  <Card className="p-4 bg-warning/10 border-warning/20">
+                    <div className="flex items-center gap-2 mb-2"><Calendar className="h-4 w-4 text-warning" /><span className="text-xs font-medium text-muted-foreground uppercase">Período</span></div>
+                    <p className="text-sm font-bold text-foreground">{safeStr(quote.dataInicio)}</p>
+                    <p className="text-xs text-muted-foreground">até {safeStr(quote.dataFim)}</p>
                   </Card>
                 </div>
 
-                <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm"><Package className="h-4 w-4 text-orange-500" />Produtos</h3>
+                <Card className="border-border">
+                  <div className="p-4 border-b border-border bg-muted/50">
+                    <h3 className="font-semibold text-foreground flex items-center gap-2"><Package className="h-4 w-4 text-primary" />Produtos</h3>
                   </div>
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                  <div className="divide-y divide-border">
                     {products.map((product: any, index: number) => (
-                      <div key={product.product_id} className="p-2.5 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-400 dark:text-gray-500 w-5">{index + 1}.</span>
-                          <span className="font-medium text-gray-900 dark:text-white text-sm">{safeStr(product.product_name)}</span>
+                      <div key={product.product_id} className="p-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-muted-foreground w-6">{index + 1}.</span>
+                          <span className="font-medium text-sm text-foreground">{safeStr(product.product_name)}</span>
                         </div>
-                        <Badge variant="outline" className="text-gray-600 dark:text-gray-300 text-xs">{safeStr(product.quantidade)} {safeStr(product.unidade)}</Badge>
+                        <Badge variant="outline" className="text-muted-foreground">{safeStr(product.quantidade)} {safeStr(product.unidade)}</Badge>
                       </div>
                     ))}
                   </div>
                 </Card>
 
-                <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm"><Building2 className="h-4 w-4 text-blue-500" />Fornecedores</h3>
+                <Card className="border-border">
+                  <div className="p-4 border-b border-border bg-muted/50">
+                    <h3 className="font-semibold text-foreground flex items-center gap-2"><Building2 className="h-4 w-4 text-info" />Fornecedores</h3>
                   </div>
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                  <div className="divide-y divide-border">
                     {fornecedores.map((fornecedor) => (
-                      <div key={fornecedor.id} className="p-2.5 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={cn("w-2 h-2 rounded-full", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
-                          <span className="font-medium text-gray-900 dark:text-white text-sm">{safeStr(fornecedor.nome)}</span>
-                          <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", fornecedor.status === 'respondido' ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700" : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700")}>
+                      <div key={fornecedor.id} className="p-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={cn("w-2.5 h-2.5 rounded-full", fornecedor.status === 'respondido' ? "bg-success" : "bg-warning")} />
+                          <span className="font-medium text-sm text-foreground">{safeStr(fornecedor.nome)}</span>
+                          <Badge variant="outline" className={cn("text-xs", fornecedor.status === 'respondido' ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20")}>
                             {fornecedor.status === 'respondido' ? 'Respondido' : 'Pendente'}
                           </Badge>
                         </div>
-                        {fornecedor.valorOferecido > 0 && <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
+                        {fornecedor.valorOferecido > 0 && <span className="font-semibold text-success">R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
                       </div>
                     ))}
                   </div>
@@ -826,15 +826,15 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
           <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0">
             <div className="flex flex-col lg:flex-row h-full">
               {/* Lista de Fornecedores - Sidebar */}
-              <div className="w-full lg:w-52 xl:w-56 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col">
-                <div className="p-2.5 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-1.5">
-                    <Building2 className="h-3.5 w-3.5 text-orange-500" />
-                    <span className="text-xs font-semibold text-gray-700 dark:text-white">Fornecedores</span>
+              <div className="w-full lg:w-56 xl:w-64 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-border bg-muted/50 flex flex-col">
+                <div className="p-3 border-b border-border">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">Fornecedores</span>
                   </div>
                 </div>
-                <ScrollArea className="flex-1 max-h-[80px] lg:max-h-none">
-                  <div className="p-1.5 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible">
+                <ScrollArea className="flex-1 max-h-[100px] lg:max-h-none">
+                  <div className="p-2 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible">
                     {fornecedores.map((fornecedor) => {
                       const total = calcularTotalFornecedor(fornecedor.id);
                       const isSelected = selectedSupplier === fornecedor.id;
@@ -843,32 +843,32 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           key={fornecedor.id} 
                           onClick={() => { setSelectedSupplier(fornecedor.id); setEditingProductId(null); setEditedValues({}); }}
                           className={cn(
-                            "flex-shrink-0 lg:w-full text-left px-2.5 py-2 rounded-lg transition-all",
-                            "min-w-[130px] lg:min-w-0",
+                            "flex-shrink-0 lg:w-full text-left px-3 py-2.5 rounded-lg transition-all",
+                            "min-w-[140px] lg:min-w-0",
                             isSelected 
-                              ? "bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 shadow-sm" 
-                              : "hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent"
+                              ? "bg-primary/10 border border-primary/30 shadow-sm" 
+                              : "hover:bg-accent border border-transparent"
                           )}
                         >
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <div className={cn("w-2 h-2 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-success" : "bg-warning")} />
                             <span 
                               className={cn(
-                                "text-xs font-medium truncate block",
-                                isSelected ? "text-orange-800 dark:text-orange-200" : "text-gray-700 dark:text-white"
+                                "text-sm font-medium truncate block",
+                                isSelected ? "text-primary" : "text-foreground"
                               )} 
                               title={safeStr(fornecedor.nome)}
-                              style={{ maxWidth: '120px' }}
+                              style={{ maxWidth: '140px' }}
                             >
                               {safeStr(fornecedor.nome)}
                             </span>
                           </div>
-                          <div className="mt-1 ml-3.5 flex items-center gap-1.5">
-                            <span className={cn("text-[11px] font-medium", isSelected ? "text-orange-600 dark:text-orange-400" : "text-gray-500 dark:text-gray-400")}>
+                          <div className="mt-1.5 ml-4.5 flex items-center gap-2">
+                            <span className={cn("text-xs font-medium", isSelected ? "text-primary" : "text-muted-foreground")}>
                               R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                             {fornecedor.status === 'respondido' && (
-                              <Badge variant="outline" className="text-[9px] px-1 py-0 h-3.5 bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700">
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-success/10 text-success border-success/20">
                                 OK
                               </Badge>
                             )}
@@ -885,18 +885,18 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 {selectedSupplier ? (
                   <>
                     {/* Header do Fornecedor Selecionado */}
-                    <div className="flex-shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                        <DollarSign className="h-3.5 w-3.5 text-orange-500 flex-shrink-0" />
+                    <div className="flex-shrink-0 px-4 py-3 border-b border-border bg-card flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <DollarSign className="h-4 w-4 text-primary flex-shrink-0" />
                         <span 
-                          className="font-semibold text-gray-900 dark:text-white truncate text-sm" 
+                          className="font-semibold text-foreground truncate text-sm sm:text-base" 
                           title={fornecedores.find(f => f.id === selectedSupplier)?.nome}
-                          style={{ maxWidth: '180px' }}
+                          style={{ maxWidth: '200px' }}
                         >
                           {fornecedores.find(f => f.id === selectedSupplier)?.nome}
                         </span>
                       </div>
-                      <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 flex-shrink-0 text-xs font-semibold">
+                      <Badge className="bg-success/10 text-success border-success/20 flex-shrink-0 text-sm font-semibold">
                         Total: R$ {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </Badge>
                     </div>
@@ -905,25 +905,25 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                     <ScrollArea className="flex-1">
                       <div className="min-w-[350px]">
                         <table className="w-full">
-                          <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+                          <thead className="bg-muted/50 border-b border-border sticky top-0 z-10">
                             <tr>
-                              <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Produto</th>
-                              <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide hidden sm:table-cell">Qtd</th>
-                              <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Valor (R$)</th>
-                              <th className="px-3 sm:px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide w-16">Ação</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Produto</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide hidden sm:table-cell">Qtd</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Valor (R$)</th>
+                              <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wide w-16">Ação</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                          <tbody className="divide-y divide-border">
                             {products.map((product: any) => {
                               const currentValue = getCurrentProductValue(selectedSupplier, product.product_id);
                               const isEditing = editingProductId === product.product_id;
                               const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
                               const isBestPrice = currentValue > 0 && selectedSupplier === bestSupplierId;
                               return (
-                                <tr key={product.product_id} className={cn("hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors", isBestPrice && "bg-green-50/50 dark:bg-green-900/10")}>
-                                  <td className="px-3 sm:px-4 py-3">
+                                <tr key={product.product_id} className={cn("hover:bg-accent/50 transition-colors", isBestPrice && "bg-success/5")}>
+                                  <td className="px-4 py-3">
                                     <div className="flex items-center gap-1">
-                                      <p className="font-medium text-sm text-gray-900 dark:text-white truncate" style={{ maxWidth: '160px' }} title={safeStr(product.product_name)}>
+                                      <p className="font-medium text-sm text-foreground truncate" style={{ maxWidth: '160px' }} title={safeStr(product.product_name)}>
                                         {safeStr(product.product_name)}
                                       </p>
                                       <ProductPriceInfoTooltip 
@@ -931,14 +931,14 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                         productName={safeStr(product.product_name)} 
                                       />
                                     </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 sm:hidden mt-0.5">
+                                    <p className="text-xs text-muted-foreground sm:hidden mt-0.5">
                                       {safeStr(product.quantidade)} {safeStr(product.unidade)}
                                     </p>
                                   </td>
-                                  <td className="px-3 sm:px-4 py-3 hidden sm:table-cell">
-                                    <span className="text-sm text-gray-600 dark:text-gray-300">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
+                                  <td className="px-4 py-3 hidden sm:table-cell">
+                                    <span className="text-sm text-muted-foreground">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
                                   </td>
-                                  <td className="px-3 sm:px-4 py-3">
+                                  <td className="px-4 py-3">
                                     {isEditing ? (
                                       <div className="flex flex-col gap-2">
                                         {/* Row 1: Value input, pricing unit selector, PriceConverter, and action buttons */}
@@ -951,7 +951,7 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                             value={editedValues[product.product_id] || 0}
                                             onChange={(e) => setEditedValues(prev => ({ ...prev, [product.product_id]: Number(e.target.value) }))}
                                             onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(product.product_id); if (e.key === 'Escape') handleCancelEdit(); }}
-                                            className="w-20 sm:w-24 h-8 text-sm bg-white dark:bg-gray-900 border-teal-300 dark:border-teal-700 focus:ring-teal-500" 
+                                            className="w-20 sm:w-24 h-8 text-sm bg-card border-primary/30 focus:ring-primary" 
                                           />
                                           {/* Pricing Unit Selector - Requirements: 1.1 */}
                                           <Select
@@ -967,7 +967,7 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                               }));
                                             }}
                                           >
-                                            <SelectTrigger className="w-[90px] h-8 text-xs border-teal-300 dark:border-teal-700">
+                                            <SelectTrigger className="w-[90px] h-8 text-xs border-primary/30">
                                               <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -999,11 +999,11 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                               size="sm" 
                                               onClick={() => handleSaveEdit(product.product_id)} 
                                               disabled={isConversionFactorRequired(product.product_id) && !editedPricingMetadata[product.product_id]?.fatorConversao}
-                                              className="h-8 w-8 p-0 bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
+                                              className="h-8 w-8 p-0 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
                                             >
                                               <Check className="h-4 w-4" />
                                             </Button>
-                                            <Button size="sm" variant="outline" onClick={handleCancelEdit} className="h-8 w-8 p-0 border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400">
+                                            <Button size="sm" variant="outline" onClick={handleCancelEdit} className="h-8 w-8 p-0 border-destructive/30 text-destructive hover:bg-destructive/10">
                                               <X className="h-4 w-4" />
                                             </Button>
                                           </div>
@@ -1011,7 +1011,7 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                         {/* Row 2: Conversion factor input (conditional) - Requirements: 1.2, 1.5 */}
                                         {isConversionFactorRequired(product.product_id) && (
                                           <div className="flex items-center gap-1.5 pl-0.5">
-                                            <span className="text-[10px] text-gray-500 dark:text-gray-400">Qtd por embalagem:</span>
+                                            <span className="text-[10px] text-muted-foreground">Qtd por embalagem:</span>
                                             <Input
                                               type="number"
                                               value={editedPricingMetadata[product.product_id]?.fatorConversao || ""}
@@ -1028,35 +1028,35 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                               }}
                                               className={cn(
                                                 "w-16 h-7 text-xs rounded-md",
-                                                !editedPricingMetadata[product.product_id]?.fatorConversao ? "border-red-300 dark:border-red-700" : "border-gray-300 dark:border-gray-600"
+                                                !editedPricingMetadata[product.product_id]?.fatorConversao ? "border-destructive/50" : "border-border"
                                               )}
                                               step="1"
                                               min="1"
                                               placeholder="Ex: 12"
                                             />
-                                            <span className="text-[10px] text-gray-400">
+                                            <span className="text-[10px] text-muted-foreground">
                                               {editedPricingMetadata[product.product_id]?.unidadePreco === "cx" ? "un/cx" : "un/pct"}
                                             </span>
                                             {!editedPricingMetadata[product.product_id]?.fatorConversao && (
-                                              <span className="text-[10px] text-red-500">* obrigatório</span>
+                                              <span className="text-[10px] text-destructive">* obrigatório</span>
                                             )}
                                           </div>
                                         )}
                                       </div>
                                     ) : (
                                       <div className="flex items-center gap-2 flex-wrap">
-                                        <span className={cn("font-semibold text-sm", isBestPrice ? "text-green-700 dark:text-green-300" : "text-gray-900 dark:text-white")}>
+                                        <span className={cn("font-semibold text-sm", isBestPrice ? "text-success" : "text-foreground")}>
                                           {formatPriceWithUnit(currentValue, product.product_id)}
                                         </span>
                                         {isBestPrice && (
-                                          <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0 h-5">
+                                          <Badge className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0 h-5">
                                             <TrendingDown className="h-3 w-3 mr-0.5" />Melhor
                                           </Badge>
                                         )}
                                       </div>
                                     )}
                                   </td>
-                                  <td className="px-3 sm:px-4 py-3 text-center">
+                                  <td className="px-4 py-3 text-center">
                                     {!isEditing && (
                                       <Button 
                                         size="sm" 
@@ -1065,7 +1065,7 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                           const currentMetadata = getSupplierItemPricingMetadata(selectedSupplier, product.product_id);
                                           handleStartEdit(product.product_id, currentValue, currentMetadata);
                                         }} 
-                                        className="h-8 w-8 p-0 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30"
+                                        className="h-8 w-8 p-0 text-primary hover:bg-primary/10"
                                       >
                                         <Edit2 className="h-4 w-4" />
                                       </Button>
@@ -1080,10 +1080,10 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                     </ScrollArea>
                   </>
                 ) : (
-                  <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400 p-8">
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground p-8">
                     <div className="text-center">
                       <Building2 className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                      <p className="text-lg font-medium">Selecione um fornecedor</p>
+                      <p className="text-lg font-medium text-foreground">Selecione um fornecedor</p>
                       <p className="text-sm mt-1">Escolha um fornecedor na lista para editar os valores</p>
                     </div>
                   </div>
@@ -1095,16 +1095,16 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
           {/* Tab Converter em Pedido */}
           <TabsContent value="converter" className="flex-1 overflow-hidden m-0 p-0">
             <ScrollArea className="h-full">
-              <div className="p-4 sm:p-5 space-y-4">
+              <div className="p-5 space-y-5">
                 {/* Resumo */}
-                <div className="grid grid-cols-2 gap-2">
-                  <Card className="p-3 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
-                    <div className="flex items-center gap-1.5 mb-1"><DollarSign className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" /><span className="text-[10px] text-blue-700 dark:text-blue-300 uppercase font-medium">Total Selecionado</span></div>
-                    <p className="text-xl font-bold text-blue-800 dark:text-blue-200">R$ {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Card className="p-4 bg-info/10 border-info/20">
+                    <div className="flex items-center gap-2 mb-2"><DollarSign className="h-4 w-4 text-info" /><span className="text-xs font-medium text-muted-foreground uppercase">Total Selecionado</span></div>
+                    <p className="text-2xl font-bold text-foreground">R$ {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </Card>
-                  <Card className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700">
-                    <div className="flex items-center gap-1.5 mb-1"><Award className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /><span className="text-[10px] text-emerald-700 dark:text-emerald-300 uppercase font-medium">Melhor Total</span></div>
-                    <p className="text-xl font-bold text-emerald-800 dark:text-emerald-200">R$ {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <Card className="p-4 bg-success/10 border-success/20">
+                    <div className="flex items-center gap-2 mb-2"><Award className="h-4 w-4 text-success" /><span className="text-xs font-medium text-muted-foreground uppercase">Melhor Total</span></div>
+                    <p className="text-2xl font-bold text-success">R$ {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </Card>
                 </div>
 
@@ -1112,7 +1112,6 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     variant="outline"
-                    size="sm"
                     onClick={() => {
                       // Auto-selecionar melhor fornecedor para cada produto
                       const bestSelections: Record<string, string> = {};
@@ -1123,15 +1122,14 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                       setProductSelections(bestSelections);
                       toast({ title: "✅ Melhores preços selecionados!", description: `Total: R$ ${melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` });
                     }}
-                    className="flex-1 h-8 text-xs border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
+                    className="flex-1 border-success/30 text-success hover:bg-success/10"
                   >
-                    <Award className="h-3.5 w-3.5 mr-1.5" />
+                    <Award className="h-4 w-4 mr-2" />
                     Melhores Preços
                   </Button>
                   {supplierGroups.length > 1 && (
                     <Button
                       variant="outline"
-                      size="sm"
                       onClick={() => {
                         // Selecionar fornecedor com menor total geral
                         const supplierTotalsArray = fornecedores.map(f => {
@@ -1154,19 +1152,19 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           toast({ title: "⚠️ Nenhum fornecedor tem todos os produtos", variant: "destructive" });
                         }
                       }}
-                      className="flex-1 h-8 text-xs border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                      className="flex-1 border-info/30 text-info hover:bg-info/10"
                     >
-                      <Building2 className="h-3.5 w-3.5 mr-1.5" />
+                      <Building2 className="h-4 w-4 mr-2" />
                       Fornecedor Único
                     </Button>
                   )}
                 </div>
 
                 {totalSelecao > melhorTotal && (
-                  <Card className="p-2.5 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700">
+                  <Card className="p-3 bg-warning/10 border-warning/20">
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                      <span className="text-xs text-amber-700 dark:text-amber-300">
+                      <AlertCircle className="h-4 w-4 text-warning" />
+                      <span className="text-sm text-foreground">
                         Economize R$ {(totalSelecao - melhorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} selecionando os melhores preços
                       </span>
                     </div>
@@ -1174,23 +1172,23 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 )}
 
                 {/* Tabela de seleção */}
-                <Card className="border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="p-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-xs">
-                      <Package className="h-3.5 w-3.5 text-orange-500" />Selecione o fornecedor para cada produto
+                <Card className="border-border overflow-hidden">
+                  <div className="p-3 border-b border-border bg-muted/50">
+                    <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
+                      <Package className="h-4 w-4 text-primary" />Selecione o fornecedor para cada produto
                     </h3>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[450px]">
-                      <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                      <thead className="bg-muted/50 border-b border-border">
                         <tr>
-                          <th className="px-2 py-2 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase">Produto</th>
-                          <th className="px-2 py-2 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase">Qtd</th>
-                          <th className="px-2 py-2 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase">Fornecedor</th>
-                          <th className="px-2 py-2 text-right text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase">Valor</th>
+                          <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Produto</th>
+                          <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Qtd</th>
+                          <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Fornecedor</th>
+                          <th className="px-3 py-2 text-right text-xs font-semibold text-muted-foreground uppercase">Valor</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                      <tbody className="divide-y divide-border">
                         {products.map((product: any) => {
                           const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
                           const selectedSupplierId = productSelections[product.product_id];
@@ -1198,16 +1196,16 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           const isBest = selectedSupplierId === bestSupplierId;
 
                           return (
-                            <tr key={product.product_id} className={cn("hover:bg-gray-50 dark:hover:bg-gray-800/50", isBest && "bg-emerald-50/50 dark:bg-emerald-900/10")}>
-                              <td className="px-2 py-2">
-                                <p className="font-medium text-xs text-gray-900 dark:text-white truncate max-w-[90px] sm:max-w-[130px]" title={safeStr(product.product_name)}>{safeStr(product.product_name)}</p>
+                            <tr key={product.product_id} className={cn("hover:bg-accent/50", isBest && "bg-success/5")}>
+                              <td className="px-3 py-2">
+                                <p className="font-medium text-sm text-foreground truncate max-w-[100px] sm:max-w-[150px]" title={safeStr(product.product_name)}>{safeStr(product.product_name)}</p>
                               </td>
-                              <td className="px-2 py-2">
-                                <span className="text-xs text-gray-600 dark:text-gray-300">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
+                              <td className="px-3 py-2">
+                                <span className="text-sm text-muted-foreground">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
                               </td>
-                              <td className="px-2 py-2">
+                              <td className="px-3 py-2">
                                 <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
-                                  <SelectTrigger className="w-[140px] sm:w-[180px] h-8 bg-white dark:bg-gray-800 text-xs">
+                                  <SelectTrigger className="w-[160px] sm:w-[200px] h-9 bg-card text-sm">
                                     <SelectValue placeholder="Selecione..." />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -1216,10 +1214,10 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                       const isBestOption = f.id === bestSupplierId;
                                       return (
                                         <SelectItem key={f.id} value={f.id}>
-                                          <div className="flex items-center gap-1.5">
-                                            <span className="truncate text-xs" style={{ maxWidth: '80px' }} title={safeStr(f.nome)}>{safeStr(f.nome)}</span>
-                                            <span className="text-gray-500 text-xs flex-shrink-0">R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                            {isBestOption && <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-[9px] px-1 flex-shrink-0">Melhor</Badge>}
+                                          <div className="flex items-center gap-2">
+                                            <span className="truncate text-sm" style={{ maxWidth: '100px' }} title={safeStr(f.nome)}>{safeStr(f.nome)}</span>
+                                            <span className="text-muted-foreground text-sm flex-shrink-0">R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            {isBestOption && <Badge className="bg-success/10 text-success border-success/20 text-xs px-1.5 flex-shrink-0">Melhor</Badge>}
                                           </div>
                                       </SelectItem>
                                     );
@@ -1227,8 +1225,8 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                 </SelectContent>
                               </Select>
                             </td>
-                              <td className="px-2 py-2 text-right">
-                                <span className={cn("font-semibold text-xs", isBest ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white")}>
+                              <td className="px-3 py-2 text-right">
+                                <span className={cn("font-semibold text-sm", isBest ? "text-success" : "text-foreground")}>
                                   R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               </td>
@@ -1242,26 +1240,26 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
 
                 {/* Pedidos que serão gerados */}
                 {supplierGroups.length > 0 && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <div className="p-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                      <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-xs">
-                        <ShoppingCart className="h-3.5 w-3.5 text-orange-500" />
+                  <Card className="border-border">
+                    <div className="p-3 border-b border-border bg-muted/50">
+                      <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm">
+                        <ShoppingCart className="h-4 w-4 text-primary" />
                         {supplierGroups.length === 1 ? "Pedido que será gerado" : `${supplierGroups.length} pedidos`}
                       </h3>
                     </div>
-                    <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                    <div className="divide-y divide-border">
                       {supplierGroups.map((group, index) => (
-                        <div key={group.supplierId} className="p-2.5">
+                        <div key={group.supplierId} className="p-3">
                           <div className="flex items-center justify-between gap-2 mb-1">
-                            <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 flex-shrink-0 text-[10px] px-1.5">#{index + 1}</Badge>
-                              <span className="font-semibold text-gray-900 dark:text-white truncate text-xs" style={{ maxWidth: '150px' }} title={group.supplierName}>{group.supplierName}</span>
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <Badge variant="outline" className="bg-info/10 text-info border-info/20 flex-shrink-0 text-xs px-2">#{index + 1}</Badge>
+                              <span className="font-semibold text-foreground truncate text-sm" style={{ maxWidth: '180px' }} title={group.supplierName}>{group.supplierName}</span>
                             </div>
-                            <span className="font-bold text-emerald-600 dark:text-emerald-400 flex-shrink-0 text-sm">
+                            <span className="font-bold text-success flex-shrink-0 text-base">
                               R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                           </div>
-                          <div className="text-[10px] text-gray-600 dark:text-gray-400 line-clamp-1">
+                          <div className="text-xs text-muted-foreground line-clamp-1">
                             {group.products.map((p: any) => safeStr(p.product_name)).join(", ")}
                           </div>
                         </div>
@@ -1271,20 +1269,20 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 )}
 
                 {/* Data de entrega e observações */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-white mb-1">Data de Entrega *</label>
-                    <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className="bg-white dark:bg-gray-800 h-9 text-sm" min={new Date().toISOString().split('T')[0]} />
+                    <label className="block text-sm font-medium text-foreground mb-1.5">Data de Entrega *</label>
+                    <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className="bg-card" min={new Date().toISOString().split('T')[0]} />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-white mb-1">Observações</label>
-                    <Input value={observations} onChange={(e) => setObservations(e.target.value)} placeholder="Opcional..." className="bg-white dark:bg-gray-800 h-9 text-sm" />
+                    <label className="block text-sm font-medium text-foreground mb-1.5">Observações</label>
+                    <Input value={observations} onChange={(e) => setObservations(e.target.value)} placeholder="Opcional..." className="bg-card" />
                   </div>
                 </div>
 
                 {/* Botão de converter */}
-                <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white h-10 text-sm font-semibold">
-                  <ShoppingCart className="h-4 w-4 mr-2" />
+                <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-11 text-base font-semibold">
+                  <ShoppingCart className="h-5 w-5 mr-2" />
                   {supplierGroups.length > 1 ? `Gerar ${supplierGroups.length} Pedidos` : "Converter em Pedido"}
                 </Button>
               </div>
@@ -1293,8 +1291,8 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
         </Tabs>
 
         {/* Footer */}
-        <div className="flex-shrink-0 px-4 py-2.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-end">
-          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} className="border-gray-300 dark:border-gray-600 dark:text-gray-300 h-8 text-xs">Fechar</Button>
+        <div className="flex-shrink-0 px-5 py-3 border-t border-border bg-muted/50 flex justify-end">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="text-muted-foreground">Fechar</Button>
         </div>
       </DialogContent>
     </Dialog>
