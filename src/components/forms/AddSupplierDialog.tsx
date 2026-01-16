@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Building2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
@@ -202,7 +202,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
           {/* Seção: Informações da Empresa */}
           <div className={isMobile ? 'space-y-3' : 'space-y-3.5'}>
             <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-1">
-              <span className="w-1 h-4 bg-gradient-to-b from-green-600 to-emerald-600 rounded-full"></span>
+              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
               Informações da Empresa
             </h3>
             
@@ -266,7 +266,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
           {/* Seção: Informações de Contato */}
           <div className={isMobile ? 'space-y-3' : 'space-y-3.5'}>
             <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-1">
-              <span className="w-1 h-4 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></span>
+              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
               Informações de Contato
             </h3>
 
@@ -330,12 +330,12 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
 
           {/* Dica de preenchimento - Ocultar no mobile */}
           {!isMobile && (
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border border-green-200/50 dark:border-green-800/30 rounded-lg p-3">
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/30 border border-gray-200/50 dark:border-gray-700/30 rounded-lg p-3">
               <div className="flex items-start gap-2">
                 <div className="text-lg">💡</div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-green-900 dark:text-green-300 text-xs mb-1.5">Dicas Rápidas</h4>
-                  <ul className="text-xs text-green-800 dark:text-green-400 space-y-0.5">
+                  <h4 className="font-semibold text-gray-700 dark:text-gray-300 text-xs mb-1.5">Dicas Rápidas</h4>
+                  <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
                     <li>• Campos com * são obrigatórios</li>
                     <li>• Email usado para cotações</li>
                     <li>• Mantenha dados atualizados</li>
@@ -360,7 +360,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
             <Button 
               type="button"
               onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
-              className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200`}
+              className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200`}
             >
               <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
               Adicionar
@@ -370,7 +370,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                 type="button"
                 onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
                 variant="outline"
-                className="h-9 rounded-lg border-green-500 dark:border-green-400 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/20 text-sm px-4"
+                className="h-9 rounded-lg border-orange-400 dark:border-orange-500 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-sm px-4"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Criar Mais
@@ -398,8 +398,8 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
           <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
-                  <Plus className="h-5 w-5" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                  <Building2 className="h-5 w-5" />
                 </div>
                 <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
                   Novo Fornecedor
@@ -439,8 +439,8 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
         <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center text-white flex-shrink-0">
-                <Plus className="h-4 w-4" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
+                <Building2 className="h-4 w-4" />
               </div>
               <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                 Novo Fornecedor

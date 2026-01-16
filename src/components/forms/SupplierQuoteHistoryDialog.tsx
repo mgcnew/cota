@@ -155,58 +155,67 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
   // Conteúdo do modal (reutilizado em mobile e desktop)
   const modalContent = (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-      <div className={`${isMobile ? 'px-4 pt-4' : 'px-6 pt-4'} border-b border-gray-200 dark:border-gray-700`}>
-        <TabsList className={`grid grid-cols-2 ${isMobile ? 'w-full' : 'w-full sm:w-auto'}`}>
-          <TabsTrigger value="quotes" className="flex items-center gap-2">
-            <Package className="h-4 w-4" />
+      <div className={`${isMobile ? 'px-4 pt-3 pb-3' : 'px-5 pt-3 pb-3'} border-b border-gray-200 dark:border-gray-700`}>
+        <TabsList className={`h-10 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 ${isMobile ? 'w-full grid grid-cols-2' : 'w-auto inline-flex'}`}>
+          <TabsTrigger 
+            value="quotes" 
+            className="h-8 px-4 text-xs font-medium rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 data-[state=active]:shadow-sm transition-all duration-200 flex items-center gap-1.5"
+          >
+            <Package className="h-3.5 w-3.5" />
             Cotações
           </TabsTrigger>
-          <TabsTrigger value="orders" className="flex items-center gap-2">
-            <ClipboardList className="h-4 w-4" />
+          <TabsTrigger 
+            value="orders" 
+            className="h-8 px-4 text-xs font-medium rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 data-[state=active]:shadow-sm transition-all duration-200 flex items-center gap-1.5"
+          >
+            <ClipboardList className="h-3.5 w-3.5" />
             Pedidos
           </TabsTrigger>
         </TabsList>
       </div>
 
-      <TabsContent value="quotes" className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+      <TabsContent value="quotes" className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-5'}`}>
         <div className={`flex flex-col gap-4 ${isMobile ? '' : 'lg:flex-row lg:items-stretch'}`}>
           {!isMobile && (
-            <div className="lg:w-72 flex-shrink-0 space-y-4">
-                <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/60 dark:border-blue-900/40 dark:bg-blue-900/20">
-                  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3">Resumo de Cotações</h4>
-                  <div className="space-y-2 text-xs text-blue-900/80 dark:text-blue-100/80">
+            <div className="lg:w-64 flex-shrink-0 space-y-4">
+                <div className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                  <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                    <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                    Resumo de Cotações
+                  </h4>
+                  <div className="space-y-2.5 text-xs text-gray-600 dark:text-gray-300">
                     <div className="flex justify-between">
                       <span>Total de cotações</span>
-                      <span className="font-semibold">{quoteStats.totalQuotes}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{quoteStats.totalQuotes}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Vitórias</span>
-                      <span className="font-semibold">{quoteStats.wonQuotes}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{quoteStats.wonQuotes}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Taxa de vitória</span>
-                      <span className="font-semibold">{quoteStats.totalQuotes ? `${quoteStats.winRate.toFixed(1)}%` : "-"}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{quoteStats.totalQuotes ? `${quoteStats.winRate.toFixed(1)}%` : "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Produtos atendidos</span>
-                      <span className="font-semibold">{quoteStats.uniqueProducts}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{quoteStats.uniqueProducts}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Preço médio</span>
-                      <span className="font-semibold">{quoteStats.totalQuotes ? `R$ ${quoteStats.avgPrice.toFixed(2)}` : '-'}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{quoteStats.totalQuotes ? `R$ ${quoteStats.avgPrice.toFixed(2)}` : '-'}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wide block">Filtrar produtos</label>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 block">Filtrar produtos</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       placeholder="Buscar produtos..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 h-9 text-sm rounded-lg border-gray-200 dark:border-gray-700"
                     />
                   </div>
                 </div>
@@ -215,24 +224,27 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
 
           {/* Mobile: Resumo no topo */}
           {isMobile && (
-            <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/60 dark:border-blue-900/40 dark:bg-blue-900/20 mb-4">
-              <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3">Resumo de Cotações</h4>
-              <div className="grid grid-cols-2 gap-3 text-xs text-blue-900/80 dark:text-blue-100/80">
+            <div className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 mb-3">
+              <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                Resumo de Cotações
+              </h4>
+              <div className="grid grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-300">
                 <div>
                   <span className="block mb-1">Total</span>
-                  <span className="font-semibold text-base">{quoteStats.totalQuotes}</span>
+                  <span className="font-semibold text-base text-gray-900 dark:text-white">{quoteStats.totalQuotes}</span>
                 </div>
                 <div>
                   <span className="block mb-1">Vitórias</span>
-                  <span className="font-semibold text-base">{quoteStats.wonQuotes}</span>
+                  <span className="font-semibold text-base text-gray-900 dark:text-white">{quoteStats.wonQuotes}</span>
                 </div>
                 <div>
                   <span className="block mb-1">Taxa de vitória</span>
-                  <span className="font-semibold text-base">{quoteStats.totalQuotes ? `${quoteStats.winRate.toFixed(1)}%` : "-"}</span>
+                  <span className="font-semibold text-base text-gray-900 dark:text-white">{quoteStats.totalQuotes ? `${quoteStats.winRate.toFixed(1)}%` : "-"}</span>
                 </div>
                 <div>
                   <span className="block mb-1">Preço médio</span>
-                  <span className="font-semibold text-base">{quoteStats.totalQuotes ? `R$ ${quoteStats.avgPrice.toFixed(2)}` : '-'}</span>
+                  <span className="font-semibold text-base text-gray-900 dark:text-white">{quoteStats.totalQuotes ? `R$ ${quoteStats.avgPrice.toFixed(2)}` : '-'}</span>
                 </div>
               </div>
             </div>
@@ -240,14 +252,14 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
 
           {/* Mobile: Busca no topo */}
           {isMobile && (
-            <div className="mb-4">
+            <div className="mb-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Buscar produtos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-11 text-base"
+                  className="pl-10 h-11 text-base rounded-lg border-gray-200 dark:border-gray-700"
                 />
               </div>
             </div>
@@ -256,7 +268,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
           <div className={`${isMobile ? 'space-y-3' : 'flex-1 space-y-4'}`}>
                 {quotesLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
                   </div>
                 ) : quotesError ? (
                   <div className="text-center py-12">
@@ -264,9 +276,9 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                     <div className="text-sm text-gray-500">{quotesError.message}</div>
                   </div>
                 ) : filteredAndSortedProducts.length === 0 ? (
-                  <div className="text-center py-12 border border-dashed border-blue-200 dark:border-blue-900/40 rounded-xl">
-                    <Package className="h-12 w-12 text-blue-400 mx-auto mb-4" />
-                    <div className="text-blue-700 dark:text-blue-200 mb-2">
+                  <div className="text-center py-12 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl">
+                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <div className="text-gray-600 dark:text-gray-300 mb-2">
                       {baseUniqueProducts.length === 0 ? "Nenhum produto cotado" : "Nenhum produto encontrado"}
                     </div>
                     {baseUniqueProducts.length > 0 && (
@@ -274,7 +286,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                         onClick={() => {
                           setSearchTerm("");
                         }}
-                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="mt-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-lg hover:from-orange-700 hover:to-amber-700 transition-colors text-sm font-medium"
                       >
                         Limpar filtros
                       </button>
@@ -286,7 +298,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                     {filteredAndSortedProducts.map((product) => {
                       const productQuotes = quoteHistory.filter(q => q.product === product.name);
                       return productQuotes.map((quote, quoteIndex) => (
-                        <div key={`${product.name}-${quoteIndex}`} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800/60">
+                        <div key={`${product.name}-${quoteIndex}`} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
                               <span className="font-semibold text-gray-900 dark:text-white text-base">{quote.product}</span>
@@ -304,7 +316,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                             </div>
                             <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                               <span>{formatDate(String(quote.date))}</span>
-                              <span className="font-semibold text-gray-900 dark:text-white">R$ {quote.price.toFixed(2)}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">R$ {quote.price.toFixed(2)}</span>
                             </div>
                           </div>
                         </div>
@@ -312,76 +324,69 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                     })}
                   </div>
                 ) : (
-                  <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div className="overflow-x-auto">
-                      <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead className="bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-900/30 dark:to-purple-900/30 border-b border-blue-100 dark:border-blue-800">
+                      <table className="w-full">
+                        <thead>
                           <tr>
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 dark:text-blue-100 uppercase tracking-wider w-[100px]">
-                              <div className="flex items-center gap-1.5">
-                                <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
-                                <span>Data</span>
+                            <td colSpan={4} className="p-0">
+                              <div className="flex items-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+                                <div className="w-[25%] flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Data</span>
+                                </div>
+                                <div className="w-[40%] flex items-center gap-2">
+                                  <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</span>
+                                </div>
+                                <div className="w-[20%] flex items-center gap-2 justify-center">
+                                  <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Preço</span>
+                                </div>
+                                <div className="w-[15%] flex items-center gap-2 justify-center">
+                                  <Award className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
+                                </div>
                               </div>
-                            </th>
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 dark:text-blue-100 uppercase tracking-wider">
-                              <div className="flex items-center gap-1.5">
-                                <Package className="h-3.5 w-3.5 flex-shrink-0" />
-                                <span>Produto</span>
-                              </div>
-                            </th>
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 dark:text-blue-100 uppercase tracking-wider w-[90px]">
-                              <div className="flex items-center gap-1.5">
-                                <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
-                                <span>Preço</span>
-                              </div>
-                            </th>
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 dark:text-blue-100 uppercase tracking-wider w-[90px]">
-                              <div className="flex items-center gap-1.5">
-                                <Award className="h-3.5 w-3.5 flex-shrink-0" />
-                                <span>Status</span>
-                              </div>
-                            </th>
+                            </td>
                           </tr>
                         </thead>
-                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody>
                           {filteredAndSortedProducts.map((product, index) => {
                             const productQuotes = quoteHistory.filter(q => q.product === product.name);
                             
                             return productQuotes.map((quote, quoteIndex) => (
-                              <tr 
-                                key={`${product.name}-${quoteIndex}`}
-                                className={cn(
-                                  "hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/30 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 transition-all duration-200",
-                                  (index + quoteIndex) % 2 === 0 ? "bg-white dark:bg-gray-800" : "bg-gray-50/30 dark:bg-gray-800/50"
-                                )}
-                              >
-                                <td className="px-3 py-3 text-sm">
-                                  <div className="font-medium text-gray-900 dark:text-gray-100">
-                                    {formatDate(String(quote.date))}
+                              <tr key={`${product.name}-${quoteIndex}`}>
+                                <td colSpan={4} className="px-1 py-1">
+                                  <div className={cn(
+                                    "flex items-center px-4 py-2.5 rounded-lg transition-colors duration-150",
+                                    "bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                  )}>
+                                    <div className="w-[25%] text-sm font-medium text-gray-900 dark:text-gray-100">
+                                      {formatDate(String(quote.date))}
+                                    </div>
+                                    <div className="w-[40%] text-sm font-medium text-gray-900 dark:text-gray-100 truncate" title={quote.product}>
+                                      {quote.product}
+                                    </div>
+                                    <div className="w-[20%] text-center">
+                                      <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">
+                                        R$ {quote.price.toFixed(2)}
+                                      </span>
+                                    </div>
+                                    <div className="w-[15%] flex justify-center">
+                                      <Badge 
+                                        variant={quote.isWinner ? "default" : "secondary"}
+                                        className={cn(
+                                          "font-medium text-xs",
+                                          quote.isWinner 
+                                            ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800" 
+                                            : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
+                                        )}
+                                      >
+                                        {quote.isWinner ? "Ganha" : "Não"}
+                                      </Badge>
+                                    </div>
                                   </div>
-                                </td>
-                                <td className="px-3 py-3 text-sm">
-                                  <div className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px]" title={quote.product}>
-                                    {quote.product}
-                                  </div>
-                                </td>
-                                <td className="px-3 py-3 text-sm">
-                                  <div className="font-medium text-gray-900 dark:text-gray-100">
-                                    R$ {quote.price.toFixed(2)}
-                                  </div>
-                                </td>
-                                <td className="px-3 py-3 text-sm">
-                                  <Badge 
-                                    variant={quote.isWinner ? "default" : "secondary"}
-                                    className={cn(
-                                      "font-medium text-xs",
-                                      quote.isWinner 
-                                        ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800" 
-                                        : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
-                                    )}
-                                  >
-                                    {quote.isWinner ? "Ganha" : "Não"}
-                                  </Badge>
                                 </td>
                               </tr>
                             ));
@@ -395,32 +400,35 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
         </div>
       </TabsContent>
 
-      <TabsContent value="orders" className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+      <TabsContent value="orders" className={`flex-1 overflow-auto ${isMobile ? 'p-4' : 'p-5'}`}>
         <div className={`flex flex-col gap-4 ${isMobile ? '' : 'lg:flex-row lg:items-stretch'}`}>
           {!isMobile && (
-            <div className="lg:w-72 flex-shrink-0 space-y-4">
-                <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/60 dark:border-emerald-900/40 dark:bg-emerald-900/20">
-                  <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-3">Resumo de Pedidos</h4>
-                  <div className="space-y-2 text-xs text-emerald-900/80 dark:text-emerald-100/80">
+            <div className="lg:w-64 flex-shrink-0 space-y-4">
+                <div className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                  <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                    <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                    Resumo de Pedidos
+                  </h4>
+                  <div className="space-y-2.5 text-xs text-gray-600 dark:text-gray-300">
                     <div className="flex justify-between">
                       <span>Total de pedidos</span>
-                      <span className="font-semibold">{orderStats.totalOrders}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{orderStats.totalOrders}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Pedidos entregues</span>
-                      <span className="font-semibold">{orderStats.deliveredOrders}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{orderStats.deliveredOrders}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Valor total</span>
-                      <span className="font-semibold">{orderStats.totalOrders ? `R$ ${orderStats.totalValue.toFixed(2)}` : '-'}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{orderStats.totalOrders ? `R$ ${orderStats.totalValue.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Ticket médio</span>
-                      <span className="font-semibold">{orderStats.totalOrders ? `R$ ${orderStats.avgValue.toFixed(2)}` : '-'}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{orderStats.totalOrders ? `R$ ${orderStats.avgValue.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Último pedido</span>
-                      <span className="font-semibold">{orderStats.lastOrderDate ? formatDate(orderStats.lastOrderDate) : '-'}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{orderStats.lastOrderDate ? formatDate(orderStats.lastOrderDate) : '-'}</span>
                     </div>
                   </div>
                 </div>
@@ -429,24 +437,27 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
 
           {/* Mobile: Resumo no topo */}
           {isMobile && (
-            <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/60 dark:border-emerald-900/40 dark:bg-emerald-900/20 mb-4">
-              <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-3">Resumo de Pedidos</h4>
-              <div className="grid grid-cols-2 gap-3 text-xs text-emerald-900/80 dark:text-emerald-100/80">
+            <div className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 mb-3">
+              <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                Resumo de Pedidos
+              </h4>
+              <div className="grid grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-300">
                 <div>
                   <span className="block mb-1">Total</span>
-                  <span className="font-semibold text-base">{orderStats.totalOrders}</span>
+                  <span className="font-semibold text-base text-gray-900 dark:text-white">{orderStats.totalOrders}</span>
                 </div>
                 <div>
                   <span className="block mb-1">Entregues</span>
-                  <span className="font-semibold text-base">{orderStats.deliveredOrders}</span>
+                  <span className="font-semibold text-base text-gray-900 dark:text-white">{orderStats.deliveredOrders}</span>
                 </div>
                 <div>
                   <span className="block mb-1">Valor total</span>
-                  <span className="font-semibold text-base">{orderStats.totalOrders ? `R$ ${orderStats.totalValue.toFixed(2)}` : '-'}</span>
+                  <span className="font-semibold text-base text-gray-900 dark:text-white">{orderStats.totalOrders ? `R$ ${orderStats.totalValue.toFixed(2)}` : '-'}</span>
                 </div>
                 <div>
                   <span className="block mb-1">Ticket médio</span>
-                  <span className="font-semibold text-base">{orderStats.totalOrders ? `R$ ${orderStats.avgValue.toFixed(2)}` : '-'}</span>
+                  <span className="font-semibold text-base text-gray-900 dark:text-white">{orderStats.totalOrders ? `R$ ${orderStats.avgValue.toFixed(2)}` : '-'}</span>
                 </div>
               </div>
             </div>
@@ -455,7 +466,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
           <div className={isMobile ? 'space-y-3' : 'flex-1'}>
                 {ordersLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
                   </div>
                 ) : ordersError ? (
                   <div className="text-center py-12">
@@ -463,14 +474,14 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                     <div className="text-sm text-gray-500">{ordersError.message}</div>
                   </div>
                 ) : orderHistory.length === 0 ? (
-                  <div className="text-center py-12 border border-dashed border-emerald-200 dark:border-emerald-900/40 rounded-xl">
-                    <ClipboardList className="h-12 w-12 text-emerald-400 mx-auto mb-4" />
-                    <div className="text-emerald-700 dark:text-emerald-200">Nenhum pedido registrado com este fornecedor</div>
+                  <div className="text-center py-12 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl">
+                    <ClipboardList className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <div className="text-gray-600 dark:text-gray-300">Nenhum pedido registrado com este fornecedor</div>
                   </div>
                 ) : (
                   <div className={isMobile ? 'space-y-3' : 'space-y-4'}>
                     {ordersWithTrend.map((order) => (
-                      <div key={order.id} className={`border border-gray-200 dark:border-gray-700 rounded-xl ${isMobile ? 'p-3' : 'p-4'} bg-white dark:bg-gray-800/60`}>
+                      <div key={order.id} className={`border border-gray-200 dark:border-gray-700 rounded-xl ${isMobile ? 'p-3' : 'p-4'} bg-white dark:bg-gray-800`}>
                         <div className={`flex flex-col ${isMobile ? '' : 'md:flex-row md:justify-between md:items-start'} gap-4`}>
                           <div className="space-y-2 flex-1">
                             <div className={`flex items-center justify-between gap-2 ${isMobile ? 'text-base' : 'text-sm'} font-semibold text-gray-900 dark:text-white`}>
@@ -482,9 +493,9 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                               {order.trend && (
                                 <div className={cn(
                                   "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
-                                  order.trend === 'up' && "bg-red-50 text-red-600 border border-red-200",
-                                  order.trend === 'down' && "bg-green-50 text-green-600 border border-green-200",
-                                  order.trend === 'same' && "bg-gray-50 text-gray-600 border border-gray-200"
+                                  order.trend === 'up' && "bg-red-100 text-red-600 border border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800",
+                                  order.trend === 'down' && "bg-green-100 text-green-600 border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800",
+                                  order.trend === 'same' && "bg-gray-100 text-gray-600 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                                 )}>
                                   {order.trend === 'up' && <TrendingUp className="h-3 w-3" />}
                                   {order.trend === 'down' && <TrendingDown className="h-3 w-3" />}
@@ -508,7 +519,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                               </div>
                               <div>
                                 <p className="font-semibold text-gray-800 dark:text-white">Valor</p>
-                                <p>R$ {order.totalValue.toFixed(2)}</p>
+                                <p className="font-semibold text-emerald-600 dark:text-emerald-400">R$ {order.totalValue.toFixed(2)}</p>
                               </div>
                               <div>
                                 <p className="font-semibold text-gray-800 dark:text-white">Status</p>
@@ -517,10 +528,10 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                                   className={cn(
                                     "px-2 py-0.5 text-xs font-semibold",
                                     order.status === "entregue" || order.status === "completed"
-                                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                      ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800"
                                       : order.status === "pendente" || order.status === "processing"
-                                      ? "bg-amber-50 text-amber-700 border-amber-200"
-                                      : "bg-gray-50 text-gray-700 border-gray-200"
+                                      ? "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800"
+                                      : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                                   )}
                                 >
                                   {order.status}
@@ -584,17 +595,17 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
           </SheetTrigger>
         )}
         <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
-          <SheetHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <SheetHeader className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
                   <Package className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
                     Histórico do Fornecedor
                   </SheetTitle>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                     {supplierName}
                   </p>
                 </div>
@@ -631,16 +642,32 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
           )}
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col [&>button]:hidden bg-white dark:bg-gray-900">
-        <DialogHeader className="flex-shrink-0 border-b border-gray-100 dark:border-gray-700 pb-4">
-          <DialogTitle className="flex items-center justify-between gap-3 text-xl font-bold text-gray-900 dark:text-white">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
-                <Package className="h-5 w-5 text-white" />
+      <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col [&>button]:hidden bg-white dark:bg-gray-900 border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
+                <Package className="h-4 w-4" />
               </div>
-              <span>Histórico do Fornecedor - {supplierName}</span>
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+                  Histórico do Fornecedor
+                </DialogTitle>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                  {supplierName}
+                </p>
+              </div>
             </div>
-          </DialogTitle>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => handleOpenChange(false)}
+              className="h-8 w-8 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
         <div className="flex flex-col flex-1 overflow-hidden">
           {modalContent}

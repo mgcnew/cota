@@ -315,22 +315,29 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-xl">
-        <DialogHeader>
-          <DialogTitle>Importar Fornecedores em Massa</DialogTitle>
-          <DialogDescription>
-            Importe múltiplos fornecedores de uma vez usando arquivos CSV ou Excel
-          </DialogDescription>
+      <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-xl p-0 overflow-hidden">
+        <DialogHeader className="px-5 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+              <FileSpreadsheet className="h-5 w-5" />
+            </div>
+            <div>
+              <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">Importar Fornecedores</DialogTitle>
+              <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
+                Importe múltiplos fornecedores usando arquivos CSV ou Excel
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="p-5 space-y-4 overflow-y-auto max-h-[calc(85vh-180px)]">
           {/* Download Template */}
           <Card className="border-dashed">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <FileSpreadsheet className="h-5 w-5 text-primary" />
+                  <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <FileSpreadsheet className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                   </div>
                   <div>
                     <p className="font-medium">Precisa de um template?</p>
@@ -478,13 +485,14 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </Card>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/40">
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancelar
           </Button>
           <Button 
             onClick={handleImport}
             disabled={parsedData.length === 0 || isProcessing}
+            className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white"
           >
             {isProcessing ? "Processando..." : `Importar ${parsedData.length} Fornecedores`}
           </Button>
