@@ -7,12 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, Building2, X, DollarSign, Edit2, TrendingDown, FileText, Calendar, Check, ClipboardList, Users, ShoppingCart, AlertCircle, Award, Plus, Trash2, Settings, Trophy, Star } from "lucide-react";
+import { Package, Building2, X, DollarSign, Edit2, TrendingDown, FileText, Calendar, Check, ClipboardList, Users, ShoppingCart, AlertCircle, Award, Plus, Trash2, Settings, Trophy, Star, Download } from "lucide-react";
 import { ProductPriceInfoTooltip } from "@/components/forms/ProductPriceInfoTooltip";
+import { QuoteExportTab } from "@/components/cotacoes/view-dialog/QuoteExportTab";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { Quote } from "@/hooks/useCotacoes";
-import { PricingUnit } from "@/utils/priceNormalization";
+import { PricingUnit, normalizePrice, PriceMetadata } from "@/utils/priceNormalization";
 import { PriceConverter } from "@/components/forms/PriceConverter";
 
 // Pricing unit options for the selector - Requirements: 1.1
@@ -243,6 +244,30 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
     setEditedPricingMetadata({});
   }, []);
 
+  // Get normalized unit price for comparison
+  const getNormalizedUnitPrice = useCallback((supplierId: string, productId: string): number => {
+    const supplierItem = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === productId);
+    if (!supplierItem || !supplierItem.valor_oferecido || supplierItem.valor_oferecido <= 0) return 0;
+
+    const product = products.find((p: any) => p.product_id === productId);
+    if (!product) return 0;
+
+    try {
+      const priceMetadata: PriceMetadata = {
+        valorOferecido: supplierItem.valor_oferecido,
+        unidadePreco: supplierItem.unidade_preco || 'un',
+        fatorConversao: supplierItem.fator_conversao || undefined,
+        quantidadePorEmbalagem: supplierItem.quantidade_por_embalagem || undefined,
+      };
+
+      const normalized = normalizePrice(priceMetadata, product.quantidade, product.unidade);
+      return normalized.valorUnitario;
+    } catch (error) {
+      console.error('Error normalizing price:', error);
+      return supplierItem.valor_oferecido;
+    }
+  }, [supplierItems, products]);
+
   // Memoizar totais por fornecedor
   const supplierTotals = useMemo(() => {
     const totals = new Map<string, number>();
@@ -443,6 +468,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
             <TabsTrigger value="resumo" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
               <Trophy className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Resumo Geral</span><span className="sm:hidden">Resumo</span>
             </TabsTrigger>
+            <TabsTrigger value="exportar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
+              <Download className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Exportar HTML</span><span className="sm:hidden">Exportar</span>
+            </TabsTrigger>
             <TabsTrigger value="editar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
               <Settings className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Editar Cotação</span><span className="sm:hidden">Editar</span>
             </TabsTrigger>
@@ -529,6 +557,16 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 </div>
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          {/* Tab Exportar HTML */}
+          <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0">
+            <QuoteExportTab
+              quote={quote}
+              products={products}
+              getSupplierProductValue={getSupplierProductValue}
+              getNormalizedUnitPrice={getNormalizedUnitPrice}
+            />
           </TabsContent>
 
           {/* Tab Editar Cotação */}
