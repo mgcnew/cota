@@ -346,13 +346,13 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
             <TabsList className="flex-shrink-0 mx-4 mt-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg grid grid-cols-3">
-              <TabsTrigger value="itens" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 touch-target">
+              <TabsTrigger value="itens" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target">
                 <Package className="h-3.5 w-3.5 mr-1.5" />Itens
               </TabsTrigger>
-              <TabsTrigger value="detalhes" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 touch-target">
+              <TabsTrigger value="detalhes" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target">
                 <FileText className="h-3.5 w-3.5 mr-1.5" />Detalhes
               </TabsTrigger>
-              <TabsTrigger value="resumo" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 touch-target">
+              <TabsTrigger value="resumo" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target">
                 <ClipboardList className="h-3.5 w-3.5 mr-1.5" />Resumo
               </TabsTrigger>
             </TabsList>
@@ -361,7 +361,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             <TabsContent value="itens" className="flex-1 overflow-auto m-0 p-4">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Produtos do Pedido</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-white">Produtos do Pedido</span>
                   <Button ref={addButtonRef} onClick={handleAddItem} size="sm" className="h-10 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white touch-target">
                     <Plus className="h-3.5 w-3.5 mr-1.5" />Adicionar
                   </Button>
@@ -370,7 +370,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 <ScrollArea className="h-[200px] pr-2">
                   <div className="space-y-2">
                     {itens.length === 0 ? (
-                      <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+                      <div className="text-center py-8 text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
                         <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">Nenhum item</p>
                         <p className="text-xs">Clique em "Adicionar" para incluir produtos</p>
@@ -380,7 +380,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         <div className="space-y-3">
                           {/* Produto */}
                           <div className="relative">
-                            <Label className="text-[10px] text-gray-500 mb-1 block">Produto</Label>
+                            <Label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">Produto</Label>
                             <div className="relative">
                               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                               <Input
@@ -405,7 +405,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                       setProductSearch(''); 
                                       setActiveSearchIndex(null);
                                     }}
-                                    className="w-full px-2 py-2 text-left text-sm hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2 min-h-[44px]"
+                                    className="w-full px-2 py-2 text-left text-sm hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2 min-h-[44px] text-gray-900 dark:text-white"
                                   >
                                     <Package className="h-3 w-3 text-orange-500" />{p.name}
                                   </button>
@@ -416,7 +416,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           {/* Quantidade, Unidade, Preço */}
                           <div className="grid grid-cols-3 gap-2">
                             <div>
-                              <Label className="text-[10px] text-gray-500 mb-1 block">Qtd</Label>
+                              <Label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">Qtd</Label>
                               <Input 
                                 type="number" 
                                 value={item.quantidade} 
@@ -425,7 +425,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                               />
                             </div>
                             <div>
-                              <Label className="text-[10px] text-gray-500 mb-1 block">Un</Label>
+                              <Label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">Un</Label>
                               <Select value={item.unidade} onValueChange={v => handleItemChange(index, 'unidade', v)}>
                                 <SelectTrigger className="h-10 text-sm"><SelectValue /></SelectTrigger>
                                 <SelectContent>
@@ -438,7 +438,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                               </Select>
                             </div>
                             <div>
-                              <Label className="text-[10px] text-gray-500 mb-1 block">Preço</Label>
+                              <Label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">Preço</Label>
                               <Input 
                                 type="number" 
                                 step="0.01"
@@ -450,10 +450,10 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           </div>
                           {/* Subtotal e Remover */}
                           <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
-                            <span className="text-xs font-semibold text-emerald-600">
+                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                               Subtotal: R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
                             </span>
-                            <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)} className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 touch-target">
+                            <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)} className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 touch-target">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -475,7 +475,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             <TabsContent value="detalhes" className="flex-1 overflow-auto m-0 p-4">
               <div className="space-y-4">
                 <div>
-                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Fornecedor</Label>
+                  <Label className="text-xs font-medium text-gray-700 dark:text-white">Fornecedor</Label>
                   <Select value={fornecedor} onValueChange={setFornecedor}>
                     <SelectTrigger className="h-10 text-sm mt-1"><SelectValue placeholder="Selecione o fornecedor" /></SelectTrigger>
                     <SelectContent>
@@ -484,12 +484,12 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Data de Entrega</Label>
+                  <Label className="text-xs font-medium text-gray-700 dark:text-white">Data de Entrega</Label>
                   <Input type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className="h-10 text-sm mt-1" />
                 </div>
                 
                 <div>
-                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Status do Pedido</Label>
+                  <Label className="text-xs font-medium text-gray-700 dark:text-white">Status do Pedido</Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {statusOptions.map(opt => (
                       <button
@@ -499,7 +499,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           "px-3 py-3 rounded-lg text-xs font-medium border-2 transition-all min-h-[44px]",
                           status === opt.value 
                             ? `${opt.color} border-current ring-2 ring-offset-1` 
-                            : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300"
+                            : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300"
                         )}
                       >
                         {opt.label}
@@ -509,7 +509,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 </div>
 
                 <div>
-                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Observações</Label>
+                  <Label className="text-xs font-medium text-gray-700 dark:text-white">Observações</Label>
                   <Textarea
                     placeholder="Adicione observações sobre o pedido..."
                     value={observacoes}
@@ -525,40 +525,40 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               <div className="space-y-4">
                 {/* Cards de resumo */}
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200/50">
-                    <div className="flex items-center gap-1.5 text-orange-600 mb-1">
+                  <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200/50 dark:border-orange-800/50">
+                    <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 mb-1">
                       <Building2 className="h-3.5 w-3.5" />
                       <span className="text-[10px] font-medium uppercase">Fornecedor</span>
                     </div>
-                    <p className="font-semibold text-sm truncate">{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
+                    <p className="font-semibold text-sm truncate text-gray-900 dark:text-white">{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
                   </div>
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200/50">
-                    <div className="flex items-center gap-1.5 text-blue-600 mb-1">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200/50 dark:border-blue-800/50">
+                    <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 mb-1">
                       <Calendar className="h-3.5 w-3.5" />
                       <span className="text-[10px] font-medium uppercase">Entrega</span>
                     </div>
-                    <p className="font-semibold text-sm">{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
                   </div>
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200/50">
-                    <div className="flex items-center gap-1.5 text-purple-600 mb-1">
+                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200/50 dark:border-purple-800/50">
+                    <div className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 mb-1">
                       <Package className="h-3.5 w-3.5" />
                       <span className="text-[10px] font-medium uppercase">Itens</span>
                     </div>
-                    <p className="font-semibold text-sm">{itens.length} produto(s)</p>
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{itens.length} produto(s)</p>
                   </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 border border-emerald-200/50">
-                    <div className="flex items-center gap-1.5 text-emerald-600 mb-1">
+                  <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 border border-emerald-200/50 dark:border-emerald-800/50">
+                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 mb-1">
                       <Truck className="h-3.5 w-3.5" />
                       <span className="text-[10px] font-medium uppercase">Total</span>
                     </div>
-                    <p className="font-bold text-sm text-emerald-700">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    <p className="font-bold text-sm text-emerald-700 dark:text-emerald-400">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                   </div>
                 </div>
 
                 {/* Status atual */}
                 <div className="flex items-center justify-center gap-2 py-2">
-                  <CheckCircle className="h-4 w-4 text-gray-400" />
-                  <span className="text-xs text-gray-500">Status atual:</span>
+                  <CheckCircle className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Status atual:</span>
                   {getStatusBadge(status || pedido?.status || 'pendente')}
                 </div>
               </div>
@@ -593,13 +593,13 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="flex-shrink-0 mx-4 mt-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg grid grid-cols-3">
-            <TabsTrigger value="itens" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            <TabsTrigger value="itens" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300">
               <Package className="h-3.5 w-3.5 mr-1.5" />Itens
             </TabsTrigger>
-            <TabsTrigger value="detalhes" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            <TabsTrigger value="detalhes" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300">
               <FileText className="h-3.5 w-3.5 mr-1.5" />Detalhes
             </TabsTrigger>
-            <TabsTrigger value="resumo" className="text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            <TabsTrigger value="resumo" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300">
               <ClipboardList className="h-3.5 w-3.5 mr-1.5" />Resumo
             </TabsTrigger>
           </TabsList>
@@ -608,7 +608,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           <TabsContent value="itens" className="flex-1 overflow-auto m-0 p-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Produtos do Pedido</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">Produtos do Pedido</span>
                 <Button ref={addButtonRef} onClick={handleAddItem} size="sm" className="h-8 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white">
                   <Plus className="h-3.5 w-3.5 mr-1.5" />Adicionar (Alt+N)
                 </Button>
@@ -617,7 +617,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               <ScrollArea className="h-[280px] pr-2">
                 <div className="space-y-2">
                   {itens.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="text-center py-8 text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
                       <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <p className="text-sm">Nenhum item</p>
                       <p className="text-xs">Clique em "Adicionar" para incluir produtos</p>
@@ -627,7 +627,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       <div className="grid grid-cols-12 gap-2 items-end">
                         {/* Produto */}
                         <div className="col-span-12 sm:col-span-5 relative">
-                          <Label className="text-[10px] text-gray-500 mb-1 block">Produto</Label>
+                          <Label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">Produto</Label>
                           <div className="relative">
                             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                             <Input
@@ -670,7 +670,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                       }, 50);
                                     }
                                   }}
-                                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-orange-50 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-900 dark:text-white"
                                 >
                                   <Package className="h-3 w-3 text-orange-500" />{p.name}
                                 </button>
@@ -680,7 +680,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         </div>
                         {/* Quantidade */}
                         <div className="col-span-4 sm:col-span-2">
-                          <Label className="text-[10px] text-gray-500 mb-1 block">Qtd</Label>
+                          <Label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">Qtd</Label>
                           <Input 
                             ref={el => quantityInputRefs.current[index] = el}
                             type="number" 
@@ -693,7 +693,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         </div>
                         {/* Unidade */}
                         <div className="col-span-4 sm:col-span-2">
-                          <Label className="text-[10px] text-gray-500 mb-1 block">Un</Label>
+                          <Label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">Un</Label>
                           <Select value={item.unidade} onValueChange={v => handleItemChange(index, 'unidade', v)}>
                             <SelectTrigger className="h-8 text-xs" tabIndex={0}><SelectValue /></SelectTrigger>
                             <SelectContent>
@@ -707,7 +707,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         </div>
                         {/* Preço */}
                         <div className="col-span-4 sm:col-span-2">
-                          <Label className="text-[10px] text-gray-500 mb-1 block">Preço</Label>
+                          <Label className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 block">Preço</Label>
                           <Input 
                             ref={el => priceInputRefs.current[index] = el}
                             type="number" 
@@ -721,7 +721,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         </div>
                         {/* Ações */}
                         <div className="col-span-12 sm:col-span-1 flex items-center justify-between sm:justify-end gap-2">
-                          <span className="text-xs font-semibold text-emerald-600 sm:hidden">
+                          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 sm:hidden">
                             R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
                           </span>
                           <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)} className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50">
@@ -731,8 +731,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       </div>
                       {/* Subtotal desktop */}
                       <div className="hidden sm:flex justify-end mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                        <span className="text-xs text-gray-500">Subtotal: </span>
-                        <span className="text-xs font-semibold text-emerald-600 ml-1">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Subtotal: </span>
+                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 ml-1">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</span>
                       </div>
                     </div>
                   ))}
@@ -752,7 +752,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Fornecedor</Label>
+                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Fornecedor</Label>
                   <Select value={fornecedor} onValueChange={setFornecedor}>
                     <SelectTrigger className="h-9 text-sm mt-1"><SelectValue placeholder="Selecione o fornecedor" /></SelectTrigger>
                     <SelectContent>
@@ -761,13 +761,13 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Data de Entrega</Label>
+                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Data de Entrega</Label>
                   <Input type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className="h-9 text-sm mt-1" />
                 </div>
               </div>
               
               <div>
-                <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Status do Pedido</Label>
+                <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Status do Pedido</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-2">
                   {statusOptions.map(opt => (
                     <button
@@ -777,7 +777,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         "px-3 py-2 rounded-lg text-xs font-medium border-2 transition-all",
                         status === opt.value 
                           ? `${opt.color} border-current ring-2 ring-offset-1` 
-                          : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300"
+                          : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300"
                       )}
                     >
                       {opt.label}
@@ -787,7 +787,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               </div>
 
               <div>
-                <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">Observações</Label>
+                <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Observações</Label>
                 <Textarea
                   placeholder="Adicione observações sobre o pedido..."
                   value={observacoes}
@@ -803,53 +803,53 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             <div className="space-y-4">
               {/* Cards de resumo */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200/50">
-                  <div className="flex items-center gap-1.5 text-orange-600 mb-1">
+                <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200/50 dark:border-orange-800/50">
+                  <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 mb-1">
                     <Building2 className="h-3.5 w-3.5" />
                     <span className="text-[10px] font-medium uppercase">Fornecedor</span>
                   </div>
-                  <p className="font-semibold text-sm truncate">{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
+                  <p className="font-semibold text-sm truncate text-gray-900 dark:text-white">{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200/50">
-                  <div className="flex items-center gap-1.5 text-blue-600 mb-1">
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200/50 dark:border-blue-800/50">
+                  <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 mb-1">
                     <Calendar className="h-3.5 w-3.5" />
                     <span className="text-[10px] font-medium uppercase">Entrega</span>
                   </div>
-                  <p className="font-semibold text-sm">{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-white">{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
                 </div>
-                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200/50">
-                  <div className="flex items-center gap-1.5 text-purple-600 mb-1">
+                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200/50 dark:border-purple-800/50">
+                  <div className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 mb-1">
                     <Package className="h-3.5 w-3.5" />
                     <span className="text-[10px] font-medium uppercase">Itens</span>
                   </div>
-                  <p className="font-semibold text-sm">{itens.length} produto(s)</p>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-white">{itens.length} produto(s)</p>
                 </div>
-                <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 border border-emerald-200/50">
-                  <div className="flex items-center gap-1.5 text-emerald-600 mb-1">
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 border border-emerald-200/50 dark:border-emerald-800/50">
+                  <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 mb-1">
                     <Truck className="h-3.5 w-3.5" />
                     <span className="text-[10px] font-medium uppercase">Total</span>
                   </div>
-                  <p className="font-bold text-sm text-emerald-700">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <p className="font-bold text-sm text-emerald-700 dark:text-emerald-400">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
 
               {/* Lista de itens resumida */}
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                 <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-t-lg">
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Itens do Pedido</span>
+                  <span className="text-xs font-semibold text-gray-700 dark:text-white">Itens do Pedido</span>
                 </div>
                 <div className="max-h-[140px] overflow-auto">
                   {itens.length === 0 ? (
-                    <p className="text-xs text-gray-400 text-center py-4">Nenhum item</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">Nenhum item</p>
                   ) : itens.map((item, index) => (
                     <div key={index} className="flex items-center justify-between px-3 py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <Package className="h-3.5 w-3.5 text-orange-500 flex-shrink-0" />
-                        <span className="text-xs truncate">{item.produto || 'Produto não definido'}</span>
+                        <Package className="h-3.5 w-3.5 text-orange-500 dark:text-orange-400 flex-shrink-0" />
+                        <span className="text-xs truncate text-gray-900 dark:text-white">{item.produto || 'Produto não definido'}</span>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-xs text-gray-500">{item.quantidade} {item.unidade}</span>
-                        <span className="text-xs font-semibold text-emerald-600">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{item.quantidade} {item.unidade}</span>
+                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</span>
                       </div>
                     </div>
                   ))}
@@ -859,18 +859,18 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               {/* Observações */}
               {observacoes && (
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-1.5 text-gray-600 mb-2">
+                  <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-200 mb-2">
                     <FileText className="h-3.5 w-3.5" />
                     <span className="text-xs font-semibold">Observações</span>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{observacoes}</p>
+                  <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{observacoes}</p>
                 </div>
               )}
 
               {/* Status atual */}
               <div className="flex items-center justify-center gap-2 py-2">
-                <CheckCircle className="h-4 w-4 text-gray-400" />
-                <span className="text-xs text-gray-500">Status atual:</span>
+                <CheckCircle className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Status atual:</span>
                 {getStatusBadge(status || pedido?.status || 'pendente')}
               </div>
             </div>
@@ -884,13 +884,13 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={loading}>
                 Fechar
               </Button>
-              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
-                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Alt+←→</kbd> Abas</span>
-                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Alt+N</kbd> Novo item</span>
-                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px]">Ctrl+Enter</kbd> Salvar</span>
+              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-[10px]">Alt+←→</kbd> Abas</span>
+                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-[10px]">Alt+N</kbd> Novo item</span>
+                <span><kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-[10px]">Ctrl+Enter</kbd> Salvar</span>
               </div>
             </div>
-            <Button onClick={handleSubmit} size="sm" disabled={loading} className="bg-orange-600 hover:bg-orange-700 text-white">
+            <Button onClick={handleSubmit} size="sm" disabled={loading} className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white">
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
               Salvar (Ctrl+Enter)
             </Button>

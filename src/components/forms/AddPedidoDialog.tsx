@@ -417,8 +417,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 disabled={index > currentStep}
                 className={cn(
                   "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all w-full",
-                  index < currentStep ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 cursor-pointer hover:bg-green-200" :
-                  index === currentStep ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400" :
+                  index < currentStep ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 cursor-pointer hover:bg-green-200 dark:hover:bg-green-900/60" :
+                  index === currentStep ? "bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300" :
                   "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                 )}
               >
@@ -427,7 +427,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 {!isMobile && <span className="sm:hidden">{index + 1}</span>}
               </button>
               {index < steps.length - 1 && (
-                <ChevronRight className={cn("h-4 w-4 mx-1 flex-shrink-0", index < currentStep ? "text-green-400" : "text-gray-300 dark:text-gray-600")} />
+                <ChevronRight className={cn("h-4 w-4 mx-1 flex-shrink-0", index < currentStep ? "text-green-400 dark:text-green-300" : "text-gray-300 dark:text-gray-500")} />
               )}
             </div>
           ))}
@@ -448,7 +448,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 rounded-xl p-4 mb-4 border border-orange-200/50 dark:border-gray-700">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                       <div className="md:col-span-2">
-                        <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Produto</Label>
+                        <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Produto</Label>
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
@@ -492,7 +492,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         </div>
                       </div>
                       <div>
-                        <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Quantidade</Label>
+                        <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Quantidade</Label>
                         <Input
                           ref={quantityInputRef}
                           type="number"
@@ -505,7 +505,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         />
                       </div>
                       <div>
-                        <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Preço Unit.</Label>
+                        <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Preço Unit.</Label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">R$</span>
                           <Input
@@ -535,8 +535,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   {/* Lista de itens */}
                   <div className="flex-1 min-h-0">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Itens do Pedido ({itens.length})</span>
-                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                      <span className="text-sm font-medium text-gray-700 dark:text-white">Itens do Pedido ({itens.length})</span>
+                      <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-700">
                         Total: R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </Badge>
                     </div>
@@ -552,14 +552,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           {itens.map((item, index) => (
                             <div key={index} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-orange-200 transition-colors">
                               <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                                <Package className="h-5 w-5 text-orange-600" />
+                                <Package className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate">{item.produto}</p>
-                                <p className="text-xs text-gray-500">{item.quantidade} {item.unidade} × R$ {item.valorUnitario.toFixed(2)}</p>
+                                <p className="font-medium text-sm truncate text-gray-900 dark:text-white">{item.produto}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{item.quantidade} {item.unidade} × R$ {item.valorUnitario.toFixed(2)}</p>
                               </div>
                               <div className="text-right">
-                                <p className="font-bold text-emerald-600">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
+                                <p className="font-bold text-emerald-600 dark:text-emerald-400">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
                               </div>
                               <div className="flex gap-1">
                                 <Button variant="ghost" size="icon" onClick={() => handleDuplicateItem(index)} className="h-8 w-8 text-gray-400 hover:text-blue-600">
@@ -583,7 +583,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 <div className="h-full flex flex-col p-4">
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">Fornecedor</Label>
+                      <Label className="text-sm font-medium text-gray-900 dark:text-white mb-2 block">Fornecedor</Label>
                       <div className="relative mb-2">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -604,16 +604,16 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                               className={cn(
                                 "w-full p-3 rounded-lg text-left transition-all flex items-center gap-3",
                                 fornecedor === s.id 
-                                  ? "bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-500" 
+                                  ? "bg-orange-100 dark:bg-orange-900/40 border-2 border-orange-500" 
                                   : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-orange-200"
                               )}
                             >
-                              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", fornecedor === s.id ? "bg-orange-500 text-white" : "bg-gray-100 dark:bg-gray-700")}>
+                              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", fornecedor === s.id ? "bg-orange-500 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300")}>
                                 <Building2 className="h-5 w-5" />
                               </div>
                               <div>
-                                <p className="font-medium text-sm">{s.name}</p>
-                                <p className="text-xs text-gray-500">{s.contact || 'Sem contato'}</p>
+                                <p className="font-medium text-sm text-gray-900 dark:text-white">{s.name}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{s.contact || 'Sem contato'}</p>
                               </div>
                               {fornecedor === s.id && <CheckCircle className="ml-auto h-5 w-5 text-orange-500" />}
                             </button>
@@ -623,7 +623,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     </div>
                     
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">Data de Entrega</Label>
+                      <Label className="text-sm font-medium text-gray-900 dark:text-white mb-2 block">Data de Entrega</Label>
                       <div className="relative">
                         <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input type="date" value={dataEntrega} onChange={(e) => setDataEntrega(e.target.value)} className="pl-9" />
@@ -638,33 +638,33 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 <div className="h-full flex flex-col p-4">
                   <div className="space-y-4">
                     {/* Resumo */}
-                    <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 rounded-xl p-4 border border-orange-200/50">
+                    <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 rounded-xl p-4 border border-orange-200/50 dark:border-gray-700">
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-orange-600" />Resumo do Pedido
+                        <FileText className="h-5 w-5 text-orange-600 dark:text-orange-400" />Resumo do Pedido
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-white dark:bg-gray-900 rounded-lg p-3">
-                          <p className="text-xs text-gray-500 mb-1">Fornecedor</p>
-                          <p className="font-medium">{suppliers.find(s => s.id === fornecedor)?.name || '-'}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Fornecedor</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{suppliers.find(s => s.id === fornecedor)?.name || '-'}</p>
                         </div>
                         <div className="bg-white dark:bg-gray-900 rounded-lg p-3">
-                          <p className="text-xs text-gray-500 mb-1">Data de Entrega</p>
-                          <p className="font-medium">{dataEntrega ? new Date(dataEntrega + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Data de Entrega</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{dataEntrega ? new Date(dataEntrega + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</p>
                         </div>
                         <div className="bg-white dark:bg-gray-900 rounded-lg p-3">
-                          <p className="text-xs text-gray-500 mb-1">Itens</p>
-                          <p className="font-medium">{itens.length} produto(s)</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Itens</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{itens.length} produto(s)</p>
                         </div>
                         <div className="bg-white dark:bg-gray-900 rounded-lg p-3">
-                          <p className="text-xs text-gray-500 mb-1">Valor Total</p>
-                          <p className="font-bold text-lg text-emerald-600">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Valor Total</p>
+                          <p className="font-bold text-lg text-emerald-600 dark:text-emerald-400">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Observações */}
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">Observações (opcional)</Label>
+                      <Label className="text-sm font-medium text-gray-900 dark:text-white mb-2 block">Observações (opcional)</Label>
                       <Textarea
                         placeholder="Adicione observações sobre o pedido..."
                         value={observacoes}
@@ -675,14 +675,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
                     {/* Lista de itens resumida */}
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">Itens do Pedido</Label>
+                      <Label className="text-sm font-medium text-gray-900 dark:text-white mb-2 block">Itens do Pedido</Label>
                       <ScrollArea className="h-32 border border-gray-200 dark:border-gray-700 rounded-lg">
                         <div className="p-2 space-y-1">
                           {itens.map((item, index) => (
                             <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
-                              <span className="truncate flex-1">{item.produto}</span>
-                              <span className="text-gray-500 mx-2">{item.quantidade} {item.unidade}</span>
-                              <span className="font-medium text-emerald-600">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</span>
+                              <span className="truncate flex-1 text-gray-900 dark:text-white">{item.produto}</span>
+                              <span className="text-gray-500 dark:text-gray-400 mx-2">{item.quantidade} {item.unidade}</span>
+                              <span className="font-medium text-emerald-600 dark:text-emerald-400">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</span>
                             </div>
                           ))}
                         </div>
