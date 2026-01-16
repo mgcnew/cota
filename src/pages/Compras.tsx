@@ -98,8 +98,8 @@ function Compras() {
       <div className="page-container">
         {/* Tabs minimalistas */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          {/* Header - Mobile: empilhado, Desktop: lado a lado */}
-          <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'} mb-4`}>
+          {/* Header com título */}
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
                 <ShoppingBag className="h-5 w-5 text-white" />
@@ -109,72 +109,70 @@ function Compras() {
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
-              {/* Indicador de atalhos - apenas desktop */}
-              {!isMobile && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                        <Keyboard className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-[200px]">
-                      <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
-                      <ul className="text-xs space-y-1">
-                        {shortcuts.map((s, i) => (
-                          <li key={i} className="flex justify-between gap-3">
-                            <span className="text-muted-foreground">{s.description}</span>
-                            <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
-                          </li>
-                        ))}
-                      </ul>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              
-              {/* Tabs - Mobile: scroll horizontal, Desktop: inline */}
-              <div className={isMobile ? 'w-full overflow-x-auto scrollbar-hide -mx-1 px-1' : ''}>
-                <TabsList className={`h-9 p-0.5 bg-muted/60 rounded-lg ${isMobile ? 'w-max' : ''}`}>
-                  <TabsTrigger 
-                    value="cotacoes" 
-                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
-                  >
-                    <FileText className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
-                    Cotações
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="pedidos"
-                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
-                  >
-                    <ShoppingCart className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
-                    Pedidos
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="lista"
-                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
-                  >
-                    <ShoppingBasket className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
-                    Lista
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="embalagens"
-                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
-                  >
-                    <Package className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
-                    Embalagens
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="analise"
-                    className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
-                  >
-                    <BarChart3 className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
-                    Análise
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-            </div>
+            {/* Indicador de atalhos - apenas desktop */}
+            {!isMobile && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                      <Keyboard className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[200px]">
+                    <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
+                    <ul className="text-xs space-y-1">
+                      {shortcuts.map((s, i) => (
+                        <li key={i} className="flex justify-between gap-3">
+                          <span className="text-muted-foreground">{s.description}</span>
+                          <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
+                        </li>
+                      ))}
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+
+          {/* Tabs - Abaixo do header, acima do conteúdo */}
+          <div className={`mb-4 ${isMobile ? 'overflow-x-auto scrollbar-hide -mx-1 px-1' : ''}`}>
+            <TabsList className={`h-9 p-0.5 bg-muted/60 rounded-lg ${isMobile ? 'w-max' : ''}`}>
+              <TabsTrigger 
+                value="cotacoes" 
+                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+              >
+                <FileText className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                Cotações
+              </TabsTrigger>
+              <TabsTrigger 
+                value="pedidos"
+                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+              >
+                <ShoppingCart className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                Pedidos
+              </TabsTrigger>
+              <TabsTrigger 
+                value="lista"
+                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+              >
+                <ShoppingBasket className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                Lista
+              </TabsTrigger>
+              <TabsTrigger 
+                value="embalagens"
+                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+              >
+                <Package className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                Embalagens
+              </TabsTrigger>
+              <TabsTrigger 
+                value="analise"
+                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+              >
+                <BarChart3 className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                Análise
+              </TabsTrigger>
+            </TabsList>
           </div>
 
           <TabsContent value="cotacoes" className="mt-0">

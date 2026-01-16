@@ -199,7 +199,6 @@ function CotacoesTab() {
           icon={CheckCircle2} 
           variant="success"
           onClick={() => setStatusFilter("prontas")}
-          className="cursor-pointer hover:ring-2 hover:ring-emerald-300"
         />
         <MetricCard 
           title="Vencendo" 
@@ -207,7 +206,6 @@ function CotacoesTab() {
           icon={AlertTriangle} 
           variant="warning"
           onClick={() => setStatusFilter("vencendo")}
-          className="cursor-pointer hover:ring-2 hover:ring-amber-300"
         />
         <MetricCard 
           title="Economia Real" 
