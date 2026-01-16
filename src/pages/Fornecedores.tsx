@@ -511,35 +511,35 @@ function Fornecedores() {
                     <TableHeader>
                       <TableRow>
                         <TableHead colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                          <div className="flex items-center bg-white/95 dark:bg-gray-800/70 border border-purple-200/60 dark:border-purple-900/40 rounded-lg shadow-sm px-4 py-3">
+                          <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
                             <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                                <Building2 className="h-4 w-4" />
+                              <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
+                                <Building2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                               </div>
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Fornecedor</span>
+                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
                             </div>
-                            <div className="w-[15%] px-2 flex justify-center items-center gap-1.5">
-                              <CircleDot className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Status</span>
+                            <div className="w-[15%] px-2 flex justify-center items-center gap-2">
+                              <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
                             </div>
-                            <div className="w-[15%] px-2 flex justify-center items-center gap-1.5">
-                              <DollarSign className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Limite</span>
+                            <div className="w-[15%] px-2 flex justify-center items-center gap-2">
+                              <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Limite</span>
                             </div>
-                            <div className="hidden lg:flex w-[15%] px-2 justify-center items-center gap-1.5">
-                              <TrendingUp className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Preço Médio</span>
+                            <div className="hidden lg:flex w-[15%] px-2 justify-center items-center gap-2">
+                              <TrendingUp className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Preço Médio</span>
                             </div>
-                            <div className="hidden lg:flex w-[10%] px-2 justify-center items-center gap-1.5">
-                              <FileText className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Cotações</span>
+                            <div className="hidden lg:flex w-[10%] px-2 justify-center items-center gap-2">
+                              <FileText className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Cot.</span>
                             </div>
-                            <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-1.5">
-                              <Star className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
-                              <span className="uppercase tracking-wide text-[11px] font-semibold text-purple-900 dark:text-purple-100">Avaliação</span>
+                            <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-2">
+                              <Star className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Avaliação</span>
                             </div>
-                            <div className="w-[5%] flex justify-end items-center gap-1.5 px-2">
-                              <MoreVertical className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
+                            <div className="w-[5%] flex justify-end items-center px-2">
+                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
                             </div>
                           </div>
                         </TableHead>
@@ -548,15 +548,15 @@ function Fornecedores() {
                     <TableBody>
                       {paginatedData.items.map(supplier => (
                         <TableRow key={supplier.id} className="group border-none">
-                          <TableCell colSpan={7} className="px-1 py-2">
-                            <div className="flex items-center p-3 bg-white/90 dark:bg-gray-800/50 rounded-lg border border-gray-300/70 dark:border-gray-700/30 hover:border-purple-300/60 dark:hover:border-purple-700/50">
+                          <TableCell colSpan={7} className="px-1 py-1.5">
+                            <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800/70">
                               <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                  <Building2 className="h-4 w-4 text-primary" />
+                                <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-600/30">
+                                  <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="font-medium text-sm text-gray-900 dark:text-white truncate">{capitalize(supplier.name)}</div>
-                                  <div className="text-xs text-muted-foreground truncate">{capitalize(supplier.contact)}</div>
+                                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{capitalize(supplier.name)}</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{capitalize(supplier.contact)}</div>
                                 </div>
                               </div>
 
@@ -573,9 +573,9 @@ function Fornecedores() {
                               </div>
 
                               <div className="hidden lg:flex w-[10%] px-2 justify-center items-center">
-                                <div className="flex items-center gap-1">
-                                  <span className="font-medium text-sm">{supplier.activeQuotes}</span>
-                                  <span className="text-xs text-muted-foreground">/ {supplier.totalQuotes}</span>
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
+                                  <FileText className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                                  <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{supplier.activeQuotes}</span>
                                 </div>
                               </div>
 
@@ -593,13 +593,13 @@ function Fornecedores() {
                                       icon: <MessageCircle className="h-3.5 w-3.5" />,
                                       label: "WhatsApp",
                                       onClick: () => openWhatsApp(supplier),
-                                      variant: "default" as const,
+                                      variant: "success" as const,
                                     },
                                     {
                                       icon: <History className="h-4 w-4" />,
                                       label: "Ver Histórico",
                                       onClick: () => setHistorySupplier(supplier),
-                                      variant: "default" as const,
+                                      variant: "view" as const,
                                     }
                                   ]}
                                   dropdownLabel="Ações"
