@@ -102,10 +102,10 @@ function Compras() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
-                <ShoppingBag className="h-5 w-5 text-white" />
+                <ShoppingBag className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">Compras</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Compras</h1>
               </div>
             </div>
             

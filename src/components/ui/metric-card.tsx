@@ -1,6 +1,4 @@
 import { memo } from "react";
-import { CardTitle } from "@/components/ui/card";
-import { ResponsiveCard } from "@/components/responsive/ResponsiveCard";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -57,12 +55,6 @@ const VARIANT_STYLES = {
   },
 } as const;
 
-const TREND_COLORS = {
-  positive: "bg-white/20 text-white",
-  negative: "bg-red-400/30 text-white",
-  neutral: "bg-white/15 text-white/80",
-} as const;
-
 export const MetricCard = memo(function MetricCard({
   title,
   value,
@@ -77,7 +69,7 @@ export const MetricCard = memo(function MetricCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl p-4 py-6 transition-all duration-200",
+        "relative overflow-hidden rounded-xl p-4 text-white",
         styles.cardBg,
         // Hover effect only on desktop - brightness change
         "md:hover:brightness-110 md:hover:shadow-md",
@@ -86,29 +78,16 @@ export const MetricCard = memo(function MetricCard({
       )}
       onClick={onClick}
     >
-      <div className="flex flex-row items-center justify-between gap-2">
-        <CardTitle className={cn("text-xs sm:text-sm font-semibold truncate flex-1", styles.subtitleColor)}>
-          {title}
-        </CardTitle>
-        {/* Icon with background */}
-        <div className={cn("p-2 sm:p-2.5 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center", styles.iconBg)}>
-          <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+      <div className="flex items-start justify-between mb-3">
+        <div className={cn("p-2.5 rounded-xl", styles.iconBg)}>
+          <Icon className="w-5 h-5" />
         </div>
       </div>
-
-      <div className="mt-2 sm:mt-3">
-        <div className={cn("text-xl sm:text-2xl md:text-3xl font-bold truncate", styles.textColor)}>
-          {value}
-        </div>
+      <div className="space-y-1">
+        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{value}</p>
+        <p className="text-sm font-medium text-white/90">{title}</p>
         {trend && (
-          <div className="flex items-center gap-2 mt-2">
-            <span className={cn("text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full", TREND_COLORS[trend.type])}>
-              {trend.value}
-            </span>
-            <span className={cn("text-[10px] sm:text-xs font-medium truncate", styles.subtitleColor)}>
-              {trend.label}
-            </span>
-          </div>
+          <p className="text-xs text-white/70">{trend.value} {trend.label}</p>
         )}
       </div>
     </div>

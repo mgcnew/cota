@@ -190,9 +190,14 @@ function Dashboard() {
       <div className="page-container space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Visão geral das suas operações</p>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
+              <TrendingUp className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Visão geral das suas operações</p>
+            </div>
           </div>
         </div>
 

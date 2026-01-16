@@ -235,106 +235,95 @@ export default function ContagemEstoque() {
   return (
     <PageWrapper>
       <div className="page-container space-y-4 sm:space-y-6">
-        {/* Stats Cards - Compactos em mobile */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-3 sm:p-4 text-white">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <ClipboardList className="w-4 h-4 sm:w-5 sm:h-5" />
+        {/* Page Title */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
+            <ClipboardList className="h-6 w-6 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Contagem de Estoque</h1>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-white">
+            <div className="flex items-start justify-between mb-3">
+              <div className="p-2.5 rounded-xl bg-white/20">
+                <ClipboardList className="w-5 h-5" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{stats.total}</p>
-                <p className="text-[10px] sm:text-xs text-white/80">Total</p>
-              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-2xl lg:text-3xl font-bold tracking-tight">{stats.total}</p>
+              <p className="text-sm font-medium text-white/90">Total</p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-3 sm:p-4 text-white">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white">
+            <div className="flex items-start justify-between mb-3">
+              <div className="p-2.5 rounded-xl bg-white/20">
+                <Clock className="w-5 h-5" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{stats.pendentes}</p>
-                <p className="text-[10px] sm:text-xs text-white/80">Pendentes</p>
-              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-2xl lg:text-3xl font-bold tracking-tight">{stats.pendentes}</p>
+              <p className="text-sm font-medium text-white/90">Pendentes</p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 sm:p-4 text-white">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+            <div className="flex items-start justify-between mb-3">
+              <div className="p-2.5 rounded-xl bg-white/20">
+                <Activity className="w-5 h-5" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{stats.emAndamento}</p>
-                <p className="text-[10px] sm:text-xs text-white/80 truncate">Em Andamento</p>
-              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-2xl lg:text-3xl font-bold tracking-tight">{stats.emAndamento}</p>
+              <p className="text-sm font-medium text-white/90">Em Andamento</p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-3 sm:p-4 text-white">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white">
+            <div className="flex items-start justify-between mb-3">
+              <div className="p-2.5 rounded-xl bg-white/20">
+                <CheckCircle className="w-5 h-5" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{stats.finalizadas}</p>
-                <p className="text-[10px] sm:text-xs text-white/80">Finalizadas</p>
-              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-2xl lg:text-3xl font-bold tracking-tight">{stats.finalizadas}</p>
+              <p className="text-sm font-medium text-white/90">Finalizadas</p>
             </div>
           </div>
         </div>
 
-        {/* Header Responsivo */}
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
-                <ClipboardList className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
-                  Contagem de Estoque
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
-                  Gerencie suas contagens
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={() => setCreateDialogOpen(true)}
-              className="w-full sm:w-auto bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Contagem
-            </Button>
+        {/* Filters & Actions */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Buscar contagens..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-10"
+            />
           </div>
-
-          {/* Filtros */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Buscar contagens..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[160px] h-10">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="pendente">Pendente</SelectItem>
-                <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                <SelectItem value="finalizada">Finalizada</SelectItem>
-                <SelectItem value="cancelada">Cancelada</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[160px] h-10">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="pendente">Pendente</SelectItem>
+              <SelectItem value="em_andamento">Em Andamento</SelectItem>
+              <SelectItem value="finalizada">Finalizada</SelectItem>
+              <SelectItem value="cancelada">Cancelada</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={() => setCreateDialogOpen(true)}
+            className="w-full sm:w-auto bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Contagem
+          </Button>
         </div>
 
         {/* Content */}

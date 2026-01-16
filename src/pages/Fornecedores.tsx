@@ -24,7 +24,6 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { PageHeader } from "@/components/ui/page-header";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { VirtualList } from "@/components/responsive/VirtualList";
 import { FornecedoresSkeleton, ExpandableSupplierCard } from "@/components/suppliers";
@@ -297,8 +296,16 @@ function Fornecedores() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
+          {/* Page Title */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
+              <Building2 className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Fornecedores</h1>
+          </div>
+
           {/* Metrics Grid - Above the fold priority (Requirement 4.1) */}
-          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4 sm:mb-6">
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4">
             <MetricCard
               title="Fornecedores"
               value={stats.total}
@@ -329,56 +336,49 @@ function Fornecedores() {
             />
           </ResponsiveGrid>
 
-          <PageHeader
-            title="Fornecedores"
-            description="Gerencie seus fornecedores e cotações"
-            icon={Building2}
-            actions={
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => importSuppliersRef.current?.click()}
-                  className="hidden sm:flex"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Importar
-                </Button>
-                <Button
-                  onClick={() => addSupplierRef.current?.click()}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Fornecedor
-                </Button>
-              </div>
-            }
-          >
-            <div className="flex flex-col sm:flex-row gap-4 mt-4">
-              <div className="flex-shrink-0">
-                <ExpandableSearch
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Buscar fornecedores..."
-                  accentColor="amber"
-                  expandedWidth="w-64"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="active">Ativos</SelectItem>
-                    <SelectItem value="inactive">Inativos</SelectItem>
-                    <SelectItem value="pending">Pendentes</SelectItem>
-                  </SelectContent>
-                </Select>
-                <ViewToggle view={viewMode} onViewChange={setViewMode} />
-              </div>
+          {/* Filters & Actions */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-4">
+            <div className="flex-shrink-0">
+              <ExpandableSearch
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar fornecedores..."
+                accentColor="amber"
+                expandedWidth="w-64"
+              />
             </div>
-          </PageHeader>
+            <div className="flex gap-2">
+              <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="active">Ativos</SelectItem>
+                  <SelectItem value="inactive">Inativos</SelectItem>
+                  <SelectItem value="pending">Pendentes</SelectItem>
+                </SelectContent>
+              </Select>
+              <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            </div>
+            <div className="flex gap-2 ml-auto">
+              <Button
+                variant="outline"
+                onClick={() => importSuppliersRef.current?.click()}
+                className="hidden sm:flex"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Importar
+              </Button>
+              <Button
+                onClick={() => addSupplierRef.current?.click()}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Fornecedor
+              </Button>
+            </div>
+          </div>
 
           {viewMode === "grid" ? (
             <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">

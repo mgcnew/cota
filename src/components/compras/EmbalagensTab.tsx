@@ -203,8 +203,7 @@ function EmbalagensTab() {
         {/* Tab: Cotações */}
         <TabsContent value="cotacoes" className="mt-4 space-y-4">
           {/* Métricas */}
-          <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 5 }} gap="sm">
-            <MetricCard title="Total" value={stats.total.toString()} icon={Package} variant="default" />
+          <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
             <MetricCard title="Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
             <MetricCard 
               title="Prontas" 
@@ -212,15 +211,13 @@ function EmbalagensTab() {
               icon={CheckCircle2} 
               variant="success"
               onClick={() => setStatusFilter("prontas")}
-              className="cursor-pointer hover:ring-2 hover:ring-emerald-300"
             />
-            <MetricCard title="Concluídas" value={stats.concluidas.toString()} icon={DollarSign} variant="success" />
+            <MetricCard title="Concluídas" value={stats.concluidas.toString()} icon={DollarSign} variant="warning" />
             <MetricCard 
               title="Economia" 
-              value={`R$ ${stats.economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
+              value={`R$ ${stats.economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`} 
               icon={TrendingDown} 
               variant="success"
-              className="col-span-2 sm:col-span-1"
             />
           </ResponsiveGrid>
 

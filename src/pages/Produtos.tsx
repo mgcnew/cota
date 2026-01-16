@@ -23,7 +23,6 @@ import { usePagination } from "@/hooks/usePagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useToast } from "@/hooks/use-toast";
-import { PageHeader } from "@/components/ui/page-header";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { LazyImage } from "@/components/responsive/LazyImage";
@@ -283,7 +282,15 @@ function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className="page-container">
-          {/* Métricas essenciais - compactas */}
+          {/* Page Title */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
+              <Package className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Produtos</h1>
+          </div>
+
+          {/* Métricas essenciais */}
           <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }} className="mb-4">
             <MetricCard
               title="Produtos"
@@ -311,59 +318,52 @@ function Produtos() {
             />
           </ResponsiveGrid>
 
-          {/* Page Header */}
-          <PageHeader
-            title="Produtos"
-            icon={Package}
-            actions={
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleExportProducts}
-                  className="h-10 hidden sm:flex"
-                >
-                  <Download className="h-4 w-4 mr-2" /> Exportar
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="h-11 sm:h-10 min-w-[44px] px-3 sm:px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm touch-target">
-                      <Plus className="h-4 w-4 sm:mr-2" />
-                      <span className="hidden sm:inline">Adicionar</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[180px]">
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
-                      <Plus className="h-4 w-4 mr-2" /> Novo Produto
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                      <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            }
-          >
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full">
-              <div className="flex-1 sm:flex-shrink-0">
-                <ExpandableSearch
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Buscar produtos..."
-                  accentColor="orange"
-                  expandedWidth="w-full sm:w-64"
-                />
-              </div>
-              <div className="flex-1 sm:flex-initial sm:w-[180px]">
-                <CategorySelect
-                  categories={safeCategories}
-                  products={safeProducts}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                />
-              </div>
+          {/* Filters & Actions */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-4">
+            <div className="flex-1 sm:flex-shrink-0">
+              <ExpandableSearch
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar produtos..."
+                accentColor="orange"
+                expandedWidth="w-full sm:w-64"
+              />
             </div>
-          </PageHeader>
+            <div className="flex-1 sm:flex-initial sm:w-[180px]">
+              <CategorySelect
+                categories={safeCategories}
+                products={safeProducts}
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+              />
+            </div>
+            <div className="flex items-center gap-2 ml-auto">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleExportProducts}
+                className="h-10 hidden sm:flex"
+              >
+                <Download className="h-4 w-4 mr-2" /> Exportar
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="h-11 sm:h-10 min-w-[44px] px-3 sm:px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm touch-target">
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Adicionar</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px]">
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
+                    <Plus className="h-4 w-4 mr-2" /> Novo Produto
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                    <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
 
           <Card className="border-0 bg-transparent">
             <CardContent className="p-0">

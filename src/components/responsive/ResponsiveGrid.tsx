@@ -16,9 +16,9 @@ export interface ResponsiveGridProps extends React.HTMLAttributes<HTMLDivElement
 }
 
 const gapClasses = {
-  sm: 'gap-2 sm:gap-3 lg:gap-4',
-  md: 'gap-3 sm:gap-4 lg:gap-6',
-  lg: 'gap-4 sm:gap-6 lg:gap-8',
+  sm: 'gap-3',
+  md: 'gap-3 sm:gap-4',
+  lg: 'gap-4 sm:gap-6',
 } as const;
 
 // Pre-defined responsive grid classes to ensure Tailwind JIT picks them up
