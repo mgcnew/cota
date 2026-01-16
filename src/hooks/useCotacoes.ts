@@ -315,8 +315,12 @@ export function useCotacoes() {
       fatorConversao?: number;
       quantidadePorEmbalagem?: number;
     }) => {
+      console.log('🔄 Atualizando valor do fornecedor:', {
+        quoteId, supplierId, productId, newValue, unidadePreco, fatorConversao, quantidadePorEmbalagem
+      });
+
       // First check if record exists
-      const { data: existing } = await supabase
+      const { data: existing, error: selectError } = await supabase
         .from("quote_supplier_items")
         .select("id")
         .eq("quote_id", quoteId)
@@ -324,9 +328,16 @@ export function useCotacoes() {
         .eq("product_id", productId)
         .maybeSingle();
 
+      if (selectError) {
+        console.error('❌ Erro ao buscar registro existente:', selectError);
+        throw selectError;
+      }
+
+      console.log('📋 Registro existente:', existing);
+
       if (existing) {
         // Update existing record with pricing metadata
-        const { error } = await supabase
+        const { data: updatedData, error } = await supabase
           .from("quote_supplier_items")
           .update({
             valor_oferecido: newValue,
@@ -334,9 +345,14 @@ export function useCotacoes() {
             fator_conversao: fatorConversao ?? null,
             quantidade_por_embalagem: quantidadePorEmbalagem ?? null
           })
-          .eq("id", existing.id);
+          .eq("id", existing.id)
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Erro ao atualizar registro:', error);
+          throw error;
+        }
+        console.log('✅ Registro atualizado:', updatedData);
       } else {
         // Get product name and base unit for default pricing unit
         const { data: productData } = await supabase
@@ -350,7 +366,7 @@ export function useCotacoes() {
         const defaultUnidadePreco = getDefaultPricingUnit(productData?.unit);
 
         // Create new record with pricing metadata
-        const { error } = await supabase
+        const { data: insertedData, error } = await supabase
           .from("quote_supplier_items")
           .insert({
             quote_id: quoteId,
@@ -361,9 +377,14 @@ export function useCotacoes() {
             unidade_preco: unidadePreco ?? defaultUnidadePreco,
             fator_conversao: fatorConversao ?? null,
             quantidade_por_embalagem: quantidadePorEmbalagem ?? null
-          });
+          })
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Erro ao inserir registro:', error);
+          throw error;
+        }
+        console.log('✅ Registro inserido:', insertedData);
       }
 
       // Update supplier status
@@ -376,16 +397,22 @@ export function useCotacoes() {
         .eq("quote_id", quoteId)
         .eq("supplier_id", supplierId);
 
-      if (statusError) throw statusError;
+      if (statusError) {
+        console.error('❌ Erro ao atualizar status do fornecedor:', statusError);
+        throw statusError;
+      }
+      console.log('✅ Status do fornecedor atualizado');
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+    onSuccess: async () => {
+      // Usar refetchQueries para forçar atualização imediata
+      await queryClient.refetchQueries({ queryKey: ['cotacoes'] });
       toast({
         title: "Valor atualizado",
         description: "O valor oferecido foi atualizado com sucesso.",
       });
     },
     onError: (error: any) => {
+      console.error('❌ Erro na mutation:', error);
       toast({
         title: "Erro ao atualizar",
         description: error.message || "Não foi possível atualizar o valor",
