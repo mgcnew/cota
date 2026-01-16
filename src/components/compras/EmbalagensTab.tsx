@@ -160,8 +160,8 @@ function EmbalagensTab() {
       {/* Sub-tabs: Cotações | Pedidos */}
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <TabsList className="h-10">
-            <TabsTrigger value="cotacoes" className="gap-2">
+          <TabsList className="h-11 p-1 bg-gray-100 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700/50">
+            <TabsTrigger value="cotacoes" className="h-9 px-4 text-sm font-medium rounded-lg transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400">
               <ClipboardList className="h-4 w-4" />
               Cotações
               {stats.prontasParaDecisao > 0 && (
@@ -170,7 +170,7 @@ function EmbalagensTab() {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="pedidos" className="gap-2">
+            <TabsTrigger value="pedidos" className="h-9 px-4 text-sm font-medium rounded-lg transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400">
               <ShoppingCart className="h-4 w-4" />
               Pedidos
               {stats.totalPedidos > 0 && (
@@ -179,11 +179,11 @@ function EmbalagensTab() {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="analise" className="gap-2">
+            <TabsTrigger value="analise" className="h-9 px-4 text-sm font-medium rounded-lg transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400">
               <BarChart3 className="h-4 w-4" />
               Análise
             </TabsTrigger>
-            <TabsTrigger value="economia" className="gap-2">
+            <TabsTrigger value="economia" className="h-9 px-4 text-sm font-medium rounded-lg transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400">
               <Calculator className="h-4 w-4" />
               Economia
             </TabsTrigger>

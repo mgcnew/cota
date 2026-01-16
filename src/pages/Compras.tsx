@@ -136,40 +136,40 @@ function Compras() {
 
           {/* Tabs - Abaixo do header, acima do conteúdo */}
           <div className={`mb-4 ${isMobile ? 'overflow-x-auto scrollbar-hide -mx-1 px-1' : ''}`}>
-            <TabsList className={`h-9 p-0.5 bg-muted/60 rounded-lg ${isMobile ? 'w-max' : ''}`}>
+            <TabsList className={`h-11 p-1 bg-gray-100 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700/50 ${isMobile ? 'w-max' : ''}`}>
               <TabsTrigger 
                 value="cotacoes" 
-                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                className={`h-9 ${isMobile ? 'px-3 text-xs' : 'px-4 text-sm'} font-medium rounded-lg transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400`}
               >
-                <FileText className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                <FileText className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
                 Cotações
               </TabsTrigger>
               <TabsTrigger 
                 value="pedidos"
-                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                className={`h-9 ${isMobile ? 'px-3 text-xs' : 'px-4 text-sm'} font-medium rounded-lg transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400`}
               >
-                <ShoppingCart className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                <ShoppingCart className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
                 Pedidos
               </TabsTrigger>
               <TabsTrigger 
                 value="lista"
-                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                className={`h-9 ${isMobile ? 'px-3 text-xs' : 'px-4 text-sm'} font-medium rounded-lg transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400`}
               >
-                <ShoppingBasket className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                <ShoppingBasket className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
                 Lista
               </TabsTrigger>
               <TabsTrigger 
                 value="embalagens"
-                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                className={`h-9 ${isMobile ? 'px-3 text-xs' : 'px-4 text-sm'} font-medium rounded-lg transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400`}
               >
-                <Package className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                <Package className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
                 Embalagens
               </TabsTrigger>
               <TabsTrigger 
                 value="analise"
-                className={`h-8 ${isMobile ? 'px-2.5 text-[11px]' : 'px-3 text-xs'} font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm rounded-md`}
+                className={`h-9 ${isMobile ? 'px-3 text-xs' : 'px-4 text-sm'} font-medium rounded-lg transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400`}
               >
-                <BarChart3 className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-3.5 w-3.5 mr-1.5'}`} />
+                <BarChart3 className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
                 Análise
               </TabsTrigger>
             </TabsList>
