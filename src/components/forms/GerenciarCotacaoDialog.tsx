@@ -443,65 +443,67 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl w-[95vw] sm:w-[90vw] h-[90vh] max-h-[850px] p-0 overflow-hidden bg-white dark:bg-gray-900 flex flex-col">
         {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <DialogHeader className="flex-shrink-0 px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-teal-100 dark:bg-teal-900/30">
-                <ClipboardList className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                <ClipboardList className="h-4 w-4 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
-                  Gerenciar Cotação #{safeStr(quote.id).substring(0, 8)}
+                <DialogTitle className="text-base font-semibold text-gray-900 dark:text-white">
+                  Gerenciar Cotação
                 </DialogTitle>
-                <p className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-[400px]">{safeStr(quote.produto)}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[350px]">
+                  #{safeStr(quote.id).substring(0, 8)} • {safeStr(quote.produto)}
+                </p>
               </div>
             </div>
-            <Button type="button" variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <Button type="button" variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
               <X className="h-4 w-4" />
             </Button>
           </div>
         </DialogHeader>
 
-        {/* Tabs */}
+        {/* Tabs - Ordem por produtividade: Resumo → Valores → Converter → Exportar → Editar → Detalhes */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="flex-shrink-0 w-full justify-start rounded-none border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-0 h-auto overflow-x-auto">
-            <TabsTrigger value="resumo" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
-              <Trophy className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Resumo Geral</span><span className="sm:hidden">Resumo</span>
+          <TabsList className="flex-shrink-0 mx-3 mt-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg grid grid-cols-6 h-9">
+            <TabsTrigger value="resumo" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
+              <Trophy className="h-3.5 w-3.5 mr-1" />Resumo
             </TabsTrigger>
-            <TabsTrigger value="exportar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
-              <Download className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Exportar HTML</span><span className="sm:hidden">Exportar</span>
+            <TabsTrigger value="valores" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
+              <DollarSign className="h-3.5 w-3.5 mr-1" />Valores
             </TabsTrigger>
-            <TabsTrigger value="editar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
-              <Settings className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Editar Cotação</span><span className="sm:hidden">Editar</span>
+            <TabsTrigger value="converter" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
+              <ShoppingCart className="h-3.5 w-3.5 mr-1" />Pedido
             </TabsTrigger>
-            <TabsTrigger value="detalhes" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
-              <FileText className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden xs:inline">Detalhes</span><span className="xs:hidden">Info</span>
+            <TabsTrigger value="exportar" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
+              <Download className="h-3.5 w-3.5 mr-1" />Export
             </TabsTrigger>
-            <TabsTrigger value="valores" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
-              <DollarSign className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Editar Valores</span><span className="sm:hidden">Valores</span>
+            <TabsTrigger value="editar" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
+              <Settings className="h-3.5 w-3.5 mr-1" />Editar
             </TabsTrigger>
-            <TabsTrigger value="converter" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent px-2 sm:px-4 py-3 text-xs sm:text-sm whitespace-nowrap">
-              <ShoppingCart className="h-4 w-4 mr-1 sm:mr-2" /><span className="hidden sm:inline">Converter em Pedido</span><span className="sm:hidden">Pedido</span>
+            <TabsTrigger value="detalhes" className="text-[11px] text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 data-[state=active]:shadow-sm rounded-md px-1.5 py-1">
+              <FileText className="h-3.5 w-3.5 mr-1" />Info
             </TabsTrigger>
           </TabsList>
 
           {/* Tab Resumo Geral */}
           <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-0">
             <ScrollArea className="h-full">
-              <div className="p-4 sm:p-6 space-y-6">
+              <div className="p-4 sm:p-5 space-y-4">
                 {/* Tabela de Preços por Produto */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                    <Package className="h-4 w-4" />
+                  <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                    <Package className="h-4 w-4 text-orange-500" />
                     Melhor Preço por Produto
                   </h3>
-                  <Card className="overflow-hidden">
+                  <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">
                       {productPricesData.map((item) => (
-                        <div key={item.productId} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                          <div className="flex items-start justify-between gap-4">
+                        <div key={item.productId} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <div className="flex items-start justify-between gap-3">
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 dark:text-white truncate">
+                              <p className="font-medium text-gray-900 dark:text-white truncate text-sm">
                                 {safeStr(item.productName)}
                               </p>
                               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -511,29 +513,29 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                             <div className="text-right flex-shrink-0">
                               {item.bestPrice > 0 ? (
                                 <>
-                                  <div className="flex items-center gap-2 justify-end">
-                                    <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                                    <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                                      R$ {item.bestPrice.toFixed(2)}
+                                  <div className="flex items-center gap-1.5 justify-end">
+                                    <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                                    <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
+                                      R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                   </div>
-                                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
                                     {safeStr(item.bestSupplierName)}
                                   </p>
                                   {item.savings > 0 && (
-                                    <Badge className="mt-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-[10px]">
+                                    <Badge className="mt-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-[10px]">
                                       <TrendingDown className="h-2.5 w-2.5 mr-0.5" />
-                                      Economia: R$ {item.savings.toFixed(2)}
+                                      Economia: R$ {item.savings.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </Badge>
                                   )}
                                 </>
                               ) : (
-                                <Badge variant="outline" className="text-gray-400">Sem preço</Badge>
+                                <Badge variant="outline" className="text-gray-400 dark:text-gray-500">Sem preço</Badge>
                                 )}
                               </div>
                             </div>
                             {item.allPrices.length > 1 && (
-                              <div className="mt-2 flex flex-wrap gap-1.5">
+                              <div className="mt-2 flex flex-wrap gap-1">
                                 {item.allPrices.map((price, idx) => (
                                   <Badge
                                     key={idx}
@@ -541,11 +543,11 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                     className={cn(
                                       "text-[10px]",
                                       idx === 0
-                                        ? "bg-emerald-600 hover:bg-emerald-600"
-                                        : "text-gray-500 dark:text-gray-400"
+                                        ? "bg-emerald-600 hover:bg-emerald-600 text-white"
+                                        : "text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"
                                     )}
                                   >
-                                    {safeStr(price.nome)}: R$ {price.value.toFixed(2)}
+                                    {safeStr(price.nome)}: R$ {price.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                   </Badge>
                                 ))}
                               </div>
@@ -572,23 +574,23 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
           {/* Tab Editar Cotação */}
           <TabsContent value="editar" className="flex-1 overflow-auto m-0 p-0">
             <ScrollArea className="h-full">
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-5 space-y-4">
                 {/* Seção Produtos */}
                 <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <Package className="h-4 w-4 text-teal-600" />
-                      Produtos da Cotação ({products.length})
+                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                      <Package className="h-4 w-4 text-orange-500" />
+                      Produtos ({products.length})
                     </h3>
                   </div>
                   
                   {/* Adicionar Produto */}
                   {productsNotInQuote.length > 0 && onAddQuoteItem && (
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-teal-50/50 dark:bg-teal-900/10">
-                      <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="p-3 border-b border-gray-100 dark:border-gray-700 bg-orange-50/50 dark:bg-orange-900/10">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <Select value={selectedProductToAdd} onValueChange={setSelectedProductToAdd}>
-                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800">
-                            <SelectValue placeholder="Selecione um produto para adicionar..." />
+                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800 h-9 text-sm">
+                            <SelectValue placeholder="Selecione um produto..." />
                           </SelectTrigger>
                           <SelectContent>
                             {productsNotInQuote.map(p => (
@@ -602,10 +604,10 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           value={productQuantity} 
                           onChange={(e) => setProductQuantity(e.target.value)}
                           placeholder="Qtd"
-                          className="w-20 bg-white dark:bg-gray-800"
+                          className="w-16 bg-white dark:bg-gray-800 h-9 text-sm"
                         />
                         <Select value={productUnit} onValueChange={setProductUnit}>
-                          <SelectTrigger className="w-[100px] bg-white dark:bg-gray-800">
+                          <SelectTrigger className="w-[90px] bg-white dark:bg-gray-800 h-9 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -617,9 +619,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                         <Button 
                           onClick={handleAddProduct} 
                           disabled={!selectedProductToAdd}
-                          className="bg-teal-600 hover:bg-teal-700 text-white"
+                          className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white h-9 text-sm"
                         >
-                          <Plus className="h-4 w-4 mr-2" />Adicionar
+                          <Plus className="h-4 w-4 mr-1" />Adicionar
                         </Button>
                       </div>
                     </div>
@@ -628,20 +630,20 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                   {/* Lista de Produtos */}
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
                     {products.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500">
-                        <Package className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p>Nenhum produto na cotação</p>
+                      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+                        <Package className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                        <p className="text-sm">Nenhum produto na cotação</p>
                       </div>
                     ) : (
                       products.map((product: any, index: number) => (
-                        <div key={product.product_id} className="p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <span className="text-xs text-gray-400 w-6 flex-shrink-0">{index + 1}.</span>
+                        <div key={product.product_id} className="p-2.5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <span className="text-xs text-gray-400 dark:text-gray-500 w-5 flex-shrink-0">{index + 1}.</span>
                             <div className="min-w-0 flex-1">
-                              <span className="font-medium text-gray-900 dark:text-white truncate block" title={safeStr(product.product_name)}>
+                              <span className="font-medium text-gray-900 dark:text-white truncate block text-sm" title={safeStr(product.product_name)}>
                                 {safeStr(product.product_name)}
                               </span>
-                              <span className="text-xs text-gray-500">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
                             </div>
                           </div>
                           {onRemoveQuoteItem && products.length > 1 && (
@@ -649,9 +651,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                               variant="ghost" 
                               size="sm" 
                               onClick={() => handleRemoveProduct(product.product_id)}
-                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           )}
                         </div>
@@ -662,20 +664,20 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
 
                 {/* Seção Fornecedores */}
                 <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-blue-600" />
-                      Fornecedores da Cotação ({fornecedores.length})
+                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                      <Building2 className="h-4 w-4 text-blue-500" />
+                      Fornecedores ({fornecedores.length})
                     </h3>
                   </div>
                   
                   {/* Adicionar Fornecedor */}
                   {suppliersNotInQuote.length > 0 && onAddQuoteSupplier && (
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/10">
-                      <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="p-3 border-b border-gray-100 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/10">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800">
-                            <SelectValue placeholder="Selecione um fornecedor para adicionar..." />
+                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800 h-9 text-sm">
+                            <SelectValue placeholder="Selecione um fornecedor..." />
                           </SelectTrigger>
                           <SelectContent>
                             {suppliersNotInQuote.map(s => (
@@ -686,9 +688,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                         <Button 
                           onClick={handleAddSupplier} 
                           disabled={!selectedSupplierToAdd}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="bg-blue-600 hover:bg-blue-700 text-white h-9 text-sm"
                         >
-                          <Plus className="h-4 w-4 mr-2" />Adicionar
+                          <Plus className="h-4 w-4 mr-1" />Adicionar
                         </Button>
                       </div>
                     </div>
@@ -697,29 +699,29 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                   {/* Lista de Fornecedores */}
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
                     {fornecedores.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500">
-                        <Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p>Nenhum fornecedor na cotação</p>
+                      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+                        <Building2 className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                        <p className="text-sm">Nenhum fornecedor na cotação</p>
                       </div>
                     ) : (
                       fornecedores.map((fornecedor) => (
-                        <div key={fornecedor.id} className="p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
+                        <div key={fornecedor.id} className="p-2.5 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <div className={cn("w-2 h-2 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
                             <div className="min-w-0 flex-1">
-                              <span className="font-medium text-gray-900 dark:text-white truncate block" title={safeStr(fornecedor.nome)}>
+                              <span className="font-medium text-gray-900 dark:text-white truncate block text-sm" title={safeStr(fornecedor.nome)}>
                                 {safeStr(fornecedor.nome)}
                               </span>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <Badge variant="outline" className={cn("text-xs", 
+                                <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", 
                                   fornecedor.status === 'respondido' 
-                                    ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300" 
-                                    : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300"
+                                    ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700" 
+                                    : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700"
                                 )}>
                                   {fornecedor.status === 'respondido' ? 'Respondido' : 'Pendente'}
                                 </Badge>
                                 {fornecedor.valorOferecido > 0 && (
-                                  <span className="text-xs text-green-600 font-medium">R$ {fornecedor.valorOferecido.toFixed(2)}</span>
+                                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 )}
                               </div>
                             </div>
@@ -729,9 +731,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                               variant="ghost" 
                               size="sm" 
                               onClick={() => handleRemoveSupplier(fornecedor.id)}
-                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           )}
                         </div>
@@ -741,13 +743,13 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 </Card>
 
                 {/* Aviso */}
-                <Card className="p-4 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <Card className="p-3 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-amber-800 dark:text-amber-200">Atenção</p>
-                      <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                        Ao remover um produto ou fornecedor, os valores já cadastrados para eles serão perdidos.
+                      <p className="text-xs font-medium text-amber-800 dark:text-amber-200">Atenção</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                        Ao remover um produto ou fornecedor, os valores já cadastrados serão perdidos.
                       </p>
                     </div>
                   </div>
@@ -759,59 +761,59 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
           {/* Tab Detalhes */}
           <TabsContent value="detalhes" className="flex-1 overflow-auto m-0 p-0">
             <ScrollArea className="h-full">
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  <Card className="p-4 bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800">
-                    <div className="flex items-center gap-2 mb-1"><Package className="h-4 w-4 text-teal-600 dark:text-teal-400" /><span className="text-xs text-teal-700 dark:text-teal-300">Produtos</span></div>
-                    <p className="text-2xl font-bold text-teal-800 dark:text-teal-200">{stats.totalProdutos}</p>
+              <div className="p-4 sm:p-5 space-y-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                  <Card className="p-3 bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700">
+                    <div className="flex items-center gap-1.5 mb-1"><Package className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" /><span className="text-[10px] text-orange-700 dark:text-orange-300 uppercase font-medium">Produtos</span></div>
+                    <p className="text-xl font-bold text-orange-800 dark:text-orange-200">{stats.totalProdutos}</p>
                   </Card>
-                  <Card className="p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center gap-2 mb-1"><Users className="h-4 w-4 text-blue-600 dark:text-blue-400" /><span className="text-xs text-blue-700 dark:text-blue-300">Fornecedores</span></div>
-                    <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">{stats.fornecedoresRespondidos}/{stats.totalFornecedores}</p>
+                  <Card className="p-3 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
+                    <div className="flex items-center gap-1.5 mb-1"><Users className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" /><span className="text-[10px] text-blue-700 dark:text-blue-300 uppercase font-medium">Fornecedores</span></div>
+                    <p className="text-xl font-bold text-blue-800 dark:text-blue-200">{stats.fornecedoresRespondidos}/{stats.totalFornecedores}</p>
                   </Card>
-                  <Card className="p-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-                    <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" /><span className="text-xs text-green-700 dark:text-green-300">Melhor Valor</span></div>
-                    <p className="text-2xl font-bold text-green-800 dark:text-green-200">R$ {stats.melhorValor.toFixed(2)}</p>
+                  <Card className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700">
+                    <div className="flex items-center gap-1.5 mb-1"><DollarSign className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /><span className="text-[10px] text-emerald-700 dark:text-emerald-300 uppercase font-medium">Melhor Valor</span></div>
+                    <p className="text-xl font-bold text-emerald-800 dark:text-emerald-200">R$ {stats.melhorValor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </Card>
-                  <Card className="p-4 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
-                    <div className="flex items-center gap-2 mb-1"><Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" /><span className="text-xs text-purple-700 dark:text-purple-300">Período</span></div>
+                  <Card className="p-3 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700">
+                    <div className="flex items-center gap-1.5 mb-1"><Calendar className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" /><span className="text-[10px] text-purple-700 dark:text-purple-300 uppercase font-medium">Período</span></div>
                     <p className="text-sm font-bold text-purple-800 dark:text-purple-200">{safeStr(quote.dataInicio)}</p>
-                    <p className="text-xs text-purple-600 dark:text-purple-400">até {safeStr(quote.dataFim)}</p>
+                    <p className="text-[10px] text-purple-600 dark:text-purple-400">até {safeStr(quote.dataFim)}</p>
                   </Card>
                 </div>
 
                 <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2"><Package className="h-4 w-4" />Produtos</h3>
+                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm"><Package className="h-4 w-4 text-orange-500" />Produtos</h3>
                   </div>
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
                     {products.map((product: any, index: number) => (
-                      <div key={product.product_id} className="p-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-400 w-6">{index + 1}.</span>
-                          <span className="font-medium text-gray-900 dark:text-white">{safeStr(product.product_name)}</span>
+                      <div key={product.product_id} className="p-2.5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-400 dark:text-gray-500 w-5">{index + 1}.</span>
+                          <span className="font-medium text-gray-900 dark:text-white text-sm">{safeStr(product.product_name)}</span>
                         </div>
-                        <Badge variant="outline" className="text-gray-600 dark:text-gray-300">{safeStr(product.quantidade)} {safeStr(product.unidade)}</Badge>
+                        <Badge variant="outline" className="text-gray-600 dark:text-gray-300 text-xs">{safeStr(product.quantidade)} {safeStr(product.unidade)}</Badge>
                       </div>
                     ))}
                   </div>
                 </Card>
 
                 <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2"><Building2 className="h-4 w-4" />Fornecedores</h3>
+                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm"><Building2 className="h-4 w-4 text-blue-500" />Fornecedores</h3>
                   </div>
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
                     {fornecedores.map((fornecedor) => (
-                      <div key={fornecedor.id} className="p-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                      <div key={fornecedor.id} className="p-2.5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
                           <div className={cn("w-2 h-2 rounded-full", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
-                          <span className="font-medium text-gray-900 dark:text-white">{safeStr(fornecedor.nome)}</span>
-                          <Badge variant="outline" className={cn("text-xs", fornecedor.status === 'respondido' ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300" : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300")}>
+                          <span className="font-medium text-gray-900 dark:text-white text-sm">{safeStr(fornecedor.nome)}</span>
+                          <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", fornecedor.status === 'respondido' ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700" : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700")}>
                             {fornecedor.status === 'respondido' ? 'Respondido' : 'Pendente'}
                           </Badge>
                         </div>
-                        {fornecedor.valorOferecido > 0 && <span className="font-semibold text-green-600 dark:text-green-400">R$ {fornecedor.valorOferecido.toFixed(2)}</span>}
+                        {fornecedor.valorOferecido > 0 && <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
                       </div>
                     ))}
                   </div>
@@ -824,15 +826,15 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
           <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0">
             <div className="flex flex-col lg:flex-row h-full">
               {/* Lista de Fornecedores - Sidebar */}
-              <div className="w-full lg:w-56 xl:w-64 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col">
-                <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Fornecedores</span>
+              <div className="w-full lg:w-52 xl:w-56 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col">
+                <div className="p-2.5 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-1.5">
+                    <Building2 className="h-3.5 w-3.5 text-orange-500" />
+                    <span className="text-xs font-semibold text-gray-700 dark:text-white">Fornecedores</span>
                   </div>
                 </div>
-                <ScrollArea className="flex-1 max-h-[100px] lg:max-h-none">
-                  <div className="p-2 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible">
+                <ScrollArea className="flex-1 max-h-[80px] lg:max-h-none">
+                  <div className="p-1.5 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible">
                     {fornecedores.map((fornecedor) => {
                       const total = calcularTotalFornecedor(fornecedor.id);
                       const isSelected = selectedSupplier === fornecedor.id;
@@ -841,33 +843,33 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           key={fornecedor.id} 
                           onClick={() => { setSelectedSupplier(fornecedor.id); setEditingProductId(null); setEditedValues({}); }}
                           className={cn(
-                            "flex-shrink-0 lg:w-full text-left px-3 py-2.5 rounded-lg transition-all",
-                            "min-w-[140px] lg:min-w-0",
+                            "flex-shrink-0 lg:w-full text-left px-2.5 py-2 rounded-lg transition-all",
+                            "min-w-[130px] lg:min-w-0",
                             isSelected 
-                              ? "bg-teal-100 dark:bg-teal-900/40 border border-teal-300 dark:border-teal-700 shadow-sm" 
+                              ? "bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 shadow-sm" 
                               : "hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent"
                           )}
                         >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <div className={cn("w-2 h-2 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
                             <span 
                               className={cn(
-                                "text-sm font-medium truncate block",
-                                isSelected ? "text-teal-800 dark:text-teal-200" : "text-gray-700 dark:text-gray-300"
+                                "text-xs font-medium truncate block",
+                                isSelected ? "text-orange-800 dark:text-orange-200" : "text-gray-700 dark:text-white"
                               )} 
                               title={safeStr(fornecedor.nome)}
-                              style={{ maxWidth: '140px' }}
+                              style={{ maxWidth: '120px' }}
                             >
                               {safeStr(fornecedor.nome)}
                             </span>
                           </div>
-                          <div className="mt-1.5 ml-4.5 flex items-center gap-2">
-                            <span className={cn("text-xs font-medium", isSelected ? "text-teal-600 dark:text-teal-400" : "text-gray-500 dark:text-gray-400")}>
-                              R$ {total.toFixed(2)}
+                          <div className="mt-1 ml-3.5 flex items-center gap-1.5">
+                            <span className={cn("text-[11px] font-medium", isSelected ? "text-orange-600 dark:text-orange-400" : "text-gray-500 dark:text-gray-400")}>
+                              R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                             {fornecedor.status === 'respondido' && (
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
-                                Respondido
+                              <Badge variant="outline" className="text-[9px] px-1 py-0 h-3.5 bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700">
+                                OK
                               </Badge>
                             )}
                           </div>
@@ -883,19 +885,19 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 {selectedSupplier ? (
                   <>
                     {/* Header do Fornecedor Selecionado */}
-                    <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <DollarSign className="h-4 w-4 text-teal-600 dark:text-teal-400 flex-shrink-0" />
+                    <div className="flex-shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <DollarSign className="h-3.5 w-3.5 text-orange-500 flex-shrink-0" />
                         <span 
-                          className="font-semibold text-gray-900 dark:text-white truncate text-sm sm:text-base" 
+                          className="font-semibold text-gray-900 dark:text-white truncate text-sm" 
                           title={fornecedores.find(f => f.id === selectedSupplier)?.nome}
-                          style={{ maxWidth: '200px' }}
+                          style={{ maxWidth: '180px' }}
                         >
                           {fornecedores.find(f => f.id === selectedSupplier)?.nome}
                         </span>
                       </div>
-                      <Badge className="bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-700 flex-shrink-0 text-sm font-semibold">
-                        Total: R$ {calcularTotalFornecedor(selectedSupplier).toFixed(2)}
+                      <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 flex-shrink-0 text-xs font-semibold">
+                        Total: R$ {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </Badge>
                     </div>
                     
@@ -1093,16 +1095,16 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
           {/* Tab Converter em Pedido */}
           <TabsContent value="converter" className="flex-1 overflow-hidden m-0 p-0">
             <ScrollArea className="h-full">
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-5 space-y-4">
                 {/* Resumo */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <Card className="p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" /><span className="text-xs text-blue-700 dark:text-blue-300">Total Selecionado</span></div>
-                    <p className="text-2xl font-bold text-blue-800 dark:text-blue-200">R$ {totalSelecao.toFixed(2)}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Card className="p-3 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
+                    <div className="flex items-center gap-1.5 mb-1"><DollarSign className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" /><span className="text-[10px] text-blue-700 dark:text-blue-300 uppercase font-medium">Total Selecionado</span></div>
+                    <p className="text-xl font-bold text-blue-800 dark:text-blue-200">R$ {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </Card>
-                  <Card className="p-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-                    <div className="flex items-center gap-2 mb-1"><Award className="h-4 w-4 text-green-600 dark:text-green-400" /><span className="text-xs text-green-700 dark:text-green-300">Melhor Total Possível</span></div>
-                    <p className="text-2xl font-bold text-green-800 dark:text-green-200">R$ {melhorTotal.toFixed(2)}</p>
+                  <Card className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700">
+                    <div className="flex items-center gap-1.5 mb-1"><Award className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /><span className="text-[10px] text-emerald-700 dark:text-emerald-300 uppercase font-medium">Melhor Total</span></div>
+                    <p className="text-xl font-bold text-emerald-800 dark:text-emerald-200">R$ {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </Card>
                 </div>
 
@@ -1110,6 +1112,7 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => {
                       // Auto-selecionar melhor fornecedor para cada produto
                       const bestSelections: Record<string, string> = {};
@@ -1118,16 +1121,17 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                         if (bestSupplierId) bestSelections[product.product_id] = bestSupplierId;
                       });
                       setProductSelections(bestSelections);
-                      toast({ title: "✅ Melhores preços selecionados!", description: `Total: R$ ${melhorTotal.toFixed(2)}` });
+                      toast({ title: "✅ Melhores preços selecionados!", description: `Total: R$ ${melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` });
                     }}
-                    className="flex-1 border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
+                    className="flex-1 h-8 text-xs border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
                   >
-                    <Award className="h-4 w-4 mr-2" />
-                    Selecionar Melhores Preços
+                    <Award className="h-3.5 w-3.5 mr-1.5" />
+                    Melhores Preços
                   </Button>
                   {supplierGroups.length > 1 && (
                     <Button
                       variant="outline"
+                      size="sm"
                       onClick={() => {
                         // Selecionar fornecedor com menor total geral
                         const supplierTotalsArray = fornecedores.map(f => {
@@ -1150,20 +1154,20 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           toast({ title: "⚠️ Nenhum fornecedor tem todos os produtos", variant: "destructive" });
                         }
                       }}
-                      className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                      className="flex-1 h-8 text-xs border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
                     >
-                      <Building2 className="h-4 w-4 mr-2" />
+                      <Building2 className="h-3.5 w-3.5 mr-1.5" />
                       Fornecedor Único
                     </Button>
                   )}
                 </div>
 
                 {totalSelecao > melhorTotal && (
-                  <Card className="p-3 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                  <Card className="p-2.5 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700">
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                      <span className="text-sm text-amber-700 dark:text-amber-300">
-                        Você pode economizar R$ {(totalSelecao - melhorTotal).toFixed(2)} selecionando os melhores preços
+                      <AlertCircle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                      <span className="text-xs text-amber-700 dark:text-amber-300">
+                        Economize R$ {(totalSelecao - melhorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} selecionando os melhores preços
                       </span>
                     </div>
                   </Card>
@@ -1171,19 +1175,19 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
 
                 {/* Tabela de seleção */}
                 <Card className="border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm sm:text-base">
-                      <Package className="h-4 w-4" />Selecione o fornecedor para cada produto
+                  <div className="p-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-xs">
+                      <Package className="h-3.5 w-3.5 text-orange-500" />Selecione o fornecedor para cada produto
                     </h3>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[500px]">
+                    <table className="w-full min-w-[450px]">
                       <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
                         <tr>
-                          <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</th>
-                          <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Qtd</th>
-                          <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300">Fornecedor</th>
-                          <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300">Valor</th>
+                          <th className="px-2 py-2 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase">Produto</th>
+                          <th className="px-2 py-2 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase">Qtd</th>
+                          <th className="px-2 py-2 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase">Fornecedor</th>
+                          <th className="px-2 py-2 text-right text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase">Valor</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -1194,16 +1198,16 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           const isBest = selectedSupplierId === bestSupplierId;
 
                           return (
-                            <tr key={product.product_id} className={cn("hover:bg-gray-50 dark:hover:bg-gray-800/50", isBest && "bg-green-50/50 dark:bg-green-900/10")}>
-                              <td className="px-2 sm:px-4 py-2 sm:py-3">
-                                <p className="font-medium text-xs sm:text-sm text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[150px]" title={safeStr(product.product_name)}>{safeStr(product.product_name)}</p>
+                            <tr key={product.product_id} className={cn("hover:bg-gray-50 dark:hover:bg-gray-800/50", isBest && "bg-emerald-50/50 dark:bg-emerald-900/10")}>
+                              <td className="px-2 py-2">
+                                <p className="font-medium text-xs text-gray-900 dark:text-white truncate max-w-[90px] sm:max-w-[130px]" title={safeStr(product.product_name)}>{safeStr(product.product_name)}</p>
                               </td>
-                              <td className="px-2 sm:px-4 py-2 sm:py-3">
-                                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
+                              <td className="px-2 py-2">
+                                <span className="text-xs text-gray-600 dark:text-gray-300">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
                               </td>
-                              <td className="px-2 sm:px-4 py-2 sm:py-3">
+                              <td className="px-2 py-2">
                                 <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
-                                  <SelectTrigger className="w-[160px] sm:w-[220px] h-9 bg-white dark:bg-gray-800 text-sm">
+                                  <SelectTrigger className="w-[140px] sm:w-[180px] h-8 bg-white dark:bg-gray-800 text-xs">
                                     <SelectValue placeholder="Selecione..." />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -1212,10 +1216,10 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                       const isBestOption = f.id === bestSupplierId;
                                       return (
                                         <SelectItem key={f.id} value={f.id}>
-                                          <div className="flex items-center gap-2">
-                                            <span className="truncate" style={{ maxWidth: '100px' }} title={safeStr(f.nome)}>{safeStr(f.nome)}</span>
-                                            <span className="text-gray-500 text-sm flex-shrink-0">R$ {value.toFixed(2)}</span>
-                                            {isBestOption && <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 flex-shrink-0">Melhor</Badge>}
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="truncate text-xs" style={{ maxWidth: '80px' }} title={safeStr(f.nome)}>{safeStr(f.nome)}</span>
+                                            <span className="text-gray-500 text-xs flex-shrink-0">R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            {isBestOption && <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-[9px] px-1 flex-shrink-0">Melhor</Badge>}
                                           </div>
                                       </SelectItem>
                                     );
@@ -1223,9 +1227,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                 </SelectContent>
                               </Select>
                             </td>
-                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-right">
-                                <span className={cn("font-semibold text-xs sm:text-sm", isBest ? "text-green-600 dark:text-green-400" : "text-gray-900 dark:text-white")}>
-                                  R$ {selectedValue.toFixed(2)}
+                              <td className="px-2 py-2 text-right">
+                                <span className={cn("font-semibold text-xs", isBest ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white")}>
+                                  R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               </td>
                             </tr>
@@ -1239,25 +1243,25 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 {/* Pedidos que serão gerados */}
                 {supplierGroups.length > 0 && (
                   <Card className="border-gray-200 dark:border-gray-700">
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                      <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <ShoppingCart className="h-4 w-4" />
-                        {supplierGroups.length === 1 ? "Pedido que será gerado" : `${supplierGroups.length} pedidos que serão gerados`}
+                    <div className="p-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                      <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-xs">
+                        <ShoppingCart className="h-3.5 w-3.5 text-orange-500" />
+                        {supplierGroups.length === 1 ? "Pedido que será gerado" : `${supplierGroups.length} pedidos`}
                       </h3>
                     </div>
                     <div className="divide-y divide-gray-100 dark:divide-gray-700">
                       {supplierGroups.map((group, index) => (
-                        <div key={group.supplierId} className="p-4">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0">Pedido {index + 1}</Badge>
-                              <span className="font-semibold text-gray-900 dark:text-white truncate" style={{ maxWidth: '200px' }} title={group.supplierName}>{group.supplierName}</span>
+                        <div key={group.supplierId} className="p-2.5">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 flex-shrink-0 text-[10px] px-1.5">#{index + 1}</Badge>
+                              <span className="font-semibold text-gray-900 dark:text-white truncate text-xs" style={{ maxWidth: '150px' }} title={group.supplierName}>{group.supplierName}</span>
                             </div>
-                            <span className="font-bold text-green-600 dark:text-green-400 flex-shrink-0">
-                              R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toFixed(2)}
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400 flex-shrink-0 text-sm">
+                              R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                          <div className="text-[10px] text-gray-600 dark:text-gray-400 line-clamp-1">
                             {group.products.map((p: any) => safeStr(p.product_name)).join(", ")}
                           </div>
                         </div>
@@ -1267,20 +1271,20 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 )}
 
                 {/* Data de entrega e observações */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data de Entrega *</label>
-                    <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className="bg-white dark:bg-gray-800" min={new Date().toISOString().split('T')[0]} />
+                    <label className="block text-xs font-medium text-gray-700 dark:text-white mb-1">Data de Entrega *</label>
+                    <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className="bg-white dark:bg-gray-800 h-9 text-sm" min={new Date().toISOString().split('T')[0]} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observações</label>
-                    <Input value={observations} onChange={(e) => setObservations(e.target.value)} placeholder="Opcional..." className="bg-white dark:bg-gray-800" />
+                    <label className="block text-xs font-medium text-gray-700 dark:text-white mb-1">Observações</label>
+                    <Input value={observations} onChange={(e) => setObservations(e.target.value)} placeholder="Opcional..." className="bg-white dark:bg-gray-800 h-9 text-sm" />
                   </div>
                 </div>
 
                 {/* Botão de converter */}
-                <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white h-12 text-base">
-                  <ShoppingCart className="h-5 w-5 mr-2" />
+                <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white h-10 text-sm font-semibold">
+                  <ShoppingCart className="h-4 w-4 mr-2" />
                   {supplierGroups.length > 1 ? `Gerar ${supplierGroups.length} Pedidos` : "Converter em Pedido"}
                 </Button>
               </div>
@@ -1289,8 +1293,8 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
         </Tabs>
 
         {/* Footer */}
-        <div className="flex-shrink-0 px-5 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-gray-300 dark:border-gray-600">Fechar</Button>
+        <div className="flex-shrink-0 px-4 py-2.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-end">
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} className="border-gray-300 dark:border-gray-600 dark:text-gray-300 h-8 text-xs">Fechar</Button>
         </div>
       </DialogContent>
     </Dialog>
