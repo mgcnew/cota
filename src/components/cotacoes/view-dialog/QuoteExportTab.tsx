@@ -17,6 +17,11 @@ export function QuoteExportTab({
   getSupplierProductValue,
   getNormalizedUnitPrice,
 }: QuoteExportTabProps) {
+  // Formatar valor em reais (padrão brasileiro)
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
   // Calcular comparativo de preços por produto
   const comparison = useMemo(() => {
     if (!quote || !products.length) return [];
@@ -207,8 +212,8 @@ export function QuoteExportTab({
                     return `
                   <tr class="${f.isMelhorPreco ? 'winner-row' : ''}">
                     <td>${f.supplierName}</td>
-                    <td>R$ ${f.valorOferecido.toFixed(2)}</td>
-                    <td><strong>R$ ${f.valorNormalizado.toFixed(4)}</strong></td>
+                    <td>R$ ${formatCurrency(f.valorOferecido)}</td>
+                    <td><strong>R$ ${formatCurrency(f.valorNormalizado)}</strong></td>
                     <td>
                       ${f.isMelhorPreco 
                         ? '<span class="badge badge-winner">🏆 MELHOR PREÇO</span>' 

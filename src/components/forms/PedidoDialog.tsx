@@ -12,13 +12,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Plus, Trash2, Loader2, Building2, Calendar, Package, FileText, 
-  Save, ShoppingCart, Truck, X, Search, CheckCircle, ClipboardList
+  Save, ShoppingCart, Truck, X, Search, CheckCircle, ClipboardList, Download
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { OrderExportTab } from "@/components/pedidos/OrderExportTab";
 
 interface PedidoItem {
   produto: string;
@@ -345,7 +346,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="flex-shrink-0 mx-4 mt-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg grid grid-cols-3">
+            <TabsList className="flex-shrink-0 mx-4 mt-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg grid grid-cols-4">
               <TabsTrigger value="itens" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target">
                 <Package className="h-3.5 w-3.5 mr-1.5" />Itens
               </TabsTrigger>
@@ -354,6 +355,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               </TabsTrigger>
               <TabsTrigger value="resumo" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target">
                 <ClipboardList className="h-3.5 w-3.5 mr-1.5" />Resumo
+              </TabsTrigger>
+              <TabsTrigger value="exportar" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target">
+                <Download className="h-3.5 w-3.5 mr-1.5" />Export
               </TabsTrigger>
             </TabsList>
 
@@ -563,6 +567,18 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 </div>
               </div>
             </TabsContent>
+
+            {/* Tab: Exportar */}
+            <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0">
+              <OrderExportTab
+                pedido={pedido}
+                itens={itens}
+                fornecedor={fornecedor}
+                dataEntrega={dataEntrega}
+                observacoes={observacoes}
+                suppliers={suppliers}
+              />
+            </TabsContent>
           </Tabs>
 
           <DrawerFooter className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
@@ -592,7 +608,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="flex-shrink-0 mx-4 mt-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg grid grid-cols-3">
+          <TabsList className="flex-shrink-0 mx-4 mt-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg grid grid-cols-4">
             <TabsTrigger value="itens" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300">
               <Package className="h-3.5 w-3.5 mr-1.5" />Itens
             </TabsTrigger>
@@ -601,6 +617,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             </TabsTrigger>
             <TabsTrigger value="resumo" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300">
               <ClipboardList className="h-3.5 w-3.5 mr-1.5" />Resumo
+            </TabsTrigger>
+            <TabsTrigger value="exportar" className="text-xs text-gray-600 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300">
+              <Download className="h-3.5 w-3.5 mr-1.5" />Exportar
             </TabsTrigger>
           </TabsList>
 
@@ -874,6 +893,18 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 {getStatusBadge(status || pedido?.status || 'pendente')}
               </div>
             </div>
+          </TabsContent>
+
+          {/* Tab: Exportar */}
+          <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0">
+            <OrderExportTab
+              pedido={pedido}
+              itens={itens}
+              fornecedor={fornecedor}
+              dataEntrega={dataEntrega}
+              observacoes={observacoes}
+              suppliers={suppliers}
+            />
           </TabsContent>
         </Tabs>
 
