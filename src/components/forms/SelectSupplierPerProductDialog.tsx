@@ -96,7 +96,7 @@ export function SelectSupplierPerProductDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-5xl h-[90vh] sm:h-[85vh] p-0 flex flex-col bg-white dark:bg-gray-900 border-0 dark:border dark:border-gray-700 rounded-lg sm:rounded-xl">
-        <DialogHeader className="px-3 sm:px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 flex-shrink-0">
+        <DialogHeader className="px-3 sm:px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
             <div className="p-1.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white flex-shrink-0">
               <Package className="h-4 w-4" />

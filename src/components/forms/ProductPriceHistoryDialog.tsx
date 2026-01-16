@@ -106,7 +106,7 @@ export function ProductPriceHistoryDialog({
         <SheetContent side="bottom" className="h-[90vh] rounded-t-2xl pb-8">
           <SheetHeader className="pb-3 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-lg">
                 <Package className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">

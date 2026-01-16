@@ -596,7 +596,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       <div className={`flex-shrink-0 px-4 ${isMobile ? 'py-4' : 'sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center text-white flex-shrink-0`}>
+            <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0`}>
               <FileText className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
             </div>
             
@@ -631,7 +631,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 size="sm"
                 onClick={handleNext}
                 disabled={!canProceedToNext()}
-                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
+                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg h-8 px-3"
               >
                 <span className="hidden sm:inline">Próximo</span>
                 <ChevronRight className="h-3 w-3 ml-1" />
@@ -648,7 +648,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
                     }
                   }}
-                  className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg h-8 px-3"
+                  className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg h-8 px-3"
                 >
                   {isSubmitting ? (
                     <>
@@ -669,7 +669,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     disabled={isSubmitting}
                     onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
                     variant="outline"
-                    className="border-teal-500 dark:border-teal-400 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/20 h-8 px-3"
+                    className="border-orange-400 dark:border-orange-500 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 h-8 px-3"
                   >
                     <Plus className="h-3 w-3 mr-1" />
                     <span className="hidden sm:inline">Criar Mais</span>
@@ -883,7 +883,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       }
                                     }}
                                     disabled={!selectedProduct || !newProductQuantity || !newProductUnit}
-                                    className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg disabled:opacity-50"
+                                    className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg disabled:opacity-50"
                                     tabIndex={0}
                                   >
                                     <Plus className="h-4 w-4 mr-2" />

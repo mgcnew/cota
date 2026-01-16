@@ -59,7 +59,7 @@ export default function ConvertToOrderDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0">
-        <DialogHeader className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
+        <DialogHeader className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-600 dark:bg-blue-500 text-white">
               <ShoppingCart className="h-5 w-5" />

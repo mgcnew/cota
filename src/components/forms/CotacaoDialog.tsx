@@ -281,7 +281,7 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-teal-50 to-cyan-50">
+          <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-900">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-teal-100"><ClipboardList className="h-5 w-5 text-teal-600" /></div>
               <div>
@@ -428,7 +428,7 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
                         ))}
                       </div>
                     </div>
-                    <Button onClick={handleConvertToOrder} className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"><ShoppingCart className="h-4 w-4 mr-2" />Converter em Pedido</Button>
+                    <Button onClick={handleConvertToOrder} className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"><ShoppingCart className="h-4 w-4 mr-2" />Converter em Pedido</Button>
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground"><ShoppingCart className="h-12 w-12 mx-auto mb-2 opacity-50" /><p>Nenhum fornecedor com valores para converter</p></div>
