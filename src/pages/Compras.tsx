@@ -101,7 +101,7 @@ function Compras() {
           {/* Header - Mobile: empilhado, Desktop: lado a lado */}
           <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'} mb-4`}>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
                 <ShoppingBag className="h-5 w-5 text-white" />
               </div>
               <div>

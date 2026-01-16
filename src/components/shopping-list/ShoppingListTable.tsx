@@ -140,24 +140,43 @@ export function ShoppingListTable({
 
 
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/50 overflow-hidden">
+    <div className="overflow-hidden">
       <Table>
-        <TableHeader>
-          <TableRow className="bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-50 dark:hover:bg-gray-900/50">
-            <TableHead className="w-12">
-              <Checkbox
-                checked={selectedItems.size === items.length && items.length > 0}
-                onCheckedChange={onSelectAll}
-              />
-            </TableHead>
-            <TableHead className="font-semibold">Produto</TableHead>
-            <TableHead className="font-semibold">Quantidade</TableHead>
-            <TableHead className="font-semibold">Prioridade</TableHead>
-            <TableHead className="font-semibold">Preço Est.</TableHead>
-            <TableHead className="font-semibold">Observações</TableHead>
-            <TableHead className="text-right font-semibold">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
+        <thead>
+          <tr>
+            <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
+              <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
+                <div className="w-[5%] flex items-center">
+                  <Checkbox
+                    checked={selectedItems.size === items.length && items.length > 0}
+                    onCheckedChange={onSelectAll}
+                  />
+                </div>
+                <div className="w-[25%] flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
+                    <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  </div>
+                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</span>
+                </div>
+                <div className="w-[12%] pl-2 flex items-center gap-2">
+                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Qtd</span>
+                </div>
+                <div className="w-[15%] pl-2 flex items-center gap-2">
+                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Prioridade</span>
+                </div>
+                <div className="w-[13%] pl-2 flex items-center gap-2">
+                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Preço Est.</span>
+                </div>
+                <div className="w-[20%] pl-2 flex items-center gap-2">
+                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Observações</span>
+                </div>
+                <div className="w-[10%] pl-2 flex justify-end items-center">
+                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </thead>
         <TableBody>
           {items.map((item) => {
             const isEditing = editingId === item.id;
@@ -165,156 +184,157 @@ export function ShoppingListTable({
             const PriorityIcon = config.icon;
 
             return (
-              <TableRow
-                key={item.id}
-                className={cn(
-                  "group transition-colors",
-                  selectedItems.has(item.id) && "bg-blue-50/50 dark:bg-blue-950/20"
-                )}
-              >
-                <TableCell>
-                  <Checkbox
-                    checked={selectedItems.has(item.id)}
-                    onCheckedChange={() => onToggleSelection(item.id)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center flex-shrink-0">
-                      <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <TableRow key={item.id} className="group border-none">
+                <TableCell colSpan={7} className="px-1 py-1.5">
+                  <div className={cn(
+                    "flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border transition-colors duration-150",
+                    selectedItems.has(item.id) 
+                      ? "border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-950/20" 
+                      : "border-gray-200 dark:border-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-800/70"
+                  )}>
+                    <div className="w-[5%] flex items-center">
+                      <Checkbox
+                        checked={selectedItems.has(item.id)}
+                        onCheckedChange={() => onToggleSelection(item.id)}
+                      />
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {item.product_name}
-                      </p>
-                      {item.category && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {item.category}
+                    <div className="w-[25%] flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-600/30">
+                        <Package className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
+                          {item.product_name}
                         </p>
+                        {item.category && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {item.category}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="w-[12%] pl-2">
+                      {isEditing ? (
+                        <Input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          value={editData.quantity}
+                          onChange={(e) =>
+                            setEditData({ ...editData, quantity: Number(e.target.value) })
+                          }
+                          className="w-20 h-8"
+                        />
+                      ) : (
+                        <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                          {item.quantity}{" "}
+                          <span className="text-gray-400 font-normal">{item.unit}</span>
+                        </span>
+                      )}
+                    </div>
+                    <div className="w-[15%] pl-2">
+                      {isEditing ? (
+                        <Select
+                          value={editData.priority}
+                          onValueChange={(value) =>
+                            setEditData({ ...editData, priority: value })
+                          }
+                        >
+                          <SelectTrigger className="w-28 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Baixa</SelectItem>
+                            <SelectItem value="medium">Média</SelectItem>
+                            <SelectItem value="high">Alta</SelectItem>
+                            <SelectItem value="urgent">Urgente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className={cn("gap-1.5 font-medium text-xs", config.badge)}
+                        >
+                          <PriorityIcon className="w-3 h-3" />
+                          {config.label}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="w-[13%] pl-2">
+                      {isEditing ? (
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={editData.estimated_price}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              estimated_price: Number(e.target.value),
+                            })
+                          }
+                          className="w-24 h-8"
+                          placeholder="R$ 0,00"
+                        />
+                      ) : item.estimated_price ? (
+                        <span className="font-semibold text-sm text-emerald-600 dark:text-emerald-400">
+                          R$ {item.estimated_price.toFixed(2)}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
+                    </div>
+                    <div className="w-[20%] pl-2">
+                      <p className="max-w-[180px] truncate text-sm text-gray-500 dark:text-gray-400">
+                        {item.notes || "-"}
+                      </p>
+                    </div>
+                    <div className="w-[10%] pl-2 flex justify-end">
+                      {isEditing ? (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleSaveEdit(item.id)}
+                            className="h-8 w-8 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg"
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleCancelEdit}
+                            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-lg"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleStartEdit(item)}
+                            className="h-8 w-8 p-0 text-gray-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (confirm("Deseja remover este item?")) {
+                                onDelete(item.id);
+                              }
+                            }}
+                            className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
-                </TableCell>
-                <TableCell>
-                  {isEditing ? (
-                    <Input
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={editData.quantity}
-                      onChange={(e) =>
-                        setEditData({ ...editData, quantity: Number(e.target.value) })
-                      }
-                      className="w-24 h-8"
-                    />
-                  ) : (
-                    <span className="font-medium text-gray-700 dark:text-gray-300">
-                      {item.quantity}{" "}
-                      <span className="text-gray-400 font-normal">{item.unit}</span>
-                    </span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {isEditing ? (
-                    <Select
-                      value={editData.priority}
-                      onValueChange={(value) =>
-                        setEditData({ ...editData, priority: value })
-                      }
-                    >
-                      <SelectTrigger className="w-32 h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Baixa</SelectItem>
-                        <SelectItem value="medium">Média</SelectItem>
-                        <SelectItem value="high">Alta</SelectItem>
-                        <SelectItem value="urgent">Urgente</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge
-                      variant="outline"
-                      className={cn("gap-1.5 font-medium", config.badge)}
-                    >
-                      <PriorityIcon className="w-3 h-3" />
-                      {config.label}
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {isEditing ? (
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={editData.estimated_price}
-                      onChange={(e) =>
-                        setEditData({
-                          ...editData,
-                          estimated_price: Number(e.target.value),
-                        })
-                      }
-                      className="w-28 h-8"
-                      placeholder="R$ 0,00"
-                    />
-                  ) : item.estimated_price ? (
-                    <span className="font-medium text-green-600 dark:text-green-400">
-                      R$ {item.estimated_price.toFixed(2)}
-                    </span>
-                  ) : (
-                    <span className="text-gray-400">-</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <p className="max-w-[200px] truncate text-sm text-gray-500 dark:text-gray-400">
-                    {item.notes || "-"}
-                  </p>
-                </TableCell>
-                <TableCell className="text-right">
-                  {isEditing ? (
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleSaveEdit(item.id)}
-                        className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/30"
-                      >
-                        <Check className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleCancelEdit}
-                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleStartEdit(item)}
-                        className="h-8 w-8 p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          if (confirm("Deseja remover este item?")) {
-                            onDelete(item.id);
-                          }
-                        }}
-                        className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
                 </TableCell>
               </TableRow>
             );
