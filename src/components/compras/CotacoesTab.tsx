@@ -240,7 +240,7 @@ function CotacoesTab() {
           <Button variant="outline" size="sm" onClick={handleExportQuotes} className="h-10">
             <Download className="h-4 w-4" />
           </Button>
-          <Button onClick={() => setAddDialogOpen(true)} className="h-10 bg-teal-600 hover:bg-teal-700">
+          <Button onClick={() => setAddDialogOpen(true)} className="h-10 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700">
             <Plus className="h-4 w-4 mr-1" />Nova
           </Button>
         </div>

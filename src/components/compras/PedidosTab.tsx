@@ -167,7 +167,7 @@ function PedidosTab() {
           <option value="confirmado">Confirmados</option>
           <option value="entregue">Entregues</option>
         </select>
-        <Button onClick={() => setAddDialogOpen(true)} className="h-10 ml-auto bg-orange-600 hover:bg-orange-700">
+        <Button onClick={() => setAddDialogOpen(true)} className="h-10 ml-auto bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700">
           <Plus className="h-4 w-4 mr-1" />Novo
         </Button>
       </div>

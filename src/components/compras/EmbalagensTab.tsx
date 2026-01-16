@@ -242,7 +242,7 @@ function EmbalagensTab() {
               </SelectContent>
             </Select>
             <div className="flex gap-2 ml-auto">
-              <Button onClick={() => setAddDialogOpen(true)} className="h-10 bg-purple-600 hover:bg-purple-700">
+              <Button onClick={() => setAddDialogOpen(true)} className="h-10 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700">
                 <Plus className="h-4 w-4 mr-1" />Nova Cotação
               </Button>
             </div>

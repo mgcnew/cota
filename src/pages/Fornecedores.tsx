@@ -372,7 +372,7 @@ function Fornecedores() {
               </Button>
               <Button
                 onClick={() => addSupplierRef.current?.click()}
-                className="bg-primary hover:bg-primary/90"
+                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Fornecedor

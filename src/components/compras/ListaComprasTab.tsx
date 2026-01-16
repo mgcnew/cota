@@ -192,7 +192,7 @@ export default function ListaComprasTab() {
           <Button
             onClick={() => setShowAddDialog(true)}
             size="sm"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
           >
             <Plus className="h-4 w-4 mr-2" />
             Adicionar
@@ -244,7 +244,7 @@ export default function ListaComprasTab() {
               <Button
                 size="sm"
                 onClick={handleCreateOrder}
-                className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                className="flex-1 sm:flex-none bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
               >
                 <PackagePlus className="h-4 w-4 mr-2" />
                 Criar Pedido

@@ -348,7 +348,7 @@ function Produtos() {
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="h-11 sm:h-10 min-w-[44px] px-3 sm:px-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm touch-target">
+                  <Button className="h-11 sm:h-10 min-w-[44px] px-3 sm:px-4 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm touch-target">
                     <Plus className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Adicionar</span>
                   </Button>
