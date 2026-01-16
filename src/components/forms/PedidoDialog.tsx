@@ -307,8 +307,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   // Header content shared between Dialog and Drawer
   const headerContent = (
     <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-        <ShoppingCart className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+      <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+        <ShoppingCart className="h-4 w-4 text-white" />
       </div>
       <div>
         <span className="text-base font-semibold text-gray-900 dark:text-white block">
@@ -327,7 +327,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={loading} className="touch-target">
         Fechar
       </Button>
-      <Button onClick={handleSubmit} size="sm" disabled={loading} className="bg-orange-600 hover:bg-orange-700 text-white touch-target">
+      <Button onClick={handleSubmit} size="sm" disabled={loading} className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white touch-target">
         {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
         Salvar Alterações
       </Button>
@@ -362,7 +362,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Produtos do Pedido</span>
-                  <Button ref={addButtonRef} onClick={handleAddItem} size="sm" className="h-10 bg-orange-600 hover:bg-orange-700 text-white touch-target">
+                  <Button ref={addButtonRef} onClick={handleAddItem} size="sm" className="h-10 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white touch-target">
                     <Plus className="h-3.5 w-3.5 mr-1.5" />Adicionar
                   </Button>
                 </div>
@@ -609,7 +609,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Produtos do Pedido</span>
-                <Button ref={addButtonRef} onClick={handleAddItem} size="sm" className="h-8 bg-orange-600 hover:bg-orange-700 text-white">
+                <Button ref={addButtonRef} onClick={handleAddItem} size="sm" className="h-8 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white">
                   <Plus className="h-3.5 w-3.5 mr-1.5" />Adicionar (Alt+N)
                 </Button>
               </div>

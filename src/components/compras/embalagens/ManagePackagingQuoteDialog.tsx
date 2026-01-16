@@ -557,11 +557,11 @@ export function ManagePackagingQuoteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl w-[95vw] h-[90vh] max-h-[850px] p-0 overflow-hidden bg-white dark:bg-gray-900 flex flex-col">
         {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-gray-800 dark:to-gray-800">
+        <DialogHeader className="flex-shrink-0 px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-purple-100 dark:bg-purple-900/30">
-                <Package className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800">
+                <Package className="h-5 w-5 text-white" />
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">Gerenciar Cotação de Embalagens</DialogTitle>

@@ -289,8 +289,10 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen); }}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
-          <DialogTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5 text-purple-600" />
+          <DialogTitle className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+              <ShoppingCart className="h-4 w-4 text-white" />
+            </div>
             Converter Cotação em Pedido(s)
           </DialogTitle>
           <DialogDescription>
@@ -580,7 +582,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
             size="sm"
             onClick={handleSubmit}
             disabled={!deliveryDate || Object.keys(ordersBySupplier).length === 0 || isSubmitting}
-            className="bg-purple-600 hover:bg-purple-700"
+            className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
           >
             {isSubmitting ? (
               <>

@@ -392,11 +392,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const modalInnerContent = (
     <>
       {/* Header compacto */}
-      <div className={`flex-shrink-0 px-4 ${isMobile ? 'py-4' : 'py-3'} border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50`}>
+      <div className={`flex-shrink-0 px-4 ${isMobile ? 'py-4' : 'py-3'} border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800`}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center`}>
-              <ShoppingCart className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-orange-600 dark:text-orange-400`} />
+            <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center`}>
+              <ShoppingCart className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-white`} />
             </div>
             <div>
               <div className={`${isMobile ? 'text-lg font-bold' : 'text-base font-semibold'} text-gray-900 dark:text-white`}>Novo Pedido</div>
@@ -521,7 +521,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         </div>
                       </div>
                     </div>
-                    <Button ref={addButtonRef} onClick={handleAddProduct} disabled={!selectedProduct} className="mt-3 w-full bg-orange-600 hover:bg-orange-700 text-white">
+                    <Button ref={addButtonRef} onClick={handleAddProduct} disabled={!selectedProduct} className="mt-3 w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white">
                       <Plus className="h-4 w-4 mr-2" />Adicionar Produto (Enter)
                     </Button>
                     
@@ -711,7 +711,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             </div>
             
             {currentStep < 2 ? (
-              <Button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} className="bg-orange-600 hover:bg-orange-700 text-white">
+              <Button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white">
                 {isMobile ? 'Próximo' : 'Próximo (Alt+→)'}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
