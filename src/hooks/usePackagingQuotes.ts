@@ -239,26 +239,88 @@ export function usePackagingQuotes() {
         ? data.valorTotal / data.quantidadeUnidadesEstimada 
         : null;
 
-      const { error } = await (supabase
+      console.log('Atualizando supplier_item:', {
+        quoteId: data.quoteId,
+        supplierId: data.supplierId,
+        packagingId: data.packagingId,
+        valorTotal: data.valorTotal,
+        custoPorUnidade
+      });
+
+      // Primeiro, verificar se o registro existe
+      const { data: existingItem, error: selectError } = await (supabase
         .from('packaging_supplier_items' as any)
-        .update({
-          valor_total: data.valorTotal,
-          unidade_venda: data.unidadeVenda,
-          quantidade_venda: data.quantidadeVenda,
-          quantidade_unidades_estimada: data.quantidadeUnidadesEstimada,
-          gramatura: data.gramatura || null,
-          dimensoes: data.dimensoes || null,
-          custo_por_unidade: custoPorUnidade,
-          updated_at: new Date().toISOString(),
-        })
+        .select('id')
         .eq('quote_id', data.quoteId)
         .eq('supplier_id', data.supplierId)
-        .eq('packaging_id', data.packagingId) as any);
+        .eq('packaging_id', data.packagingId)
+        .maybeSingle() as any);
 
-      if (error) throw error;
+      if (selectError) {
+        console.error('Erro ao buscar supplier_item:', selectError);
+        throw selectError;
+      }
+
+      console.log('Registro existente:', existingItem);
+
+      if (existingItem) {
+        // Atualizar registro existente
+        const { error: updateError, data: updatedData } = await (supabase
+          .from('packaging_supplier_items' as any)
+          .update({
+            valor_total: data.valorTotal,
+            unidade_venda: data.unidadeVenda,
+            quantidade_venda: data.quantidadeVenda,
+            quantidade_unidades_estimada: data.quantidadeUnidadesEstimada,
+            gramatura: data.gramatura || null,
+            dimensoes: data.dimensoes || null,
+            custo_por_unidade: custoPorUnidade,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existingItem.id)
+          .select() as any);
+
+        if (updateError) {
+          console.error('Erro ao atualizar supplier_item:', updateError);
+          throw updateError;
+        }
+        console.log('Registro atualizado:', updatedData);
+      } else {
+        // Buscar o nome da embalagem
+        const { data: quoteItem } = await (supabase
+          .from('packaging_quote_items' as any)
+          .select('packaging_name')
+          .eq('quote_id', data.quoteId)
+          .eq('packaging_id', data.packagingId)
+          .single() as any);
+
+        // Criar novo registro
+        const { error: insertError, data: insertedData } = await (supabase
+          .from('packaging_supplier_items' as any)
+          .insert({
+            quote_id: data.quoteId,
+            supplier_id: data.supplierId,
+            packaging_id: data.packagingId,
+            packaging_name: quoteItem?.packaging_name || '',
+            valor_total: data.valorTotal,
+            unidade_venda: data.unidadeVenda,
+            quantidade_venda: data.quantidadeVenda,
+            quantidade_unidades_estimada: data.quantidadeUnidadesEstimada,
+            gramatura: data.gramatura || null,
+            dimensoes: data.dimensoes || null,
+            custo_por_unidade: custoPorUnidade,
+          })
+          .select() as any);
+
+        if (insertError) {
+          console.error('Erro ao inserir supplier_item:', insertError);
+          throw insertError;
+        }
+        console.log('Registro inserido:', insertedData);
+      }
 
       // Atualizar status do fornecedor para "respondido"
-      await (supabase
+      const { error: supplierError } = await (supabase
         .from('packaging_quote_suppliers' as any)
         .update({
           status: 'respondido',
@@ -266,6 +328,10 @@ export function usePackagingQuotes() {
         })
         .eq('quote_id', data.quoteId)
         .eq('supplier_id', data.supplierId) as any);
+
+      if (supplierError) {
+        console.error('Erro ao atualizar status do fornecedor:', supplierError);
+      }
     },
     onSuccess: async () => {
       // Usar refetchQueries para forçar atualização imediata
