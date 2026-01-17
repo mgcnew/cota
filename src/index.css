@@ -228,12 +228,18 @@
   
   /* GPU acceleration for animated elements */
   @media (max-width: 767px) {
-    /* Disable heavy effects on mobile */
-    .backdrop-blur-xl,
-    .backdrop-blur-lg,
+    /* Disable heavy effects on mobile - Reduced intensity instead of disabling */
+    .backdrop-blur-xl {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .backdrop-blur-lg {
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
     .backdrop-blur-md {
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
     
     /* Disable hover effects on touch devices */
@@ -2224,7 +2230,7 @@
   /* Footer de modal */
   .dark [class*="DialogFooter"],
   .dark .bg-white.dark\:bg-gray-900 {
-    background-color: hsl(var(--background)) !important;
+    background-color: hsl(var(--background));
     border-top-color: hsl(var(--border));
   }
   
@@ -2239,15 +2245,15 @@
   /* Wrapper de tabela com borda */
   .dark .bg-white.dark\:bg-gray-800\/50,
   .dark [class*="rounded-xl"][class*="border"] {
-    background-color: hsl(var(--card)) !important;
-    border-color: hsl(var(--border)) !important;
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
   }
   
   /* Header da tabela - MESMO tom das linhas para efeito flutuante */
   .dark th,
   .dark .table-modern th,
   .dark thead {
-    background-color: transparent !important;
+    background-color: transparent;
     color: hsl(220 15% 75%);
     font-weight: 500;
     border-bottom-color: hsl(var(--border));
@@ -2264,7 +2270,7 @@
   /* O hover deve ser aplicado apenas no card interno (div), não na linha */
   .dark tbody tr.border-none:hover,
   .dark .table-modern tbody tr.border-none:hover {
-    background-color: transparent !important;
+    background-color: transparent;
   }
   
   /* Hover apenas para tabelas tradicionais (sem cards flutuantes) */
@@ -2275,28 +2281,28 @@
   
   /* Header customizado das tabelas (card flutuante) - MESMO tom das linhas */
   .dark .bg-card\/95 {
-    background-color: hsl(var(--card)) !important;
+    background-color: hsl(var(--card));
   }
   
   /* Cards flutuantes dentro das linhas */
   .dark .bg-card\/90 {
-    background-color: hsl(var(--card)) !important;
+    background-color: hsl(var(--card));
   }
   
   /* Hover nos cards flutuantes - muda apenas a borda */
   .dark .bg-card\/90:hover {
-    background-color: hsl(var(--card)) !important;
+    background-color: hsl(var(--card));
   }
   
   /* Bordas das linhas de tabela */
   .dark .border-border {
-    border-color: hsl(var(--border)) !important;
+    border-color: hsl(var(--border));
   }
   
   /* Hover nas bordas dos cards flutuantes */
   .dark .hover\:border-purple-300\/50:hover,
   .dark .hover\:border-teal-300\/50:hover {
-    border-color: hsl(262 40% 40%) !important;
+    border-color: hsl(262 40% 40%);
   }
   
   /* === INPUTS E FORMS DARK MODE === */
@@ -2305,8 +2311,8 @@
   .dark select,
   .dark [class*="Input"],
   .dark [class*="Select"] {
-    background-color: hsl(var(--input)) !important;
-    border-color: hsl(var(--border)) !important;
+    background-color: hsl(var(--input));
+    border-color: hsl(var(--border));
     color: hsl(var(--foreground));
   }
   
@@ -2757,7 +2763,7 @@
   input:not([type="checkbox"]):not([type="radio"]),
   textarea,
   select {
-    background-color: hsl(var(--card)) !important;
+    background-color: hsl(var(--card));
   }
   
   /* Placeholder mais suave */
