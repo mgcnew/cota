@@ -359,7 +359,7 @@ function Fornecedores() {
                   <SelectItem value="pending">Pendentes</SelectItem>
                 </SelectContent>
               </Select>
-              <ViewToggle view={viewMode} onViewChange={setViewMode} />
+              <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
             </div>
             <div className="flex gap-2 ml-auto">
               <Button

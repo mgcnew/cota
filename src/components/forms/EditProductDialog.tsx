@@ -286,11 +286,11 @@ function EditProductDialogInternal({
 
   // Conteúdo do formulário (compartilhado entre mobile e desktop)
   const formContent = (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-gray-900">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-transparent">
       {/* Product Image Preview */}
       {(currentProduct?.image_url || newImageUrl) && (
             <div className="flex flex-col items-center gap-3 pb-2">
-              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-md relative group">
+              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-md relative group bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm">
                 {isUploadingImage ? (
                   <div className="w-full h-full bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center">
                     <Loader2 className="h-8 w-8 text-orange-600 animate-spin" />
@@ -360,11 +360,11 @@ function EditProductDialogInternal({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Nome do Produto</FormLabel>
+                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Nome do Produto</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Ex: Coxa com Sobrecoxa"
-                      className="bg-white dark:bg-gray-900/40 dark:border-gray-700/60 dark:text-gray-200"
+                      className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
                       {...field}
                     />
                   </FormControl>
@@ -378,7 +378,7 @@ function EditProductDialogInternal({
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Categoria</FormLabel>
+                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Categoria</FormLabel>
                   <Select 
                     onValueChange={(value) => {
                       field.onChange(value);
@@ -390,17 +390,17 @@ function EditProductDialogInternal({
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="bg-background">
+                      <SelectTrigger className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
                         <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-background border z-50">
+                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
                       {availableCategories.map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
                         </SelectItem>
                       ))}
-                      <SelectItem value="nova" className="text-primary font-medium">
+                      <SelectItem value="nova" className="text-primary font-medium border-t mt-1 pt-2">
                         + Adicionar nova categoria
                       </SelectItem>
                     </SelectContent>
@@ -416,14 +416,14 @@ function EditProductDialogInternal({
                 name="newCategory"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nome da Nova Categoria</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Ex: Peixes, Laticínios"
-                        className="bg-white dark:bg-gray-900/40 dark:border-gray-700/60 dark:text-gray-200"
-                        {...field}
-                      />
-                    </FormControl>
+                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Nome da Nova Categoria</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Ex: Peixes, Laticínios"
+                      className="!bg-orange-50/30 dark:!bg-orange-900/20 backdrop-blur-sm border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
+                      {...field}
+                    />
+                  </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -435,14 +435,14 @@ function EditProductDialogInternal({
               name="unit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Unidade de Medida *</FormLabel>
+                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Unidade de Medida *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="bg-background">
+                      <SelectTrigger className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
                         <SelectValue placeholder="Selecione a unidade" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-background border z-50 rounded-lg">
+                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
                       <SelectItem value="un">Unidade (un)</SelectItem>
                       <SelectItem value="kg">Quilograma (kg)</SelectItem>
                       <SelectItem value="g">Grama (g)</SelectItem>
@@ -465,13 +465,13 @@ function EditProductDialogInternal({
               name="barcode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Código de Barras (Opcional)</FormLabel>
+                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Código de Barras (Opcional)</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input 
                         {...field} 
                         placeholder="EAN-13, EAN-8, UPC..."
-                        className="pr-10 bg-white dark:bg-gray-900/40 dark:border-gray-700/60 dark:text-gray-200"
+                        className="pr-10 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
                         maxLength={13}
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -489,6 +489,7 @@ function EditProductDialogInternal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
+                disabled={isUploadingImage}
                 className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 dark:bg-gray-900/50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-900/70"
               >
                 Cancelar
@@ -509,8 +510,8 @@ function EditProductDialogInternal({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0">
-          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
+          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
@@ -548,8 +549,8 @@ function EditProductDialogInternal({
   // Desktop: Usar Dialog
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">

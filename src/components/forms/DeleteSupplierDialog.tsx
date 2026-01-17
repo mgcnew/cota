@@ -42,18 +42,18 @@ export default function DeleteSupplierDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="!bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30">
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogTitle className="dark:text-white">Confirmar exclusão</AlertDialogTitle>
+          <AlertDialogDescription className="dark:text-gray-400">
             Tem certeza que deseja excluir o fornecedor{" "}
-            <strong>{supplier?.name}</strong>? Esta ação não pode ser desfeita.
+            <strong className="dark:text-gray-200">{supplier?.name}</strong>? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            Excluir
+        <AlertDialogFooter className="gap-2 sm:gap-0">
+          <AlertDialogCancel className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm dark:text-gray-300 border-gray-200 dark:border-gray-700">Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white border-0 shadow-lg shadow-red-500/20 transition-all duration-200 active:scale-95">
+            Excluir Fornecedor
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

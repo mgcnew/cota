@@ -3,20 +3,24 @@ import { LayoutGrid, Table } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ViewMode } from "@/types/pagination";
 
+import { cn } from "@/lib/utils";
+
 interface ViewToggleProps {
   view: ViewMode;
   onViewChange: (view: ViewMode) => void;
+  className?: string;
 }
 
 export const ViewToggle = memo(function ViewToggle({
   view,
-  onViewChange
+  onViewChange,
+  className
 }: ViewToggleProps) {
   const handleGridClick = useCallback(() => onViewChange("grid"), [onViewChange]);
   const handleTableClick = useCallback(() => onViewChange("table"), [onViewChange]);
 
   return (
-    <div className="flex items-center gap-0.5 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-0.5">
+    <div className={cn("flex items-center gap-0.5 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-0.5", className)}>
       <Button
         variant={view === "grid" ? "default" : "ghost"}
         size="sm"

@@ -593,7 +593,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
   const modalInnerContent = (
     <>
-      <div className={`flex-shrink-0 px-4 ${isMobile ? 'py-4' : 'sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
+      <div className={`flex-shrink-0 px-4 ${isMobile ? 'py-4' : 'sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-800/40 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md`}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0`}>
@@ -712,7 +712,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           <Form {...form}>
             <form id="quote-form" onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden">
               {/* Compact Tab Navigation */}
-              <div className="flex-shrink-0 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <div className="flex-shrink-0 px-4 py-2.5 border-b border-gray-200 dark:border-gray-800/40 bg-gray-50/30 dark:bg-gray-800/20 backdrop-blur-sm">
                 <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
                   {tabs.map((tab) => {
                     const Icon = tab.icon;
@@ -757,9 +757,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           <div className="h-full p-3 sm:p-4 md:p-6">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full">
                               {/* Formulário de Adição - Lado Esquerdo */}
-                              <Card className="border-teal-100 dark:border-gray-700 bg-gradient-to-br from-white to-teal-50/20 dark:from-gray-800/50 dark:to-gray-800/50 shadow-sm h-fit">
-                                <CardHeader className="pb-3 border-b border-teal-100/60 dark:border-gray-700">
-                                  <CardTitle className="flex items-center gap-2 text-teal-900 dark:text-white text-base">
+                              <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm h-fit">
+                                <CardHeader className="pb-3 border-b border-white/10 dark:border-white/5">
+                                  <CardTitle className="flex items-center gap-2 text-teal-900 dark:text-teal-100 text-base">
                                     <Plus className="h-5 w-5 text-teal-600 flex-shrink-0" />
                                     <span className="truncate">Adicionar Produto</span>
                                   </CardTitle>
@@ -773,21 +773,22 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         <Button
                                           variant="outline"
                                           role="combobox"
-                                          className="w-full justify-between border-teal-200 dark:border-gray-700 focus:ring-teal-500/20 dark:bg-gray-800 dark:text-white"
+                                          className="w-full justify-between border-white/20 dark:border-white/10 bg-transparent focus:ring-teal-500/20 dark:text-white"
                                         >
                                           {selectedProduct ? selectedProduct.name : "Selecionar produto..."}
                                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                       </PopoverTrigger>
-                                      <PopoverContent className="w-full p-0 border-teal-200 dark:border-gray-700 dark:bg-gray-800" align="start">
-                                        <Command>
+                                      <PopoverContent className="w-full p-0 border-white/20 dark:border-white/10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl" align="start">
+                                        <Command className="bg-transparent">
                                           <CommandInput 
                                             placeholder={`Buscar entre ${products.length} produtos...`}
                                             value={productSearch}
                                             onValueChange={setProductSearch}
+                                            className="bg-transparent"
                                           />
                                            <CommandList>
-                                             <CommandEmpty>
+                                             <CommandEmpty className="text-gray-500 dark:text-gray-400">
                                                {debouncedProductSearch 
                                                  ? "Nenhum produto encontrado." 
                                                  : `Digite para buscar entre ${products.length} produtos...`
@@ -808,6 +809,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                       quantityInputRef.current?.select();
                                                     }, 50);
                                                   }}
+                                                  className="hover:bg-white/10 dark:hover:bg-gray-800/50"
                                                 >
                                                   <Check
                                                     className={cn(
@@ -836,7 +838,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         value={newProductQuantity}
                                         onChange={(e) => setNewProductQuantity(e.target.value)}
                                         onKeyDown={handleQuantityKeyDown}
-                                        className="border-teal-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:border-teal-500 focus:ring-teal-500/20"
+                                        className="border-white/20 dark:border-white/10 bg-transparent dark:text-white focus:border-teal-500 focus:ring-teal-500/20"
                                         tabIndex={0}
                                       />
                                     </div>
@@ -853,12 +855,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       }}>
                                         <SelectTrigger 
                                           ref={unitSelectRef}
-                                          className="border-teal-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                          className="border-white/20 dark:border-white/10 bg-transparent dark:text-white"
                                           tabIndex={0}
                                         >
                                           <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
-                                        <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
+                                        <SelectContent className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10">
                                           <SelectItem value="kg">kg</SelectItem>
                                           <SelectItem value="g">g</SelectItem>
                                           <SelectItem value="un">un</SelectItem>
@@ -901,9 +903,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               </Card>
 
                               {/* Lista de Produtos - Lado Direito */}
-                              <Card className="border-teal-100 dark:border-gray-700 bg-gradient-to-br from-white to-teal-50/20 dark:from-gray-800/50 dark:to-gray-800/50 shadow-sm">
-                                <CardHeader className="pb-3 border-b border-teal-100/60 dark:border-gray-700">
-                                  <CardTitle className="flex items-center gap-2 text-teal-900 dark:text-white text-base">
+                              <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm">
+                                <CardHeader className="pb-3 border-b border-white/10 dark:border-white/5">
+                                  <CardTitle className="flex items-center gap-2 text-teal-900 dark:text-teal-100 text-base">
                                     <Package className="h-5 w-5 text-teal-600 dark:text-teal-400 flex-shrink-0" />
                                     <span className="truncate">Produtos Adicionados ({fields.length})</span>
                                   </CardTitle>
@@ -919,8 +921,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     <ScrollArea className="h-[400px] [&>div>div[style]]:!pr-0">
                                       <div className="space-y-3">
                                         {fields.map((field, index) => (
-                                          <Card key={field.id} className="border-teal-200 dark:border-gray-700 hover:border-teal-400 dark:hover:border-teal-600 transition-all bg-white dark:bg-gray-800">
-                                            <div className="h-1 bg-gradient-to-r from-teal-500 to-cyan-500"></div>
+                                          <Card key={field.id} className="border-white/10 dark:border-white/5 transition-all bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+                                            <div className="h-1 bg-gradient-to-r from-teal-500/50 to-cyan-500/50"></div>
                                             <CardContent className="p-3">
                                               <div className="flex items-start justify-between gap-2">
                                                 <div className="flex-1 min-w-0">
@@ -957,8 +959,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                         {/* Período Tab */}
                         <TabsContent value="periodo" className="flex-1 overflow-y-auto p-3 sm:p-4 m-0">
-                          <Card className="border-0 shadow-lg bg-gradient-to-br from-white via-gray-50/30 to-indigo-50/20 dark:from-gray-800/50 dark:via-gray-800/50 dark:to-gray-800/50 backdrop-blur-sm dark:border dark:border-gray-700">
-                            <CardHeader className="pb-3 bg-gradient-to-r from-indigo-50/60 to-purple-50/40 dark:from-gray-800 dark:to-gray-800 rounded-t-xl border-b border-gray-100/60 dark:border-gray-700">
+                          <Card className="border-white/20 dark:border-white/10 shadow-lg bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+                            <CardHeader className="pb-3 bg-white/10 dark:bg-white/5 rounded-t-xl border-b border-white/10 dark:border-white/5">
                               <CardTitle className="flex items-center gap-2 sm:gap-3 text-base font-bold">
                                 <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25 flex-shrink-0">
                                   <Clock className="h-4 w-4 drop-shadow-sm" />
@@ -988,7 +990,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           <Button
                                             variant="outline"
                                             className={cn(
-                                              "w-full pl-3 text-left font-normal",
+                                              "w-full pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
                                               !field.value && "text-muted-foreground"
                                             )}
                                           >
@@ -1001,7 +1003,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           </Button>
                                         </FormControl>
                                       </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                                      <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
                                         <Calendar
                                           mode="single"
                                           selected={field.value}
@@ -1028,7 +1030,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           <Button
                                             variant="outline"
                                             className={cn(
-                                              "w-full pl-3 text-left font-normal",
+                                              "w-full pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
                                               !field.value && "text-muted-foreground"
                                             )}
                                           >
@@ -1041,7 +1043,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           </Button>
                                         </FormControl>
                                       </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                                      <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
                                         <Calendar
                                           mode="single"
                                           selected={field.value}
@@ -1061,7 +1063,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                             </div>
 
                             {/* Dicas compactas */}
-                            <div className="bg-gradient-to-r from-blue-50/60 to-indigo-50/40 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-800/40 rounded-lg p-3">
+                            <div className="bg-blue-50/30 dark:bg-blue-900/10 border border-blue-200/40 dark:border-blue-800/20 backdrop-blur-sm rounded-lg p-3">
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
                                   <span className="text-white text-xs">💡</span>
@@ -1092,7 +1094,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     form.setValue("dataFim", hoje);
                                     toast({ title: "✅ Período definido", description: "Hoje (início e fim no mesmo dia)", duration: 1500 });
                                   }}
-                                  className="h-10 text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                                  className="h-10 text-xs font-semibold bg-amber-50/30 dark:bg-amber-900/10 border-amber-200/40 dark:border-amber-800/20 hover:bg-amber-100/40 dark:hover:bg-amber-900/20 backdrop-blur-sm"
                                 >
                                   <Zap className="h-3 w-3 mr-1" />
                                   Hoje
@@ -1109,7 +1111,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     form.setValue("dataFim", fim);
                                     toast({ title: "✅ Período definido", description: "3 dias", duration: 1500 });
                                   }}
-                                  className="h-10 text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:border-indigo-300 dark:hover:border-indigo-700"
+                                  className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
                                 >
                                   <Clock className="h-3 w-3 mr-1" />
                                   3 dias
@@ -1126,7 +1128,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     form.setValue("dataFim", fim);
                                     toast({ title: "✅ Período definido", description: "7 dias (recomendado)", duration: 1500 });
                                   }}
-                                  className="h-10 text-xs font-semibold bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
+                                  className="h-10 text-xs font-semibold bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-200/40 dark:border-indigo-800/20 hover:bg-indigo-100/40 dark:hover:bg-indigo-900/20 backdrop-blur-sm"
                                 >
                                   <Zap className="h-3 w-3 mr-1" />
                                   7 dias
@@ -1143,7 +1145,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     form.setValue("dataFim", fim);
                                     toast({ title: "✅ Período definido", description: "14 dias", duration: 1500 });
                                   }}
-                                  className="h-10 text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:border-indigo-300 dark:hover:border-indigo-700"
+                                  className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
                                 >
                                   <Clock className="h-3 w-3 mr-1" />
                                   14 dias
@@ -1160,7 +1162,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     form.setValue("dataFim", fim);
                                     toast({ title: "✅ Período definido", description: "30 dias", duration: 1500 });
                                   }}
-                                  className="h-10 text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:border-indigo-300 dark:hover:border-indigo-700"
+                                  className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
                                 >
                                   <Clock className="h-3 w-3 mr-1" />
                                   30 dias
@@ -1175,9 +1177,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         <TabsContent value="fornecedores" className="flex-1 overflow-y-auto p-3 sm:p-4 m-0">
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
                             {/* Formulário de Adição de Fornecedores - Lado Esquerdo */}
-                            <Card className="h-fit border-green-100 dark:border-gray-700 bg-gradient-to-br from-white to-green-50/20 dark:from-gray-800/50 dark:to-gray-800/50">
-                              <CardHeader className="border-b border-green-100/60 dark:border-gray-700 pb-3">
-                                <CardTitle className="flex items-center gap-2 text-green-900 dark:text-white text-base">
+                            <Card className="h-fit border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+                              <CardHeader className="border-b border-white/10 dark:border-white/5 pb-3">
+                                <CardTitle className="flex items-center gap-2 text-green-900 dark:text-green-100 text-base">
                                   <Building2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                                   <span className="truncate">Adicionar Fornecedores</span>
                                 </CardTitle>
@@ -1211,28 +1213,30 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             <Button
                                               variant="outline"
                                               role="combobox"
-                                              className="w-full justify-between"
+                                              className="w-full justify-between border-white/20 dark:border-white/10 bg-transparent dark:text-white"
                                             >
                                               Buscar fornecedores...
                                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                             </Button>
                                           </FormControl>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-full p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
-                                          <Command>
+                                        <PopoverContent className="w-full p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
+                                          <Command className="bg-transparent">
                                             <CommandInput 
                                               placeholder="Digite o nome do fornecedor ou vendedor..." 
                                               value={supplierSearch}
                                               onValueChange={setSupplierSearch}
+                                              className="bg-transparent"
                                             />
                                             <CommandList>
-                                              <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
+                                              <CommandEmpty className="text-gray-500 dark:text-gray-400">Nenhum fornecedor encontrado.</CommandEmpty>
                                               <CommandGroup>
                                                 {filteredSuppliers.map((supplier) => (
                                                   <CommandItem
                                                     key={supplier.id}
                                                     value={`${supplier.name} ${supplier.contact || ''}`}
                                                     onSelect={() => handleSupplierSelect(supplier)}
+                                                    className="hover:bg-white/10 dark:hover:bg-gray-800/50"
                                                   >
                                                     <Plus className="mr-2 h-4 w-4 text-green-600 dark:text-green-400" />
                                                     <div className="flex flex-col">
@@ -1258,14 +1262,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                             </Card>
 
                             {/* Lista de Fornecedores Selecionados - Lado Direito */}
-                            <Card className="h-fit border-blue-100 dark:border-gray-700 bg-gradient-to-br from-white to-blue-50/20 dark:from-gray-800/50 dark:to-gray-800/50">
-                              <CardHeader className="border-b border-blue-100/60 dark:border-gray-700 pb-3">
+                            <Card className="h-fit border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+                              <CardHeader className="border-b border-white/10 dark:border-white/5 pb-3">
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                  <CardTitle className="flex items-center gap-2 text-blue-900 dark:text-white text-base">
+                                  <CardTitle className="flex items-center gap-2 text-blue-900 dark:text-blue-100 text-base">
                                     <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                                     <span className="truncate">Fornecedores Selecionados</span>
                                     {selectedSuppliers.length > 0 && (
-                                      <Badge variant="secondary" className="dark:bg-gray-700 dark:text-gray-200 flex-shrink-0">
+                                      <Badge variant="secondary" className="bg-white/10 dark:bg-gray-800/50 dark:text-gray-200 flex-shrink-0">
                                         {selectedSuppliers.length}
                                       </Badge>
                                     )}
@@ -1291,10 +1295,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       {selectedSuppliers.map((supplier) => (
                                         <div
                                           key={supplier.id}
-                                          className="flex items-center justify-between gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 rounded-lg"
+                                          className="flex items-center justify-between gap-2 p-3 bg-green-50/30 dark:bg-green-900/10 border border-green-200/40 dark:border-green-800/20 backdrop-blur-sm rounded-lg"
                                         >
                                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <div className="w-8 h-8 bg-green-100 dark:bg-green-800/40 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <div className="w-8 h-8 bg-green-100/40 dark:bg-green-800/20 rounded-full flex items-center justify-center flex-shrink-0">
                                               <Building2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                                             </div>
                                             <CapitalizedText className="font-medium text-green-900 dark:text-green-100 truncate">
@@ -1306,7 +1310,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             variant="ghost"
                                             size="sm"
                                             onClick={() => handleSupplierRemove(supplier.id)}
-                                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 h-8 w-8 p-0 flex-shrink-0"
+                                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50/50 dark:hover:bg-red-900/20 h-8 w-8 p-0 flex-shrink-0"
                                           >
                                             <X className="h-4 w-4" />
                                           </Button>
@@ -1328,15 +1332,15 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                         {/* Agendamento Tab */}
                         <TabsContent value="agendamento" className="flex-1 overflow-y-auto p-3 sm:p-4 m-0">
-                          <Card className="border-amber-100 dark:border-gray-700 bg-gradient-to-br from-white to-amber-50/20 dark:from-gray-800/50 dark:to-gray-800/50">
-                            <CardHeader className="border-b border-amber-100/60 dark:border-gray-700">
-                              <CardTitle className="text-lg flex items-center gap-2 text-amber-900 dark:text-white">
+                          <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+                            <CardHeader className="border-b border-white/10 dark:border-white/5">
+                              <CardTitle className="text-lg flex items-center gap-2 text-amber-900 dark:text-amber-100">
                                 <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                                 Agendar Cotação (Opcional)
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4 pt-4">
-                              <div className="flex items-center space-x-2 p-3 bg-amber-50/50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                              <div className="flex items-center space-x-2 p-3 bg-amber-50/30 dark:bg-amber-900/10 border border-amber-200/40 dark:border-amber-800/20 backdrop-blur-sm rounded-lg">
                                 <Switch
                                   checked={isScheduled}
                                   onCheckedChange={(checked) => {
@@ -1365,7 +1369,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                               <Button
                                                 variant="outline"
                                                 className={cn(
-                                                  "pl-3 text-left font-normal",
+                                                  "pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
                                                   !field.value && "text-muted-foreground"
                                                 )}
                                               >
@@ -1378,7 +1382,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                               </Button>
                                             </FormControl>
                                           </PopoverTrigger>
-                                          <PopoverContent className="w-auto p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
+                                          <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
                                             <Calendar
                                               mode="single"
                                               selected={field.value}
@@ -1401,7 +1405,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   />
                                   
                                   {form.watch("dataPlanejada") && (
-                                    <Alert className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+                                    <Alert className="border-amber-200/40 dark:border-amber-800/20 bg-amber-50/30 dark:bg-amber-900/10 backdrop-blur-sm">
                                       <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                                       <AlertDescription className="text-amber-800 dark:text-amber-200">
                                         Esta cotação será ativada em {format(form.watch("dataPlanejada")!, "dd/MM/yyyy", { locale: ptBR })}
@@ -1412,7 +1416,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               )}
                               
                               {!isScheduled && (
-                                <div className="bg-gradient-to-r from-blue-50/60 to-indigo-50/40 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-800/40 rounded-lg p-4">
+                                <div className="bg-blue-50/30 dark:bg-blue-900/10 border border-blue-200/40 dark:border-blue-800/20 backdrop-blur-sm rounded-lg p-4">
                                   <div className="flex items-center gap-2 mb-2">
                                     <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
                                       <span className="text-white text-xs">💡</span>
@@ -1435,9 +1439,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           <ScrollArea className="h-full w-full [&>div>div[style]]:!pr-0">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-3 sm:p-4">
                               {/* Coluna Esquerda - Formulário de Detalhes */}
-                              <Card className="border-purple-100 dark:border-gray-700 bg-gradient-to-br from-white to-purple-50/20 dark:from-gray-800/50 dark:to-gray-800/50 shadow-sm h-fit">
-                                <CardHeader className="pb-3 border-b border-purple-100/60 dark:border-gray-700">
-                                  <CardTitle className="flex items-center gap-2 text-purple-900 dark:text-white text-base">
+                              <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm h-fit">
+                                <CardHeader className="pb-3 border-b border-white/10 dark:border-white/5">
+                                  <CardTitle className="flex items-center gap-2 text-purple-900 dark:text-purple-100 text-base">
                                     <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                                     <span className="truncate">Detalhes Adicionais</span>
                                   </CardTitle>
@@ -1452,7 +1456,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       <FormControl>
                                         <Textarea 
                                           placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
-                                          className="resize-none min-h-[100px] text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white" 
+                                          className="resize-none min-h-[100px] text-sm bg-transparent border-white/20 dark:border-white/10 dark:text-white" 
                                           {...field} 
                                         />
                                       </FormControl>
@@ -1465,7 +1469,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 />
 
                                 {/* Informações Adicionais */}
-                                <div className="bg-purple-50/50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/40 rounded-lg p-3">
+                                <div className="bg-purple-50/30 dark:bg-purple-900/10 border border-purple-100/40 dark:border-purple-800/20 backdrop-blur-sm rounded-lg p-3">
                                   <h4 className="font-medium text-purple-900 dark:text-purple-300 mb-2 flex items-center gap-2 text-sm">
                                     <FileText className="h-3 w-3" />
                                     Dicas para uma boa cotação
@@ -1489,9 +1493,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                             </Card>
 
                             {/* Coluna Direita - Resumo da Cotação */}
-                            <Card className="border-blue-100 dark:border-gray-700 bg-gradient-to-br from-white to-blue-50/20 dark:from-gray-800/50 dark:to-gray-800/50 shadow-sm h-fit">
-                              <CardHeader className="pb-3 border-b border-blue-100/60 dark:border-gray-700">
-                                <CardTitle className="flex items-center gap-2 text-blue-900 dark:text-white text-base">
+                            <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm h-fit">
+                              <CardHeader className="pb-3 border-b border-white/10 dark:border-white/5">
+                                <CardTitle className="flex items-center gap-2 text-blue-900 dark:text-blue-100 text-base">
                                   <Package className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                                   <span className="truncate">Resumo da Cotação</span>
                                 </CardTitle>
@@ -1499,18 +1503,18 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               <CardContent className="pt-3 space-y-3">
                                 {/* Estatísticas Principais */}
                                 <div className="grid grid-cols-2 gap-2">
-                                  <div className="bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40 rounded-lg p-2 text-center">
+                                  <div className="bg-blue-50/30 dark:bg-blue-900/10 border border-blue-100/40 dark:border-blue-800/20 backdrop-blur-sm rounded-lg p-2 text-center">
                                     <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{fields.length}</div>
                                     <div className="text-xs text-blue-700 dark:text-blue-300 font-medium">Produtos</div>
                                   </div>
-                                  <div className="bg-green-50/50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/40 rounded-lg p-2 text-center">
+                                  <div className="bg-green-50/30 dark:bg-green-900/10 border border-green-100/40 dark:border-green-800/20 backdrop-blur-sm rounded-lg p-2 text-center">
                                     <div className="text-xl font-bold text-green-600 dark:text-green-400">{selectedSuppliers.length}</div>
                                     <div className="text-xs text-green-700 dark:text-green-300 font-medium">Fornecedores</div>
                                   </div>
                                 </div>
 
                                 {/* Detalhes do Período */}
-                                <div className="bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
+                                <div className="bg-white/10 dark:bg-gray-800/30 border border-white/10 dark:border-white/5 backdrop-blur-sm rounded-lg p-3">
                                   <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
                                     <Clock className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                                     Período da Cotação
@@ -1530,7 +1534,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                                 {/* Lista de Produtos */}
                                 {fields.length > 0 && (
-                                  <div className="bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
+                                  <div className="bg-white/10 dark:bg-gray-800/30 border border-white/10 dark:border-white/5 backdrop-blur-sm rounded-lg p-3">
                                     <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
                                       <Package className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                                       Produtos Selecionados
@@ -1538,7 +1542,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     <ScrollArea className="max-h-[120px] lg:max-h-[150px] [&>div>div[style]]:!pr-0">
                                       <div className="space-y-1">
                                         {fields.map((field, index) => (
-                                          <div key={field.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border border-gray-100 dark:border-gray-700">
+                                          <div key={field.id} className="flex items-center justify-between p-2 bg-white/10 dark:bg-gray-800/50 rounded border border-white/10 dark:border-white/5">
                                             <div className="flex-1 min-w-0">
                                               <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
                                                 {form.watch(`produtos.${index}.produtoNome`) || "Produto não selecionado"}
@@ -1556,7 +1560,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                                 {/* Lista de Fornecedores */}
                                 {selectedSuppliers.length > 0 && (
-                                  <div className="bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
+                                  <div className="bg-white/10 dark:bg-gray-800/30 border border-white/10 dark:border-white/5 backdrop-blur-sm rounded-lg p-3">
                                     <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
                                       <Building2 className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                                       Fornecedores Participantes
@@ -1564,7 +1568,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     <ScrollArea className="max-h-[100px] lg:max-h-[120px] [&>div>div[style]]:!pr-0">
                                       <div className="space-y-1">
                                         {selectedSuppliers.map((supplier) => (
-                                          <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 rounded border border-gray-100 dark:border-gray-700">
+                                          <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white/10 dark:bg-gray-800/50 rounded border border-white/10 dark:border-white/5">
                                             <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full"></div>
                                             <CapitalizedText className="text-xs font-medium text-gray-900 dark:text-white">
                                               {supplier.name}
@@ -1608,7 +1612,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-900">
+        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-white/20">
           {modalInnerContent}
         </DrawerContent>
       </Drawer>
@@ -1624,7 +1628,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         </DialogTrigger>
       )}
       <DialogContent 
-        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden"
+        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-white/20 dark:border-white/10 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden"
         onKeyDown={handleModalKeyDown}
       >
         {modalInnerContent}

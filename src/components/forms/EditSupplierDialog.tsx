@@ -129,17 +129,17 @@ export default function EditSupplierDialog({
   const formContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className={`flex flex-col h-full ${isMobile ? 'space-y-3' : 'space-y-4'}`}>
-        <div className={`flex-1 overflow-y-auto ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-4 sm:py-5'}`}>
+        <div className={`flex-1 overflow-y-auto bg-transparent ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-4 sm:py-5'}`}>
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Nome do Fornecedor*</FormLabel>
+                <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Nome do Fornecedor*</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="Ex: Holambra" 
-                    className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                    className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                     {...field} 
                   />
                 </FormControl>
@@ -153,11 +153,11 @@ export default function EditSupplierDialog({
             name="contact"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Nome do Contato*</FormLabel>
+                <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Nome do Contato*</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="Ex: João Silva" 
-                    className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                    className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                     {...field} 
                   />
                 </FormControl>
@@ -172,11 +172,11 @@ export default function EditSupplierDialog({
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Telefone</FormLabel>
+                  <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Telefone</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="(11) 99999-9999" 
-                      className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field} 
                     />
                   </FormControl>
@@ -190,12 +190,12 @@ export default function EditSupplierDialog({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Email</FormLabel>
+                  <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Email</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="contato@empresa.com" 
                       type="email" 
-                      className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field} 
                     />
                   </FormControl>
@@ -210,11 +210,11 @@ export default function EditSupplierDialog({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Endereço</FormLabel>
+                <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Endereço</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="Rua, número, bairro, cidade" 
-                    className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                    className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                     {...field} 
                   />
                 </FormControl>
@@ -229,11 +229,11 @@ export default function EditSupplierDialog({
               name="limit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Limite de Crédito*</FormLabel>
+                  <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Limite de Crédito*</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="R$ 25.000" 
-                      className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}
+                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field} 
                     />
                   </FormControl>
@@ -247,14 +247,14 @@ export default function EditSupplierDialog({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={isMobile ? 'text-sm font-semibold' : ''}>Status*</FormLabel>
+                  <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Status*</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className={isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'}>
+                      <SelectTrigger className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white`}>
                         <SelectValue placeholder="Selecione o status" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
                       <SelectItem value="active">Ativo</SelectItem>
                       <SelectItem value="pending">Pendente</SelectItem>
                       <SelectItem value="inactive">Inativo</SelectItem>
@@ -267,7 +267,7 @@ export default function EditSupplierDialog({
           </div>
         </div>
 
-        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4 flex flex-col gap-2' : 'flex justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200/60 dark:border-gray-700/40'}`}>
+        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4 flex flex-col gap-2' : 'flex justify-end gap-2 sm:gap-3 px-4 sm:px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm'}`}>
           <Button 
             type="button" 
             variant="outline" 
@@ -291,8 +291,8 @@ export default function EditSupplierDialog({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0">
-          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
+          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
@@ -324,8 +324,8 @@ export default function EditSupplierDialog({
   // Desktop: Usar Dialog
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">

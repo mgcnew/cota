@@ -550,11 +550,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold text-gray-600 dark:text-gray-400`}>Nome do Produto *</FormLabel>
+                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Produto *</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Ex: Coxa com Sobrecoxa Congelada"
-                      className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:bg-gray-800 dark:text-white`}
+                      className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field}
                     />
                   </FormControl>
@@ -568,14 +568,14 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               name="unit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold text-gray-600 dark:text-gray-400`}>Unidade de Medida *</FormLabel>
+                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Unidade de Medida *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:bg-gray-800 dark:text-white`}>
+                      <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white`}>
                         <SelectValue placeholder="Selecione a unidade" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-background border z-50 rounded-lg">
+                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
                       <SelectItem value="un">Unidade (un)</SelectItem>
                       <SelectItem value="kg">Quilograma (kg)</SelectItem>
                       <SelectItem value="g">Grama (g)</SelectItem>
@@ -598,13 +598,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               name="barcode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold text-gray-600 dark:text-gray-400`}>Código de Barras (Opcional)</FormLabel>
+                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Código de Barras (Opcional)</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input 
                         {...field} 
                         placeholder="EAN-13, EAN-8, UPC..."
-                        className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:bg-gray-800 dark:text-white`}
+                        className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         maxLength={13}
                       />
                       <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${isMobile ? 'right-4' : ''}`}>
@@ -625,9 +625,9 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               Foto do Produto
             </h3>
             
-            <div className={`space-y-4 ${isMobile ? 'p-3' : 'p-4'} border border-dashed border-gray-300 dark:border-gray-700 rounded-lg`}>
+            <div className={`space-y-4 ${isMobile ? 'p-3' : 'p-4'} border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm`}>
               <div className="flex items-center justify-between">
-                <Label className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold text-gray-600 dark:text-gray-400`}>Imagem (Opcional)</Label>
+                <Label className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Imagem (Opcional)</Label>
                 {productImage && (
                   <Button
                     type="button"
@@ -762,7 +762,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                     <FormControl>
                       <Input 
                         placeholder="Ex: Peixes, Laticínios, Temperos"
-                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} rounded-lg border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 bg-orange-50/30 dark:bg-orange-900/20 dark:text-white`}
+                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-orange-50/30 dark:!bg-orange-900/20 backdrop-blur-sm rounded-lg border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white`}
                         {...field}
                       />
                     </FormControl>
@@ -792,7 +792,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         </div>
 
         {/* Footer com botões */}
-        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30`}>
+        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm`}>
           <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2 justify-end'}`}>
             <Button
               type="button"
@@ -853,8 +853,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent className="h-[90vh] max-h-[90vh] overflow-hidden flex flex-col">
-          <DrawerHeader className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 dark:border-gray-700/40">
+        <DrawerContent className="h-[90vh] max-h-[90vh] overflow-hidden flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
+          <DrawerHeader className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
@@ -891,8 +891,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">

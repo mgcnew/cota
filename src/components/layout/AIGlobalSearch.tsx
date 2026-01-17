@@ -361,21 +361,33 @@ export function AIGlobalSearchTrigger({ onClick }: { onClick: () => void }) {
       variant="outline"
       onClick={onClick}
       className={cn(
-        "relative transition-all duration-200 active:scale-95 touch-manipulation",
-        "w-full h-10 px-4 justify-start",
-        "bg-gradient-to-r from-violet-500/10 to-purple-500/10 dark:from-violet-400/20 dark:to-purple-400/20",
-        "border border-violet-200 dark:border-violet-800 hover:from-violet-500/20 hover:to-purple-500/20"
+        "relative transition-all duration-300 active:scale-95 touch-manipulation group",
+        "w-full h-10 px-4 justify-start overflow-hidden",
+        "bg-white/40 dark:bg-gray-950/40 backdrop-blur-md",
+        "border border-violet-200/50 dark:border-violet-800/30 hover:border-violet-400/50 dark:hover:border-violet-500/50",
+        "shadow-[0_2px_10px_-3px_rgba(139,92,246,0.05)] hover:shadow-[0_4px_20px_-5px_rgba(139,92,246,0.15)]"
       )}
     >
-      <div className="flex items-center w-full gap-3">
-        <Sparkles className="h-4 w-4 shrink-0 text-violet-600 dark:text-violet-400" />
-        <span className="text-muted-foreground font-normal flex-1 text-left text-sm truncate">
-          Pergunte ao assistente de IA...
+      <div className="flex items-center w-full gap-3 relative z-10">
+        <div className="relative">
+          <Sparkles className="h-4 w-4 shrink-0 text-violet-500 dark:text-violet-400 group-hover:scale-110 transition-transform duration-300" />
+          <div className="absolute inset-0 blur-sm bg-violet-400/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+        <span className="text-gray-500 dark:text-gray-400 font-medium flex-1 text-left text-sm truncate group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+          Assistente de IA
         </span>
-        <kbd className="hidden lg:inline-flex h-5 px-1.5 select-none items-center justify-center rounded border border-input bg-muted font-mono text-[10px] font-medium text-muted-foreground">
-          ⌘K
-        </kbd>
+        <div className="hidden lg:flex items-center gap-1">
+          <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-violet-100 dark:border-violet-900/50 bg-violet-50/50 dark:bg-violet-950/50 font-mono text-[10px] font-medium text-violet-400 dark:text-violet-500">
+            ⌘
+          </kbd>
+          <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-violet-100 dark:border-violet-900/50 bg-violet-50/50 dark:bg-violet-950/50 font-mono text-[10px] font-medium text-violet-400 dark:text-violet-500">
+            K
+          </kbd>
+        </div>
       </div>
+      
+      {/* Subtle shine effect on hover */}
+      <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent" />
     </Button>
   );
 }

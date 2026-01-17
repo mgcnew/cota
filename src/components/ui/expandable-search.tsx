@@ -140,8 +140,10 @@ export const ExpandableSearch = memo(function ExpandableSearch({
         {/* Search Icon */}
         <div
           className={cn(
-            "absolute left-3 top-1/2 transform -translate-y-1/2 z-10 transition-colors duration-100",
-            isOpen ? colors.iconColor : "text-gray-400 dark:text-gray-500"
+            "flex items-center justify-center z-10 transition-colors duration-100",
+            isOpen 
+              ? cn("absolute left-3 top-1/2 transform -translate-y-1/2", colors.iconColor)
+              : "w-full h-full text-gray-400 dark:text-gray-500"
           )}
         >
           <Search className="h-4 w-4" />

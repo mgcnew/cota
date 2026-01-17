@@ -202,7 +202,7 @@ export default function ListaComprasTab() {
               {filteredItems.length} {filteredItems.length === 1 ? "item" : "itens"}
             </Badge>
           )}
-          {!isMobile && <ViewToggle view={viewMode} onViewChange={setViewMode} />}
+          <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
         </div>
       </div>
 

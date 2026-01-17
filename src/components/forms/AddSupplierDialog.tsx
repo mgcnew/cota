@@ -192,7 +192,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
   const formContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full">
-        <div className={`flex-1 overflow-y-auto ${isMobile ? 'p-4 space-y-4' : 'p-5 space-y-5'}`}>
+        <div className={`flex-1 overflow-y-auto bg-transparent ${isMobile ? 'p-4 space-y-4' : 'p-5 space-y-5'}`}>
           {/* Alerta de limite de fornecedores */}
           <LimitAlert 
             resource="suppliers"
@@ -216,7 +216,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     <FormControl>
                       <Input 
                         placeholder="Ex: Holambra Distribuidora" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white`}
+                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         {...field} 
                       />
                     </FormControl>
@@ -234,7 +234,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     <FormControl>
                       <Input 
                         placeholder="00.000.000/0000-00" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white`}
+                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         {...field} 
                       />
                     </FormControl>
@@ -253,7 +253,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                   <FormControl>
                     <Input 
                       placeholder="Rua das Flores, 123, Centro, São Paulo - SP" 
-                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white`}
+                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field} 
                     />
                   </FormControl>
@@ -279,7 +279,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                   <FormControl>
                     <Input 
                       placeholder="Ex: João Silva Santos" 
-                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white`}
+                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field} 
                     />
                   </FormControl>
@@ -298,7 +298,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     <FormControl>
                       <Input 
                         placeholder="(11) 99999-9999" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white`}
+                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         {...field} 
                       />
                     </FormControl>
@@ -317,7 +317,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                       <Input 
                         placeholder="comercial@empresa.com" 
                         type="email" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 dark:bg-gray-800 dark:text-white`}
+                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         {...field} 
                       />
                     </FormControl>
@@ -330,7 +330,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
 
           {/* Dica de preenchimento - Ocultar no mobile */}
           {!isMobile && (
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/30 border border-gray-200/50 dark:border-gray-700/30 rounded-lg p-3">
+            <div className="bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-800/40 dark:to-gray-800/20 border border-gray-200/50 dark:border-gray-700/30 rounded-lg p-3 backdrop-blur-sm">
               <div className="flex items-start gap-2">
                 <div className="text-lg">💡</div>
                 <div className="flex-1">
@@ -347,7 +347,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
         </div>
 
         {/* Footer com botões */}
-        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30`}>
+        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm`}>
           <div className={`flex gap-2 ${isMobile ? 'flex-col' : 'justify-end'}`}>
             <Button 
               type="button" 
@@ -394,8 +394,8 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0">
-          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
+          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
@@ -435,8 +435,8 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+      <DialogContent className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">

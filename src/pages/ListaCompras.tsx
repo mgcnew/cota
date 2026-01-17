@@ -229,7 +229,7 @@ export default function ListaCompras() {
                 {filteredItems.length} {filteredItems.length === 1 ? "item" : "itens"}
               </Badge>
             )}
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
           </div>
         </div>
 

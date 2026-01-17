@@ -315,8 +315,8 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-xl p-0 overflow-hidden">
-        <DialogHeader className="px-5 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+      <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-xl p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 shadow-2xl">
+        <DialogHeader className="px-5 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
               <FileSpreadsheet className="h-5 w-5" />
@@ -330,24 +330,24 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </div>
         </DialogHeader>
 
-        <div className="p-5 space-y-4 overflow-y-auto max-h-[calc(85vh-180px)]">
+        <div className="p-5 space-y-4 overflow-y-auto max-h-[calc(85vh-180px)] bg-transparent">
           {/* Download Template */}
-          <Card className="border-dashed">
+          <Card className="border-dashed bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                  <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50">
                     <FileSpreadsheet className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                   </div>
                   <div>
-                    <p className="font-medium">Precisa de um template?</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">Precisa de um template?</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Baixe um arquivo de exemplo para facilitar a importação
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={downloadTemplate}>
-                  <Download className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" onClick={downloadTemplate} className="h-8 text-xs border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <Download className="h-3.5 w-3.5 mr-2" />
                   Baixar Template
                 </Button>
               </div>
@@ -355,13 +355,15 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </Card>
 
           {/* File Upload */}
-          <Card>
+          <Card className="bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               {!file ? (
-                <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-semibold mb-2">Selecione um arquivo</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
+                <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center hover:border-orange-400 dark:hover:border-orange-500 transition-colors">
+                  <div className="w-16 h-16 rounded-2xl bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center mx-auto mb-4">
+                    <Upload className="h-8 w-8 text-orange-500 dark:text-orange-400" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Selecione um arquivo</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                     Formatos aceitos: CSV, XLSX, XLS (máx. 10MB)
                   </p>
                   <input
@@ -373,54 +375,56 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
                     id="supplier-file-upload"
                   />
                   <label htmlFor="supplier-file-upload">
-                    <Button asChild>
+                    <Button asChild className="bg-orange-600 hover:bg-orange-700 text-white rounded-lg shadow-lg shadow-orange-500/20 px-8">
                       <span>Selecionar Arquivo</span>
                     </Button>
                   </label>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
                     <div className="flex items-center gap-3">
-                      <FileSpreadsheet className="h-5 w-5 text-primary" />
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <FileSpreadsheet className="h-5 w-5 text-primary" />
+                      </div>
                       <div>
-                        <p className="font-medium">{file.name}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="font-medium text-sm text-gray-900 dark:text-white">{file.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           {(file.size / 1024).toFixed(2)} KB
                         </p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={resetImport}>
+                    <Button variant="ghost" size="sm" onClick={resetImport} className="h-8 w-8 p-0 text-gray-500 hover:text-red-500">
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
 
                   {/* Preview */}
                   {parsedData.length > 0 && (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-5 w-5 text-success" />
-                          <span className="font-medium">
-                            {parsedData.length} fornecedores prontos para importar
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                          <span className="font-medium text-sm text-gray-900 dark:text-white">
+                            {parsedData.length} fornecedores prontos
                           </span>
                         </div>
-                        <Badge variant="secondary">
+                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
                           {parsedData.filter(s => s.status === 'active').length} ativos
                         </Badge>
                       </div>
 
                       {validationErrors.length > 0 && (
-                        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                        <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-xl p-3">
                           <div className="flex items-start gap-2">
-                            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                            <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
                             <div className="space-y-1">
-                              <p className="font-medium text-destructive">Avisos de validação:</p>
+                              <p className="font-medium text-xs text-red-600 dark:text-red-400">Avisos de validação:</p>
                               {validationErrors.slice(0, 3).map((error, i) => (
-                                <p key={i} className="text-sm text-destructive">{error}</p>
+                                <p key={i} className="text-[11px] text-red-500/80">{error}</p>
                               ))}
                               {validationErrors.length > 3 && (
-                                <p className="text-sm text-destructive">
+                                <p className="text-[11px] text-red-500/80">
                                   e mais {validationErrors.length - 3} avisos...
                                 </p>
                               )}
@@ -429,32 +433,32 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
                         </div>
                       )}
 
-                      <ScrollArea className="h-[200px] border rounded-lg">
+                      <ScrollArea className="h-[250px] border border-gray-200 dark:border-gray-700 rounded-xl bg-white/20 dark:bg-gray-900/20 backdrop-blur-sm">
                         <div className="p-3 space-y-2">
                           {parsedData.slice(0, 50).map((supplier, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded">
+                            <div key={index} className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/40 rounded-lg border border-gray-200/50 dark:border-gray-700/50 transition-colors hover:bg-white dark:hover:bg-gray-800">
                               <div className="flex items-center gap-3 flex-1">
-                                <span className="text-sm text-muted-foreground w-8">#{index + 1}</span>
-                                <div className="flex-1">
-                                  <p className="font-medium text-sm">{supplier.name}</p>
-                                  <p className="text-xs text-muted-foreground">{supplier.contact}</p>
-                                  <div className="flex gap-2 mt-1">
-                                    <Badge variant={getStatusVariant(supplier.status || 'active') as any} className="text-xs">
+                                <span className="text-xs text-gray-400 w-8 font-mono">#{String(index + 1).padStart(2, '0')}</span>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{supplier.name}</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{supplier.contact}</p>
+                                  <div className="flex items-center gap-3 mt-1.5">
+                                    <Badge variant={getStatusVariant(supplier.status || 'active') as any} className="text-[10px] h-4 border-0">
                                       {getStatusLabel(supplier.status || 'active')}
                                     </Badge>
                                     {supplier.phone && (
-                                      <span className="text-xs text-muted-foreground">{supplier.phone}</span>
+                                      <span className="text-[10px] text-gray-400 font-mono">{supplier.phone}</span>
                                     )}
                                   </div>
                                 </div>
                                 {supplier.limit && supplier.limit !== 'R$ 0' && (
-                                  <span className="text-sm font-medium">{supplier.limit}</span>
+                                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{supplier.limit}</span>
                                 )}
                               </div>
                             </div>
                           ))}
                           {parsedData.length > 50 && (
-                            <p className="text-center text-sm text-muted-foreground py-2">
+                            <p className="text-center text-xs text-gray-400 py-3 border-t border-gray-200/50 dark:border-gray-700/50 mt-2">
                               e mais {parsedData.length - 50} fornecedores...
                             </p>
                           )}
@@ -468,33 +472,59 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </Card>
 
           {/* Instructions */}
-          <Card className="bg-muted/50">
+          <Card className="bg-gray-50/50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700 backdrop-blur-sm">
             <CardContent className="p-4">
-              <h4 className="font-semibold mb-2 text-sm">Formato do arquivo:</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• <strong>nome</strong>: Nome do fornecedor (obrigatório)</li>
-                <li>• <strong>contato</strong>: Nome do responsável (obrigatório)</li>
-                <li>• <strong>telefone</strong>: Telefone de contato (opcional)</li>
-                <li>• <strong>email</strong>: E-mail de contato (opcional)</li>
-                <li>• <strong>endereco</strong>: Endereço completo (opcional)</li>
-                <li>• <strong>limite</strong>: Limite de crédito (opcional)</li>
-                <li>• <strong>status</strong>: active, inactive ou pending (opcional)</li>
-                <li>• <strong>avaliacao</strong>: Nota de 0 a 5 (opcional)</li>
-              </ul>
+              <h4 className="font-bold text-gray-900 dark:text-white mb-2 text-xs uppercase tracking-wider">Formato do arquivo:</h4>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="w-1 h-1 rounded-full bg-orange-400"></span>
+                  <strong>nome</strong>: Fornecedor (obrigatório)
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="w-1 h-1 rounded-full bg-orange-400"></span>
+                  <strong>contato</strong>: Responsável (obrigatório)
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="w-1 h-1 rounded-full bg-gray-400"></span>
+                  <strong>telefone</strong>: Opcional
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="w-1 h-1 rounded-full bg-gray-400"></span>
+                  <strong>email</strong>: Opcional
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="w-1 h-1 rounded-full bg-gray-400"></span>
+                  <strong>endereco</strong>: Opcional
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="w-1 h-1 rounded-full bg-gray-400"></span>
+                  <strong>limite</strong>: Opcional
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        <DialogFooter className="px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/40">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+        <DialogFooter className="px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30 backdrop-blur-sm">
+          <Button variant="outline" onClick={() => setOpen(false)} className="h-10 text-sm border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
             Cancelar
           </Button>
           <Button 
             onClick={handleImport}
             disabled={parsedData.length === 0 || isProcessing}
-            className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white"
+            className="h-10 text-sm bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-lg shadow-orange-500/20 px-8 transition-all duration-200 active:scale-95"
           >
-            {isProcessing ? "Processando..." : `Importar ${parsedData.length} Fornecedores`}
+            {isProcessing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Importar {parsedData.length} Fornecedores
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

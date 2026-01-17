@@ -64,68 +64,75 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       title="Resumo da Cotação"
       description={`#${safeStr(quote.id).slice(0, 8)}`}
       desktopMaxWidth="lg"
+      className="!bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10 shadow-2xl"
       footer={
         <Button 
           onClick={() => onOpenChange(false)} 
           size="sm" 
-          className="bg-gray-900 hover:bg-gray-800 text-white dark:bg-gray-100 dark:hover:bg-gray-200 dark:text-gray-900"
+          className="bg-gray-900 hover:bg-gray-800 text-white dark:bg-gray-100 dark:hover:bg-gray-200 dark:text-gray-900 font-medium"
         >
           Fechar
         </Button>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-4 pt-2">
         {/* Status Badge */}
-        <div className="flex items-center gap-2">
-          <ClipboardList className="h-5 w-5 text-green-600 dark:text-green-400" />
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center border border-green-500/20">
+            <ClipboardList className="h-4 w-4 text-green-600 dark:text-green-400" />
+          </div>
           <StatusBadge status={quote.status} />
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
-          <Card className="p-3 bg-teal-50 border-teal-200 dark:bg-teal-900/20 dark:border-teal-800">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-1.5 text-teal-700 dark:text-teal-300 mb-1">
               <Package className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">Produtos</span>
+              <span className="text-xs font-medium uppercase tracking-wider opacity-70">Produtos</span>
             </div>
             <p className="text-xl font-bold text-teal-800 dark:text-teal-200">{products.length}</p>
           </Card>
           
-          <Card className="p-3 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-1.5 text-blue-700 dark:text-blue-300 mb-1">
               <Users className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">Fornecedores</span>
+              <span className="text-xs font-medium uppercase tracking-wider opacity-70">Fornecedores</span>
             </div>
             <p className="text-xl font-bold text-blue-800 dark:text-blue-200">{fornecedoresRespondidos}/{fornecedores.length}</p>
           </Card>
           
-          <Card className="p-3 bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-1.5 text-green-700 dark:text-green-300 mb-1">
               <DollarSign className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">Melhor Total</span>
+              <span className="text-xs font-medium uppercase tracking-wider opacity-70">Melhor Total</span>
             </div>
             <p className="text-lg font-bold text-green-800 dark:text-green-200">R$ {totalMelhorPreco.toFixed(2)}</p>
           </Card>
           
-          <Card className="p-3 bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-1.5 text-purple-700 dark:text-purple-300 mb-1">
               <Calendar className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">Período</span>
+              <span className="text-xs font-medium uppercase tracking-wider opacity-70">Período</span>
             </div>
-            <p className="text-xs font-bold text-purple-800 dark:text-purple-200">{safeStr(quote.dataInicio)}</p>
-            <p className="text-xs text-purple-600 dark:text-purple-400">até {safeStr(quote.dataFim)}</p>
+            <div className="flex flex-col">
+              <p className="text-xs font-bold text-purple-800 dark:text-purple-200">{safeStr(quote.dataInicio)}</p>
+              <p className="text-[10px] text-purple-600 dark:text-purple-400 font-medium opacity-80">até {safeStr(quote.dataFim)}</p>
+            </div>
           </Card>
         </div>
 
         {/* Melhor Fornecedor */}
         {melhorFornecedor && (
-          <Card className="p-3 bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
-            <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <Card className="p-3 bg-amber-500/10 dark:bg-amber-500/5 border-amber-500/20 dark:border-amber-500/10 backdrop-blur-sm shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+                <Award className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+              </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">Melhor Fornecedor</p>
-                <p className="text-sm font-bold text-amber-800 dark:text-amber-200 truncate">
-                  {safeStr(melhorFornecedor.nome)} • R$ {melhorFornecedor.total.toFixed(2)}
+                <p className="text-[10px] font-bold text-amber-700 dark:text-amber-300 uppercase tracking-widest opacity-80">Melhor Fornecedor</p>
+                <p className="text-sm font-bold text-amber-900 dark:text-amber-100 truncate">
+                  {safeStr(melhorFornecedor.nome)} • <span className="text-amber-600 dark:text-amber-400">R$ {melhorFornecedor.total.toFixed(2)}</span>
                 </p>
               </div>
             </div>
@@ -133,26 +140,26 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         )}
 
         {/* Produtos */}
-        <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
-          <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+        <Card className="overflow-hidden border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm">
+          <div className="px-3 py-2.5 bg-white/10 dark:bg-white/5 border-b border-white/10 dark:border-white/5 flex items-center gap-2">
             <Package className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">Produtos ({products.length})</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-white">Produtos ({products.length})</span>
           </div>
-          <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-[200px] overflow-y-auto">
+          <div className="divide-y divide-white/5 dark:divide-white/5 max-h-[200px] overflow-y-auto">
             {products.map((p: any, i: number) => {
               const best = getBestPrice(p.product_id);
               return (
-                <div key={p.product_id} className="px-3 py-2 flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800/30">
-                  <span className="text-xs text-gray-400 dark:text-gray-500 w-5 shrink-0">{i + 1}.</span>
+                <div key={p.product_id} className="px-3 py-2.5 flex items-center gap-2 hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 w-5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{safeStr(p.product_name)}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{safeStr(p.quantidade)} {safeStr(p.unidade)}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{safeStr(p.product_name)}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{safeStr(p.quantidade)} {safeStr(p.unidade)}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-green-600 dark:text-green-400 flex items-center gap-1">
+                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-end gap-1">
                       <TrendingDown className="h-3 w-3" />R$ {best.price.toFixed(2)}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[80px]">{best.supplier}</p>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[100px] font-medium opacity-80">{best.supplier}</p>
                   </div>
                 </div>
               );
@@ -161,28 +168,28 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         </Card>
 
         {/* Fornecedores */}
-        <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
-          <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+        <Card className="overflow-hidden border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm">
+          <div className="px-3 py-2.5 bg-white/10 dark:bg-white/5 border-b border-white/10 dark:border-white/5 flex items-center gap-2">
             <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">Fornecedores ({fornecedores.length})</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-white">Fornecedores ({fornecedores.length})</span>
           </div>
-          <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-[180px] overflow-y-auto">
+          <div className="divide-y divide-white/5 dark:divide-white/5 max-h-[180px] overflow-y-auto">
             {fornecedores.map((f) => {
               const total = calcularTotalFornecedor(f.id);
               const isBest = melhorFornecedor?.id === f.id;
               return (
-                <div key={f.id} className={cn("px-3 py-2 flex items-center gap-2", isBest && "bg-amber-50/50 dark:bg-amber-900/10")}>
+                <div key={f.id} className={cn("px-3 py-2.5 flex items-center gap-2 transition-colors", isBest ? "bg-amber-500/10 dark:bg-amber-500/5" : "hover:bg-white/10 dark:hover:bg-white/5")}>
                   <div className={cn("w-2 h-2 rounded-full shrink-0", f.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{safeStr(f.nome)}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{safeStr(f.nome)}</p>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <Badge variant="outline" className={cn("text-[10px] h-5", f.status === 'respondido' ? "text-green-600 border-green-300 dark:text-green-400 dark:border-green-700" : "text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700")}>
+                      <Badge variant="outline" className={cn("text-[9px] h-4 font-bold uppercase tracking-tighter", f.status === 'respondido' ? "text-green-600 border-green-500/30 bg-green-500/5 dark:text-green-400 dark:border-green-500/20" : "text-amber-600 border-amber-500/30 bg-amber-500/5 dark:text-amber-400 dark:border-amber-500/20")}>
                         {f.status === 'respondido' ? 'Respondido' : 'Pendente'}
                       </Badge>
-                      {isBest && <Badge className="text-[10px] h-5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"><Award className="h-2.5 w-2.5 mr-0.5" />Melhor</Badge>}
+                      {isBest && <Badge className="text-[9px] h-4 bg-amber-500 text-white dark:bg-amber-600 font-bold uppercase tracking-tighter"><Award className="h-2.5 w-2.5 mr-0.5" />Melhor</Badge>}
                     </div>
                   </div>
-                  <p className={cn("text-sm font-bold shrink-0", total > 0 ? (isBest ? "text-amber-700 dark:text-amber-300" : "text-gray-900 dark:text-white") : "text-gray-400 dark:text-gray-500")}>
+                  <p className={cn("text-sm font-bold shrink-0", total > 0 ? (isBest ? "text-amber-600 dark:text-amber-400" : "text-gray-900 dark:text-white") : "text-gray-400 dark:text-gray-500")}>
                     {total > 0 ? `R$ ${total.toFixed(2)}` : '-'}
                   </p>
                 </div>
@@ -193,12 +200,12 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
         {/* Observações */}
         {(quote as any).observacoes && (
-          <Card className="p-3 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <FileText className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">Observações</span>
+              <span className="text-sm font-bold text-gray-900 dark:text-white">Observações</span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300">{safeStr((quote as any).observacoes)}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{safeStr((quote as any).observacoes)}</p>
           </Card>
         )}
       </div>
