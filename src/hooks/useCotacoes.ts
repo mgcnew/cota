@@ -875,6 +875,7 @@ export function useCotacoes() {
     isLoading,
     refetch: () => queryClient.invalidateQueries({ queryKey: ['cotacoes'] }),
     updateSupplierProductValue: updateSupplierProductValue.mutate,
+    updateQuoteItemPrice: updateSupplierProductValue,
     deleteQuote: deleteQuote.mutate,
     updateQuote: updateQuote.mutate,
     updateQuoteStatus: updateQuoteStatus.mutate,

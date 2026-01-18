@@ -43,6 +43,9 @@ export {
   // History Dialogs
   ViewHistoricoDialogLazy,
   
+  // List Dialogs
+  AddListDialogLazy,
+  
   // Utility functions
   createLazyDialog,
   createDeferredLazyDialog,

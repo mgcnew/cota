@@ -3,7 +3,7 @@ import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -391,80 +391,89 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
   const modalInnerContent = (
     <>
-      {/* Header compacto */}
-      <div className={`flex-shrink-0 px-4 ${isMobile ? 'py-4' : 'py-3'} border-b border-white/10 dark:border-white/5 bg-white/20 dark:bg-white/5 backdrop-blur-md`}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white shadow-lg shadow-gray-500/20`}>
-              <ShoppingCart className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
+      {/* Header com design semiglass */}
+      <div className="flex-shrink-0 px-8 py-6 border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 backdrop-blur-md relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-500/10 to-transparent pointer-events-none"></div>
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white shadow-xl shadow-gray-500/20 ring-1 ring-white/20">
+              <ShoppingCart className="h-7 w-7" />
             </div>
-            <div>
-              <div className={`${isMobile ? 'text-lg font-bold' : 'text-base font-bold'} text-gray-900 dark:text-white tracking-tight`}>Novo Pedido</div>
-              <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest opacity-70">
-                Etapa {currentStep + 1} de {steps.length} • {steps[currentStep].title}
+            <div className="space-y-1">
+              <DialogTitle className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                Novo Pedido
+              </DialogTitle>
+              <div className="flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-gray-500 animate-pulse" />
+                <DialogDescription className="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-[0.2em]">
+                  Etapa {currentStep + 1} de {steps.length} • {steps[currentStep].title}
+                </DialogDescription>
               </div>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className={`${isMobile ? 'h-9 w-9 rounded-lg' : 'h-8 w-8'} text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-white/10 dark:hover:bg-white/5 rounded-full transition-all`}>
-            <X className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => onOpenChange(false)} 
+            className="h-12 w-12 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/20 dark:hover:bg-white/10 rounded-2xl transition-all border border-transparent hover:border-white/20 shadow-sm"
+          >
+            <X className="h-6 w-6" />
           </Button>
         </div>
         
-        {/* Steps indicator elegante */}
-        <div className="flex items-center gap-1 bg-white/10 dark:bg-white/5 p-1 rounded-xl border border-white/10 dark:border-white/5 backdrop-blur-sm">
+        {/* Steps indicator elegante Semiglass */}
+        <div className="flex items-center gap-2 mt-6 relative z-10 bg-white/10 dark:bg-white/5 p-1.5 rounded-[1.25rem] border border-white/10 dark:border-white/5 backdrop-blur-sm">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center flex-1">
               <button
                 onClick={() => index < currentStep && setCurrentStep(index)}
                 disabled={index > currentStep}
                 className={cn(
-                  "flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black transition-all w-full uppercase tracking-tighter",
+                  "flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black transition-all w-full uppercase tracking-widest",
                   index < currentStep ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 cursor-pointer hover:bg-emerald-500/20" :
-                  index === currentStep ? "bg-orange-500/20 text-orange-700 dark:text-orange-400 shadow-sm border border-orange-500/20" :
+                  index === currentStep ? "bg-white/40 dark:bg-white/10 text-gray-900 dark:text-white shadow-sm border border-white/20" :
                   "text-gray-400 dark:text-gray-600 cursor-not-allowed"
                 )}
               >
-                {index < currentStep ? <CheckCircle className="h-3 w-3" /> : <step.icon className="h-3 w-3" />}
-                <span className={isMobile ? '' : 'hidden sm:inline'}>{step.title}</span>
+                {index < currentStep ? <CheckCircle className="h-4 w-4" /> : <step.icon className="h-4 w-4" />}
+                <span className={isMobile ? 'hidden' : 'sm:inline'}>{step.title}</span>
               </button>
-              {index < steps.length - 1 && (
-                <div className="w-px h-4 bg-white/10 dark:bg-white/5 mx-0.5" />
-              )}
             </div>
           ))}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-500/5 to-transparent pointer-events-none"></div>
         <AnimatedTabContent
           value={String(currentStep)}
           activeTab={String(currentStep)}
-          className="h-full"
+          className="h-full relative z-10"
         >
               {/* Step 0: Produtos */}
               {currentStep === 0 && (
-                <div className="h-full flex flex-col p-4">
-                  {/* Formulário de adicionar produto */}
-                  <div className="bg-white/40 dark:bg-gray-900/40 rounded-xl p-4 mb-4 border border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                      <div className="md:col-span-2">
-                        <Label className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 block uppercase tracking-wider opacity-70">Produto</Label>
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <div className="h-full flex flex-col p-8">
+                  {/* Formulário de adicionar produto Semiglass */}
+                  <div className="bg-white/40 dark:bg-gray-900/40 rounded-[2rem] p-8 mb-6 border border-white/40 dark:border-white/10 backdrop-blur-xl shadow-xl shadow-gray-500/5 ring-1 ring-white/20">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      <div className="md:col-span-2 space-y-3">
+                        <Label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Produto</Label>
+                        <div className="relative group">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
                           <Input
                             ref={productSearchRef}
                             placeholder="Digite para buscar..."
                             value={selectedProduct ? selectedProduct.name : productSearch}
                             onChange={(e) => { setProductSearch(e.target.value); setSelectedProduct(null); }}
                             onKeyDown={(e) => handleProductKeyDown(e, 'search')}
-                            className="pl-9 h-10 bg-transparent border-white/20 dark:border-white/10 font-bold text-sm"
+                            className="h-14 pl-12 bg-white/60 dark:bg-gray-950/60 border-white/40 dark:border-white/10 font-black text-sm rounded-2xl focus:ring-orange-500/20 transition-all shadow-sm"
                             tabIndex={0}
                           />
                           {filteredProducts.length > 0 && !selectedProduct && (
                             <div 
                               ref={productListRef}
-                              className="absolute z-50 w-full mt-1 bg-white/90 dark:bg-gray-950/90 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-lg shadow-2xl max-h-48 overflow-auto"
+                              className="absolute z-50 w-full mt-2 bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border border-white/30 dark:border-white/10 rounded-2xl shadow-2xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-2"
                             >
                               {filteredProducts.map((p, index) => (
                                 <button
@@ -472,28 +481,24 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                   onClick={() => selectProductFromList(p)}
                                   onMouseEnter={() => setHighlightedProductIndex(index)}
                                   className={cn(
-                                    "w-full px-3 py-2 text-left text-sm flex items-center gap-2 transition-colors",
+                                    "w-full px-5 py-4 text-left text-sm flex items-center gap-4 transition-all border-b border-white/5 last:border-none",
                                     highlightedProductIndex === index 
                                       ? "bg-orange-500/10 text-orange-700 dark:text-orange-400" 
                                       : "hover:bg-white/10 dark:hover:bg-white/5"
                                   )}
                                 >
-                                  <Package className={cn(
-                                    "h-4 w-4",
-                                    highlightedProductIndex === index ? "text-orange-600" : "text-orange-500"
-                                  )} />
-                                  <span className="font-bold">{p.name}</span>
+                                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all", highlightedProductIndex === index ? "bg-orange-500 text-white shadow-lg" : "bg-gray-500/10 text-gray-400")}>
+                                    <Package className="h-5 w-5" />
+                                  </div>
+                                  <span className="font-black tracking-tight">{p.name}</span>
                                 </button>
                               ))}
-                              <div className="px-3 py-1.5 text-[10px] text-gray-400 border-t border-white/10 dark:border-white/5 bg-white/5 dark:bg-white/5 font-bold uppercase tracking-tighter">
-                                <kbd className="px-1 py-0.5 bg-white/10 dark:bg-gray-800/50 rounded">↑↓</kbd> Navegar • <kbd className="px-1 py-0.5 bg-white/10 dark:bg-gray-800/50 rounded">Enter</kbd> Selecionar • <kbd className="px-1 py-0.5 bg-white/10 dark:bg-gray-800/50 rounded">Esc</kbd> Fechar
-                              </div>
                             </div>
                           )}
                         </div>
                       </div>
-                      <div>
-                        <Label className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 block uppercase tracking-wider opacity-70">Quantidade</Label>
+                      <div className="space-y-3">
+                        <Label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Quantidade</Label>
                         <Input
                           ref={quantityInputRef}
                           type="number"
@@ -501,14 +506,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           value={newProductQuantity}
                           onChange={(e) => setNewProductQuantity(e.target.value)}
                           onKeyDown={(e) => handleProductKeyDown(e, 'quantity')}
-                          className="h-10 bg-transparent border-white/20 dark:border-white/10 font-bold text-sm"
+                          className="h-14 bg-white/60 dark:bg-gray-950/60 border-white/40 dark:border-white/10 font-black text-center text-lg rounded-2xl focus:ring-orange-500/20 transition-all shadow-sm"
                           tabIndex={0}
                         />
                       </div>
-                      <div>
-                        <Label className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 block uppercase tracking-wider opacity-70">Preço Unit.</Label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">R$</span>
+                      <div className="space-y-3">
+                        <Label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Preço Unit.</Label>
+                        <div className="relative group">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 font-black text-sm">R$</span>
                           <Input
                             ref={priceInputRef}
                             type="text"
@@ -516,62 +521,70 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                             value={newProductPrice}
                             onChange={(e) => setNewProductPrice(e.target.value)}
                             onKeyDown={(e) => handleProductKeyDown(e, 'price')}
-                            className="pl-9 h-10 bg-transparent border-white/20 dark:border-white/10 font-bold text-sm"
+                            className="h-14 pl-12 bg-white/60 dark:bg-gray-950/60 border-white/40 dark:border-white/10 font-black text-lg rounded-2xl focus:ring-emerald-500/20 transition-all shadow-sm"
                             tabIndex={0}
                           />
                         </div>
                       </div>
                     </div>
-                    <Button ref={addButtonRef} onClick={handleAddProduct} disabled={!selectedProduct} className="mt-4 w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold shadow-lg shadow-orange-500/20">
-                      <Plus className="h-4 w-4 mr-2" />Adicionar Produto (Enter)
+                    <Button 
+                      ref={addButtonRef} 
+                      onClick={handleAddProduct} 
+                      disabled={!selectedProduct} 
+                      className="mt-8 w-full h-14 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 hover:from-orange-700 hover:to-amber-700 text-white font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-orange-500/20 rounded-2xl transition-all active:scale-95 ring-2 ring-white/20 relative overflow-hidden group"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-shimmer pointer-events-none"></div>
+                      <Plus className="h-5 w-5 mr-3" /> Adicionar Produto (Enter)
                     </Button>
-                    
-                    {/* Dicas de atalhos */}
-                    <div className="mt-2 text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest opacity-60 space-y-1">
-                      <p><kbd className="px-1 py-0.5 bg-white/10 dark:bg-gray-800/50 rounded">Enter</kbd> Avançar campo / Adicionar</p>
-                      <p><kbd className="px-1 py-0.5 bg-white/10 dark:bg-gray-800/50 rounded">Alt+→</kbd> Próximo passo</p>
-                    </div>
                   </div>
 
-                  {/* Lista de itens */}
-                  <div className="flex-1 min-h-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-bold text-gray-700 dark:text-white uppercase tracking-wider opacity-70">Itens do Pedido ({itens.length})</span>
-                      <Badge variant="outline" className="bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20 font-bold">
+                  {/* Lista de itens Semiglass */}
+                  <div className="flex-1 min-h-0 flex flex-col">
+                    <div className="flex items-center justify-between mb-4 px-1">
+                      <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Itens do Pedido ({itens.length})</span>
+                      <Badge variant="outline" className="h-8 px-4 bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20 font-black text-[10px] uppercase tracking-widest rounded-full ring-1 ring-orange-500/20 shadow-sm">
                         Total: R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </Badge>
                     </div>
-                    <ScrollArea className="h-[calc(100%-2rem)] border border-white/20 dark:border-white/10 rounded-xl bg-white/20 dark:bg-gray-950/20 backdrop-blur-sm">
+                    <ScrollArea className="flex-1 border border-white/20 dark:border-white/10 rounded-[2rem] bg-white/20 dark:bg-gray-950/20 backdrop-blur-xl shadow-inner custom-scrollbar">
                       {itens.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                          <Package className="h-12 w-12 mb-3 opacity-30" />
-                          <p className="text-sm font-bold uppercase tracking-widest opacity-50">Nenhum produto adicionado</p>
-                          <p className="text-xs font-medium opacity-40">Use o formulário acima para adicionar</p>
+                        <div className="flex flex-col items-center justify-center py-24 text-gray-400">
+                          <div className="w-20 h-20 rounded-3xl bg-gray-500/5 flex items-center justify-center mb-6 border border-white/10">
+                            <Package className="h-10 w-10 opacity-20" />
+                          </div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Nenhum produto adicionado</p>
+                          <p className="text-[9px] font-bold opacity-30 mt-2 uppercase tracking-widest">Use o formulário acima para começar</p>
                         </div>
                       ) : (
-                        <div className="p-2 space-y-2">
+                        <div className="p-6 space-y-3">
                           {itens.map((item, index) => (
-                            <div key={index} className="flex items-center gap-3 p-3 bg-white/40 dark:bg-gray-900/40 rounded-xl border border-white/20 dark:border-white/10 hover:border-orange-500/50 transition-all group shadow-sm">
-                              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20 group-hover:scale-110 transition-transform">
-                                <Package className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                            <div key={index} className="flex items-center gap-4 p-4 bg-white/40 dark:bg-gray-900/40 rounded-2xl border border-white/40 dark:border-white/10 hover:border-orange-500/40 transition-all group shadow-sm ring-1 ring-transparent hover:ring-white/20">
+                              <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 group-hover:scale-110 group-hover:shadow-lg transition-all flex-shrink-0">
+                                <Package className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-bold text-sm truncate text-gray-900 dark:text-white">{item.produto}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{item.quantidade} {item.unidade} × R$ {item.valorUnitario.toFixed(2)}</p>
+                                <p className="font-black text-base text-gray-900 dark:text-white truncate tracking-tight">{item.produto}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="secondary" className="h-5 px-2 text-[9px] font-black bg-orange-500/10 text-orange-600 dark:text-orange-400 border-none rounded-md">
+                                    {item.quantidade} {item.unidade}
+                                  </Badge>
+                                  <span className="text-[10px] font-black text-gray-400">×</span>
+                                  <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400">R$ {item.valorUnitario.toFixed(2)}</span>
+                                </div>
                               </div>
-                              <div className="text-right">
-                                <p className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
-                              </div>
-                              <div className="flex gap-1">
-                                <Button variant="ghost" size="icon" onClick={() => handleDuplicateItem(index)} className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-500/10 rounded-full">
-                                  <Copy className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)} className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-500/10 rounded-full">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                              <div className="text-right flex flex-col items-end">
+                                <p className="font-black text-emerald-600 dark:text-emerald-400 text-base tracking-tight">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
+                                <div className="flex gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-all">
+                                  <Button variant="ghost" size="icon" onClick={() => handleDuplicateItem(index)} className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-500/10 rounded-lg">
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)} className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               </div>
                             </div>
-                          ))}
+                          )).reverse()}
                         </div>
                       )}
                     </ScrollArea>
@@ -581,54 +594,61 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
               {/* Step 1: Fornecedor */}
               {currentStep === 1 && (
-                <div className="h-full flex flex-col p-4">
+                <div className="h-full flex flex-col p-8 space-y-8">
                   <div className="space-y-4">
-                    <div>
-                      <Label className="text-sm font-bold text-gray-900 dark:text-white mb-2 block uppercase tracking-wider opacity-70">Fornecedor</Label>
-                      <div className="relative mb-3">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input
-                          ref={supplierSearchRef}
-                          placeholder="Buscar fornecedor..."
-                          value={supplierSearch}
-                          onChange={(e) => setSupplierSearch(e.target.value)}
-                          className="pl-9 h-10 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 font-bold"
-                          tabIndex={0}
-                        />
-                      </div>
-                      <ScrollArea className="h-48 border border-white/20 dark:border-white/10 rounded-xl bg-white/20 dark:bg-gray-950/20 backdrop-blur-sm">
-                        <div className="p-2 space-y-1.5">
-                          {filteredSuppliers.map(s => (
-                            <button
-                              key={s.id}
-                              onClick={() => setFornecedor(s.id)}
-                              className={cn(
-                                "w-full p-3 rounded-xl text-left transition-all flex items-center gap-3 border",
-                                fornecedor === s.id 
-                                  ? "bg-orange-500/10 dark:bg-orange-900/40 border-orange-500/50 shadow-sm" 
-                                  : "bg-white/40 dark:bg-gray-900/40 border-white/10 dark:border-white/5 hover:border-orange-500/30"
-                              )}
-                            >
-                              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-colors", fornecedor === s.id ? "bg-orange-500 text-white" : "bg-white/20 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 border border-white/10")}>
-                                <Building2 className="h-5 w-5" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{s.name}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate">{s.contact || 'Sem contato'}</p>
-                              </div>
-                              {fornecedor === s.id && <CheckCircle className="h-5 w-5 text-orange-500 animate-in zoom-in-50" />}
-                            </button>
-                          ))}
-                        </div>
-                      </ScrollArea>
+                    <Label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Selecione o Fornecedor</Label>
+                    <div className="relative group">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                      <Input
+                        ref={supplierSearchRef}
+                        placeholder="Buscar por nome ou contato..."
+                        value={supplierSearch}
+                        onChange={(e) => setSupplierSearch(e.target.value)}
+                        className="h-14 pl-12 bg-white/60 dark:bg-gray-950/60 border-white/40 dark:border-white/10 font-black rounded-2xl focus:ring-orange-500/20 transition-all shadow-sm"
+                        tabIndex={0}
+                      />
                     </div>
-                    
-                    <div>
-                      <Label className="text-sm font-bold text-gray-900 dark:text-white mb-2 block uppercase tracking-wider opacity-70">Data de Entrega</Label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input type="date" value={dataEntrega} onChange={(e) => setDataEntrega(e.target.value)} className="pl-9 h-10 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 font-bold" />
+                    <ScrollArea className="h-64 border border-white/20 dark:border-white/10 rounded-[2rem] bg-white/20 dark:bg-gray-950/20 backdrop-blur-xl shadow-inner custom-scrollbar">
+                      <div className="p-4 space-y-3">
+                        {filteredSuppliers.map(s => (
+                          <button
+                            key={s.id}
+                            onClick={() => setFornecedor(s.id)}
+                            className={cn(
+                              "w-full p-4 rounded-2xl text-left transition-all flex items-center gap-4 border group",
+                              fornecedor === s.id 
+                                ? "bg-orange-500/10 border-orange-500 shadow-xl shadow-orange-500/5 ring-1 ring-white/20" 
+                                : "bg-white/40 dark:bg-gray-900/40 border-white/40 dark:border-white/10 hover:border-orange-500/40"
+                            )}
+                          >
+                            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center transition-all", fornecedor === s.id ? "bg-orange-500 text-white shadow-lg scale-110" : "bg-white/40 dark:bg-gray-800/40 text-gray-400 border border-white/20 group-hover:scale-105")}>
+                              <Building2 className="h-6 w-6" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={cn("font-black text-base tracking-tight truncate", fornecedor === s.id ? "text-orange-700 dark:text-orange-400" : "text-gray-900 dark:text-white")}>{s.name}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 font-bold truncate opacity-70">{s.contact || 'Sem contato registrado'}</p>
+                            </div>
+                            {fornecedor === s.id && (
+                              <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-600">
+                                <CheckCircle className="h-5 w-5 animate-in zoom-in-50" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
                       </div>
+                    </ScrollArea>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <Label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Data Prevista de Entrega</Label>
+                    <div className="relative group max-w-sm">
+                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                      <Input 
+                        type="date" 
+                        value={dataEntrega} 
+                        onChange={(e) => setDataEntrega(e.target.value)} 
+                        className="h-14 pl-12 bg-white/60 dark:bg-gray-950/60 border-white/40 dark:border-white/10 font-black rounded-2xl focus:ring-orange-500/20 transition-all shadow-sm" 
+                      />
                     </div>
                   </div>
                 </div>
@@ -636,101 +656,132 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
               {/* Step 2: Finalizar */}
               {currentStep === 2 && (
-                <div className="h-full flex flex-col p-4">
-                  <div className="space-y-4">
-                    {/* Resumo */}
-                    <div className="bg-white/40 dark:bg-gray-900/40 rounded-xl p-4 border border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
-                      <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2 uppercase tracking-wider opacity-70 text-xs">
-                        <FileText className="h-4 w-4 text-orange-600 dark:text-orange-400" />Resumo do Pedido
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-white/40 dark:bg-gray-950/40 rounded-xl p-3 border border-white/10">
-                          <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 font-bold uppercase tracking-tighter opacity-70">Fornecedor</p>
-                          <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{suppliers.find(s => s.id === fornecedor)?.name || '-'}</p>
-                        </div>
-                        <div className="bg-white/40 dark:bg-gray-950/40 rounded-xl p-3 border border-white/10">
-                          <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 font-bold uppercase tracking-tighter opacity-70">Data de Entrega</p>
-                          <p className="font-bold text-sm text-gray-900 dark:text-white">{dataEntrega ? new Date(dataEntrega + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</p>
-                        </div>
-                        <div className="bg-white/40 dark:bg-gray-950/40 rounded-xl p-3 border border-white/10">
-                          <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 font-bold uppercase tracking-tighter opacity-70">Itens</p>
-                          <p className="font-bold text-sm text-gray-900 dark:text-white">{itens.length} produto(s)</p>
-                        </div>
-                        <div className="bg-white/40 dark:bg-gray-950/40 rounded-xl p-3 border border-white/10">
-                          <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 font-bold uppercase tracking-tighter opacity-70">Valor Total</p>
-                          <p className="font-bold text-lg text-emerald-600 dark:text-emerald-400">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                        </div>
+                <div className="h-full flex flex-col p-8 space-y-8">
+                  {/* Resumo Semiglass */}
+                  <div className="bg-white/40 dark:bg-gray-900/40 rounded-[2.5rem] p-8 border border-white/40 dark:border-white/10 backdrop-blur-xl shadow-xl shadow-gray-500/5 ring-1 ring-white/20 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none"></div>
+                    <h3 className="font-black text-[10px] text-gray-500 dark:text-gray-400 mb-6 flex items-center gap-3 uppercase tracking-[0.2em] relative z-10">
+                      <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-600">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      Resumo da Operação
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                      <div className="bg-white/60 dark:bg-gray-950/60 rounded-2xl p-5 border border-white/40 dark:border-white/10 shadow-sm">
+                        <p className="text-[9px] text-gray-400 dark:text-gray-500 mb-1.5 font-black uppercase tracking-widest">Fornecedor</p>
+                        <p className="font-black text-base text-gray-900 dark:text-white truncate tracking-tight">{suppliers.find(s => s.id === fornecedor)?.name || '-'}</p>
+                      </div>
+                      <div className="bg-white/60 dark:bg-gray-950/60 rounded-2xl p-5 border border-white/40 dark:border-white/10 shadow-sm">
+                        <p className="text-[9px] text-gray-400 dark:text-gray-500 mb-1.5 font-black uppercase tracking-widest">Previsão de Entrega</p>
+                        <p className="font-black text-base text-gray-900 dark:text-white tracking-tight">{dataEntrega ? new Date(dataEntrega + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</p>
+                      </div>
+                      <div className="bg-white/60 dark:bg-gray-950/60 rounded-2xl p-5 border border-white/40 dark:border-white/10 shadow-sm">
+                        <p className="text-[9px] text-gray-400 dark:text-gray-500 mb-1.5 font-black uppercase tracking-widest">Volume de Itens</p>
+                        <p className="font-black text-base text-gray-900 dark:text-white tracking-tight">{itens.length} produto(s) listado(s)</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 rounded-2xl p-5 border border-emerald-500/20 shadow-sm">
+                        <p className="text-[9px] text-emerald-700 dark:text-emerald-500 mb-1.5 font-black uppercase tracking-widest">Investimento Total</p>
+                        <p className="font-black text-2xl text-emerald-600 dark:text-emerald-400 tracking-tighter">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Observações */}
-                    <div>
-                      <Label className="text-xs font-bold text-gray-900 dark:text-white mb-2 block uppercase tracking-wider opacity-70">Observações (opcional)</Label>
-                      <Textarea
-                        placeholder="Adicione observações sobre o pedido..."
-                        value={observacoes}
-                        onChange={(e) => setObservacoes(e.target.value)}
-                        className="min-h-[80px] resize-none bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 font-medium text-sm"
-                      />
-                    </div>
+                  {/* Observações Semiglass */}
+                  <div className="space-y-4">
+                    <Label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Notas Adicionais (OPCIONAL)</Label>
+                    <Textarea
+                      placeholder="Instruções de entrega, condições de pagamento..."
+                      value={observacoes}
+                      onChange={(e) => setObservacoes(e.target.value)}
+                      className="min-h-[100px] resize-none bg-white/60 dark:bg-gray-950/60 border-white/40 dark:border-white/10 font-medium text-sm rounded-[1.5rem] p-6 focus:ring-orange-500/20 transition-all shadow-sm"
+                    />
+                  </div>
 
-                    {/* Lista de itens resumida */}
-                    <div className="flex-1 min-h-0">
-                      <Label className="text-xs font-bold text-gray-900 dark:text-white mb-2 block uppercase tracking-wider opacity-70">Itens do Pedido</Label>
-                      <ScrollArea className="h-32 border border-white/20 dark:border-white/10 rounded-xl bg-white/20 dark:bg-gray-950/20 backdrop-blur-sm">
-                        <div className="p-2 space-y-1">
-                          {itens.map((item, index) => (
-                            <div key={index} className="flex items-center justify-between p-2.5 bg-white/40 dark:bg-gray-900/40 rounded-lg border border-white/5 text-sm">
-                              <span className="truncate flex-1 font-bold text-gray-900 dark:text-white">{item.produto}</span>
-                              <span className="text-gray-500 dark:text-gray-400 mx-2 font-medium">{item.quantidade} {item.unidade}</span>
-                              <span className="font-bold text-emerald-600 dark:text-emerald-400">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</span>
+                  {/* Lista de itens resumida Semiglass */}
+                  <div className="flex-1 min-h-0 flex flex-col">
+                    <Label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] mb-4 pl-1">Conferência de Itens</Label>
+                    <ScrollArea className="flex-1 border border-white/20 dark:border-white/10 rounded-[2rem] bg-white/20 dark:bg-gray-950/20 backdrop-blur-xl shadow-inner custom-scrollbar">
+                      <div className="p-6 space-y-2">
+                        {itens.map((item, index) => (
+                          <div key={index} className="flex items-center justify-between p-4 bg-white/40 dark:bg-gray-900/40 rounded-xl border border-white/10 shadow-sm">
+                            <span className="truncate flex-1 font-black text-sm text-gray-900 dark:text-white tracking-tight">{item.produto}</span>
+                            <div className="flex items-center gap-4 ml-4">
+                              <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">{item.quantidade} {item.unidade}</span>
+                              <div className="h-4 w-px bg-white/10 mx-2"></div>
+                              <span className="font-black text-sm text-emerald-600 dark:text-emerald-400 tracking-tight">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</span>
                             </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
                   </div>
                 </div>
               )}
           </AnimatedTabContent>
-        </div>
+      </div>
 
-        {/* Footer */}
-        <div className="border-t border-white/20 dark:border-white/10 px-6 py-4 bg-white/20 dark:bg-gray-950/20 backdrop-blur-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => currentStep > 0 ? setCurrentStep(currentStep - 1) : onOpenChange(false)} disabled={loading} className="border-white/20 dark:border-white/10 bg-transparent font-bold text-xs uppercase tracking-wider">
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                {currentStep === 0 ? 'Cancelar' : 'Voltar'}
-              </Button>
-              {!isMobile && (
-                <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-tighter opacity-60">
-                  <span><kbd className="px-1 py-0.5 bg-white/10 dark:bg-gray-800/50 rounded">Alt+←→</kbd> Navegar</span>
-                  {currentStep === 2 && <span><kbd className="px-1 py-0.5 bg-white/10 dark:bg-gray-800/50 rounded">Ctrl+Enter</kbd> Criar</span>}
-                </div>
-              )}
+      {/* Footer Semiglass */}
+      <div className="flex-shrink-0 px-8 py-6 border-t border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl flex items-center justify-between relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-500/5 to-transparent pointer-events-none"></div>
+        <div className="flex items-center gap-4 relative z-10">
+          <Button 
+            variant="outline" 
+            onClick={() => currentStep > 0 ? setCurrentStep(currentStep - 1) : onOpenChange(false)} 
+            disabled={loading} 
+            className="h-14 px-8 border-white/30 dark:border-white/10 bg-white/5 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-white/10 transition-all backdrop-blur-md shadow-sm"
+          >
+            <ChevronLeft className="h-5 w-5 mr-2" />
+            {currentStep === 0 ? 'Cancelar' : 'Voltar'}
+          </Button>
+          {!isMobile && (
+            <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-white/10 dark:bg-white/5 rounded-full border border-white/10 backdrop-blur-sm text-[8px] text-gray-400 font-black uppercase tracking-widest opacity-60">
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-black/20 rounded">Alt+←→</kbd> Navegar</span>
+              {currentStep === 2 && <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-black/20 rounded">Ctrl+Enter</kbd> Criar</span>}
             </div>
-            
-            {currentStep < 2 ? (
-              <Button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold shadow-lg shadow-orange-500/20 uppercase tracking-wider text-xs px-6">
-                {isMobile ? 'Próximo' : 'Próximo (Alt+→)'}
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            ) : (
-              <Button onClick={handleSubmit} disabled={loading || !canProceed()} className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white min-w-[140px] font-bold shadow-lg shadow-orange-500/20 uppercase tracking-wider text-xs">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShoppingCart className="h-4 w-4 mr-2" />{isMobile ? 'Criar' : 'Criar (Ctrl+Enter)'}</>}
-              </Button>
-            )}
-          </div>
+          )}
         </div>
-      </>
-    );
+        
+        <div className="relative z-10">
+          {currentStep < 2 ? (
+            <Button 
+              onClick={() => setCurrentStep(currentStep + 1)} 
+              disabled={!canProceed()} 
+              className="h-14 px-10 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 hover:from-orange-700 hover:to-amber-700 text-white font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-orange-500/20 rounded-2xl transition-all active:scale-[0.98] ring-2 ring-white/20 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-shimmer pointer-events-none"></div>
+              {isMobile ? 'Próximo' : 'Próximo Passo'}
+              <ChevronRight className="h-5 w-5 ml-2" />
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleSubmit} 
+              disabled={loading || !canProceed()} 
+              className="h-14 px-12 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 hover:from-orange-700 hover:to-amber-700 text-white font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-orange-500/20 rounded-2xl transition-all active:scale-[0.98] ring-2 ring-white/20 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-shimmer pointer-events-none"></div>
+              {loading ? (
+                <>
+                  <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                  Criando...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="h-5 w-5 mr-3" />
+                  {isMobile ? 'Finalizar' : 'Finalizar Pedido'}
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      </div>
+    </>
+  );
 
   // Mobile: Usar Drawer
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-white/20">
+        <DrawerContent className="max-h-[95vh] overflow-hidden flex flex-col !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border-t border-white/20 rounded-t-[2.5rem] shadow-2xl">
           {modalInnerContent}
         </DrawerContent>
       </Drawer>
@@ -741,7 +792,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="w-[95vw] max-w-[800px] h-[90vh] max-h-[700px] overflow-hidden p-0 gap-0 border border-white/20 dark:border-white/10 shadow-2xl rounded-xl !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden"
+        className="w-[95vw] max-w-[850px] h-[90vh] max-h-[750px] overflow-hidden p-0 gap-0 border border-white/30 dark:border-white/10 shadow-2xl rounded-[2.5rem] !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl [&>button]:hidden animate-in fade-in zoom-in-95 duration-300"
         onKeyDown={handleModalKeyDown}
       >
         {modalInnerContent}

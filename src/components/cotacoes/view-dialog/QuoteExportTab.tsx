@@ -94,33 +94,33 @@ export function QuoteExportTab({
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1f2937; line-height: 1.6; }
     .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 40px 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
+    .header { background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%); color: white; padding: 40px 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
     .header h1 { font-size: 28px; margin-bottom: 10px; }
     .header p { font-size: 14px; opacity: 0.9; }
     .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .info-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f97316; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .info-card strong { display: block; color: #f97316; margin-bottom: 5px; font-size: 12px; text-transform: uppercase; }
+    .info-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #0f766e; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .info-card strong { display: block; color: #0f766e; margin-bottom: 5px; font-size: 12px; text-transform: uppercase; }
     .info-card span { font-size: 16px; color: #1f2937; font-weight: 600; }
     .winners-section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .winners-section h2 { color: #f97316; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+    .winners-section h2 { color: #0f766e; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
     .winners-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-    .winner-card { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); padding: 15px; border-radius: 8px; border: 1px solid #86efac; }
-    .winner-card .rank { display: inline-block; background: #22c55e; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-    .winner-card .name { font-weight: 600; color: #166534; margin-bottom: 5px; font-size: 16px; }
-    .winner-card .wins { font-size: 14px; color: #15803d; }
+    .winner-card { background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); padding: 15px; border-radius: 8px; border: 1px solid #5eead4; }
+    .winner-card .rank { display: inline-block; background: #0d9488; color: white; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+    .winner-card .name { font-weight: 600; color: #115e59; margin-bottom: 5px; font-size: 16px; }
+    .winner-card .wins { font-size: 14px; color: #0f766e; }
     .comparatives { display: grid; gap: 20px; }
     .comparative-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .comparative-header { background: #fff7ed; padding: 15px; border-bottom: 2px solid #f97316; }
-    .comparative-header h3 { color: #c2410c; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-    .comparative-header .qty { font-size: 13px; color: #9a3412; font-weight: normal; margin-left: auto; }
+    .comparative-header { background: #f0fdfa; padding: 15px; border-bottom: 2px solid #0f766e; }
+    .comparative-header h3 { color: #115e59; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .comparative-header .qty { font-size: 13px; color: #0f766e; font-weight: normal; margin-left: auto; }
     .comparative-table { width: 100%; border-collapse: collapse; }
     .comparative-table th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 600; font-size: 13px; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
     .comparative-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
     .comparative-table tr:hover { background: #f9fafb; }
-    .winner-row { background: #dcfce7 !important; }
-    .winner-row td { font-weight: 600; color: #166534; }
+    .winner-row { background: #ccfbf1 !important; }
+    .winner-row td { font-weight: 600; color: #115e59; }
     .badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; }
-    .badge-winner { background: #22c55e; color: white; }
+    .badge-winner { background: #0d9488; color: white; }
     .badge-difference { background: #fee2e2; color: #991b1b; }
     .no-response { padding: 20px; text-align: center; color: #9ca3af; font-style: italic; }
     .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; margin-top: 40px; border-top: 1px solid #e5e7eb; }

@@ -193,7 +193,8 @@ export const ResumoCotacaoDialogLazy = createDeferredLazyDialog(
 );
 
 export const GerenciarCotacaoDialogLazy = createDeferredLazyDialog(
-  () => import('./GerenciarCotacaoDialog')
+  () => import('./GerenciarCotacaoDialog'),
+  'GerenciarCotacaoDialog'
 );
 
 export const ViewQuoteDialogLazy = createDeferredLazyDialog(
@@ -239,6 +240,14 @@ export const SelectSupplierPerProductDialogLazy = createDeferredLazyDialog(
 
 export const ViewHistoricoDialogLazy = createDeferredLazyDialog(
   () => import('./ViewHistoricoDialog')
+);
+
+// ============================================================================
+// List Dialogs
+// ============================================================================
+
+export const AddListDialogLazy = createDeferredLazyDialog(
+  () => import('./AddListDialog')
 );
 
 // ============================================================================

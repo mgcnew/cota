@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
@@ -18,24 +18,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Loader2,
   ShoppingBasket,
   Search,
   Package,
   Check,
-  AlertCircle,
   Clock,
   Zap,
   ArrowUp,
   Minus,
   Plus,
+  X,
+  Trash2,
 } from "lucide-react";
 import { useShoppingList } from "@/hooks/useShoppingList";
 import { useProducts } from "@/hooks/useProducts";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 
 interface AddProductToListDialogProps {
   open: boolean;
@@ -49,27 +51,32 @@ const priorityConfig: Record<Priority, { label: string; icon: any; color: string
     label: "Baixa",
     icon: Clock,
     color: "text-gray-600 dark:text-gray-400",
-    bg: "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600",
+    bg: "bg-gray-100 dark:bg-gray-800",
   },
   medium: {
     label: "Média",
     icon: Minus,
     color: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-blue-300 dark:border-blue-700",
+    bg: "bg-blue-50 dark:bg-blue-950/30",
   },
   high: {
     label: "Alta",
     icon: ArrowUp,
     color: "text-orange-600 dark:text-orange-400",
-    bg: "bg-orange-50 dark:bg-orange-950/30 hover:bg-orange-100 dark:hover:bg-orange-900/40 border-orange-300 dark:border-orange-700",
+    bg: "bg-orange-50 dark:bg-orange-950/30",
   },
   urgent: {
     label: "Urgente",
     icon: Zap,
     color: "text-red-600 dark:text-red-400",
-    bg: "bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/40 border-red-300 dark:border-red-700",
+    bg: "bg-red-50 dark:bg-red-950/30",
   },
 };
+
+interface SelectedItem {
+  product: any;
+  quantity: number;
+}
 
 export function AddProductToListDialog({ open, onOpenChange }: AddProductToListDialogProps) {
   const isMobile = useIsMobile();
@@ -77,30 +84,41 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
   const { addItem } = useShoppingList();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  
+  // Global settings for the batch
   const [priority, setPriority] = useState<Priority>("medium");
-  const [estimatedPrice, setEstimatedPrice] = useState("");
   const [notes, setNotes] = useState("");
-  const [step, setStep] = useState<"select" | "details">("select");
+  const [step, setStep] = useState<"select" | "configure">("select");
+
+  // Debounce search
+  useEffect(() => {
+    setIsSearching(true);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setIsSearching(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Reset form
   useEffect(() => {
     if (!open) {
       setSearchQuery("");
-      setSelectedProduct(null);
-      setQuantity(1);
+      setDebouncedSearch("");
+      setSelectedItems([]);
       setPriority("medium");
-      setEstimatedPrice("");
       setNotes("");
       setStep("select");
     }
   }, [open]);
 
-  // Filter products
+  // Filter products based on debounced search
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return products.slice(0, 50);
-    const query = searchQuery.toLowerCase();
+    if (!debouncedSearch.trim()) return []; // Empty list initially
+    const query = debouncedSearch.toLowerCase();
     return products
       .filter(
         (p) =>
@@ -108,11 +126,35 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
           (p.category && p.category.toLowerCase().includes(query))
       )
       .slice(0, 50);
-  }, [products, searchQuery]);
+  }, [products, debouncedSearch]);
 
-  const handleSelectProduct = (product: any) => {
-    setSelectedProduct(product);
-    setStep("details");
+  const toggleProduct = (product: any) => {
+    setSelectedItems((prev) => {
+      const exists = prev.find((item) => item.product.id === product.id);
+      if (exists) {
+        return prev.filter((item) => item.product.id !== product.id);
+      }
+      return [...prev, { product, quantity: 1 }];
+    });
+  };
+
+  const updateQuantity = (productId: string, value: number) => {
+    // Ensure positive integer
+    const newQty = Math.max(1, Math.floor(value));
+    setSelectedItems((prev) =>
+      prev.map((item) => {
+        if (item.product.id === productId) {
+          return { ...item, quantity: newQty };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleNext = () => {
+    if (selectedItems.length > 0) {
+      setStep("configure");
+    }
   };
 
   const handleBack = () => {
@@ -120,180 +162,239 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
   };
 
   const handleSubmit = async () => {
-    if (!selectedProduct || quantity <= 0) return;
+    if (selectedItems.length === 0) return;
 
-    await addItem.mutateAsync({
-      product_id: selectedProduct.id,
-      product_name: selectedProduct.name,
-      quantity,
-      unit: selectedProduct.unit || "un",
-      priority,
-      notes: notes.trim() || undefined,
-      estimated_price: estimatedPrice ? parseFloat(estimatedPrice) : undefined,
-      category: selectedProduct.category || undefined,
-    });
+    try {
+      await Promise.all(
+        selectedItems.map((item) =>
+          addItem.mutateAsync({
+            product_id: item.product.id,
+            product_name: item.product.name,
+            quantity: item.quantity,
+            unit: item.product.unit || "un",
+            priority,
+            notes: notes.trim() || undefined,
+            category: item.product.category || undefined,
+          })
+        )
+      );
 
-    onOpenChange(false);
+      toast({
+        title: "Sucesso",
+        description: `${selectedItems.length} itens adicionados à lista.`,
+      });
+
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar itens.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const incrementQuantity = () => setQuantity((q) => q + 1);
-  const decrementQuantity = () => setQuantity((q) => Math.max(0.5, q - 1));
-
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <ShoppingBasket className="w-6 h-6" />
-            </div>
-            <div>
-              <DialogHeader className="p-0 space-y-1">
-                <DialogTitle className="text-xl font-bold text-white">
-                  {step === "select" ? "Adicionar à Lista" : "Detalhes do Item"}
-                </DialogTitle>
-                <DialogDescription className="text-blue-100">
-                  {step === "select"
-                    ? "Selecione um produto para adicionar"
-                    : selectedProduct?.name}
-                </DialogDescription>
-              </DialogHeader>
-            </div>
+  // Shared content for Drawer and Dialog
+  const renderHeader = () => (
+    <div className="flex-shrink-0 px-5 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+            <ShoppingBasket className="h-5 w-5" />
           </div>
-
-          {/* Progress indicator */}
-          <div className="flex gap-2 mt-4">
-            <div
-              className={cn(
-                "h-1 flex-1 rounded-full transition-colors",
-                step === "select" ? "bg-white" : "bg-white/40"
-              )}
-            />
-            <div
-              className={cn(
-                "h-1 flex-1 rounded-full transition-colors",
-                step === "details" ? "bg-white" : "bg-white/40"
-              )}
-            />
+          <div>
+            <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
+              {step === "select" ? "Selecionar Produtos" : "Configurar Itens"}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+              {step === "select"
+                ? "Busque e selecione os itens"
+                : `Configurando ${selectedItems.length} itens`}
+            </DialogDescription>
           </div>
         </div>
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onOpenChange(false)}
+            className="h-8 w-8 text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 
-        {/* Content */}
-        <div className="p-0">
-          {step === "select" ? (
-            <div className="flex flex-col">
-              {/* Search */}
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    placeholder="Buscar produto por nome ou categoria..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                    autoFocus
-                  />
+  const renderContent = () => (
+    <div className="flex-1 overflow-hidden flex flex-col relative">
+      {step === "select" ? (
+        <>
+          <div className="p-4 bg-white/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 backdrop-blur-sm z-10">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Digite para buscar produtos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-10 pl-9 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-blue-500/20"
+                autoFocus
+              />
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
                 </div>
-              </div>
-
-              {/* Product List */}
-              <ScrollArea className="h-[300px]">
-                <div className="p-2">
-                  {filteredProducts.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <Package className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
-                      <p className="text-gray-500 dark:text-gray-400 font-medium">
-                        Nenhum produto encontrado
-                      </p>
-                      <p className="text-sm text-gray-400 dark:text-gray-500">
-                        Tente buscar por outro termo
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-1">
-                      {filteredProducts.map((product) => (
-                        <button
-                          key={product.id}
-                          onClick={() => handleSelectProduct(product)}
-                          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left group"
-                        >
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center flex-shrink-0">
-                            <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                              {product.name}
-                            </p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              {product.category && (
-                                <Badge variant="secondary" className="text-xs">
-                                  {product.category}
-                                </Badge>
-                              )}
-                              {product.unit && (
-                                <span className="text-xs text-gray-400">
-                                  {product.unit}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                              <Plus className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
+              )}
             </div>
-          ) : (
-            <div className="p-6 space-y-6">
-              {/* Quantity */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Quantidade</Label>
-                <div className="flex items-center justify-center gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={decrementQuantity}
-                    className="h-12 w-12 rounded-xl"
-                  >
-                    <Minus className="w-5 h-5" />
-                  </Button>
-                  <div className="flex-1 max-w-[120px]">
-                    <Input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
-                      min="0.01"
-                      step="0.5"
-                      className="text-center text-2xl font-bold h-14"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={incrementQuantity}
-                    className="h-12 w-12 rounded-xl"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </Button>
+          </div>
+          <ScrollArea className="flex-1">
+            <div className="p-4 space-y-2">
+              {!debouncedSearch.trim() ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400">
+                  <Search className="w-12 h-12 mb-3 opacity-20" />
+                  <p className="text-sm font-medium">Digite para buscar produtos</p>
+                  <p className="text-xs opacity-60 mt-1">Busque por nome ou categoria</p>
                 </div>
-                <p className="text-center text-sm text-gray-500">
-                  {selectedProduct?.unit || "unidades"}
-                </p>
+              ) : filteredProducts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400">
+                  <Package className="w-12 h-12 mb-3 opacity-20" />
+                  <p className="text-sm font-medium">Nenhum produto encontrado</p>
+                </div>
+              ) : (
+                filteredProducts.map((product) => {
+                  const isSelected = selectedItems.some((i) => i.product.id === product.id);
+                  return (
+                    <div
+                      key={product.id}
+                      onClick={() => toggleProduct(product)}
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer group",
+                        isSelected
+                          ? "bg-blue-50/50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                          : "bg-white dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                      )}
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 pointer-events-none"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className={cn("font-medium text-sm truncate", isSelected ? "text-blue-700 dark:text-blue-300" : "text-gray-700 dark:text-gray-300")}>
+                          {product.name}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <span>{product.unit || "UN"}</span>
+                          {product.category && (
+                            <>
+                              <span>•</span>
+                              <span>{product.category}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
+          
+          {/* Selected Items Summary/Preview */}
+          {selectedItems.length > 0 && (
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-100 dark:border-blue-800">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                  {selectedItems.length} itens selecionados
+                </span>
+                <div className="flex -space-x-2">
+                   {selectedItems.slice(0, 5).map((item, i) => (
+                     <div 
+                       key={item.product.id} 
+                       className="w-6 h-6 rounded-full bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 flex items-center justify-center text-[10px] font-bold text-blue-600 dark:text-blue-400 relative"
+                       style={{ zIndex: 5 - i, marginLeft: i > 0 ? -8 : 0 }}
+                     >
+                       {item.product.name.charAt(0)}
+                     </div>
+                   ))}
+                   {selectedItems.length > 5 && (
+                     <div 
+                       className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 flex items-center justify-center text-[10px] font-bold text-blue-600 dark:text-blue-400 relative"
+                       style={{ zIndex: 0, marginLeft: -8 }}
+                     >
+                       +{selectedItems.length - 5}
+                     </div>
+                   )}
+                </div>
               </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <ScrollArea className="flex-1">
+          <div className="p-5 space-y-6">
+            {/* List of selected items */}
+            <div className="space-y-3">
+              <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Itens Selecionados</Label>
+              <div className="space-y-2">
+                {selectedItems.map((item) => (
+                  <div key={item.product.id} className="flex flex-col gap-3 p-4 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 transition-all hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 truncate">{item.product.name}</p>
+                        <span className="text-xs text-gray-400">{item.product.unit || "UN"}</span>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 -mt-1 -mr-1"
+                        onClick={() => toggleProduct(item.product)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    {/* Quantity Control */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center flex-1 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 rounded-md hover:bg-white dark:hover:bg-gray-800 shadow-sm"
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <Input 
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={item.quantity}
+                          onChange={(e) => updateQuantity(item.product.id, parseInt(e.target.value) || 1)}
+                          className="flex-1 h-8 text-center border-none bg-transparent focus-visible:ring-0 font-bold p-0"
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 rounded-md hover:bg-white dark:hover:bg-gray-800 shadow-sm"
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <div className="text-xs text-gray-400 font-medium whitespace-nowrap px-2">
+                        {item.product.unit || "un"}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-              {/* Priority */}
+            {/* Global Settings */}
+            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Prioridade</Label>
+                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Prioridade (Geral)</Label>
                 <div className="grid grid-cols-4 gap-2">
                   {(Object.keys(priorityConfig) as Priority[]).map((key) => {
                     const config = priorityConfig[key];
@@ -302,110 +403,105 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
                     return (
                       <button
                         key={key}
-                        type="button"
                         onClick={() => setPriority(key)}
                         className={cn(
-                          "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all",
+                          "flex flex-col items-center justify-center gap-2 p-2 rounded-lg border transition-all",
                           isSelected
-                            ? cn(config.bg, "border-current ring-2 ring-offset-2", config.color)
-                            : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                            ? cn(config.bg, "border-current ring-1 ring-current/20", config.color)
+                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300"
                         )}
                       >
-                        <Icon className={cn("w-5 h-5", isSelected ? config.color : "text-gray-400")} />
-                        <span
-                          className={cn(
-                            "text-xs font-medium",
-                            isSelected ? config.color : "text-gray-500"
-                          )}
-                        >
-                          {config.label}
-                        </span>
-                        {isSelected && (
-                          <Check className={cn("w-3 h-3", config.color)} />
-                        )}
+                        <Icon className="w-4 h-4" />
+                        <span className="text-[10px] font-bold uppercase">{config.label}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Estimated Price */}
               <div className="space-y-2">
-                <Label htmlFor="price" className="text-sm font-medium">
-                  Preço Estimado (opcional)
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                    R$
-                  </span>
-                  <Input
-                    id="price"
-                    type="number"
-                    value={estimatedPrice}
-                    onChange={(e) => setEstimatedPrice(e.target.value)}
-                    placeholder="0,00"
-                    min="0"
-                    step="0.01"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div className="space-y-2">
-                <Label htmlFor="notes" className="text-sm font-medium">
-                  Observações (opcional)
-                </Label>
+                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Observações (Opcional)</Label>
                 <Textarea
-                  id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Ex: Preferência por marca X, verificar validade..."
-                  rows={2}
-                  maxLength={500}
-                  className="resize-none"
+                  placeholder="Observações para todos os itens..."
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm min-h-[80px]"
                 />
-                <p className="text-xs text-gray-400 text-right">{notes.length}/500</p>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        </ScrollArea>
+      )}
+    </div>
+  );
 
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex gap-3">
-          {step === "details" && (
-            <Button variant="outline" onClick={handleBack} className="flex-1">
-              Voltar
-            </Button>
-          )}
-          {step === "select" ? (
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-            >
-              Cancelar
-            </Button>
-          ) : (
-            <Button
-              onClick={handleSubmit}
-              disabled={!selectedProduct || quantity <= 0 || addItem.isPending}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              {addItem.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Adicionando...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Adicionar à Lista
-                </>
-              )}
-            </Button>
-          )}
+  const renderFooter = () => (
+    <div className="flex-shrink-0 p-4 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-sm flex gap-3">
+      {step === "configure" && (
+        <Button
+          variant="outline"
+          onClick={handleBack}
+          className="flex-1 h-11 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+        >
+          Voltar
+        </Button>
+      )}
+      {step === "select" ? (
+        <div className="flex gap-3 w-full">
+           <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="flex-1 h-11 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleNext}
+            disabled={selectedItems.length === 0}
+            className="flex-[2] h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md disabled:opacity-50 disabled:shadow-none transition-all"
+          >
+            {selectedItems.length > 0 ? `Continuar (${selectedItems.length})` : "Selecione..."}
+          </Button>
         </div>
+      ) : (
+        <Button
+          onClick={handleSubmit}
+          disabled={addItem.isPending}
+          className="flex-[2] h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-blue-500/20 transition-all"
+        >
+          {addItem.isPending ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : (
+            <Check className="w-5 h-5 mr-2" />
+          )}
+          Adicionar à Lista
+        </Button>
+      )}
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[90vh] flex flex-col rounded-t-[1.5rem] !bg-white/95 dark:!bg-gray-950/95 backdrop-blur-xl border-t border-white/20">
+          <DrawerHeader className="p-0 border-b-0 text-left">
+            {renderHeader()}
+          </DrawerHeader>
+          {renderContent()}
+          {renderFooter()}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden !bg-white/95 dark:!bg-gray-950/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl rounded-2xl [&>button]:hidden flex flex-col max-h-[85vh] h-[600px]">
+        <DialogHeader className="p-0 border-b-0 text-left">
+          {renderHeader()}
+        </DialogHeader>
+        {renderContent()}
+        {renderFooter()}
       </DialogContent>
     </Dialog>
   );
