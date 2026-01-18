@@ -1001,7 +1001,25 @@
 }
 
 /* Custom Scrollbar - Elegant & Invisible */
-@layer base {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+  }
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
   }
@@ -1097,7 +1115,6 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-}
 
 /* ============================================
    TYPOGRAPHY SYSTEM - Padronização Visual

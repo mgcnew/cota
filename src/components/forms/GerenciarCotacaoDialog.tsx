@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, Building2, X, DollarSign, Edit2, TrendingDown, FileText, Calendar, Check, ClipboardList, Users, ShoppingCart, AlertCircle, Award, Plus, Trash2, Settings, Trophy, Star, Download } from "lucide-react";
+import { Package, Building2, X, DollarSign, Edit2, TrendingDown, FileText, Calendar, Check, ClipboardList, Users, ShoppingCart, AlertCircle, Award, Plus, Trash2, Settings, Trophy, Star, Download, CheckCircle } from "lucide-react";
 import { ProductPriceInfoTooltip } from "@/components/forms/ProductPriceInfoTooltip";
 import { QuoteExportTab } from "@/components/cotacoes/view-dialog/QuoteExportTab";
 import { cn } from "@/lib/utils";
@@ -442,135 +442,213 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[95vw] sm:w-[90vw] h-[90vh] max-h-[850px] p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10 flex flex-col shadow-2xl">
-        {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-5 py-4 border-b border-white/10 dark:border-white/5 bg-white/20 dark:bg-white/5 backdrop-blur-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                <ClipboardList className="h-5 w-5 text-primary" />
+      <DialogContent className="max-w-[1100px] w-[95vw] h-[95vh] max-h-[850px] p-0 overflow-hidden !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 flex flex-col shadow-2xl rounded-[2.5rem] animate-in fade-in zoom-in-95 duration-300">
+        {/* Header com design semiglass */}
+        <div className="flex-shrink-0 px-8 py-6 border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 backdrop-blur-md relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 to-transparent pointer-events-none"></div>
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white shadow-xl shadow-teal-500/20 ring-1 ring-white/20">
+                <ClipboardList className="h-7 w-7" />
               </div>
-              <div>
-                <DialogTitle className="text-lg font-bold text-foreground">
+              <div className="space-y-1">
+                <DialogTitle className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                   Gerenciar Cotação
                 </DialogTitle>
-                <p className="text-sm text-muted-foreground truncate max-w-[350px] font-medium opacity-80">
-                  #{safeStr(quote.id).substring(0, 8)} • {safeStr(quote.produto)}
-                </p>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-[0.2em] bg-white/50 dark:bg-black/20 px-2.5 py-1 rounded-lg border border-white/20 shadow-sm">
+                    #{safeStr(quote.id).substring(0, 8)}
+                  </span>
+                  <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+                  <span className="text-xs text-teal-600 dark:text-teal-400 font-bold truncate max-w-[250px]">
+                    {safeStr(quote.produto)}
+                  </span>
+                </div>
               </div>
             </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => onOpenChange(false)} 
+              className="h-12 w-12 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/20 dark:hover:bg-white/10 rounded-2xl transition-all border border-transparent hover:border-white/20 shadow-sm"
+            >
+              <X className="h-6 w-6" />
+            </Button>
           </div>
-        </DialogHeader>
+        </div>
 
-        {/* Tabs - Ordem por produtividade */}
+        {/* Tabs - Ordem por produtividade com design refinado */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-shrink-0 mx-4 mt-3">
-            <TabsList className="w-full h-11 p-1 bg-white/40 dark:bg-gray-950/40 backdrop-blur-md rounded-xl border border-white/20 dark:border-white/10 grid grid-cols-5 gap-1">
+          <div className="flex-shrink-0 px-8 pt-6 bg-white/20 dark:bg-black/5">
+            <TabsList className="w-full h-14 p-1.5 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl rounded-2xl border border-white/30 dark:border-white/10 grid grid-cols-5 gap-2 shadow-inner">
               <TabsTrigger 
                 value="resumo" 
-                className="h-9 px-2 uppercase tracking-wide text-[11px] font-medium rounded-lg transition-all data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-700/90 data-[state=active]:backdrop-blur-sm data-[state=active]:shadow-sm text-teal-900/70 dark:text-teal-100/70 data-[state=active]:text-teal-900 dark:data-[state=active]:text-teal-100 hover:bg-white/30 dark:hover:bg-gray-800/30"
+                className="h-full px-2 uppercase tracking-[0.15em] font-black text-[10px] rounded-xl transition-all duration-300 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-teal-600 dark:data-[state=active]:text-teal-300 data-[state=active]:shadow-lg data-[state=active]:ring-1 data-[state=active]:ring-white/20"
               >
-                <Trophy className="h-3.5 w-3.5 mr-1.5" />Resumo
+                <Trophy className="h-4 w-4 mr-2" />Resumo
               </TabsTrigger>
               <TabsTrigger 
                 value="valores" 
-                className="h-9 px-2 uppercase tracking-wide text-[11px] font-medium rounded-lg transition-all data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-700/90 data-[state=active]:backdrop-blur-sm data-[state=active]:shadow-sm text-teal-900/70 dark:text-teal-100/70 data-[state=active]:text-teal-900 dark:data-[state=active]:text-teal-100 hover:bg-white/30 dark:hover:bg-gray-800/30"
+                className="h-full px-2 uppercase tracking-[0.15em] font-black text-[10px] rounded-xl transition-all duration-300 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-teal-600 dark:data-[state=active]:text-teal-300 data-[state=active]:shadow-lg data-[state=active]:ring-1 data-[state=active]:ring-white/20"
               >
-                <DollarSign className="h-3.5 w-3.5 mr-1.5" />Valores
+                <DollarSign className="h-4 w-4 mr-2" />Valores
               </TabsTrigger>
               <TabsTrigger 
                 value="converter" 
-                className="h-9 px-2 uppercase tracking-wide text-[11px] font-medium rounded-lg transition-all data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-700/90 data-[state=active]:backdrop-blur-sm data-[state=active]:shadow-sm text-teal-900/70 dark:text-teal-100/70 data-[state=active]:text-teal-900 dark:data-[state=active]:text-teal-100 hover:bg-white/30 dark:hover:bg-gray-800/30"
+                className="h-full px-2 uppercase tracking-[0.15em] font-black text-[10px] rounded-xl transition-all duration-300 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-teal-600 dark:data-[state=active]:text-teal-300 data-[state=active]:shadow-lg data-[state=active]:ring-1 data-[state=active]:ring-white/20"
               >
-                <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />Pedido
+                <ShoppingCart className="h-4 w-4 mr-2" />Pedido
               </TabsTrigger>
               <TabsTrigger 
                 value="editar" 
-                className="h-9 px-2 uppercase tracking-wide text-[11px] font-medium rounded-lg transition-all data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-700/90 data-[state=active]:backdrop-blur-sm data-[state=active]:shadow-sm text-teal-900/70 dark:text-teal-100/70 data-[state=active]:text-teal-900 dark:data-[state=active]:text-teal-100 hover:bg-white/30 dark:hover:bg-gray-800/30"
+                className="h-full px-2 uppercase tracking-[0.15em] font-black text-[10px] rounded-xl transition-all duration-300 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-teal-600 dark:data-[state=active]:text-teal-300 data-[state=active]:shadow-lg data-[state=active]:ring-1 data-[state=active]:ring-white/20"
               >
-                <Settings className="h-3.5 w-3.5 mr-1.5" />Editar
+                <Settings className="h-4 w-4 mr-2" />Editar
               </TabsTrigger>
               <TabsTrigger 
                 value="detalhes" 
-                className="h-9 px-2 uppercase tracking-wide text-[11px] font-medium rounded-lg transition-all data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-700/90 data-[state=active]:backdrop-blur-sm data-[state=active]:shadow-sm text-teal-900/70 dark:text-teal-100/70 data-[state=active]:text-teal-900 dark:data-[state=active]:text-teal-100 hover:bg-white/30 dark:hover:bg-gray-800/30"
+                className="h-full px-2 uppercase tracking-[0.15em] font-black text-[10px] rounded-xl transition-all duration-300 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-teal-600 dark:data-[state=active]:text-teal-300 data-[state=active]:shadow-lg data-[state=active]:ring-1 data-[state=active]:ring-white/20"
               >
-                <FileText className="h-3.5 w-3.5 mr-1.5" />Info
+                <FileText className="h-4 w-4 mr-2" />Info
               </TabsTrigger>
             </TabsList>
           </div>
 
-          {/* Tab Resumo Geral */}
-          <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-0">
-            <ScrollArea className="h-full">
-              <div className="p-5 space-y-5">
-                {/* Tabela de Preços por Produto */}
-                <div>
-                  <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-                    <Package className="h-4 w-4 text-primary" />
-                    Melhor Preço por Produto
-                  </h3>
-                  <Card className="overflow-hidden border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-md shadow-sm">
-                    <div className="divide-y divide-white/10 dark:divide-white/5">
-                      {productPricesData.map((item) => (
-                        <div key={item.productId} className="p-4 hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-bold text-sm text-foreground truncate">
-                                {safeStr(item.productName)}
-                              </p>
-                              <p className="text-xs text-foreground/70 mt-1 font-medium">
-                                {safeStr(item.quantidade)} {safeStr(item.unidade)}
-                              </p>
-                            </div>
-                            <div className="text-right flex-shrink-0">
-                              {item.bestPrice > 0 ? (
-                                <>
-                                  <div className="flex items-center gap-2 justify-end">
-                                    <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                                    <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                                      R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-foreground mt-1 font-bold">
-                                    {safeStr(item.bestSupplierName)}
-                                  </p>
-                                  {item.savings > 0 && (
-                                    <Badge className="mt-2 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-bold uppercase tracking-tighter text-[10px]">
-                                      <TrendingDown className="h-3 w-3 mr-1" />
-                                      Economia: R$ {item.savings.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </Badge>
-                                  )}
-                                </>
-                              ) : (
-                                <Badge variant="outline" className="text-foreground/50 font-bold border-foreground/20 uppercase tracking-tighter text-[10px]">Sem preço</Badge>
-                                )}
-                              </div>
-                            </div>
-                            {item.allPrices.length > 1 && (
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                {item.allPrices.map((price, idx) => (
-                                  <Badge
-                                    key={idx}
-                                    variant={idx === 0 ? "default" : "outline"}
-                                    className={cn(
-                                      "text-[10px] font-bold uppercase tracking-tighter",
-                                      idx === 0
-                                        ? "bg-emerald-600 dark:bg-emerald-500 text-white border-none shadow-sm"
-                                        : "text-foreground/60 border-white/20 dark:border-white/10 bg-white/5 dark:bg-white/5"
-                                    )}
-                                  >
-                                    {safeStr(price.nome)}: R$ {price.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+          {/* Tab Resumo Geral com design semiglass */}
+          <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-0 custom-scrollbar">
+            <div className="p-8 space-y-8">
+              {/* Cards de Stats Rápidos */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-teal-500/5 dark:bg-teal-900/10 rounded-3xl p-5 border border-teal-500/20 dark:border-teal-800/30 backdrop-blur-md shadow-sm group/card hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-3 text-teal-600 dark:text-teal-400 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/10 flex items-center justify-center group-hover/card:scale-110 transition-transform">
+                      <Package className="h-4 w-4" />
                     </div>
-                  </Card>
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Produtos</span>
+                  </div>
+                  <p className="font-black text-2xl text-gray-900 dark:text-white">{stats.totalProdutos}</p>
+                </div>
+                <div className="bg-amber-500/5 dark:bg-amber-900/10 rounded-3xl p-5 border border-amber-500/20 dark:border-amber-800/30 backdrop-blur-md shadow-sm group/card hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover/card:scale-110 transition-transform">
+                      <Building2 className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Fornecedores</span>
+                  </div>
+                  <p className="font-black text-2xl text-gray-900 dark:text-white">{stats.totalFornecedores}</p>
+                </div>
+                <div className="bg-emerald-500/5 dark:bg-emerald-900/10 rounded-3xl p-5 border border-emerald-500/20 dark:border-emerald-800/30 backdrop-blur-md shadow-sm group/card hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover/card:scale-110 transition-transform">
+                      <Trophy className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Melhor Total</span>
+                  </div>
+                  <p className="font-black text-2xl text-emerald-700 dark:text-emerald-400 flex items-baseline gap-1">
+                    <span className="text-sm">R$</span> {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <div className="bg-purple-500/5 dark:bg-purple-900/10 rounded-3xl p-5 border border-purple-500/20 dark:border-purple-800/30 backdrop-blur-md shadow-sm group/card hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-3 text-purple-600 dark:text-purple-400 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover/card:scale-110 transition-transform">
+                      <TrendingDown className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Potencial</span>
+                  </div>
+                  <p className="font-black text-2xl text-purple-700 dark:text-purple-400 flex items-baseline gap-1">
+                    <span className="text-sm">R$</span> {(productPricesData.reduce((acc, curr) => acc + curr.savings, 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
                 </div>
               </div>
-            </ScrollArea>
+
+              {/* Tabela de Preços por Produto */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-4 w-4 text-amber-500" />
+                    <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Melhor Preço por Produto</span>
+                  </div>
+                  <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest border-white/20">Análise Competitiva</Badge>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-4">
+                  {productPricesData.map((item) => (
+                    <div key={item.productId} className="group relative">
+                      <div className="p-6 bg-white/40 dark:bg-gray-900/40 rounded-[2rem] border border-white/30 dark:border-white/10 backdrop-blur-xl shadow-sm group-hover:border-teal-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/5 ring-1 ring-transparent hover:ring-white/20">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                          <div className="flex items-center gap-5 flex-1 min-w-0">
+                            <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-600 border border-teal-500/20 group-hover:scale-110 transition-transform flex-shrink-0">
+                              <Package className="h-6 w-6" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-black text-base text-gray-900 dark:text-white truncate tracking-tight">
+                                {safeStr(item.productName)}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white/50 dark:bg-black/20 px-2 py-0.5 rounded-md border border-white/20 shadow-sm">
+                                  {safeStr(item.quantidade)} {safeStr(item.unidade)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col lg:items-end gap-2 flex-shrink-0">
+                            {item.bestPrice > 0 ? (
+                              <div className="flex flex-col lg:items-end gap-1">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 shadow-sm ring-1 ring-amber-500/20">
+                                    <Star className="h-3.5 w-3.5 fill-amber-500" />
+                                  </div>
+                                  <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">
+                                    R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Fornecedor:</span>
+                                  <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-widest px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md border border-white/20">
+                                    {safeStr(item.bestSupplierName)}
+                                  </span>
+                                </div>
+                                {item.savings > 0 && (
+                                  <div className="mt-2 px-3 py-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-full border border-emerald-500/20 flex items-center gap-2 shadow-sm animate-pulse">
+                                    <TrendingDown className="h-3 w-3" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest">Economia: R$ {item.savings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <Badge variant="outline" className="h-8 px-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] border-dashed border-2 rounded-xl">Sem Cotação</Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Comparativo de Preços com design semiglass */}
+                        {item.allPrices.length > 1 && (
+                          <div className="mt-6 pt-4 border-t border-white/10 dark:border-white/5">
+                            <div className="flex flex-wrap gap-2">
+                              {item.allPrices.map((price, idx) => (
+                                <div
+                                  key={idx}
+                                  className={cn(
+                                    "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center gap-2",
+                                    idx === 0
+                                      ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30 shadow-sm ring-1 ring-emerald-500/20"
+                                      : "bg-white/40 dark:bg-white/5 text-gray-400 dark:text-gray-500 border-white/20 dark:border-white/10"
+                                  )}
+                                >
+                                  {idx === 0 && <CheckCircle className="h-3 w-3" />}
+                                  {safeStr(price.nome)}: R$ {price.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Tab Exportar HTML */}
@@ -584,54 +662,60 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
           </TabsContent>
 
           {/* Tab Editar Cotação */}
-          <TabsContent value="editar" className="flex-1 overflow-auto m-0 p-0">
-            <ScrollArea className="h-full">
-              <div className="p-5 space-y-5">
-                {/* Seção Produtos */}
-                <Card className="border-white/20 dark:border-gray-800/50 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md overflow-hidden">
-                  <div className="p-4 border-b border-white/10 dark:border-gray-800/30 bg-white/20 dark:bg-gray-800/20">
-                    <h3 className="font-medium text-foreground flex items-center gap-2">
-                      <Package className="h-4 w-4 text-primary" />
-                      Produtos ({products.length})
-                    </h3>
+          {/* Tab Editar com design semiglass */}
+          <TabsContent value="editar" className="flex-1 overflow-auto m-0 p-0 custom-scrollbar">
+            <div className="p-8 space-y-8">
+              {/* Seção Produtos Semiglass */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-teal-500" />
+                    <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Produtos na Cotação</span>
+                    <Badge variant="secondary" className="h-5 px-2 text-[9px] font-black bg-teal-500/10 text-teal-600 dark:text-teal-400 border-none rounded-md ring-1 ring-teal-500/20">
+                      {products.length} {products.length === 1 ? 'item' : 'itens'}
+                    </Badge>
                   </div>
-                  
-                  {/* Adicionar Produto */}
+                </div>
+
+                <Card className="border-white/30 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl shadow-xl rounded-[2rem] overflow-hidden ring-1 ring-white/20">
+                  {/* Adicionar Produto Semiglass */}
                   {productsNotInQuote.length > 0 && onAddQuoteItem && (
-                    <div className="p-4 border-b border-white/10 dark:border-gray-800/30 bg-primary/5 backdrop-blur-sm">
-                      <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="p-6 border-b border-white/10 dark:border-white/5 bg-teal-500/5 backdrop-blur-md">
+                      <div className="flex flex-col sm:flex-row gap-4">
                         <Select value={selectedProductToAdd} onValueChange={setSelectedProductToAdd}>
-                          <SelectTrigger className="flex-1 bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-gray-700/50 backdrop-blur-sm font-normal">
-                            <SelectValue placeholder="Selecione um produto..." />
+                          <SelectTrigger className="flex-1 h-12 bg-white/60 dark:bg-gray-800/60 border-white/30 dark:border-white/10 font-bold rounded-2xl focus:ring-teal-500/20 transition-all shadow-sm">
+                            <SelectValue placeholder="Buscar produto para adicionar..." />
                           </SelectTrigger>
-                          <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
+                          <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-white/30 rounded-2xl shadow-2xl">
                             {productsNotInQuote.map(p => (
-                              <SelectItem key={p.id} value={p.id} className="font-normal">{p.name}</SelectItem>
+                              <SelectItem key={p.id} value={p.id} className="font-bold py-3 px-4 focus:bg-teal-500/10 focus:text-teal-600 transition-colors">{p.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <Input 
-                          type="number" 
-                          min="1" 
-                          value={productQuantity} 
-                          onChange={(e) => setProductQuantity(e.target.value)}
-                          placeholder="Qtd"
-                          className="w-20 bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-gray-700/50 backdrop-blur-sm font-normal"
-                        />
-                        <Select value={productUnit} onValueChange={setProductUnit}>
-                          <SelectTrigger className="w-[100px] bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-gray-700/50 backdrop-blur-sm font-normal">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
-                            {unidadesMedida.map(u => (
-                              <SelectItem key={u.value} value={u.value} className="font-normal">{u.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex gap-3">
+                          <Input 
+                            type="number" 
+                            min="1" 
+                            value={productQuantity} 
+                            onChange={(e) => setProductQuantity(e.target.value)}
+                            placeholder="Qtd"
+                            className="w-24 h-12 bg-white/60 dark:bg-gray-800/60 border-white/30 dark:border-white/10 font-black rounded-2xl text-center focus:ring-teal-500/20 shadow-sm"
+                          />
+                          <Select value={productUnit} onValueChange={setProductUnit}>
+                            <SelectTrigger className="w-24 h-12 bg-white/60 dark:bg-gray-800/60 border-white/30 dark:border-white/10 font-black rounded-2xl focus:ring-teal-500/20 shadow-sm uppercase">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-white/30 rounded-2xl shadow-2xl">
+                              {unidadesMedida.map(u => (
+                                <SelectItem key={u.value} value={u.value} className="font-black uppercase text-[10px] tracking-widest focus:bg-teal-500/10 focus:text-teal-600 transition-colors">{u.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <Button 
                           onClick={handleAddProduct} 
                           disabled={!selectedProductToAdd}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                          className="h-12 px-6 bg-gradient-to-br from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-black uppercase tracking-wider text-[10px] shadow-lg shadow-teal-500/20 rounded-2xl transition-all active:scale-95 ring-1 ring-white/20"
                         >
                           <Plus className="h-4 w-4 mr-2" />Adicionar
                         </Button>
@@ -639,31 +723,40 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                     </div>
                   )}
                   
-                  {/* Lista de Produtos */}
-                  <div className="divide-y divide-white/10 dark:divide-gray-800/30">
+                  {/* Lista de Produtos Semiglass */}
+                  <div className="divide-y divide-white/10 dark:divide-white/5 max-h-[400px] overflow-auto custom-scrollbar">
                     {products.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground">
-                        <Package className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p className="font-normal">Nenhum produto na cotação</p>
+                      <div className="p-16 text-center text-gray-400 dark:text-gray-500">
+                        <div className="w-20 h-20 rounded-3xl bg-gray-500/5 flex items-center justify-center mx-auto mb-4 border border-white/5">
+                          <Package className="h-10 w-10 opacity-20" />
+                        </div>
+                        <p className="text-xs font-black uppercase tracking-[0.2em] opacity-50">Nenhum produto</p>
                       </div>
                     ) : (
                       products.map((product: any, index: number) => (
-                        <div key={product.product_id} className="p-3 flex items-center justify-between hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <span className="text-xs text-muted-foreground w-6 flex-shrink-0 font-normal">{index + 1}.</span>
+                        <div key={product.product_id} className="p-4 flex items-center justify-between hover:bg-white/10 dark:hover:bg-white/5 transition-all group/item">
+                          <div className="flex items-center gap-5 min-w-0 flex-1">
+                            <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 w-6 flex-shrink-0 tracking-widest">{String(index + 1).padStart(2, '0')}</span>
+                            <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-600 border border-teal-500/20 group-hover/item:scale-110 transition-transform flex-shrink-0">
+                              <Package className="h-5 w-5" />
+                            </div>
                             <div className="min-w-0 flex-1">
-                              <span className="font-medium text-sm text-foreground truncate block" title={safeStr(product.product_name)}>
+                              <span className="font-bold text-sm text-gray-900 dark:text-white truncate block tracking-tight" title={safeStr(product.product_name)}>
                                 {safeStr(product.product_name)}
                               </span>
-                              <span className="text-xs text-muted-foreground font-normal">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest bg-white/50 dark:bg-black/20 px-2 py-0.5 rounded-md border border-white/20">
+                                  {safeStr(product.quantidade)} {safeStr(product.unidade)}
+                                </span>
+                              </div>
                             </div>
                           </div>
                           {onRemoveQuoteItem && products.length > 1 && (
                             <Button 
                               variant="ghost" 
-                              size="sm" 
+                              size="icon" 
                               onClick={() => handleRemoveProduct(product.product_id)}
-                              className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              className="h-10 w-10 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20 shadow-sm"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -673,67 +766,81 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                     )}
                   </div>
                 </Card>
+              </div>
 
-                {/* Seção Fornecedores */}
-                <Card className="border-white/20 dark:border-gray-800/50 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md overflow-hidden">
-                  <div className="p-4 border-b border-white/10 dark:border-gray-800/30 bg-white/20 dark:bg-gray-800/20">
-                    <h3 className="font-medium text-foreground flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-info" />
-                      Fornecedores ({fornecedores.length})
-                    </h3>
+              {/* Seção Fornecedores Semiglass */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-teal-500" />
+                    <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Fornecedores na Cotação</span>
+                    <Badge variant="secondary" className="h-5 px-2 text-[9px] font-black bg-teal-500/10 text-teal-600 dark:text-teal-400 border-none rounded-md ring-1 ring-teal-500/20">
+                      {fornecedores.length} {fornecedores.length === 1 ? 'fornecedor' : 'fornecedores'}
+                    </Badge>
                   </div>
-                  
-                  {/* Adicionar Fornecedor */}
+                </div>
+
+                <Card className="border-white/30 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl shadow-xl rounded-[2rem] overflow-hidden ring-1 ring-white/20">
+                  {/* Adicionar Fornecedor Semiglass */}
                   {suppliersNotInQuote.length > 0 && onAddQuoteSupplier && (
-                    <div className="p-4 border-b border-white/10 dark:border-gray-800/30 bg-info/5 backdrop-blur-sm">
-                      <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="p-6 border-b border-white/10 dark:border-white/5 bg-teal-500/5 backdrop-blur-md">
+                      <div className="flex flex-col sm:flex-row gap-4">
                         <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-                          <SelectTrigger className="flex-1 bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-gray-700/50 backdrop-blur-sm font-normal">
-                            <SelectValue placeholder="Selecione um fornecedor..." />
+                          <SelectTrigger className="flex-1 h-12 bg-white/60 dark:bg-gray-800/60 border-white/30 dark:border-white/10 font-bold rounded-2xl focus:ring-teal-500/20 transition-all shadow-sm">
+                            <SelectValue placeholder="Buscar fornecedor para adicionar..." />
                           </SelectTrigger>
-                          <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
+                          <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-white/30 rounded-2xl shadow-2xl">
                             {suppliersNotInQuote.map(s => (
-                              <SelectItem key={s.id} value={s.id} className="font-normal">{s.name}</SelectItem>
+                              <SelectItem key={s.id} value={s.id} className="font-bold py-3 px-4 focus:bg-teal-500/10 focus:text-teal-600 transition-colors">{s.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         <Button 
                           onClick={handleAddSupplier} 
                           disabled={!selectedSupplierToAdd}
-                          className="bg-info hover:bg-info/90 text-white font-medium"
+                          className="h-12 px-8 bg-gradient-to-br from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-black uppercase tracking-wider text-[10px] shadow-lg shadow-teal-500/20 rounded-2xl transition-all active:scale-95 ring-1 ring-white/20"
                         >
-                          <Plus className="h-4 w-4 mr-2" />Adicionar
+                          <Plus className="h-4 w-4 mr-2" />Adicionar Fornecedor
                         </Button>
                       </div>
                     </div>
                   )}
                   
-                  {/* Lista de Fornecedores */}
-                  <div className="divide-y divide-white/10 dark:divide-gray-800/30">
+                  {/* Lista de Fornecedores Semiglass */}
+                  <div className="divide-y divide-white/10 dark:divide-white/5 max-h-[400px] overflow-auto custom-scrollbar">
                     {fornecedores.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground">
-                        <Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p className="font-normal">Nenhum fornecedor na cotação</p>
+                      <div className="p-16 text-center text-gray-400 dark:text-gray-500">
+                        <div className="w-20 h-20 rounded-3xl bg-gray-500/5 flex items-center justify-center mx-auto mb-4 border border-white/5">
+                          <Building2 className="h-10 w-10 opacity-20" />
+                        </div>
+                        <p className="text-xs font-black uppercase tracking-[0.2em] opacity-50">Nenhum fornecedor</p>
                       </div>
                     ) : (
                       fornecedores.map((fornecedor) => (
-                        <div key={fornecedor.id} className="p-3 flex items-center justify-between hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-success" : "bg-warning")} />
+                        <div key={fornecedor.id} className="p-4 flex items-center justify-between hover:bg-white/10 dark:hover:bg-white/5 transition-all group/item">
+                          <div className="flex items-center gap-5 min-w-0 flex-1">
+                            <div className={cn("w-3 h-3 rounded-full flex-shrink-0 shadow-sm ring-2 ring-white/20", 
+                              fornecedor.status === 'respondido' ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                            )} />
+                            <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-600 border border-teal-500/20 group-hover/item:scale-110 transition-transform flex-shrink-0">
+                              <Building2 className="h-5 w-5" />
+                            </div>
                             <div className="min-w-0 flex-1">
-                              <span className="font-medium text-sm text-foreground truncate block" title={safeStr(fornecedor.nome)}>
+                              <span className="font-bold text-sm text-gray-900 dark:text-white truncate block tracking-tight" title={safeStr(fornecedor.nome)}>
                                 {safeStr(fornecedor.nome)}
                               </span>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className={cn("text-xs font-normal", 
+                              <div className="flex items-center gap-3 mt-1">
+                                <Badge variant="outline" className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md", 
                                   fornecedor.status === 'respondido' 
-                                    ? "bg-success/10 text-success border-success/20" 
-                                    : "bg-warning/10 text-warning border-warning/20"
+                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
+                                    : "bg-amber-500/10 text-amber-600 border-amber-500/20"
                                 )}>
                                   {fornecedor.status === 'respondido' ? 'Respondido' : 'Pendente'}
                                 </Badge>
                                 {fornecedor.valorOferecido > 0 && (
-                                  <span className="text-sm text-success font-medium">R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-black">
+                                    R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                  </span>
                                 )}
                               </div>
                             </div>
@@ -741,9 +848,9 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           {onRemoveQuoteSupplier && fornecedores.length > 1 && (
                             <Button 
                               variant="ghost" 
-                              size="sm" 
+                              size="icon" 
                               onClick={() => handleRemoveSupplier(fornecedor.id)}
-                              className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              className="h-10 w-10 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20 shadow-sm"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -753,105 +860,153 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                     )}
                   </div>
                 </Card>
-
-                {/* Aviso */}
-                <Card className="p-4 bg-warning/10 border-warning/20">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Atenção</p>
-                      <p className="text-sm text-muted-foreground mt-1 font-normal">
-                        Ao remover um produto ou fornecedor, os valores já cadastrados serão perdidos.
-                      </p>
-                    </div>
-                  </div>
-                </Card>
               </div>
-            </ScrollArea>
+
+              {/* Aviso Semiglass */}
+              <div className="relative group overflow-hidden rounded-[2rem] p-0.5">
+                <div className="absolute inset-0 bg-amber-500/20 opacity-40"></div>
+                <div className="relative flex items-start gap-4 p-6 bg-amber-500/5 dark:bg-amber-950/10 border border-amber-500/30 dark:border-amber-500/10 backdrop-blur-2xl rounded-[1.9rem]">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 flex-shrink-0 shadow-sm">
+                    <AlertCircle className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest mb-1">Atenção Crítica</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-500/70 font-bold leading-relaxed uppercase tracking-tighter">
+                      Ao remover um produto ou fornecedor, todos os valores de cotação associados serão excluídos permanentemente.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
-          {/* Tab Detalhes */}
-          <TabsContent value="detalhes" className="flex-1 overflow-auto m-0 p-0">
-            <ScrollArea className="h-full">
-              <div className="p-5 space-y-5">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                  <Card className="p-4 bg-primary/10 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
-                    <div className="flex items-center gap-2 mb-2"><Package className="h-4 w-4 text-primary" /><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider opacity-70">Produtos</span></div>
-                    <p className="text-2xl font-bold text-foreground">{stats.totalProdutos}</p>
-                  </Card>
-                  <Card className="p-4 bg-info/10 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
-                    <div className="flex items-center gap-2 mb-2"><Users className="h-4 w-4 text-info" /><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider opacity-70">Fornecedores</span></div>
-                    <p className="text-2xl font-bold text-foreground">{stats.fornecedoresRespondidos}/{stats.totalFornecedores}</p>
-                  </Card>
-                  <Card className="p-4 bg-success/10 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
-                    <div className="flex items-center gap-2 mb-2"><DollarSign className="h-4 w-4 text-success" /><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider opacity-70">Melhor Valor</span></div>
-                    <p className="text-2xl font-bold text-success">R$ {stats.melhorValor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  </Card>
-                  <Card className="p-4 bg-warning/10 border-white/20 dark:border-white/10 backdrop-blur-md relative overflow-hidden group cursor-pointer hover:bg-warning/20 transition-colors shadow-sm" onClick={() => setActiveTab("exportar")}>
-                    <div className="flex items-center gap-2 mb-2"><Download className="h-4 w-4 text-warning" /><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider opacity-70">Exportar</span></div>
-                    <div className="flex flex-col">
-                        <span className="text-sm font-bold text-foreground">Relatório</span>
-                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Clique para baixar</span>
+          {/* Tab Detalhes com design semiglass */}
+          <TabsContent value="detalhes" className="flex-1 overflow-auto m-0 p-0 custom-scrollbar">
+            <div className="p-8 space-y-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-teal-500/5 dark:bg-teal-900/10 rounded-3xl p-5 border border-teal-500/20 dark:border-teal-800/30 backdrop-blur-md shadow-sm group/card hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-3 text-teal-600 dark:text-teal-400 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/10 flex items-center justify-center group-hover/card:scale-110 transition-transform">
+                      <Package className="h-4 w-4" />
                     </div>
-                    <div className="absolute right-[-10px] bottom-[-10px] opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Download className="h-16 w-16 text-warning" />
-                    </div>
-                  </Card>
-                </div>
-
-                <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm overflow-hidden">
-                  <div className="p-3 border-b border-white/10 dark:border-white/5 bg-white/10 dark:bg-white/5">
-                    <h3 className="font-bold text-foreground flex items-center gap-2 text-sm"><Package className="h-4 w-4 text-primary" />Produtos</h3>
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Produtos</span>
                   </div>
-                  <div className="divide-y divide-white/5 dark:divide-white/5">
+                  <p className="font-black text-2xl text-gray-900 dark:text-white">{stats.totalProdutos}</p>
+                </div>
+                <div className="bg-blue-500/5 dark:bg-blue-900/10 rounded-3xl p-5 border border-blue-500/20 dark:border-blue-800/30 backdrop-blur-md shadow-sm group/card hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-3 text-blue-600 dark:text-blue-400 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover/card:scale-110 transition-transform">
+                      <Users className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Respostas</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <p className="font-black text-2xl text-gray-900 dark:text-white">{stats.fornecedoresRespondidos}</p>
+                    <span className="text-xs font-bold text-gray-400">/ {stats.totalFornecedores}</span>
+                  </div>
+                </div>
+                <div className="bg-emerald-500/5 dark:bg-emerald-900/10 rounded-3xl p-5 border border-emerald-500/20 dark:border-emerald-800/30 backdrop-blur-md shadow-sm group/card hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover/card:scale-110 transition-transform">
+                      <DollarSign className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Melhor Valor</span>
+                  </div>
+                  <p className="font-black text-2xl text-emerald-700 dark:text-emerald-400 flex items-baseline gap-1">
+                    <span className="text-sm">R$</span> {stats.melhorValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setActiveTab("exportar")}
+                  className="bg-amber-500/5 dark:bg-amber-900/10 rounded-3xl p-5 border border-amber-500/20 dark:border-amber-800/30 backdrop-blur-md shadow-sm group/card hover:bg-amber-500/10 transition-all text-left relative overflow-hidden"
+                >
+                  <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400 mb-3 relative z-10">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover/card:scale-110 transition-transform">
+                      <Download className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Exportar</span>
+                  </div>
+                  <div className="relative z-10">
+                    <p className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-tight">Baixar Relatório</p>
+                    <p className="text-[9px] text-amber-600/60 font-black uppercase tracking-widest mt-1">Gerar PDF/Excel</p>
+                  </div>
+                  <div className="absolute right-[-10px] bottom-[-10px] opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Download className="h-20 w-20 text-amber-600" />
+                  </div>
+                </button>
+              </div>
+
+              {/* Listagem de Resumo Semiglass */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <Card className="border-white/30 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl shadow-xl rounded-[2rem] overflow-hidden ring-1 ring-white/20">
+                  <div className="p-5 border-b border-white/10 dark:border-white/5 bg-white/20 dark:bg-white/5 backdrop-blur-md flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-600 border border-teal-500/20 shadow-sm">
+                      <Package className="h-4 w-4" />
+                    </div>
+                    <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] text-[10px]">Lista de Produtos</h3>
+                  </div>
+                  <div className="divide-y divide-white/10 dark:divide-white/5 max-h-[300px] overflow-auto custom-scrollbar">
                     {products.map((product: any, index: number) => (
-                      <div key={product.product_id} className="p-3 flex items-center justify-between hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <span className="text-[10px] font-bold text-muted-foreground w-6 tracking-tighter">{String(index + 1).padStart(2, '0')}</span>
-                          <span className="font-semibold text-sm text-foreground">{safeStr(product.product_name)}</span>
+                      <div key={product.product_id} className="p-4 flex items-center justify-between hover:bg-white/10 dark:hover:bg-white/5 transition-all">
+                        <div className="flex items-center gap-4">
+                          <span className="text-[10px] font-black text-gray-400 w-6 tracking-widest">{String(index + 1).padStart(2, '0')}</span>
+                          <span className="font-bold text-sm text-gray-900 dark:text-white tracking-tight">{safeStr(product.product_name)}</span>
                         </div>
-                        <Badge variant="outline" className="text-muted-foreground border-white/20 dark:border-white/10 bg-white/5 dark:bg-white/5 font-bold uppercase tracking-tighter text-[9px]">{safeStr(product.quantidade)} {safeStr(product.unidade)}</Badge>
+                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-white/20 bg-white/10 dark:bg-white/5 text-gray-500 dark:text-gray-400">{safeStr(product.quantidade)} {safeStr(product.unidade)}</Badge>
                       </div>
                     ))}
                   </div>
                 </Card>
 
-                <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm overflow-hidden">
-                  <div className="p-3 border-b border-white/10 dark:border-white/5 bg-white/10 dark:bg-white/5">
-                    <h3 className="font-bold text-foreground flex items-center gap-2 text-sm"><Building2 className="h-4 w-4 text-info" />Fornecedores</h3>
+                <Card className="border-white/30 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl shadow-xl rounded-[2rem] overflow-hidden ring-1 ring-white/20">
+                  <div className="p-5 border-b border-white/10 dark:border-white/5 bg-white/20 dark:bg-white/5 backdrop-blur-md flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-500/20 shadow-sm">
+                      <Building2 className="h-4 w-4" />
+                    </div>
+                    <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] text-[10px]">Status de Fornecedores</h3>
                   </div>
-                  <div className="divide-y divide-white/5 dark:divide-white/5">
+                  <div className="divide-y divide-white/10 dark:divide-white/5 max-h-[300px] overflow-auto custom-scrollbar">
                     {fornecedores.map((fornecedor) => (
-                      <div key={fornecedor.id} className="p-3 flex items-center justify-between hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className={cn("w-2 h-2 rounded-full", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
-                          <span className="font-semibold text-sm text-foreground">{safeStr(fornecedor.nome)}</span>
-                          <Badge variant="outline" className={cn("text-[9px] h-4 font-bold uppercase tracking-tighter", fornecedor.status === 'respondido' ? "bg-green-500/10 text-green-600 border-green-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20")}>
+                      <div key={fornecedor.id} className="p-4 flex items-center justify-between hover:bg-white/10 dark:hover:bg-white/5 transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm", fornecedor.status === 'respondido' ? "bg-emerald-500 animate-pulse" : "bg-amber-500")} />
+                          <span className="font-bold text-sm text-gray-900 dark:text-white tracking-tight">{safeStr(fornecedor.nome)}</span>
+                          <Badge variant="outline" className={cn("text-[8px] h-4 font-black uppercase tracking-tighter px-1.5", 
+                            fornecedor.status === 'respondido' ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                          )}>
                             {fornecedor.status === 'respondido' ? 'Respondido' : 'Pendente'}
                           </Badge>
                         </div>
-                        {fornecedor.valorOferecido > 0 && <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
+                        {fornecedor.valorOferecido > 0 && (
+                          <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                            R$ {fornecedor.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
                 </Card>
               </div>
-            </ScrollArea>
+            </div>
           </TabsContent>
 
           {/* Tab Editar Valores */}
+          {/* Tab Valores com design semiglass e sidebar refinada */}
           <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0">
             <div className="flex flex-col lg:flex-row h-full">
-              {/* Lista de Fornecedores - Sidebar */}
-              <div className="w-full lg:w-56 xl:w-64 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 dark:border-white/5 bg-white/20 dark:bg-gray-950/20 backdrop-blur-md flex flex-col">
-                <div className="p-3 border-b border-white/10 dark:border-white/5">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-bold text-foreground uppercase tracking-wider opacity-70">Fornecedores</span>
+              {/* Lista de Fornecedores - Sidebar Semiglass */}
+              <div className="w-full lg:w-64 xl:w-72 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 dark:border-white/5 bg-white/30 dark:bg-black/20 backdrop-blur-2xl flex flex-col relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 to-transparent pointer-events-none"></div>
+                <div className="p-5 border-b border-white/10 dark:border-white/5 relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-600 border border-teal-500/20 shadow-sm">
+                      <Building2 className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Fornecedores</span>
                   </div>
                 </div>
-                <ScrollArea className="flex-1 max-h-[100px] lg:max-h-none">
-                  <div className="p-2 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-x-visible">
+                <ScrollArea className="flex-1 max-h-[150px] lg:max-h-none relative z-10 custom-scrollbar">
+                  <div className="p-3 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible">
                     {fornecedores.map((fornecedor) => {
                       const total = calcularTotalFornecedor(fornecedor.id);
                       const isSelected = selectedSupplier === fornecedor.id;
@@ -860,32 +1015,36 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           key={fornecedor.id} 
                           onClick={() => { setSelectedSupplier(fornecedor.id); setEditingProductId(null); setEditedValues({}); }}
                           className={cn(
-                            "flex-shrink-0 lg:w-full text-left px-3 py-2.5 rounded-xl transition-all",
-                            "min-w-[140px] lg:min-w-0",
+                            "flex-shrink-0 lg:w-full text-left p-4 rounded-2xl transition-all duration-300 relative overflow-hidden group/supplier",
+                            "min-w-[160px] lg:min-w-0",
                             isSelected 
-                              ? "bg-primary/10 border border-primary/20 shadow-sm backdrop-blur-md" 
-                              : "hover:bg-white/10 dark:hover:bg-white/5 border border-transparent"
+                              ? "bg-white/60 dark:bg-gray-800/60 border border-white/40 dark:border-white/10 shadow-xl shadow-teal-500/5 ring-1 ring-white/20" 
+                              : "hover:bg-white/30 dark:hover:bg-white/5 border border-transparent"
                           )}
                         >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div className={cn("w-2 h-2 rounded-full flex-shrink-0", fornecedor.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
+                          {isSelected && (
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-teal-500 rounded-r-full"></div>
+                          )}
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm", 
+                              fornecedor.status === 'respondido' ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                            )} />
                             <span 
                               className={cn(
-                                "text-sm truncate block",
-                                isSelected ? "text-primary font-bold" : "text-foreground font-semibold"
+                                "text-sm truncate block tracking-tight",
+                                isSelected ? "text-teal-600 dark:text-teal-300 font-black" : "text-gray-600 dark:text-gray-400 font-bold group-hover/supplier:text-gray-900 dark:group-hover/supplier:text-white"
                               )} 
                               title={safeStr(fornecedor.nome)}
-                              style={{ maxWidth: '140px' }}
                             >
                               {safeStr(fornecedor.nome)}
                             </span>
                           </div>
-                          <div className="mt-1 ml-4 flex items-center gap-2">
-                            <span className={cn("text-[11px]", isSelected ? "text-primary font-bold" : "text-muted-foreground font-medium")}>
-                              R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          <div className="mt-2 ml-5.5 flex items-center justify-between">
+                            <span className={cn("text-[11px] font-black tracking-tight", isSelected ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500")}>
+                              R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </span>
                             {fornecedor.status === 'respondido' && (
-                              <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 bg-green-500/10 text-green-600 border-green-500/20 font-bold uppercase tracking-tighter">
+                              <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-4 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-black uppercase tracking-tighter">
                                 OK
                               </Badge>
                             )}
@@ -897,83 +1056,100 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                 </ScrollArea>
               </div>
 
-              {/* Área de Edição de Valores */}
-              <div className="flex-1 flex flex-col overflow-hidden min-w-0 bg-white/5 dark:bg-black/5">
+              {/* Área de Edição de Valores com design semiglass */}
+              <div className="flex-1 flex flex-col overflow-hidden min-w-0 bg-white/10 dark:bg-black/10 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-emerald-500/5 pointer-events-none"></div>
                 {selectedSupplier ? (
                   <>
-                    {/* Header do Fornecedor Selecionado */}
-                    <div className="flex-shrink-0 px-4 py-3 border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 backdrop-blur-md flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
-                          <DollarSign className="h-4 w-4 text-primary" />
+                    {/* Header do Fornecedor Selecionado Semiglass */}
+                    <div className="flex-shrink-0 px-8 py-5 border-b border-white/10 dark:border-white/5 bg-white/40 dark:bg-white/5 backdrop-blur-md flex items-center justify-between gap-4 relative z-10">
+                      <div className="flex items-center gap-4 min-w-0 flex-1">
+                        <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center border border-teal-500/20 shadow-sm">
+                          <DollarSign className="h-5 w-5 text-teal-600" />
                         </div>
-                        <span 
-                          className="font-bold text-foreground truncate text-sm" 
-                          title={fornecedores.find(f => f.id === selectedSupplier)?.nome}
-                          style={{ maxWidth: '200px' }}
-                        >
-                          {fornecedores.find(f => f.id === selectedSupplier)?.nome}
-                        </span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Valores de:</span>
+                          <span 
+                            className="font-black text-gray-900 dark:text-white truncate text-base tracking-tight" 
+                            title={fornecedores.find(f => f.id === selectedSupplier)?.nome}
+                          >
+                            {fornecedores.find(f => f.id === selectedSupplier)?.nome}
+                          </span>
+                        </div>
                       </div>
-                      <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 flex-shrink-0 text-sm font-bold shadow-sm">
-                        Total: R$ {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </Badge>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Total do Fornecedor</span>
+                        <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 px-4 py-1.5 h-auto text-base font-black shadow-lg shadow-emerald-500/5 rounded-xl ring-1 ring-white/20">
+                          <span className="text-xs mr-1 opacity-70">R$</span>
+                          {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </Badge>
+                      </div>
                     </div>
                     
-                    {/* Tabela de Produtos */}
-                    <ScrollArea className="flex-1">
-                      <div className="min-w-[350px] p-4">
-                        <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-md shadow-sm overflow-hidden">
+                    {/* Tabela de Produtos Semiglass */}
+                    <ScrollArea className="flex-1 relative z-10 custom-scrollbar">
+                      <div className="min-w-[450px] p-8">
+                        <Card className="border-white/30 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl shadow-2xl rounded-[2rem] overflow-hidden ring-1 ring-white/20">
                           <table className="w-full border-collapse">
-                            <thead className="bg-white/10 dark:bg-white/5 backdrop-blur-md border-b border-white/10 dark:border-white/5 sticky top-0 z-10">
+                            <thead className="bg-white/30 dark:bg-white/5 backdrop-blur-md border-b border-white/10 dark:border-white/5 sticky top-0 z-10">
                               <tr>
-                                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Produto</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Qtd</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Valor (R$)</th>
-                                <th className="px-4 py-3 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest w-16">Ação</th>
+                                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Produto</th>
+                                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] hidden sm:table-cell">Quantidade</th>
+                                <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Valor Oferecido</th>
+                                <th className="px-6 py-4 text-center text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] w-20">Ações</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5 dark:divide-white/5">
+                            <tbody className="divide-y divide-white/10 dark:divide-white/5">
                               {products.map((product: any) => {
                                 const currentValue = getCurrentProductValue(selectedSupplier, product.product_id);
                                 const isEditing = editingProductId === product.product_id;
                                 const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
                                 const isBestPrice = currentValue > 0 && selectedSupplier === bestSupplierId;
                                 return (
-                                  <tr key={product.product_id} className={cn("hover:bg-white/10 dark:hover:bg-white/5 transition-colors", isBestPrice && "bg-emerald-500/5 dark:bg-emerald-500/10")}>
-                                    <td className="px-4 py-3">
-                                      <div className="flex items-center gap-1">
-                                        <p className="font-bold text-sm text-foreground truncate" style={{ maxWidth: '160px' }} title={safeStr(product.product_name)}>
-                                          {safeStr(product.product_name)}
-                                        </p>
-                                        <ProductPriceInfoTooltip 
-                                          productId={product.product_id} 
-                                          productName={safeStr(product.product_name)} 
-                                        />
-                                      </div>
-                                      <p className="text-[10px] text-muted-foreground sm:hidden mt-0.5 font-bold uppercase tracking-tighter">
-                                        {safeStr(product.quantidade)} {safeStr(product.unidade)}
-                                      </p>
-                                    </td>
-                                    <td className="px-4 py-3 hidden sm:table-cell">
-                                      <span className="text-xs text-muted-foreground font-bold uppercase tracking-tighter">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                      {isEditing ? (
-                                        <div className="flex flex-col gap-2 py-1">
-                                          {/* Row 1: Value input, pricing unit selector, PriceConverter, and action buttons */}
-                                          <div className="flex items-center gap-1.5 flex-wrap">
-                                            <Input 
-                                              ref={editInputRef} 
-                                              type="number" 
-                                              step="0.01" 
-                                              min="0" 
-                                              value={editedValues[product.product_id] || 0}
-                                              onChange={(e) => setEditedValues(prev => ({ ...prev, [product.product_id]: Number(e.target.value) }))}
-                                              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(product.product_id); if (e.key === 'Escape') handleCancelEdit(); }}
-                                              className="w-20 sm:w-24 h-8 text-sm bg-white/20 dark:bg-white/5 border-primary/30 focus:ring-primary font-bold" 
+                                  <tr key={product.product_id} className={cn("hover:bg-white/20 dark:hover:bg-white/5 transition-all duration-300 group/row", isBestPrice && "bg-emerald-500/5 dark:bg-emerald-500/10")}>
+                                    <td className="px-6 py-5">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-teal-500/5 flex items-center justify-center text-teal-600 border border-teal-500/10 group-hover/row:scale-110 transition-transform">
+                                          <Package className="h-5 w-5" />
+                                        </div>
+                                        <div className="min-w-0">
+                                          <div className="flex items-center gap-2">
+                                            <p className="font-black text-sm text-gray-900 dark:text-white truncate tracking-tight" title={safeStr(product.product_name)}>
+                                              {safeStr(product.product_name)}
+                                            </p>
+                                            <ProductPriceInfoTooltip 
+                                              productId={product.product_id} 
+                                              productName={safeStr(product.product_name)} 
                                             />
-                                            {/* Pricing Unit Selector - Requirements: 1.1 */}
+                                          </div>
+                                          <p className="text-[9px] text-gray-400 sm:hidden mt-1 font-black uppercase tracking-widest bg-white/50 dark:bg-black/20 px-2 py-0.5 rounded-md border border-white/20 w-fit">
+                                            {safeStr(product.quantidade)} {safeStr(product.unidade)}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="px-6 py-5 hidden sm:table-cell">
+                                      <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.15em] px-3 py-1 bg-white/40 dark:bg-white/5 rounded-full border border-white/20 shadow-sm">
+                                        {safeStr(product.quantidade)} {safeStr(product.unidade)}
+                                      </span>
+                                    </td>
+                                    <td className="px-6 py-5">
+                                      {isEditing ? (
+                                        <div className="flex flex-col gap-3 py-2 animate-in fade-in slide-in-from-top-1">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <div className="relative group/val">
+                                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-teal-500/50">R$</span>
+                                              <Input 
+                                                ref={editInputRef} 
+                                                type="number" 
+                                                step="0.01" 
+                                                min="0" 
+                                                value={editedValues[product.product_id] || 0}
+                                                onChange={(e) => setEditedValues(prev => ({ ...prev, [product.product_id]: Number(e.target.value) }))}
+                                                onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(product.product_id); if (e.key === 'Escape') handleCancelEdit(); }}
+                                                className="w-24 sm:w-28 h-10 text-sm pl-8 bg-white/60 dark:bg-white/5 border-teal-500/30 focus:ring-teal-500/20 font-black rounded-xl shadow-inner" 
+                                              />
+                                            </div>
                                             <Select
                                               value={editedPricingMetadata[product.product_id]?.unidadePreco || getCurrentPricingUnit(product.product_id)}
                                               onValueChange={(value: PricingUnit) => {
@@ -987,12 +1163,12 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                                 }));
                                               }}
                                             >
-                                              <SelectTrigger className="w-[90px] h-8 text-xs border-primary/30 bg-white/20 dark:bg-white/5 font-bold">
+                                              <SelectTrigger className="w-[100px] h-10 text-xs border-teal-500/30 bg-white/60 dark:bg-white/5 font-black rounded-xl shadow-inner uppercase">
                                                 <SelectValue />
                                               </SelectTrigger>
-                                              <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
+                                              <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-white/30 rounded-2xl shadow-2xl">
                                                 {PRICING_UNIT_OPTIONS.map((option) => (
-                                                  <SelectItem key={option.value} value={option.value} className="text-xs font-bold">
+                                                  <SelectItem key={option.value} value={option.value} className="text-[10px] font-black uppercase tracking-widest focus:bg-teal-500/10 focus:text-teal-600 transition-colors">
                                                     {option.label}
                                                   </SelectItem>
                                                 ))}
@@ -1014,80 +1190,84 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                                                 setTimeout(() => { editInputRef.current?.focus(); editInputRef.current?.select(); }, 100);
                                               }}
                                             />
-                                            <div className="flex gap-1">
+                                            <div className="flex gap-2">
                                               <Button 
-                                                size="sm" 
+                                                size="icon" 
                                                 onClick={() => handleSaveEdit(product.product_id)} 
                                                 disabled={isConversionFactorRequired(product.product_id) && !editedPricingMetadata[product.product_id]?.fatorConversao}
-                                                className="h-8 w-8 p-0 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 shadow-sm"
+                                                className="h-10 w-10 bg-gradient-to-br from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white shadow-lg shadow-teal-500/20 rounded-xl transition-all active:scale-95 ring-1 ring-white/20"
                                               >
-                                                <Check className="h-4 w-4" />
+                                                <Check className="h-5 w-5" />
                                               </Button>
-                                              <Button size="sm" variant="outline" onClick={handleCancelEdit} className="h-8 w-8 p-0 border-destructive/30 text-destructive hover:bg-destructive/10 font-bold">
-                                                <X className="h-4 w-4" />
+                                              <Button size="icon" variant="ghost" onClick={handleCancelEdit} className="h-10 w-10 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20">
+                                                <X className="h-5 w-5" />
                                               </Button>
                                             </div>
                                           </div>
-                                          {/* Row 2: Conversion factor input (conditional) - Requirements: 1.2, 1.5 */}
                                           {isConversionFactorRequired(product.product_id) && (
-                                            <div className="flex items-center gap-1.5 pl-0.5 animate-in fade-in slide-in-from-left-1">
-                                              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Qtd por embalagem:</span>
-                                              <Input
-                                                type="number"
-                                                value={editedPricingMetadata[product.product_id]?.fatorConversao || ""}
-                                                onChange={(e) => {
-                                                  const value = Number(e.target.value);
-                                                  setEditedPricingMetadata(prev => ({
-                                                    ...prev,
-                                                    [product.product_id]: {
-                                                      ...prev[product.product_id],
-                                                      unidadePreco: prev[product.product_id]?.unidadePreco || getCurrentPricingUnit(product.product_id),
-                                                      fatorConversao: value > 0 ? value : undefined
-                                                    }
-                                                  }));
-                                                }}
-                                                className={cn(
-                                                  "w-16 h-7 text-xs rounded-md bg-white/20 dark:bg-white/5 font-bold",
-                                                  !editedPricingMetadata[product.product_id]?.fatorConversao ? "border-destructive/50" : "border-border"
-                                                )}
-                                                step="1"
-                                                min="1"
-                                                placeholder="Ex: 12"
-                                              />
-                                              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">
+                                            <div className="flex items-center gap-3 pl-1 animate-in fade-in slide-in-from-left-2">
+                                              <span className="text-[9px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.15em]">Qtd por emb:</span>
+                                              <div className="relative">
+                                                <Input
+                                                  type="number"
+                                                  value={editedPricingMetadata[product.product_id]?.fatorConversao || ""}
+                                                  onChange={(e) => {
+                                                    const value = Number(e.target.value);
+                                                    setEditedPricingMetadata(prev => ({
+                                                      ...prev,
+                                                      [product.product_id]: {
+                                                        ...prev[product.product_id],
+                                                        unidadePreco: prev[product.product_id]?.unidadePreco || getCurrentPricingUnit(product.product_id),
+                                                        fatorConversao: value > 0 ? value : undefined
+                                                      }
+                                                    }));
+                                                  }}
+                                                  className={cn(
+                                                    "w-20 h-8 text-xs rounded-lg bg-white/60 dark:bg-white/5 font-black shadow-inner",
+                                                    !editedPricingMetadata[product.product_id]?.fatorConversao ? "border-red-500/50 focus:ring-red-500/20" : "border-teal-500/20 focus:ring-teal-500/20"
+                                                  )}
+                                                  step="1"
+                                                  min="1"
+                                                  placeholder="Ex: 12"
+                                                />
+                                              </div>
+                                              <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest">
                                                 {editedPricingMetadata[product.product_id]?.unidadePreco === "cx" ? "un/cx" : "un/pct"}
                                               </span>
                                               {!editedPricingMetadata[product.product_id]?.fatorConversao && (
-                                                <span className="text-[9px] text-destructive font-bold uppercase tracking-tighter animate-pulse">* obrigatório</span>
+                                                <span className="text-[8px] text-red-500 font-black uppercase tracking-[0.2em] animate-pulse">obrigatório</span>
                                               )}
                                             </div>
                                           )}
                                         </div>
                                       ) : (
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                          <span className={cn("font-bold text-sm", isBestPrice ? "text-emerald-600 dark:text-emerald-400" : "text-foreground")}>
-                                            {formatPriceWithUnit(currentValue, product.product_id)}
-                                          </span>
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                          <div className="flex flex-col">
+                                            <span className={cn("font-black text-base tracking-tight", isBestPrice ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white")}>
+                                              {formatPriceWithUnit(currentValue, product.product_id)}
+                                            </span>
+                                          </div>
                                           {isBestPrice && (
-                                            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[9px] px-1.5 py-0 h-4.5 font-bold uppercase tracking-tighter">
-                                              <TrendingDown className="h-2.5 w-2.5 mr-0.5" />Melhor
-                                            </Badge>
+                                            <div className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm">
+                                              <TrendingDown className="h-3 w-3" />
+                                              <span className="text-[8px] font-black uppercase tracking-widest">Melhor Preço</span>
+                                            </div>
                                           )}
                                         </div>
                                       )}
                                     </td>
-                                    <td className="px-4 py-3 text-center">
+                                    <td className="px-6 py-5 text-center">
                                       {!isEditing && (
                                         <Button 
-                                          size="sm" 
+                                          size="icon" 
                                           variant="ghost" 
                                           onClick={() => {
                                             const currentMetadata = getSupplierItemPricingMetadata(selectedSupplier, product.product_id);
                                             handleStartEdit(product.product_id, currentValue, currentMetadata);
                                           }} 
-                                          className="h-8 w-8 p-0 text-primary hover:bg-primary/10 rounded-full"
+                                          className="h-10 w-10 text-teal-600 hover:text-teal-700 hover:bg-teal-500/10 rounded-xl transition-all border border-transparent hover:border-teal-500/20"
                                         >
-                                          <Edit2 className="h-3.5 w-3.5" />
+                                          <Edit2 className="h-4 w-4" />
                                         </Button>
                                       )}
                                     </td>
@@ -1101,13 +1281,13 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                     </ScrollArea>
                   </>
                 ) : (
-                  <div className="flex-1 flex items-center justify-center text-muted-foreground p-8">
-                    <div className="text-center animate-in fade-in zoom-in-95 duration-500">
-                      <div className="w-20 h-20 rounded-full bg-white/10 dark:bg-white/5 border border-white/10 dark:border-white/5 flex items-center justify-center mx-auto mb-4 backdrop-blur-md shadow-xl">
-                        <Building2 className="h-10 w-10 text-primary/40" />
+                  <div className="flex-1 flex items-center justify-center p-8">
+                    <div className="text-center animate-in fade-in zoom-in-95 duration-700 max-w-sm">
+                      <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20 flex items-center justify-center mx-auto mb-6 backdrop-blur-md shadow-2xl group hover:scale-110 transition-transform">
+                        <Building2 className="h-12 w-12 text-teal-600 opacity-40 group-hover:opacity-100 transition-opacity" />
                       </div>
-                      <p className="text-lg font-bold text-foreground uppercase tracking-widest opacity-80">Selecione um fornecedor</p>
-                      <p className="text-sm mt-2 font-medium opacity-60">Escolha um fornecedor na lista lateral para visualizar e editar os valores oferecidos</p>
+                      <p className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">Selecione um fornecedor</p>
+                      <p className="text-xs mt-3 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-relaxed">Escolha um parceiro na lista lateral para visualizar e gerenciar os valores da cotação.</p>
                     </div>
                   </div>
                 )}
@@ -1115,92 +1295,111 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
             </div>
           </TabsContent>
 
-          {/* Tab Converter em Pedido */}
-          <TabsContent value="converter" className="flex-1 overflow-hidden m-0 p-0">
-            <ScrollArea className="h-full">
-              <div className="p-5 space-y-5">
-                {/* Resumo */}
-                <div className="grid grid-cols-2 gap-3">
-                  <Card className="p-4 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
-                    <div className="flex items-center gap-2 mb-2"><DollarSign className="h-4 w-4 text-info" /><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider opacity-70">Total Selecionado</span></div>
-                    <p className="text-2xl font-bold text-foreground">R$ {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  </Card>
-                  <Card className="p-4 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
-                    <div className="flex items-center gap-2 mb-2"><Award className="h-4 w-4 text-success" /><span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider opacity-70">Melhor Total</span></div>
-                    <p className="text-2xl font-bold text-success">R$ {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  </Card>
-                </div>
-
-                {/* Sub-abas de seleção */}
-                <div className="flex justify-end">
-                  <Tabs value={pedidoSubTab} onValueChange={(val) => {
-                    setPedidoSubTab(val);
-                    if (val === "melhores") {
-                      const bestSelections: Record<string, string> = {};
-                      products.forEach((product: any) => {
-                        const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
-                        if (bestSupplierId) bestSelections[product.product_id] = bestSupplierId;
-                      });
-                      setProductSelections(bestSelections);
-                    } else if (val === "unico") {
-                      const supplierTotalsArray = fornecedores.map(f => {
-                        const total = products.reduce((sum: number, p: any) => {
-                          const value = getSupplierProductValue(f.id, p.product_id);
-                          return sum + (value > 0 ? value : Infinity);
-                        }, 0);
-                        return { id: f.id, total, hasAllProducts: !products.some((p: any) => getSupplierProductValue(f.id, p.product_id) === 0) };
-                      }).filter(s => s.hasAllProducts).sort((a, b) => a.total - b.total);
-                      
-                      if (supplierTotalsArray.length > 0) {
-                        const bestSingleSupplier = supplierTotalsArray[0].id;
-                        const singleSelections: Record<string, string> = {};
-                        products.forEach((product: any) => {
-                          singleSelections[product.product_id] = bestSingleSupplier;
-                        });
-                        setProductSelections(singleSelections);
-                      }
-                    }
-                  }}>
-                    <TabsList className="h-10 p-1 bg-white/40 dark:bg-gray-950/40 backdrop-blur-md rounded-xl border border-white/20 dark:border-white/10 gap-1">
-                      <TabsTrigger value="melhores" className="h-8 px-3 text-[10px] uppercase tracking-wide font-bold rounded-lg data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-700/90 text-success/80 data-[state=active]:text-success hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all">
-                        <Award className="h-3.5 w-3.5 mr-1.5" /> Melhores Preços
-                      </TabsTrigger>
-                      <TabsTrigger value="unico" className="h-8 px-3 text-[10px] uppercase tracking-wide font-bold rounded-lg data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-700/90 text-info/80 data-[state=active]:text-info hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all">
-                        <Building2 className="h-3.5 w-3.5 mr-1.5" /> Fornecedor Único
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-
-                {totalSelecao > melhorTotal && (
-                  <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-gray-800/50 backdrop-blur-md">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-warning" />
-                      <span className="text-sm text-foreground font-normal">
-                        Economize R$ {(totalSelecao - melhorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} selecionando os melhores preços
-                      </span>
+          {/* Tab Converter em Pedido com design semiglass */}
+          <TabsContent value="converter" className="flex-1 overflow-auto m-0 p-0 custom-scrollbar">
+            <div className="p-8 space-y-8">
+              {/* Resumo Financeiro da Seleção */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="bg-teal-500/5 dark:bg-teal-900/10 rounded-[2rem] p-6 border border-teal-500/20 dark:border-teal-800/30 backdrop-blur-md shadow-sm relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="flex items-center gap-4 mb-4 relative z-10">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-600 border border-teal-500/20 shadow-sm">
+                      <DollarSign className="h-5 w-5" />
                     </div>
-                  </Card>
-                )}
-
-                {/* Tabela de seleção */}
-                <Card className="border-white/20 dark:border-gray-800/50 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md overflow-hidden">
-                  <div className="p-3 border-b border-white/10 dark:border-gray-800/30 bg-white/20 dark:bg-gray-800/20">
-                    <h3 className="font-medium text-foreground flex items-center gap-2 text-sm">
-                      <Package className="h-4 w-4 text-primary" />Selecione o fornecedor para cada produto
-                    </h3>
+                    <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Total Selecionado</span>
                   </div>
+                  <p className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter relative z-10">
+                    <span className="text-lg mr-1 text-teal-500/50">R$</span>
+                    {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <div className="bg-emerald-500/5 dark:bg-emerald-900/10 rounded-[2rem] p-6 border border-emerald-500/20 dark:border-emerald-800/30 backdrop-blur-md shadow-sm relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="flex items-center gap-4 mb-4 relative z-10">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/20 shadow-sm">
+                      <Trophy className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Melhor Total Possível</span>
+                  </div>
+                  <p className="text-3xl font-black text-emerald-700 dark:text-emerald-400 tracking-tighter relative z-10">
+                    <span className="text-lg mr-1 text-emerald-500/50">R$</span>
+                    {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Estratégias de Seleção Rápidas */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/30 dark:bg-black/20 p-4 rounded-[1.5rem] border border-white/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div>
+                  <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Estratégia de Seleção</span>
+                </div>
+                <Tabs value={pedidoSubTab} onValueChange={(val) => {
+                  setPedidoSubTab(val);
+                  if (val === "melhores") {
+                    const bestSelections: Record<string, string> = {};
+                    products.forEach((product: any) => {
+                      const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
+                      if (bestSupplierId) bestSelections[product.product_id] = bestSupplierId;
+                    });
+                    setProductSelections(bestSelections);
+                  } else if (val === "unico") {
+                    const supplierTotalsArray = fornecedores.map(f => {
+                      const total = products.reduce((sum: number, p: any) => {
+                        const value = getSupplierProductValue(f.id, p.product_id);
+                        return sum + (value > 0 ? value : Infinity);
+                      }, 0);
+                      return { id: f.id, total, hasAllProducts: !products.some((p: any) => getSupplierProductValue(f.id, p.product_id) === 0) };
+                    }).filter(s => s.hasAllProducts).sort((a, b) => a.total - b.total);
+                    
+                    if (supplierTotalsArray.length > 0) {
+                      const bestSingleSupplier = supplierTotalsArray[0].id;
+                      const singleSelections: Record<string, string> = {};
+                      products.forEach((product: any) => {
+                        singleSelections[product.product_id] = bestSingleSupplier;
+                      });
+                      setProductSelections(singleSelections);
+                    }
+                  }
+                }}>
+                  <TabsList className="h-12 p-1 bg-white/40 dark:bg-gray-950/40 backdrop-blur-xl rounded-xl border border-white/20 shadow-inner gap-1">
+                    <TabsTrigger value="melhores" className="h-full px-4 text-[9px] font-black uppercase tracking-widest rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-emerald-600 data-[state=active]:shadow-md transition-all">
+                      <Trophy className="h-3.5 w-3.5 mr-2" /> Melhores Preços
+                    </TabsTrigger>
+                    <TabsTrigger value="unico" className="h-full px-4 text-[9px] font-black uppercase tracking-widest rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-blue-600 data-[state=active]:shadow-md transition-all">
+                      <Building2 className="h-3.5 w-3.5 mr-2" /> Fornecedor Único
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              {totalSelecao > melhorTotal && (
+                <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex items-center gap-3 animate-bounce-subtle">
+                  <TrendingDown className="h-5 w-5 text-amber-600" />
+                  <span className="text-[11px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-tight">
+                    Economia Pendente: R$ {(totalSelecao - melhorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (Selecione os melhores preços para maximizar)
+                  </span>
+                </div>
+              )}
+
+              {/* Tabela de Seleção Semiglass */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 px-2">
+                  <ShoppingCart className="h-4 w-4 text-teal-500" />
+                  <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Configuração do Pedido</span>
+                </div>
+                <Card className="border-white/30 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl shadow-2xl rounded-[2rem] overflow-hidden ring-1 ring-white/20">
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[450px] border-collapse bg-transparent">
-                      <thead className="bg-white/10 dark:bg-gray-800/10 backdrop-blur-md border-b border-white/10 dark:border-gray-800/30 sticky top-0 z-10">
+                    <table className="w-full min-w-[600px] border-collapse">
+                      <thead className="bg-white/30 dark:bg-white/5 border-b border-white/10">
                         <tr>
-                          <th className="px-3 py-3 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Produto</th>
-                          <th className="px-3 py-3 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Qtd</th>
-                          <th className="px-3 py-3 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Fornecedor</th>
-                          <th className="px-3 py-3 text-right text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Valor</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Produto</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Quantidade</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Fornecedor Selecionado</th>
+                          <th className="px-6 py-4 text-right text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Subtotal</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/10 dark:divide-gray-800/30">
+                      <tbody className="divide-y divide-white/10 dark:divide-white/5">
                         {products.map((product: any) => {
                           const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
                           const selectedSupplierId = productSelections[product.product_id];
@@ -1208,33 +1407,36 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                           const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
 
                           return (
-                            <tr key={product.product_id} className={cn("hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors", isBest && "bg-success/5 dark:bg-success/10")}>
-                              <td className="px-3 py-3">
-                                <p className="font-normal text-sm text-foreground truncate max-w-[100px] sm:max-w-[150px]" title={safeStr(product.product_name)}>{safeStr(product.product_name)}</p>
+                            <tr key={product.product_id} className={cn("hover:bg-white/20 dark:hover:bg-white/5 transition-all group/row", isBest && "bg-emerald-500/5")}>
+                              <td className="px-6 py-4">
+                                <p className="font-bold text-sm text-gray-900 dark:text-white truncate max-w-[200px]" title={safeStr(product.product_name)}>{safeStr(product.product_name)}</p>
                               </td>
-                              <td className="px-3 py-3">
-                                <span className="text-sm text-muted-foreground font-normal">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
+                              <td className="px-6 py-4">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white/50 dark:bg-black/20 px-2 py-0.5 rounded-md border border-white/20">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
                               </td>
-                              <td className="px-3 py-3">
+                              <td className="px-6 py-4">
                                 <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
-                                  <SelectTrigger className="w-[160px] sm:w-[200px] h-8 bg-white/20 dark:bg-gray-800/20 border-white/20 dark:border-gray-700/50 backdrop-blur-sm text-sm font-normal">
-                                    <SelectValue placeholder="Selecione..." />
+                                  <SelectTrigger className="w-full h-10 bg-white/60 dark:bg-white/5 border-white/30 dark:border-white/10 font-bold rounded-xl focus:ring-teal-500/20 shadow-sm transition-all">
+                                    <SelectValue placeholder="Escolha um fornecedor..." />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-white/20 dark:border-gray-800/50">
-                                    {fornecedores.filter(f => getSupplierProductValue(f.id, product.product_id) > 0).map(f => {
-                                      return (
-                                        <SelectItem key={f.id} value={f.id} className="text-sm font-normal">
-                                          <span className="truncate font-normal" title={safeStr(f.nome)}>{safeStr(f.nome)}</span>
+                                  <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-white/30 rounded-2xl shadow-2xl">
+                                    {fornecedores.filter(f => getSupplierProductValue(f.id, product.product_id) > 0).map(f => (
+                                      <SelectItem key={f.id} value={f.id} className="font-bold py-2.5 px-4 focus:bg-teal-500/10 focus:text-teal-600 transition-colors">
+                                        {safeStr(f.nome)}
                                       </SelectItem>
-                                    );
-                                  })}
-                                </SelectContent>
-                              </Select>
-                            </td>
-                              <td className="px-3 py-3 text-right">
-                                <span className={cn("font-medium text-sm", isBest ? "text-success" : "text-foreground")}>
-                                  R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </span>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex flex-col items-end">
+                                  <span className={cn("font-black text-sm tracking-tight", isBest ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white")}>
+                                    R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                  </span>
+                                  {isBest && (
+                                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-0.5">Melhor Preço</span>
+                                  )}
+                                </div>
                               </td>
                             </tr>
                           );
@@ -1243,77 +1445,91 @@ export default function GerenciarCotacaoDialog({ open, onOpenChange, quote, onUp
                     </table>
                   </div>
                 </Card>
+              </div>
 
-                {/* Pedidos que serão gerados */}
-                {supplierGroups.length > 0 && (
-                  <Card className="border-white/20 dark:border-gray-800/50 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md overflow-hidden">
-                    <div className="p-3 border-b border-white/10 dark:border-gray-800/30 bg-white/20 dark:bg-gray-800/20">
-                      <h3 className="font-medium text-foreground flex items-center gap-2 text-sm">
-                        <ShoppingCart className="h-4 w-4 text-primary" />
-                        {supplierGroups.length === 1 ? "Pedido que será gerado" : `${supplierGroups.length} pedidos`}
-                      </h3>
-                    </div>
-                    <div className="divide-y divide-white/10 dark:divide-gray-800/30">
-                      {supplierGroups.map((group, index) => (
-                        <div key={group.supplierId} className="p-3 hover:bg-white/20 dark:hover:bg-gray-800/20 transition-colors backdrop-blur-sm">
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <Badge variant="outline" className="bg-info/10 text-info border-white/20 dark:border-gray-800/50 backdrop-blur-sm flex-shrink-0 text-[10px] px-1.5 font-normal">#{index + 1}</Badge>
-                              <span className="font-medium text-foreground truncate text-sm" style={{ maxWidth: '180px' }} title={group.supplierName}>{group.supplierName}</span>
-                            </div>
-                            <span className="font-medium text-success flex-shrink-0 text-base">
-                              R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-muted-foreground font-normal line-clamp-1">
-                            {group.products.map((p: any) => safeStr(p.product_name)).join(", ")}
-                          </div>
+              {/* Pedidos Gerados Preview Semiglass */}
+              {supplierGroups.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 px-2">
+                    <Package className="h-4 w-4 text-blue-500" />
+                    <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Preview de Envio</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {supplierGroups.map((group, index) => (
+                      <Card key={group.supplierId} className="p-5 bg-white/40 dark:bg-gray-900/40 border-white/30 dark:border-white/10 backdrop-blur-2xl rounded-[1.5rem] shadow-lg group/order hover:border-blue-500/40 transition-all duration-300">
+                        <div className="flex items-center justify-between mb-4">
+                          <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 font-black text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-lg shadow-sm">Pedido #{index + 1}</Badge>
+                          <span className="font-black text-sm text-emerald-600 dark:text-emerald-400">R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
-                      ))}
-                    </div>
-                  </Card>
-                )}
+                        <p className="font-black text-sm text-gray-900 dark:text-white truncate mb-2 group-hover/order:text-blue-600 transition-colors" title={group.supplierName}>{group.supplierName}</p>
+                        <div className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter line-clamp-2 leading-relaxed opacity-60">
+                          {group.products.map((p: any) => safeStr(p.product_name)).join(", ")}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                {/* Data de entrega e observações */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Data de Entrega *</label>
+              {/* Dados de Entrega Semiglass */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 bg-white/20 dark:bg-black/10 p-8 rounded-[2rem] border border-white/20">
+                <div className="space-y-3">
+                  <label className="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Data de Entrega *</label>
+                  <div className="relative group">
+                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-teal-500 transition-colors pointer-events-none" />
                     <Input 
                       type="date" 
                       value={deliveryDate} 
                       onChange={(e) => setDeliveryDate(e.target.value)} 
-                      className="bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-gray-800/50 backdrop-blur-md focus:bg-white/60 transition-all shadow-inner font-normal" 
+                      className="h-12 bg-white/60 dark:bg-gray-950/60 border-white/30 dark:border-white/10 font-bold rounded-2xl pl-12 focus:ring-teal-500/20 shadow-sm" 
                       min={new Date().toISOString().split('T')[0]} 
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Observações</label>
+                </div>
+                <div className="space-y-3">
+                  <label className="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Observações do Pedido</label>
+                  <div className="relative group">
+                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-teal-500 transition-colors pointer-events-none" />
                     <Input 
                       value={observations} 
                       onChange={(e) => setObservations(e.target.value)} 
-                      placeholder="Opcional..." 
-                      className="bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-gray-800/50 backdrop-blur-md focus:bg-white/60 transition-all shadow-inner font-normal" 
+                      placeholder="Instruções para o fornecedor..." 
+                      className="h-12 bg-white/60 dark:bg-gray-950/60 border-white/30 dark:border-white/10 font-medium rounded-2xl pl-12 focus:ring-teal-500/20 shadow-sm" 
                     />
                   </div>
                 </div>
+              </div>
 
-                {/* Botão de converter */}
+              {/* Botão de Ação Impactante */}
+              <div className="pt-4 pb-8">
                 <Button 
                   onClick={handleConvertToOrder} 
                   disabled={!deliveryDate || Object.keys(productSelections).length === 0} 
-                  className="w-full bg-primary/90 hover:bg-primary text-primary-foreground h-11 text-base font-medium shadow-lg backdrop-blur-md transition-all"
+                  className="w-full h-16 bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-emerald-500/20 rounded-[1.5rem] transition-all active:scale-[0.98] ring-2 ring-white/20 relative overflow-hidden group"
                 >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  {supplierGroups.length > 1 ? `Gerar ${supplierGroups.length} Pedidos` : "Converter em Pedido"}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-shimmer pointer-events-none"></div>
+                  <ShoppingCart className="h-6 w-6 mr-4" />
+                  {supplierGroups.length > 1 ? `Confirmar ${supplierGroups.length} Pedidos de Compra` : "Converter Cotação em Pedido"}
                 </Button>
               </div>
-            </ScrollArea>
+            </div>
           </TabsContent>
         </Tabs>
 
-        {/* Footer */}
-        <div className="flex-shrink-0 px-5 py-3 border-t border-white/20 dark:border-gray-800/50 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md flex justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="text-muted-foreground border-white/20 dark:border-gray-800/50 bg-white/20 dark:bg-gray-800/20 hover:bg-white/40 dark:hover:bg-gray-800/40">Fechar</Button>
+        {/* Footer com design semiglass */}
+        <div className="flex-shrink-0 px-8 py-5 border-t border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl flex justify-between items-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-t from-teal-500/5 to-transparent pointer-events-none"></div>
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="h-2 w-2 rounded-full bg-teal-500 animate-pulse"></div>
+            <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Modo de Gerenciamento Ativo</span>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)} 
+            className="border-white/30 dark:border-white/10 bg-white/5 dark:bg-white/5 font-black text-[10px] uppercase tracking-[0.2em] h-11 px-8 hover:bg-white/10 transition-all rounded-xl backdrop-blur-md shadow-sm relative z-10"
+          >
+            Fechar Painel
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
