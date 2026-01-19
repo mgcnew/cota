@@ -189,17 +189,15 @@ export function useDashboard() {
     queryKey: ['dashboard'],
     queryFn: async () => {
       // OPTIMIZED: Fetch all data in parallel
-      const [quotesResult, suppliersResult, productsResult, ordersResult, quoteSupplierItemsResult] = await Promise.all([
+      const [quotesResult, suppliersResult, ordersResult, quoteSupplierItemsResult] = await Promise.all([
         supabase.from("quotes").select(`*, quote_items(*), quote_suppliers(*)`).order("created_at", { ascending: false }),
         supabase.from("suppliers").select("*"),
-        supabase.from("products").select("*"),
         supabase.from("orders").select("*").order("order_date", { ascending: false }),
         supabase.from("quote_supplier_items").select("*"),
       ]);
 
       if (quotesResult.error) throw quotesResult.error;
       if (suppliersResult.error) throw suppliersResult.error;
-      if (productsResult.error) throw productsResult.error;
       if (ordersResult.error) throw ordersResult.error;
       if (quoteSupplierItemsResult.error) throw quoteSupplierItemsResult.error;
 
@@ -212,7 +210,7 @@ export function useDashboard() {
       return {
         quotes: quotesWithSupplierItems,
         suppliers: suppliersResult.data || [],
-        products: productsResult.data || [],
+        products: [], // Products list not used in dashboard aggregation
         orders: ordersResult.data || [],
       };
     },
