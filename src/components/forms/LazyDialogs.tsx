@@ -92,15 +92,18 @@ function createDeferredLazyDialog(
     useEffect(() => {
       // Only start loading when dialog opens and component isn't loaded yet
       if (props.open && !LazyComponent && !isLoading) {
+        console.log(`[LazyDialog] Iniciando carregamento para ${exportName || 'default export'}...`);
         setIsLoading(true);
         importFn().then((module) => {
+          console.log(`[LazyDialog] Módulo carregado com sucesso.`);
           if (exportName && exportName in module) {
             setLazyComponent(() => (module as Record<string, ComponentType<AnyProps>>)[exportName]);
           } else {
             setLazyComponent(() => (module as { default: ComponentType<AnyProps> }).default);
           }
           setIsLoading(false);
-        }).catch(() => {
+        }).catch((err) => {
+          console.error(`[LazyDialog] Erro ao carregar módulo:`, err);
           setIsLoading(false);
         });
       }

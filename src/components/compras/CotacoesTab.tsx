@@ -540,7 +540,14 @@ function CotacoesTab() {
       )}
 
       {/* Dialogs */}
-      <AddQuoteDialogLazy open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={() => { refetch(); setAddDialogOpen(false); }} trigger={<div />} />
+      <AddQuoteDialogLazy 
+        open={addDialogOpen} 
+        onOpenChange={(open) => {
+          console.log("[CotacoesTab] onOpenChange chamado com:", open);
+          setAddDialogOpen(open);
+        }} 
+        onAdd={() => { refetch(); setAddDialogOpen(false); }} 
+      />
       <ResumoCotacaoDialogLazy open={viewDialogOpen} onOpenChange={setViewDialogOpen} quote={selectedQuote} />
       <GerenciarCotacaoDialogLazy open={gerenciarDialogOpen} onOpenChange={setGerenciarDialogOpen} quote={selectedQuote} onUpdateSupplierProductValue={updateSupplierProductValue} onConvertToOrder={(quoteId, orders) => convertToOrder({ quoteId, orders })} onAddQuoteItem={addQuoteItem} onRemoveQuoteItem={removeQuoteItem} onAddQuoteSupplier={addQuoteSupplier} onRemoveQuoteSupplier={removeQuoteSupplier} availableProducts={availableProducts} availableSuppliers={availableSuppliers} onRefresh={refetch} isUpdating={isUpdating} />
       <DeleteQuoteDialogLazy open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} quote={selectedQuote} onDelete={(id) => { deleteQuote(id); setDeleteDialogOpen(false); }} trigger={<div />} />

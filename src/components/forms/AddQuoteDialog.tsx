@@ -48,6 +48,12 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -70,7 +76,9 @@ import {
   FileText,
   ChevronRight,
   ChevronLeft,
-  Zap
+  Zap,
+  Search,
+  Loader2
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -135,6 +143,7 @@ interface AddQuoteDialogProps {
 }
 
 export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddQuoteDialogProps) {
+  console.log("[AddQuoteDialog] Componente renderizado. Open state:", externalOpen);
   const isMobile = useIsMobile();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -142,20 +151,23 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const [products, setProducts] = useState<Product[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSearchingProducts, setIsSearchingProducts] = useState(false);
   const [supplierSearch, setSupplierSearch] = useState("");
   const [productSearch, setProductSearch] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showProductSuggestions, setShowProductSuggestions] = useState(false);
+  const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
   const debouncedProductSearch = useDebounce(productSearch, 300);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Supplier[]>([]);
   const [activeTab, setActiveTab] = useState("produtos");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const productsContainerRef = useRef<HTMLDivElement>(null);
+  const productListRef = useRef<HTMLDivElement>(null);
   
   // Estados para o novo formulário de produto único
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("");
   const [lastUsedUnit, setLastUsedUnit] = useState("kg");
-  const [productPopoverOpen, setProductPopoverOpen] = useState(false);
   const [supplierPopoverOpen, setSupplierPopoverOpen] = useState(false);
   
   // Estados para agendamento
@@ -203,7 +215,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       
       // Auto-foco no campo de busca de produto para continuar adicionando
       setTimeout(() => {
-        setProductPopoverOpen(true);
+        productSearchRef.current?.focus();
       }, 50);
       
       toast({
@@ -229,8 +241,38 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     }
   };
   
-  // Handler para Enter key - legado
+  // Handler para busca de produtos e navegação
   const handleProductKeyDown = (e: React.KeyboardEvent) => {
+    if (showProductSuggestions && products.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedProductIndex(prev => prev < products.length - 1 ? prev + 1 : 0);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedProductIndex(prev => prev > 0 ? prev - 1 : products.length - 1);
+        return;
+      }
+      if (e.key === 'Enter' && highlightedProductIndex >= 0) {
+        e.preventDefault();
+        const product = products[highlightedProductIndex];
+        setSelectedProduct(product);
+        setProductSearch("");
+        setShowProductSuggestions(false);
+        setHighlightedProductIndex(-1);
+        setTimeout(() => {
+          quantityInputRef.current?.focus();
+        }, 50);
+        return;
+      }
+      if (e.key === 'Escape') {
+        setShowProductSuggestions(false);
+        setHighlightedProductIndex(-1);
+        return;
+      }
+    }
+
     if (e.key === 'Enter' && selectedProduct && newProductQuantity && newProductUnit) {
       e.preventDefault();
       handleAddNewProduct();
@@ -267,15 +309,15 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
   useEffect(() => {
     if (open) {
-      loadData();
+      loadInitialData();
       // Definir unidade padrão na primeira vez
       if (!newProductUnit) {
         setNewProductUnit(lastUsedUnit);
       }
       // Auto-foco no seletor de produto ao abrir
       setTimeout(() => {
-        if (activeTab === 'produtos') {
-          setProductPopoverOpen(true);
+        if (activeTab === 'produtos' && productSearchRef.current) {
+          productSearchRef.current.focus();
         }
       }, 300);
     } else {
@@ -286,8 +328,18 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       setNewProductUnit("");
       setProductSearch("");
       setSupplierSearch("");
+      setProducts([]);
     }
   }, [open]);
+  
+  // Busca dinâmica de produtos quando o termo de busca muda
+  useEffect(() => {
+    if (debouncedProductSearch.length >= 2) {
+      searchProducts(debouncedProductSearch);
+    } else {
+      setProducts([]);
+    }
+  }, [debouncedProductSearch]);
   
   // Auto-foco quando produto é selecionado
   useEffect(() => {
@@ -296,76 +348,44 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     }
   }, [selectedProduct]);
 
-  const loadData = async () => {
+  const loadInitialData = async () => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Load suppliers (RLS filtra por company_id automaticamente)
+      // Load suppliers
       const suppliersRes = await supabase
         .from("suppliers")
         .select("id, name, contact")
         .order("name");
 
       if (suppliersRes.data) setSuppliers(suppliersRes.data);
-
-      // Load products in batches (RLS filtra por company_id automaticamente)
-      const { count: totalCount, error: countError } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true });
-
-      if (countError) throw countError;
-      
-      if (!totalCount || totalCount === 0) {
-        setProducts([]);
-        setLoading(false);
-        return;
-      }
-
-      const pageSize = 1000;
-      const totalPages = Math.ceil(totalCount / pageSize);
-      const allProducts = [];
-
-      console.log(`[ADD QUOTE] Loading ${totalCount} products in ${totalPages} pages`);
-
-      for (let page = 0; page < totalPages; page++) {
-        const from = page * pageSize;
-        const to = from + pageSize - 1;
-
-        const { data: pageData, error: pageError } = await supabase
-          .from('products')
-          .select('id, name')
-          .order('name')
-          .range(from, to);
-
-        if (pageError) throw pageError;
-        if (pageData && pageData.length > 0) {
-          allProducts.push(...pageData);
-        }
-      }
-
-      console.log(`[ADD QUOTE] Loaded ${allProducts.length} products total`);
-      setProducts(allProducts);
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar produtos e fornecedores",
-        variant: "destructive",
-      });
+      console.error("Erro ao carregar dados iniciais:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter products with debounce - só mostra ao digitar
-  const filteredProducts = useMemo(() => {
-    if (!debouncedProductSearch) return []; // Não mostra nada até começar a digitar
-    return products.filter(p => 
-      p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase())
-    );
-  }, [products, debouncedProductSearch]);
+  const searchProducts = async (term: string) => {
+    setIsSearchingProducts(true);
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name')
+        .ilike('name', `%${term}%`)
+        .order('name')
+        .limit(10);
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error);
+    } finally {
+      setIsSearchingProducts(false);
+    }
+  };
 
   const onSubmit = async (data: QuoteFormData, keepOpen = false) => {
     setIsSubmitting(true);
@@ -491,9 +511,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       if (!keepOpen) {
         setOpen(false);
       } else {
-        // Focar no combobox de produtos
+        // Focar no campo de produtos
         setTimeout(() => {
-          setProductPopoverOpen(true);
+          productSearchRef.current?.focus();
         }, 100);
       }
     } catch (error: any) {
@@ -546,9 +566,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
   const tabs = [
     { id: "produtos", label: "Produtos", icon: Package },
-    { id: "periodo", label: "Período", icon: Clock },
+    { id: "periodo", label: "Período & Agendamento", icon: Clock },
     { id: "fornecedores", label: "Fornecedores", icon: Building2 },
-    { id: "agendamento", label: "Agendamento", icon: Zap },
     { id: "detalhes", label: "Detalhes", icon: FileText }
   ];
 
@@ -561,6 +580,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       case "produtos":
         return formValues.produtos.every(p => p.produtoId && p.quantidade && p.unidade);
       case "periodo":
+        if (isScheduled && !formValues.dataPlanejada) return false;
         return formValues.dataInicio && formValues.dataFim;
       case "fornecedores":
         return selectedSuppliers.length > 0;
@@ -593,110 +613,83 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
   const modalInnerContent = (
     <>
-      <div className={`flex-shrink-0 px-4 ${isMobile ? 'py-4' : 'sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-800/40 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md`}>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0`}>
-              <FileText className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className={`${isMobile ? 'text-lg font-bold' : 'text-base sm:text-lg font-semibold'} text-gray-900 dark:text-white truncate`}>
-                Nova Cotação
-              </div>
-              <div className="text-gray-500 dark:text-gray-400 text-xs truncate">
-                Etapa {currentTabIndex + 1}/{tabs.length}
-              </div>
+      {/* Header Compacto com design semiglass e Steps integradas */}
+      <div className="flex-shrink-0 border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 backdrop-blur-md relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
+        
+        {/* Top Bar Minimalista */}
+        <div className="flex items-center justify-between px-4 py-2 relative z-10 min-h-[3rem] gap-4 bg-white/50 dark:bg-gray-950/50 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+          
+          {/* Lado Esquerdo: Ícone Identificador */}
+          <div className="flex items-center flex-shrink-0">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="w-8 h-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+                    <Plus className="h-4 w-4 stroke-[3]" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p className="font-semibold text-xs">Nova Cotação</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          {/* Centro: Steps indicator ultraminimalista - Navegação Livre */}
+          <div className="flex-1 flex items-center justify-start sm:justify-center overflow-x-auto scrollbar-hide mx-2 h-full">
+            <div className="flex items-center gap-4 h-8">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "h-full px-1 text-[9px] font-black uppercase tracking-widest rounded-none border-b-2 transition-colors cursor-pointer select-none outline-none",
+                      "!bg-transparent hover:!bg-transparent focus:!bg-transparent",
+                      "!shadow-none",
+                      isActive 
+                        ? "!border-gray-900 dark:!border-white !text-gray-900 dark:!text-white" 
+                        : "!border-transparent !text-gray-400 dark:!text-gray-500 hover:!text-gray-600 dark:hover:!text-gray-300"
+                    )}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Navigation Controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {currentTabIndex > 0 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handlePrevious}
-                className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-200 h-8 px-3"
-              >
-                <ChevronLeft className="h-3 w-3 mr-1" />
-                <span className="hidden sm:inline">Voltar</span>
-              </Button>
-            )}
-            
-            {currentTabIndex < tabs.length - 1 ? (
+          {/* Lado Direito: Ações */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {currentTabIndex === tabs.length - 1 && (
               <Button
                 type="button"
                 size="sm"
-                onClick={handleNext}
-                disabled={!canProceedToNext()}
-                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg h-8 px-3"
+                disabled={isSubmitting}
+                onClick={() => {
+                  const formElement = document.getElementById('quote-form') as HTMLFormElement;
+                  if (formElement) {
+                    formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                  }
+                }}
+                className="mr-2 h-7 px-3 text-[9px] font-black uppercase tracking-widest text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-md !bg-transparent hover:!bg-transparent !shadow-none transition-colors hover:border-gray-900 dark:hover:border-white"
               >
-                <span className="hidden sm:inline">Próximo</span>
-                <ChevronRight className="h-3 w-3 ml-1" />
+                {isSubmitting ? "CRIANDO..." : "SALVAR"}
               </Button>
-            ) : (
-              <>
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={isSubmitting}
-                  onClick={() => {
-                    const formElement = document.getElementById('quote-form') as HTMLFormElement;
-                    if (formElement) {
-                      formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                    }
-                  }}
-                  className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg h-8 px-3"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-1"></div>
-                      <span className="hidden sm:inline">Criando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check className="h-3 w-3 mr-1" />
-                      <span className="hidden sm:inline">Criar</span>
-                    </>
-                  )}
-                </Button>
-                {!isMobile && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={isSubmitting}
-                    onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
-                    variant="outline"
-                    className="border-orange-400 dark:border-orange-500 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 h-8 px-3"
-                  >
-                    <Plus className="h-3 w-3 mr-1" />
-                    <span className="hidden sm:inline">Criar Mais</span>
-                  </Button>
-                )}
-              </>
             )}
+
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setOpen(false)} 
+              className="h-7 w-7 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white !bg-transparent hover:!bg-transparent focus:!bg-transparent !shadow-none rounded-full"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          
-          {/* Close Button */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setOpen(false)}
-            className={`${isMobile ? 'h-9 w-9 rounded-lg' : 'h-8 w-8'} p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700`}
-          >
-            <X className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
-          </Button>
-        </div>
-          
-        {/* Minimal Progress Bar */}
-        <div className="mt-2">
-          <Progress 
-            value={progress} 
-            className="h-1 bg-gray-100 dark:bg-gray-800 [&>div]:bg-teal-600"
-          />
         </div>
       </div>
       
@@ -711,39 +704,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         <div className="flex flex-col h-full overflow-hidden">
           <Form {...form}>
             <form id="quote-form" onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden">
-              {/* Compact Tab Navigation */}
-              <div className="flex-shrink-0 px-4 py-2.5 border-b border-gray-200 dark:border-gray-800/40 bg-gray-50/30 dark:bg-gray-800/20 backdrop-blur-sm">
-                <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    const status = getTabStatus(tab.id);
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => setActiveTab(tab.id)}
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap flex-shrink-0",
-                          status === "current" && "bg-teal-600 text-white",
-                          status === "completed" && "bg-green-600 text-white",
-                          status === "pending" && "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
-                        )}
-                      >
-                        <div className="flex items-center justify-center w-4 h-4">
-                          {status === "completed" ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <Icon className="h-3 w-3" />
-                          )}
-                        </div>
-                        
-                        <span className={isMobile ? '' : 'hidden sm:inline'}>{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Content Area - Now with more space */}
               <div className="flex-1 overflow-hidden">
                 <AnimatedTabContent
@@ -765,66 +725,93 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   </CardTitle>
                                 </CardHeader>
                                  <CardContent className="pt-4 space-y-4">
-                                  {/* Seletor de Produto */}
-                                  <div>
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2 block">Produto *</label>
-                                    <Popover open={productPopoverOpen} onOpenChange={setProductPopoverOpen}>
-                                      <PopoverTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          role="combobox"
-                                          className="w-full justify-between border-white/20 dark:border-white/10 bg-transparent focus:ring-teal-500/20 dark:text-white"
+                                  {/* Seletor de Produto com Autocomplete Dinâmico */}
+                                  <div className="relative z-50">
+                                    <label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1 mb-2 block">Produto *</label>
+                                    <div className="relative group">
+                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                                      <Input
+                                        ref={productSearchRef}
+                                        placeholder="Digite o nome do produto..."
+                                        value={selectedProduct ? selectedProduct.name : productSearch}
+                                        onChange={(e) => { 
+                                          setProductSearch(e.target.value); 
+                                          setSelectedProduct(null); 
+                                          setShowProductSuggestions(true);
+                                        }}
+                                        onFocus={() => setShowProductSuggestions(true)}
+                                        onBlur={() => {
+                                          // Timeout para permitir o clique nas sugestões
+                                          setTimeout(() => setShowProductSuggestions(false), 200);
+                                        }}
+                                        onKeyDown={handleProductKeyDown}
+                                        className="h-10 pl-10 bg-white/60 dark:bg-gray-900/60 border-white/20 dark:border-white/10 font-bold text-sm rounded-xl focus:ring-orange-500/20 transition-all shadow-sm"
+                                        tabIndex={0}
+                                      />
+                                      
+                                      {/* Lista de Sugestões Autocomplete */}
+                                      {showProductSuggestions && products.length > 0 && !selectedProduct && (
+                                        <div 
+                                          ref={productListRef}
+                                          className="absolute z-[100] w-full mt-2 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-2 custom-scrollbar"
                                         >
-                                          {selectedProduct ? selectedProduct.name : "Selecionar produto..."}
-                                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-full p-0 border-white/20 dark:border-white/10 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl" align="start">
-                                        <Command className="bg-transparent">
-                                          <CommandInput 
-                                            placeholder={`Buscar entre ${products.length} produtos...`}
-                                            value={productSearch}
-                                            onValueChange={setProductSearch}
-                                            className="bg-transparent"
-                                          />
-                                           <CommandList>
-                                             <CommandEmpty className="text-gray-500 dark:text-gray-400">
-                                               {debouncedProductSearch 
-                                                 ? "Nenhum produto encontrado." 
-                                                 : `Digite para buscar entre ${products.length} produtos...`
-                                               }
-                                             </CommandEmpty>
-                                             <CommandGroup>
-                                              {filteredProducts.map((product) => (
-                                                <CommandItem
-                                                  key={product.id}
-                                                  value={product.name}
-                                                  onSelect={() => {
-                                                    setSelectedProduct(product);
-                                                    setProductSearch("");
-                                                    setProductPopoverOpen(false);
-                                                    // Auto-foco no campo de quantidade após selecionar produto
-                                                    setTimeout(() => {
-                                                      quantityInputRef.current?.focus();
-                                                      quantityInputRef.current?.select();
-                                                    }, 50);
-                                                  }}
-                                                  className="hover:bg-white/10 dark:hover:bg-gray-800/50"
-                                                >
-                                                  <Check
-                                                    className={cn(
-                                                      "mr-2 h-4 w-4",
-                                                      selectedProduct?.id === product.id ? "opacity-100" : "opacity-0"
-                                                    )}
-                                                  />
-                                                  {product.name}
-                                                </CommandItem>
-                                              ))}
-                                            </CommandGroup>
-                                          </CommandList>
-                                        </Command>
-                                      </PopoverContent>
-                                    </Popover>
+                                          <div className="p-2 space-y-1">
+                                            {products.map((product, index) => (
+                                              <button
+                                                key={product.id}
+                                                type="button"
+                                                onClick={() => {
+                                                  setSelectedProduct(product);
+                                                  setProductSearch("");
+                                                  setShowProductSuggestions(false);
+                                                  setHighlightedProductIndex(-1);
+                                                  setTimeout(() => {
+                                                    quantityInputRef.current?.focus();
+                                                    quantityInputRef.current?.select();
+                                                  }, 50);
+                                                }}
+                                                onMouseEnter={() => setHighlightedProductIndex(index)}
+                                                className={cn(
+                                                  "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
+                                                  (highlightedProductIndex === index)
+                                                    ? "bg-orange-500/20 text-orange-700 dark:text-orange-400 border-orange-500/30" 
+                                                    : "hover:bg-orange-500/10 hover:text-orange-700 dark:hover:text-orange-400 border-transparent",
+                                                  "group border transition-all"
+                                                )}
+                                              >
+                                                <div className={cn(
+                                                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
+                                                  highlightedProductIndex === index ? "bg-orange-500 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:bg-orange-500 group-hover:text-white"
+                                                )}>
+                                                  <Package className="h-4 w-4" />
+                                                </div>
+                                                <div className="flex flex-col min-w-0">
+                                                  <span className={cn(
+                                                    "font-black tracking-tight transition-colors",
+                                                    highlightedProductIndex === index ? "text-orange-700 dark:text-orange-400" : "text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400"
+                                                  )}>{product.name}</span>
+                                                </div>
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {/* Indicador de Carregamento Dinâmico */}
+                                      {isSearchingProducts && (
+                                        <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                                          <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                                        </div>
+                                      )}
+
+                                      {/* Estado Vazio/Nenhum Resultado */}
+                                      {showProductSuggestions && productSearch.length >= 2 && products.length === 0 && !selectedProduct && !isSearchingProducts && (
+                                        <div className="absolute z-[100] w-full mt-2 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl shadow-xl p-6 text-center animate-in fade-in slide-in-from-top-2">
+                                          <Package className="h-8 w-8 mx-auto mb-2 text-gray-300 opacity-50" />
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Nenhum produto encontrado</p>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
 
                                   {/* Quantidade e Unidade */}
@@ -958,7 +945,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         </TabsContent>
 
                         {/* Período Tab */}
-                        <TabsContent value="periodo" className="flex-1 overflow-y-auto p-3 sm:p-4 m-0">
+                        <TabsContent value="periodo" className="flex-1 h-full min-h-0 overflow-y-auto p-3 sm:p-4 m-0 pb-20 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                           <Card className="border-white/20 dark:border-white/10 shadow-lg bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
                             <CardHeader className="pb-3 bg-white/10 dark:bg-white/5 rounded-t-xl border-b border-white/10 dark:border-white/5">
                               <CardTitle className="flex items-center gap-2 sm:gap-3 text-base font-bold">
@@ -970,205 +957,318 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     Período da Cotação
                                   </span>
                                   <span className="text-xs text-gray-600 dark:text-gray-400 font-normal mt-0.5 truncate">
-                                    Defina quando a cotação ficará aberta
+                                    Defina os prazos e agendamento da cotação
                                   </span>
                                 </div>
                               </CardTitle>
                             </CardHeader>
-                            <CardContent className="p-3 sm:p-4 space-y-4">
+                            <CardContent className="p-3 sm:p-4 space-y-6">
 
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              {/* Seção de Datas */}
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <FormField
+                                    control={form.control}
+                                    name="dataInicio"
+                                    render={({ field }) => (
+                                      <FormItem className="flex flex-col">
+                                        <FormLabel>Data de Início *</FormLabel>
+                                        <Popover>
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <Button
+                                              variant="outline"
+                                              className={cn(
+                                                "w-full pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
+                                                !field.value && "text-muted-foreground"
+                                              )}
+                                            >
+                                              {field.value ? (
+                                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                              ) : (
+                                                <span>Selecione a data de início</span>
+                                              )}
+                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
+                                          <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            disabled={(date) => date < new Date()}
+                                            initialFocus
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
                                 <FormField
                                   control={form.control}
-                                  name="dataInicio"
+                                  name="dataFim"
                                   render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                      <FormLabel>Data de Início *</FormLabel>
+                                      <FormLabel>Data de Fim *</FormLabel>
                                       <Popover>
-                                      <PopoverTrigger asChild>
-                                        <FormControl>
-                                          <Button
-                                            variant="outline"
-                                            className={cn(
-                                              "w-full pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
-                                              !field.value && "text-muted-foreground"
-                                            )}
-                                          >
-                                            {field.value ? (
-                                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                            ) : (
-                                              <span>Selecione a data de início</span>
-                                            )}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                          </Button>
-                                        </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
-                                        <Calendar
-                                          mode="single"
-                                          selected={field.value}
-                                          onSelect={field.onChange}
-                                          disabled={(date) => date < new Date()}
-                                          initialFocus
-                                        />
-                                      </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <Button
+                                              variant="outline"
+                                              className={cn(
+                                                "w-full pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
+                                                !field.value && "text-muted-foreground"
+                                              )}
+                                            >
+                                              {field.value ? (
+                                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                              ) : (
+                                                <span>Selecione a data de fim</span>
+                                              )}
+                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
+                                          <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            disabled={(date) => {
+                                              const startDate = form.getValues("dataInicio");
+                                              return startDate ? date < startDate : date < new Date();
+                                            }}
+                                            initialFocus
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
 
-                              <FormField
-                                control={form.control}
-                                name="dataFim"
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-col">
-                                    <FormLabel>Data de Fim *</FormLabel>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <FormControl>
-                                          <Button
-                                            variant="outline"
-                                            className={cn(
-                                              "w-full pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
-                                              !field.value && "text-muted-foreground"
-                                            )}
-                                          >
-                                            {field.value ? (
-                                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                            ) : (
-                                              <span>Selecione a data de fim</span>
-                                            )}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                          </Button>
-                                        </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
-                                        <Calendar
-                                          mode="single"
-                                          selected={field.value}
-                                          onSelect={field.onChange}
-                                          disabled={(date) => {
-                                            const startDate = form.getValues("dataInicio");
-                                            return startDate ? date < startDate : date < new Date();
-                                          }}
-                                          initialFocus
-                                        />
-                                      </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-
-                            {/* Dicas compactas */}
-                            <div className="bg-blue-50/30 dark:bg-blue-900/10 border border-blue-200/40 dark:border-blue-800/20 backdrop-blur-sm rounded-lg p-3">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                                  <span className="text-white text-xs">💡</span>
+                              {/* Presets rápidos */}
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                  <Zap className="h-3 w-3" />
+                                  <span className="font-medium">Atalhos Rápidos:</span>
                                 </div>
-                                <h4 className="font-bold text-blue-900 dark:text-blue-300 text-xs">Dicas de Período</h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const hoje = new Date();
+                                      form.setValue("dataInicio", hoje);
+                                      form.setValue("dataFim", hoje);
+                                      toast({ title: "✅ Período definido", description: "Hoje (início e fim no mesmo dia)", duration: 1500 });
+                                    }}
+                                    className="h-10 text-xs font-semibold bg-amber-50/30 dark:bg-amber-900/10 border-amber-200/40 dark:border-amber-800/20 hover:bg-amber-100/40 dark:hover:bg-amber-900/20 backdrop-blur-sm"
+                                  >
+                                    <Zap className="h-3 w-3 mr-1" />
+                                    Hoje
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const hoje = new Date();
+                                      const fim = new Date(hoje);
+                                      fim.setDate(hoje.getDate() + 3);
+                                      form.setValue("dataInicio", hoje);
+                                      form.setValue("dataFim", fim);
+                                      toast({ title: "✅ Período definido", description: "3 dias", duration: 1500 });
+                                    }}
+                                    className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
+                                  >
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    3 dias
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const hoje = new Date();
+                                      const fim = new Date(hoje);
+                                      fim.setDate(hoje.getDate() + 7);
+                                      form.setValue("dataInicio", hoje);
+                                      form.setValue("dataFim", fim);
+                                      toast({ title: "✅ Período definido", description: "7 dias (recomendado)", duration: 1500 });
+                                    }}
+                                    className="h-10 text-xs font-semibold bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-200/40 dark:border-indigo-800/20 hover:bg-indigo-100/40 dark:hover:bg-indigo-900/20 backdrop-blur-sm"
+                                  >
+                                    <Zap className="h-3 w-3 mr-1" />
+                                    7 dias
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const hoje = new Date();
+                                      const fim = new Date(hoje);
+                                      fim.setDate(hoje.getDate() + 14);
+                                      form.setValue("dataInicio", hoje);
+                                      form.setValue("dataFim", fim);
+                                      toast({ title: "✅ Período definido", description: "14 dias", duration: 1500 });
+                                    }}
+                                    className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
+                                  >
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    14 dias
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const hoje = new Date();
+                                      const fim = new Date(hoje);
+                                      fim.setDate(hoje.getDate() + 30);
+                                      form.setValue("dataInicio", hoje);
+                                      form.setValue("dataFim", fim);
+                                      toast({ title: "✅ Período definido", description: "30 dias", duration: 1500 });
+                                    }}
+                                    className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
+                                  >
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    30 dias
+                                  </Button>
+                                </div>
                               </div>
-                              <ul className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
-                                <li>• 3-7 dias para cotações simples</li>
-                                <li>• 7-14 dias para produtos especiais</li>
-                                <li>• Evite períodos muito longos</li>
-                              </ul>
-                            </div>
+                              </div>
 
-                            {/* Presets rápidos */}
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                                <Zap className="h-3 w-3" />
-                                <span className="font-medium">Atalhos Rápidos:</span>
+                              {/* Separator com estilo visual */}
+                              <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                  <span className="w-full border-t border-gray-200 dark:border-gray-800" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                  <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 font-medium tracking-wider">
+                                    Opções Avançadas
+                                  </span>
+                                </div>
                               </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    const hoje = new Date();
-                                    form.setValue("dataInicio", hoje);
-                                    form.setValue("dataFim", hoje);
-                                    toast({ title: "✅ Período definido", description: "Hoje (início e fim no mesmo dia)", duration: 1500 });
-                                  }}
-                                  className="h-10 text-xs font-semibold bg-amber-50/30 dark:bg-amber-900/10 border-amber-200/40 dark:border-amber-800/20 hover:bg-amber-100/40 dark:hover:bg-amber-900/20 backdrop-blur-sm"
-                                >
-                                  <Zap className="h-3 w-3 mr-1" />
-                                  Hoje
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    const hoje = new Date();
-                                    const fim = new Date(hoje);
-                                    fim.setDate(hoje.getDate() + 3);
-                                    form.setValue("dataInicio", hoje);
-                                    form.setValue("dataFim", fim);
-                                    toast({ title: "✅ Período definido", description: "3 dias", duration: 1500 });
-                                  }}
-                                  className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
-                                >
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  3 dias
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    const hoje = new Date();
-                                    const fim = new Date(hoje);
-                                    fim.setDate(hoje.getDate() + 7);
-                                    form.setValue("dataInicio", hoje);
-                                    form.setValue("dataFim", fim);
-                                    toast({ title: "✅ Período definido", description: "7 dias (recomendado)", duration: 1500 });
-                                  }}
-                                  className="h-10 text-xs font-semibold bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-200/40 dark:border-indigo-800/20 hover:bg-indigo-100/40 dark:hover:bg-indigo-900/20 backdrop-blur-sm"
-                                >
-                                  <Zap className="h-3 w-3 mr-1" />
-                                  7 dias
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    const hoje = new Date();
-                                    const fim = new Date(hoje);
-                                    fim.setDate(hoje.getDate() + 14);
-                                    form.setValue("dataInicio", hoje);
-                                    form.setValue("dataFim", fim);
-                                    toast({ title: "✅ Período definido", description: "14 dias", duration: 1500 });
-                                  }}
-                                  className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
-                                >
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  14 dias
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    const hoje = new Date();
-                                    const fim = new Date(hoje);
-                                    fim.setDate(hoje.getDate() + 30);
-                                    form.setValue("dataInicio", hoje);
-                                    form.setValue("dataFim", fim);
-                                    toast({ title: "✅ Período definido", description: "30 dias", duration: 1500 });
-                                  }}
-                                  className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
-                                >
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  30 dias
-                                </Button>
+
+                              {/* Seção de Agendamento */}
+                              <div className={cn(
+                                "rounded-xl border transition-all duration-300 overflow-hidden",
+                                isScheduled 
+                                  ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/60 dark:border-amber-800/30 shadow-sm" 
+                                  : "bg-gray-50/50 dark:bg-gray-800/30 border-gray-200/60 dark:border-gray-700/30"
+                              )}>
+                                <div className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                      <div className={cn(
+                                        "p-2 rounded-lg transition-colors",
+                                        isScheduled ? "bg-amber-100 text-amber-600" : "bg-gray-200 text-gray-500"
+                                      )}>
+                                        <Zap className="h-4 w-4" />
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <label className="text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer select-none" onClick={() => {
+                                            const newValue = !isScheduled;
+                                            setIsScheduled(newValue);
+                                            if (!newValue) {
+                                              form.setValue("dataPlanejada", undefined);
+                                            }
+                                        }}>
+                                          Agendar Cotação
+                                        </label>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                          Programar ativação automática para uma data futura
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <Switch
+                                      checked={isScheduled}
+                                      onCheckedChange={(checked) => {
+                                        setIsScheduled(checked);
+                                        if (!checked) {
+                                          form.setValue("dataPlanejada", undefined);
+                                        }
+                                      }}
+                                      className="data-[state=checked]:bg-amber-500"
+                                    />
+                                  </div>
+                                  
+                                  {isScheduled && (
+                                    <div className="mt-4 pt-4 border-t border-amber-200/40 dark:border-amber-800/20 animate-in slide-in-from-top-2 fade-in duration-300">
+                                      <div className="grid grid-cols-1 gap-4">
+                                        <FormField
+                                          control={form.control}
+                                          name="dataPlanejada"
+                                          render={({ field }) => (
+                                            <FormItem className="flex flex-col">
+                                              <FormLabel className="text-amber-900 dark:text-amber-200">Data de Ativação</FormLabel>
+                                              <Popover>
+                                                <PopoverTrigger asChild>
+                                                  <FormControl>
+                                                    <Button
+                                                      variant="outline"
+                                                      className={cn(
+                                                        "w-full pl-3 text-left font-normal border-amber-200 dark:border-amber-800 bg-white dark:bg-gray-950",
+                                                        !field.value && "text-muted-foreground"
+                                                      )}
+                                                    >
+                                                      {field.value ? (
+                                                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                                      ) : (
+                                                        <span>Selecione a data</span>
+                                                      )}
+                                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50 text-amber-600" />
+                                                    </Button>
+                                                  </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-amber-200 dark:border-amber-800" align="start">
+                                                  <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    disabled={(date) => {
+                                                      const startDate = form.getValues("dataInicio");
+                                                      return startDate ? date < startDate : date < new Date();
+                                                    }}
+                                                    initialFocus
+                                                    className="pointer-events-auto"
+                                                  />
+                                                </PopoverContent>
+                                              </Popover>
+                                              <FormMessage />
+                                              <p className="text-xs text-amber-700 dark:text-amber-300/80 mt-1">
+                                                A cotação ficará visível mas inativa até esta data.
+                                              </p>
+                                            </FormItem>
+                                          )}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            </div>
+
+                              {/* Dicas compactas - Sempre visíveis agora, mas adaptadas */}
+                              <div className="bg-blue-50/30 dark:bg-blue-900/10 border border-blue-200/40 dark:border-blue-800/20 backdrop-blur-sm rounded-lg p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                                    <span className="text-white text-xs">💡</span>
+                                  </div>
+                                  <h4 className="font-bold text-blue-900 dark:text-blue-300 text-xs">Dicas de Planejamento</h4>
+                                </div>
+                                <ul className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
+                                  <li>• Cotações urgentes: 3-5 dias de prazo</li>
+                                  <li>• Compras planejadas: Use o agendamento para organizar a semana</li>
+                                  <li>• Grandes volumes: Mínimo de 7 dias para negociação</li>
+                                </ul>
+                              </div>
                             </CardContent>
                           </Card>
                         </TabsContent>
@@ -1330,109 +1430,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           </div>
                         </TabsContent>
 
-                        {/* Agendamento Tab */}
-                        <TabsContent value="agendamento" className="flex-1 overflow-y-auto p-3 sm:p-4 m-0">
-                          <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-                            <CardHeader className="border-b border-white/10 dark:border-white/5">
-                              <CardTitle className="text-lg flex items-center gap-2 text-amber-900 dark:text-amber-100">
-                                <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                                Agendar Cotação (Opcional)
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4 pt-4">
-                              <div className="flex items-center space-x-2 p-3 bg-amber-50/30 dark:bg-amber-900/10 border border-amber-200/40 dark:border-amber-800/20 backdrop-blur-sm rounded-lg">
-                                <Switch
-                                  checked={isScheduled}
-                                  onCheckedChange={(checked) => {
-                                    setIsScheduled(checked);
-                                    if (!checked) {
-                                      form.setValue("dataPlanejada", undefined);
-                                    }
-                                  }}
-                                />
-                                <label className="text-sm font-medium text-amber-900 dark:text-amber-200 cursor-pointer">
-                                  Agendar esta cotação para uma data futura
-                                </label>
-                              </div>
-                              
-                              {isScheduled && (
-                                <div className="space-y-4 animate-in fade-in-50">
-                                  <FormField
-                                    control={form.control}
-                                    name="dataPlanejada"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-col">
-                                        <FormLabel>Data de Ativação</FormLabel>
-                                        <Popover>
-                                          <PopoverTrigger asChild>
-                                            <FormControl>
-                                              <Button
-                                                variant="outline"
-                                                className={cn(
-                                                  "pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
-                                                  !field.value && "text-muted-foreground"
-                                                )}
-                                              >
-                                                {field.value ? (
-                                                  format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                                ) : (
-                                                  <span>Selecione a data</span>
-                                                )}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                              </Button>
-                                            </FormControl>
-                                          </PopoverTrigger>
-                                          <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
-                                            <Calendar
-                                              mode="single"
-                                              selected={field.value}
-                                              onSelect={field.onChange}
-                                              disabled={(date) => {
-                                                const startDate = form.getValues("dataInicio");
-                                                return startDate ? date < startDate : date < new Date();
-                                              }}
-                                              initialFocus
-                                              className="pointer-events-auto"
-                                            />
-                                          </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                        <p className="text-sm text-muted-foreground">
-                                          A cotação só aparecerá nas métricas e será ativada a partir desta data
-                                        </p>
-                                      </FormItem>
-                                    )}
-                                  />
-                                  
-                                  {form.watch("dataPlanejada") && (
-                                    <Alert className="border-amber-200/40 dark:border-amber-800/20 bg-amber-50/30 dark:bg-amber-900/10 backdrop-blur-sm">
-                                      <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                                      <AlertDescription className="text-amber-800 dark:text-amber-200">
-                                        Esta cotação será ativada em {format(form.watch("dataPlanejada")!, "dd/MM/yyyy", { locale: ptBR })}
-                                      </AlertDescription>
-                                    </Alert>
-                                  )}
-                                </div>
-                              )}
-                              
-                              {!isScheduled && (
-                                <div className="bg-blue-50/30 dark:bg-blue-900/10 border border-blue-200/40 dark:border-blue-800/20 backdrop-blur-sm rounded-lg p-4">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                                      <span className="text-white text-xs">💡</span>
-                                    </div>
-                                    <h4 className="font-bold text-blue-900 dark:text-blue-300 text-sm">Por que agendar?</h4>
-                                  </div>
-                                  <ul className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
-                                    <li>• Prepare cotações com antecedência</li>
-                                    <li>• Otimize seu planejamento de compras</li>
-                                    <li>• Métricas precisas por período</li>
-                                  </ul>
-                                </div>
-                              )}
-                            </CardContent>
-                          </Card>
-                        </TabsContent>
+
 
                         {/* Detalhes Tab */}
                         <TabsContent value="detalhes" className="flex-1 m-0 min-h-0">

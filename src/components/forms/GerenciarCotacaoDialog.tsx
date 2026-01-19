@@ -473,29 +473,32 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                 </div>
               </div>
 
-              {/* Tabs no Header */}
-              <TabsList className="h-8 p-0.5 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-2xl rounded-lg border border-gray-200/60 dark:border-gray-700/40 flex shadow-inner">
-                <TabsTrigger value="resumo" className="h-full px-3 text-[9px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-gray-500 dark:text-gray-400">
-                  Resumo
-                </TabsTrigger>
-                <TabsTrigger value="valores" className="h-full px-3 text-[9px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-gray-500 dark:text-gray-400">
-                  Valores
-                </TabsTrigger>
-                <TabsTrigger value="converter" className="h-full px-3 text-[9px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-gray-500 dark:text-gray-400">
-                  Pedido
-                </TabsTrigger>
-                <TabsTrigger value="editar" className="h-full px-3 text-[9px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-gray-500 dark:text-gray-400">
-                  Editar
-                </TabsTrigger>
+              {/* Tabs no Header - FORÇANDO TRANSPARÊNCIA TOTAL */}
+              <TabsList className="h-8 p-0 bg-transparent !bg-transparent border-0 flex gap-4 shadow-none !shadow-none">
+                {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
+                  <TabsTrigger 
+                    key={tab}
+                    value={tab} 
+                    className="h-full px-1 text-[9px] font-black uppercase tracking-widest rounded-none border-b-2 border-transparent 
+                      data-[state=active]:!border-gray-900 dark:data-[state=active]:!border-white 
+                      !bg-transparent data-[state=active]:!bg-transparent hover:!bg-transparent
+                      !text-gray-400 dark:!text-gray-500 
+                      data-[state=active]:!text-gray-900 dark:data-[state=active]:!text-white 
+                      !shadow-none data-[state=active]:!shadow-none 
+                      transition-colors cursor-pointer select-none"
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </div>
 
             <div className="flex items-center gap-2 relative z-10">
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm" 
                 onClick={handleExportHtml} 
-                className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40 bg-blue-50/50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-800 transition-all duration-200 rounded-lg shadow-sm hidden sm:flex"
+                className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 !bg-transparent hover:!bg-transparent hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 rounded-lg !shadow-none !border-0 hidden sm:flex"
               >
                 <Download className="h-3 w-3 mr-1.5" />
                 Exportar
