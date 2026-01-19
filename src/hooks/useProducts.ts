@@ -206,14 +206,16 @@ export function useProducts() {
       const cleanedProducts = formattedProducts.map(({ _lastOrderTimestamp, ...rest }: any) => rest as Product);
 
       console.log('[PRODUCTS DEBUG] Total formatted products:', cleanedProducts.length);
-      console.log('[PRODUCTS DEBUG] Sample formatted products:', cleanedProducts.slice(0, 3).map(p => ({ 
-        id: p.id, 
-        name: p.name, 
-        category: p.category,
-        quotesCount: p.quotesCount 
-      })));
+      
+      // Ensure unique products by ID to prevent duplicate key warnings
+      const uniqueProducts = Array.from(new Map(cleanedProducts.map(p => [p.id, p])).values());
+      
+      if (uniqueProducts.length !== cleanedProducts.length) {
+        console.warn(`[PRODUCTS DEBUG] Found ${cleanedProducts.length - uniqueProducts.length} duplicate products. Filtered them out.`);
+      }
 
-      return cleanedProducts;
+      console.log('[PRODUCTS DEBUG] Total unique products:', uniqueProducts.length);
+      return uniqueProducts;
     },
   });
 
