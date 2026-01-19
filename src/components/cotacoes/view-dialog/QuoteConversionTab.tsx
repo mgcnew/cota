@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Package, DollarSign, Trophy, TrendingDown, ShoppingCart, Calendar, FileText, Building2 } from "lucide-react";
+import { Package, DollarSign, Trophy, TrendingDown, ShoppingCart, Calendar, FileText, Building2, Inbox } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface QuoteConversionTabProps {
   products: any[];
@@ -109,33 +110,46 @@ export function QuoteConversionTab({
     }
   };
 
+  if (products.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-12">
+        <EmptyState 
+          icon={Inbox}
+          title="Nenhum produto disponível"
+          description="Não há produtos nesta cotação para converter em pedido."
+          variant="inline"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="p-3 space-y-3">
       {/* Resumo Financeiro */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="bg-teal-500/5 dark:bg-teal-900/10 rounded-2xl p-3 border border-teal-500/20 dark:border-teal-800/30 backdrop-blur-md shadow-sm relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="bg-gray-500/5 dark:bg-gray-900/10 rounded-2xl p-3 border border-gray-200/60 dark:border-gray-700/40 backdrop-blur-md shadow-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="flex items-center gap-2 mb-1 relative z-10">
-            <div className="w-6 h-6 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-600 border border-teal-500/20 shadow-sm">
+            <div className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 border border-gray-200 dark:border-gray-700 shadow-sm">
               <DollarSign className="h-3 w-3" />
             </div>
             <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Total Selecionado</span>
           </div>
           <p className="text-xl font-black text-gray-900 dark:text-white tracking-tighter relative z-10">
-            <span className="text-xs mr-1 text-teal-500/50">R$</span>
+            <span className="text-xs mr-1 text-gray-400">R$</span>
             {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="bg-emerald-500/5 dark:bg-emerald-900/10 rounded-2xl p-3 border border-emerald-500/20 dark:border-emerald-800/30 backdrop-blur-md shadow-sm relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="bg-gray-900/5 dark:bg-white/5 rounded-2xl p-3 border border-gray-200 dark:border-gray-700 backdrop-blur-md shadow-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 to-transparent dark:from-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="flex items-center gap-2 mb-1 relative z-10">
-            <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/20 shadow-sm">
+            <div className="w-6 h-6 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 border border-gray-900 dark:border-white shadow-sm">
               <Trophy className="h-3 w-3" />
             </div>
             <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Melhor Total Possível</span>
           </div>
-          <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 tracking-tighter relative z-10">
-            <span className="text-xs mr-1 text-emerald-500/50">R$</span>
+          <p className="text-xl font-black text-gray-900 dark:text-white tracking-tighter relative z-10">
+            <span className="text-xs mr-1 text-gray-400">R$</span>
             {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
@@ -144,7 +158,7 @@ export function QuoteConversionTab({
       {/* Estratégias */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-white/30 dark:bg-black/20 p-2 rounded-xl border border-white/20">
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></div>
+          <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse"></div>
           <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Estratégia de Seleção</span>
         </div>
         <Tabs value={pedidoSubTab} onValueChange={(val) => {
@@ -176,10 +190,10 @@ export function QuoteConversionTab({
           }
         }}>
           <TabsList className="h-8 p-1 bg-white/40 dark:bg-gray-950/40 backdrop-blur-xl rounded-lg border border-white/20 shadow-inner gap-1">
-            <TabsTrigger value="melhores" className="h-full px-3 text-[7px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-emerald-600 data-[state=active]:shadow-md transition-all">
+            <TabsTrigger value="melhores" className="h-full px-3 text-[7px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
               <Trophy className="h-2.5 w-2.5 mr-1.5" /> Melhores Preços
             </TabsTrigger>
-            <TabsTrigger value="unico" className="h-full px-3 text-[7px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-blue-600 data-[state=active]:shadow-md transition-all">
+            <TabsTrigger value="unico" className="h-full px-3 text-[7px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
               <Building2 className="h-2.5 w-2.5 mr-1.5" /> Fornecedor Único
             </TabsTrigger>
           </TabsList>
@@ -187,9 +201,9 @@ export function QuoteConversionTab({
       </div>
 
       {totalSelecao > melhorTotal && (
-        <div className="bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl flex items-center gap-2 animate-bounce-subtle">
-          <TrendingDown className="h-3 w-3 text-amber-600" />
-          <span className="text-[9px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-tight">
+        <div className="bg-gray-500/10 border border-gray-200 dark:border-gray-700 p-2 rounded-xl flex items-center gap-2 animate-bounce-subtle">
+          <TrendingDown className="h-3 w-3 text-gray-500" />
+          <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-tight">
             Economia Pendente: R$ {(totalSelecao - melhorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </span>
         </div>
@@ -198,83 +212,104 @@ export function QuoteConversionTab({
       {/* Tabela de Seleção */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 px-1">
-          <ShoppingCart className="h-3 w-3 text-teal-500" />
+          <ShoppingCart className="h-3 w-3 text-gray-400" />
           <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Configuração do Pedido</span>
         </div>
-        <Card className="border-white/30 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl shadow-xl rounded-xl overflow-hidden ring-1 ring-white/20">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[500px] border-collapse">
-              <thead className="bg-white/30 dark:bg-white/5 border-b border-white/10">
-                <tr>
-                  <th className="px-3 py-2 text-left text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Produto</th>
-                  <th className="px-3 py-2 text-left text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Qtd</th>
-                  <th className="px-3 py-2 text-left text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Fornecedor</th>
-                  <th className="px-3 py-2 text-right text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10 dark:divide-white/5">
-                {products.map((product: any) => {
-                  const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
-                  const selectedSupplierId = productSelections[product.product_id];
-                  const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
-                  const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
+        
+        {/* Header da Tabela (Fixo) - Igual ao QuoteValuesTab */}
+        <div className="grid grid-cols-[1.5fr_0.8fr_1.5fr_auto] gap-2 px-3 py-1.5 border-b border-gray-100 dark:border-gray-800 text-[8px] font-black uppercase text-gray-500 tracking-[0.2em] bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm">
+           <div>Produto</div>
+           <div className="hidden sm:block">Qtd</div>
+           <div>Fornecedor</div>
+           <div className="text-right">Subtotal</div>
+        </div>
 
-                  return (
-                    <tr key={product.product_id} className={cn("hover:bg-white/20 dark:hover:bg-white/5 transition-all group/row", isBest && "bg-emerald-500/5")}>
-                      <td className="px-3 py-1.5">
-                        <p className="font-bold text-[11px] text-gray-900 dark:text-white truncate max-w-[200px]" title={safeStr(product.product_name)}>{safeStr(product.product_name)}</p>
-                      </td>
-                      <td className="px-3 py-1.5">
-                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded border border-white/20">{safeStr(product.quantidade)} {safeStr(product.unidade)}</span>
-                      </td>
-                      <td className="px-3 py-1.5">
-                        <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
-                          <SelectTrigger className="w-full h-7 bg-white/60 dark:bg-white/5 border-white/30 dark:border-white/10 font-bold rounded-lg text-[10px] shadow-sm transition-all">
-                            <SelectValue placeholder="Escolha..." />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-white/30 rounded-xl shadow-2xl">
-                            {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
-                              <SelectItem key={f.id} value={f.id} className="font-bold text-xs">
-                                {safeStr(f.nome)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </td>
-                      <td className="px-3 py-1.5 text-right">
-                        <div className="flex flex-col items-end">
-                          <span className={cn("font-black text-[11px] tracking-tight", isBest ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white")}>
-                            R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </span>
-                          {isBest && (
-                            <span className="text-[6px] font-black text-emerald-500 uppercase tracking-widest mt-0.5">Melhor</span>
-                          )}
+        <div className="flex flex-col gap-1.5">
+          {products.map((product: any) => {
+            const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
+            const selectedSupplierId = productSelections[product.product_id];
+            const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
+            const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
+
+            return (
+              <div 
+                key={product.product_id} 
+                className={cn(
+                  "flex items-center px-3 rounded-xl border transition-all duration-300 group/row bg-white dark:bg-gray-900 shadow-sm hover:shadow-md", 
+                  isBest ? "border-emerald-100 dark:border-emerald-900/30" : "border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
+                )}
+                style={{ height: '52px' }}
+              >
+                <div className="grid grid-cols-[1.5fr_0.8fr_1.5fr_auto] gap-2 w-full items-center">
+                  {/* Produto */}
+                  <div className="min-w-0">
+                    <p className="font-bold text-[11px] text-gray-900 dark:text-white truncate tracking-tight" title={safeStr(product.product_name)}>
+                      {safeStr(product.product_name)}
+                    </p>
+                    <span className="sm:hidden text-[7px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-100 dark:bg-gray-800 px-1 py-0 rounded border border-gray-200 dark:border-gray-700 w-fit mt-0.5 block">
+                      {safeStr(product.quantidade)} {safeStr(product.unidade)}
+                    </span>
+                  </div>
+
+                  {/* Qtd Desktop */}
+                  <div className="hidden sm:block">
+                    <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1.5 py-0.5 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+                      {safeStr(product.quantidade)} {safeStr(product.unidade)}
+                    </span>
+                  </div>
+
+                  {/* Select Fornecedor */}
+                  <div className="min-w-0">
+                    <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
+                      <SelectTrigger className="w-full h-7 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-bold rounded-lg text-[10px] shadow-sm transition-all text-gray-700 dark:text-gray-300">
+                        <SelectValue placeholder="Escolha..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                        {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
+                          <SelectItem key={f.id} value={f.id} className="font-bold text-xs">
+                            {safeStr(f.nome)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Subtotal */}
+                  <div className="text-right">
+                    <div className="flex flex-col items-end">
+                      <span className={cn("font-bold text-[11px] tracking-tight", isBest ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400")}>
+                        R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
+                      {isBest && (
+                        <div className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 border border-gray-800 dark:border-gray-200 px-1.5 py-0 rounded text-[6px] font-black uppercase tracking-wider shadow-sm flex items-center gap-0.5 mt-0.5">
+                          <Trophy className="h-2 w-2" />
+                          Melhor
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Preview de Envio */}
       {supplierGroups.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center gap-2 px-1">
-            <Package className="h-3 w-3 text-blue-500" />
+            <Package className="h-3 w-3 text-gray-400" />
             <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Preview de Envio</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {supplierGroups.map((group, index) => (
-              <Card key={group.supplierId} className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/30 dark:border-white/10 backdrop-blur-2xl rounded-xl shadow-lg group/order hover:border-blue-500/40 transition-all duration-300">
+              <Card key={group.supplierId} className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/30 dark:border-white/10 backdrop-blur-2xl rounded-xl shadow-lg group/order hover:border-gray-400/40 transition-all duration-300">
                 <div className="flex items-center justify-between mb-1.5">
-                  <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded shadow-sm">Pedido #{index + 1}</Badge>
-                  <span className="font-black text-[10px] text-emerald-600 dark:text-emerald-400">R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded shadow-sm">Pedido #{index + 1}</Badge>
+                  <span className="font-black text-[10px] text-gray-900 dark:text-white">R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                 </div>
-                <p className="font-black text-[11px] text-gray-900 dark:text-white truncate mb-0.5 group-hover/order:text-blue-600 transition-colors" title={group.supplierName}>{group.supplierName}</p>
+                <p className="font-black text-[11px] text-gray-900 dark:text-white truncate mb-0.5 group-hover/order:text-gray-600 transition-colors" title={group.supplierName}>{group.supplierName}</p>
                 <div className="text-[8px] text-gray-400 font-bold uppercase tracking-tighter line-clamp-2 leading-relaxed opacity-60">
                   {group.products.map((p: any) => safeStr(p.product_name)).join(", ")}
                 </div>
@@ -289,12 +324,12 @@ export function QuoteConversionTab({
         <div className="space-y-1.5">
           <label className="block text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Data de Entrega *</label>
           <div className="relative group">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-hover:text-teal-500 transition-colors pointer-events-none" />
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600 transition-colors pointer-events-none" />
             <Input 
               type="date" 
               value={deliveryDate} 
               onChange={(e) => setDeliveryDate(e.target.value)} 
-              className="h-9 bg-white/60 dark:bg-gray-950/60 border-white/30 dark:border-white/10 font-bold rounded-xl pl-9 focus:ring-teal-500/20 shadow-sm text-xs" 
+              className="h-9 bg-white/60 dark:bg-gray-950/60 border-white/30 dark:border-white/10 font-bold rounded-xl pl-9 focus:ring-gray-400/20 shadow-sm text-xs" 
               min={new Date().toISOString().split('T')[0]} 
             />
           </div>
@@ -302,12 +337,12 @@ export function QuoteConversionTab({
         <div className="space-y-1.5">
           <label className="block text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Observações</label>
           <div className="relative group">
-            <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-hover:text-teal-500 transition-colors pointer-events-none" />
+            <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-hover:text-gray-600 transition-colors pointer-events-none" />
             <Input 
               value={observations} 
               onChange={(e) => setObservations(e.target.value)} 
               placeholder="Instruções..." 
-              className="h-9 bg-white/60 dark:bg-gray-950/60 border-white/30 dark:border-white/10 font-medium rounded-xl pl-9 focus:ring-teal-500/20 shadow-sm text-xs" 
+              className="h-9 bg-white/60 dark:bg-gray-950/60 border-white/30 dark:border-white/10 font-medium rounded-xl pl-9 focus:ring-gray-400/20 shadow-sm text-xs" 
             />
           </div>
         </div>
@@ -318,7 +353,7 @@ export function QuoteConversionTab({
         <Button 
           onClick={handleConvertToOrder} 
           disabled={!deliveryDate || Object.keys(productSelections).length === 0} 
-          className="w-full h-10 bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-emerald-500/20 rounded-xl transition-all active:scale-[0.98] ring-2 ring-white/20 relative overflow-hidden group"
+          className="w-full h-10 bg-orange-600 hover:bg-orange-700 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-orange-500/20 rounded-xl transition-all active:scale-[0.98] ring-2 ring-white/20 relative overflow-hidden group"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-shimmer pointer-events-none"></div>
           <ShoppingCart className="h-3.5 w-3.5 mr-2" />

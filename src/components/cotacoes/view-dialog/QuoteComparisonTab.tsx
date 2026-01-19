@@ -63,28 +63,28 @@ export function QuoteComparisonTab({
 
                 {/* Resumo Comparativo Superior */}
                 {bestSupplier && (
-                    <Card className="mb-2.5 border-2 border-primary/20 dark:border-primary/30 bg-primary/5 dark:bg-primary/10 rounded-lg shadow-md dark:shadow-none">
+                    <Card className="mb-2.5 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950/50 rounded-lg shadow-sm dark:shadow-none">
                         <div className="p-2.5 sm:p-3">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                                 <div className="flex items-center gap-2">
-                                    <div className="p-2 rounded-lg bg-purple-600 dark:bg-purple-600 text-white shadow-sm">
+                                    <div className="p-2 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-950 shadow-sm">
                                         <BarChart3 className="h-4 w-4" />
                                     </div>
                                     <div>
-                                        <h3 className="text-[10px] font-semibold text-purple-900 dark:text-purple-300 uppercase mb-0.5">
+                                        <h3 className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase mb-0.5">
                                             Melhor Opção
                                         </h3>
-                                        <p className="font-bold text-sm text-purple-900 dark:text-white">
+                                        <p className="font-bold text-sm text-gray-900 dark:text-white">
                                             {bestSupplier.nome}
                                         </p>
-                                        <p className="text-[10px] text-purple-700 dark:text-purple-400 mt-0.5">
+                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
                                             Economia: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{currentQuote?.economia || 'N/A'}</span>
                                         </p>
                                     </div>
                                 </div>
                                 <div className="text-center sm:text-right">
-                                    <p className="text-[10px] text-purple-700 dark:text-purple-400 font-medium mb-0.5">Total</p>
-                                    <p className="text-base font-bold text-purple-600 dark:text-purple-400">
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium mb-0.5">Total</p>
+                                    <p className="text-base font-bold text-gray-900 dark:text-white">
                                         R$ {bestSupplier.totalValue.toFixed(2)}
                                     </p>
                                 </div>
@@ -94,15 +94,15 @@ export function QuoteComparisonTab({
                 )}
 
                 {/* Tabela Comparativa - Foco Total */}
-                <Card className="flex-1 overflow-hidden border-2 border-purple-200/80 dark:border-purple-800/60 bg-white dark:bg-[#1C1F26] rounded-lg shadow-md dark:shadow-none flex flex-col">
+                <Card className="flex-1 overflow-hidden border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1C1F26] rounded-lg shadow-sm dark:shadow-none flex flex-col">
                     <ScrollArea className="flex-1">
                         <table className="w-full border-collapse min-w-max">
-                            <thead className="sticky top-0 z-10 bg-purple-50/80 dark:bg-gray-900/95 backdrop-blur-sm">
-                                <tr className="border-b-2 border-purple-300/60 dark:border-purple-700/60">
-                                    <th className="px-3 py-2 text-left bg-purple-100/80 dark:bg-gray-800/95 backdrop-blur-sm sticky left-0 z-20 shadow-sm">
+                            <thead className="sticky top-0 z-10 bg-gray-50/80 dark:bg-gray-900/95 backdrop-blur-sm">
+                                <tr className="border-b border-gray-200 dark:border-gray-800">
+                                    <th className="px-3 py-2 text-left bg-gray-50/80 dark:bg-gray-800/95 backdrop-blur-sm sticky left-0 z-20 shadow-sm">
                                         <div className="flex items-center gap-1.5">
-                                            <Package className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-                                            <span className="font-bold text-xs text-purple-900 dark:text-white">Produto</span>
+                                            <Package className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                            <span className="font-bold text-xs text-gray-900 dark:text-white">Produto</span>
                                         </div>
                                     </th>
                                     {currentQuote?.fornecedoresParticipantes.map(fornecedor => {
@@ -120,28 +120,28 @@ export function QuoteComparisonTab({
                                                     "px-2 py-2 text-center group relative",
                                                     currentQuote.fornecedoresParticipantes.length > 5 ? "min-w-[100px] max-w-[120px]" : "min-w-[120px]",
                                                     isWinning
-                                                        ? "bg-emerald-100/90 dark:bg-emerald-900/40 border-l-2 border-r-2 border-emerald-300 dark:border-emerald-700"
-                                                        : "bg-purple-50/80 dark:bg-gray-900"
+                                                        ? "bg-emerald-50/50 dark:bg-emerald-900/20 border-l border-r border-emerald-100 dark:border-emerald-800"
+                                                        : "bg-gray-50/80 dark:bg-gray-900"
                                                 )}
                                                 title={`Total: R$ ${totalValue.toFixed(2)}`}
                                             >
                                                 <div className="flex items-center justify-center gap-1 mb-0.5">
                                                     <Building2 className={cn(
                                                         "h-3 w-3 flex-shrink-0",
-                                                        isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-purple-600 dark:text-purple-400"
+                                                        isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-gray-400 dark:text-gray-500"
                                                     )} />
                                                     {isWinning && <Star className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400 fill-current flex-shrink-0" />}
                                                 </div>
                                                 <p className={cn(
                                                     "font-bold truncate",
                                                     currentQuote.fornecedoresParticipantes.length > 5 ? "text-[10px]" : "text-xs",
-                                                    isWinning ? "text-emerald-700 dark:text-emerald-300" : "text-purple-900 dark:text-white"
+                                                    isWinning ? "text-emerald-700 dark:text-emerald-300" : "text-gray-900 dark:text-white"
                                                 )} title={fornecedor.nome}>
                                                     {fornecedor.nome}
                                                 </p>
                                                 <div className={cn(
                                                     "mt-0.5 text-[9px] font-medium",
-                                                    isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-purple-600 dark:text-purple-400"
+                                                    isWinning ? "text-emerald-600 dark:text-emerald-400" : "text-gray-500 dark:text-gray-400"
                                                 )}>
                                                     R$ {totalValue.toFixed(2)}
                                                 </div>
@@ -157,14 +157,14 @@ export function QuoteComparisonTab({
 
                                     return (
                                         <tr key={product.product_id} className={cn(
-                                            "border-b border-slate-200 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors",
-                                            index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-slate-50/50 dark:bg-gray-800/30"
+                                            "border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors",
+                                            index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50/30 dark:bg-gray-800/30"
                                         )}>
-                                            <td className="px-3 py-2 bg-purple-50/50 dark:bg-gray-800/80 sticky left-0 z-10 shadow-sm border-r border-purple-200/40 dark:border-purple-700/40">
-                                                <p className="font-bold text-xs text-purple-900 dark:text-white truncate max-w-[200px]" title={product.product_name}>
+                                            <td className="px-3 py-2 bg-gray-50/30 dark:bg-gray-800/80 sticky left-0 z-10 shadow-sm border-r border-gray-100 dark:border-gray-800">
+                                                <p className="font-bold text-xs text-gray-900 dark:text-white truncate max-w-[200px]" title={product.product_name}>
                                                     {product.product_name}
                                                 </p>
-                                                <p className="text-[10px] text-purple-600 dark:text-purple-400 mt-0.5 font-medium">
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
                                                     {product.quantidade} {product.unidade}
                                                 </p>
                                             </td>
@@ -189,8 +189,8 @@ export function QuoteComparisonTab({
                                                     <td key={fornecedor.id} className={cn(
                                                         "py-2 text-center",
                                                         (currentQuote?.fornecedoresParticipantes.length ?? 0) > 5 ? "px-1.5" : "px-2",
-                                                        isBestPrice && "bg-emerald-50/80 dark:bg-emerald-900/30",
-                                                        isWinning && "border-l-2 border-r-2 border-emerald-300/60 dark:border-emerald-700/60"
+                                                        isBestPrice && "bg-emerald-50/30 dark:bg-emerald-900/20",
+                                                        isWinning && "border-l border-r border-emerald-100/50 dark:border-emerald-800/50"
                                                     )}>
                                                         {originalValue > 0 ? (
                                                             <div className="flex flex-col items-center gap-0.5">
@@ -203,8 +203,8 @@ export function QuoteComparisonTab({
                                                                                     ? "text-[10px] min-w-[75px]"
                                                                                     : "text-xs min-w-[85px]",
                                                                                 isBestPrice
-                                                                                    ? "bg-emerald-600 dark:bg-gray-700 text-white ring-1 ring-emerald-200 dark:ring-emerald-800"
-                                                                                    : "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100 border border-purple-200 dark:border-purple-800"
+                                                                                    ? "bg-emerald-600 dark:bg-emerald-600 text-white ring-1 ring-emerald-200 dark:ring-emerald-800"
+                                                                                    : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700"
                                                             )}>
                                                                                 {isBestPrice && <TrendingDown className="h-2.5 w-2.5 flex-shrink-0" />}
                                                                                 <span className="whitespace-nowrap">R$ {normalizedUnitPrice.toFixed(2)}</span>
@@ -222,7 +222,7 @@ export function QuoteComparisonTab({
                                                                     </Tooltip>
                                                                 </TooltipProvider>
                                                                 {showOriginalUnit && (
-                                                                    <span className="text-[8px] text-gray-500 dark:text-gray-400">
+                                                                    <span className="text-[8px] text-gray-400 dark:text-gray-500">
                                                                         orig: R$ {originalValue.toFixed(2)}/{metadata.unidadePreco}
                                                                     </span>
                                                                 )}
@@ -233,7 +233,7 @@ export function QuoteComparisonTab({
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <div className="text-purple-300 dark:text-purple-800">
+                                                            <div className="text-gray-300 dark:text-gray-800">
                                                                 <Minus className="h-3 w-3 mx-auto" />
                                                             </div>
                                                         )}
@@ -249,17 +249,17 @@ export function QuoteComparisonTab({
 
                     {/* Rodapé com Ação de Converter */}
                     {bestSupplier && currentQuote.status !== 'finalizada' && !readOnly && (
-                        <div className="flex-shrink-0 p-2.5 sm:p-3 border-t-2 border-primary/20 dark:border-gray-700/30 bg-primary/5 dark:bg-primary/10">
+                        <div className="flex-shrink-0 p-2.5 sm:p-3 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                                 <div className="flex items-center gap-2">
-                                    <div className="p-2 rounded-lg bg-purple-600 dark:bg-purple-600 text-white shadow-sm">
+                                    <div className="p-2 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-950 shadow-sm">
                                         <Star className="h-3.5 w-3.5 fill-current" />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-bold text-purple-900 dark:text-white">
+                                        <p className="text-xs font-bold text-gray-900 dark:text-white">
                                             Melhor: <span className="text-emerald-600 dark:text-emerald-400">{bestSupplier.nome}</span>
                                         </p>
-                                        <p className="text-[10px] text-purple-700 dark:text-purple-400 mt-0.5">
+                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
                                             R$ {bestSupplier.totalValue.toFixed(2)} • Eco: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{currentQuote?.economia || 'N/A'}</span>
                                         </p>
                                     </div>
@@ -271,7 +271,7 @@ export function QuoteComparisonTab({
                                                 onClick={handleConvertToOrder}
                                                 disabled={isUpdating}
                                                 size="sm"
-                                                className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white font-semibold text-xs shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all h-8"
+                                                className="w-full sm:w-auto bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-950 font-semibold text-xs shadow-sm transition-all h-8"
                                             >
                                                 <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
                                                 Converter

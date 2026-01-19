@@ -112,7 +112,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
       </ResponsiveGrid>
 
       <div className="flex flex-col sm:flex-row items-stretch gap-2">
-        <ExpandableSearch value={searchTerm} onChange={setSearchTerm} placeholder="Buscar..." accentColor="purple" expandedWidth="w-full sm:w-48" />
+        <ExpandableSearch value={searchTerm} onChange={setSearchTerm} placeholder="Buscar..." accentColor="gray" expandedWidth="w-full sm:w-48" />
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-xl">
             <SelectValue placeholder="Status" />
@@ -125,7 +125,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
           </SelectContent>
         </Select>
         <div className="flex gap-2 ml-auto">
-          <Button onClick={onCreateOrder} className="h-10 bg-purple-600 hover:bg-purple-700">
+          <Button onClick={onCreateOrder} className="h-10 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-950 font-bold uppercase tracking-wider text-xs shadow-lg">
             <Plus className="h-4 w-4 mr-1" />Novo Pedido
           </Button>
         </div>
@@ -147,8 +147,8 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
               <div key={order.id} className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-purple-100 dark:bg-purple-900/30">
-                      <ShoppingCart className="h-5 w-5 text-purple-600" />
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-800/50">
+                      <ShoppingCart className="h-5 w-5 text-gray-900 dark:text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-sm truncate"><CapitalizedText>{order.supplierName}</CapitalizedText></p>
@@ -187,36 +187,36 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
           <thead>
             <tr>
               <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                <div className="flex items-center bg-card/95 border border-purple-200/60 dark:border-purple-900/40 rounded-lg shadow-sm px-4 py-3">
+                <div className="flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/60 rounded-lg shadow-sm px-4 py-3">
                   <div className="w-[14%] flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-600">
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center text-gray-500">
                       <ShoppingCart className="h-4 w-4" />
                     </div>
-                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Pedido</span>
+                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Pedido</span>
                   </div>
                   <div className="w-[18%] pl-2 flex items-center gap-1.5">
-                    <Building2 className="h-3.5 w-3.5 text-purple-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Fornecedor</span>
+                    <Building2 className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
                   </div>
                   <div className="w-[20%] pl-2 flex items-center gap-1.5">
-                    <Package className="h-3.5 w-3.5 text-purple-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Itens</span>
+                    <Package className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Itens</span>
                   </div>
                   <div className="w-[12%] pl-2 flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5 text-purple-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Entrega</span>
+                    <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Entrega</span>
                   </div>
                   <div className="w-[12%] pl-2 flex justify-center items-center gap-1.5">
-                    <CircleDot className="h-3.5 w-3.5 text-purple-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Status</span>
+                    <CircleDot className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Status</span>
                   </div>
                   <div className="w-[12%] pl-2 flex items-center gap-1.5">
-                    <DollarSign className="h-3.5 w-3.5 text-purple-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Valor</span>
+                    <DollarSign className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Valor</span>
                   </div>
                   <div className="w-[12%] pl-2 flex justify-end items-center gap-1.5">
-                    <MoreVertical className="h-3.5 w-3.5 text-purple-600/70" />
-                    <span className="uppercase text-[11px] font-semibold text-purple-900 dark:text-purple-100">Ações</span>
+                    <MoreVertical className="h-3.5 w-3.5 text-gray-400" />
+                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Ações</span>
                   </div>
                 </div>
               </td>
@@ -231,10 +231,10 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                 <TableRow key={order.id} className="group border-none">
                   <TableCell colSpan={7} className="px-1 py-2">
                     <div className={cn(
-                      "flex items-center px-3 py-2.5 bg-card/90 rounded-lg border transition-colors",
+                      "flex items-center px-3 py-2.5 bg-white dark:bg-gray-800/50 rounded-lg border transition-colors",
                       isEntregue 
                         ? "border-emerald-300/50 hover:border-emerald-400/70 dark:border-emerald-700/50" 
-                        : "border-border hover:border-purple-300/50"
+                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                     )}>
                       {/* Pedido */}
                       <div className="w-[14%] flex items-center gap-3">
@@ -242,12 +242,12 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                           "w-8 h-8 rounded-lg flex items-center justify-center border",
                           isEntregue 
                             ? "bg-emerald-500/10 border-emerald-200/50" 
-                            : "bg-purple-500/10 border-purple-200/50"
+                            : "bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600/30"
                         )}>
                           {isEntregue ? (
                             <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                           ) : (
-                            <ShoppingCart className="h-4 w-4 text-purple-600" />
+                            <ShoppingCart className="h-4 w-4 text-gray-500" />
                           )}
                         </div>
                         <div>
@@ -278,7 +278,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                       <div className="w-[12%] pl-2 text-sm text-muted-foreground">
                         {order.deliveryDate ? (
                           <div className="flex items-center gap-1">
-                            <Truck className="h-3 w-3 text-purple-500" />
+                            <Truck className="h-3 w-3 text-gray-400" />
                             <span>{order.deliveryDate}</span>
                           </div>
                         ) : (

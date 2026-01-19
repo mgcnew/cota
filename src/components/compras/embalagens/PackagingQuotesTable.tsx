@@ -50,7 +50,7 @@ export function PackagingQuotesTable({
       return <Badge variant="destructive">Cancelada</Badge>;
     }
     
-    return <Badge className="bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300">Ativa</Badge>;
+    return <Badge className="bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">Ativa</Badge>;
   };
 
   return (
@@ -168,19 +168,19 @@ export function PackagingQuotesTable({
                       "flex items-center gap-1 px-2 py-0.5 rounded-full w-fit",
                       respondidos === total && total > 0
                         ? "bg-emerald-50 dark:bg-emerald-900/20"
-                        : "bg-blue-50 dark:bg-blue-900/20"
+                        : "bg-gray-100 dark:bg-gray-800/50"
                     )}>
                       <Building2 className={cn(
                         "h-3 w-3",
                         respondidos === total && total > 0
                           ? "text-emerald-500 dark:text-emerald-400"
-                          : "text-blue-500 dark:text-blue-400"
+                          : "text-gray-400 dark:text-gray-500"
                       )} />
                       <span className={cn(
                         "font-semibold text-xs",
                         respondidos === total && total > 0
                           ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-blue-600 dark:text-blue-400"
+                          : "text-gray-600 dark:text-gray-400"
                       )}>
                         {respondidos}/{total}
                       </span>

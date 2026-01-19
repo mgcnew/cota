@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Plus, Trash2, Package, Building2 } from "lucide-react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { Plus, Trash2, Package, Building2, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { PricingUnit } from "@/utils/priceNormalization";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface QuoteEditTabProps {
   products: any[];
@@ -38,6 +40,14 @@ export function QuoteEditTab({
   const [productQuantity, setProductQuantity] = useState(1);
   const [productUnit, setProductUnit] = useState<PricingUnit>("un");
   const [selectedSupplierToAdd, setSelectedSupplierToAdd] = useState("");
+  
+  // States para busca de produtos
+  const [productSearch, setProductSearch] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
+  const debouncedProductSearch = useDebounce(productSearch, 300);
+  const productSearchRef = useRef<HTMLInputElement>(null);
+  const productListRef = useRef<HTMLDivElement>(null);
 
   const suppliersNotInQuote = useMemo(() => 
     availableSuppliers.filter((s: any) => !fornecedores.some((f: any) => f.id === s.id)),
@@ -49,6 +59,51 @@ export function QuoteEditTab({
     [availableProducts, products]
   );
 
+  const filteredProducts = useMemo(() => {
+    if (!debouncedProductSearch || debouncedProductSearch.trim().length < 2) return [];
+    return availableProductsNotInQuote
+      .filter((p: any) => p.nome.toLowerCase().includes(debouncedProductSearch.toLowerCase()))
+      .slice(0, 30);
+  }, [availableProductsNotInQuote, debouncedProductSearch]);
+
+  // Reset highlighted index when search changes
+  useEffect(() => {
+    setHighlightedProductIndex(-1);
+  }, [debouncedProductSearch]);
+
+  const selectProductFromList = (product: any) => {
+    setSelectedProduct(product);
+    setSelectedProductToAdd(product.id);
+    setProductSearch(product.nome);
+    setHighlightedProductIndex(-1);
+  };
+
+  const handleProductKeyDown = (e: React.KeyboardEvent) => {
+    if (filteredProducts.length > 0 && !selectedProduct) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedProductIndex(prev => prev < filteredProducts.length - 1 ? prev + 1 : 0);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedProductIndex(prev => prev > 0 ? prev - 1 : filteredProducts.length - 1);
+        return;
+      }
+      if (e.key === 'Enter' && highlightedProductIndex >= 0) {
+        e.preventDefault();
+        selectProductFromList(filteredProducts[highlightedProductIndex]);
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setProductSearch("");
+        setHighlightedProductIndex(-1);
+        return;
+      }
+    }
+  };
+
   const handleAddProduct = async () => {
     if (!selectedProductToAdd) return;
     try {
@@ -59,6 +114,8 @@ export function QuoteEditTab({
         unidade: productUnit
       });
       setSelectedProductToAdd("");
+      setSelectedProduct(null);
+      setProductSearch("");
       setProductQuantity(1);
       toast({ title: "Produto adicionado!" });
     } catch {
@@ -83,21 +140,53 @@ export function QuoteEditTab({
         {/* Gestão de Produtos */}
         <div className="space-y-2">
           <div className="flex items-center gap-2 px-1">
-            <Package className="h-3 w-3 text-teal-500" />
+            <Package className="h-3 w-3 text-gray-400" />
             <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Adicionar Produtos</span>
           </div>
-          <Card className="p-2 bg-white/40 dark:bg-gray-900/40 border-white/30 dark:border-white/10 backdrop-blur-2xl rounded-xl shadow-sm">
+          <Card className="p-2 bg-white/40 dark:bg-gray-900/40 border-white/30 dark:border-white/10 backdrop-blur-2xl rounded-xl shadow-sm relative z-50">
             <div className="flex flex-col sm:flex-row gap-2">
-              <Select value={selectedProductToAdd} onValueChange={setSelectedProductToAdd}>
-                <SelectTrigger className="flex-1 h-8 text-[10px] font-bold bg-white/60 dark:bg-white/5 border-white/30 rounded-lg">
-                  <SelectValue placeholder="Selecione um produto..." />
-                </SelectTrigger>
-                <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl">
-                  {availableProductsNotInQuote.map((p: any) => (
-                    <SelectItem key={p.id} value={p.id} className="text-[10px] font-bold">{safeStr(p.nome)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex-1 relative group">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                <Input
+                  ref={productSearchRef}
+                  placeholder="Buscar produto..."
+                  value={selectedProduct ? selectedProduct.nome : productSearch}
+                  onChange={(e) => { 
+                    setProductSearch(e.target.value); 
+                    setSelectedProduct(null); 
+                    setSelectedProductToAdd("");
+                  }}
+                  onKeyDown={handleProductKeyDown}
+                  className="h-8 pl-8 text-[10px] font-bold bg-white/60 dark:bg-white/5 border-white/30 rounded-lg focus:ring-orange-500/20"
+                />
+                
+                {filteredProducts.length > 0 && !selectedProduct && (
+                  <div 
+                    ref={productListRef}
+                    className="absolute z-50 w-full mt-1 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-1 custom-scrollbar"
+                  >
+                    {filteredProducts.map((p: any, index: number) => (
+                      <button
+                        key={p.id}
+                        onClick={() => selectProductFromList(p)}
+                        onMouseEnter={() => setHighlightedProductIndex(index)}
+                        className={cn(
+                          "w-full px-3 py-2 text-left text-xs flex items-center gap-2 transition-all border-b border-gray-100 dark:border-gray-900 last:border-none",
+                          highlightedProductIndex === index 
+                            ? "bg-orange-500/10 text-orange-700 dark:text-orange-400" 
+                            : "hover:bg-gray-50 dark:hover:bg-white/5"
+                        )}
+                      >
+                        <div className={cn("w-6 h-6 rounded flex items-center justify-center transition-all", highlightedProductIndex === index ? "bg-orange-500 text-white shadow-md" : "bg-gray-100 dark:bg-gray-800 text-gray-400")}>
+                          <Package className="h-3 w-3" />
+                        </div>
+                        <span className="font-bold tracking-tight">{safeStr(p.nome)}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-2">
                 <Input 
                   type="number" 
@@ -121,7 +210,7 @@ export function QuoteEditTab({
                   onClick={handleAddProduct} 
                   disabled={!selectedProductToAdd}
                   size="icon"
-                  className="h-8 w-8 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-sm"
+                  className="h-8 w-8 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg shadow-sm"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -131,9 +220,9 @@ export function QuoteEditTab({
 
           <div className="space-y-1">
             {products.map((p: any) => (
-              <div key={p.product_id} className="flex items-center justify-between p-2 bg-white/20 dark:bg-white/5 rounded-lg border border-white/10 hover:border-teal-500/30 transition-all group">
+              <div key={p.product_id} className="flex items-center justify-between p-2 bg-white/20 dark:bg-white/5 rounded-lg border border-white/10 hover:border-gray-400/30 transition-all group">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-md bg-teal-500/10 flex items-center justify-center text-teal-600">
+                  <div className="w-6 h-6 rounded-md bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 border border-gray-200 dark:border-gray-700 shadow-sm">
                     <Package className="h-3 w-3" />
                   </div>
                   <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate">{safeStr(p.product_name)}</span>
@@ -146,7 +235,7 @@ export function QuoteEditTab({
                     variant="ghost" 
                     size="icon" 
                     onClick={() => onRemoveQuoteItem(p.product_id)}
-                    className="h-6 w-6 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                    className="h-6 w-6 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -157,9 +246,9 @@ export function QuoteEditTab({
         </div>
 
         {/* Gestão de Fornecedores */}
-        <div className="space-y-2 pt-2 border-t border-white/10">
+        <div className="space-y-2 pt-2 border-t border-gray-200/60 dark:border-gray-700/40">
           <div className="flex items-center gap-2 px-1">
-            <Building2 className="h-3 w-3 text-amber-500" />
+            <Building2 className="h-3 w-3 text-gray-400" />
             <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Adicionar Fornecedores</span>
           </div>
           <Card className="p-2 bg-white/40 dark:bg-gray-900/40 border-white/30 dark:border-white/10 backdrop-blur-2xl rounded-xl shadow-sm">
@@ -178,7 +267,7 @@ export function QuoteEditTab({
                 onClick={handleAddSupplier} 
                 disabled={!selectedSupplierToAdd}
                 size="icon"
-                className="h-8 w-8 bg-amber-500 hover:bg-amber-600 text-white rounded-lg shadow-sm"
+                className="h-8 w-8 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg shadow-sm"
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -187,9 +276,9 @@ export function QuoteEditTab({
 
           <div className="grid grid-cols-2 gap-2">
             {fornecedores.map((f: any) => (
-              <div key={f.id} className="flex items-center justify-between p-2 bg-white/20 dark:bg-white/5 rounded-lg border border-white/10 hover:border-amber-500/30 transition-all group">
+              <div key={f.id} className="flex items-center justify-between p-2 bg-white/20 dark:bg-white/5 rounded-lg border border-white/10 hover:border-gray-400/30 transition-all group">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-md bg-amber-500/10 flex items-center justify-center text-amber-600">
+                  <div className="w-6 h-6 rounded-md bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 border border-gray-200 dark:border-gray-700 shadow-sm">
                     <Building2 className="h-3 w-3" />
                   </div>
                   <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate">{safeStr(f.nome)}</span>
@@ -198,7 +287,7 @@ export function QuoteEditTab({
                   variant="ghost" 
                   size="icon" 
                   onClick={() => onRemoveQuoteSupplier(f.id)}
-                  className="h-6 w-6 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                  className="h-6 w-6 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>

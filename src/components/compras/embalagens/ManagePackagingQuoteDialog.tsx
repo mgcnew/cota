@@ -16,7 +16,7 @@ import { Card } from "@/components/ui/card";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { 
   Package, Building2, DollarSign, CheckCircle2, Clock, 
-  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye
+  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
@@ -212,12 +212,13 @@ export function ManagePackagingQuoteDialog({
     let y = 20;
 
     // Cores
-    const purple = [139, 92, 246]; // purple-500
-    const green = [34, 197, 94]; // green-500
-    const gray = [107, 114, 128]; // gray-500
+    const primary = [31, 41, 55]; // gray-800
+    const accent = [107, 114, 128]; // gray-500
+    const success = [10, 10, 10]; // black
+    const gray = [156, 163, 175]; // gray-400
 
-    // Header com fundo roxo
-    doc.setFillColor(purple[0], purple[1], purple[2]);
+    // Header com fundo escuro
+    doc.setFillColor(primary[0], primary[1], primary[2]);
     doc.rect(0, 0, pageWidth, 35, 'F');
     
     doc.setTextColor(255, 255, 255);
@@ -233,7 +234,7 @@ export function ManagePackagingQuoteDialog({
     y = 45;
 
     // Info da cotação
-    doc.setTextColor(gray[0], gray[1], gray[2]);
+    doc.setTextColor(accent[0], accent[1], accent[2]);
     doc.setFontSize(9);
     doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, margin, y);
     doc.text(`Total: ${quote.itens.length} embalagens | ${quote.fornecedores.length} fornecedores`, pageWidth - margin, y, { align: "right" });
@@ -249,10 +250,10 @@ export function ManagePackagingQuoteDialog({
       }
 
       // Título da embalagem com fundo
-      doc.setFillColor(245, 243, 255); // purple-50
+      doc.setFillColor(249, 250, 251); // gray-50
       doc.rect(margin, y - 5, pageWidth - margin * 2, 10, 'F');
       
-      doc.setTextColor(88, 28, 135); // purple-900
+      doc.setTextColor(17, 24, 39); // gray-900
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       doc.text(`${idx + 1}. ${comp.packagingName}`, margin + 3, y + 2);
@@ -269,7 +270,7 @@ export function ManagePackagingQuoteDialog({
       }
 
       // Cabeçalho da tabela
-      doc.setFillColor(249, 250, 251); // gray-50
+      doc.setFillColor(243, 244, 246); // gray-100
       doc.rect(margin, y - 4, pageWidth - margin * 2, 8, 'F');
       doc.setTextColor(gray[0], gray[1], gray[2]);
       doc.setFontSize(8);
@@ -286,7 +287,7 @@ export function ManagePackagingQuoteDialog({
         const isWinner = f.isMelhorPreco;
         
         if (isWinner) {
-          doc.setFillColor(220, 252, 231); // green-100
+          doc.setFillColor(243, 244, 246); // gray-100 (destaque sutil)
           doc.rect(margin, y - 4, pageWidth - margin * 2, 8, 'F');
         }
 
@@ -303,7 +304,7 @@ export function ManagePackagingQuoteDialog({
         
         // Custo por unidade
         if (isWinner) {
-          doc.setTextColor(green[0], green[1], green[2]);
+          doc.setTextColor(0, 0, 0); // Black
         } else {
           doc.setTextColor(gray[0], gray[1], gray[2]);
         }
@@ -311,10 +312,10 @@ export function ManagePackagingQuoteDialog({
         
         // Status
         if (isWinner) {
-          doc.setTextColor(green[0], green[1], green[2]);
+          doc.setTextColor(0, 0, 0); // Black
           doc.text("🏆 MELHOR PREÇO", margin + 140, y);
         } else {
-          doc.setTextColor(239, 68, 68); // red-500
+          doc.setTextColor(107, 114, 128); // gray-500
           doc.text(`+${f.diferencaPercentual.toFixed(1)}%`, margin + 140, y);
         }
         
@@ -331,7 +332,7 @@ export function ManagePackagingQuoteDialog({
     }
 
     y += 5;
-    doc.setFillColor(purple[0], purple[1], purple[2]);
+    doc.setFillColor(primary[0], primary[1], primary[2]);
     doc.rect(margin, y - 5, pageWidth - margin * 2, 25, 'F');
     
     doc.setTextColor(255, 255, 255);
@@ -358,7 +359,7 @@ export function ManagePackagingQuoteDialog({
     const sortedWinners = Object.values(winsPerSupplier).sort((a, b) => b.wins - a.wins);
     const winnersText = sortedWinners.map(w => `${w.name}: ${w.wins} item(s)`).join(" | ");
     doc.text(winnersText || "Nenhum vencedor definido", margin + 5, y + 5);
-
+    
     // Rodapé
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
@@ -401,33 +402,33 @@ export function ManagePackagingQuoteDialog({
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1f2937; line-height: 1.6; }
     .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 40px 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
-    .header h1 { font-size: 28px; margin-bottom: 10px; }
-    .header p { font-size: 14px; opacity: 0.9; }
+    .header { background: linear-gradient(135deg, #1f2937 0%, #111827 100%); color: white; padding: 40px 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
+    .header h1 { font-size: 28px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+    .header p { font-size: 14px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
     .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .info-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .info-card strong { display: block; color: #8b5cf6; margin-bottom: 5px; }
-    .info-card span { font-size: 14px; color: #6b7280; }
+    .info-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #1f2937; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .info-card strong { display: block; color: #1f2937; margin-bottom: 5px; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; }
+    .info-card span { font-size: 14px; color: #4b5563; font-weight: 600; }
     .winners-section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .winners-section h2 { color: #8b5cf6; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+    .winners-section h2 { color: #111827; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
     .winners-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-    .winner-card { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); padding: 15px; border-radius: 8px; border: 1px solid #86efac; }
-    .winner-card .rank { display: inline-block; background: #22c55e; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-    .winner-card .name { font-weight: 600; color: #166534; margin-bottom: 5px; }
-    .winner-card .wins { font-size: 14px; color: #15803d; }
+    .winner-card { background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; }
+    .winner-card .rank { display: inline-block; background: #111827; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+    .winner-card .name { font-weight: 700; color: #111827; margin-bottom: 5px; }
+    .winner-card .wins { font-size: 14px; color: #4b5563; }
     .comparatives { display: grid; gap: 20px; }
     .comparative-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .comparative-header { background: #f3e8ff; padding: 15px; border-bottom: 2px solid #8b5cf6; }
-    .comparative-header h3 { color: #6b21a8; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .comparative-header { background: #f9fafb; padding: 15px; border-bottom: 2px solid #1f2937; }
+    .comparative-header h3 { color: #111827; font-size: 16px; display: flex; align-items: center; gap: 8px; font-weight: 800; }
     .comparative-table { width: 100%; border-collapse: collapse; }
-    .comparative-table th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 600; font-size: 13px; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+    .comparative-table th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 700; font-size: 11px; color: #6b7280; border-bottom: 1px solid #e5e7eb; text-transform: uppercase; letter-spacing: 1px; }
     .comparative-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
     .comparative-table tr:hover { background: #f9fafb; }
-    .winner-row { background: #dcfce7 !important; }
-    .winner-row td { font-weight: 600; color: #166534; }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
-    .badge-winner { background: #22c55e; color: white; }
-    .badge-difference { background: #fee2e2; color: #991b1b; }
+    .winner-row { background: #f3f4f6 !important; }
+    .winner-row td { font-weight: 700; color: #000; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+    .badge-winner { background: #000; color: white; }
+    .badge-difference { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
     .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; margin-top: 40px; border-top: 1px solid #e5e7eb; }
     @media (max-width: 768px) {
       .header h1 { font-size: 22px; }
@@ -555,72 +556,103 @@ export function ManagePackagingQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] max-h-[850px] p-0 overflow-hidden bg-white dark:bg-gray-900 flex flex-col">
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[95vw] max-w-[1200px] h-[90vh] sm:h-[92vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-2xl rounded-[2rem] flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-300">
         {/* Header */}
-        <DialogHeader className="flex-shrink-0 px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <div className="flex items-center justify-between">
+        <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-transparent pointer-events-none"></div>
+          <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800">
-                <Package className="h-5 w-5 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white shadow-xl shadow-gray-500/20 ring-1 ring-white/20 flex-shrink-0">
+                <Package className="h-5 w-5" />
               </div>
               <div>
-                <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">Gerenciar Cotação de Embalagens</DialogTitle>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className="text-xs">{quote.status}</Badge>
-                  <span className="text-xs text-gray-500">{quote.dataInicio} - {quote.dataFim}</span>
+                <DialogTitle className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Gerenciar Cotação</DialogTitle>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className="text-[10px] font-bold uppercase tracking-wider h-5">{quote.status}</Badge>
+                  <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{quote.dataInicio} - {quote.dataFim}</span>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Select value={quote.status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-32 h-8 text-xs font-medium bg-white/50 dark:bg-gray-900/50 border-gray-200/60 dark:border-gray-700/40"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ativa">Ativa</SelectItem>
                   <SelectItem value="concluida">Concluída</SelectItem>
                   <SelectItem value="cancelada">Cancelada</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8"><X className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} 
+                className="h-8 w-8 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-xl transition-all">
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-        </DialogHeader>
+        </div>
 
         {/* Stats */}
-        <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex items-center gap-2"><Package className="h-4 w-4 text-purple-500" /><span className="text-sm"><strong>{stats.totalEmbalagens}</strong> embalagens</span></div>
-            <div className="flex items-center gap-2"><Building2 className="h-4 w-4 text-blue-500" /><span className="text-sm"><strong>{stats.totalFornecedores}</strong> fornecedores</span></div>
-            <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /><span className="text-sm"><strong>{stats.fornecedoresRespondidos}</strong> responderam</span></div>
+        <div className="flex-shrink-0 px-5 py-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30 backdrop-blur-sm">
+          <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap">
+              <Package className="h-3.5 w-3.5 text-gray-400" />
+              <span><strong className="text-gray-900 dark:text-white">{stats.totalEmbalagens}</strong> embalagens</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap">
+              <Building2 className="h-3.5 w-3.5 text-gray-400" />
+              <span><strong className="text-gray-900 dark:text-white">{stats.totalFornecedores}</strong> fornecedores</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap">
+              <CheckCircle2 className="h-3.5 w-3.5 text-gray-400" />
+              <span><strong className="text-gray-900 dark:text-white">{stats.fornecedoresRespondidos}</strong> responderam</span>
+            </div>
           </div>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="flex-shrink-0 w-full justify-start rounded-none border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-0 h-auto">
-            <TabsTrigger value="resumo" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm"><Trophy className="h-4 w-4 mr-2" />Resumo</TabsTrigger>
-            <TabsTrigger value="editar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm"><Settings className="h-4 w-4 mr-2" />Editar Cotação</TabsTrigger>
-            <TabsTrigger value="valores" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm"><DollarSign className="h-4 w-4 mr-2" />Valores</TabsTrigger>
-            <TabsTrigger value="comparativo" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm"><TrendingDown className="h-4 w-4 mr-2" />Comparativo</TabsTrigger>
-            <TabsTrigger value="exportar" className="rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent px-4 py-3 text-sm"><FileDown className="h-4 w-4 mr-2" />Exportar</TabsTrigger>
-          </TabsList>
+          <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+            <TabsList className="flex w-full sm:w-auto space-x-1 overflow-x-auto scrollbar-hide p-1 bg-white/50 dark:bg-gray-950/50 rounded-xl border border-gray-200/60 dark:border-gray-700/40 shadow-inner h-auto">
+              <TabsTrigger value="resumo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-gray-200 dark:data-[state=active]:ring-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+                <Trophy className="h-3.5 w-3.5 mb-0.5" />Resumo
+              </TabsTrigger>
+              <TabsTrigger value="editar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-gray-200 dark:data-[state=active]:ring-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+                <Settings className="h-3.5 w-3.5 mb-0.5" />Editar
+              </TabsTrigger>
+              <TabsTrigger value="valores" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-gray-200 dark:data-[state=active]:ring-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+                <DollarSign className="h-3.5 w-3.5 mb-0.5" />Valores
+              </TabsTrigger>
+              <TabsTrigger value="comparativo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-gray-200 dark:data-[state=active]:ring-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+                <TrendingDown className="h-3.5 w-3.5 mb-0.5" />Comparativo
+              </TabsTrigger>
+              <TabsTrigger value="exportar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-gray-200 dark:data-[state=active]:ring-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+                <FileDown className="h-3.5 w-3.5 mb-0.5" />Exportar
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Tab Resumo */}
-          <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0">
+          <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
             <ScrollArea className="h-full">
-              <div className="p-5 space-y-4">
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2"><Star className="h-4 w-4 text-amber-500" />Melhor Preço por Embalagem</h3>
-                <Card className="overflow-hidden border-gray-200 dark:border-gray-700">
-                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              <div className="p-4 sm:p-6 space-y-4">
+                <h3 className="text-xs font-black text-gray-500 uppercase tracking-wider flex items-center gap-2 px-1">
+                  <Star className="h-3.5 w-3.5 text-gray-400" />
+                  Melhor Preço por Embalagem
+                </h3>
+                <Card className="overflow-hidden border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl">
+                  <div className="divide-y divide-gray-200/60 dark:divide-gray-700/40">
                     {bestPricesData.map((item) => (
-                      <div key={item.packagingId} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                      <div key={item.packagingId} className="p-4 hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 dark:text-white">{item.packagingName}</p>
+                            <p className="font-bold text-gray-900 dark:text-white text-sm">{item.packagingName}</p>
                             {item.allPrices.length > 1 && (
                               <div className="mt-2 flex flex-wrap gap-1.5">
                                 {item.allPrices.map((price, idx) => (
-                                  <Badge key={price.supplierId} variant={idx === 0 ? "default" : "outline"}
-                                    className={cn("text-[10px] cursor-pointer", idx === 0 ? "bg-green-600 hover:bg-green-700" : "text-gray-500 hover:bg-gray-100")}
+                                  <Badge key={price.supplierId} variant="outline"
+                                    className={cn("text-[10px] font-medium cursor-pointer border-gray-200 dark:border-gray-700", 
+                                      idx === 0 
+                                        ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700" 
+                                        : "bg-white dark:bg-gray-950 text-gray-500 hover:bg-gray-50")}
                                     onClick={() => handleEditItem(price.supplierId, item.packagingId)}>
                                     {price.supplierName}: R$ {price.custoPorUnidade.toFixed(4)}/un
                                   </Badge>
@@ -631,11 +663,19 @@ export function ManagePackagingQuoteDialog({
                           <div className="text-right flex-shrink-0">
                             {item.bestPrice > 0 ? (
                               <>
-                                <div className="flex items-center gap-2 justify-end"><Award className="h-4 w-4 text-amber-500" /><span className="text-lg font-bold text-green-600 dark:text-green-400">R$ {item.bestPrice.toFixed(4)}/un</span></div>
-                                <p className="text-xs text-gray-500 mt-0.5">{item.bestSupplierName}</p>
-                                {item.savings > 0 && <Badge className="mt-1 bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 text-[10px]"><TrendingDown className="h-2.5 w-2.5 mr-0.5" />Economia: R$ {item.savings.toFixed(4)}/un</Badge>}
+                                <div className="flex items-center gap-2 justify-end">
+                                  <Award className="h-4 w-4 text-gray-400" />
+                                  <span className="text-lg font-black text-gray-900 dark:text-white tracking-tight">R$ {item.bestPrice.toFixed(4)}<span className="text-xs font-medium text-gray-400 ml-0.5">/un</span></span>
+                                </div>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mt-0.5">{item.bestSupplierName}</p>
+                                {item.savings > 0 && (
+                                  <Badge className="mt-1 bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-0 text-[10px] font-bold">
+                                    <TrendingDown className="h-2.5 w-2.5 mr-1" />
+                                    Economia: R$ {item.savings.toFixed(4)}/un
+                                  </Badge>
+                                )}
                               </>
-                            ) : <Badge variant="outline" className="text-gray-400">Sem preço</Badge>}
+                            ) : <Badge variant="outline" className="text-gray-400 bg-gray-50 text-[10px]">Sem preço</Badge>}
                           </div>
                         </div>
                       </div>
@@ -647,79 +687,91 @@ export function ManagePackagingQuoteDialog({
           </TabsContent>
 
           {/* Tab Editar Cotação */}
-          <TabsContent value="editar" className="flex-1 overflow-hidden m-0 p-0">
+          <TabsContent value="editar" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
             <ScrollArea className="h-full">
-              <div className="p-5 space-y-6">
+              <div className="p-4 sm:p-6 space-y-6">
                 {/* Seção Embalagens */}
-                <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2"><Package className="h-4 w-4 text-purple-600" />Embalagens da Cotação ({quote.itens.length})</h3>
+                <Card className="border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl overflow-hidden">
+                  <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40">
+                    <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-2">
+                      <Package className="h-4 w-4 text-gray-500" />
+                      Embalagens da Cotação ({quote.itens.length})
+                    </h3>
                   </div>
                   {packagingNotInQuote.length > 0 && (
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-purple-50/50 dark:bg-purple-900/10">
+                    <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
                       <div className="flex gap-3">
                         <Select value={selectedPackagingToAdd} onValueChange={setSelectedPackagingToAdd}>
-                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800"><SelectValue placeholder="Selecione uma embalagem para adicionar..." /></SelectTrigger>
+                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 h-9 text-xs"><SelectValue placeholder="Selecione uma embalagem para adicionar..." /></SelectTrigger>
                           <SelectContent>{packagingNotInQuote.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
                         </Select>
-                        <Button onClick={handleAddPackaging} disabled={!selectedPackagingToAdd || addQuoteItem.isPending} className="bg-purple-600 hover:bg-purple-700">
-                          {addQuoteItem.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}Adicionar
+                        <Button onClick={handleAddPackaging} disabled={!selectedPackagingToAdd || addQuoteItem.isPending} 
+                          className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 h-9 px-4 rounded-lg text-xs font-bold uppercase tracking-wider">
+                          {addQuoteItem.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Plus className="h-3 w-3 mr-1.5" />}Adicionar
                         </Button>
                       </div>
                     </div>
                   )}
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                  <div className="divide-y divide-gray-200/60 dark:divide-gray-700/40">
                     {quote.itens.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500"><Package className="h-12 w-12 mx-auto mb-3 opacity-30" /><p>Nenhuma embalagem na cotação</p></div>
+                      <div className="p-8 text-center text-gray-500"><Package className="h-10 w-10 mx-auto mb-3 opacity-20" /><p className="text-xs font-medium">Nenhuma embalagem na cotação</p></div>
                     ) : quote.itens.map((item, index) => (
-                      <div key={item.packagingId} className="p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <div key={item.packagingId} className="p-3 flex items-center justify-between hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
                         <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-400 w-6">{index + 1}.</span>
-                          <Package className="h-4 w-4 text-purple-500" />
-                          <span className="font-medium">{item.packagingName}</span>
+                          <span className="text-[10px] font-bold text-gray-400 w-6">#{index + 1}</span>
+                          <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                            <Package className="h-3 w-3 text-gray-500" />
+                          </div>
+                          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{item.packagingName}</span>
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => handleRemovePackaging(item.packagingId)} disabled={removeQuoteItem.isPending}
-                          className="h-8 w-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
+                          className="h-7 w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"><Trash2 className="h-3.5 w-3.5" /></Button>
                       </div>
                     ))}
                   </div>
                 </Card>
 
                 {/* Seção Fornecedores */}
-                <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2"><Building2 className="h-4 w-4 text-blue-600" />Fornecedores da Cotação ({quote.fornecedores.length})</h3>
+                <Card className="border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl overflow-hidden">
+                  <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40">
+                    <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-gray-500" />
+                      Fornecedores da Cotação ({quote.fornecedores.length})
+                    </h3>
                   </div>
                   {suppliersNotInQuote.length > 0 && (
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/10">
+                    <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
                       <div className="flex gap-3">
                         <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800"><SelectValue placeholder="Selecione um fornecedor para adicionar..." /></SelectTrigger>
+                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 h-9 text-xs"><SelectValue placeholder="Selecione um fornecedor para adicionar..." /></SelectTrigger>
                           <SelectContent>{suppliersNotInQuote.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                         </Select>
-                        <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd || addQuoteSupplier.isPending} className="bg-blue-600 hover:bg-blue-700">
-                          {addQuoteSupplier.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}Adicionar
+                        <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd || addQuoteSupplier.isPending} 
+                          className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 h-9 px-4 rounded-lg text-xs font-bold uppercase tracking-wider">
+                          {addQuoteSupplier.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Plus className="h-3 w-3 mr-1.5" />}Adicionar
                         </Button>
                       </div>
                     </div>
                   )}
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                  <div className="divide-y divide-gray-200/60 dark:divide-gray-700/40">
                     {quote.fornecedores.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500"><Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" /><p>Nenhum fornecedor na cotação</p></div>
+                      <div className="p-8 text-center text-gray-500"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-20" /><p className="text-xs font-medium">Nenhum fornecedor na cotação</p></div>
                     ) : quote.fornecedores.map((fornecedor, index) => (
-                      <div key={fornecedor.supplierId} className="p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <div key={fornecedor.supplierId} className="p-3 flex items-center justify-between hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
                         <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-400 w-6">{index + 1}.</span>
-                          <Building2 className="h-4 w-4 text-blue-500" />
-                          <span className="font-medium">{fornecedor.supplierName}</span>
+                          <span className="text-[10px] font-bold text-gray-400 w-6">#{index + 1}</span>
+                          <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                            <Building2 className="h-3 w-3 text-gray-500" />
+                          </div>
+                          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{fornecedor.supplierName}</span>
                           {fornecedor.status === "respondido" ? (
-                            <Badge className="text-[10px] bg-green-100 text-green-700"><CheckCircle2 className="h-3 w-3 mr-0.5" />Respondido</Badge>
+                            <Badge className="text-[9px] bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-0"><CheckCircle2 className="h-2.5 w-2.5 mr-1" />Respondido</Badge>
                           ) : (
-                            <Badge variant="outline" className="text-[10px]"><Clock className="h-3 w-3 mr-0.5" />Pendente</Badge>
+                            <Badge variant="outline" className="text-[9px] text-gray-500 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50"><Clock className="h-2.5 w-2.5 mr-1" />Pendente</Badge>
                           )}
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => handleRemoveSupplier(fornecedor.supplierId)} disabled={removeQuoteSupplier.isPending}
-                          className="h-8 w-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button>
+                          className="h-7 w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"><Trash2 className="h-3.5 w-3.5" /></Button>
                       </div>
                     ))}
                   </div>
@@ -729,19 +781,27 @@ export function ManagePackagingQuoteDialog({
           </TabsContent>
 
           {/* Tab Valores */}
-          <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0">
+          <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
             <div className="h-full flex">
-              <div className="w-48 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                <div className="p-3 border-b border-gray-200 dark:border-gray-700"><h4 className="text-xs font-semibold text-gray-500 uppercase">Fornecedores</h4></div>
-                <ScrollArea className="h-[calc(100%-44px)]">
+              <div className="w-56 flex-shrink-0 border-r border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl">
+                <div className="p-3 border-b border-gray-200/60 dark:border-gray-700/40"><h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Fornecedores</h4></div>
+                <ScrollArea className="h-[calc(100%-41px)]">
                   <div className="p-2 space-y-1">
                     {quote.fornecedores.map((fornecedor) => (
                       <button key={fornecedor.supplierId} onClick={() => setSelectedSupplier(fornecedor.supplierId)}
-                        className={cn("w-full p-2.5 rounded-lg text-left transition-all text-sm",
-                          selectedSupplier === fornecedor.supplierId ? "bg-purple-100 dark:bg-purple-900/30 border border-purple-400 text-purple-900 dark:text-purple-100" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-200")}>
-                        <div className="flex items-center gap-2"><Building2 className="h-3.5 w-3.5 flex-shrink-0" /><span className="truncate font-medium">{fornecedor.supplierName}</span></div>
-                        <div className="flex items-center gap-1 mt-1">
-                          {fornecedor.status === "respondido" ? <Badge className="text-[9px] bg-green-100 text-green-700 px-1.5 py-0"><CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />Respondido</Badge> : <Badge variant="outline" className="text-[9px] px-1.5 py-0"><Clock className="h-2.5 w-2.5 mr-0.5" />Pendente</Badge>}
+                        className={cn("w-full p-2.5 rounded-lg text-left transition-all text-xs font-medium group relative overflow-hidden",
+                          selectedSupplier === fornecedor.supplierId 
+                            ? "bg-gray-900 text-white shadow-md ring-1 ring-gray-900/10" 
+                            : "text-gray-600 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:text-gray-900")}>
+                        <div className="flex items-center gap-2 relative z-10">
+                          <Building2 className={cn("h-3.5 w-3.5 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-gray-300" : "text-gray-400 group-hover:text-gray-600")} />
+                          <span className="truncate font-bold">{fornecedor.supplierName}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1.5 pl-5.5 relative z-10">
+                          {fornecedor.status === "respondido" ? 
+                            <span className={cn("text-[9px] flex items-center gap-1", selectedSupplier === fornecedor.supplierId ? "text-gray-300" : "text-gray-900")}><CheckCircle2 className="h-2.5 w-2.5" />Respondido</span> : 
+                            <span className={cn("text-[9px] flex items-center gap-1", selectedSupplier === fornecedor.supplierId ? "text-gray-400" : "text-gray-400")}><Clock className="h-2.5 w-2.5" />Pendente</span>
+                          }
                         </div>
                       </button>
                     ))}
@@ -750,7 +810,7 @@ export function ManagePackagingQuoteDialog({
               </div>
               <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
-                  <div className="p-4 space-y-3" onKeyDown={handleKeyDown}>
+                  <div className="p-4 sm:p-6 space-y-3" onKeyDown={handleKeyDown}>
                     {selectedSupplier && quote.itens.map((item) => {
                       const fornecedor = quote.fornecedores.find(f => f.supplierId === selectedSupplier);
                       const supplierItem = fornecedor?.itens.find(si => si.packagingId === item.packagingId);
@@ -759,41 +819,49 @@ export function ManagePackagingQuoteDialog({
                       const isBestPrice = bestData?.bestSupplierId === selectedSupplier;
 
                       return (
-                        <Card key={item.packagingId} className={cn("p-4 transition-all", isBestPrice && "ring-2 ring-green-500 bg-green-50/50 dark:bg-green-900/10", isEditing && "ring-2 ring-purple-500")}>
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <Package className="h-4 w-4 text-purple-600" /><span className="font-semibold">{item.packagingName}</span>
-                              {isBestPrice && <Badge className="bg-green-600 text-[10px]"><Award className="h-3 w-3 mr-0.5" />Melhor</Badge>}
+                        <Card key={item.packagingId} className={cn("p-4 transition-all border-gray-200/60 dark:border-gray-700/40 shadow-sm", 
+                          isBestPrice ? "bg-gray-50/50 dark:bg-gray-800/50 ring-1 ring-gray-200/60" : "bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl",
+                          isEditing && "ring-2 ring-gray-900 dark:ring-white shadow-lg z-10")}>
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2.5">
+                              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shadow-sm", isBestPrice ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500")}>
+                                <Package className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <span className="font-bold text-gray-900 dark:text-white block text-sm">{item.packagingName}</span>
+                                {isBestPrice && <span className="text-[10px] font-bold text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-1"><Award className="h-3 w-3" />Melhor Preço</span>}
+                              </div>
                             </div>
-                            {!isEditing && <Button size="sm" variant="outline" onClick={() => handleEditItem(selectedSupplier, item.packagingId)} className="h-7 text-xs"><Edit2 className="h-3 w-3 mr-1" />Editar</Button>}
+                            {!isEditing && <Button size="sm" variant="outline" onClick={() => handleEditItem(selectedSupplier, item.packagingId)} 
+                              className="h-7 text-xs font-bold uppercase tracking-wider bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50"><Edit2 className="h-3 w-3 mr-1.5" />Editar</Button>}
                           </div>
                           {isEditing ? (
-                            <div className="space-y-3">
+                            <div className="space-y-4 bg-gray-50/50 dark:bg-gray-800/30 -m-1 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50">
                               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                <div><Label className="text-xs">Valor Total (R$) *</Label><Input ref={valorTotalInputRef} type="number" step="0.01" value={formData.valorTotal} onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} placeholder="0,00" className="h-9" /></div>
-                                <div><Label className="text-xs">Unidade de Venda *</Label><Select value={formData.unidadeVenda} onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{PACKAGING_SALE_UNITS.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}</SelectContent></Select></div>
-                                <div><Label className="text-xs">Qtd. na Unidade *</Label><Input type="number" step="0.01" value={formData.quantidadeVenda} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} placeholder="Ex: 5" className="h-9" /></div>
-                                <div><Label className="text-xs">Qtd. Unidades Estimada *</Label><Input type="number" value={formData.quantidadeUnidadesEstimada} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} placeholder="Ex: 500" className="h-9" /></div>
-                                <div><Label className="text-xs">Gramatura</Label><Input type="number" step="0.01" value={formData.gramatura} onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} placeholder="Ex: 0.08" className="h-9" /></div>
-                                <div><Label className="text-xs">Dimensões</Label><Input value={formData.dimensoes} onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} placeholder="Ex: 30x40cm" className="h-9" /></div>
+                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1 block">Valor Total (R$) *</Label><Input ref={valorTotalInputRef} type="number" step="0.01" value={formData.valorTotal} onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} placeholder="0,00" className="h-8 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700" /></div>
+                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1 block">Unidade de Venda *</Label><Select value={formData.unidadeVenda} onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}><SelectTrigger className="h-8 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"><SelectValue /></SelectTrigger><SelectContent>{PACKAGING_SALE_UNITS.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}</SelectContent></Select></div>
+                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1 block">Qtd. na Unidade *</Label><Input type="number" step="0.01" value={formData.quantidadeVenda} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} placeholder="Ex: 5" className="h-8 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700" /></div>
+                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1 block">Qtd. Unidades Est. *</Label><Input type="number" value={formData.quantidadeUnidadesEstimada} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} placeholder="Ex: 500" className="h-8 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700" /></div>
+                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1 block">Gramatura</Label><Input type="number" step="0.01" value={formData.gramatura} onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} placeholder="Ex: 0.08" className="h-8 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700" /></div>
+                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1 block">Dimensões</Label><Input value={formData.dimensoes} onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} placeholder="Ex: 30x40cm" className="h-8 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700" /></div>
                               </div>
-                              {custoPorUnidadePreview && <div className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded-lg"><p className="text-sm text-purple-700 dark:text-purple-300"><strong>Custo por unidade:</strong> R$ {custoPorUnidadePreview}</p></div>}
-                              <div className="flex items-center justify-between pt-2 border-t">
-                                <p className="text-xs text-muted-foreground"><kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl+Enter</kbd> salvar • <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> cancelar</p>
+                              {custoPorUnidadePreview && <div className="bg-white dark:bg-gray-900 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center"><span className="text-xs text-gray-500 font-medium">Custo calculado:</span><span className="text-sm font-bold text-gray-900 dark:text-white">R$ {custoPorUnidadePreview}/un</span></div>}
+                              <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700/50">
+                                <p className="text-[10px] text-gray-400 font-medium"><kbd className="px-1 py-0.5 rounded bg-white border border-gray-200 font-sans">Enter</kbd> salvar</p>
                                 <div className="flex gap-2">
-                                  <Button size="sm" variant="outline" onClick={() => setEditingItem(null)} className="h-8">Cancelar</Button>
-                                  <Button size="sm" onClick={handleSaveItem} disabled={updateSupplierItem.isPending || !formData.valorTotal} className="h-8 bg-purple-600 hover:bg-purple-700">{updateSupplierItem.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}Salvar</Button>
+                                  <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)} className="h-8 text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-gray-900">Cancelar</Button>
+                                  <Button size="sm" onClick={handleSaveItem} disabled={updateSupplierItem.isPending || !formData.valorTotal} className="h-8 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-gray-900/20">{updateSupplierItem.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Save className="h-3 w-3 mr-1.5" />}Salvar</Button>
                                 </div>
                               </div>
                             </div>
                           ) : supplierItem?.valorTotal ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                              <div><span className="text-xs text-muted-foreground block">Valor</span><p className="font-semibold">R$ {supplierItem.valorTotal.toFixed(2)}</p></div>
-                              <div><span className="text-xs text-muted-foreground block">Venda</span><p className="font-medium">{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</p></div>
-                              <div><span className="text-xs text-muted-foreground block">Unidades</span><p className="font-medium">{supplierItem.quantidadeUnidadesEstimada}</p></div>
-                              <div><span className="text-xs text-muted-foreground block">Custo/un</span><p className={cn("font-bold", isBestPrice ? "text-green-600" : "text-purple-600")}>R$ {supplierItem.custoPorUnidade?.toFixed(4) || '-'}</p></div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-gray-50/50 dark:bg-gray-800/30 p-3 rounded-lg border border-gray-100 dark:border-gray-700/30">
+                              <div><span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-0.5">Valor Total</span><p className="font-bold text-gray-700 dark:text-gray-300">R$ {supplierItem.valorTotal.toFixed(2)}</p></div>
+                              <div><span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-0.5">Venda</span><p className="font-medium text-gray-600 dark:text-gray-400">{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</p></div>
+                              <div><span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-0.5">Unidades</span><p className="font-medium text-gray-600 dark:text-gray-400">{supplierItem.quantidadeUnidadesEstimada}</p></div>
+                              <div><span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-0.5">Custo/un</span><p className={cn("font-black text-base", isBestPrice ? "text-emerald-600" : "text-gray-900 dark:text-white")}>R$ {supplierItem.custoPorUnidade?.toFixed(4) || '-'}</p></div>
                             </div>
-                          ) : <p className="text-sm text-muted-foreground italic">Clique em "Editar" para adicionar valores</p>}
+                          ) : <div className="p-4 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 text-center"><p className="text-xs text-gray-400 font-medium">Nenhum valor informado</p></div>}
                         </Card>
                       );
                     })}
@@ -804,32 +872,38 @@ export function ManagePackagingQuoteDialog({
           </TabsContent>
 
           {/* Tab Comparativo */}
-          <TabsContent value="comparativo" className="flex-1 overflow-hidden m-0 p-0">
+          <TabsContent value="comparativo" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
             <ScrollArea className="h-full">
-              <div className="p-5 space-y-4">
+              <div className="p-4 sm:p-6 space-y-4">
                 {comparison.length === 0 || comparison.every(c => c.fornecedores.length === 0) ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <TrendingDown className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium">Nenhum fornecedor respondeu ainda</p>
-                    <p className="text-sm">Adicione os valores na aba "Valores"</p>
+                  <div className="text-center py-16 text-gray-400">
+                    <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                      <TrendingDown className="h-8 w-8 opacity-50" />
+                    </div>
+                    <p className="font-bold text-gray-900 dark:text-white mb-1">Sem dados comparativos</p>
+                    <p className="text-xs">Adicione os valores na aba "Valores" para visualizar</p>
                   </div>
                 ) : comparison.map((comp) => (
-                  <Card key={comp.packagingId} className="overflow-hidden border-gray-200 dark:border-gray-700">
-                    <div className="bg-purple-50 dark:bg-purple-900/20 p-3 border-b border-gray-200 dark:border-gray-700">
-                      <h4 className="font-semibold flex items-center gap-2"><Package className="h-4 w-4 text-purple-600" />{comp.packagingName}</h4>
+                  <Card key={comp.packagingId} className="overflow-hidden border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl">
+                    <div className="bg-gray-50/50 dark:bg-gray-800/50 p-3 border-b border-gray-200/60 dark:border-gray-700/40">
+                      <h4 className="font-bold text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2"><Package className="h-4 w-4 text-gray-400" />{comp.packagingName}</h4>
                     </div>
                     {comp.fornecedores.length === 0 ? (
-                      <div className="p-4 text-center text-muted-foreground text-sm">Nenhum fornecedor respondeu ainda</div>
+                      <div className="p-6 text-center text-gray-400 text-xs font-medium">Nenhum fornecedor respondeu ainda</div>
                     ) : (
-                      <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                      <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
                         {comp.fornecedores.map((f, index) => (
-                          <div key={f.supplierId} className={cn("p-3 flex items-center gap-4 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50", f.isMelhorPreco && "bg-green-50 dark:bg-green-900/20")} onClick={() => handleEditItem(f.supplierId, comp.packagingId)}>
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 font-bold text-sm flex-shrink-0">{f.isMelhorPreco ? <Award className="h-5 w-5 text-amber-500" /> : index + 1}</div>
-                            <div className="flex-1 min-w-0"><p className="font-medium">{f.supplierName}</p><p className="text-xs text-muted-foreground">R$ {f.valorTotal.toFixed(2)} por {f.quantidadeVenda} {f.unidadeVenda} ({f.quantidadeUnidades} un)</p></div>
+                          <div key={f.supplierId} className={cn("p-4 flex items-center gap-4 transition-colors cursor-pointer hover:bg-white/80 dark:hover:bg-gray-800/80", f.isMelhorPreco && "bg-gray-50/50 dark:bg-gray-800/50")} onClick={() => handleEditItem(f.supplierId, comp.packagingId)}>
+                            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm", f.isMelhorPreco ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500")}>
+                              {f.isMelhorPreco ? <Award className="h-4 w-4" /> : index + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-gray-900 dark:text-white text-sm">{f.supplierName}</p>
+                              <p className="text-[10px] text-gray-500 font-medium mt-0.5">R$ {f.valorTotal.toFixed(2)} ({f.quantidadeVenda} {f.unidadeVenda} / {f.quantidadeUnidades} un)</p>
+                            </div>
                             <div className="text-right flex-shrink-0">
-                              <p className={cn("font-bold text-lg", f.isMelhorPreco ? "text-green-600" : "text-gray-700 dark:text-gray-300")}>R$ {f.custoPorUnidade.toFixed(4)}/un</p>
-                              {!f.isMelhorPreco && <p className="text-xs text-red-500">+{f.diferencaPercentual.toFixed(1)}% mais caro</p>}
-                              {f.isMelhorPreco && <Badge className="bg-green-600 text-xs">Melhor preço</Badge>}
+                              <p className={cn("font-black text-sm", f.isMelhorPreco ? "text-gray-900 dark:text-white" : "text-gray-900 dark:text-gray-300")}>R$ {f.custoPorUnidade.toFixed(4)}/un</p>
+                              {!f.isMelhorPreco ? <p className="text-[10px] font-bold text-red-500 mt-0.5">+{f.diferencaPercentual.toFixed(1)}%</p> : <Badge className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-0 text-[9px] mt-0.5 h-4">Melhor</Badge>}
                             </div>
                           </div>
                         ))}
@@ -842,64 +916,54 @@ export function ManagePackagingQuoteDialog({
           </TabsContent>
 
           {/* Tab Exportar PDF */}
-          <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0">
+          <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
             <ScrollArea className="h-full">
-              <div className="p-5 space-y-6">
-                <div className="text-center py-8">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                    <FileDown className="h-10 w-10 text-purple-600" />
+              <div className="p-4 sm:p-6 space-y-6">
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-inner">
+                    <FileDown className="h-8 w-8 text-gray-600 dark:text-gray-300" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Exportar Comparativo em PDF</h3>
-                  <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                    Gere um relatório PDF profissional com o comparativo de preços de todos os fornecedores, 
-                    destacando os vencedores de cada embalagem.
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white mb-2 tracking-tight">Exportar Relatório</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto leading-relaxed">
+                    Gere um PDF ou HTML com o comparativo completo, ideal para documentação e aprovação.
                   </p>
                 </div>
 
-                {/* Preview do que será exportado */}
-                <Card className="border-gray-200 dark:border-gray-700">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <Package className="h-4 w-4 text-purple-600" />
-                      Conteúdo do Relatório
-                    </h4>
-                  </div>
-                  <div className="p-4 space-y-3">
-                    <div className="flex items-center gap-3 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Período da cotação: {quote.dataInicio} a {quote.dataFim}</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Preview do que será exportado */}
+                  <Card className="border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl overflow-hidden">
+                    <div className="p-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40">
+                      <h4 className="text-xs font-black text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                        <FileText className="h-3.5 w-3.5" />
+                        Conteúdo
+                      </h4>
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>{quote.itens.length} embalagens comparadas</span>
+                    <div className="p-4 space-y-2.5">
+                      {[
+                        `Período: ${quote.dataInicio} a ${quote.dataFim}`,
+                        `${quote.itens.length} embalagens comparadas`,
+                        `${quote.fornecedores.length} fornecedores participantes`,
+                        "Tabela de preços detalhada",
+                        "Destaque dos melhores preços",
+                        "Ranking de fornecedores"
+                      ].map((text, i) => (
+                        <div key={i} className="flex items-center gap-2.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0" />
+                          <span>{text}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>{quote.fornecedores.length} fornecedores participantes</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Tabela comparativa com preços e custo por unidade</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Destaque do melhor preço (🏆) em cada embalagem</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Resumo dos vencedores por fornecedor</span>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
 
-                {/* Resumo dos vencedores */}
-                <Card className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
-                  <div className="p-4">
-                    <h4 className="font-semibold text-green-800 dark:text-green-300 flex items-center gap-2 mb-3">
-                      <Trophy className="h-4 w-4" />
-                      Prévia dos Vencedores
-                    </h4>
-                    <div className="space-y-2">
+                  {/* Resumo dos vencedores */}
+                  <Card className="border-gray-200/60 dark:border-gray-800/40 bg-gray-50/50 dark:bg-gray-950/30 backdrop-blur-xl shadow-sm rounded-xl overflow-hidden">
+                    <div className="p-3 border-b border-gray-200/60 dark:border-gray-800/40 bg-gray-100/40 dark:bg-gray-800/20">
+                      <h4 className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                        <Trophy className="h-3.5 w-3.5 text-gray-400" />
+                        Vencedores
+                      </h4>
+                    </div>
+                    <div className="p-4 space-y-2">
                       {(() => {
                         const winsPerSupplier: Record<string, { name: string; wins: number }> = {};
                         comparison.forEach(comp => {
@@ -913,76 +977,47 @@ export function ManagePackagingQuoteDialog({
                         });
                         const sorted = Object.values(winsPerSupplier).sort((a, b) => b.wins - a.wins);
                         
-                        if (sorted.length === 0) {
-                          return <p className="text-sm text-gray-500">Nenhum vencedor definido ainda</p>;
-                        }
+                        if (sorted.length === 0) return <p className="text-xs text-gray-500 italic">Sem dados suficientes</p>;
                         
                         return sorted.map((w, idx) => (
-                          <div key={idx} className="flex items-center justify-between text-sm">
-                            <span className="flex items-center gap-2">
-                              {idx === 0 && <Award className="h-4 w-4 text-amber-500" />}
-                              <span className={idx === 0 ? "font-bold" : ""}>{w.name}</span>
+                          <div key={idx} className="flex items-center justify-between text-xs">
+                            <span className={cn("flex items-center gap-2", idx === 0 ? "font-bold text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400")}>
+                              {idx === 0 && <Award className="h-3.5 w-3.5 text-gray-400" />}
+                              {w.name}
                             </span>
-                            <Badge variant={idx === 0 ? "default" : "outline"} className={idx === 0 ? "bg-green-600" : ""}>
+                            <Badge variant="outline" className={cn("h-5 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300", idx !== 0 && "border-gray-200 bg-gray-50 text-gray-500")}>
                               {w.wins} {w.wins === 1 ? "item" : "itens"}
                             </Badge>
                           </div>
                         ));
                       })()}
                     </div>
-                  </div>
-                </Card>
+                  </Card>
+                </div>
 
-                {/* Botão de download */}
+                {/* Botões */}
                 <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4">
-                  <Button 
-                    size="lg" 
-                    onClick={handleGeneratePDF}
-                    disabled={comparison.every(c => c.fornecedores.length === 0)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-8"
-                  >
-                    <Download className="h-5 w-5 mr-2" />
-                    Baixar PDF
+                  <Button size="lg" onClick={handleGeneratePDF} disabled={comparison.every(c => c.fornecedores.length === 0)}
+                    className="bg-gray-900 hover:bg-gray-800 text-white font-bold uppercase tracking-wider text-xs shadow-lg shadow-gray-900/20 rounded-xl px-8 h-10">
+                    <Download className="h-4 w-4 mr-2" />Baixar PDF
                   </Button>
-                  <Button 
-                    size="lg" 
-                    onClick={() => setShowHtmlPreview(!showHtmlPreview)}
-                    disabled={comparison.every(c => c.fornecedores.length === 0)}
-                    variant="outline"
-                    className="px-8"
-                  >
-                    <Eye className="h-5 w-5 mr-2" />
-                    {showHtmlPreview ? "Fechar" : "Visualizar"} HTML
+                  <Button size="lg" onClick={handleDownloadHtml} disabled={comparison.every(c => c.fornecedores.length === 0)}
+                    variant="outline" className="font-bold uppercase tracking-wider text-xs rounded-xl px-8 h-10 border-gray-200 hover:bg-gray-50">
+                    <FileText className="h-4 w-4 mr-2" />Baixar HTML
                   </Button>
-                  <Button 
-                    size="lg" 
-                    onClick={handleDownloadHtml}
-                    disabled={comparison.every(c => c.fornecedores.length === 0)}
-                    variant="outline"
-                    className="px-8"
-                  >
-                    <Download className="h-5 w-5 mr-2" />
-                    Baixar HTML
+                  <Button size="lg" onClick={() => setShowHtmlPreview(!showHtmlPreview)} disabled={comparison.every(c => c.fornecedores.length === 0)}
+                    variant="ghost" className="font-bold uppercase tracking-wider text-xs rounded-xl px-8 h-10 text-gray-500 hover:text-gray-900 hover:bg-gray-100">
+                    <Eye className="h-4 w-4 mr-2" />{showHtmlPreview ? "Ocultar" : "Visualizar"}
                   </Button>
                 </div>
 
-                {comparison.every(c => c.fornecedores.length === 0) && (
-                  <p className="text-center text-sm text-amber-600 dark:text-amber-400">
-                    ⚠️ Adicione valores dos fornecedores na aba "Valores" antes de exportar
-                  </p>
-                )}
-
                 {/* Preview HTML */}
                 {showHtmlPreview && (
-                  <div className="mt-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Prévia do Comparativo HTML</p>
+                  <div className="mt-6 border border-gray-200/60 dark:border-gray-700/40 rounded-xl overflow-hidden shadow-2xl">
+                    <div className="bg-gray-50/80 dark:bg-gray-800/80 px-4 py-2 border-b border-gray-200/60 dark:border-gray-700/40 backdrop-blur-sm">
+                      <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Preview</p>
                     </div>
-                    <iframe
-                      srcDoc={generateHtmlComparative()}
-                      className="w-full h-[600px] border-0"
-                      title="HTML Preview"
-                    />
+                    <iframe srcDoc={generateHtmlComparative()} className="w-full h-[600px] border-0 bg-white" title="HTML Preview" />
                   </div>
                 )}
               </div>
