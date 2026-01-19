@@ -78,7 +78,16 @@ import {
   ChevronLeft,
   Zap,
   Search,
-  Loader2
+  Loader2,
+  Phone,
+  Mail,
+  MapPin,
+  History,
+  Star,
+  Info,
+  LayoutList,
+  MousePointerClick,
+  ArrowLeft
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -169,6 +178,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const [newProductUnit, setNewProductUnit] = useState("");
   const [lastUsedUnit, setLastUsedUnit] = useState("kg");
   const [supplierPopoverOpen, setSupplierPopoverOpen] = useState(false);
+  const [focusedSupplierId, setFocusedSupplierId] = useState<string | null>(null);
   
   // Estados para agendamento
   const [isScheduled, setIsScheduled] = useState(false);
@@ -522,6 +532,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         title: "❌ Erro ao criar cotação",
         description: error.message || "Ocorreu um erro ao criar a cotação",
         variant: "destructive",
+        className: "bg-red-50 border-red-200 text-red-900",
       });
     } finally {
       setIsSubmitting(false);
@@ -541,16 +552,44 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     const newSuppliers = selectedSuppliers.filter(s => s.id !== supplierId);
     setSelectedSuppliers(newSuppliers);
     form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
+    
+    if (focusedSupplierId === supplierId) {
+        setFocusedSupplierId(null);
+    }
   };
   
   const handleSelectAllSuppliers = () => {
-    setSelectedSuppliers(suppliers);
-    form.setValue("fornecedoresIds", suppliers.map(s => s.id));
-    toast({
-      title: "✅ Todos os fornecedores selecionados",
-      description: `${suppliers.length} fornecedores adicionados à cotação`,
-      duration: 2000,
-    });
+    if (filteredSuppliers.length === 0) return;
+
+    // Check if all currently visible filtered suppliers are selected
+    const allVisibleSelected = filteredSuppliers.every(s => 
+        selectedSuppliers.some(selected => selected.id === s.id)
+    );
+
+    if (allVisibleSelected) {
+        // Remove only the visible/filtered suppliers from selection
+        const newSuppliers = selectedSuppliers.filter(s => 
+            !filteredSuppliers.some(f => f.id === s.id)
+        );
+        setSelectedSuppliers(newSuppliers);
+        form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
+    } else {
+        // Add visible/filtered suppliers to selection (avoid duplicates)
+        const newSuppliers = [...selectedSuppliers];
+        filteredSuppliers.forEach(s => {
+            if (!newSuppliers.some(selected => selected.id === s.id)) {
+                newSuppliers.push(s);
+            }
+        });
+        setSelectedSuppliers(newSuppliers);
+        form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
+        
+        toast({
+            title: "✅ Fornecedores selecionados",
+            description: `${filteredSuppliers.length} fornecedores adicionados da busca`,
+            duration: 1500,
+        });
+    }
   };
   
   const handleClearAllSuppliers = () => {
@@ -558,11 +597,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     form.setValue("fornecedoresIds", []);
   };
 
-  const filteredSuppliers = suppliers.filter(supplier =>
-    !selectedSuppliers.find(s => s.id === supplier.id) &&
-    (supplier.name.toLowerCase().includes(supplierSearch.toLowerCase()) ||
-     (supplier.contact && supplier.contact.toLowerCase().includes(supplierSearch.toLowerCase())))
-  );
+  // Filter suppliers only if search has content
+  const filteredSuppliers = supplierSearch.length > 0 
+    ? suppliers.filter(supplier =>
+        supplier.name.toLowerCase().includes(supplierSearch.toLowerCase()) ||
+        (supplier.contact && supplier.contact.toLowerCase().includes(supplierSearch.toLowerCase()))
+      )
+    : [];
 
   const tabs = [
     { id: "produtos", label: "Produtos", icon: Package },
@@ -1273,163 +1314,351 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           </Card>
                         </TabsContent>
 
-                        {/* Fornecedores Tab */}
-                        <TabsContent value="fornecedores" className="flex-1 overflow-y-auto p-3 sm:p-4 m-0">
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-                            {/* Formulário de Adição de Fornecedores - Lado Esquerdo */}
-                            <Card className="h-fit border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-                              <CardHeader className="border-b border-white/10 dark:border-white/5 pb-3">
-                                <CardTitle className="flex items-center gap-2 text-green-900 dark:text-green-100 text-base">
-                                  <Building2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                                  <span className="truncate">Adicionar Fornecedores</span>
-                                </CardTitle>
-                              </CardHeader>
-                              <CardContent className="space-y-4 pt-4">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Selecione os fornecedores que participarão desta cotação
-                                  </p>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleSelectAllSuppliers}
-                                    className="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 whitespace-nowrap self-start sm:self-auto"
-                                  >
-                                    <Check className="h-3 w-3 mr-1" />
-                                    Selecionar Todos
-                                  </Button>
-                                </div>
-
-                                <FormField
-                                  control={form.control}
-                                  name="fornecedoresIds"
-                                  render={() => (
-                                    <FormItem>
-                                      <FormLabel>Buscar e Adicionar Fornecedores *</FormLabel>
-                                      <Popover>
-                                        <PopoverTrigger asChild>
-                                          <FormControl>
-                                            <Button
-                                              variant="outline"
-                                              role="combobox"
-                                              className="w-full justify-between border-white/20 dark:border-white/10 bg-transparent dark:text-white"
-                                            >
-                                              Buscar fornecedores...
-                                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                          </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-full p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
-                                          <Command className="bg-transparent">
-                                            <CommandInput 
-                                              placeholder="Digite o nome do fornecedor ou vendedor..." 
-                                              value={supplierSearch}
-                                              onValueChange={setSupplierSearch}
-                                              className="bg-transparent"
-                                            />
-                                            <CommandList>
-                                              <CommandEmpty className="text-gray-500 dark:text-gray-400">Nenhum fornecedor encontrado.</CommandEmpty>
-                                              <CommandGroup>
-                                                {filteredSuppliers.map((supplier) => (
-                                                  <CommandItem
-                                                    key={supplier.id}
-                                                    value={`${supplier.name} ${supplier.contact || ''}`}
-                                                    onSelect={() => handleSupplierSelect(supplier)}
-                                                    className="hover:bg-white/10 dark:hover:bg-gray-800/50"
-                                                  >
-                                                    <Plus className="mr-2 h-4 w-4 text-green-600 dark:text-green-400" />
-                                                    <div className="flex flex-col">
-                                                      <CapitalizedText>{supplier.name}</CapitalizedText>
-                                                      {supplier.contact && (
-                                                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                          Vendedor: {supplier.contact}
-                                                        </span>
-                                                      )}
-                                                    </div>
-                                                  </CommandItem>
-                                                ))}
-                                              </CommandGroup>
-                                            </CommandList>
-                                          </Command>
-                                        </PopoverContent>
-                                      </Popover>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </CardContent>
-                            </Card>
-
-                            {/* Lista de Fornecedores Selecionados - Lado Direito */}
-                            <Card className="h-fit border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-                              <CardHeader className="border-b border-white/10 dark:border-white/5 pb-3">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                  <CardTitle className="flex items-center gap-2 text-blue-900 dark:text-blue-100 text-base">
-                                    <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                                    <span className="truncate">Fornecedores Selecionados</span>
-                                    {selectedSuppliers.length > 0 && (
-                                      <Badge variant="secondary" className="bg-white/10 dark:bg-gray-800/50 dark:text-gray-200 flex-shrink-0">
-                                        {selectedSuppliers.length}
-                                      </Badge>
-                                    )}
-                                  </CardTitle>
-                                  {selectedSuppliers.length > 0 && (
+                        {/* Fornecedores Tab - Layout Master-Detail Responsivo */}
+                        <TabsContent value="fornecedores" className="flex-1 h-full min-h-0 overflow-hidden p-0 m-0">
+                          <div className="flex flex-col lg:flex-row h-full bg-white dark:bg-gray-950 relative">
+                            
+                            {/* Lado Esquerdo: Lista de Fornecedores */}
+                            {/* Mobile: Oculta se tiver detalhe aberto. Desktop: Sempre visível (7/12) */}
+                            <div className={cn(
+                              "flex-col border-r border-gray-200 dark:border-gray-800 h-full overflow-hidden bg-white dark:bg-gray-950 transition-all duration-300",
+                              focusedSupplierId ? "hidden lg:flex lg:w-7/12" : "flex w-full lg:w-7/12"
+                            )}>
+                              {/* Header Fixo */}
+                              <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm z-10">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                    <Building2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                    <span className="font-bold text-sm">Catálogo de Fornecedores</span>
+                                  </div>
+                                  
+                                  {/* Botão Selecionar Todos - Só visível se houver resultados de busca */}
+                                  {supplierSearch.length > 0 && filteredSuppliers.length > 0 && (
                                     <Button
                                       type="button"
                                       variant="ghost"
                                       size="sm"
-                                      onClick={handleClearAllSuppliers}
-                                      className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 whitespace-nowrap self-start sm:self-auto"
+                                      onClick={handleSelectAllSuppliers}
+                                      className="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 h-8 !bg-transparent !shadow-none"
                                     >
-                                      <X className="h-3 w-3 mr-1" />
-                                      Limpar Todos
+                                      <Check className="h-3 w-3 mr-1.5" />
+                                      {filteredSuppliers.every(s => selectedSuppliers.some(sel => sel.id === s.id)) 
+                                        ? "Desmarcar Resultados" 
+                                        : "Selecionar Resultados"}
                                     </Button>
                                   )}
                                 </div>
-                              </CardHeader>
-                              <CardContent className="pt-4">
-                                {selectedSuppliers.length > 0 ? (
-                                  <ScrollArea className="h-[400px] [&>div>div[style]]:!pr-0">
-                                    <div className="space-y-3">
-                                      {selectedSuppliers.map((supplier) => (
-                                        <div
-                                          key={supplier.id}
-                                          className="flex items-center justify-between gap-2 p-3 bg-green-50/30 dark:bg-green-900/10 border border-green-200/40 dark:border-green-800/20 backdrop-blur-sm rounded-lg"
-                                        >
-                                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <div className="w-8 h-8 bg-green-100/40 dark:bg-green-800/20 rounded-full flex items-center justify-center flex-shrink-0">
-                                              <Building2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                            </div>
-                                            <CapitalizedText className="font-medium text-green-900 dark:text-green-100 truncate">
-                                              {supplier.name}
-                                            </CapitalizedText>
-                                          </div>
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => handleSupplierRemove(supplier.id)}
-                                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50/50 dark:hover:bg-red-900/20 h-8 w-8 p-0 flex-shrink-0"
-                                          >
-                                            <X className="h-4 w-4" />
-                                          </Button>
-                                        </div>
-                                      ))}
+                                
+                                <div className="relative group">
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-green-500 transition-colors" />
+                                  <Input
+                                    placeholder="Buscar por nome, contato ou e-mail..."
+                                    value={supplierSearch}
+                                    onChange={(e) => setSupplierSearch(e.target.value)}
+                                    className="pl-9 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 transition-all text-sm h-10 rounded-xl"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Lista Scrollável */}
+                              <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800 pb-20">
+                                
+                                {/* Estado Vazio (Sem busca e sem selecionados) */}
+                                {supplierSearch.length === 0 && selectedSuppliers.length === 0 && (
+                                  <div className="flex flex-col items-center justify-center h-full text-center p-8 space-y-3 text-gray-400">
+                                    <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                      <Search className="h-6 w-6 opacity-50" />
                                     </div>
-                                  </ScrollArea>
-                                ) : (
-                                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                    <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                    <p className="font-medium">Nenhum fornecedor selecionado ainda</p>
-                                    <p className="text-sm mt-1">Use o formulário ao lado para buscar e adicionar fornecedores</p>
+                                    <p className="text-sm">Digite para buscar fornecedores</p>
+                                    <p className="text-xs text-gray-500">Seus fornecedores selecionados também aparecerão aqui</p>
                                   </div>
                                 )}
-                              </CardContent>
-                            </Card>
+                                
+                                {/* Resultados da Busca */}
+                                {supplierSearch.length > 0 && (
+                                  <div className="mb-6">
+                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">
+                                      Resultados da Busca
+                                    </h3>
+                                    
+                                    {filteredSuppliers.length === 0 ? (
+                                      <div className="text-center p-4 text-gray-400 text-sm italic bg-gray-50 dark:bg-gray-900/50 rounded-lg mx-2 border border-dashed border-gray-200 dark:border-gray-800">
+                                        Nenhum fornecedor encontrado para "{supplierSearch}"
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-1">
+                                        {filteredSuppliers.map((supplier) => {
+                                          const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
+                                          const isFocused = focusedSupplierId === supplier.id;
+
+                                          return (
+                                            <div
+                                              key={supplier.id}
+                                              onClick={() => setFocusedSupplierId(supplier.id)}
+                                              className={cn(
+                                                "group flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
+                                                isFocused 
+                                                  ? "bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800/30 shadow-sm" 
+                                                  : "bg-white dark:bg-gray-900 border-transparent hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-gray-200 dark:hover:border-gray-700"
+                                              )}
+                                            >
+                                              {/* Selection Indicator Bar */}
+                                              {isFocused && (
+                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />
+                                              )}
+
+                                              <div className="flex-shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
+                                                <div 
+                                                  className={cn(
+                                                    "w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer",
+                                                    isSelected
+                                                      ? "bg-green-500 border-green-500 text-white"
+                                                      : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 group-hover:border-green-400"
+                                                  )}
+                                                  onClick={() => handleSupplierSelect(supplier)}
+                                                >
+                                                  {isSelected && <Check className="h-3 w-3" />}
+                                                </div>
+                                              </div>
+
+                                              <div className="flex-1 min-w-0 z-10">
+                                                <div className="flex items-center justify-between">
+                                                  <span className={cn(
+                                                    "font-medium text-sm truncate",
+                                                    isSelected ? "text-green-900 dark:text-green-100" : "text-gray-900 dark:text-gray-100"
+                                                  )}>
+                                                    {supplier.name}
+                                                  </span>
+                                                  {isSelected && (
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded">
+                                                      Selecionado
+                                                    </span>
+                                                  )}
+                                                </div>
+                                                <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                                  {supplier.contact && (
+                                                    <span className="flex items-center gap-1 truncate">
+                                                      <Phone className="h-3 w-3" />
+                                                      {supplier.contact}
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              </div>
+
+                                              <ChevronRight className={cn(
+                                                "h-4 w-4 text-gray-300 dark:text-gray-600 transition-transform lg:hidden",
+                                                isFocused && "text-green-500 translate-x-1"
+                                              )} />
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {/* Lista de Selecionados - Sempre visível se houver selecionados */}
+                                {selectedSuppliers.length > 0 && (
+                                  <div className="mb-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                    <div className="flex items-center justify-between mb-2 px-3">
+                                      <h3 className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">
+                                        Selecionados ({selectedSuppliers.length})
+                                      </h3>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        onClick={handleClearAllSuppliers}
+                                        className="h-6 px-2 text-[10px] text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                      >
+                                        Limpar
+                                      </Button>
+                                    </div>
+                                    
+                                    <div className="space-y-1">
+                                      {selectedSuppliers.map((supplier) => {
+                                        const isFocused = focusedSupplierId === supplier.id;
+                                        
+                                        return (
+                                          <div
+                                            key={`selected-${supplier.id}`}
+                                            onClick={() => setFocusedSupplierId(supplier.id)}
+                                            className={cn(
+                                              "group flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer relative overflow-hidden bg-green-50/30 dark:bg-green-900/5",
+                                              isFocused 
+                                                ? "border-green-300 dark:border-green-700 shadow-sm" 
+                                                : "border-green-100 dark:border-green-900/30 hover:bg-green-50/80 dark:hover:bg-green-900/20"
+                                            )}
+                                          >
+                                            <div className="flex-shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
+                                              <div 
+                                                className="w-5 h-5 rounded border border-green-500 bg-green-500 text-white flex items-center justify-center transition-all cursor-pointer hover:bg-red-500 hover:border-red-500"
+                                                onClick={() => handleSupplierRemove(supplier.id)}
+                                              >
+                                                <div className="group-hover:hidden"><Check className="h-3 w-3" /></div>
+                                                <div className="hidden group-hover:block"><X className="h-3 w-3" /></div>
+                                              </div>
+                                            </div>
+
+                                            <div className="flex-1 min-w-0 z-10">
+                                              <div className="flex items-center justify-between">
+                                                <span className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">
+                                                  {supplier.name}
+                                                </span>
+                                              </div>
+                                              <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                                {supplier.contact && (
+                                                  <span className="flex items-center gap-1 truncate">
+                                                    <Phone className="h-3 w-3" />
+                                                    {supplier.contact}
+                                                  </span>
+                                                )}
+                                              </div>
+                                            </div>
+                                            
+                                            <ChevronRight className={cn(
+                                                "h-4 w-4 text-gray-300 dark:text-gray-600 transition-transform lg:hidden",
+                                                isFocused && "text-green-500 translate-x-1"
+                                              )} />
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Lado Direito: Painel de Detalhes (Desktop & Mobile) */}
+                            {/* Mobile: Visível se tiver detalhe aberto. Desktop: Sempre visível (5/12) */}
+                            <div className={cn(
+                              "flex-col bg-gray-50/50 dark:bg-gray-900/30 h-full border-l border-gray-100 dark:border-gray-800 transition-all duration-300",
+                              focusedSupplierId ? "flex w-full lg:w-5/12" : "hidden lg:flex lg:w-5/12"
+                            )}>
+                              {focusedSupplierId ? (
+                                (() => {
+                                  const supplier = suppliers.find(s => s.id === focusedSupplierId);
+                                  if (!supplier) return null;
+                                  const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
+
+                                  return (
+                                    <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300 bg-white dark:bg-gray-950 lg:bg-transparent">
+                                      {/* Header do Painel */}
+                                      <div className="p-4 lg:p-6 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-900/50 flex items-center gap-3">
+                                        {/* Botão Voltar (Mobile Only) */}
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="lg:hidden h-8 w-8 -ml-2"
+                                          onClick={() => setFocusedSupplierId(null)}
+                                        >
+                                          <ArrowLeft className="h-5 w-5" />
+                                        </Button>
+                                        
+                                        <div className="flex-1 flex items-center justify-between gap-4">
+                                          <div>
+                                            <div className="flex items-center gap-3 mb-1">
+                                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-300 shadow-sm">
+                                                {supplier.name.substring(0, 2).toUpperCase()}
+                                              </div>
+                                              <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight truncate">
+                                                {supplier.name}
+                                              </h2>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Ação Principal (Separada para Mobile) */}
+                                      <div className="px-4 lg:px-6 py-2 border-b border-gray-100 dark:border-gray-800 lg:border-0 lg:pb-0">
+                                         <Button
+                                            size="sm"
+                                            variant={isSelected ? "outline" : "default"}
+                                            onClick={() => isSelected ? handleSupplierRemove(supplier.id) : handleSupplierSelect(supplier)}
+                                            className={cn(
+                                              "w-full lg:w-auto transition-all !shadow-none",
+                                              isSelected 
+                                                ? "border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800 !bg-transparent" 
+                                                : "bg-gray-900 text-white hover:bg-gray-800"
+                                            )}
+                                          >
+                                            {isSelected ? (
+                                              <>
+                                                <X className="h-4 w-4 mr-1.5" />
+                                                Remover da Cotação
+                                              </>
+                                            ) : (
+                                              <>
+                                                <Plus className="h-4 w-4 mr-1.5" />
+                                                Adicionar à Cotação
+                                              </>
+                                            )}
+                                          </Button>
+                                      </div>
+
+                                      {/* Corpo do Painel */}
+                                      <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+                                        {/* Info Cards */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                          <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700/50 shadow-sm">
+                                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                                              <History className="h-3.5 w-3.5" />
+                                              Última Cotação
+                                            </div>
+                                            <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">--</p>
+                                          </div>
+                                          <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700/50 shadow-sm">
+                                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                                              <Star className="h-3.5 w-3.5 text-amber-500" />
+                                              Avaliação
+                                            </div>
+                                            <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">Novo</p>
+                                          </div>
+                                        </div>
+
+                                        {/* Contact Info */}
+                                        <div className="space-y-4">
+                                          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                            Informações de Contato
+                                          </h4>
+                                          <div className="space-y-3">
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-colors">
+                                              <Phone className="h-5 w-5 text-gray-400 mt-0.5" />
+                                              <div>
+                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Telefone / WhatsApp</p>
+                                                <p className="text-sm text-gray-500">{supplier.contact || "Não informado"}</p>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-colors">
+                                              <Mail className="h-5 w-5 text-gray-400 mt-0.5" />
+                                              <div>
+                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">E-mail</p>
+                                                <p className="text-sm text-gray-500">{"Não informado"}</p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+
+
+                                      </div>
+                                    </div>
+                                  );
+                                })()
+                              ) : (
+                                <div className="flex flex-col items-center justify-center h-full text-center p-8 space-y-4 text-gray-400">
+                                  <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center animate-pulse">
+                                    <MousePointerClick className="h-10 w-10 opacity-30" />
+                                  </div>
+                                  <div>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Detalhes do Fornecedor</h3>
+                                    <p className="text-sm max-w-[200px] mx-auto mt-2">
+                                      Clique em um fornecedor da lista para ver informações detalhadas e histórico.
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </TabsContent>
-
 
 
                         {/* Detalhes Tab */}
