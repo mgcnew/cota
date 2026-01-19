@@ -265,20 +265,24 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         className={cn(
-                          "flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-all duration-200",
+                          "relative flex items-center justify-center h-10 w-10 mx-auto rounded-none transition-all duration-300",
                           isActive 
-                            ? "shadow-lg shadow-pink-500/25" 
-                            : "hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                            ? "text-orange-600 dark:text-orange-400" 
+                            : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg"
                         )}
-                        style={{
-                          backgroundColor: isActive ? '#ec4899' : undefined
-                        }}
                       >
                         <Icon
                           className="w-5 h-5"
                           style={{
-                            color: isActive ? '#ffffff' : (isDark ? '#d1d5db' : '#374151')
+                            color: 'currentColor'
                           }}
+                        />
+                        {/* Underline indicator */}
+                        <span 
+                          className={cn(
+                            "absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] bg-orange-600 dark:bg-orange-400 transition-all duration-300",
+                            isActive ? "w-5 opacity-100" : "w-0 opacity-0"
+                          )} 
                         />
                       </NavLink>
                     </TooltipTrigger>

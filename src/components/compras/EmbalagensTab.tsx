@@ -212,10 +212,16 @@ function EmbalagensTab() {
               variant="success"
               onClick={() => setStatusFilter("prontas")}
             />
-            <MetricCard title="Concluídas" value={stats.concluidas.toString()} icon={DollarSign} variant="warning" />
+            <MetricCard 
+              title="Concluídas" 
+              value={stats.concluidas.toString()} 
+              icon={DollarSign} 
+              variant="warning"
+              onClick={() => setStatusFilter("concluida")}
+            />
             <MetricCard 
               title="Economia" 
-              value={`R$ ${stats.economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`} 
+              value={`R$ ${stats.economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`}
               icon={TrendingDown} 
               variant="success"
             />

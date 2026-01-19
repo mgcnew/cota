@@ -43,6 +43,14 @@ const accentColors = {
     iconColor: "text-amber-600 dark:text-amber-400",
     bgHover: "hover:bg-amber-50 dark:hover:bg-amber-900/20",
   },
+  gray: {
+    border: "border-gray-300/70 dark:border-gray-600/70",
+    focusBorder: "focus-within:border-gray-400 dark:focus-within:border-gray-500",
+    focusRing: "focus-within:ring-gray-200/50 dark:focus-within:ring-gray-800/50",
+    hoverBorder: "hover:border-gray-300/70 dark:hover:border-gray-600/70",
+    iconColor: "text-gray-600 dark:text-gray-400",
+    bgHover: "hover:bg-gray-50 dark:hover:bg-gray-900/20",
+  },
 };
 
 interface ExpandableSearchProps {
