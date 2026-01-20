@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { Info, TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useProductPriceHistory } from "@/hooks/useProductPriceHistory";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -11,10 +13,23 @@ interface ProductPriceInfoTooltipProps {
 }
 
 export function ProductPriceInfoTooltip({ productId, productName }: ProductPriceInfoTooltipProps) {
-  const { data: priceHistory, isLoading } = useProductPriceHistory(productId);
+  const { data, isLoading } = useProductPriceHistory(productId);
+  const { orderHistory = [] } = (data as any) || {};
 
-  // Pegar os últimos 5 preços
-  const recentPrices = priceHistory?.slice(0, 5) || [];
+  // Encontrar o MENOR preço entre todos os pedidos confirmados
+  const bestOrderEntry = useMemo(() => {
+    if (!orderHistory || orderHistory.length === 0) return null;
+    return orderHistory.reduce((min: any, current: any) => 
+      current.price < min.price ? current : min
+    , orderHistory[0]);
+  }, [orderHistory]);
+
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
 
   const getTrendIcon = (currentPrice: number, previousPrice: number) => {
     if (currentPrice < previousPrice) {
@@ -40,68 +55,68 @@ export function ProductPriceInfoTooltip({ productId, productName }: ProductPrice
         <TooltipContent 
           side="right" 
           align="start"
-          className="w-72 p-0 bg-popover border shadow-lg"
+          className="w-64 p-0 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 shadow-xl rounded-xl overflow-hidden"
         >
-          <div className="p-3 border-b bg-muted/30">
-            <p className="font-semibold text-sm text-foreground truncate" title={productName}>
-              Histórico de Preços
+          <div className="p-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
+            <p className="font-black text-[10px] uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
+              Melhor Preço Fechado
             </p>
-            <p className="text-xs text-muted-foreground truncate">{productName}</p>
           </div>
           
-          <div className="p-2 max-h-[250px] overflow-y-auto">
+          <div className="p-4">
             {isLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-4 flex-1" />
-                    <Skeleton className="h-4 w-14" />
-                  </div>
-                ))}
+              <div className="flex flex-col items-center py-4 gap-2">
+                <Skeleton className="h-8 w-32" />
+                <Skeleton className="h-4 w-full" />
               </div>
-            ) : recentPrices.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground text-sm">
-                Nenhum histórico de preços encontrado
+            ) : !bestOrderEntry ? (
+              <div className="text-center py-6">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest">
+                  Sem pedidos finalizados
+                </p>
               </div>
             ) : (
-              <div className="space-y-1">
-                {recentPrices.map((entry, index) => {
-                  const previousPrice = recentPrices[index + 1]?.price;
-                  return (
-                    <div 
-                      key={entry.id}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {previousPrice && getTrendIcon(entry.price, previousPrice)}
-                        <span className="text-xs font-medium text-foreground w-14 text-right">
-                          R$ {entry.price.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-muted-foreground truncate" title={entry.supplier}>
-                          {entry.supplier}
-                        </p>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground flex-shrink-0">
-                        {format(new Date(entry.date), "dd/MM/yy", { locale: ptBR })}
-                      </span>
-                    </div>
-                  );
-                })}
+              <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
+                {/* Preço Principal */}
+                <div className="text-center">
+                  <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">
+                    {formatCurrency(bestOrderEntry.price)}
+                  </p>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                    Menor valor validado
+                  </p>
+                </div>
+
+                {/* Detalhes */}
+                <div className="space-y-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Fornecedor</span>
+                    <span className="text-[10px] font-bold text-gray-900 dark:text-gray-100 truncate flex-1 text-right">
+                      {bestOrderEntry.supplier}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Data</span>
+                    <span className="text-[10px] font-bold text-gray-900 dark:text-gray-100">
+                      {format(new Date(bestOrderEntry.date), "dd/MM/yyyy", { locale: ptBR })}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Origem</span>
+                    <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-4 bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 font-black uppercase tracking-tighter">
+                      {bestOrderEntry.quotationId ? 'Cotação Convertida' : 'Pedido Direto'}
+                    </Badge>
+                  </div>
+                </div>
               </div>
             )}
           </div>
           
-          {recentPrices.length > 0 && (
-            <div className="p-2 border-t bg-muted/30">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Menor preço:</span>
-                <span className="font-semibold text-green-600 dark:text-green-400">
-                  R$ {Math.min(...recentPrices.map(p => p.price)).toFixed(2)}
-                </span>
-              </div>
+          {bestOrderEntry && (
+            <div className="p-2 border-t border-gray-100 dark:border-gray-800 bg-emerald-50/30 dark:bg-emerald-900/10 text-center">
+              <p className="text-[8px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-[0.1em]">
+                Preço final de última linha
+              </p>
             </div>
           )}
         </TooltipContent>

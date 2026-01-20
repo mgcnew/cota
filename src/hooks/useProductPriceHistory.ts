@@ -63,7 +63,8 @@ export function useProductPriceHistory(productId: string) {
             id,
             supplier_name,
             status,
-            created_at
+            created_at,
+            quote_id
           )
         `)
         .eq('product_id', productId)
@@ -121,11 +122,12 @@ export function useProductPriceHistory(productId: string) {
           id: `order-${item.order_id}`,
           date: item.orders?.created_at || item.created_at,
           supplier: item.orders?.supplier_name || 'Fornecedor Desconhecido',
-          supplierId: '', // We don't have supplier_id directly in order_items but it's in orders
+          supplierId: '', // We don't have supplier_id directly in order_items
           price: Number(item.unit_price),
           orderId: item.order_id,
+          quotationId: item.orders?.quote_id || undefined,
           status: item.orders?.status || 'concluido',
-          type: 'order'
+          type: item.orders?.quote_id ? 'quote' : 'order'
         });
       });
 
