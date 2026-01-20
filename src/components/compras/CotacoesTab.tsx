@@ -8,21 +8,20 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Quote } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusSelect, QUOTE_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
-import { FileText, Plus, Trash2, Download, Calendar, DollarSign, Building2, MoreVertical, ClipboardList, Eye, Package, CircleDot, Info, CheckCircle2, AlertTriangle, ShoppingCart, TrendingDown } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { FileText, Plus, Trash2, Download, Building2, MoreVertical, ClipboardList, Eye, CheckCircle2, AlertTriangle, ShoppingCart, TrendingDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
-import { Table, TableCell, TableRow } from "@/components/ui/table";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { useExportCSV } from "@/hooks/useExportCSV";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { useToast } from "@/hooks/use-toast";
+import { useCotacoesStats } from "@/hooks/useCotacoesStats";
+import { CotacoesListDesktop } from "./CotacoesListDesktop";
 
 import {
   AddQuoteDialogLazy,
@@ -47,6 +46,8 @@ function CotacoesTab() {
   const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, convertToOrder, addQuoteItem, removeQuoteItem, addQuoteSupplier, removeQuoteSupplier, updateQuoteStatus, isUpdating } = useCotacoes();
   const { pedidos } = usePedidos();
   
+  const stats = useCotacoesStats(cotacoes, pedidos);
+
   // Derive selectedQuote from cotacoes to ensure real-time updates
   const selectedQuote = useMemo(() => {
     if (!selectedQuoteId) return null;
@@ -80,6 +81,10 @@ function CotacoesTab() {
   const handleDeleteQuote = useCallback((quote: Quote) => {
     startTransition(() => { setSelectedQuoteId(quote.id); setDeleteDialogOpen(true); });
   }, []);
+
+  const handleUpdateStatus = useCallback((quoteId: string, status: string) => {
+    updateQuoteStatus.mutate({ quoteId, status });
+  }, [updateQuoteStatus]);
 
   // Helper para verificar status especial da cotação
   const getQuoteSpecialStatus = useCallback((cotacao: Quote) => {
@@ -138,51 +143,6 @@ function CotacoesTab() {
     });
     toast({ title: "Exportado!" });
   }, [filteredCotacoes, toast, exportToCSV]);
-
-  const stats = useMemo(() => {
-    const ativas = cotacoes.filter(c => c.statusReal === "ativa").length;
-    const pendentes = cotacoes.filter(c => c.status === "pendente").length;
-    
-    // Cotações prontas para decisão (todos fornecedores responderam)
-    const prontasParaDecisao = cotacoes.filter(c => {
-      if (c.statusReal !== "ativa") return false;
-      const fornecedoresRespondidos = c.fornecedoresParticipantes?.filter(f => f.status === "respondido").length || 0;
-      const totalFornecedores = c.fornecedoresParticipantes?.length || 0;
-      return totalFornecedores > 0 && fornecedoresRespondidos === totalFornecedores;
-    }).length;
-    
-    // Cotações vencendo em 48h
-    const hoje = new Date();
-    const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
-    const vencendo = cotacoes.filter(c => {
-      if (c.statusReal !== "ativa") return false;
-      const dataFim = new Date(c.dataFim.split('/').reverse().join('-'));
-      return dataFim <= em48h && dataFim >= hoje;
-    }).length;
-    
-    // Calcular economia dos pedidos que vieram de cotações
-    const pedidosDeCotacao = pedidos.filter(p => p.quote_id);
-    
-    // Economia REAL = soma de economia_real dos pedidos entregues
-    const economiaReal = pedidosDeCotacao
-      .filter(p => p.status === 'entregue')
-      .reduce((sum, p) => sum + (p.economia_real || 0), 0);
-    
-    // Economia ESTIMADA = soma de economia_estimada de todos os pedidos de cotação
-    const economiaEstimada = pedidosDeCotacao
-      .reduce((sum, p) => sum + (p.economia_estimada || 0), 0);
-    
-    return { 
-      ativas, 
-      pendentes,
-      prontasParaDecisao,
-      vencendo,
-      economiaReal,
-      economiaEstimada,
-      economiaRealFormatada: economiaReal > 0 ? `R$ ${economiaReal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : "R$ 0",
-      economiaEstimadaFormatada: economiaEstimada > 0 ? `R$ ${economiaEstimada.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : "R$ 0"
-    };
-  }, [cotacoes, pedidos]);
 
   if (isLoading) return <div className="flex items-center justify-center py-12"><p className="text-muted-foreground">Carregando...</p></div>;
   
@@ -386,142 +346,15 @@ function CotacoesTab() {
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block">
-        <Table>
-          <thead>
-            <tr>
-              <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
-                  <div className="w-[15%] flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
-                      <ClipboardList className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                    </div>
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Cotação</span>
-                  </div>
-                  <div className="w-[18%] pl-2 flex items-center gap-2">
-                    <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</span>
-                  </div>
-                  <div className="w-[10%] pl-2 flex justify-center items-center gap-2">
-                    <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
-                  </div>
-                  <div className="w-[14%] pl-2 flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Melhor Preço</span>
-                  </div>
-                  <div className="w-[12%] pl-2 flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornec.</span>
-                  </div>
-                  <div className="w-[8%] pl-2 flex items-center gap-2">
-                    <Info className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Itens</span>
-                  </div>
-                  <div className="w-[10%] pl-2 flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Prazo</span>
-                  </div>
-                  <div className="w-[8%] pl-2 flex justify-end items-center">
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.items.map((cotacao, index) => {
-              const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
-              return (
-                <TableRow key={cotacao.id} className="group border-none">
-                  <TableCell colSpan={7} className="px-1 py-1.5">
-                    <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800/70">
-                      <div className="w-[15%] flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center border border-gray-200 dark:border-gray-600/30">
-                          <ClipboardList className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                        </div>
-                        <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">#{cotacaoNumero.toString().padStart(4, '0')}</span>
-                      </div>
-                      <div className="w-[18%] pl-2">
-                        <CapitalizedText className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate block max-w-[150px]">
-                          {cotacao.produtoResumo || cotacao.produto}
-                        </CapitalizedText>
-                      </div>
-                      <div className="w-[10%] pl-2 flex justify-center">
-                        <StatusSelect
-                          value={cotacao.status}
-                          options={QUOTE_STATUS_OPTIONS}
-                          onChange={(newStatus) => updateQuoteStatus.mutate({ quoteId: cotacao.id, status: newStatus })}
-                          isLoading={isUpdating}
-                        />
-                      </div>
-                      <div className="w-[14%] pl-2">
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400">{cotacao.melhorPreco || 'R$ 0,00'}</span>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[100px]">{cotacao.melhorFornecedor || '-'}</p>
-                      </div>
-                      <div className="w-[12%] pl-2">
-                        <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full w-fit">
-                          <Building2 className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                          <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{cotacao.fornecedores}</span>
-                        </div>
-                      </div>
-                      <div className="w-[8%] pl-2 flex items-center gap-1">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{cotacao.produtosLista?.length || 0}</span>
-                        {cotacao.produtosLista && cotacao.produtosLista.length > 0 && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-[250px]">
-                                <p className="font-semibold text-xs mb-1">Produtos cotados:</p>
-                                <ul className="text-xs space-y-0.5">
-                                  {cotacao.produtosLista.map((produto, idx) => (
-                                    <li key={idx}>• {produto}</li>
-                                  ))}
-                                </ul>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
-                      </div>
-                      <div className="w-[10%] pl-2 text-sm text-gray-500 dark:text-gray-400">
-                        {cotacao.dataFim || '-'}
-                      </div>
-                      <div className="w-[8%] pl-2 flex justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/70 rounded-lg">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
-                            {(cotacao.status === "concluida" || cotacao.status === "finalizada") ? (
-                              <DropdownMenuItem onClick={() => handleViewQuote(cotacao)} className="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">
-                                <Eye className="h-4 w-4 mr-2" />Resumo
-                              </DropdownMenuItem>
-                            ) : (
-                              <>
-                                <DropdownMenuItem onClick={() => handleGerenciarQuote(cotacao)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70">
-                                  <ClipboardList className="h-4 w-4 mr-2" />Gerenciar
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
-                                <DropdownMenuItem onClick={() => handleDeleteQuote(cotacao)} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
-                                  <Trash2 className="h-4 w-4 mr-2" />Excluir
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </tbody>
-        </Table>
-      </div>
+      <CotacoesListDesktop 
+        cotacoes={paginatedData.items} 
+        startIndex={paginatedData.pagination.startIndex} 
+        onUpdateStatus={handleUpdateStatus} 
+        onView={handleViewQuote} 
+        onManage={handleGerenciarQuote} 
+        onDelete={handleDeleteQuote} 
+        isUpdating={isUpdating} 
+      />
 
       {/* Pagination */}
       {paginatedData.pagination.totalPages > 1 && (

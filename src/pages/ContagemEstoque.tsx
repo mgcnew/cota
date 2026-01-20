@@ -1,25 +1,6 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -34,29 +15,25 @@ import {
   CheckCircle,
   Clock,
   Trash2,
-  Package,
   Loader2,
   Activity,
   Eye,
-  FileBox,
-  Sparkles,
-  Building2,
-  ArrowRight,
   XCircle,
 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { useStockCounts } from "@/hooks/useStockCounts";
 import { useToast } from "@/hooks/use-toast";
 import { ViewStockCountDialog } from "@/components/stock/ViewStockCountDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
 import { cn } from "@/lib/utils";
-import { useDebounce } from "@/hooks/useDebounce";
+import { Badge } from "@/components/ui/badge";
 
-// Status configuration
+// Hooks & Components
+import { useContagemEstoque } from "@/hooks/useContagemEstoque";
+import { StockCountListDesktop } from "@/components/stock/StockCountListDesktop";
+import { CreateStockCountDialog } from "@/components/stock/CreateStockCountDialog";
+
+// Status configuration for Mobile Cards
 const statusConfig = {
   pendente: {
     label: "Pendente",
@@ -80,109 +57,51 @@ const statusConfig = {
   },
 };
 
+const getStatusBadge = (status: string) => {
+  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendente;
+  return (
+    <Badge variant="outline" className={cn("gap-1", config.badge)}>
+      {config.label}
+    </Badge>
+  );
+};
+
 export default function ContagemEstoque() {
-  const { user } = useAuth();
   const { toast } = useToast();
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const debouncedSearch = useDebounce(searchTerm, 300);
-
-  const { stockCounts, isLoading, createStockCount, updateStockCount, deleteStockCount } =
-    useStockCounts();
+  
+  const {
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    setStatusFilter,
+    filteredCounts,
+    stats,
+    isLoading,
+    createStockCount,
+    updateStockCount,
+    deleteStockCount,
+    availableOrders,
+    loadingOrders,
+    loadOrders
+  } = useContagemEstoque();
 
   const [selectedCount, setSelectedCount] = useState<string | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState("");
-  const [availableOrders, setAvailableOrders] = useState<any[]>([]);
-  const [countType, setCountType] = useState<"from_order" | "from_scratch">("from_order");
-  const [countNotes, setCountNotes] = useState("");
-  const [loadingOrders, setLoadingOrders] = useState(false);
-
-  // Reset form on dialog close
-  const handleCreateDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setSelectedOrderId("");
-      setCountNotes("");
-      setCountType("from_order");
-    }
-    setCreateDialogOpen(open);
-  };
-
-  // Load available orders
-  useEffect(() => {
-    if (!createDialogOpen || !user) return;
-
-    const loadOrders = async () => {
-      setLoadingOrders(true);
-      try {
-        const { data: orders, error } = await supabase
-          .from("orders")
-          .select("id, supplier_name, order_date, status")
-          .order("order_date", { ascending: false })
-          .limit(100);
-
-        if (error) throw error;
-        setAvailableOrders(orders || []);
-      } catch (error) {
-        console.error("Erro ao carregar pedidos:", error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os pedidos.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoadingOrders(false);
-      }
-    };
-
-    loadOrders();
-  }, [createDialogOpen, user, toast]);
-
-  // Filter counts
-  const filteredCounts = useMemo(() => {
-    return stockCounts.filter((count) => {
-      const matchesSearch =
-        (count as any).order?.supplier_name
-          ?.toLowerCase()
-          .includes(debouncedSearch.toLowerCase()) ||
-        count.notes?.toLowerCase().includes(debouncedSearch.toLowerCase());
-
-      const matchesStatus = statusFilter === "all" || count.status === statusFilter;
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [stockCounts, debouncedSearch, statusFilter]);
-
-  // Stats
-  const stats = useMemo(() => {
-    const total = stockCounts.length;
-    const pendentes = stockCounts.filter((c) => c.status === "pendente").length;
-    const emAndamento = stockCounts.filter((c) => c.status === "em_andamento").length;
-    const finalizadas = stockCounts.filter((c) => c.status === "finalizada").length;
-
-    return { total, pendentes, emAndamento, finalizadas };
-  }, [stockCounts]);
 
   // Handlers
-  const handleCreateCount = async () => {
-    if (countType === "from_order" && !selectedOrderId) {
-      toast({
-        title: "Selecione um pedido",
-        description: "Por favor, selecione um pedido para criar a contagem.",
-        variant: "destructive",
-      });
-      return;
+  const handleCreateCount = async ({ orderId, notes }: { orderId?: string; notes?: string }) => {
+    if (!orderId && !notes && orderId === undefined) {
+      // Basic check, though logic handles "from_scratch" via undefined orderId
     }
 
     try {
       const newCount = await createStockCount.mutateAsync({
-        order_id: countType === "from_order" ? selectedOrderId : undefined,
-        notes: countNotes || undefined,
+        order_id: orderId,
+        notes: notes,
       });
 
-      handleCreateDialogOpenChange(false);
+      setCreateDialogOpen(false);
 
       if (newCount) {
         setSelectedCount(newCount.id);
@@ -221,16 +140,6 @@ export default function ContagemEstoque() {
     },
     [deleteStockCount]
   );
-
-  const getStatusBadge = (status: string) => {
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendente;
-    return (
-      <Badge variant="outline" className={cn("gap-1", config.badge)}>
-        {config.label}
-      </Badge>
-    );
-  };
-
 
   return (
     <PageWrapper>
@@ -430,287 +339,25 @@ export default function ContagemEstoque() {
             </div>
 
             {/* Tabela Desktop */}
-            <div className="hidden lg:block rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/50 overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50 dark:bg-gray-900/50">
-                    <TableHead className="font-semibold">Fornecedor</TableHead>
-                    <TableHead className="font-semibold">Data</TableHead>
-                    <TableHead className="font-semibold">Pedido</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="font-semibold">Observações</TableHead>
-                    <TableHead className="text-right font-semibold">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCounts.map((count) => (
-                    <TableRow key={count.id} className="group">
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center">
-                            <ClipboardList className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                          </div>
-                          <span className="font-medium">
-                            {(count as any).order?.supplier_name || "Contagem Livre"}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-gray-600 dark:text-gray-400">
-                        {format(new Date(count.count_date), "dd/MM/yyyy", { locale: ptBR })}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            (count as any).order
-                              ? "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/50 dark:text-orange-300"
-                              : "bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400"
-                          }
-                        >
-                          {(count as any).order ? "Sim" : "Não"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(count.status)}</TableCell>
-                      <TableCell className="max-w-[200px] truncate text-gray-500">
-                        {count.notes || "—"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleViewCount(count.id)}
-                            className="h-8 w-8 p-0 hover:text-blue-600 hover:bg-blue-50"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          {count.status !== "finalizada" && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleFinalizeCount(count.id)}
-                              className="h-8 w-8 p-0 hover:text-emerald-600 hover:bg-emerald-50"
-                            >
-                              <CheckCircle className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDeleteCount(count.id)}
-                            className="h-8 w-8 p-0 hover:text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <StockCountListDesktop 
+              counts={filteredCounts} 
+              onView={handleViewCount} 
+              onFinalize={handleFinalizeCount} 
+              onDelete={handleDeleteCount} 
+            />
           </>
         )}
 
-        {/* Create Dialog - Responsivo */}
-        <Dialog open={createDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
-          <DialogContent className="w-[95vw] max-w-lg p-0 gap-0 overflow-hidden max-h-[90vh]">
-            {/* Header Compacto */}
-            <div className="bg-gradient-to-r from-orange-500 to-amber-600 p-4 sm:p-5 text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <ClipboardList className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div className="min-w-0">
-                  <DialogHeader className="p-0 space-y-0.5">
-                    <DialogTitle className="text-lg sm:text-xl font-bold text-white">
-                      Nova Contagem
-                    </DialogTitle>
-                    <DialogDescription className="text-orange-100 text-xs sm:text-sm">
-                      Como deseja criar a contagem?
-                    </DialogDescription>
-                  </DialogHeader>
-                </div>
-              </div>
-            </div>
-
-            <ScrollArea className="max-h-[60vh]">
-              <div className="p-4 sm:p-5 space-y-4">
-                {/* Type Selection - Cards Responsivos */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setCountType("from_order")}
-                    className={cn(
-                      "relative p-4 rounded-xl border-2 text-left transition-all",
-                      countType === "from_order"
-                        ? "border-orange-500 bg-orange-50 dark:bg-orange-950/30"
-                        : "border-gray-200 dark:border-gray-700 hover:border-orange-300"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
-                        countType === "from_order"
-                          ? "bg-orange-500 text-white"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-500"
-                      )}>
-                        <Package className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className={cn(
-                          "font-semibold text-sm",
-                          countType === "from_order" ? "text-orange-700 dark:text-orange-300" : "text-gray-900 dark:text-gray-100"
-                        )}>
-                          A partir de Pedido
-                        </h3>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Importa itens do pedido
-                        </p>
-                      </div>
-                      {countType === "from_order" && (
-                        <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
-                      )}
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setCountType("from_scratch")}
-                    className={cn(
-                      "relative p-4 rounded-xl border-2 text-left transition-all",
-                      countType === "from_scratch"
-                        ? "border-orange-500 bg-orange-50 dark:bg-orange-950/30"
-                        : "border-gray-200 dark:border-gray-700 hover:border-orange-300"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
-                        countType === "from_scratch"
-                          ? "bg-orange-500 text-white"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-500"
-                      )}>
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className={cn(
-                          "font-semibold text-sm",
-                          countType === "from_scratch" ? "text-orange-700 dark:text-orange-300" : "text-gray-900 dark:text-gray-100"
-                        )}>
-                          Contagem Livre
-                        </h3>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Sem vínculo com pedido
-                        </p>
-                      </div>
-                      {countType === "from_scratch" && (
-                        <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
-                      )}
-                    </div>
-                  </button>
-                </div>
-
-                {/* Order Selection */}
-                {countType === "from_order" && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-orange-500" />
-                      Selecionar Pedido
-                    </Label>
-                    {loadingOrders ? (
-                      <div className="flex items-center justify-center py-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg border">
-                        <Loader2 className="h-5 w-5 animate-spin text-orange-500 mr-2" />
-                        <span className="text-sm text-gray-500">Carregando...</span>
-                      </div>
-                    ) : availableOrders.length === 0 ? (
-                      <div className="flex flex-col items-center py-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg border text-center">
-                        <FileBox className="w-8 h-8 text-gray-300 mb-2" />
-                        <p className="text-sm text-gray-500">Nenhum pedido disponível</p>
-                        <p className="text-xs text-gray-400">Use contagem livre</p>
-                      </div>
-                    ) : (
-                      <div className="rounded-lg border max-h-[180px] overflow-auto">
-                        <div className="p-1.5 space-y-1">
-                          {availableOrders.map((order) => (
-                            <button
-                              key={order.id}
-                              type="button"
-                              onClick={() => setSelectedOrderId(order.id)}
-                              className={cn(
-                                "w-full flex items-center gap-2.5 p-2.5 rounded-lg text-left transition-all",
-                                selectedOrderId === order.id
-                                  ? "bg-orange-100 dark:bg-orange-900/40 border border-orange-300"
-                                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                                selectedOrderId === order.id
-                                  ? "bg-orange-500 text-white"
-                                  : "bg-gray-100 dark:bg-gray-700 text-gray-500"
-                              )}>
-                                <Building2 className="w-4 h-4" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate">
-                                  {order.supplier_name}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {format(new Date(order.order_date), "dd/MM/yyyy")}
-                                </p>
-                              </div>
-                              {selectedOrderId === order.id && (
-                                <CheckCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Notes */}
-                <div className="space-y-1.5">
-                  <Label className="text-sm font-medium">Observações (opcional)</Label>
-                  <Textarea
-                    placeholder="Adicione observações..."
-                    value={countNotes}
-                    onChange={(e) => setCountNotes(e.target.value)}
-                    rows={2}
-                    className="resize-none text-sm"
-                  />
-                </div>
-              </div>
-            </ScrollArea>
-
-            {/* Footer Fixo */}
-            <div className="p-3 sm:p-4 border-t bg-gray-50 dark:bg-gray-900/50 flex gap-2 sm:gap-3">
-              <Button
-                variant="outline"
-                onClick={() => handleCreateDialogOpenChange(false)}
-                className="flex-1 h-10"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleCreateCount}
-                disabled={createStockCount.isPending || (countType === "from_order" && !selectedOrderId)}
-                className="flex-1 h-10 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
-              >
-                {createStockCount.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <ArrowRight className="h-4 w-4 mr-1.5" />
-                    Criar
-                  </>
-                )}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Create Dialog */}
+        <CreateStockCountDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          onCreate={handleCreateCount}
+          isLoading={createStockCount.isPending}
+          availableOrders={availableOrders}
+          loadingOrders={loadingOrders}
+          loadOrders={loadOrders}
+        />
 
         {/* View Dialog */}
         <ViewStockCountDialog

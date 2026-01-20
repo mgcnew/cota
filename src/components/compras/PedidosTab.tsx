@@ -2,14 +2,11 @@ import { useState, useMemo, useCallback, memo, useEffect } from "react";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusSelect, ORDER_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
-import { Table, TableCell, TableRow } from "@/components/ui/table";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, Building2, CircleDot, Info, TrendingDown, ClipboardCheck } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, ClipboardCheck, TrendingDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";
@@ -20,25 +17,8 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
-
-interface OrderData {
-  id: string;
-  fornecedor: string;
-  total: string;
-  status: string;
-  dataPedido: string;
-  dataEntrega: string;
-  itens: number;
-  produtos: string[];
-  observacoes: string;
-  detalhesItens: Array<{ produto: string; quantidade: number; valorUnitario: number }>;
-  supplier_id: string | null;
-  delivery_date: string | null;
-  quote_id: string | null;
-  economia_estimada: number;
-  economia_real: number;
-  _raw?: Pedido; // Referência ao pedido original
-}
+import { usePedidosStats, OrderData } from "@/hooks/usePedidosStats";
+import { PedidosListDesktop } from "./PedidosListDesktop";
 
 function PedidosTab() {
   const { isMobile } = useBreakpoint();
@@ -103,28 +83,7 @@ function PedidosTab() {
 
   const paginatedData = paginate(filteredPedidos);
 
-  const stats = useMemo(() => {
-    const pedidosAtivos = pedidos.filter(p => p.status === "pendente" || p.status === "processando").length;
-    const pedidosEntregues = pedidos.filter(p => p.status === "entregue").length;
-    const pedidosValidos = pedidos.filter(p => p.status !== "cancelado");
-    const totalValue = pedidosValidos.reduce((acc, p) => {
-      const cleanValue = p.total.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
-      return acc + (parseFloat(cleanValue) || 0);
-    }, 0);
-    
-    // Economia real (pedidos entregues que vieram de cotação)
-    const economiaReal = pedidos
-      .filter(p => p.status === "entregue" && p.quote_id)
-      .reduce((sum, p) => sum + (p.economia_real || 0), 0);
-    
-    return {
-      pedidosAtivos,
-      pedidosEntregues,
-      totalValueFormatado: totalValue > 0 ? totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
-      economiaReal,
-      economiaRealFormatada: economiaReal > 0 ? `R$ ${economiaReal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : 'R$ 0'
-    };
-  }, [pedidos]);
+  const stats = usePedidosStats(pedidos);
 
   const handleManagePedido = useCallback((pedido: OrderData) => {
     setSelectedPedido(pedido);
@@ -141,6 +100,10 @@ function PedidosTab() {
     setSelectedPedidoRaw(pedido._raw || null);
     setEntregaDialogOpen(true);
   }, []);
+
+  const handleUpdateStatus = useCallback((pedidoId: string, status: string) => {
+    updatePedidoStatus({ pedidoId, status });
+  }, [updatePedidoStatus]);
 
   if (isLoading) return <div className="flex items-center justify-center py-12"><p className="text-muted-foreground">Carregando...</p></div>;
 
@@ -220,125 +183,14 @@ function PedidosTab() {
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block">
-        <Table>
-          <thead>
-            <tr>
-              <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
-                  <div className="w-[15%] flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
-                      <ShoppingCart className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                    </div>
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Pedido</span>
-                  </div>
-                  <div className="w-[20%] pl-2 flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
-                  </div>
-                  <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
-                    <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
-                  </div>
-                  <div className="w-[15%] pl-2 flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Valor</span>
-                  </div>
-                  <div className="w-[12%] pl-2 flex items-center gap-2">
-                    <Info className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Itens</span>
-                  </div>
-                  <div className="w-[15%] pl-2 flex items-center gap-2">
-                    <Truck className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Entrega</span>
-                  </div>
-                  <div className="w-[11%] pl-2 flex justify-end items-center">
-                    <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.items.map((pedido) => (
-              <TableRow key={pedido.id} className="group border-none">
-                <TableCell colSpan={7} className="px-1 py-1.5">
-                  <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800/70">
-                    <div className="w-[15%] flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center border border-gray-200 dark:border-gray-600/30">
-                        <ShoppingCart className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                      </div>
-                      <div>
-                        <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">#{pedido.id.substring(0, 8)}</span>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{pedido.dataPedido}</p>
-                      </div>
-                    </div>
-                    <div className="w-[20%] pl-2">
-                      <span className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate block max-w-[150px]">{capitalize(pedido.fornecedor)}</span>
-                    </div>
-                    <div className="w-[12%] pl-2 flex justify-center">
-                      <StatusSelect
-                        value={pedido.status}
-                        options={ORDER_STATUS_OPTIONS}
-                        onChange={(newStatus) => updatePedidoStatus({ pedidoId: pedido.id, status: newStatus })}
-                        isLoading={isUpdating}
-                      />
-                    </div>
-                    <div className="w-[15%] pl-2">
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{pedido.total}</span>
-                    </div>
-                    <div className="w-[12%] pl-2 flex items-center gap-1">
-                      <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                        <Package className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                        <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{pedido.itens}</span>
-                      </div>
-                      {pedido.produtos && pedido.produtos.length > 0 && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-[250px]">
-                              <p className="font-semibold text-xs mb-1">Produtos do pedido:</p>
-                              <ul className="text-xs space-y-0.5">
-                                {pedido.detalhesItens.map((item, idx) => (
-                                  <li key={idx}>• {item.produto} ({item.quantidade}x R$ {item.valorUnitario.toFixed(2)})</li>
-                                ))}
-                              </ul>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </div>
-                    <div className="w-[15%] pl-2 text-sm text-gray-500 dark:text-gray-400">
-                      {pedido.dataEntrega || '-'}
-                    </div>
-                    <div className="w-[11%] pl-2 flex justify-end">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/70 rounded-lg">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
-                          <DropdownMenuItem onClick={() => handleManagePedido(pedido)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70"><ShoppingCart className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
-                          {pedido.status !== "entregue" && pedido.status !== "cancelado" && (
-                            <DropdownMenuItem onClick={() => handleRegistrarEntrega(pedido)} className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
-                              <ClipboardCheck className="h-4 w-4 mr-2" />Registrar Entrega
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
-                          <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </tbody>
-        </Table>
-      </div>
+      <PedidosListDesktop 
+        pedidos={paginatedData.items} 
+        onUpdateStatus={handleUpdateStatus} 
+        onManage={handleManagePedido} 
+        onRegisterDelivery={handleRegistrarEntrega} 
+        onDelete={handleDeletePedidoClick} 
+        isUpdating={isUpdating} 
+      />
 
       {/* Pagination */}
       {paginatedData.pagination.totalPages > 1 && (

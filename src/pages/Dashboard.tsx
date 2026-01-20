@@ -1,21 +1,6 @@
 import { useState, useMemo, memo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  FileText, 
-  Users, 
-  Package,
-  Clock,
-  ShoppingCart,
-  ClipboardList,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowRight,
-  Calendar,
-  Bell
-} from 'lucide-react';
+import { TrendingUp, ClipboardList, ShoppingCart, Bell, Package, Users, Clock } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -28,6 +13,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+import { DashboardCards } from '@/components/dashboard/DashboardCards';
+import { DashboardAlerts } from '@/components/dashboard/DashboardAlerts';
+import { DashboardActivities } from '@/components/dashboard/DashboardActivities';
+
 // Lazy load charts
 const EvolutionChart = lazy(() => import('@/components/dashboard/EvolutionChart').then(m => ({ default: m.EvolutionChart })));
 const EconomyChart = lazy(() => import('@/components/dashboard/EconomyChart').then(m => ({ default: m.EconomyChart })));
@@ -36,6 +25,15 @@ const EconomyChart = lazy(() => import('@/components/dashboard/EconomyChart').th
 const ChartSkeleton = () => (
   <div className="h-[320px] bg-muted rounded-xl animate-pulse" />
 );
+
+const STATUS_COLORS: Record<string, string> = {
+  finalizada: 'bg-emerald-500',
+  concluida: 'bg-emerald-500',
+  entregue: 'bg-emerald-500',
+  ativa: 'bg-blue-500',
+  pendente: 'bg-amber-500',
+  confirmado: 'bg-blue-500',
+};
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -111,87 +109,13 @@ function Dashboard() {
     );
   }
 
-  // 4 Cards principais - Cores sólidas com significado lógico
-  // Emerald = Dinheiro/Economia (verde = positivo financeiro)
-  // Blue = Cotações (azul = informação/documentos)
-  // Purple = Fornecedores (roxo = relacionamentos/parcerias)
-  // Amber = Produtos (âmbar = itens/estoque)
-  const cards = [
-    {
-      title: 'Economia Gerada',
-      value: formatCurrency(metrics.economiaGerada),
-      icon: DollarSign,
-      trend: metrics.crescimentoEconomia,
-      color: 'emerald',
-      sub: `Potencial: ${formatCurrency(metrics.economiaPotencial)}`
-    },
-    {
-      title: 'Cotações Ativas',
-      value: metrics.cotacoesAtivas,
-      icon: FileText,
-      trend: metrics.crescimentoCotacoes,
-      color: 'blue',
-      sub: `${metrics.aprovacoesTotal} aprovadas no período`
-    },
-    {
-      title: 'Fornecedores',
-      value: metrics.fornecedores,
-      icon: Users,
-      trend: metrics.taxaAtividade,
-      color: 'purple',
-      sub: `${metrics.taxaAtividade}% participando ativamente`
-    },
-    {
-      title: 'Produtos Cotados',
-      value: metrics.produtosCotados,
-      icon: Package,
-      trend: metrics.competitividadeMedia,
-      color: 'amber',
-      sub: `${metrics.competitividadeMedia}% com boa competitividade`
-    }
-  ];
-
-  // Cores sólidas para cards - mesmo padrão da ContagemEstoque
-  const colorMap: Record<string, { bg: string; iconBg: string }> = {
-    emerald: { 
-      bg: 'bg-gradient-to-br from-emerald-500 to-emerald-600', 
-      iconBg: 'bg-white/20'
-    },
-    blue: { 
-      bg: 'bg-gradient-to-br from-blue-500 to-blue-600', 
-      iconBg: 'bg-white/20'
-    },
-    purple: { 
-      bg: 'bg-gradient-to-br from-purple-500 to-purple-600', 
-      iconBg: 'bg-white/20'
-    },
-    amber: { 
-      bg: 'bg-gradient-to-br from-amber-500 to-amber-600', 
-      iconBg: 'bg-white/20'
-    },
-  };
-
-  const statusColors: Record<string, string> = {
-    finalizada: 'bg-emerald-500',
-    concluida: 'bg-emerald-500',
-    entregue: 'bg-emerald-500',
-    ativa: 'bg-blue-500',
-    pendente: 'bg-amber-500',
-    confirmado: 'bg-blue-500',
-  };
-
-  const allActivities = [
-    ...recentQuotes.slice(0, 5).map((q: any) => ({ type: 'quote', data: q })),
-    ...recentOrders.slice(0, 5).map((o: any) => ({ type: 'order', data: o }))
-  ];
-
   return (
     <PageWrapper>
       <div className="page-container space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg transition-smooth hover:shadow-xl hover:scale-105">
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -201,126 +125,17 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* 4 Cards Lado a Lado - Cores Sólidas */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {cards.map((card) => {
-            const colors = colorMap[card.color];
-            const isPositive = card.trend >= 0;
-            return (
-              <div 
-                key={card.title} 
-                className={cn(
-                  "relative overflow-hidden rounded-xl p-4 text-white",
-                  colors.bg
-                )}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className={cn("p-2.5 rounded-xl", colors.iconBg)}>
-                    <card.icon className="w-5 h-5" />
-                  </div>
-                  <div className={cn(
-                    "flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full",
-                    isPositive 
-                      ? "bg-white/20" 
-                      : "bg-red-400/30"
-                  )}>
-                    {isPositive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                    {Math.abs(card.trend).toFixed(1)}%
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-2xl lg:text-3xl font-bold tracking-tight">{card.value}</p>
-                  <p className="text-sm font-medium text-white/90">{card.title}</p>
-                  <p className="text-xs text-white/70">{card.sub}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {/* Cards */}
+        <DashboardCards metrics={metrics} />
 
-        {/* Alertas de Cotações */}
-        {(quotesStats.prontasParaDecisao.length > 0 || quotesStats.vencendo.length > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Cotações Prontas para Decisão */}
-            {quotesStats.prontasParaDecisao.length > 0 && (
-              <Card className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 border-emerald-200 dark:border-emerald-800">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-emerald-500 shadow-sm">
-                    <CheckCircle2 className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-emerald-800 dark:text-emerald-200">
-                      {quotesStats.prontasParaDecisao.length} cotação(ões) pronta(s) para decisão
-                    </h3>
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-0.5">
-                      Todos os fornecedores já responderam
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {quotesStats.prontasParaDecisao.slice(0, 3).map(q => (
-                        <span key={q.id} className="text-xs bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-2 py-1 rounded-full">
-                          #{q.id.substring(0, 6)}
-                        </span>
-                      ))}
-                      {quotesStats.prontasParaDecisao.length > 3 && (
-                        <span className="text-xs text-emerald-600 dark:text-emerald-400">
-                          +{quotesStats.prontasParaDecisao.length - 3} mais
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                    onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
-                  >
-                    Ver <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                  </Button>
-                </div>
-              </Card>
-            )}
+        {/* Alertas */}
+        <DashboardAlerts 
+          prontasParaDecisao={quotesStats.prontasParaDecisao.map(q => ({ id: q.id, dataFim: q.dataFim }))} 
+          vencendo={quotesStats.vencendo.map(q => ({ id: q.id, dataFim: q.dataFim }))} 
+        />
 
-            {/* Cotações Vencendo */}
-            {quotesStats.vencendo.length > 0 && (
-              <Card className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 border-amber-200 dark:border-amber-800">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-amber-500 shadow-sm">
-                    <AlertTriangle className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-amber-800 dark:text-amber-200">
-                      {quotesStats.vencendo.length} cotação(ões) vencendo em 48h
-                    </h3>
-                    <p className="text-sm text-amber-600 dark:text-amber-400 mt-0.5">
-                      Prazo expirando em breve
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {quotesStats.vencendo.slice(0, 3).map(q => (
-                        <span key={q.id} className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-full">
-                          #{q.id.substring(0, 6)} • {q.dataFim}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300"
-                    onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
-                  >
-                    Ver <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                  </Button>
-                </div>
-              </Card>
-            )}
-          </div>
-        )}
-
-        {/* Layout Principal: Gráficos + Atividades */}
-        {/* Desktop: Gráficos + Atividades lado a lado */}
-        {/* Mobile: Apenas Atividades e Ações Rápidas (sem gráficos) */}
-        
+        {/* Layout Principal */}
         {isMobile ? (
-          /* ========== MOBILE LAYOUT ========== */
           <div className="space-y-4">
             {/* Ações Rápidas Mobile */}
             <Card className="p-4 border border-border bg-card">
@@ -331,7 +146,7 @@ function Dashboard() {
               <div className="grid grid-cols-2 gap-2">
                 <Button 
                   variant="outline" 
-                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs hover:bg-muted/50 transition-smooth"
                   onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
                 >
                   <ClipboardList className="h-5 w-5 text-teal-600" />
@@ -339,7 +154,7 @@ function Dashboard() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs hover:bg-muted/50 transition-smooth"
                   onClick={() => navigate('/dashboard/compras?tab=pedidos')}
                 >
                   <ShoppingCart className="h-5 w-5 text-orange-600" />
@@ -347,7 +162,7 @@ function Dashboard() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs hover:bg-muted/50 transition-smooth"
                   onClick={() => navigate('/dashboard/produtos')}
                 >
                   <Package className="h-5 w-5 text-amber-600" />
@@ -355,7 +170,7 @@ function Dashboard() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs"
+                  className="h-auto py-3 flex flex-col items-center gap-1.5 text-xs hover:bg-muted/50 transition-smooth"
                   onClick={() => navigate('/dashboard/fornecedores')}
                 >
                   <Users className="h-5 w-5 text-purple-600" />
@@ -384,7 +199,7 @@ function Dashboard() {
               <div className="p-3 space-y-2">
                 {/* Cotações Recentes */}
                 {recentQuotes.slice(0, 3).map((quote: any) => (
-                  <div key={`q-${quote.id}`} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 active:bg-muted">
+                  <div key={`q-${quote.id}`} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 active:bg-muted transition-smooth">
                     <div className="p-1.5 rounded-lg bg-teal-100 dark:bg-teal-900/40">
                       <ClipboardList className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                     </div>
@@ -392,13 +207,13 @@ function Dashboard() {
                       <p className="text-sm font-medium text-foreground truncate">{quote.product}</p>
                       <p className="text-xs text-muted-foreground truncate">{quote.supplier} • {quote.bestPrice}</p>
                     </div>
-                    <div className={cn("w-2 h-2 rounded-full", statusColors[quote.status] || 'bg-muted-foreground')} />
+                    <div className={cn("w-2 h-2 rounded-full", STATUS_COLORS[quote.status] || 'bg-muted-foreground')} />
                   </div>
                 ))}
 
                 {/* Pedidos Recentes */}
                 {recentOrders.slice(0, 3).map((order) => (
-                  <div key={`o-${order.id}`} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 active:bg-muted">
+                  <div key={`o-${order.id}`} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 active:bg-muted transition-smooth">
                     <div className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/40">
                       <ShoppingCart className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                     </div>
@@ -406,7 +221,7 @@ function Dashboard() {
                       <p className="text-sm font-medium text-foreground truncate">{order.supplier}</p>
                       <p className="text-xs text-muted-foreground truncate">{order.items} itens • {order.total}</p>
                     </div>
-                    <div className={cn("w-2 h-2 rounded-full", statusColors[order.status] || 'bg-muted-foreground')} />
+                    <div className={cn("w-2 h-2 rounded-full", STATUS_COLORS[order.status] || 'bg-muted-foreground')} />
                   </div>
                 ))}
 
@@ -415,37 +230,10 @@ function Dashboard() {
                 )}
               </div>
             </Card>
-
-            {/* Resumo do Período Mobile */}
-            <Card className="p-4 border border-border bg-card">
-              <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-blue-600" />
-                Resumo do Período
-              </h2>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <span className="text-sm text-muted-foreground">Total em Cotações</span>
-                  <span className="text-sm font-semibold text-foreground">{metrics.cotacoesAtivas} ativas</span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <span className="text-sm text-muted-foreground">Aprovações</span>
-                  <span className="text-sm font-semibold text-emerald-600">{metrics.aprovacoesTotal} no período</span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <span className="text-sm text-muted-foreground">Economia Gerada</span>
-                  <span className="text-sm font-semibold text-emerald-600">{formatCurrency(metrics.economiaGerada)}</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm text-muted-foreground">Economia Potencial</span>
-                  <span className="text-sm font-semibold text-blue-600">{formatCurrency(metrics.economiaPotencial)}</span>
-                </div>
-              </div>
-            </Card>
           </div>
         ) : (
-          /* ========== DESKTOP LAYOUT ========== */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Coluna dos Gráficos (2/3 da largura) */}
+            {/* Coluna dos Gráficos */}
             <div className="lg:col-span-2 space-y-6">
               <Suspense fallback={<ChartSkeleton />}>
                 <EvolutionChart data={dailyData} period={chartPeriod} onPeriodChange={setChartPeriod} isLoading={false} />
@@ -456,84 +244,18 @@ function Dashboard() {
               </Suspense>
             </div>
 
-            {/* Card de Últimas Atividades (1/3 da largura) */}
+            {/* Coluna de Atividades */}
             <div className="lg:col-span-1">
-              <Card className="h-full border border-border bg-card shadow-sm flex flex-col">
-                <div className="p-4 border-b border-border flex-shrink-0">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-                      <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-sm">
-                        <Clock className="w-4 h-4 text-white" />
-                      </div>
-                      Últimas Atividades
-                    </h2>
-                    <button 
-                      onClick={() => setActivityOpen(true)}
-                      className="text-xs text-primary font-medium hover:underline"
-                    >
-                      Ver todas
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                  {/* Seção de Cotações */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                      <ClipboardList className="w-3.5 h-3.5" /> Cotações Recentes
-                    </h3>
-                    <div className="space-y-2">
-                      {recentQuotes.slice(0, 4).map((quote: any) => (
-                        <div key={`q-${quote.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                          <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/40 flex-shrink-0">
-                            <ClipboardList className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                          </div>
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <p className="text-sm font-medium text-foreground truncate" title={quote.product}>{quote.product}</p>
-                            <p className="text-xs text-muted-foreground truncate" title={`${quote.supplier} • ${quote.bestPrice}`}>{quote.supplier} • {quote.bestPrice}</p>
-                          </div>
-                          <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", statusColors[quote.status] || 'bg-muted-foreground')} />
-                        </div>
-                      ))}
-                      {recentQuotes.length === 0 && (
-                        <p className="text-xs text-muted-foreground text-center py-3">Nenhuma cotação recente</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="border-t border-border my-3" />
-
-                  {/* Seção de Pedidos */}
-                  <div>
-                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                      <ShoppingCart className="w-3.5 h-3.5" /> Pedidos Recentes
-                    </h3>
-                    <div className="space-y-2">
-                      {recentOrders.slice(0, 4).map((order) => (
-                        <div key={`o-${order.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                          <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/40 flex-shrink-0">
-                            <ShoppingCart className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                          </div>
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <p className="text-sm font-medium text-foreground truncate" title={order.supplier}>{order.supplier}</p>
-                            <p className="text-xs text-muted-foreground truncate" title={`${order.items} itens • ${order.total}`}>{order.items} itens • {order.total}</p>
-                          </div>
-                          <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", statusColors[order.status] || 'bg-muted-foreground')} />
-                        </div>
-                      ))}
-                      {recentOrders.length === 0 && (
-                        <p className="text-xs text-muted-foreground text-center py-3">Nenhum pedido recente</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Card>
+              <DashboardActivities 
+                recentQuotes={recentQuotes} 
+                recentOrders={recentOrders} 
+                onViewAll={() => setActivityOpen(true)} 
+              />
             </div>
           </div>
         )}
 
-        {/* Modal de Atividades Completo - Usa Drawer no mobile */}
+        {/* Modal de Atividades Completo */}
         <ResponsiveModal 
           open={activityOpen} 
           onOpenChange={setActivityOpen}
@@ -552,7 +274,7 @@ function Dashboard() {
                 ) : (
                   recentQuotes.map((quote: any) => (
                     <div key={quote.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 active:bg-muted transition-colors">
-                      <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", statusColors[quote.status] || 'bg-muted-foreground')} />
+                      <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", STATUS_COLORS[quote.status] || 'bg-muted-foreground')} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground">{quote.product}</p>
                         <p className="text-xs text-muted-foreground">{quote.supplier} • {quote.bestPrice}</p>
@@ -575,7 +297,7 @@ function Dashboard() {
                 ) : (
                   recentOrders.map((order) => (
                     <div key={order.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 active:bg-muted transition-colors">
-                      <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", statusColors[order.status] || 'bg-muted-foreground')} />
+                      <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", STATUS_COLORS[order.status] || 'bg-muted-foreground')} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground">{order.supplier}</p>
                         <p className="text-xs text-muted-foreground">{order.items} itens • {order.total}</p>

@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useCallback, startTransition, memo, lazy, Suspense } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProducts } from "@/hooks/useProducts";
@@ -8,16 +7,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
-import { TableActionGroup } from "@/components/ui/table-action-group";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { useExportCSV } from "@/hooks/useExportCSV";
-import { Package, Plus, MoreVertical, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download, Loader2, Star, Award } from "lucide-react";
-import { capitalize } from "@/lib/text-utils";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { Package, Plus, Tags, DollarSign, ClipboardList, Download, Loader2, Award, FileUp } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import type { Product } from "@/hooks/useProducts";
@@ -25,12 +19,12 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useToast } from "@/hooks/use-toast";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
-import { LazyImage } from "@/components/responsive/LazyImage";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
 import { BrandManagementDialog } from "@/components/products/BrandManagementDialog";
-
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
+import { ProductListDesktop } from "@/components/products/ProductListDesktop";
+import { useProductStats } from "@/hooks/useProductStats";
 
 // Lazy load dialogs for better initial load performance
 const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
@@ -45,7 +39,6 @@ const DialogLoader = () => (
   </div>
 );
 
-// Shared utility functions to avoid duplication
 const getProductStatus = (product: Product) => {
   if (product.quotesCount === 0) return "sem_cotacao";
   if (product.lastOrderPrice === "R$ 0,00") return "pendente";
@@ -53,14 +46,7 @@ const getProductStatus = (product: Product) => {
   return "cotado";
 };
 
-const getTrendIcon = (trend: "up" | "down" | "stable") => {
-  if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
-  if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
-  return <Minus className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />;
-};
-
 function Produtos() {
-  const navigate = useNavigate();
   const { user, loading } = useAuth();
   const isMobile = useIsMobile();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -111,96 +97,7 @@ function Produtos() {
   const safeFilteredProducts = Array.isArray(filteredProducts) ? filteredProducts : [];
   const paginatedData = paginate(safeFilteredProducts);
 
-  const stats = useMemo(() => {
-    if (!Array.isArray(safeProducts) || !Array.isArray(safeCategories)) {
-      return {
-        totalProducts: 0,
-        totalCategories: 0,
-        activeQuotes: 0,
-        produtosPorStatus: { ativos: 0, cotados: 0, pendentes: 0, semCotacao: 0 },
-        percentualComCotacao: 0,
-        topCategoria: null,
-        mediaCotacoesPorProduto: "0.0",
-        averageValue: "R$ 0,00",
-        averageValueNumeric: 0,
-        economiaMediaPorProduto: "0",
-        economiaPotencial: 0,
-        percentualEconomiaMedia: 0,
-        productsWithPrices: 0,
-      };
-    }
-
-    const totalCategories = Math.max(0, safeCategories.length - 1);
-    const activeQuotes = safeProducts.reduce((sum, p) => sum + (p.quotesCount || 0), 0);
-
-    const produtosPorStatus = {
-      ativos: safeProducts.filter((p) => (p.quotesCount || 0) >= 3).length,
-      cotados: safeProducts.filter((p) => (p.quotesCount || 0) > 0 && (p.quotesCount || 0) < 3).length,
-      pendentes: safeProducts.filter((p) => (p.quotesCount || 0) === 0 && p.lastOrderPrice !== "R$ 0,00").length,
-      semCotacao: safeProducts.filter((p) => (p.quotesCount || 0) === 0 && p.lastOrderPrice === "R$ 0,00").length
-    };
-
-    const produtosComCotacao = produtosPorStatus.ativos + produtosPorStatus.cotados;
-    const percentualComCotacao = safeProducts.length > 0
-      ? Math.round((produtosComCotacao / safeProducts.length) * 100)
-      : 0;
-
-    const categoriaCount = new Map<string, number>();
-    safeProducts.forEach(p => {
-      const cat = p.category || 'Sem Categoria';
-      categoriaCount.set(cat, (categoriaCount.get(cat) || 0) + 1);
-    });
-    const topCategoriaEntry = Array.from(categoriaCount.entries()).sort((a, b) => b[1] - a[1])[0];
-
-    const produtosComCotacaoParaMedia = safeProducts.filter((p) => (p.quotesCount || 0) > 0);
-    const mediaCotacoesPorProduto = produtosComCotacaoParaMedia.length > 0
-      ? (activeQuotes / produtosComCotacaoParaMedia.length).toFixed(1)
-      : "0.0";
-
-    const productsWithPrices = safeProducts.filter((p) => p.lastOrderPrice !== "R$ 0,00");
-    let averageValue = "R$ 0,00";
-    let averageValueNumeric = 0;
-    let economiaMediaPorProduto = "0";
-    let economiaPotencial = 0;
-    let percentualEconomiaMedia = 0;
-
-    if (productsWithPrices.length > 0) {
-      const total = productsWithPrices.reduce((sum, p) => {
-        const priceStr = p.lastOrderPrice || "R$ 0,00";
-        const price = parseFloat(priceStr.replace(/[^\d,]/g, '').replace(',', '.'));
-        return sum + (isNaN(price) ? 0 : price);
-      }, 0);
-      averageValueNumeric = total / productsWithPrices.length;
-      averageValue = `R$ ${averageValueNumeric.toFixed(2)}`;
-
-      const produtosComMultiplasCotacoes = safeProducts.filter((p) => (p.quotesCount || 0) >= 2);
-      if (produtosComMultiplasCotacoes.length > 0) {
-        percentualEconomiaMedia = Math.round((produtosComMultiplasCotacoes.length / productsWithPrices.length) * 12);
-        economiaMediaPorProduto = (averageValueNumeric * (percentualEconomiaMedia / 100)).toFixed(2);
-        economiaPotencial = total * 0.08; // 8% de economia potencial estimada
-      }
-    }
-
-    return {
-      totalProducts: safeProducts.length,
-      totalCategories,
-      activeQuotes,
-      produtosPorStatus,
-      percentualComCotacao,
-      topCategoria: topCategoriaEntry ? { nome: topCategoriaEntry[0], count: topCategoriaEntry[1] } : null,
-      mediaCotacoesPorProduto,
-      averageValue,
-      averageValueNumeric,
-      economiaMediaPorProduto,
-      economiaPotencial,
-      percentualEconomiaMedia,
-      productsWithPrices: productsWithPrices.length,
-    };
-  }, [safeProducts, safeCategories]);
-
-
-
-
+  const stats = useProductStats(safeProducts, safeCategories);
 
   const { exportToCSV } = useExportCSV();
 
@@ -244,7 +141,7 @@ function Produtos() {
       title: "Exportação realizada",
       description: `${exportData.length} produtos exportados com sucesso.`,
     });
-  }, [safeFilteredProducts, toast, getProductStatus, exportToCSV]);
+  }, [safeFilteredProducts, toast, exportToCSV]);
 
   const handleAddProduct = useCallback(() => {
     startTransition(() => {
@@ -270,6 +167,10 @@ function Produtos() {
     });
   }, []);
 
+  const handleHistoryProduct = useCallback((product: Product) => {
+    setHistoryProduct(product);
+  }, []);
+
   if (loading || productsLoading) {
     return (
       <PageWrapper>
@@ -287,7 +188,7 @@ function Produtos() {
         <div className="page-container">
           {/* Page Title */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg transition-smooth hover:shadow-xl hover:scale-105">
               <Package className="h-6 w-6 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Produtos</h1>
@@ -300,24 +201,28 @@ function Produtos() {
               value={stats.totalProducts}
               icon={Package}
               variant="warning"
+              className="transition-smooth hover:scale-[1.02]"
             />
             <MetricCard
               title="Categorias"
               value={stats.totalCategories}
               icon={Tags}
               variant="info"
+              className="transition-smooth hover:scale-[1.02]"
             />
             <MetricCard
               title="Cotações"
               value={stats.activeQuotes}
               icon={ClipboardList}
               variant="success"
+              className="transition-smooth hover:scale-[1.02]"
             />
             <MetricCard
               title="Valor Médio"
               value={stats.averageValue}
               icon={DollarSign}
               variant="default"
+              className="transition-smooth hover:scale-[1.02]"
             />
           </ResponsiveGrid>
 
@@ -345,7 +250,7 @@ function Produtos() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => setBrandDialogOpen(true)}
-                className="h-10 hidden sm:flex border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                className="h-10 hidden sm:flex border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-smooth"
               >
                 <Award className="h-4 w-4 mr-2 text-orange-500" /> Marcas
               </Button>
@@ -353,7 +258,7 @@ function Produtos() {
                 variant="outline" 
                 size="sm" 
                 onClick={handleExportProducts}
-                className="h-10 hidden sm:flex"
+                className="h-10 hidden sm:flex transition-smooth"
               >
                 <Download className="h-4 w-4 mr-2" /> Exportar
               </Button>
@@ -407,150 +312,12 @@ function Produtos() {
                   </div>
 
                   {/* Desktop Table View */}
-                  <div className="hidden md:block overflow-x-auto w-full">
-                    <Table className="w-full">
-                      <TableHeader>
-                        <TableRow>
-                          <TableCell colSpan={9} className="px-1 pb-3 pt-0 border-none">
-                            <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
-                              <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
-                                  <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                </div>
-                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</span>
-                              </div>
-                              <div className="w-[12%] px-2 flex justify-center items-center gap-2">
-                                <Tags className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Categoria</span>
-                              </div>
-                              <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
-                                <Award className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Marca</span>
-                              </div>
-                              <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-2">
-                                <Barcode className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Código</span>
-                              </div>
-                              <div className="w-[11%] px-2 flex justify-center items-center gap-2">
-                                <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
-                              </div>
-                              <div className="w-[10%] px-2 flex justify-center items-center gap-2">
-                                <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Preço</span>
-                              </div>
-                              <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
-                                <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
-                              </div>
-                              <div className="w-[8%] px-2 flex justify-center items-center gap-2">
-                                <ClipboardList className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Cot.</span>
-                              </div>
-                              <div className="w-[10%] flex justify-end items-center gap-2 px-2">
-                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
-                              </div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {paginatedData.items.map((product) => (
-                          <TableRow key={product.id} className="group border-none">
-                            <TableCell colSpan={9} className="px-1 py-1.5">
-                              <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800/70">
-                                <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
-                                  <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-200 dark:border-gray-600/30">
-                                    {product.image_url ? (
-                                      <LazyImage 
-                                        src={product.image_url} 
-                                        alt={product.name} 
-                                        className="w-9 h-9 rounded-xl object-cover"
-                                        showSkeleton={true}
-                                        fallback={<Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />}
-                                      />
-                                    ) : (
-                                      <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                    )}
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{capitalize(product.name)}</div>
-                                  </div>
-                                </div>
-
-                                <div className="w-[12%] px-2 flex justify-center items-center">
-                                  <Badge variant="secondary" className="bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 border-0 font-medium">
-                                    {capitalize(product.category)}
-                                  </Badge>
-                                </div>
-
-                                <div className="hidden lg:flex w-[12%] px-2 flex-col justify-center items-center gap-1">
-                                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-full font-medium">
-                                    {capitalize(product.brand_name || "—")}
-                                  </span>
-                                  {product.brand_rating ? (
-                                    <div className="flex items-center gap-0.5">
-                                      {Array.from({ length: 5 }).map((_, i) => (
-                                        <Star 
-                                          key={i} 
-                                          className={`h-2.5 w-2.5 ${i < (product.brand_rating || 0) ? "text-amber-400 fill-amber-400" : "text-gray-300 dark:text-gray-600"}`} 
-                                        />
-                                      ))}
-                                    </div>
-                                  ) : null}
-                                </div>
-
-                                <div className="hidden xl:flex w-[10%] px-2 justify-center items-center">
-                                  <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                                    {product.barcode || "—"}
-                                  </span>
-                                </div>
-
-                                <div className="w-[11%] px-2 flex justify-center items-center">
-                                  <StatusBadge status={getProductStatus(product)} />
-                                </div>
-
-                                <div className="w-[10%] px-2 flex justify-center items-center gap-1.5">
-                                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">{product.lastOrderPrice}</span>
-                                  {getTrendIcon(product.trend)}
-                                </div>
-
-                                <div className="hidden lg:flex w-[12%] px-2 justify-center items-center">
-                                  <span className="text-sm text-gray-600 dark:text-gray-400 truncate">{capitalize(product.bestSupplier || "—")}</span>
-                                </div>
-
-                                <div className="w-[8%] px-2 flex justify-center items-center gap-1.5">
-                                  <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                                    <ClipboardList className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                                    <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{product.quotesCount || 0}</span>
-                                  </div>
-                                </div>
-
-                                <div className="w-[10%] flex justify-end items-center px-2">
-                                  <TableActionGroup
-                                    showView={false}
-                                    onEdit={() => handleEditProduct(product)}
-                                    onDelete={() => handleDeleteProduct(product)}
-                                    additionalActions={[
-                                      {
-                                        icon: <History className="h-4 w-4" />,
-                                        label: "Histórico de Preços",
-                                        onClick: () => {
-                                          setHistoryProduct(product);
-                                        },
-                                        variant: "default" as const,
-                                      }
-                                    ]}
-                                    dropdownLabel="Ações"
-                                  />
-                                </div>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                  <ProductListDesktop 
+                    products={paginatedData.items} 
+                    onEdit={handleEditProduct}
+                    onDelete={handleDeleteProduct}
+                    onHistory={handleHistoryProduct}
+                  />
 
                   {/* Pagination */}
                   <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">

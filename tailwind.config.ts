@@ -75,6 +75,15 @@ export default {
         'gradient-error': 'linear-gradient(135deg, hsl(var(--error)), hsl(0 84% 70%))',
         'gradient-info': 'linear-gradient(135deg, hsl(var(--info)), hsl(251 91% 77%))',
       },
+      transitionTimingFunction: {
+        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'bounce-custom': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+      },
+      transitionDuration: {
+        '250': '250ms',
+        '350': '350ms',
+        '400': '400ms',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

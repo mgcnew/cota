@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense, memo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -9,13 +9,11 @@ import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
-import { TableActionGroup } from "@/components/ui/table-action-group";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye, History, MessageCircle, Star, CircleDot, Loader2 } from "lucide-react";
+import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { MetricCard } from "@/components/ui/metric-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -27,6 +25,9 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { VirtualList } from "@/components/responsive/VirtualList";
 import { FornecedoresSkeleton, ExpandableSupplierCard } from "@/components/suppliers";
+import { SupplierListDesktop } from "@/components/suppliers/SupplierListDesktop";
+import { useSupplierStats } from "@/hooks/useSupplierStats";
+import { Loader2 } from "lucide-react";
 
 // Lazy load dialogs for better initial load performance
 const AddSupplierDialog = lazy(() => import("@/components/forms/AddSupplierDialog"));
@@ -73,7 +74,6 @@ type SupplierFormData = {
 const VIRTUALIZATION_THRESHOLD = 15;
 
 function Fornecedores() {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading } = useAuth();
   const { canViewSensitiveData } = useUserRole();
@@ -81,7 +81,7 @@ function Fornecedores() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
-  const { suppliers, isLoading: suppliersLoading, error: suppliersError, deleteSupplier, updateSupplier, refetch: invalidateCache } = useSuppliers();
+  const { suppliers, isLoading: suppliersLoading, deleteSupplier, updateSupplier, refetch: invalidateCache } = useSuppliers();
 
   const { paginate } = usePagination<Supplier>({
     initialItemsPerPage: isMobile ? 8 : 10
@@ -129,7 +129,7 @@ function Fornecedores() {
     deleteSupplier(id);
   };
 
-  const handleSuppliersImported = (importedSuppliers: Supplier[]) => {
+  const handleSuppliersImported = () => {
     invalidateCache();
   };
 
@@ -175,7 +175,7 @@ function Fornecedores() {
     window.open(whatsappUrl, '_blank');
   }, [canViewSensitiveData, generateWhatsAppMessage]);
 
-  const handleAddQuote = (data: any) => {
+  const handleAddQuote = () => {
     toast({
       title: "Cotação criada",
       description: "A cotação foi criada e enviada aos fornecedores."
@@ -200,72 +200,7 @@ function Fornecedores() {
     </span>
   ), []);
 
-  // Calculate real stats
-  const stats = useMemo(() => {
-    if (!suppliers) return {
-      total: 0,
-      active: 0,
-      inactive: 0,
-      pending: 0,
-      percentualAtivos: 0,
-      totalLimit: "R$ 0",
-      limiteMedioPorAtivo: "0.0",
-      activeQuotes: 0,
-      mediaCotacoesPorFornecedor: "0.0",
-      distribuicaoCotacoes: [0, 0, 0, 0, 0, 0, 0]
-    };
-
-    const totalLimit = suppliers.reduce((sum, s) => {
-      const limitValue = parseFloat((s as any).limit?.replace(/[^\d,]/g, '').replace(',', '.') || '0');
-      return sum + (isNaN(limitValue) ? 0 : limitValue);
-    }, 0);
-    const activeQuotesTotal = suppliers.reduce((sum, s) => sum + ((s as any).activeQuotes || 0), 0);
-
-    const porStatus = {
-      active: suppliers.filter(s => s.status === "active").length,
-      inactive: suppliers.filter(s => s.status === "inactive").length,
-      pending: suppliers.filter(s => s.status === "pending").length
-    };
-
-    const percentualAtivos = suppliers.length > 0
-      ? Math.round((porStatus.active / suppliers.length) * 100)
-      : 0;
-
-    const limiteMedioPorAtivo = porStatus.active > 0
-      ? (totalLimit / porStatus.active).toFixed(1)
-      : "0.0";
-
-    const fornecedoresComCotacoes = suppliers.filter(s => ((s as any).activeQuotes || 0) > 0 || ((s as any).totalQuotes || 0) > 0);
-    const totalQuotes = suppliers.reduce((sum, s) => sum + ((s as any).totalQuotes || 0), 0);
-    const mediaCotacoesPorFornecedor = fornecedoresComCotacoes.length > 0
-      ? (totalQuotes / fornecedoresComCotacoes.length).toFixed(1)
-      : "0.0";
-
-    const distribuicaoCotacoes = [0, 0, 0, 0, 0, 0, 0];
-    suppliers.forEach(s => {
-      const quotes = s.activeQuotes;
-      if (quotes === 0) distribuicaoCotacoes[0]++;
-      else if (quotes <= 2) distribuicaoCotacoes[1]++;
-      else if (quotes <= 5) distribuicaoCotacoes[2]++;
-      else if (quotes <= 8) distribuicaoCotacoes[3]++;
-      else if (quotes <= 12) distribuicaoCotacoes[4]++;
-      else if (quotes <= 20) distribuicaoCotacoes[5]++;
-      else distribuicaoCotacoes[6]++;
-    });
-
-    return {
-      total: suppliers.length,
-      active: porStatus.active,
-      inactive: porStatus.inactive,
-      pending: porStatus.pending,
-      percentualAtivos,
-      totalLimit: totalLimit > 0 ? `R$ ${totalLimit.toFixed(0)}k` : "R$ 0",
-      limiteMedioPorAtivo,
-      activeQuotes: activeQuotesTotal,
-      mediaCotacoesPorFornecedor,
-      distribuicaoCotacoes
-    };
-  }, [suppliers]);
+  const stats = useSupplierStats(suppliers);
 
   // Show skeleton during initial load (Requirement 4.1)
   if (loading || suppliersLoading) {
@@ -298,7 +233,7 @@ function Fornecedores() {
         <div className="page-container">
           {/* Page Title */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg transition-smooth hover:shadow-xl hover:scale-105">
               <Building2 className="h-6 w-6 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Fornecedores</h1>
@@ -312,6 +247,7 @@ function Fornecedores() {
               icon={Building2}
               trend={{ value: "+15", label: "novos este mês", type: "positive" }}
               variant="info"
+              className="transition-smooth hover:scale-[1.02]"
             />
             <MetricCard
               title="Ativos"
@@ -319,6 +255,7 @@ function Fornecedores() {
               icon={TrendingUp}
               trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
               variant="success"
+              className="transition-smooth hover:scale-[1.02]"
             />
             <MetricCard
               title="Limite Total"
@@ -326,6 +263,7 @@ function Fornecedores() {
               icon={DollarSign}
               trend={{ value: `R$ ${stats.limiteMedioPorAtivo}k`, label: "média por ativo", type: "neutral" }}
               variant="default"
+              className="transition-smooth hover:scale-[1.02]"
             />
             <MetricCard
               title="Cotações"
@@ -333,6 +271,7 @@ function Fornecedores() {
               icon={FileText}
               trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
               variant="warning"
+              className="transition-smooth hover:scale-[1.02]"
             />
           </ResponsiveGrid>
 
@@ -365,14 +304,14 @@ function Fornecedores() {
               <Button
                 variant="outline"
                 onClick={() => importSuppliersRef.current?.click()}
-                className="hidden sm:flex"
+                className="hidden sm:flex transition-smooth"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Importar
               </Button>
               <Button
                 onClick={() => addSupplierRef.current?.click()}
-                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
+                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 transition-smooth hover:scale-[1.02]"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Fornecedor
@@ -383,7 +322,7 @@ function Fornecedores() {
           {viewMode === "grid" ? (
             <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {paginatedData.items.map(supplier => (
-                <Card key={supplier.id} className="group">
+                <Card key={supplier.id} className="group transition-smooth hover:shadow-md hover:-translate-y-1">
                   <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
                     <div className="flex items-start justify-between">
                       <div className="space-y-2 sm:space-y-3 flex-1">
@@ -464,7 +403,7 @@ function Fornecedores() {
 
                       <div className="pt-2.5">
                         <AddQuoteDialog onAdd={handleAddQuote} trigger={
-                          <Button size="sm" variant="outline" className="w-full h-9">
+                          <Button size="sm" variant="outline" className="w-full h-9 transition-smooth hover:bg-muted">
                             <Plus className="h-3.5 w-3.5 mr-1.5" />
                             Nova Cotação
                           </Button>
@@ -506,112 +445,14 @@ function Fornecedores() {
                 </div>
 
                 {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                          <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
-                            <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
-                                <Building2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                              </div>
-                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
-                            </div>
-                            <div className="w-[15%] px-2 flex justify-center items-center gap-2">
-                              <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
-                            </div>
-                            <div className="w-[15%] px-2 flex justify-center items-center gap-2">
-                              <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Limite</span>
-                            </div>
-                            <div className="hidden lg:flex w-[15%] px-2 justify-center items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Preço Médio</span>
-                            </div>
-                            <div className="hidden lg:flex w-[10%] px-2 justify-center items-center gap-2">
-                              <FileText className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Cot.</span>
-                            </div>
-                            <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-2">
-                              <Star className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Avaliação</span>
-                            </div>
-                            <div className="w-[5%] flex justify-end items-center px-2">
-                              <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
-                            </div>
-                          </div>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paginatedData.items.map(supplier => (
-                        <TableRow key={supplier.id} className="group border-none">
-                          <TableCell colSpan={7} className="px-1 py-1.5">
-                            <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800/70">
-                              <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                                <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-600/30">
-                                  <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{capitalize(supplier.name)}</div>
-                                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{capitalize(supplier.contact)}</div>
-                                </div>
-                              </div>
-
-                              <div className="w-[15%] px-2 flex justify-center items-center">
-                                <StatusBadge status={supplier.status} />
-                              </div>
-
-                              <div className="w-[15%] px-2 flex justify-center items-center">
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.limit}</span>
-                              </div>
-
-                              <div className="hidden lg:flex w-[15%] px-2 justify-center items-center">
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{supplier.avgPrice}</span>
-                              </div>
-
-                              <div className="hidden lg:flex w-[10%] px-2 justify-center items-center">
-                                <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                                  <FileText className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                                  <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{supplier.activeQuotes}</span>
-                                </div>
-                              </div>
-
-                              <div className="hidden xl:flex w-[10%] px-2 justify-center items-center">
-                                {renderNumericRating(supplier.rating)}
-                              </div>
-
-                              <div className="w-[10%] flex justify-end items-center px-2">
-                                <TableActionGroup
-                                  showView={false}
-                                  onEdit={() => setEditingSupplier(supplier)}
-                                  onDelete={() => setDeletingSupplier(supplier)}
-                                  additionalActions={[
-                                    {
-                                      icon: <MessageCircle className="h-3.5 w-3.5" />,
-                                      label: "WhatsApp",
-                                      onClick: () => openWhatsApp(supplier),
-                                      variant: "success" as const,
-                                    },
-                                    {
-                                      icon: <History className="h-4 w-4" />,
-                                      label: "Ver Histórico",
-                                      onClick: () => setHistorySupplier(supplier),
-                                      variant: "view" as const,
-                                    }
-                                  ]}
-                                  dropdownLabel="Ações"
-                                />
-                              </div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                <SupplierListDesktop 
+                  suppliers={paginatedData.items}
+                  onEdit={setEditingSupplier}
+                  onDelete={setDeletingSupplier}
+                  onHistory={setHistorySupplier}
+                  onWhatsApp={openWhatsApp}
+                  renderRating={renderNumericRating}
+                />
 
                 {/* Pagination */}
                 <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
@@ -678,7 +519,7 @@ function Fornecedores() {
                 supplierName={historySupplier.name}
                 supplierId={historySupplier.id}
                 open={!!historySupplier}
-                onOpenChange={(open) => { if (!open) setHistorySupplier(null); }}
+                onOpenChange={open => { if (!open) setHistorySupplier(null); }}
               />
             </Suspense>
           )}
