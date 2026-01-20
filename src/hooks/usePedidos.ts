@@ -14,6 +14,7 @@ export interface PedidoItem {
   unidade_entregue?: string | null;
   valor_unitario_cotado?: number | null;
   maior_valor_cotado?: number | null;
+  brand_name?: string | null;
 }
 
 export interface Pedido {

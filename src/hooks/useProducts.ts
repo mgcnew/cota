@@ -1,15 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export interface Product {
   id: string;
   name: string;
   category: string;
   unit: string;
+  brand_id?: string;
+  brand_name?: string;
+  brand_rating?: number;
+  brand_score?: number;
   barcode?: string;
   image_url?: string;
-  lastQuotePrice: string;
+  lastOrderPrice: string;
   bestSupplier: string;
   quotesCount: number;
   lastUpdate: string;
@@ -17,14 +22,14 @@ export interface Product {
 }
 
 export function useProducts() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: products = [], isLoading, error } = useQuery({
-    queryKey: ['products'],
+    queryKey: ['products', user?.id],
+    enabled: !!user?.id,
     queryFn: async () => {
-      // Verificar autenticação primeiro
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
       console.log('[PRODUCTS DEBUG] Fetching products for user:', user.id);
@@ -60,7 +65,7 @@ export function useProducts() {
 
         const { data: pageData, error: pageError } = await supabase
           .from('products')
-          .select('*')
+          .select('*, brands(id, name, manual_rating)')
           .order('created_at', { ascending: false })
           .range(from, to);
 
@@ -116,8 +121,12 @@ export function useProducts() {
         const productQuotes = quoteItems?.filter(qi => qi.product_id === p.id) || [];
         const quotesCount = new Set(productQuotes.map(qi => qi.quote_id)).size;
 
-        // Get all order items for this product
-        const productOrderItems = orderItems?.filter(oi => oi.product_id === p.id) || [];
+        // Get all order items for this product from CONFIRMED orders
+        // Only include orders that are NOT "cancelado"
+        const productOrderItems = orderItems?.filter(oi => 
+          oi.product_id === p.id && 
+          oi.orders?.status !== 'cancelado'
+        ) || [];
 
         // Group order items by order and get prices
         const orderPrices: Array<{
@@ -143,14 +152,14 @@ export function useProducts() {
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
 
-        let lastQuotePrice = "R$ 0,00";
+        let lastOrderPrice = "R$ 0,00";
         let bestSupplier = "-";
         let trend: "up" | "down" | "stable" = "stable";
         let lastOrderTimestamp: number | null = null;
 
         if (orderPrices.length > 0) {
           const latestOrderPrice = orderPrices[0];
-          lastQuotePrice = `R$ ${latestOrderPrice.price.toFixed(2)}`;
+          lastOrderPrice = `R$ ${latestOrderPrice.price.toFixed(2)}`;
           bestSupplier = latestOrderPrice.supplierName;
           lastOrderTimestamp = new Date(latestOrderPrice.created_at).getTime();
 
@@ -173,9 +182,12 @@ export function useProducts() {
           name: p.name,
           category: p.category,
           unit: p.unit || "un",
+          brand_id: p.brand_id,
+          brand_name: p.brands?.name,
+          brand_rating: p.brands?.manual_rating,
           barcode: p.barcode,
           image_url: p.image_url,
-          lastQuotePrice,
+          lastOrderPrice, // Repurposed to show last order price
           bestSupplier,
           quotesCount,
           lastUpdate,
@@ -220,10 +232,9 @@ export function useProducts() {
   });
 
   const { data: categories = ["all"] } = useQuery({
-    queryKey: ['product-categories'],
+    queryKey: ['product-categories', user?.id],
+    enabled: !!user?.id,
     queryFn: async () => {
-      // Verificar autenticação primeiro
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
       const { data, error } = await supabase
@@ -266,7 +277,7 @@ export function useProducts() {
   const updateMutation = useMutation({
     mutationFn: async ({ productId, data }: { 
       productId: string, 
-      data: { name: string, category: string, unit: string, barcode?: string } 
+      data: { name: string, category: string, unit: string, brand_id?: string, barcode?: string } 
     }) => {
       const { error } = await supabase
         .from('products')
@@ -274,6 +285,7 @@ export function useProducts() {
           name: data.name,
           category: data.category,
           unit: data.unit,
+          brand_id: data.brand_id || null,
           barcode: data.barcode || null,
           updated_at: new Date().toISOString()
         })

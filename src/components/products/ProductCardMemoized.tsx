@@ -183,12 +183,12 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
             <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/60 dark:border-green-700/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400 mb-1">Melhor Preço</p>
-                  <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-300">{(product as any).lastQuotePrice || "R$ 0,00"}</p>
+                  <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400 mb-1">Última Compra</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-300">{product.lastOrderPrice || "R$ 0,00"}</p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-1 mb-1">
-                    {getTrendIcon((product as any).trend || "stable")}
+                    {getTrendIcon(product.trend || "stable")}
                     <span className="text-xs sm:text-sm font-medium text-green-600 hidden sm:inline">Tendência</span>
                   </div>
                   <div className="text-[10px] sm:text-xs text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
@@ -199,12 +199,12 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
             </div>
 
             <div className="space-y-2 sm:space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-gray-500" />
                   <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Fornecedor</span>
                 </div>
-                <span className="table-cell-primary truncate max-w-[120px]">{capitalize((product as any).bestSupplier || "N/A")}</span>
+                <span className="table-cell-primary truncate max-w-[120px]">{capitalize(product.bestSupplier || "N/A")}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -213,7 +213,7 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
                     <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                     <span className="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
                   </div>
-                  <span className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-300">{(product as any).quotesCount || 0}</span>
+                  <span className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-300">{product.quotesCount || 0}</span>
                 </div>
 
                 <div className="p-2 sm:p-3 rounded-lg bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/60 dark:border-purple-700/30 text-center">
@@ -221,7 +221,7 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
                     <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
                     <span className="text-[10px] sm:text-xs font-medium text-purple-600 dark:text-purple-400">Atualizado</span>
                   </div>
-                  <span className="text-[10px] sm:text-xs font-semibold text-purple-800 dark:text-purple-300">{(product as any).lastUpdate || "N/A"}</span>
+                  <span className="text-[10px] sm:text-xs font-semibold text-purple-800 dark:text-purple-300">{product.lastUpdate || "N/A"}</span>
                 </div>
               </div>
             </div>
@@ -256,6 +256,8 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
     prevProps.product.unit === nextProps.product.unit &&
     prevProps.product.barcode === nextProps.product.barcode &&
     prevProps.product.image_url === nextProps.product.image_url &&
+    prevProps.product.lastOrderPrice === nextProps.product.lastOrderPrice &&
+    prevProps.product.quotesCount === nextProps.product.quotesCount &&
     prevProps.isMobile === nextProps.isMobile
   );
 });

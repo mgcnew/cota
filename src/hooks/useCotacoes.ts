@@ -23,6 +23,9 @@ export interface SupplierItemWithPricing {
   unidade_preco: PricingUnit | null;
   fator_conversao: number | null;
   quantidade_por_embalagem: number | null;
+  brand_id: string | null;
+  brand_name: string | null;
+  brand_rating: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -117,6 +120,8 @@ export function useCotacoes() {
               unidade_preco,
               fator_conversao,
               quantidade_por_embalagem,
+              brand_id,
+              brands(name, manual_rating),
               created_at,
               updated_at
             `)
@@ -181,6 +186,9 @@ export function useCotacoes() {
                 unidade_preco: item.unidade_preco as PricingUnit | null,
                 fator_conversao: item.fator_conversao,
                 quantidade_por_embalagem: item.quantidade_por_embalagem,
+                brand_id: item.brand_id,
+                brand_name: item.brands?.name,
+                brand_rating: item.brands?.manual_rating,
                 created_at: item.created_at,
                 updated_at: item.updated_at
               }))
@@ -313,7 +321,8 @@ export function useCotacoes() {
       newValue,
       unidadePreco,
       fatorConversao,
-      quantidadePorEmbalagem
+      quantidadePorEmbalagem,
+      brandId
     }: { 
       quoteId: string; 
       supplierId: string; 
@@ -322,9 +331,10 @@ export function useCotacoes() {
       unidadePreco?: PricingUnit;
       fatorConversao?: number;
       quantidadePorEmbalagem?: number;
+      brandId?: string;
     }) => {
       console.log('🔄 Atualizando valor do fornecedor:', {
-        quoteId, supplierId, productId, newValue, unidadePreco, fatorConversao, quantidadePorEmbalagem
+        quoteId, supplierId, productId, newValue, unidadePreco, fatorConversao, quantidadePorEmbalagem, brandId
       });
 
       // First check if record exists
@@ -351,7 +361,8 @@ export function useCotacoes() {
             valor_oferecido: newValue,
             unidade_preco: unidadePreco ?? null,
             fator_conversao: fatorConversao ?? null,
-            quantidade_por_embalagem: quantidadePorEmbalagem ?? null
+            quantidade_por_embalagem: quantidadePorEmbalagem ?? null,
+            brand_id: brandId ?? null
           })
           .eq("id", existing.id)
           .select();
@@ -384,7 +395,8 @@ export function useCotacoes() {
             valor_oferecido: newValue,
             unidade_preco: unidadePreco ?? defaultUnidadePreco,
             fator_conversao: fatorConversao ?? null,
-            quantidade_por_embalagem: quantidadePorEmbalagem ?? null
+            quantidade_por_embalagem: quantidadePorEmbalagem ?? null,
+            brand_id: brandId ?? null
           })
           .select();
 
@@ -432,10 +444,19 @@ export function useCotacoes() {
   // Mutation to delete quote
   const deleteQuote = useMutation({
     mutationFn: async (quoteId: string) => {
-      // Delete related records first (if not using CASCADE)
+      // 1. Remove the link from orders to this quote first
+      // This prevents the foreign key constraint error
+      await supabase
+        .from("orders")
+        .update({ quote_id: null })
+        .eq("quote_id", quoteId);
+
+      // 2. Delete related quote data
       await supabase.from("quote_items").delete().eq("quote_id", quoteId);
       await supabase.from("quote_suppliers").delete().eq("quote_id", quoteId);
+      await supabase.from("quote_supplier_items").delete().eq("quote_id", quoteId);
       
+      // 3. Finally delete the quote itself
       const { error } = await supabase
         .from("quotes")
         .delete()
@@ -653,6 +674,7 @@ export function useCotacoes() {
               unidade_entregue: null,
               valor_unitario_cotado: valorEscolhido,
               maior_valor_cotado: maiorValor,
+              brand_id: supplierItem?.brand_id || null
             };
           });
 
@@ -874,16 +896,16 @@ export function useCotacoes() {
     cotacoes,
     isLoading,
     refetch: () => queryClient.invalidateQueries({ queryKey: ['cotacoes'] }),
-    updateSupplierProductValue: updateSupplierProductValue.mutate,
+    updateSupplierProductValue,
     updateQuoteItemPrice: updateSupplierProductValue,
-    deleteQuote: deleteQuote.mutate,
-    updateQuote: updateQuote.mutate,
-    updateQuoteStatus: updateQuoteStatus.mutate,
-    convertToOrder: convertToOrder.mutate,
-    addQuoteItem: addQuoteItem.mutate,
-    removeQuoteItem: removeQuoteItem.mutate,
-    addQuoteSupplier: addQuoteSupplier.mutate,
-    removeQuoteSupplier: removeQuoteSupplier.mutate,
+    deleteQuote,
+    updateQuote,
+    updateQuoteStatus,
+    convertToOrder,
+    addQuoteItem,
+    removeQuoteItem,
+    addQuoteSupplier,
+    removeQuoteSupplier,
     isUpdating: updateSupplierProductValue.isPending || deleteQuote.isPending || updateQuote.isPending || updateQuoteStatus.isPending || convertToOrder.isPending || addQuoteItem.isPending || removeQuoteItem.isPending || addQuoteSupplier.isPending || removeQuoteSupplier.isPending,
   };
 }

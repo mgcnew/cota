@@ -1,14 +1,16 @@
-import { useState, useMemo, Suspense, lazy, useCallback } from "react";
+import { useState, useMemo, Suspense, lazy, useCallback, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Download, Loader2 } from "lucide-react";
+import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Download, Loader2, Trash2 } from "lucide-react";
 import { useCotacoes } from "@/hooks/useCotacoes";
+import { useProducts } from "@/hooks/useProducts";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DeleteQuoteDialogLazy } from "@/components/forms/LazyDialogs";
 
 // Lazy loading dos componentes das abas
 const QuoteSummaryTab = lazy(() => import("@/components/cotacoes/view-dialog/QuoteSummaryTab").then(m => ({ default: m.QuoteSummaryTab })));
@@ -60,31 +62,41 @@ const TabSkeleton = ({ type }: { type: string }) => {
 };
 
 export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange }: GerenciarCotacaoDialogProps) {
-  if (!initialQuote) return null;
-
   const [activeTab, setActiveTab] = useState("resumo");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'converter' && !open) setActiveTab('resumo');
+  }, [open, activeTab]);
+
   const { 
     cotacoes, // Get full list to find latest version
     updateQuoteItemPrice, 
-    produtos: availableProducts, 
-    fornecedores: availableSuppliers,
+    fornecedores: availableSuppliers, // Renomeando para evitar conflito
     addQuoteItem,
     removeQuoteItem,
     addQuoteSupplier,
     removeQuoteSupplier,
-    convertToOrder
+    convertToOrder,
+    deleteQuote,
+    isUpdating
   } = useCotacoes();
+
+  const { products: availableProducts } = useProducts();
 
   // Find the latest version of this quote from the global state
   const quote = useMemo(() => {
+    if (!initialQuote) return null;
     return cotacoes.find((c: any) => c.id === initialQuote.id) || initialQuote;
   }, [cotacoes, initialQuote]);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
 
   // Memos globais para evitar recálculos
   const products = useMemo(() => {
+    if (!quote) return [];
     const rawItems = quote._raw?.quote_items || [];
     return rawItems.map((item: any) => ({
       product_id: item.product_id,
@@ -92,20 +104,22 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
       quantidade: item.quantidade,
       unidade: item.unidade
     }));
-  }, [quote._raw]);
+  }, [quote?._raw]);
 
   const fornecedores = useMemo(() => {
+    if (!quote) return [];
     const rawSuppliers = quote._raw?.quote_suppliers || [];
     return rawSuppliers.map((cf: any) => ({
       id: cf.supplier_id,
       nome: cf.supplier_name,
       status: cf.status
     }));
-  }, [quote._raw]);
+  }, [quote?._raw]);
 
   const supplierItems = useMemo(() => {
+    if (!quote) return [];
     return quote._supplierItems || [];
-  }, [quote._supplierItems, quote]); // Add quote to dependency to force re-calc
+  }, [quote?._supplierItems, quote]); // Add quote to dependency to force re-calc
 
   // Helpers
   const safeStr = useCallback((val: any) => val || "", []);
@@ -449,6 +463,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     }
   }, [generateHtmlComparative, quote, toast]);
 
+  if (!initialQuote || !quote) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300">
@@ -497,8 +513,17 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               <Button 
                 variant="ghost" 
                 size="sm" 
+                onClick={() => setDeleteDialogOpen(true)} 
+                className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 !bg-transparent hover:!bg-red-50 dark:hover:!bg-red-900/10 transition-all duration-200 rounded-lg !shadow-none !border-0 flex"
+              >
+                <Trash2 className="h-3 w-3 mr-1.5" />
+                Excluir
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
                 onClick={handleExportHtml} 
-                className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 !bg-transparent hover:!bg-transparent hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 rounded-lg !shadow-none !border-0 hidden sm:flex"
+                className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 !bg-transparent hover:!bg-blue-50 dark:hover:!bg-blue-900/10 transition-all duration-200 rounded-lg !shadow-none !border-0 hidden sm:flex"
               >
                 <Download className="h-3 w-3 mr-1.5" />
                 Exportar
@@ -589,6 +614,21 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             CotaJá v2.0
           </span>
         </div>
+
+        <DeleteQuoteDialogLazy 
+          open={deleteDialogOpen} 
+          onOpenChange={setDeleteDialogOpen} 
+          quote={quote} 
+          onDelete={(id) => {
+            deleteQuote.mutate(id, {
+              onSuccess: () => {
+                setDeleteDialogOpen(false);
+                onOpenChange(false); // Close the main dialog too
+              }
+            });
+          }}
+          isDeleting={deleteQuote.isPending}
+        />
       </DialogContent>
     </Dialog>
   );

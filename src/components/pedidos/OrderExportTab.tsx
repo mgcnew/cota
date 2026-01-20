@@ -8,6 +8,7 @@ interface OrderItem {
   quantidade: number;
   valorUnitario: number;
   unidade: string;
+  marca?: string;
 }
 
 interface OrderExportTabProps {
@@ -131,7 +132,10 @@ export function OrderExportTab({
         <tbody>
           ${itens.map((item, idx) => `
             <tr>
-              <td>${idx + 1}. ${item.produto}</td>
+              <td>
+                ${idx + 1}. ${item.produto}
+                ${item.marca ? `<br/><small style="color: #666; font-size: 11px;">Marca: ${item.marca}</small>` : ''}
+              </td>
               <td style="text-align: center;">${item.quantidade} ${item.unidade}</td>
               <td style="text-align: right;">R$ ${formatCurrency(item.valorUnitario)}</td>
               <td style="text-align: right;"><strong>R$ ${formatCurrency(item.quantidade * item.valorUnitario)}</strong></td>

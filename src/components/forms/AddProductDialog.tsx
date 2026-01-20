@@ -44,11 +44,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
 import { LimitAlert } from "@/components/billing/LimitAlert";
 import { useUserRole } from "@/hooks/useUserRole";
-import { 
-  compressImageForUpload, 
-  needsCompression, 
-  getCompressionInfo 
-} from "@/utils/imageCompression";
+import { compressImageForUpload, needsCompression, getCompressionInfo } from "@/utils/imageCompression";
+import { BrandSelect } from "@/components/products/BrandSelect";
+import { CategorySelectForm } from "@/components/products/CategorySelectForm";
 
 const productSchema = z.object({
   name: z.string()
@@ -57,6 +55,7 @@ const productSchema = z.object({
     .max(100, "Nome deve ter no máximo 100 caracteres"),
   category: z.string()
     .min(1, "Categoria é obrigatória"),
+  brand_id: z.string().optional(),
   unit: z.string()
     .min(1, "Unidade é obrigatória"),
   barcode: z.string()
@@ -90,7 +89,6 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const handleSetOpen = externalOnOpenChange || ((newOpen: boolean) => setInternalOpen(newOpen));
-  const [showNewCategory, setShowNewCategory] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [productImage, setProductImage] = useState<string | null>(null);
@@ -109,6 +107,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     defaultValues: {
       name: "",
       category: "",
+      brand_id: "",
       unit: "un",
       barcode: "",
       newCategory: "",
@@ -395,6 +394,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         company_id: companyData.company_id,
         name: data.name.trim(),
         category: finalCategory.trim(),
+        brand_id: data.brand_id && data.brand_id !== 'none' ? data.brand_id : null,
         unit: data.unit || 'un', // Garantir que unit sempre tenha um valor
         barcode: data.barcode && data.barcode.trim() ? data.barcode.trim() : null,
         weight: data.weight && data.weight.trim() ? data.weight.trim() : null,
@@ -470,7 +470,6 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       onProductAdded(null);
       form.reset();
       setProductImage(null);
-      setShowNewCategory(false);
       
       if (!keepOpen) {
         handleOpenChange(false);
@@ -556,6 +555,23 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                       placeholder="Ex: Coxa com Sobrecoxa Congelada"
                       className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="brand_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Marca (Opcional)</FormLabel>
+                  <FormControl>
+                    <BrandSelect 
+                      value={field.value} 
+                      onChange={field.onChange} 
                     />
                   </FormControl>
                   <FormMessage />
@@ -703,74 +719,25 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold text-gray-600 dark:text-gray-400`}>Categoria do Produto *</FormLabel>
-                  <Select 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setShowNewCategory(value === "nova");
-                      if (value !== "nova") {
-                        form.setValue("newCategory", "");
-                      }
-                    }} 
-                    defaultValue={field.value}
-                    disabled={loadingCategories}
-                  >
-                    <FormControl>
-                      <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-background dark:bg-gray-800 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white`}>
-                        <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Selecione uma categoria existente"} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-background border z-50 rounded-lg">
-                      {loadingCategories ? (
-                        <SelectItem value="loading" disabled className="rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                            Carregando categorias...
-                          </div>
-                        </SelectItem>
-                      ) : (
-                        <>
-                          {categories.map((category) => (
-                            <SelectItem key={category} value={category} className="rounded-lg">
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                {category}
-                              </div>
-                            </SelectItem>
-                          ))}
-                          <SelectItem value="nova" className="text-primary font-medium rounded-lg border-t mt-1 pt-2">
-                            <div className="flex items-center gap-2">
-                              <Plus className="h-3 w-3" />
-                              Criar nova categoria
-                            </div>
-                          </SelectItem>
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <CategorySelectForm 
+                      value={field.value}
+                      onChange={field.onChange}
+                      categories={categories}
+                      isLoading={loadingCategories}
+                      onCategoryAdded={(newCat) => {
+                        setCategories(prev => {
+                          const newCategories = [...prev, newCat].sort();
+                          return Array.from(new Set(newCategories));
+                        });
+                        if (onCategoryAdded) onCategoryAdded(newCat);
+                      }}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {showNewCategory && (
-              <FormField
-                control={form.control}
-                name="newCategory"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold text-gray-600 dark:text-gray-400`}>Nome da Nova Categoria *</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Ex: Peixes, Laticínios, Temperos"
-                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-orange-50/30 dark:!bg-orange-900/20 backdrop-blur-sm rounded-lg border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white`}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
           </div>
 
           {/* Dica de preenchimento - ocultar no mobile para economizar espaço */}

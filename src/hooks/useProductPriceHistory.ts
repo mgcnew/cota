@@ -7,8 +7,10 @@ export interface PriceHistoryEntry {
   supplier: string;
   supplierId: string;
   price: number;
-  quotationId: string;
-  status: "concluida" | "ativa" | "expirada";
+  quotationId?: string;
+  orderId?: string;
+  status: string;
+  type: 'quote' | 'order';
 }
 
 export function useProductPriceHistory(productId: string) {
@@ -17,7 +19,7 @@ export function useProductPriceHistory(productId: string) {
     queryFn: async () => {
       console.log(`📊 Fetching price history for product: ${productId}`);
       
-      // Buscar todos os itens de cotação para este produto
+      // 1. Fetch Quote History
       const { data: quoteItems, error: qiError } = await supabase
         .from('quote_items')
         .select(`
@@ -31,17 +33,8 @@ export function useProductPriceHistory(productId: string) {
         `)
         .eq('product_id', productId);
 
-      if (qiError) {
-        console.error("❌ Error fetching quote items:", qiError);
-        throw qiError;
-      }
+      if (qiError) throw qiError;
 
-      if (!quoteItems || quoteItems.length === 0) {
-        console.log("✅ No quote items found for product");
-        return [];
-      }
-
-      // Buscar todos os valores oferecidos pelos fornecedores para este produto
       const { data: supplierItems, error: siError } = await supabase
         .from('quote_supplier_items')
         .select(`
@@ -55,42 +48,49 @@ export function useProductPriceHistory(productId: string) {
         .not('valor_oferecido', 'is', null)
         .gt('valor_oferecido', 0);
 
-      if (siError) {
-        console.error("❌ Error fetching supplier items:", siError);
-        throw siError;
-      }
+      if (siError) throw siError;
 
-      if (!supplierItems || supplierItems.length === 0) {
-        console.log("✅ No supplier items found for product");
-        return [];
-      }
+      // 2. Fetch Order History (Confirmed Orders)
+      const { data: orderItems, error: oiError } = await supabase
+        .from('order_items')
+        .select(`
+          id,
+          product_id,
+          order_id,
+          unit_price,
+          created_at,
+          orders!inner(
+            id,
+            supplier_name,
+            status,
+            created_at
+          )
+        `)
+        .eq('product_id', productId)
+        .neq('orders.status', 'cancelado')
+        .gt('unit_price', 0);
 
-      // Buscar informações dos fornecedores
-      const supplierIds = [...new Set(supplierItems.map(si => si.supplier_id))];
+      if (oiError) throw oiError;
+
+      // 3. Fetch all related suppliers for names
+      const quoteSupplierIds = supplierItems?.map(si => si.supplier_id) || [];
+      const supplierIds = [...new Set([...quoteSupplierIds])];
+      
       const { data: suppliers, error: suppliersError } = await supabase
         .from('suppliers')
         .select('id, name')
         .in('id', supplierIds);
 
-      if (suppliersError) {
-        console.error("❌ Error fetching suppliers:", suppliersError);
-        throw suppliersError;
-      }
-
-      // Criar mapa de fornecedores para lookup rápido
+      if (suppliersError) throw suppliersError;
       const supplierMap = new Map(suppliers?.map(s => [s.id, s.name]) || []);
 
-      // Processar dados para criar histórico
-      const priceHistory: PriceHistoryEntry[] = [];
+      const quoteHistory: PriceHistoryEntry[] = [];
+      const orderHistory: PriceHistoryEntry[] = [];
 
-      // Agrupar por cotação para pegar apenas o melhor preço de cada cotação
-      const quoteGroups = new Map<string, {
-        quote: any;
-        bestOffer: any;
-      }>();
-
-      supplierItems.forEach(item => {
-        const quote = quoteItems.find(qi => qi.quote_id === item.quote_id);
+      // Process Quote History (Best price per quote)
+      const quoteGroups = new Map<string, any>();
+      supplierItems?.forEach(item => {
+        const quote = quoteItems?.find(qi => qi.quote_id === item.quote_id);
         if (!quote || !quote.quotes) return;
 
         const currentBest = quoteGroups.get(item.quote_id);
@@ -102,26 +102,39 @@ export function useProductPriceHistory(productId: string) {
         }
       });
 
-      // Converter para array de histórico
       quoteGroups.forEach(({ quote, bestOffer }) => {
-        const supplierName = supplierMap.get(bestOffer.supplier_id) || 'Fornecedor Desconhecido';
-        
-        priceHistory.push({
-          id: `${bestOffer.quote_id}-${bestOffer.supplier_id}`,
+        quoteHistory.push({
+          id: `quote-${bestOffer.quote_id}`,
           date: quote.created_at,
-          supplier: supplierName,
+          supplier: supplierMap.get(bestOffer.supplier_id) || 'Fornecedor Desconhecido',
           supplierId: bestOffer.supplier_id,
           price: Number(bestOffer.valor_oferecido),
           quotationId: quote.id,
-          status: quote.status as "concluida" | "ativa" | "expirada"
+          status: quote.status,
+          type: 'quote'
         });
       });
 
-      // Ordenar por data (mais recente primeiro)
-      priceHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      // Process Order History
+      orderItems?.forEach(item => {
+        orderHistory.push({
+          id: `order-${item.order_id}`,
+          date: item.orders?.created_at || item.created_at,
+          supplier: item.orders?.supplier_name || 'Fornecedor Desconhecido',
+          supplierId: '', // We don't have supplier_id directly in order_items but it's in orders
+          price: Number(item.unit_price),
+          orderId: item.order_id,
+          status: item.orders?.status || 'concluido',
+          type: 'order'
+        });
+      });
 
-      console.log(`✅ Found ${priceHistory.length} price history entries`);
-      return priceHistory;
+      // Sort both by date
+      const sortFn = (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime();
+      quoteHistory.sort(sortFn);
+      orderHistory.sort(sortFn);
+
+      return { quoteHistory, orderHistory };
     },
     enabled: !!productId,
   });

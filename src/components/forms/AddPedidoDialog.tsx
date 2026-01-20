@@ -12,7 +12,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { 
   Plus, ShoppingCart, Package, Building2, CheckCircle, ChevronRight, ChevronLeft, 
-  FileText, X, Search, Trash2, Copy, Calendar, DollarSign, Loader2, AlertCircle
+  FileText, X, Search, Trash2, Copy, Calendar, DollarSign, Loader2, AlertCircle,
+  Star, Trophy
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -162,8 +163,22 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       const pageSize = 1000;
       const allProducts: any[] = [];
       for (let page = 0; page < Math.ceil(count / pageSize); page++) {
-        const { data } = await supabase.from('products').select('id, name').order('name').range(page * pageSize, (page + 1) * pageSize - 1);
-        if (data) allProducts.push(...data);
+        const { data } = await supabase
+          .from('products')
+          .select('id, name, brands(name, manual_rating, purchaseScore)')
+          .order('name')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+        
+        if (data) {
+          // Flatten the brand data
+          const processedData = data.map(p => ({
+            ...p,
+            brand_name: p.brands?.name,
+            brand_rating: p.brands?.manual_rating,
+            brand_score: p.brands?.purchaseScore
+          }));
+          allProducts.push(...processedData);
+        }
       }
       setProducts(allProducts);
     } catch (error) {
@@ -480,16 +495,40 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                 onClick={() => selectProductFromList(p)}
                                 onMouseEnter={() => setHighlightedProductIndex(index)}
                                 className={cn(
-                                  "w-full px-3 py-2 text-left text-xs flex items-center gap-2 transition-all border-b border-gray-100 dark:border-gray-900 last:border-none",
+                                  "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-all border-b border-gray-100 dark:border-gray-900 last:border-none",
                                   highlightedProductIndex === index 
                                     ? "bg-orange-500/10 text-orange-700 dark:text-orange-400" 
                                     : "hover:bg-gray-50 dark:hover:bg-white/5"
                                 )}
                               >
-                                <div className={cn("w-6 h-6 rounded flex items-center justify-center transition-all", highlightedProductIndex === index ? "bg-orange-500 text-white shadow-md" : "bg-gray-100 dark:bg-gray-800 text-gray-400")}>
-                                  <Package className="h-3 w-3" />
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                  <div className={cn("w-6 h-6 rounded flex items-center justify-center transition-all flex-shrink-0", highlightedProductIndex === index ? "bg-orange-500 text-white shadow-md" : "bg-gray-100 dark:bg-gray-800 text-gray-400")}>
+                                    <Package className="h-3 w-3" />
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="font-bold tracking-tight truncate">{p.name}</span>
+                                    {p.brand_name && (
+                                      <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{p.brand_name}</span>
+                                        {p.brand_rating > 0 && (
+                                          <div className="flex items-center gap-0.5">
+                                            <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
+                                            <span className="text-[9px] font-bold text-amber-600 dark:text-amber-500">{p.brand_rating}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                                <span className="font-bold tracking-tight">{p.name}</span>
+                                
+                                {p.brand_score > 0 && (
+                                  <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                                    <Trophy className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400" />
+                                    <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400">
+                                      {p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}
+                                    </span>
+                                  </div>
+                                )}
                               </button>
                             ))}
                           </div>

@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import { 
   Package, Edit, Trash2, MoreVertical,
-  ClipboardList, TrendingUp, TrendingDown, Minus
+  ClipboardList, TrendingUp, TrendingDown, Minus, Star
 } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { 
@@ -40,7 +40,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
 
   const getProductStatus = (product: Product) => {
     if (product.quotesCount === 0) return "sem_cotacao";
-    if (product.lastQuotePrice === "R$ 0,00") return "pendente";
+    if (product.lastOrderPrice === "R$ 0,00") return "pendente";
     if (product.quotesCount >= 3) return "ativo";
     return "cotado";
   };
@@ -74,10 +74,25 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{capitalize(product.name)}</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
               <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px] px-1.5 py-0">
                 {capitalize(product.category)}
               </Badge>
+              {product.brand_name && (
+                <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 px-1.5 py-0 rounded-full border border-gray-200 dark:border-gray-700">
+                  <span className="text-[10px] text-gray-600 dark:text-gray-400 font-medium">{capitalize(product.brand_name)}</span>
+                  {product.brand_rating ? (
+                    <div className="flex items-center">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`h-2 w-2 ${i < (product.brand_rating || 0) ? "text-amber-400 fill-amber-400" : "text-gray-300 dark:text-gray-600"}`} 
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              )}
               <StatusBadge status={getProductStatus(product)} />
             </div>
           </div>
@@ -102,7 +117,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
       {/* Info compacta em linha */}
       <div className="flex items-center justify-between text-xs px-1">
         <div className="flex items-center gap-1">
-          <span className="font-semibold text-green-700 dark:text-green-400">{product.lastQuotePrice}</span>
+          <span className="font-semibold text-green-700 dark:text-green-400">{product.lastOrderPrice}</span>
           {getTrendIcon(product.trend)}
         </div>
         <div className="flex items-center gap-1 text-gray-500">
@@ -121,12 +136,15 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
     prevProps.product.id === nextProps.product.id &&
     prevProps.product.name === nextProps.product.name &&
     prevProps.product.category === nextProps.product.category &&
-    prevProps.product.lastQuotePrice === nextProps.product.lastQuotePrice &&
+    prevProps.product.lastOrderPrice === nextProps.product.lastOrderPrice &&
     prevProps.product.quotesCount === nextProps.product.quotesCount &&
     prevProps.product.trend === nextProps.product.trend &&
     prevProps.product.barcode === nextProps.product.barcode &&
     prevProps.product.bestSupplier === nextProps.product.bestSupplier &&
-    prevProps.product.image_url === nextProps.product.image_url
+    prevProps.product.image_url === nextProps.product.image_url &&
+    prevProps.product.brand_id === nextProps.product.brand_id &&
+    prevProps.product.brand_name === nextProps.product.brand_name &&
+    prevProps.product.brand_rating === nextProps.product.brand_rating
   );
 });
 

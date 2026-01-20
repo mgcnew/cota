@@ -31,7 +31,7 @@ interface Product {
   name: string;
   category: string;
   weight: string;
-  lastQuotePrice: string;
+  lastOrderPrice: string;
   bestSupplier: string;
   quotesCount: number;
   lastUpdate: string;
@@ -50,7 +50,7 @@ interface ParsedProduct {
   name: string;
   category: string;
   weight?: string;
-  lastQuotePrice?: string;
+  lastOrderPrice?: string;
   bestSupplier?: string;
   quotesCount?: number;
   lastUpdate?: string;
@@ -157,7 +157,7 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded, trig
           name: String(name).trim(),
           category: String(category).trim(),
           weight: row.peso || row.weight || row.Peso || row.Weight || 'N/A',
-          lastQuotePrice: row.ultimoPreco || row.lastQuotePrice || row.preco || row.price || 'R$ 0.00',
+          lastOrderPrice: row.ultimoPreco || row.lastOrderPrice || row.preco || row.price || 'R$ 0.00',
           bestSupplier: row.fornecedor || row.supplier || row.bestSupplier || row.Fornecedor || 'N/A',
           quotesCount: parseInt(row.numCotacoes || row.quotesCount || row.cotacoes || '0') || 0,
           lastUpdate: row.ultimaAtualizacao || row.lastUpdate || row.data || new Date().toLocaleDateString('pt-BR')
@@ -490,8 +490,8 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded, trig
                                     )}
                                   </div>
                                 </div>
-                                {product.lastQuotePrice && product.lastQuotePrice !== 'R$ 0.00' && (
-                                  <span className="text-sm font-medium text-success">{product.lastQuotePrice}</span>
+                                {product.lastOrderPrice && product.lastOrderPrice !== 'R$ 0.00' && (
+                                  <span className="text-sm font-medium text-success">{product.lastOrderPrice}</span>
                                 )}
                               </div>
                             </div>

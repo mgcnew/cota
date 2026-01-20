@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useExportCSV } from "@/hooks/useExportCSV";
-import { Package, Plus, MoreVertical, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download, Loader2 } from "lucide-react";
+import { Package, Plus, MoreVertical, TrendingUp, TrendingDown, Minus, Scale, FileUp, FileText, Building2, History, ClipboardList, Tags, DollarSign, CircleDot, Barcode, Download, Loader2, Star, Award } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
@@ -28,6 +28,7 @@ import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
+import { BrandManagementDialog } from "@/components/products/BrandManagementDialog";
 
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
 
@@ -47,7 +48,7 @@ const DialogLoader = () => (
 // Shared utility functions to avoid duplication
 const getProductStatus = (product: Product) => {
   if (product.quotesCount === 0) return "sem_cotacao";
-  if (product.lastQuotePrice === "R$ 0,00") return "pendente";
+  if (product.lastOrderPrice === "R$ 0,00") return "pendente";
   if (product.quotesCount >= 3) return "ativo";
   return "cotado";
 };
@@ -73,6 +74,7 @@ function Produtos() {
   const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const { products, categories, isLoading: productsLoading, deleteProduct, updateProduct, invalidateCache } = useProducts();
@@ -134,8 +136,8 @@ function Produtos() {
     const produtosPorStatus = {
       ativos: safeProducts.filter((p) => (p.quotesCount || 0) >= 3).length,
       cotados: safeProducts.filter((p) => (p.quotesCount || 0) > 0 && (p.quotesCount || 0) < 3).length,
-      pendentes: safeProducts.filter((p) => (p.quotesCount || 0) === 0 && p.lastQuotePrice !== "R$ 0,00").length,
-      semCotacao: safeProducts.filter((p) => (p.quotesCount || 0) === 0 && p.lastQuotePrice === "R$ 0,00").length
+      pendentes: safeProducts.filter((p) => (p.quotesCount || 0) === 0 && p.lastOrderPrice !== "R$ 0,00").length,
+      semCotacao: safeProducts.filter((p) => (p.quotesCount || 0) === 0 && p.lastOrderPrice === "R$ 0,00").length
     };
 
     const produtosComCotacao = produtosPorStatus.ativos + produtosPorStatus.cotados;
@@ -155,7 +157,7 @@ function Produtos() {
       ? (activeQuotes / produtosComCotacaoParaMedia.length).toFixed(1)
       : "0.0";
 
-    const productsWithPrices = safeProducts.filter((p) => p.lastQuotePrice !== "R$ 0,00");
+    const productsWithPrices = safeProducts.filter((p) => p.lastOrderPrice !== "R$ 0,00");
     let averageValue = "R$ 0,00";
     let averageValueNumeric = 0;
     let economiaMediaPorProduto = "0";
@@ -164,7 +166,8 @@ function Produtos() {
 
     if (productsWithPrices.length > 0) {
       const total = productsWithPrices.reduce((sum, p) => {
-        const price = parseFloat(p.lastQuotePrice.replace(/[^\d,]/g, '').replace(',', '.'));
+        const priceStr = p.lastOrderPrice || "R$ 0,00";
+        const price = parseFloat(priceStr.replace(/[^\d,]/g, '').replace(',', '.'));
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
       averageValueNumeric = total / productsWithPrices.length;
@@ -217,7 +220,7 @@ function Produtos() {
       barcode: product.barcode || 'N/A',
       unit: product.unit || 'un',
       status: getProductStatus(product),
-      price: product.lastQuotePrice || 'R$ 0,00',
+      price: product.lastOrderPrice || 'R$ 0,00',
       bestSupplier: product.bestSupplier || 'N/A',
       quotesCount: product.quotesCount || 0,
     }));
@@ -341,6 +344,14 @@ function Produtos() {
               <Button 
                 variant="outline" 
                 size="sm" 
+                onClick={() => setBrandDialogOpen(true)}
+                className="h-10 hidden sm:flex border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+              >
+                <Award className="h-4 w-4 mr-2 text-orange-500" /> Marcas
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
                 onClick={handleExportProducts}
                 className="h-10 hidden sm:flex"
               >
@@ -359,6 +370,10 @@ function Produtos() {
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
                     <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setBrandDialogOpen(true); }} className="min-h-[44px] sm:hidden">
+                    <Award className="h-4 w-4 mr-2 text-orange-500" /> Marcas
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -396,31 +411,35 @@ function Produtos() {
                     <Table className="w-full">
                       <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={8} className="px-1 pb-3 pt-0 border-none">
+                          <TableCell colSpan={9} className="px-1 pb-3 pt-0 border-none">
                             <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
-                              <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
+                              <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
                                 <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
                                   <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                 </div>
                                 <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</span>
                               </div>
-                              <div className="w-[15%] px-2 flex justify-center items-center gap-2">
+                              <div className="w-[12%] px-2 flex justify-center items-center gap-2">
                                 <Tags className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Categoria</span>
                               </div>
                               <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
+                                <Award className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Marca</span>
+                              </div>
+                              <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-2">
                                 <Barcode className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Código</span>
                               </div>
-                              <div className="w-[13%] px-2 flex justify-center items-center gap-2">
+                              <div className="w-[11%] px-2 flex justify-center items-center gap-2">
                                 <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
                               </div>
-                              <div className="w-[12%] px-2 flex justify-center items-center gap-2">
+                              <div className="w-[10%] px-2 flex justify-center items-center gap-2">
                                 <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Preço</span>
                               </div>
-                              <div className="hidden lg:flex w-[15%] px-2 justify-center items-center gap-2">
+                              <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
                                 <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
                               </div>
@@ -438,9 +457,9 @@ function Produtos() {
                       <TableBody>
                         {paginatedData.items.map((product) => (
                           <TableRow key={product.id} className="group border-none">
-                            <TableCell colSpan={8} className="px-1 py-1.5">
+                            <TableCell colSpan={9} className="px-1 py-1.5">
                               <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800/70">
-                                <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
+                                <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
                                   <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-200 dark:border-gray-600/30">
                                     {product.image_url ? (
                                       <LazyImage 
@@ -459,28 +478,44 @@ function Produtos() {
                                   </div>
                                 </div>
 
-                                <div className="w-[15%] px-2 flex justify-center items-center">
+                                <div className="w-[12%] px-2 flex justify-center items-center">
                                   <Badge variant="secondary" className="bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 border-0 font-medium">
                                     {capitalize(product.category)}
                                   </Badge>
                                 </div>
 
-                                <div className="hidden lg:flex w-[12%] px-2 justify-center items-center">
+                                <div className="hidden lg:flex w-[12%] px-2 flex-col justify-center items-center gap-1">
+                                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-full font-medium">
+                                    {capitalize(product.brand_name || "—")}
+                                  </span>
+                                  {product.brand_rating ? (
+                                    <div className="flex items-center gap-0.5">
+                                      {Array.from({ length: 5 }).map((_, i) => (
+                                        <Star 
+                                          key={i} 
+                                          className={`h-2.5 w-2.5 ${i < (product.brand_rating || 0) ? "text-amber-400 fill-amber-400" : "text-gray-300 dark:text-gray-600"}`} 
+                                        />
+                                      ))}
+                                    </div>
+                                  ) : null}
+                                </div>
+
+                                <div className="hidden xl:flex w-[10%] px-2 justify-center items-center">
                                   <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                                     {product.barcode || "—"}
                                   </span>
                                 </div>
 
-                                <div className="w-[13%] px-2 flex justify-center items-center">
+                                <div className="w-[11%] px-2 flex justify-center items-center">
                                   <StatusBadge status={getProductStatus(product)} />
                                 </div>
 
-                                <div className="w-[12%] px-2 flex justify-center items-center gap-1.5">
-                                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">{product.lastQuotePrice}</span>
+                                <div className="w-[10%] px-2 flex justify-center items-center gap-1.5">
+                                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">{product.lastOrderPrice}</span>
                                   {getTrendIcon(product.trend)}
                                 </div>
 
-                                <div className="hidden lg:flex w-[15%] px-2 justify-center items-center">
+                                <div className="hidden lg:flex w-[12%] px-2 justify-center items-center">
                                   <span className="text-sm text-gray-600 dark:text-gray-400 truncate">{capitalize(product.bestSupplier || "—")}</span>
                                 </div>
 
@@ -576,7 +611,16 @@ function Produtos() {
                 onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
                 onProductUpdated={(updatedProduct) => {
                   if (typeof updateProduct === 'function') {
-                    updateProduct({ productId: updatedProduct.id, data: { name: updatedProduct.name, category: updatedProduct.category, unit: updatedProduct.unit, barcode: updatedProduct.barcode } });
+                    updateProduct({ 
+                      productId: updatedProduct.id, 
+                      data: { 
+                        name: updatedProduct.name, 
+                        category: updatedProduct.category, 
+                        unit: updatedProduct.unit, 
+                        barcode: updatedProduct.barcode,
+                        brand_id: updatedProduct.brand_id
+                      } 
+                    });
                   }
                   setEditingProduct(null);
                 }}
@@ -610,6 +654,11 @@ function Produtos() {
 
         </div>
       </PageWrapper>
+
+      <BrandManagementDialog
+        open={brandDialogOpen}
+        onOpenChange={setBrandDialogOpen}
+      />
     </>
   );
 }

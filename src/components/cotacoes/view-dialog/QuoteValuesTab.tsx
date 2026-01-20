@@ -14,6 +14,7 @@ import { PriceConverter } from "@/components/forms/PriceConverter";
 import { ProductPriceInfoTooltip } from "@/components/forms/ProductPriceInfoTooltip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Inbox } from "lucide-react";
+import { BrandSelect } from "@/components/products/BrandSelect";
 
 const parseNumber = (val: string | number | undefined): number => {
   if (val === undefined || val === null || val === "") return 0;
@@ -283,6 +284,7 @@ export function QuoteValuesTab({
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, string | number>>({});
   const [editedPricingMetadata, setEditedPricingMetadata] = useState<Record<string, { unidadePreco: PricingUnit; fatorConversao?: number }>>({});
+  const [editedBrandIds, setEditedBrandIds] = useState<Record<string, string>>({});
   const [lastSavedProductId, setLastSavedProductId] = useState<string | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const [supplierSearch, setSupplierSearch] = useState("");
@@ -335,16 +337,18 @@ export function QuoteValuesTab({
   const getCurrentProductValue = useCallback((supplierId: string, productId: string): number => {
     // Se estiver editando este item, retorna o valor editado
     if (selectedSupplier === supplierId && editedValues[productId] !== undefined) {
-      return editedValues[productId];
+      const val = editedValues[productId];
+      return typeof val === 'number' ? val : parseNumber(val);
     }
     return getSupplierProductValue(supplierId, productId);
   }, [selectedSupplier, editedValues, getSupplierProductValue]);
 
-  const getSupplierItemPricingMetadata = useCallback((supplierId: string, productId: string): { unidadePreco: PricingUnit | null; fatorConversao: number | null } => {
+  const getSupplierItemPricingMetadata = useCallback((supplierId: string, productId: string): { unidadePreco: PricingUnit | null; fatorConversao: number | null; brandId: string | null } => {
     const item = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === productId);
     return {
       unidadePreco: item?.unidade_preco || null,
-      fatorConversao: item?.fator_conversao || null
+      fatorConversao: item?.fator_conversao || null,
+      brandId: item?.brand_id || null
     };
   }, [supplierItems]);
 
@@ -373,7 +377,7 @@ export function QuoteValuesTab({
     return `R$ ${safeValue.toFixed(2)}${unitLabel}`;
   }, [getCurrentPricingUnit]);
 
-  const handleStartEdit = useCallback((productId: string, currentValue: number, currentMetadata?: { unidadePreco: PricingUnit | null; fatorConversao: number | null }) => {
+  const handleStartEdit = useCallback((productId: string, currentValue: number, currentMetadata?: { unidadePreco: PricingUnit | null; fatorConversao: number | null; brandId: string | null; brandName: string | null }) => {
     setEditingProductId(productId);
     setEditedValues(prev => ({ ...prev, [productId]: currentValue ? currentValue.toString() : "" }));
     if (currentMetadata?.unidadePreco) {
@@ -385,19 +389,24 @@ export function QuoteValuesTab({
         }
       }));
     }
+    if (currentMetadata?.brandId) {
+      setEditedBrandIds(prev => ({ ...prev, [productId]: currentMetadata.brandId! }));
+    }
   }, []);
 
   const handleSaveEdit = useCallback(async (productId: string) => {
     if (selectedSupplier && editedValues[productId] !== undefined) {
       try {
         const metadata = editedPricingMetadata[productId];
+        const brandId = editedBrandIds[productId];
         const newValue = parseNumber(editedValues[productId]);
         
         console.log('💾 Saving value:', {
           productId,
           rawValue: editedValues[productId],
           parsedValue: newValue,
-          metadata
+          metadata,
+          brandId
         });
 
         await onUpdateSupplierProductValue({
@@ -407,7 +416,8 @@ export function QuoteValuesTab({
           newValue: newValue,
           unidadePreco: metadata?.unidadePreco,
           fatorConversao: metadata?.fatorConversao,
-          quantidadePorEmbalagem: metadata?.fatorConversao
+          quantidadePorEmbalagem: metadata?.fatorConversao,
+          brandId: brandId
         });
         
         // Clear edited values after successful save to force refresh from backend data
@@ -419,6 +429,7 @@ export function QuoteValuesTab({
         
         setEditingProductId(null);
         setEditedPricingMetadata({});
+        setEditedBrandIds({});
         setLastSavedProductId(productId);
         setTimeout(() => setLastSavedProductId(null), 2000);
         toast({ title: "✅ Valor atualizado!" });
@@ -433,6 +444,7 @@ export function QuoteValuesTab({
     setEditingProductId(null);
     setEditedValues({});
     setEditedPricingMetadata({});
+    setEditedBrandIds({});
   }, []);
 
   const supplierTotals = useMemo(() => {
@@ -472,8 +484,8 @@ export function QuoteValuesTab({
     formatPriceWithUnit,
     editInputRef,
     safeStr,
-    lastSavedProductId
-  }), [products, selectedSupplier, getCurrentProductValue, editingProductId, getBestPriceInfoForProduct, editedValues, editedPricingMetadata, getCurrentPricingUnit, isConversionFactorRequired, formatPriceWithUnit, getSupplierItemPricingMetadata, lastSavedProductId]);
+    setEditedBrandIds
+  }), [products, selectedSupplier, getCurrentProductValue, editingProductId, getBestPriceInfoForProduct, editedValues, editedPricingMetadata, editedBrandIds, getCurrentPricingUnit, isConversionFactorRequired, formatPriceWithUnit, getSupplierItemPricingMetadata, lastSavedProductId]);
 
   return (
     <div className="flex flex-col md:flex-row h-full relative">
@@ -632,10 +644,10 @@ export function QuoteValuesTab({
                   <List
                     style={{ height: listDimensions.height, width: listDimensions.width }}
                     rowCount={products.length}
-                    rowHeight={54} // Altura reduzida para visual mais fino
-                    rowProps={{ data: itemData }}
-                    rowComponent={ProductRow}
                     className="custom-scrollbar"
+                    rowHeight={65}
+                    rowProps={{ data: itemData }}
+                    rowComponent={ProductRow as any}
                   />
                 )}
               </div>

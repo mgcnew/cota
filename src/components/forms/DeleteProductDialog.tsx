@@ -14,7 +14,7 @@ interface Product {
   id: string;
   name: string;
   category: string;
-  lastQuotePrice: string;
+  lastOrderPrice: string;
   bestSupplier: string;
   quotesCount: number;
   lastUpdate: string;

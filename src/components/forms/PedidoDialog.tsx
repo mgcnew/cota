@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Plus, Trash2, Loader2, Building2, Calendar, Package, FileText, 
   Save, ShoppingCart, Truck, X, Search, CheckCircle, ClipboardList, Download,
-  DollarSign
+  DollarSign, Star, Trophy
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,7 @@ interface PedidoItem {
   quantidade: number;
   valorUnitario: number;
   unidade: string;
+  marca?: string;
 }
 
 interface PedidoDialogProps {
@@ -115,7 +116,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           produto: item.product_name || item.produto || "",
           quantidade: parseFloat(item.quantity || item.quantidade || 1),
           valorUnitario: parseFloat(item.unit_price || item.valorUnitario || 0),
-          unidade: item.unit || item.unidade || "un"
+          unidade: item.unit || item.unidade || "un",
+          marca: item.brand_name || item.marca || ""
         })));
       } else {
         setItens([]);
@@ -135,8 +137,21 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       
       const allProducts: any[] = [];
       for (let page = 0; page < Math.ceil(count / 1000); page++) {
-        const { data } = await supabase.from('products').select('id, name').order('name').range(page * 1000, (page + 1) * 1000 - 1);
-        if (data) allProducts.push(...data);
+        const { data } = await supabase
+          .from('products')
+          .select('id, name, brand_id, brands(name, manual_rating, purchaseScore)')
+          .order('name')
+          .range(page * 1000, (page + 1) * 1000 - 1);
+        
+        if (data) {
+          const processedData = data.map(p => ({
+            ...p,
+            brand_name: p.brands?.name,
+            brand_rating: p.brands?.manual_rating,
+            brand_score: p.brands?.purchaseScore
+          }));
+          allProducts.push(...processedData);
+        }
       }
       setProducts(allProducts);
     } catch (error) {
@@ -156,8 +171,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     const qty = parseFloat(newQuantity) || 1;
     // Basic cleanup for price input
     const price = typeof newPrice === 'string' ? parseFloat(newPrice.replace(',', '.')) || 0 : newPrice;
+    const marca = newProduct?.brand_name || "";
 
-    setItens([{ produto: productName, quantidade: qty, valorUnitario: price, unidade: 'un' }, ...itens]);
+    setItens([{ produto: productName, quantidade: qty, valorUnitario: price, unidade: 'un', marca }, ...itens]);
     
     // Reset form
     setNewProduct(null);
@@ -203,7 +219,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
   const handleAddItem = () => {
     const newIndex = itens.length;
-    setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0, unidade: "un" }]);
+    setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0, unidade: "un", marca: "" }]);
     
     // Auto-foco no campo de produto do novo item
     setTimeout(() => {
@@ -497,9 +513,28 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                             <button
                               key={p.id}
                               onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
-                              className="w-full px-3 py-2 text-left text-[10px] font-bold border-b border-white/5 last:border-none"
+                              className="w-full px-3 py-2 text-left text-[10px] font-bold border-b border-white/5 last:border-none flex items-center justify-between gap-2"
                             >
-                              {p.name}
+                              <div className="flex flex-col min-w-0">
+                                <span>{p.name}</span>
+                                {p.brand_name && (
+                                  <div className="flex items-center gap-1 mt-0.5">
+                                    <span className="text-[8px] text-gray-500 uppercase">{p.brand_name}</span>
+                                    {p.brand_rating > 0 && (
+                                      <div className="flex items-center gap-0.5">
+                                        <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
+                                        <span className="text-[8px] text-amber-500">{p.brand_rating}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              {p.brand_score > 0 && (
+                                <div className="flex items-center gap-0.5 bg-emerald-500/10 px-1 py-0.5 rounded">
+                                  <Trophy className="h-2 w-2 text-emerald-500" />
+                                  <span className="text-[8px] text-emerald-600">{p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}</span>
+                                </div>
+                              )}
                             </button>
                           ))}
                         </div>
@@ -950,13 +985,33 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                         key={p.id} 
                                         onClick={() => { 
                                           handleItemChange(index, 'produto', p.name); 
+                                          handleItemChange(index, 'marca', p.brand_name || "");
                                           setProductSearch(''); 
                                           setActiveSearchIndex(null);
                                           setTimeout(() => quantityInputRefs.current[index]?.focus(), 50);
                                         }}
-                                        className="w-full px-2 py-1 text-left text-[9px] hover:bg-orange-500/10 text-gray-900 dark:text-white flex items-center gap-1 transition-all font-bold"
+                                        className="w-full px-2 py-1.5 text-left text-[9px] hover:bg-orange-500/10 text-gray-900 dark:text-white flex items-center justify-between gap-1 transition-all font-bold border-b border-gray-100 dark:border-white/5 last:border-none"
                                       >
-                                        {p.name}
+                                        <div className="flex flex-col min-w-0">
+                                          <span>{p.name}</span>
+                                          {p.brand_name && (
+                                            <div className="flex items-center gap-1 mt-0.5">
+                                              <span className="text-[7px] text-gray-500 uppercase tracking-wider">{p.brand_name}</span>
+                                              {p.brand_rating > 0 && (
+                                                <div className="flex items-center gap-0.5">
+                                                  <Star className="h-1.5 w-1.5 fill-amber-400 text-amber-400" />
+                                                  <span className="text-[7px] text-amber-500">{p.brand_rating}</span>
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                        {p.brand_score > 0 && (
+                                          <div className="flex items-center gap-0.5 bg-emerald-500/10 px-1 py-0.5 rounded flex-shrink-0">
+                                            <Trophy className="h-2 w-2 text-emerald-500" />
+                                            <span className="text-[7px] text-emerald-600">{p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}</span>
+                                          </div>
+                                        )}
                                       </button>
                                     ))}
                                   </div>

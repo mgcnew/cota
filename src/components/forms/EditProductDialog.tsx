@@ -37,11 +37,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Package, Upload, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LazyImage } from "@/components/responsive/LazyImage";
-import { 
-  compressImageForUpload, 
-  needsCompression, 
-  getCompressionInfo 
-} from "@/utils/imageCompression";
+import { compressImageForUpload, needsCompression, getCompressionInfo } from "@/utils/imageCompression";
+import { BrandSelect } from "@/components/products/BrandSelect";
+import { CategorySelectForm } from "@/components/products/CategorySelectForm";
 
 const productSchema = z.object({
   name: z.string()
@@ -50,6 +48,7 @@ const productSchema = z.object({
     .max(100, "Nome deve ter no máximo 100 caracteres"),
   category: z.string()
     .min(1, "Categoria é obrigatória"),
+  brand_id: z.string().optional(),
   unit: z.string()
     .min(1, "Unidade é obrigatória"),
   barcode: z.string()
@@ -70,9 +69,10 @@ interface Product {
   name: string;
   category: string;
   unit: string;
+  brand_id?: string;
   barcode?: string;
   image_url?: string;
-  lastQuotePrice: string;
+  lastOrderPrice: string;
   bestSupplier: string;
   quotesCount: number;
   lastUpdate: string;
@@ -99,7 +99,6 @@ function EditProductDialogInternal({
   productId 
 }: EditProductDialogProps) {
   const isMobile = useIsMobile();
-  const [showNewCategory, setShowNewCategory] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -113,6 +112,7 @@ function EditProductDialogInternal({
     defaultValues: {
       name: "",
       category: "",
+      brand_id: "",
       unit: "un",
       barcode: "",
       newCategory: "",
@@ -127,11 +127,11 @@ function EditProductDialogInternal({
       form.reset({
         name: currentProduct.name,
         category: currentProduct.category,
+        brand_id: currentProduct.brand_id || "",
         unit: currentProduct.unit || "un",
         barcode: currentProduct.barcode || "",
         newCategory: "",
       });
-      setShowNewCategory(false);
       if (currentProduct.image_url) {
         setNewImageUrl(currentProduct.image_url);
       } else {
@@ -144,7 +144,6 @@ function EditProductDialogInternal({
   useEffect(() => {
     if (!open) {
       // Limpar estados quando o modal fecha
-      setShowNewCategory(false);
       setImageFile(null);
       // Não resetar newImageUrl aqui para manter a imagem caso o usuário reabra
     }
@@ -257,6 +256,7 @@ function EditProductDialogInternal({
       ...currentProduct,
       name: data.name,
       category: finalCategory,
+      brand_id: data.brand_id && data.brand_id !== 'none' ? data.brand_id : undefined,
       unit: data.unit,
       barcode: data.barcode || undefined,
       lastUpdate: new Date().toLocaleDateString('pt-BR'),
@@ -375,60 +375,39 @@ function EditProductDialogInternal({
 
             <FormField
               control={form.control}
-              name="category"
+              name="brand_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Categoria</FormLabel>
-                  <Select 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setShowNewCategory(value === "nova");
-                      if (value !== "nova") {
-                        form.setValue("newCategory", "");
-                      }
-                    }} 
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
-                        <SelectValue placeholder="Selecione uma categoria" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
-                      {availableCategories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="nova" className="text-primary font-medium border-t mt-1 pt-2">
-                        + Adicionar nova categoria
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Marca</FormLabel>
+                  <FormControl>
+                    <BrandSelect 
+                      value={field.value} 
+                      onChange={field.onChange} 
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {showNewCategory && (
-              <FormField
-                control={form.control}
-                name="newCategory"
-                render={({ field }) => (
-                  <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Nome da Nova Categoria</FormLabel>
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Categoria</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Ex: Peixes, Laticínios"
-                      className="!bg-orange-50/30 dark:!bg-orange-900/20 backdrop-blur-sm border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
-                      {...field}
+                    <CategorySelectForm 
+                      value={field.value}
+                      onChange={field.onChange}
+                      categories={categories}
+                      onCategoryAdded={onCategoryAdded}
                     />
                   </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
