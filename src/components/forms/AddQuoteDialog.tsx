@@ -726,9 +726,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
               variant="ghost" 
               size="icon" 
               onClick={() => setOpen(false)} 
-              className="h-7 w-7 text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white !bg-transparent hover:!bg-transparent focus:!bg-transparent !shadow-none rounded-full"
+              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <X className="h-4 w-4" />
+              <span className="sr-only">Fechar</span>
             </Button>
           </div>
         </div>
@@ -1855,6 +1856,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         </DialogTrigger>
       )}
       <DialogContent 
+        hideClose
         className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-white/20 dark:border-white/10 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden"
         onKeyDown={handleModalKeyDown}
       >

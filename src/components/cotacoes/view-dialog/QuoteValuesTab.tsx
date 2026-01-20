@@ -111,28 +111,28 @@ const ProductRow = memo(({ index, style, data }: any) => {
         </div>
 
         {/* Value / Edit Form */}
-        <div>
+        <div className="flex items-center min-h-[36px]">
           {isEditing ? (
-            <div className="flex flex-col gap-1 py-0.5 animate-in fade-in slide-in-from-top-1">
-              <div className="flex items-center gap-1 flex-wrap">
-                <div className="relative group/val">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400">R$</span>
-                  <Input 
-                    ref={editInputRef} 
-                    type="text" 
-                    inputMode="decimal"
-                    value={editedValues[product.product_id] !== undefined ? editedValues[product.product_id] : ""}
-                    onChange={(e) => {
-                      // Permite digitar números e vírgula/ponto
-                      const val = e.target.value;
-                      if (/^[\d.,]*$/.test(val)) {
-                        setEditedValues((prev: any) => ({ ...prev, [product.product_id]: val }));
-                      }
-                    }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(product.product_id); if (e.key === 'Escape') handleCancelEdit(); }}
-                    className="w-16 h-7 text-[10px] pl-5 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-gray-400/20 font-bold rounded-md shadow-sm" 
-                  />
-                </div>
+            <div className="flex items-center gap-1.5 w-full animate-in fade-in slide-in-from-top-1">
+              <div className="relative group/val flex-shrink-0">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-gray-400">R$</span>
+                <Input 
+                  ref={editInputRef} 
+                  type="text" 
+                  inputMode="decimal"
+                  value={editedValues[product.product_id] !== undefined ? editedValues[product.product_id] : ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^[\d.,]*$/.test(val)) {
+                      setEditedValues((prev: any) => ({ ...prev, [product.product_id]: val }));
+                    }
+                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(product.product_id); if (e.key === 'Escape') handleCancelEdit(); }}
+                  className="w-20 h-8 text-[10px] pl-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-blue-500/20 focus:border-blue-500 font-black rounded-lg shadow-sm" 
+                />
+              </div>
+
+              <div className="flex items-center gap-1 flex-shrink-0">
                 <Select
                   value={editedPricingMetadata[product.product_id]?.unidadePreco || getCurrentPricingUnit(product.product_id)}
                   onValueChange={(value: PricingUnit) => {
@@ -146,17 +146,47 @@ const ProductRow = memo(({ index, style, data }: any) => {
                     }));
                   }}
                 >
-                  <SelectTrigger className="w-[70px] h-7 text-[9px] border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-bold rounded-md shadow-sm uppercase px-1.5 text-gray-600 dark:text-gray-300">
+                  <SelectTrigger className="w-[75px] h-8 text-[9px] border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-black rounded-lg shadow-sm uppercase px-2 text-gray-700 dark:text-gray-200">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                  <SelectContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
                     {PRICING_UNIT_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value} className="text-[10px] font-bold uppercase tracking-wider">
+                      <SelectItem key={option.value} value={option.value} className="text-[10px] font-black uppercase tracking-wider">
                         {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+
+                {isConversionFactorRequired(product.product_id) && (
+                  <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 px-1.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95">
+                    <Input
+                      type="number"
+                      value={editedPricingMetadata[product.product_id]?.fatorConversao || ""}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        setEditedPricingMetadata((prev: any) => ({
+                          ...prev,
+                          [product.product_id]: {
+                            ...prev[product.product_id],
+                            unidadePreco: prev[product.product_id]?.unidadePreco || getCurrentPricingUnit(product.product_id),
+                            fatorConversao: value > 0 ? value : undefined
+                          }
+                        }));
+                      }}
+                      className={cn(
+                        "w-10 h-6 text-[9px] rounded-md bg-white dark:bg-gray-800 font-black shadow-sm p-1 text-center",
+                        !editedPricingMetadata[product.product_id]?.fatorConversao ? "border-red-300 dark:border-red-700" : "border-gray-200 dark:border-gray-700"
+                      )}
+                      step="1"
+                      min="1"
+                    />
+                    <span className="text-[7px] text-gray-500 font-black uppercase tracking-tighter">
+                      {editedPricingMetadata[product.product_id]?.unidadePreco === "cx" ? "un/cx" : "un/pct"}
+                    </span>
+                  </div>
+                )}
+
                 <PriceConverter
                   currentValue={parseNumber(editedValues[product.product_id]) || currentValue}
                   productQuantity={product.quantidade}
@@ -173,50 +203,26 @@ const ProductRow = memo(({ index, style, data }: any) => {
                     setTimeout(() => { editInputRef.current?.focus(); editInputRef.current?.select(); }, 100);
                   }}
                 />
-                <div className="flex gap-0.5">
-                  <Button 
-                    size="icon" 
-                    onClick={() => handleSaveEdit(product.product_id)} 
-                    disabled={isConversionFactorRequired(product.product_id) && !editedPricingMetadata[product.product_id]?.fatorConversao}
-                    className="h-7 w-7 bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm rounded-md transition-all active:scale-95"
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button size="icon" variant="ghost" onClick={handleCancelEdit} className="h-7 w-7 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all">
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
               </div>
-              {isConversionFactorRequired(product.product_id) && (
-                <div className="flex items-center gap-2 pl-1 animate-in fade-in slide-in-from-left-2">
-                  <span className="text-[8px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Qtd emb:</span>
-                  <Input
-                    type="number"
-                    value={editedPricingMetadata[product.product_id]?.fatorConversao || ""}
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
-                      setEditedPricingMetadata((prev: any) => ({
-                        ...prev,
-                        [product.product_id]: {
-                          ...prev[product.product_id],
-                          unidadePreco: prev[product.product_id]?.unidadePreco || getCurrentPricingUnit(product.product_id),
-                          fatorConversao: value > 0 ? value : undefined
-                        }
-                      }));
-                    }}
-                    className={cn(
-                      "w-14 h-6 text-[9px] rounded bg-white dark:bg-gray-800 font-bold shadow-sm p-1",
-                      !editedPricingMetadata[product.product_id]?.fatorConversao ? "border-red-300 dark:border-red-700" : "border-gray-200 dark:border-gray-700"
-                    )}
-                    step="1"
-                    min="1"
-                    placeholder="Ex: 12"
-                  />
-                  <span className="text-[7px] text-gray-500 font-bold uppercase tracking-wider">
-                    {editedPricingMetadata[product.product_id]?.unidadePreco === "cx" ? "un/cx" : "un/pct"}
-                  </span>
-                </div>
-              )}
+
+              <div className="flex items-center gap-1 ml-auto">
+                <Button 
+                  size="icon" 
+                  onClick={() => handleSaveEdit(product.product_id)} 
+                  disabled={isConversionFactorRequired(product.product_id) && !editedPricingMetadata[product.product_id]?.fatorConversao}
+                  className="h-8 w-8 bg-[#007BFF] hover:bg-[#0069D9] active:bg-[#0062CC] text-white shadow-sm rounded-lg transition-all active:scale-95"
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  onClick={handleCancelEdit} 
+                  className="h-8 w-8 text-[#DC3545] hover:text-white hover:bg-[#DC3545] active:bg-[#C82333] rounded-lg transition-all"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex items-center gap-2 flex-wrap">

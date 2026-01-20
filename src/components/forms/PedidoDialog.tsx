@@ -757,6 +757,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
+        hideClose
         className="w-[95vw] max-w-[1100px] h-[85vh] max-h-[700px] overflow-hidden p-0 gap-0 !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-[2rem] [&>button]:hidden animate-in fade-in zoom-in-95 duration-300"
         onKeyDown={handleModalKeyDown}
       >
@@ -806,9 +807,10 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onOpenChange(false)} 
-                className="h-8 w-8 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/20 dark:hover:bg-white/10 rounded-lg transition-all border border-transparent hover:border-white/20 shadow-sm"
+                className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 <X className="h-4 w-4" />
+                <span className="sr-only">Fechar</span>
               </Button>
             </div>
           </div>

@@ -4,7 +4,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, TrendingUp, TrendingDown, Calendar, Building2, DollarSign, Minus, Loader2, ClipboardList, ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Package, TrendingUp, TrendingDown, Calendar, Building2, DollarSign, Minus, Loader2, ClipboardList, ShoppingCart, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProductPriceHistory, PriceHistoryEntry } from "@/hooks/useProductPriceHistory";
 
@@ -36,6 +37,10 @@ export function ProductPriceHistoryDialog({
   // Buscar dados reais do histórico de preços
   const { data, isLoading, error } = useProductPriceHistory(productId);
   const { quoteHistory = [], orderHistory = [] } = (data as any) || {};
+
+  const sortedHistory = [...orderHistory, ...quoteHistory].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 
   // Calcular variação de preço
   const calculatePriceVariation = (currentPrice: number, previousPrice: number | null) => {
@@ -268,7 +273,7 @@ export function ProductPriceHistoryDialog({
                                 <Calendar className="h-3 w-3" />
                                 <span>{formatDate(entry.date)}</span>
                               </div>
-                              {getStatusBadge(entry.status)}
+                              {getStatusBadge(entry.status, entry.type)}
                             </div>
                           </div>
                         </div>
@@ -297,7 +302,7 @@ export function ProductPriceHistoryDialog({
                             "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold",
                             getVariationColor(variation.type)
                           )}>
-                            {getVariationIcon(variation.type, variation.percentage)}
+                            {getVariationIcon(variation.type)}
                             <span>
                               {variation.type === "stable" 
                                 ? "Sem mudança" 
@@ -323,8 +328,8 @@ export function ProductPriceHistoryDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-w-2xl h-[80vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-[#10141f]">
-        <DialogHeader className="p-4 border-b border-gray-100/80 dark:border-gray-700/60">
+      <DialogContent hideClose className="max-w-2xl h-[80vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-[#10141f] [&>button]:hidden">
+        <DialogHeader className="p-4 border-b border-gray-100/80 dark:border-gray-700/60 flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-lg">
               <Package className="h-5 w-5 text-white" />
@@ -338,6 +343,16 @@ export function ProductPriceHistoryDialog({
               </p>
             </div>
           </div>
+          
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setOpen(false)} 
+            className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Fechar</span>
+          </Button>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Download, Loader2, Trash2 } from "lucide-react";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
+import { useSuppliers } from "@/hooks/useSuppliers";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -72,7 +73,6 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const { 
     cotacoes, // Get full list to find latest version
     updateQuoteItemPrice, 
-    fornecedores: availableSuppliers, // Renomeando para evitar conflito
     addQuoteItem,
     removeQuoteItem,
     addQuoteSupplier,
@@ -83,6 +83,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   } = useCotacoes();
 
   const { products: availableProducts } = useProducts();
+  const { suppliers: availableSuppliers } = useSuppliers();
 
   // Find the latest version of this quote from the global state
   const quote = useMemo(() => {
@@ -467,7 +468,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300">
+      <DialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300 [&>button]:hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           {/* Header Compacto com Tabs Integradas */}
           <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden flex items-center justify-between">
@@ -532,7 +533,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onOpenChange(false)} 
-                className="h-8 w-8 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-lg transition-all border border-transparent hover:border-gray-200/50 dark:hover:border-gray-700/50 shadow-sm"
+                className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Fechar</span>
@@ -542,7 +543,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
           <div className="flex-1 overflow-hidden relative">
             <Suspense fallback={<TabSkeleton type={activeTab} />}>
-              <TabsContent value="resumo" className="h-full m-0 p-0 overflow-auto custom-scrollbar" forceMount={false}>
+              <TabsContent value="resumo" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
                 {activeTab === 'resumo' && (
                   <QuoteSummaryTab 
                     stats={stats} 
@@ -553,7 +554,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                 )}
               </TabsContent>
               
-              <TabsContent value="valores" className="h-full m-0 p-0 overflow-hidden" forceMount={false}>
+              <TabsContent value="valores" className="h-full m-0 p-0 overflow-hidden">
                 {activeTab === 'valores' && (
                   <QuoteValuesTab 
                     products={products}
@@ -569,13 +570,13 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                 )}
               </TabsContent>
 
-              <TabsContent value="converter" className="h-full m-0 p-0 overflow-auto custom-scrollbar" forceMount={false}>
+              <TabsContent value="converter" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
                 {activeTab === 'converter' && (
                   <QuoteConversionTab 
                     products={products}
                     fornecedores={fornecedores}
                     quote={quote}
-                    onConvertToOrder={convertToOrder.mutate}
+                    onConvertToOrder={(quoteId, orders) => convertToOrder.mutate({ quoteId, orders })}
                     onOpenChange={onOpenChange}
                     getSupplierProductValue={getSupplierProductValue}
                     getBestPriceInfoForProduct={getBestPriceInfoForProduct}
@@ -584,7 +585,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                 )}
               </TabsContent>
 
-              <TabsContent value="editar" className="h-full m-0 p-0 overflow-auto custom-scrollbar" forceMount={false}>
+              <TabsContent value="editar" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
                 {activeTab === 'editar' && (
                   <QuoteEditTab 
                     products={products}
@@ -592,9 +593,16 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                     availableProducts={availableProducts || []}
                     availableSuppliers={availableSuppliers || []}
                     onAddQuoteItem={addQuoteItem.mutateAsync}
-                    onRemoveQuoteItem={removeQuoteItem.mutateAsync}
-                    onAddQuoteSupplier={addQuoteSupplier.mutateAsync}
-                    onRemoveQuoteSupplier={removeQuoteSupplier.mutateAsync}
+                    onRemoveQuoteItem={(productId) => removeQuoteItem.mutateAsync({ quoteId: quote.id, productId })}
+                    onAddQuoteSupplier={(supplierId) => {
+                      const supplier = availableSuppliers.find(s => s.id === supplierId);
+                      return addQuoteSupplier.mutateAsync({ 
+                        quoteId: quote.id, 
+                        supplierId, 
+                        supplierName: supplier?.name || "Desconhecido" 
+                      });
+                    }}
+                    onRemoveQuoteSupplier={(supplierId) => removeQuoteSupplier.mutateAsync({ quoteId: quote.id, supplierId })}
                     quoteId={quote.id}
                     safeStr={safeStr}
                   />

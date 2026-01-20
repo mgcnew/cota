@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Package, Building2, DollarSign, Calendar, ClipboardList, TrendingDown, Award, Users, FileText } from "lucide-react";
+import { Package, Building2, DollarSign, Calendar, ClipboardList, TrendingDown, Award, Users, FileText, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Quote } from "@/hooks/useCotacoes";
 
@@ -61,10 +61,11 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     <ResponsiveModal
       open={open}
       onOpenChange={onOpenChange}
+      hideClose
       title="Resumo da Cotação"
       description={`#${safeStr(quote.id).slice(0, 8)}`}
       desktopMaxWidth="lg"
-      className="!bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10 shadow-2xl"
+      className="!bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10 shadow-2xl [&>button]:hidden"
       footer={
         <Button 
           onClick={() => onOpenChange(false)} 
@@ -75,6 +76,17 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         </Button>
       }
     >
+      <div className="absolute right-4 top-4 z-50">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => onOpenChange(false)} 
+          className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Fechar</span>
+        </Button>
+      </div>
       <div className="space-y-4 pt-2">
         {/* Status Badge */}
         <div className="flex items-center gap-2 mb-2">

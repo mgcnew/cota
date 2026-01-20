@@ -59,6 +59,10 @@ export interface ResponsiveModalProps {
    * Additional class name for the content container
    */
   className?: string;
+  /**
+   * Whether to hide the default close button
+   */
+  hideClose?: boolean;
 }
 
 const maxWidthClasses = {
@@ -105,6 +109,7 @@ export function ResponsiveModal({
   desktopMaxWidth = 'lg',
   showDragIndicator = true,
   className,
+  hideClose = false,
 }: ResponsiveModalProps): JSX.Element {
   const isMobile = useIsMobile();
 
@@ -149,6 +154,7 @@ export function ResponsiveModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        hideClose={hideClose}
         className={cn(
           maxWidthClasses[desktopMaxWidth],
           className

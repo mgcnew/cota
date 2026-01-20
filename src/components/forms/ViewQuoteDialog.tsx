@@ -824,14 +824,15 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={() => {
                     setIsEditMode(false);
                     setOpen(false);
                   }}
-                  className={`${isMobile ? 'h-9 w-9 rounded-lg' : 'h-8 w-8'} p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700`}
+                  className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
-                  <X className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Fechar</span>
                 </Button>
               </div>
             </div>
@@ -1685,7 +1686,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+      <DialogContent hideClose className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
         {modalInnerContent}
       </DialogContent>
     </Dialog>

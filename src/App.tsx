@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { useEffect, lazy, Suspense, ReactNode } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
-import { AuthProvider } from "./components/auth/AuthProvider";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import { CompanyAutoSetup } from "./components/auth/CompanyAutoSetup";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ErrorBoundary } from "./components/ErrorBoundary";

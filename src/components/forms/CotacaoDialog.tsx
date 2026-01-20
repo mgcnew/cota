@@ -278,7 +278,7 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+      <DialogContent hideClose className="max-w-4xl max-h-[90vh] p-0 overflow-hidden [&>button]:hidden">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-900">
@@ -291,7 +291,15 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
             </div>
             <div className="flex items-center gap-2">
               {getStatusBadge(cotacaoStatus)}
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}><X className="h-4 w-4" /></Button>
+              <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => onOpenChange(false)} 
+              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Fechar</span>
+            </Button>
             </div>
           </div>
 
