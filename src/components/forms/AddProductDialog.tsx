@@ -5,7 +5,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogTrigger } from "@/components/ui/responsive-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -799,25 +799,25 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange} modal={true}>
       {trigger && (
-        <ResponsiveDialogTrigger asChild>
+        <DialogTrigger asChild>
           {trigger}
-        </ResponsiveDialogTrigger>
+        </DialogTrigger>
       )}
-      <ResponsiveDialogContent 
+      <DialogContent 
         hideClose 
-        className="w-full sm:w-[90vw] md:max-w-[520px] h-auto sm:h-[85vh] max-h-[85dvh] sm:max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl rounded-t-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
+        className="w-[95vw] sm:w-[90vw] md:max-w-[520px] max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
       >
-        <ResponsiveDialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-9 h-9 rounded-xl sm:rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg sm:shadow-none">
                 <Package className="h-4 w-4" />
               </div>
-              <ResponsiveDialogTitle className="text-base sm:text-lg font-bold sm:font-semibold text-gray-900 dark:text-white truncate">
+              <DialogTitle className="text-base sm:text-lg font-bold sm:font-semibold text-gray-900 dark:text-white truncate">
                 Novo Produto
-              </ResponsiveDialogTitle>
+              </DialogTitle>
             </div>
             <Button
               type="button"
@@ -833,11 +833,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               {!isMobile && <span className="sr-only">Fechar</span>}
             </Button>
           </div>
-        </ResponsiveDialogHeader>
+        </DialogHeader>
         <div className="flex flex-col flex-1 overflow-hidden">
           {formContent}
         </div>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+      </DialogContent>
+    </Dialog>
   );
 }
