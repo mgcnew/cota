@@ -192,19 +192,19 @@ const ResponsiveDialogContent = React.forwardRef<
         )}
         style={{ 
           WebkitOverflowScrolling: 'touch',
-          // Reposicionamento dinâmico usando APENAS transform para evitar layout shifts
-          // Adicionamos uma margem de segurança de 20px para o teclado
-          transform: isKeyboardVisible ? `translate3d(0, -${Math.max(0, keyboardHeight)}px, 0)` : 'translate3d(0, 0, 0)',
-          // Ajusta a altura máxima para ocupar exatamente a área visível quando o teclado está aberto
-          // Isso garante que o header permaneça visível e o conteúdo rolável
-          maxHeight: isKeyboardVisible 
-            ? `calc(100dvh - ${Math.max(0, keyboardHeight)}px)` 
-            : '96dvh',
-          // Suaviza a transição de altura e posição (300ms conforme requisitos)
-          transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), max-height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-          // Padding extra no fundo para garantir que o último input não fique colado no teclado
-          paddingBottom: isKeyboardVisible ? '20px' : 'env(safe-area-inset-bottom, 20px)',
-          willChange: 'transform, max-height',
+          // REMOVIDO: transform manual que causava conflito com o redimensionamento nativo do Android
+          // O Drawer da biblioteca 'vaul' já gerencia o posicionamento fixed/bottom
+          
+          // Ajusta a altura máxima para garantir que cabe na tela visível
+          maxHeight: isKeyboardVisible ? '100dvh' : '96dvh',
+          
+          // Importante: Padding inferior dinâmico para garantir que o conteúdo role acima do teclado
+          // No iOS, o teclado sobrepõe, então precisamos de padding grande.
+          // No Android, a viewport encolhe, então o padding pode ser menor, mas mal não faz.
+          paddingBottom: isKeyboardVisible ? `${keyboardHeight + 20}px` : 'env(safe-area-inset-bottom, 20px)',
+          
+          transition: 'padding-bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), max-height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+          willChange: 'padding-bottom, max-height',
         }}
         {...props as any}
       >
