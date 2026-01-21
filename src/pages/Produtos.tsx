@@ -307,6 +307,7 @@ function Produtos() {
                         product={product}
                         onEdit={handleEditProduct}
                         onDelete={handleDeleteProduct}
+                        onHistory={handleHistoryProduct}
                       />
                     ))}
                   </div>
