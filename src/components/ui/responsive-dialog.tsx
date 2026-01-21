@@ -193,14 +193,17 @@ const ResponsiveDialogContent = React.forwardRef<
         style={{ 
           WebkitOverflowScrolling: 'touch',
           // Reposicionamento dinâmico usando APENAS transform para evitar layout shifts
-          // Adicionamos uma margem de segurança de 20px
-          transform: isKeyboardVisible ? `translate3d(0, -${Math.max(0, keyboardHeight - 10)}px, 0)` : 'translate3d(0, 0, 0)',
-          // Ajusta a altura máxima para evitar que o topo do modal saia da tela
-          maxHeight: isKeyboardVisible ? `calc(100dvh - ${Math.max(0, keyboardHeight - 10)}px)` : '96dvh',
-          // Suaviza a transição quando o teclado aparece
+          // Adicionamos uma margem de segurança de 20px para o teclado
+          transform: isKeyboardVisible ? `translate3d(0, -${Math.max(0, keyboardHeight)}px, 0)` : 'translate3d(0, 0, 0)',
+          // Ajusta a altura máxima para ocupar exatamente a área visível quando o teclado está aberto
+          // Isso garante que o header permaneça visível e o conteúdo rolável
+          maxHeight: isKeyboardVisible 
+            ? `calc(100dvh - ${Math.max(0, keyboardHeight)}px)` 
+            : '96dvh',
+          // Suaviza a transição de altura e posição (300ms conforme requisitos)
           transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), max-height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-          // Garantir que o conteúdo não seja cortado no fundo
-          paddingBottom: isKeyboardVisible ? '10px' : 'env(safe-area-inset-bottom, 0px)',
+          // Padding extra no fundo para garantir que o último input não fique colado no teclado
+          paddingBottom: isKeyboardVisible ? '20px' : 'env(safe-area-inset-bottom, 20px)',
           willChange: 'transform, max-height',
         }}
         {...props as any}
