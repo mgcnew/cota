@@ -15,6 +15,7 @@ import { DataPagination } from "@/components/ui/data-pagination";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
+import { cn } from "@/lib/utils";
 import { 
   Package, Plus, Trash2, DollarSign, 
   Building2, MoreVertical, Eye, CheckCircle2,
@@ -162,26 +163,28 @@ function EmbalagensTab() {
       {/* Sub-tabs: Cotações | Pedidos */}
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
         <div className={cn(
-          "flex items-center justify-between gap-3 mb-4",
-          isMobile ? "flex-col items-stretch gap-3" : "flex-row"
+          "mb-4",
+          isMobile ? "sticky top-0 z-10 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm -mx-4 px-4 py-2 border-b border-gray-200 dark:border-gray-800 overflow-x-auto scrollbar-none" : ""
         )}>
           <div className={cn(
-            isMobile ? "overflow-x-auto scrollbar-none -mx-4 px-4 w-[calc(100%+2rem)]" : ""
+            "flex items-center justify-between gap-3",
+            isMobile ? "w-max" : ""
           )}>
             <TabsList className={cn(
-              "p-1 bg-gray-100 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50",
               isMobile 
-                ? "h-10 w-max justify-start rounded-full px-1" 
-                : "h-11 rounded-xl"
+                ? "h-auto w-max p-0 bg-transparent gap-2" 
+                : "h-auto p-0 bg-transparent border-0 gap-6"
             )}>
               <TabsTrigger 
                 value="cotacoes" 
                 className={cn(
-                  "text-sm font-medium transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400",
-                  isMobile ? "h-8 rounded-full px-3" : "h-9 rounded-lg px-4"
+                  "transition-all",
+                  isMobile 
+                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
+                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
                 )}
               >
-                <ClipboardList className="h-4 w-4" />
+                <ClipboardList className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
                 Cotações
                 {stats.prontasParaDecisao > 0 && (
                   <Badge className="ml-1 bg-emerald-500 text-white text-[10px] px-1.5 py-0">
@@ -192,11 +195,13 @@ function EmbalagensTab() {
               <TabsTrigger 
                 value="pedidos" 
                 className={cn(
-                  "text-sm font-medium transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400",
-                  isMobile ? "h-8 rounded-full px-3" : "h-9 rounded-lg px-4"
+                  "transition-all",
+                  isMobile 
+                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
+                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
                 )}
               >
-                <ShoppingCart className="h-4 w-4" />
+                <ShoppingCart className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
                 Pedidos
                 {stats.totalPedidos > 0 && (
                   <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
@@ -207,39 +212,56 @@ function EmbalagensTab() {
               <TabsTrigger 
                 value="analise" 
                 className={cn(
-                  "text-sm font-medium transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400",
-                  isMobile ? "h-8 rounded-full px-3" : "h-9 rounded-lg px-4"
+                  "transition-all",
+                  isMobile 
+                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
+                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
                 )}
               >
-                <BarChart3 className="h-4 w-4" />
+                <BarChart3 className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
                 Análise
               </TabsTrigger>
               <TabsTrigger 
                 value="economia" 
                 className={cn(
-                  "text-sm font-medium transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400",
-                  isMobile ? "h-8 rounded-full px-3" : "h-9 rounded-lg px-4"
+                  "transition-all",
+                  isMobile 
+                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
+                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Calculator className="h-4 w-4" />
+                <Calculator className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
                 Economia
               </TabsTrigger>
             </TabsList>
-          </div>
 
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setItemsDialogOpen(true)} 
-            className={cn(
-              "bg-white dark:bg-gray-800",
-              isMobile ? "w-full h-10 rounded-xl" : "h-10"
+            {!isMobile && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setItemsDialogOpen(true)} 
+                className="h-10 ml-auto"
+              >
+                <Package className="h-4 w-4 mr-2" />
+                Cadastrar Embalagens
+              </Button>
             )}
-          >
-            <Package className="h-4 w-4 mr-2" />
-            Cadastrar Embalagens
-          </Button>
+          </div>
         </div>
+
+        {isMobile && (
+          <div className="px-1 mb-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setItemsDialogOpen(true)} 
+              className="w-full h-10 rounded-xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+            >
+              <Package className="h-4 w-4 mr-2" />
+              Cadastrar Embalagens
+            </Button>
+          </div>
+        )}
 
         {/* Tab: Cotações */}
         <TabsContent value="cotacoes" className="mt-4 space-y-4">

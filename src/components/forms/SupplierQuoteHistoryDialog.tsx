@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Calendar, Package, Award, Search, DollarSign, ClipboardList, X, Trendin
 import { cn } from "@/lib/utils";
 import { useSupplierQuoteHistory } from "@/hooks/useSupplierQuoteHistory";
 import { useSupplierOrderHistory } from "@/hooks/useSupplierOrderHistory";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SupplierQuoteHistoryDialogProps {
   supplierName: string;
@@ -19,7 +20,7 @@ interface SupplierQuoteHistoryDialogProps {
 }
 
 export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange }: SupplierQuoteHistoryDialogProps) {
-  const isMobile = false; // Removida dependência mobile
+  const isMobile = useIsMobile();
   const [internalOpen, setInternalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("quotes");
   const [searchTerm, setSearchTerm] = useState("");
@@ -580,52 +581,43 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
     </Tabs>
   );
 
-  // Mobile: Usar Sheet (bottom sheet)
+  // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
-      <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+      <Drawer open={isOpen} onOpenChange={handleOpenChange}>
         {/* Only render trigger when not in controlled mode or when trigger is provided */}
         {(!isControlled || trigger) && (
-          <SheetTrigger asChild>
+          <DrawerTrigger asChild>
             {trigger || (
               <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                 Ver Histórico
               </button>
             )}
-          </SheetTrigger>
+          </DrawerTrigger>
         )}
-        <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 [&>button]:hidden">
-          <SheetHeader className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
+        <DrawerContent className="h-[95vh] rounded-t-2xl pb-8 flex flex-col bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+          <DrawerHeader className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
                   <Package className="h-5 w-5" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <SheetTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                <div className="flex-1 min-w-0 text-left">
+                  <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
                     Histórico do Fornecedor
-                  </SheetTitle>
+                  </DrawerTitle>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                     {supplierName}
                   </p>
                 </div>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => handleOpenChange(false)}
-                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                <X className="h-5 w-5" />
-              </Button>
             </div>
-          </SheetHeader>
+          </DrawerHeader>
           <div className="flex flex-col flex-1 overflow-hidden">
             {modalContent}
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
