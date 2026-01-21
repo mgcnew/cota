@@ -100,6 +100,56 @@ const ResponsiveDialogContent = React.forwardRef<
   const { keyboardHeight, isKeyboardVisible } = useKeyboardAdjustment();
   const contentRef = React.useRef<HTMLDivElement>(null);
 
+  // Função para rolar até o elemento focado
+  const scrollToFocusedElement = React.useCallback(() => {
+    if (!isMobile || !isKeyboardVisible) return;
+    
+    // Pequeno delay para garantir que o layout foi atualizado
+    requestAnimationFrame(() => {
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && contentRef.current?.contains(activeElement)) {
+        // Verifica se é um input/textarea
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName)) {
+          // Aguarda a transição do teclado
+          setTimeout(() => {
+            activeElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'nearest'
+            });
+          }, 300); // Sincronizado com a transição do drawer
+        }
+      }
+    });
+  }, [isMobile, isKeyboardVisible]);
+
+  // Listener para foco em elementos
+  React.useEffect(() => {
+    const handleFocus = (e: FocusEvent) => {
+      if (isMobile && isKeyboardVisible) {
+        scrollToFocusedElement();
+      }
+    };
+
+    const element = contentRef.current;
+    if (element) {
+      element.addEventListener('focusin', handleFocus);
+    }
+
+    return () => {
+      if (element) {
+        element.removeEventListener('focusin', handleFocus);
+      }
+    };
+  }, [isMobile, isKeyboardVisible, scrollToFocusedElement]);
+
+  // Reagir à abertura do teclado
+  React.useEffect(() => {
+    if (isKeyboardVisible) {
+      scrollToFocusedElement();
+    }
+  }, [isKeyboardVisible, scrollToFocusedElement]);
+
   // Autofoco automático no primeiro campo de input/textarea quando aberto
   React.useEffect(() => {
     let focusTimer: number;
@@ -144,11 +194,12 @@ const ResponsiveDialogContent = React.forwardRef<
           WebkitOverflowScrolling: 'touch',
           // Reposicionamento dinâmico usando APENAS transform para evitar layout shifts
           // Adicionamos uma margem de segurança de 20px
-          transform: isKeyboardVisible ? `translateY(-${Math.max(0, keyboardHeight - 10)}px)` : 'translateY(0)',
+          transform: isKeyboardVisible ? `translate3d(0, -${Math.max(0, keyboardHeight - 10)}px, 0)` : 'translate3d(0, 0, 0)',
           // Suaviza a transição quando o teclado aparece
-          transition: 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)',
+          transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
           // Garantir que o conteúdo não seja cortado no fundo
           paddingBottom: isKeyboardVisible ? '10px' : 'env(safe-area-inset-bottom, 0px)',
+          willChange: 'transform',
         }}
         {...props as any}
       >
