@@ -324,31 +324,21 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       }
 
       // Verificar limite antes de inserir (validação adicional no frontend)
-      // Owners não têm limites - verificação múltipla para garantir
-      // Lista de emails conhecidos de owners do sistema (para casos especiais)
       const ownerEmails = ['mgc.info.new@gmail.com'];
       
-      // SEMPRE verifica primeiro por email (prioridade máxima para owners conhecidos)
       let userIsOwner = false;
       if (user.email && ownerEmails.includes(user.email.toLowerCase().trim())) {
         userIsOwner = true;
-        console.log('✅ Owner identificado por email:', user.email);
       } else {
-        // Depois verifica pelo hook
         userIsOwner = isOwner === true;
-        
-        // Se ainda não for owner, verifica no banco
         if (!userIsOwner) {
           try {
-            // Verifica usando função SECURITY DEFINER do banco
             const { data: isSuperAdmin, error: superAdminError } = await supabase
               .rpc('is_super_admin', { _user_id: user.id });
             
             if (!superAdminError && isSuperAdmin) {
               userIsOwner = true;
-              console.log('✅ Owner identificado por is_super_admin');
             } else {
-              // Fallback: verifica na tabela user_roles
               const { data: roleData, error: roleError } = await supabase
                 .from("user_roles")
                 .select("role")
@@ -358,27 +348,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               
               if (!roleError && roleData?.role === 'owner') {
                 userIsOwner = true;
-                console.log('✅ Owner identificado por user_roles');
               }
             }
           } catch (error) {
             console.error('Erro ao verificar owner:', error);
           }
-        } else {
-          console.log('✅ Owner identificado pelo hook useUserRole');
         }
       }
-      
-      // Log para debug
-      console.log('🔍 Verificação de Owner:', { 
-        email: user.email, 
-        isOwnerFromHook: isOwner, 
-        userIsOwner, 
-        userId: user.id,
-        canAddProduct: subscriptionLimits.canAddProduct,
-        currentProducts: subscriptionLimits.currentProducts,
-        maxProducts: subscriptionLimits.maxProducts
-      });
       
       if (!userIsOwner && !subscriptionLimits.canAddProduct) {
         toast({
@@ -389,38 +365,21 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         return;
       }
 
-      // Preparar dados garantindo que strings vazias sejam null
       const productData = {
         company_id: companyData.company_id,
         name: data.name.trim(),
         category: finalCategory.trim(),
         brand_id: data.brand_id && data.brand_id !== 'none' ? data.brand_id : null,
-        unit: data.unit || 'un', // Garantir que unit sempre tenha um valor
+        unit: data.unit || 'un',
         barcode: data.barcode && data.barcode.trim() ? data.barcode.trim() : null,
         weight: data.weight && data.weight.trim() ? data.weight.trim() : null,
         image_url: productImage && productImage.trim() ? productImage.trim() : null,
       };
 
-      // Validações finais
-      if (!productData.name || productData.name.length === 0) {
-        throw new Error("Nome do produto é obrigatório");
-      }
-      if (!productData.category || productData.category.length === 0) {
-        throw new Error("Categoria do produto é obrigatória");
-      }
-      if (!productData.unit || productData.unit.length === 0) {
-        throw new Error("Unidade de medida é obrigatória");
-      }
-      if (!productData.company_id) {
-        throw new Error("Erro ao identificar a empresa");
-      }
-
-      console.log("Tentando inserir produto:", { 
-        ...productData, 
-        image_url: productData.image_url ? "URL presente" : null,
-        barcode: productData.barcode ? `${productData.barcode.length} caracteres` : null,
-        weight: productData.weight ? `${productData.weight.length} caracteres` : null
-      });
+      if (!productData.name || productData.name.length === 0) throw new Error("Nome do produto é obrigatório");
+      if (!productData.category || productData.category.length === 0) throw new Error("Categoria do produto é obrigatória");
+      if (!productData.unit || productData.unit.length === 0) throw new Error("Unidade de medida é obrigatória");
+      if (!productData.company_id) throw new Error("Erro ao identificar a empresa");
 
       const { data: insertedProduct, error: insertError } = await supabase
         .from('products')
@@ -428,31 +387,22 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         .select()
         .single();
 
-      if (insertError) {
-        console.error("Erro na inserção do produto:", insertError);
-        console.error("Dados tentados:", productData);
-        throw insertError;
-      }
+      if (insertError) throw insertError;
 
-      console.log("Produto inserido com sucesso:", insertedProduct);
-
-      // Log activity
       await logActivity({
         tipo: "produto",
         acao: "Produto adicionado",
         detalhes: `${data.name} - Categoria: ${finalCategory}${data.weight ? `, Peso: ${data.weight}` : ""}`
       });
 
-      // Invalidar queries para atualizar dados em tempo real
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product-categories'] });
       queryClient.invalidateQueries({ queryKey: ['subscription-limits'] });
 
-      // Adicionar nova categoria à lista local se necessário
       if (data.category === "nova" && data.newCategory) {
         setCategories(prev => {
           const newCategories = [...prev, data.newCategory!].sort();
-          return Array.from(new Set(newCategories)); // Remove duplicatas
+          return Array.from(new Set(newCategories));
         });
         
         if (onCategoryAdded) {
@@ -474,48 +424,28 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       if (!keepOpen) {
         handleOpenChange(false);
       } else {
-        // Focar no primeiro campo
         setTimeout(() => {
           document.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
         }, 100);
       }
     } catch (error: any) {
       console.error("Erro ao adicionar produto:", error);
-      console.error("Erro completo (JSON):", JSON.stringify(error, null, 2));
-      console.error("Erro details:", error?.details);
-      console.error("Erro hint:", error?.hint);
-      console.error("Erro code:", error?.code);
       
-      // Extrair mensagem de erro mais específica
       let errorMessage = "Não foi possível adicionar o produto. Tente novamente.";
       
-      // Tentar diferentes formas de extrair a mensagem de erro
-      if (error?.details) {
-        errorMessage = error.details;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.hint) {
-        errorMessage = error.hint;
-      } else if (error?.error_description) {
-        errorMessage = error.error_description;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error?.error) {
-        errorMessage = error.error;
-      }
+      if (error?.details) errorMessage = error.details;
+      else if (error?.message) errorMessage = error.message;
+      else if (error?.hint) errorMessage = error.hint;
+      else if (error?.error_description) errorMessage = error.error_description;
+      else if (typeof error === 'string') errorMessage = error;
+      else if (error?.error) errorMessage = error.error;
       
-      // Mensagens mais amigáveis para erros comuns
-      if (errorMessage.includes('Limite de produtos atingido') || errorMessage.includes('limite')) {
-        // Manter a mensagem original do banco que já é clara
-        errorMessage = errorMessage;
-      } else if (errorMessage.includes('duplicate') || errorMessage.includes('unique')) {
+      if (errorMessage.includes('duplicate') || errorMessage.includes('unique')) {
         errorMessage = "Já existe um produto com este nome e categoria.";
       } else if (errorMessage.includes('permission') || errorMessage.includes('policy') || errorMessage.includes('RLS')) {
         errorMessage = "Você não tem permissão para adicionar produtos. Verifique sua conta.";
       } else if (errorMessage.includes('company_id') || errorMessage.includes('company')) {
         errorMessage = "Erro ao identificar a empresa. Faça login novamente.";
-      } else if (errorMessage.includes('constraint') || errorMessage.includes('check')) {
-        errorMessage = "Dados inválidos. Verifique os campos obrigatórios.";
       }
       
       toast({
@@ -526,279 +456,9 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     }
   };
 
-  // Conteúdo do formulário (reutilizável para mobile e desktop)
-  const formContent = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-          {/* Alerta de limite de produtos */}
-          <LimitAlert 
-            resource="products"
-            current={subscriptionLimits.currentProducts}
-            max={subscriptionLimits.maxProducts}
-          />
-          {/* Seção: Informações Básicas */}
-          <div className="space-y-3">
-            <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
-              Informações do Produto
-            </h3>
-            
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Produto *</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ex: Coxa com Sobrecoxa Congelada"
-                      className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="brand_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Marca (Opcional)</FormLabel>
-                  <FormControl>
-                    <BrandSelect 
-                      value={field.value} 
-                      onChange={field.onChange} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="unit"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Unidade de Medida *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white`}>
-                        <SelectValue placeholder="Selecione a unidade" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
-                      <SelectItem value="un">Unidade (un)</SelectItem>
-                      <SelectItem value="kg">Quilograma (kg)</SelectItem>
-                      <SelectItem value="g">Grama (g)</SelectItem>
-                      <SelectItem value="lt">Litro (lt)</SelectItem>
-                      <SelectItem value="ml">Mililitro (ml)</SelectItem>
-                      <SelectItem value="cx">Caixa (cx)</SelectItem>
-                      <SelectItem value="pc">Pacote (pc)</SelectItem>
-                      <SelectItem value="dz">Dúzia (dz)</SelectItem>
-                      <SelectItem value="m">Metro (m)</SelectItem>
-                      <SelectItem value="m2">Metro² (m²)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="barcode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Código de Barras (Opcional)</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input 
-                        {...field} 
-                        placeholder="EAN-13, EAN-8, UPC..."
-                        className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                        maxLength={13}
-                      />
-                      <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${isMobile ? 'right-4' : ''}`}>
-                        <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-gray-400`} />
-                      </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Seção de Foto do Produto */}
-          <div className="space-y-3">
-            <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
-              Foto do Produto
-            </h3>
-            
-            <div className={`space-y-4 ${isMobile ? 'p-3' : 'p-4'} border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm`}>
-              <div className="flex items-center justify-between">
-                <Label className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Imagem (Opcional)</Label>
-                {productImage && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setProductImage(null)}
-                    className={`${isMobile ? 'h-8 text-xs' : 'h-7 text-xs'}`}
-                  >
-                    <Trash2 className={`${isMobile ? 'h-3.5 w-3.5' : 'h-3 w-3'} mr-1`} />
-                    Remover
-                  </Button>
-                )}
-              </div>
-              
-              {productImage && (
-                <div className={`relative w-full ${isMobile ? 'h-40' : 'h-48'} bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700`}>
-                  <img 
-                    src={productImage} 
-                    alt="Preview do produto"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              )}
-              
-              <div className="flex gap-2">
-                <label className="flex-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className={`w-full ${isMobile ? 'h-11 text-base' : 'h-9 text-sm'}`}
-                    disabled={isUploadingImage}
-                    asChild
-                  >
-                    <div>
-                      {isUploadingImage ? (
-                        <>
-                          <Loader2 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2 animate-spin`} />
-                          Enviando...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
-                          Fazer Upload da Imagem
-                        </>
-                      )}
-                    </div>
-                  </Button>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-                </label>
-              </div>
-              
-              <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-gray-500 dark:text-gray-400 text-center`}>
-                Formatos aceitos: JPG, PNG, WEBP (máx. 5MB)
-              </p>
-            </div>
-          </div>
-
-          {/* Seção: Categorização */}
-          <div className="space-y-3">
-            <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
-              Categorização
-            </h3>
-
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold text-gray-600 dark:text-gray-400`}>Categoria do Produto *</FormLabel>
-                  <FormControl>
-                    <CategorySelectForm 
-                      value={field.value}
-                      onChange={field.onChange}
-                      categories={categories}
-                      isLoading={loadingCategories}
-                      onCategoryAdded={(newCat) => {
-                        setCategories(prev => {
-                          const newCategories = [...prev, newCat].sort();
-                          return Array.from(new Set(newCategories));
-                        });
-                        if (onCategoryAdded) onCategoryAdded(newCat);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Dica de preenchimento - ocultar no mobile para economizar espaço */}
-          {!isMobile && (
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border border-orange-200/50 dark:border-orange-800/30 rounded-lg p-3">
-              <div className="flex items-start gap-2">
-                <div className="text-lg">💡</div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-orange-900 dark:text-orange-300 text-xs mb-1.5">Dicas Rápidas</h4>
-                  <ul className="text-xs text-orange-800 dark:text-orange-400 space-y-0.5">
-                    <li>• Use nomes descritivos</li>
-                    <li>• Especifique peso/quantidade</li>
-                    <li>• Categorias organizam cotações</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer com botões */}
-        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm`}>
-          <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2 justify-end'}`}>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-4'} rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white`}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="button"
-              onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
-              className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200`}
-            >
-              <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
-              Adicionar
-            </Button>
-            {!isMobile && (
-              <Button 
-                type="button"
-                onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
-                variant="outline"
-                className="h-9 rounded-lg border-orange-500 dark:border-orange-400 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-sm px-4"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Criar Mais
-              </Button>
-            )}
-          </div>
-        </div>
-      </form>
-    </Form>
-  );
-
-  // Handler para controlar a abertura/fechamento do modal
   const handleOpenChange = (newOpen: boolean) => {
     handleSetOpen(newOpen);
     if (!newOpen) {
-      // Ao fechar, restaurar scroll imediatamente
       setTimeout(() => {
         window.scrollTo({
           top: scrollPositionRef.current,
@@ -810,7 +470,306 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     }
   };
 
-  // Mobile: Usar Drawer (bottom sheet)
+  // Shared Header Component
+  const Header = (
+    <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-transparent pointer-events-none"></div>
+      <div className="flex items-center justify-between relative z-10">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white shadow-xl shadow-gray-500/20 ring-1 ring-white/20 flex-shrink-0">
+            <Package className="h-4 w-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            {isMobile ? (
+              <DrawerTitle className="text-lg font-black text-gray-900 dark:text-white tracking-tight truncate">
+                Novo Produto
+              </DrawerTitle>
+            ) : (
+              <DialogTitle className="text-lg font-black text-gray-900 dark:text-white tracking-tight truncate">
+                Novo Produto
+              </DialogTitle>
+            )}
+          </div>
+        </div>
+        
+        <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
+          className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-xl transition-all border border-transparent hover:border-gray-200/50 dark:hover:border-gray-700/50 shadow-sm ml-2">
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  const content = (
+    <>
+      {Header}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-4">
+            {/* Alerta de limite de produtos */}
+            <LimitAlert 
+              resource="products"
+              current={subscriptionLimits.currentProducts}
+              max={subscriptionLimits.maxProducts}
+            />
+            {/* Seção: Informações Básicas */}
+            <div className="space-y-3">
+              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
+                <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                Informações do Produto
+              </h3>
+              
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Produto *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex: Coxa com Sobrecoxa Congelada"
+                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="brand_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Marca (Opcional)</FormLabel>
+                    <FormControl>
+                      <BrandSelect 
+                        value={field.value} 
+                        onChange={field.onChange} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Unidade de Medida *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white`}>
+                          <SelectValue placeholder="Selecione a unidade" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
+                        <SelectItem value="un">Unidade (un)</SelectItem>
+                        <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                        <SelectItem value="g">Grama (g)</SelectItem>
+                        <SelectItem value="lt">Litro (lt)</SelectItem>
+                        <SelectItem value="ml">Mililitro (ml)</SelectItem>
+                        <SelectItem value="cx">Caixa (cx)</SelectItem>
+                        <SelectItem value="pc">Pacote (pc)</SelectItem>
+                        <SelectItem value="dz">Dúzia (dz)</SelectItem>
+                        <SelectItem value="m">Metro (m)</SelectItem>
+                        <SelectItem value="m2">Metro² (m²)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="barcode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Código de Barras (Opcional)</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          {...field} 
+                          placeholder="EAN-13, EAN-8, UPC..."
+                          className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                          maxLength={13}
+                        />
+                        <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${isMobile ? 'right-4' : ''}`}>
+                          <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-gray-400`} />
+                        </div>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Seção de Foto do Produto */}
+            <div className="space-y-3">
+              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
+                <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                Foto do Produto
+              </h3>
+              
+              <div className={`space-y-4 ${isMobile ? 'p-3' : 'p-4'} border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm`}>
+                <div className="flex items-center justify-between">
+                  <Label className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Imagem (Opcional)</Label>
+                  {productImage && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setProductImage(null)}
+                      className={`${isMobile ? 'h-8 text-xs' : 'h-7 text-xs'}`}
+                    >
+                      <Trash2 className={`${isMobile ? 'h-3.5 w-3.5' : 'h-3 w-3'} mr-1`} />
+                      Remover
+                    </Button>
+                  )}
+                </div>
+                
+                {productImage && (
+                  <div className={`relative w-full ${isMobile ? 'h-40' : 'h-48'} bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700`}>
+                    <img 
+                      src={productImage} 
+                      alt="Preview do produto"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <label className="flex-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={`w-full ${isMobile ? 'h-11 text-base' : 'h-9 text-sm'}`}
+                      disabled={isUploadingImage}
+                      asChild
+                    >
+                      <div>
+                        {isUploadingImage ? (
+                          <>
+                            <Loader2 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2 animate-spin`} />
+                            Enviando...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
+                            Fazer Upload da Imagem
+                          </>
+                        )}
+                      </div>
+                    </Button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                  </label>
+                </div>
+                
+                <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-gray-500 dark:text-gray-400 text-center`}>
+                  Formatos aceitos: JPG, PNG, WEBP (máx. 5MB)
+                </p>
+              </div>
+            </div>
+
+            {/* Seção: Categorização */}
+            <div className="space-y-3">
+              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
+                <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                Categorização
+              </h3>
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold text-gray-600 dark:text-gray-400`}>Categoria do Produto *</FormLabel>
+                    <FormControl>
+                      <CategorySelectForm 
+                        value={field.value}
+                        onChange={field.onChange}
+                        categories={categories}
+                        isLoading={loadingCategories}
+                        onCategoryAdded={(newCat) => {
+                          setCategories(prev => {
+                            const newCategories = [...prev, newCat].sort();
+                            return Array.from(new Set(newCategories));
+                          });
+                          if (onCategoryAdded) onCategoryAdded(newCat);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Dica de preenchimento - ocultar no mobile para economizar espaço */}
+            {!isMobile && (
+              <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border border-orange-200/50 dark:border-orange-800/30 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <div className="text-lg">💡</div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-orange-900 dark:text-orange-300 text-xs mb-1.5">Dicas Rápidas</h4>
+                    <ul className="text-xs text-orange-800 dark:text-orange-400 space-y-0.5">
+                      <li>• Use nomes descritivos</li>
+                      <li>• Especifique peso/quantidade</li>
+                      <li>• Categorias organizam cotações</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer com botões */}
+          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm`}>
+            <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2 justify-end'}`}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-4'} rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white`}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="button"
+                onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
+                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200`}
+              >
+                <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
+                Adicionar
+              </Button>
+              {!isMobile && (
+                <Button 
+                  type="button"
+                  onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
+                  variant="outline"
+                  className="h-9 rounded-lg border-orange-500 dark:border-orange-400 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-sm px-4"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Mais
+                </Button>
+              )}
+            </div>
+          </div>
+        </form>
+      </Form>
+    </>
+  );
+
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
@@ -819,37 +778,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent className="h-[90vh] max-h-[90vh] overflow-hidden flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
-          <DrawerHeader className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
-                  <Package className="h-4 w-4" />
-                </div>
-                <DrawerTitle className="text-base font-bold text-gray-900 dark:text-white truncate">
-                  Novo Produto
-                </DrawerTitle>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => handleOpenChange(false)}
-                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </DrawerHeader>
-          <div className="flex flex-col flex-1 overflow-hidden">
-            {formContent}
-          </div>
+        <DrawerContent className="h-[90vh] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200/60 dark:border-gray-700/30 !bg-white/90 dark:!bg-gray-950/90 backdrop-blur-xl">
+          {content}
         </DrawerContent>
       </Drawer>
     );
   }
 
-  // Desktop: Usar Dialog
   return (
     <Dialog open={open} onOpenChange={handleSetOpen}>
       {trigger && (
@@ -858,31 +793,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         </DialogTrigger>
       )}
       <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
-                <Package className="h-4 w-4" />
-              </div>
-              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-                Novo Produto
-              </DialogTitle>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => handleOpenChange(false)}
-              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fechar</span>
-            </Button>
-          </div>
-        </DialogHeader>
-        <div className="flex flex-col flex-1 overflow-hidden">
-          {formContent}
-        </div>
+        {content}
       </DialogContent>
     </Dialog>
   );
