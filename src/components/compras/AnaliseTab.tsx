@@ -11,8 +11,14 @@ import { cn } from "@/lib/utils";
 import {
   Search, Package, Building2, TrendingUp, TrendingDown, Minus,
   DollarSign, ShoppingCart, FileText, Calendar, Award, AlertCircle,
-  ArrowRight, BarChart3, Target, Clock, CheckCircle, XCircle, Loader2
+  ArrowRight, BarChart3, Target, Clock, CheckCircle, XCircle, Loader2,
+  ChevronDown, ChevronUp
 } from "lucide-react";
+import { 
+  Collapsible, 
+  CollapsibleContent, 
+  CollapsibleTrigger 
+} from "@/components/ui/collapsible";
 
 interface AnaliseTabProps {}
 
@@ -947,39 +953,84 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
     <ScrollArea className="h-[300px]">
       <div className="space-y-2">
         {orders.slice(0, 15).map((order) => (
-          <div key={order.id} className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">#{order.id.substring(0, 8)}</span>
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "text-xs",
-                    order.status === "entregue" || order.status === "completed"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : order.status === "pendente"
-                      ? "bg-amber-50 text-amber-700 border-amber-200"
-                      : "bg-gray-50 text-gray-700 border-gray-200"
-                  )}
-                >
-                  {order.status}
-                </Badge>
-              </div>
-              <span className="font-bold text-gray-900 dark:text-white">
-                R$ {(order.total_value || 0).toFixed(2)}
-              </span>
-            </div>
-            <div className="flex items-center gap-4 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {new Date(order.order_date).toLocaleDateString("pt-BR")}
-              </span>
-              <span>{order.order_items?.length || 0} item(s)</span>
-            </div>
-          </div>
+          <OrderHistoryItem key={order.id} order={order} />
         ))}
       </div>
     </ScrollArea>
+  );
+}
+
+function OrderHistoryItem({ order }: { order: any }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <Collapsible
+      open={isExpanded}
+      onOpenChange={setIsExpanded}
+      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 overflow-hidden"
+    >
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500">#{order.id.substring(0, 8)}</span>
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs",
+                order.status === "entregue" || order.status === "completed"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : order.status === "pendente"
+                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                  : "bg-gray-50 text-gray-700 border-gray-200"
+              )}
+            >
+              {order.status}
+            </Badge>
+          </div>
+          <span className="font-bold text-gray-900 dark:text-white">
+            R$ {(order.total_value || 0).toFixed(2)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {new Date(order.order_date).toLocaleDateString("pt-BR")}
+            </span>
+            <span>{order.order_items?.length || 0} item(s)</span>
+          </div>
+          
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              {isExpanded ? (
+                <ChevronUp className="h-4 w-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+      </div>
+
+      <CollapsibleContent>
+        <div className="bg-gray-50 dark:bg-gray-900/50 p-3 border-t border-gray-100 dark:border-gray-700 space-y-2">
+          <p className="text-xs font-semibold text-gray-500 mb-2">Itens do Pedido</p>
+          {order.order_items?.map((item: any) => (
+            <div key={item.id} className="flex justify-between text-xs">
+              <span className="text-gray-700 dark:text-gray-300">
+                {item.quantity}x {item.product_name}
+              </span>
+              <span className="text-gray-500">
+                R$ {(item.total_price || 0).toFixed(2)}
+              </span>
+            </div>
+          ))}
+          {(!order.order_items || order.order_items.length === 0) && (
+            <p className="text-xs text-gray-400 italic">Nenhum item encontrado</p>
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

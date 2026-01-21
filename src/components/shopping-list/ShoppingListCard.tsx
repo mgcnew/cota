@@ -13,8 +13,15 @@ import {
   Calendar,
   Plus,
   Check,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { 
+  Collapsible, 
+  CollapsibleContent, 
+  CollapsibleTrigger 
+} from "@/components/ui/collapsible";
 import type { ShoppingListItem } from "@/hooks/useShoppingList";
 
 interface ShoppingListCardProps {
@@ -69,6 +76,7 @@ export const ShoppingListCard = memo(function ShoppingListCard({
   const PriorityIcon = config.icon;
   const [localQuantity, setLocalQuantity] = useState(item.quantity);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Touch-friendly quantity stepper handlers
   const handleIncrement = async () => {
@@ -99,14 +107,16 @@ export const ShoppingListCard = memo(function ShoppingListCard({
   };
 
   return (
-    <div
+    <Collapsible
+      open={isExpanded}
+      onOpenChange={setIsExpanded}
       className={cn(
         "group relative rounded-xl border-l-4 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 overflow-hidden transition-all duration-200 hover:shadow-md",
         config.accent,
         isSelected && "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900"
       )}
     >
-      <div className="p-4">
+      <div className="p-4 pb-2">
         <div className="flex items-start gap-3">
           {/* Checkbox */}
           <div className="pt-0.5">
@@ -190,51 +200,73 @@ export const ShoppingListCard = memo(function ShoppingListCard({
                 </p>
               </div>
             </div>
-
-            {/* Notes */}
-            {item.notes && (
-              <div className="mb-3 p-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-lg">
-                <p className="text-xs text-amber-800 dark:text-amber-200 line-clamp-2">
-                  {item.notes}
-                </p>
-              </div>
-            )}
-
-            {/* Footer - Touch-optimized with min 44px touch targets */}
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700/50">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                <Calendar className="w-3 h-3" />
-                {new Date(item.created_at).toLocaleDateString("pt-BR")}
-              </div>
-              {/* Always visible on mobile for better touch UX */}
-              <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => onEdit?.(item)}
-                  className="h-11 min-h-[44px] px-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 active:scale-95 transition-transform touch-manipulation"
-                >
-                  <Edit className="h-4 w-4 mr-1.5" />
-                  <span className="hidden sm:inline">Editar</span>
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    if (confirm("Deseja remover este item?")) {
-                      onDelete(item.id);
-                    }
-                  }}
-                  className="h-11 min-h-[44px] px-3 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 active:scale-95 transition-transform touch-manipulation"
-                >
-                  <Trash2 className="h-4 w-4 mr-1.5" />
-                  <span className="hidden sm:inline">Remover</span>
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Expand/Collapse Button */}
+      <CollapsibleTrigger asChild>
+        <button
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[44px]"
+        >
+          {isExpanded ? (
+            <>
+              <ChevronUp className="h-4 w-4" />
+              <span>Menos detalhes</span>
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-4 w-4" />
+              <span>Mais detalhes</span>
+            </>
+          )}
+        </button>
+      </CollapsibleTrigger>
+
+      {/* Expandable Actions */}
+      <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
+        <div className="p-4 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30 bg-gray-50/50 dark:bg-gray-900/20">
+          
+          {/* Notes */}
+          {item.notes && (
+            <div className="p-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-lg">
+              <p className="text-xs text-amber-800 dark:text-amber-200">
+                {item.notes}
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-center gap-1.5 text-xs text-gray-400 pb-2">
+            <Calendar className="w-3 h-3" />
+            Criado em {new Date(item.created_at).toLocaleDateString("pt-BR")}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onEdit?.(item)}
+              className="h-10 touch-target active:scale-95 transition-transform"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                if (confirm("Deseja remover este item?")) {
+                  onDelete(item.id);
+                }
+              }}
+              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Remover
+            </Button>
+          </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 });

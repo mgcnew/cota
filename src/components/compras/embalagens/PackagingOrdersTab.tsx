@@ -13,6 +13,7 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { PackagingOrderDetailsDialog } from "./PackagingOrderDetailsDialog";
+import { MobilePackagingOrderCard } from "./MobilePackagingOrderCard";
 import {
   ShoppingCart, Plus, Trash2, Calendar, DollarSign,
   Building2, MoreVertical, CheckCircle2, Clock,
@@ -144,41 +145,14 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
           {paginatedData.items.map((order, index) => {
             const numero = paginatedData.pagination.startIndex + index + 1;
             return (
-              <div key={order.id} className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4 shadow-sm">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-800/50">
-                      <ShoppingCart className="h-5 w-5 text-gray-900 dark:text-white" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-sm truncate"><CapitalizedText>{order.supplierName}</CapitalizedText></p>
-                      <p className="text-xs text-muted-foreground">#{numero.toString().padStart(4, '0')} • {order.orderDate}</p>
-                    </div>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleViewDetails(order)}><Eye className="h-4 w-4 mr-2" />Ver Detalhes</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'confirmado')}><CheckCircle2 className="h-4 w-4 mr-2" />Confirmar</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'entregue')}><Truck className="h-4 w-4 mr-2" />Marcar Entregue</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleDelete(order.id)} className="text-red-600"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {order.itens.slice(0, 3).map(item => (<Badge key={item.id} variant="secondary" className="text-xs">{item.quantidade}x {item.packagingName}</Badge>))}
-                  {order.itens.length > 3 && <Badge variant="outline" className="text-xs">+{order.itens.length - 3} mais</Badge>}
-                </div>
-                <div className="flex items-center gap-2 mt-3 flex-wrap">
-                  {getStatusBadge(order.status)}
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200"><DollarSign className="h-3 w-3 mr-1" />R$ {order.totalValue.toFixed(2)}</Badge>
-                  {order.deliveryDate && <Badge variant="outline" className="text-xs"><Calendar className="h-3 w-3 mr-1" />Entrega: {order.deliveryDate}</Badge>}
-                </div>
-              </div>
+              <MobilePackagingOrderCard
+                key={order.id}
+                order={order}
+                orderNumber={numero}
+                onViewDetails={handleViewDetails}
+                onUpdateStatus={handleUpdateStatus}
+                onDelete={handleDelete}
+              />
             );
           })}
         </div>
