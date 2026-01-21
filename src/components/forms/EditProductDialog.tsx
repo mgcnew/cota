@@ -286,13 +286,13 @@ function EditProductDialogInternal({
 
   // Conteúdo do formulário (compartilhado entre mobile e desktop)
   const formContent = (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-transparent">
+    <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-gray-950">
       {/* Product Image Preview */}
       {(currentProduct?.image_url || newImageUrl) && (
             <div className="flex flex-col items-center gap-3 pb-2">
-              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-md relative group bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm">
+              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-sm relative group bg-gray-50 dark:bg-gray-900">
                 {isUploadingImage ? (
-                  <div className="w-full h-full bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center">
+                  <div className="w-full h-full bg-orange-50 dark:bg-orange-900/10 flex items-center justify-center">
                     <Loader2 className="h-8 w-8 text-orange-600 animate-spin" />
                   </div>
                 ) : (
@@ -364,7 +364,7 @@ function EditProductDialogInternal({
                   <FormControl>
                     <Input 
                       placeholder="Ex: Coxa com Sobrecoxa"
-                      className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
+                      className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
                       {...field}
                     />
                   </FormControl>
@@ -417,11 +417,11 @@ function EditProductDialogInternal({
                   <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Unidade de Medida *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
+                      <SelectTrigger className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
                         <SelectValue placeholder="Selecione a unidade" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
+                    <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
                       <SelectItem value="un">Unidade (un)</SelectItem>
                       <SelectItem value="kg">Quilograma (kg)</SelectItem>
                       <SelectItem value="g">Grama (g)</SelectItem>
@@ -450,7 +450,7 @@ function EditProductDialogInternal({
                       <Input 
                         {...field} 
                         placeholder="EAN-13, EAN-8, UPC..."
-                        className="pr-10 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
+                        className="pr-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
                         maxLength={13}
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -475,7 +475,7 @@ function EditProductDialogInternal({
               </Button>
               <Button 
                 type="submit"
-                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
               >
                 Salvar Alterações
               </Button>
@@ -489,11 +489,11 @@ function EditProductDialogInternal({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
-          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-700">
+          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white flex-shrink-0 shadow-sm border border-gray-200 dark:border-gray-700">
                   <Package className="h-5 w-5" />
                 </div>
                 <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
@@ -528,11 +528,11 @@ function EditProductDialogInternal({
   // Desktop: Usar Dialog
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white flex-shrink-0 border border-gray-200 dark:border-gray-700">
                 <Package className="h-4 w-4" />
               </div>
               <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
@@ -544,7 +544,7 @@ function EditProductDialogInternal({
               variant="ghost"
               size="icon"
               onClick={() => onOpenChange(false)}
-              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <X className="h-4 w-4" />
               <span className="sr-only">Fechar</span>
