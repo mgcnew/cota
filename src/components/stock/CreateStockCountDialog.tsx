@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription } from "@/components/ui/responsive-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,8 +49,8 @@ export function CreateStockCountDialog({
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className="w-[95vw] max-w-lg p-0 gap-0 overflow-hidden max-h-[90vh] sm:rounded-xl rounded-t-xl">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[95vw] max-w-lg p-0 gap-0 overflow-hidden max-h-[90vh]">
         {/* Header Compacto */}
         <div className="bg-gradient-to-r from-orange-500 to-amber-600 p-4 sm:p-5 text-white">
           <div className="flex items-center gap-3">
@@ -58,14 +58,14 @@ export function CreateStockCountDialog({
               <ClipboardList className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="min-w-0">
-              <ResponsiveDialogHeader className="p-0 space-y-0.5 text-left">
-                <ResponsiveDialogTitle className="text-lg sm:text-xl font-bold text-white">
+              <DialogHeader className="p-0 space-y-0.5">
+                <DialogTitle className="text-lg sm:text-xl font-bold text-white">
                   Nova Contagem
-                </ResponsiveDialogTitle>
-                <ResponsiveDialogDescription className="text-orange-100 text-xs sm:text-sm">
+                </DialogTitle>
+                <DialogDescription className="text-orange-100 text-xs sm:text-sm">
                   Como deseja criar a contagem?
-                </ResponsiveDialogDescription>
-              </ResponsiveDialogHeader>
+                </DialogDescription>
+              </DialogHeader>
             </div>
           </div>
         </div>
@@ -245,7 +245,7 @@ export function CreateStockCountDialog({
             )}
           </Button>
         </div>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

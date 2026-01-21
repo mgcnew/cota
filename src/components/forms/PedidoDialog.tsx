@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
-import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
-import { DrawerHeader, DrawerFooter } from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -396,9 +396,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         <ShoppingCart className="h-4 w-4" />
       </div>
       <div className="flex flex-col">
-        <ResponsiveDialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
+        <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
           Gerenciar Pedido
-        </ResponsiveDialogTitle>
+        </DialogTitle>
         <div className="flex items-center gap-1.5 mt-1">
           <span className="text-[8px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest bg-gray-100/50 dark:bg-white/5 px-1.5 py-0.5 rounded-md border border-gray-200/50 dark:border-white/5">
             #{pedido?.id?.substring(0, 8)}
@@ -435,21 +435,12 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     </div>
   );
 
-  return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent 
-        hideClose
-        className={cn(
-            "overflow-hidden !bg-white dark:!bg-gray-950 shadow-2xl animate-in duration-300 p-0 gap-0",
-            isMobile 
-              ? "max-h-[90vh] flex flex-col border-t border-gray-200 dark:border-gray-800 rounded-t-[2.5rem] slide-in-from-bottom"
-              : "w-[95vw] max-w-[1100px] h-[85vh] max-h-[700px] border border-gray-200 dark:border-gray-800 rounded-[2rem] [&>button]:hidden fade-in zoom-in-95"
-        )}
-        onKeyDown={handleModalKeyDown}
-      >
-        {isMobile ? (
-          <>
-          <DrawerHeader className="text-left border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-6 py-5 relative overflow-hidden">
+  // Mobile: Render as Drawer (bottom sheet) - Requirements: 5.5
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[90vh] overflow-hidden flex flex-col !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border-t border-white/20 rounded-t-[2.5rem] shadow-2xl animate-in slide-in-from-bottom duration-300">
+          <DrawerHeader className="text-left border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 px-6 py-5 backdrop-blur-md relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
             <div className="relative z-10">
               {headerContent}
@@ -459,17 +450,17 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           {/* Tabs com design refinado para mobile */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
             <div className="px-4 pt-4">
-              <TabsList className="flex-shrink-0 bg-gray-100 dark:bg-gray-900 p-1 rounded-2xl border border-gray-200 dark:border-gray-800 grid grid-cols-4 gap-1 shadow-inner h-12">
-                <TabsTrigger value="itens" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
+              <TabsList className="flex-shrink-0 bg-white/40 dark:bg-gray-950/40 backdrop-blur-xl p-1 rounded-2xl border border-white/20 dark:border-white/10 grid grid-cols-4 gap-1 shadow-inner h-12">
+                <TabsTrigger value="itens" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
                   <Package className="h-3.5 w-3.5 mr-1" />Itens
                 </TabsTrigger>
-                <TabsTrigger value="detalhes" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
+                <TabsTrigger value="detalhes" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
                   <FileText className="h-3.5 w-3.5 mr-1" />Info
                 </TabsTrigger>
-                <TabsTrigger value="resumo" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
+                <TabsTrigger value="resumo" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
                   <ClipboardList className="h-3.5 w-3.5 mr-1" />Resumo
                 </TabsTrigger>
-                <TabsTrigger value="exportar" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
+                <TabsTrigger value="exportar" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
                   <Download className="h-3.5 w-3.5 mr-1" />Export
                 </TabsTrigger>
               </TabsList>
@@ -479,15 +470,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             <TabsContent value="itens" className="flex-1 overflow-auto m-0 p-3 custom-scrollbar">
               <div className="space-y-3">
                 {/* Campos de Detalhes e Adicionar (Mobile) */}
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 border border-gray-100 dark:border-gray-800 space-y-3">
+                <div className="bg-white/40 dark:bg-gray-900/40 rounded-xl p-3 border border-white/20 dark:border-white/5 space-y-3 backdrop-blur-sm">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[8px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 pl-1">Fornecedor</Label>
                       <Select value={fornecedor} onValueChange={setFornecedor}>
-                        <SelectTrigger className="h-8 text-[10px] font-bold bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 rounded-lg shadow-sm">
+                        <SelectTrigger className="h-8 text-[10px] font-bold bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 rounded-lg shadow-sm">
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800">
+                        <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-white/20 dark:border-white/10">
                           {suppliers.map(s => <SelectItem key={s.id} value={s.id} className="text-xs font-bold">{s.name}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -498,13 +489,13 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         type="date" 
                         value={dataEntrega} 
                         onChange={e => setDataEntrega(e.target.value)} 
-                        className="h-8 text-[10px] font-bold bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 rounded-lg shadow-sm" 
+                        className="h-8 text-[10px] font-bold bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 rounded-lg shadow-sm" 
                       />
                     </div>
                   </div>
                   
                   {/* Formulário de Adição Rápida Mobile */}
-                  <div className="pt-2 border-t border-gray-100 dark:border-gray-800 space-y-2">
+                  <div className="pt-2 border-t border-white/10 space-y-2">
                     <Label className="text-[8px] font-black uppercase tracking-widest text-orange-500 pl-1">Adicionar Produto</Label>
                     <div className="relative group">
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
@@ -514,15 +505,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         value={newProductSearch}
                         onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
                         onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
-                        className="h-8 pl-8 text-[11px] bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-bold rounded-lg"
+                        className="h-8 pl-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-bold rounded-lg"
                       />
                       {filteredNewProducts.length > 0 && !newProduct && (
-                        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl max-h-32 overflow-auto">
+                        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-950 border border-white/10 rounded-lg shadow-xl max-h-32 overflow-auto">
                           {filteredNewProducts.map((p, idx) => (
                             <button
                               key={p.id}
                               onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
-                              className="w-full px-3 py-2 text-left text-[10px] font-bold border-b border-gray-100 dark:border-gray-800 last:border-none flex items-center justify-between gap-2"
+                              className="w-full px-3 py-2 text-left text-[10px] font-bold border-b border-white/5 last:border-none flex items-center justify-between gap-2"
                             >
                               <div className="flex flex-col min-w-0">
                                 <span>{p.name}</span>
@@ -557,7 +548,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         value={newQuantity}
                         onChange={(e) => setNewQuantity(e.target.value)}
                         onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
-                        className="col-span-2 h-8 text-[11px] bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-black text-center rounded-lg"
+                        className="col-span-2 h-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-black text-center rounded-lg"
                       />
                       <Input
                         ref={newPriceInputRef}
@@ -565,7 +556,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         value={newPrice}
                         onChange={(e) => setNewPrice(e.target.value)}
                         onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
-                        className="col-span-2 h-8 text-[11px] bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-black text-center rounded-lg"
+                        className="col-span-2 h-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-black text-center rounded-lg"
                       />
                       <Button onClick={handleAddNewItem} size="icon" className="h-8 w-8 bg-orange-600 rounded-lg shrink-0">
                         <Plus className="h-4 w-4" />
@@ -583,12 +574,12 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 
                 <div className="space-y-1 pb-4">
                   {itens.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400 dark:text-gray-500 border border-dashed border-gray-200 dark:border-gray-800 rounded-xl bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center">
+                    <div className="text-center py-8 text-gray-400 dark:text-gray-500 border border-dashed border-white/10 rounded-xl bg-white/5 flex flex-col items-center justify-center">
                       <Package className="h-6 w-6 opacity-20 mb-1" />
                       <p className="text-[8px] font-black uppercase tracking-widest opacity-50">Nenhum item</p>
                     </div>
                   ) : itens.map((item, index) => (
-                    <div key={index} className="p-1.5 bg-white dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <div key={index} className="p-1.5 bg-white/60 dark:bg-gray-900/40 rounded-lg border border-white/10 backdrop-blur-md shadow-sm">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] font-bold truncate text-gray-900 dark:text-white">{item.produto}</p>
@@ -609,7 +600,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 </div>
 
                 {/* Total Mobile */}
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-950 rounded-xl border border-emerald-100 dark:border-emerald-900 flex justify-between items-center shadow-sm">
+                <div className="p-3 bg-emerald-500/5 dark:bg-emerald-900/10 rounded-xl border border-emerald-500/20 backdrop-blur-md flex justify-between items-center shadow-sm">
                   <div className="flex flex-col">
                     <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-0.5">Total do Pedido</span>
                     <div className="flex items-baseline gap-1">
@@ -632,7 +623,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 <div className="space-y-1.5">
                   <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Fornecedor</Label>
                   <Select value={fornecedor} onValueChange={setFornecedor}>
-                    <SelectTrigger className="h-10 text-xs bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-bold rounded-xl">
+                    <SelectTrigger className="h-10 text-xs bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 font-bold rounded-xl">
                       <div className="flex items-center gap-2">
                         <Building2 className="h-3.5 w-3.5 text-orange-500" />
                         <SelectValue placeholder="Selecione o fornecedor" />
@@ -647,7 +638,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Data de Entrega</Label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
-                    <Input type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className="h-10 text-xs pl-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-bold rounded-xl" />
+                    <Input type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className="h-10 text-xs pl-9 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 font-bold rounded-xl" />
                   </div>
                 </div>
                 
@@ -662,7 +653,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           "px-3 py-2 rounded-xl text-[9px] uppercase tracking-widest font-black border transition-all min-h-[36px]",
                           status === opt.value 
                             ? `${opt.color} border-current ring-2 ring-current/10` 
-                            : "bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800"
+                            : "bg-white/40 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800"
                         )}
                       >
                         {opt.label}
@@ -677,7 +668,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     placeholder="Notas internas..."
                     value={observacoes}
                     onChange={e => setObservacoes(e.target.value)}
-                    className="min-h-[100px] resize-none text-xs bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-medium rounded-xl pt-2"
+                    className="min-h-[100px] resize-none text-xs bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 font-medium rounded-xl pt-2"
                   />
                 </div>
               </div>
@@ -688,28 +679,28 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               <div className="space-y-6">
                 {/* Cards de resumo mobile semiglass */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-orange-50 dark:bg-orange-950 rounded-[1.5rem] p-4 border border-orange-100 dark:border-orange-900 shadow-sm">
+                  <div className="bg-orange-500/5 dark:bg-orange-900/10 rounded-[1.5rem] p-4 border border-orange-500/20 dark:border-orange-800/30 backdrop-blur-md shadow-sm">
                     <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 mb-2">
                       <Building2 className="h-3.5 w-3.5" />
                       <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Fornecedor</span>
                     </div>
                     <p className="font-black text-xs truncate text-gray-900 dark:text-white">{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
                   </div>
-                  <div className="bg-blue-50 dark:bg-blue-950 rounded-[1.5rem] p-4 border border-blue-100 dark:border-blue-900 shadow-sm">
+                  <div className="bg-blue-500/5 dark:bg-blue-900/10 rounded-[1.5rem] p-4 border border-blue-500/20 dark:border-blue-800/30 backdrop-blur-md shadow-sm">
                     <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-2">
                       <Calendar className="h-3.5 w-3.5" />
                       <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Entrega</span>
                     </div>
                     <p className="font-black text-xs text-gray-900 dark:text-white">{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
                   </div>
-                  <div className="bg-purple-50 dark:bg-purple-950 rounded-[1.5rem] p-4 border border-purple-100 dark:border-purple-900 shadow-sm">
+                  <div className="bg-purple-500/5 dark:bg-purple-900/10 rounded-[1.5rem] p-4 border border-purple-500/20 dark:border-purple-800/30 backdrop-blur-md shadow-sm">
                     <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2">
                       <Package className="h-3.5 w-3.5" />
                       <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Itens</span>
                     </div>
                     <p className="font-black text-xs text-gray-900 dark:text-white">{itens.length} produto(s)</p>
                   </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-950 rounded-[1.5rem] p-4 border border-emerald-100 dark:border-emerald-900 shadow-sm">
+                  <div className="bg-emerald-500/5 dark:bg-emerald-900/10 rounded-[1.5rem] p-4 border border-emerald-500/20 dark:border-emerald-800/30 backdrop-blur-md shadow-sm">
                     <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-2">
                       <DollarSign className="h-3.5 w-3.5" />
                       <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Total</span>
@@ -719,7 +710,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 </div>
 
                 {/* Status atual mobile */}
-                <div className="flex flex-col items-center justify-center gap-3 py-4 bg-gray-50 dark:bg-gray-900 rounded-[1.5rem] border border-gray-100 dark:border-gray-800">
+                <div className="flex flex-col items-center justify-center gap-3 py-4 bg-white/30 dark:bg-black/20 rounded-[1.5rem] border border-white/20">
                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Status do Pedido</span>
                   <div className="transform scale-110">
                     {getStatusBadge(status || pedido?.status || 'pendente')}
@@ -733,7 +724,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       <FileText className="h-3.5 w-3.5 text-orange-500" />
                       <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Observações</span>
                     </div>
-                    <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 border border-gray-100 dark:border-gray-800">
+                    <div className="bg-white/40 dark:bg-gray-900/40 rounded-2xl p-4 border border-white/20 backdrop-blur-md">
                       <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-medium leading-relaxed">{observacoes}</p>
                     </div>
                   </div>
@@ -754,16 +745,26 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             </TabsContent>
           </Tabs>
 
-          <DrawerFooter className="border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-4 py-3">
+          <DrawerFooter className="border-t border-white/10 dark:border-white/5 bg-white/20 dark:bg-gray-900/20 px-4 py-3 backdrop-blur-md">
             {footerContent}
           </DrawerFooter>
-          </>
-        ) : (
-          <>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // Desktop: Render as Dialog (centered modal)
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        hideClose
+        className="w-[95vw] max-w-[1100px] h-[85vh] max-h-[700px] overflow-hidden p-0 gap-0 !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-[2rem] [&>button]:hidden animate-in fade-in zoom-in-95 duration-300"
+        onKeyDown={handleModalKeyDown}
+      >
         {/* Tabs com design refinado */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           {/* Header compacto com semiglass e Tabs integradas */}
-          <div className="flex-shrink-0 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
+          <div className="flex-shrink-0 border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 backdrop-blur-md relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
             
             {/* Top Bar: Título, Tabs e Botão Fechar */}
@@ -774,9 +775,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <div className="w-8 h-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-lg ring-1 ring-white/20">
                     <ShoppingCart className="h-4 w-4" />
                   </div>
-                  <ResponsiveDialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
+                  <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
                     Gerenciar Pedido
-                  </ResponsiveDialogTitle>
+                  </DialogTitle>
                 </div>
 
                 {/* Tabs List Integrada na mesma linha */}
@@ -816,21 +817,21 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
           {/* Tab: Itens (Edição) */}
           <TabsContent value="itens" className="flex-1 overflow-hidden m-0 p-0 flex flex-col">
-            <div className="flex-1 flex gap-0 overflow-hidden divide-x divide-gray-100 dark:divide-gray-800">
+            <div className="flex-1 flex gap-0 overflow-hidden divide-x divide-white/10">
               {/* Coluna Esquerda: Fornecedor e Adicionar Produto */}
-              <div className="w-[280px] flex-shrink-0 flex flex-col bg-gray-50 dark:bg-gray-900 overflow-y-auto custom-scrollbar p-3 gap-3">
+              <div className="w-[280px] flex-shrink-0 flex flex-col bg-white/30 dark:bg-black/5 overflow-y-auto custom-scrollbar p-3 gap-3">
                   <div className="space-y-3">
                     {/* Fornecedor */}
                     <div className="space-y-1">
                       <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Fornecedor</Label>
                       <Select value={fornecedor} onValueChange={setFornecedor}>
-                        <SelectTrigger className="h-8 text-[11px] bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-bold rounded-lg shadow-sm focus:ring-orange-500/20 transition-all">
+                        <SelectTrigger className="h-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-bold rounded-lg shadow-sm focus:ring-orange-500/20 transition-all">
                           <div className="flex items-center gap-2">
                             <Building2 className="h-3.5 w-3.5 text-orange-500" />
                             <SelectValue placeholder="Selecione" />
                           </div>
                         </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl">
+                        <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-white/20 dark:border-white/10 rounded-xl shadow-2xl">
                           {suppliers.map(s => <SelectItem key={s.id} value={s.id} className="font-bold py-1.5 px-3 text-[11px]">{s.name}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -844,13 +845,13 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           type="date" 
                           value={dataEntrega} 
                           onChange={e => setDataEntrega(e.target.value)} 
-                          className="h-8 text-[11px] pl-8 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-bold rounded-lg shadow-sm focus:ring-orange-500/20 transition-all" 
+                          className="h-8 text-[11px] pl-8 bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-bold rounded-lg shadow-sm focus:ring-orange-500/20 transition-all" 
                         />
                       </div>
                     </div>
 
                     {/* Formulário de Adicionar Produto */}
-                    <div className="space-y-1 bg-white dark:bg-gray-800 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div className="space-y-1 bg-white/40 dark:bg-gray-900/40 p-2.5 rounded-xl border border-white/20 dark:border-white/5 shadow-sm">
                       <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1 text-orange-500">Adicionar Produto</Label>
                       
                       {/* Product Search */}
@@ -863,18 +864,18 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
                           onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
                           onFocus={() => setHighlightedIndex(-1)}
-                          className="h-8 pl-8 text-[11px] bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-bold rounded-lg focus:ring-orange-500/20 shadow-sm"
+                          className="h-8 pl-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-bold rounded-lg focus:ring-orange-500/20 shadow-sm"
                         />
                         {/* Dropdown */}
                         {filteredNewProducts.length > 0 && !newProduct && (
-                          <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl max-h-48 overflow-auto custom-scrollbar animate-in fade-in slide-in-from-top-1">
+                          <div className="absolute z-50 w-full mt-1 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-xl shadow-xl max-h-48 overflow-auto custom-scrollbar animate-in fade-in slide-in-from-top-1">
                             {filteredNewProducts.map((p, idx) => (
                               <button
                                 key={p.id}
                                 onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
                                 onMouseEnter={() => setHighlightedIndex(idx)}
                                 className={cn(
-                                  "w-full px-3 py-1.5 text-left text-[10px] flex items-center gap-2 transition-all border-b border-gray-100 dark:border-gray-800 last:border-none group/btn",
+                                  "w-full px-3 py-1.5 text-left text-[10px] flex items-center gap-2 transition-all border-b border-white/5 last:border-none group/btn",
                                   idx === highlightedIndex ? "bg-orange-500/10 text-orange-600 dark:text-orange-400" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
                                 )}
                               >
@@ -898,7 +899,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                              value={newQuantity}
                              onChange={(e) => setNewQuantity(e.target.value)}
                              onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
-                             className="h-8 text-[11px] bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-black text-center rounded-lg shadow-sm"
+                             className="h-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-black text-center rounded-lg shadow-sm"
                            />
                         </div>
                         <div className="space-y-0.5">
@@ -911,7 +912,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                value={newPrice}
                                onChange={(e) => setNewPrice(e.target.value)}
                                onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
-                               className="h-8 pl-6 text-[11px] bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-black rounded-lg shadow-sm"
+                               className="h-8 pl-6 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-black rounded-lg shadow-sm"
                              />
                            </div>
                         </div>
@@ -936,14 +937,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       placeholder="Adicione notas..."
                       value={observacoes}
                       onChange={e => setObservacoes(e.target.value)}
-                      className="flex-1 w-full min-h-[60px] resize-none text-[11px] bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 font-medium rounded-lg focus:ring-orange-500/20 transition-all shadow-sm p-2"
+                      className="flex-1 w-full min-h-[60px] resize-none text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-medium rounded-lg focus:ring-orange-500/20 transition-all shadow-sm p-2"
                     />
                   </div>
               </div>
 
               {/* Coluna Direita: Lista de Itens (Ocupa mais espaço) */}
-              <div className="flex-1 flex flex-col bg-white dark:bg-gray-950 overflow-hidden relative">
-                 <div className="flex-shrink-0 px-3 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex-1 flex flex-col bg-white/20 dark:bg-gray-950/20 overflow-hidden relative">
+                 <div className="flex-shrink-0 px-3 py-2 bg-white/40 dark:bg-white/5 border-b border-white/10 backdrop-blur-md">
                   <div className="flex items-center gap-2">
                     <span className="text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest">Itens do Pedido</span>
                     <Badge variant="outline" className="h-3.5 px-1 text-[7px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 rounded">
@@ -962,7 +963,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     ) : (
                       <div className="space-y-0.5">
                         {itens.map((item, index) => (
-                          <div key={index} className="flex items-center gap-1 p-0.5 bg-white dark:bg-gray-900 rounded border border-gray-100 dark:border-gray-800 hover:border-orange-500/20 transition-all group relative">
+                          <div key={index} className="flex items-center gap-1 p-0.5 bg-white/80 dark:bg-gray-900/80 rounded border border-white/10 dark:border-white/5 hover:border-orange-500/20 transition-all group relative">
                             <div className="flex-1 grid grid-cols-12 gap-1 items-center">
                               {/* Produto */}
                               <div className="col-span-5 relative">
@@ -977,10 +978,10 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                   }}
                                   onFocus={() => setActiveSearchIndex(index)}
                                   onKeyDown={e => handleItemKeyDown(e, index, 'produto')}
-                                  className="h-5 text-[10px] bg-transparent border-transparent focus:bg-gray-50 dark:focus:bg-gray-800 font-bold rounded px-1 shadow-none focus:border-gray-200 dark:focus:border-gray-700"
+                                  className="h-5 text-[10px] bg-transparent border-transparent focus:bg-white/50 dark:focus:bg-gray-950/50 font-bold rounded px-1 shadow-none focus:border-white/10"
                                 />
                                 {activeSearchIndex === index && productSearch && filteredProducts.length > 0 && (
-                                  <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded shadow-xl max-h-40 overflow-auto custom-scrollbar">
+                                  <div className="absolute z-50 w-full mt-1 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded shadow-xl max-h-40 overflow-auto custom-scrollbar">
                                     {filteredProducts.map((p) => (
                                       <button 
                                         key={p.id} 
@@ -991,7 +992,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                           setActiveSearchIndex(null);
                                           setTimeout(() => quantityInputRefs.current[index]?.focus(), 50);
                                         }}
-                                        className="w-full px-2 py-1.5 text-left text-[9px] hover:bg-orange-500/10 text-gray-900 dark:text-white flex items-center justify-between gap-1 transition-all font-bold border-b border-gray-100 dark:border-gray-800 last:border-none"
+                                        className="w-full px-2 py-1.5 text-left text-[9px] hover:bg-orange-500/10 text-gray-900 dark:text-white flex items-center justify-between gap-1 transition-all font-bold border-b border-gray-100 dark:border-white/5 last:border-none"
                                       >
                                         <div className="flex flex-col min-w-0">
                                           <span>{p.name}</span>
@@ -1027,11 +1028,11 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                   value={item.quantidade || ''} 
                                   onChange={e => handleItemChange(index, 'quantidade', parseFloat(e.target.value) || 0)} 
                                   onKeyDown={e => handleItemKeyDown(e, index, 'quantidade')}
-                                  className="h-5 text-[10px] bg-transparent border-transparent focus:bg-gray-50 dark:focus:bg-gray-800 font-black rounded text-center px-0.5 shadow-none" 
+                                  className="h-5 text-[10px] bg-transparent border-transparent focus:bg-white/50 dark:focus:bg-gray-950/50 font-black rounded text-center px-0.5 shadow-none" 
                                 />
                                 <Select value={item.unidade} onValueChange={v => handleItemChange(index, 'unidade', v)}>
-                                  <SelectTrigger className="h-5 w-10 text-[8px] bg-transparent border-transparent focus:bg-gray-50 dark:focus:bg-gray-800 font-black rounded uppercase px-0.5 shadow-none"><SelectValue /></SelectTrigger>
-                                  <SelectContent className="bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 rounded">
+                                  <SelectTrigger className="h-5 w-10 text-[8px] bg-transparent border-transparent focus:bg-white/50 dark:focus:bg-gray-950/50 font-black rounded uppercase px-0.5 shadow-none"><SelectValue /></SelectTrigger>
+                                  <SelectContent className="bg-white/95 dark:bg-gray-950/95 border-white/20 rounded">
                                     {["un", "kg", "cx", "pc", "L", "dz", "pct", "g", "ml"].map(u => (
                                       <SelectItem key={u} value={u} className="font-black uppercase text-[9px]">{u}</SelectItem>
                                     ))}
@@ -1049,7 +1050,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                   value={item.valorUnitario || ''} 
                                   onChange={e => handleItemChange(index, 'valorUnitario', parseFloat(e.target.value) || 0)} 
                                   onKeyDown={e => handleItemKeyDown(e, index, 'preco')}
-                                  className="h-5 pl-4 text-[10px] bg-transparent border-transparent focus:bg-gray-50 dark:focus:bg-gray-800 font-black rounded shadow-none" 
+                                  className="h-5 pl-4 text-[10px] bg-transparent border-transparent focus:bg-white/50 dark:focus:bg-gray-950/50 font-black rounded shadow-none" 
                                 />
                               </div>
 
@@ -1080,7 +1081,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 </ScrollArea>
 
                 {/* Total Footer Ultra Compacto */}
-                <div className="flex-shrink-0 px-3 py-1 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex-shrink-0 px-3 py-1 bg-white/40 dark:bg-black/20 border-t border-white/10 backdrop-blur-md">
                   <div className="flex items-center justify-between">
                     <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Total</span>
                     <div className="flex items-baseline gap-0.5">
@@ -1101,28 +1102,28 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               <div className="p-4 space-y-4 pb-16 pt-2">
                 {/* Cards de resumo com design semiglass */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div className="bg-orange-50 dark:bg-orange-950 rounded-xl p-3 border border-orange-100 dark:border-orange-900 shadow-sm">
+                <div className="bg-orange-500/5 dark:bg-orange-900/10 rounded-xl p-3 border border-orange-500/20 dark:border-orange-800/30 backdrop-blur-md shadow-sm">
                   <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 mb-1">
                     <Building2 className="h-3 w-3" />
                     <span className="text-[8px] font-black uppercase tracking-widest opacity-70">Fornecedor</span>
                   </div>
                   <p className="font-black text-[10px] truncate text-gray-900 dark:text-white">{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-950 rounded-xl p-3 border border-blue-100 dark:border-blue-900 shadow-sm">
+                <div className="bg-blue-500/5 dark:bg-blue-900/10 rounded-xl p-3 border border-blue-500/20 dark:border-blue-800/30 backdrop-blur-md shadow-sm">
                   <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 mb-1">
                     <Calendar className="h-3 w-3" />
                     <span className="text-[8px] font-black uppercase tracking-widest opacity-70">Entrega</span>
                   </div>
                   <p className="font-black text-[10px] text-gray-900 dark:text-white">{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
                 </div>
-                <div className="bg-purple-50 dark:bg-purple-950 rounded-xl p-3 border border-purple-100 dark:border-purple-900 shadow-sm">
+                <div className="bg-purple-500/5 dark:bg-purple-900/10 rounded-xl p-3 border border-purple-500/20 dark:border-purple-800/30 backdrop-blur-md shadow-sm">
                   <div className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 mb-1">
                     <Package className="h-3 w-3" />
                     <span className="text-[8px] font-black uppercase tracking-widest opacity-70">Itens</span>
                   </div>
                   <p className="font-black text-[10px] text-gray-900 dark:text-white">{itens.length} produto(s)</p>
                 </div>
-                <div className="bg-emerald-50 dark:bg-emerald-950 rounded-xl p-3 border border-emerald-100 dark:border-emerald-900 shadow-sm">
+                <div className="bg-emerald-500/5 dark:bg-emerald-900/10 rounded-xl p-3 border border-emerald-500/20 dark:border-emerald-800/30 backdrop-blur-md shadow-sm">
                   <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 mb-1">
                     <DollarSign className="h-3 w-3" />
                     <span className="text-[8px] font-black uppercase tracking-widest opacity-70">Total</span>
@@ -1137,15 +1138,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <ClipboardList className="h-3.5 w-3.5 text-orange-500" />
                   <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Detalhamento de Itens</span>
                 </div>
-                <div className="bg-white dark:bg-gray-950 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-                  <div className="max-h-[300px] overflow-auto custom-scrollbar divide-y divide-gray-100 dark:divide-gray-800">
+                <div className="bg-white/40 dark:bg-gray-950/40 rounded-xl border border-gray-100 dark:border-gray-800/50 overflow-hidden backdrop-blur-xl shadow-sm">
+                  <div className="max-h-[300px] overflow-auto custom-scrollbar divide-y divide-gray-100 dark:divide-gray-800/50">
                     {itens.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-8 gap-2 opacity-30">
                         <Package className="h-8 w-8" />
                         <p className="text-[10px] font-black uppercase tracking-widest">Nenhum item</p>
                       </div>
                     ) : itens.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all group">
+                      <div key={index} className="flex items-center justify-between px-3 py-2 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all group">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           <div className="w-6 h-6 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0 border border-orange-500/10">
                             <Package className="h-3 w-3 text-orange-500" />
@@ -1174,14 +1175,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     <FileText className="h-3.5 w-3.5 text-orange-500" />
                     <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Notas do Pedido</span>
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 border border-gray-100 dark:border-gray-800 shadow-sm">
+                  <div className="bg-white/40 dark:bg-gray-900/40 rounded-xl p-3 border border-gray-100 dark:border-gray-800/50 backdrop-blur-md shadow-sm">
                     <p className="text-[10px] text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-medium leading-relaxed">{observacoes}</p>
                   </div>
                 </div>
               )}
 
               {/* Status atual centralizado */}
-              <div className="flex flex-col items-center justify-center gap-2 py-3 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex flex-col items-center justify-center gap-2 py-3 border-t border-gray-100 dark:border-gray-800/50">
                 <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Status do Pedido</span>
                 <div className="transform scale-90">
                   {getStatusBadge(status || pedido?.status || 'pendente')}
@@ -1205,14 +1206,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         </Tabs>
 
         {/* Footer Compacto */}
-        <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 relative overflow-hidden flex items-center justify-end gap-2">
+        <div className="flex-shrink-0 px-4 py-3 border-t border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl relative overflow-hidden flex items-center justify-end gap-2">
           <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none"></div>
           
           <Button 
             variant="outline" 
             onClick={() => onOpenChange(false)} 
             disabled={loading} 
-            className="h-8 px-4 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 font-black text-[9px] uppercase tracking-widest rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all shadow-sm relative z-10"
+            className="h-8 px-4 border-white/30 dark:border-white/10 bg-white/5 dark:bg-white/5 font-black text-[9px] uppercase tracking-widest rounded-lg hover:bg-white/10 transition-all shadow-sm relative z-10"
           >
             Cancelar
           </Button>
@@ -1226,9 +1227,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             Salvar
           </Button>
         </div>
-          </>
-        )}
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

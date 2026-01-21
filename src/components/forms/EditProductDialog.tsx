@@ -3,7 +3,18 @@ import { useState, useEffect, memo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Form,
@@ -279,7 +290,7 @@ function EditProductDialogInternal({
       {/* Product Image Preview */}
       {(currentProduct?.image_url || newImageUrl) && (
             <div className="flex flex-col items-center gap-3 pb-2">
-              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-md relative group bg-gray-50 dark:bg-gray-900">
+              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-md relative group bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm">
                 {isUploadingImage ? (
                   <div className="w-full h-full bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center">
                     <Loader2 className="h-8 w-8 text-orange-600 animate-spin" />
@@ -353,7 +364,7 @@ function EditProductDialogInternal({
                   <FormControl>
                     <Input 
                       placeholder="Ex: Coxa com Sobrecoxa"
-                      className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
+                      className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
                       {...field}
                     />
                   </FormControl>
@@ -406,11 +417,11 @@ function EditProductDialogInternal({
                   <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Unidade de Medida *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
+                      <SelectTrigger className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
                         <SelectValue placeholder="Selecione a unidade" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
+                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
                       <SelectItem value="un">Unidade (un)</SelectItem>
                       <SelectItem value="kg">Quilograma (kg)</SelectItem>
                       <SelectItem value="g">Grama (g)</SelectItem>
@@ -439,7 +450,7 @@ function EditProductDialogInternal({
                       <Input 
                         {...field} 
                         placeholder="EAN-13, EAN-8, UPC..."
-                        className="pr-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
+                        className="pr-10 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
                         maxLength={13}
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -474,38 +485,33 @@ function EditProductDialogInternal({
     </div>
   );
 
-  return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent 
-        hideClose 
-        className="w-[90vw] sm:w-[90vw] md:max-w-[520px] h-[90vh] sm:h-[85vh] max-h-[90vh] sm:max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl rounded-t-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
-      >
-        <ResponsiveDialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg sm:shadow-none">
-                <Package className="h-5 w-5 sm:h-4 sm:w-4" />
+  // Mobile: Usar Drawer (bottom sheet)
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
+          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                  <Package className="h-5 w-5" />
+                </div>
+                <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                  {isLoading ? 'Carregando...' : 'Editar Produto'}
+                </DrawerTitle>
               </div>
-              <ResponsiveDialogTitle className="text-lg sm:text-base font-bold sm:font-semibold text-gray-900 dark:text-white truncate">
-                {isLoading ? 'Carregando...' : 'Editar Produto'}
-              </ResponsiveDialogTitle>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size={isMobile ? "sm" : "icon"}
-              onClick={() => onOpenChange(false)}
-              className={isMobile 
-                ? "h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                : "h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              }
-            >
-              <X className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
-              {!isMobile && <span className="sr-only">Fechar</span>}
-            </Button>
-          </div>
-        </ResponsiveDialogHeader>
-        <div className="flex flex-col flex-1 overflow-hidden">
+          </DrawerHeader>
+          <div className="flex flex-col flex-1 overflow-hidden">
             {isLoading ? (
               <div className="flex items-center justify-center py-12 flex-1">
                 <Loader2 className="h-8 w-8 animate-spin text-orange-600 dark:text-orange-400" />
@@ -513,9 +519,41 @@ function EditProductDialogInternal({
             ) : (
               formContent
             )}
-        </div>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // Desktop: Usar Dialog
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
+                <Package className="h-4 w-4" />
+              </div>
+              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+                Editar Produto
+              </DialogTitle>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange(false)}
+              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Fechar</span>
+            </Button>
+          </div>
+        </DialogHeader>
+        {formContent}
+      </DialogContent>
+    </Dialog>
   );
 }
 

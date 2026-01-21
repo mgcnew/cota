@@ -20,7 +20,6 @@ export function useUserProfile() {
   const { data: profile, isLoading } = useQuery({
     queryKey: ["user-profile", user?.id],
     enabled: Boolean(user?.id),
-    staleTime: 30 * 60 * 1000, // 30 minutos
     queryFn: async (): Promise<UserProfile | null> => {
       if (!user?.id) return null;
 

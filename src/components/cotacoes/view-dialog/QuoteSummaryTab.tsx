@@ -78,10 +78,10 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   }, [productPricesData, searchQuery, sortBy, safeStr]);
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="h-full flex flex-col bg-gray-50/50 dark:bg-gray-900/20">
       {/* Top 3 Fornecedores Destaque */}
       {topSuppliers.length > 0 && (
-        <div className="p-3 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+        <div className="p-3 bg-white/40 dark:bg-gray-950/40 border-b border-gray-200/60 dark:border-gray-700/40 backdrop-blur-md">
           <div className="flex items-center gap-2 mb-2">
             <Trophy className="h-3 w-3 text-emerald-600" />
             <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Ranking de Economia</span>
@@ -93,7 +93,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                 className={cn(
                   "flex-1 p-2 rounded-xl border relative overflow-hidden group/top transition-all duration-300",
                   idx === 0 
-                    ? "bg-emerald-50 dark:bg-emerald-950 border-emerald-500/20 ring-1 ring-emerald-500/10 shadow-lg shadow-emerald-500/5" 
+                    ? "bg-emerald-500/5 border-emerald-500/20 ring-1 ring-emerald-500/10 shadow-lg shadow-emerald-500/5" 
                     : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800"
                 )}
               >
@@ -119,7 +119,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       )}
 
       {/* Header com Filtros */}
-      <div className="flex-shrink-0 p-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 z-10">
+      <div className="flex-shrink-0 p-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10">
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
@@ -157,7 +157,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       {/* Lista Compacta - Estilo Grid (Igual ao Valores/Pedido) */}
       <div className="flex-1 overflow-auto custom-scrollbar">
         {/* Header da Tabela (Fixo) */}
-        <div className="grid grid-cols-[1.5fr_0.8fr_1.5fr_auto] gap-2 px-3 py-1.5 border-b border-gray-200 dark:border-gray-800 text-[8px] font-black uppercase text-gray-500 tracking-[0.2em] bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
+        <div className="grid grid-cols-[1.5fr_0.8fr_1.5fr_auto] gap-2 px-3 py-1.5 border-b border-gray-200/60 dark:border-gray-700/40 text-[8px] font-black uppercase text-gray-500 tracking-[0.2em] bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
            <div>Produto</div>
            <div className="hidden sm:block">Qtd</div>
            <div>Melhor Fornecedor</div>

@@ -497,13 +497,13 @@ export function QuoteValuesTab({
     <div className="flex flex-col md:flex-row h-full relative">
       {/* Lista de Fornecedores - Sidebar */}
       <div className={cn(
-        "w-full md:w-48 xl:w-56 flex-col border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 transition-all duration-300 z-20",
+        "w-full md:w-48 xl:w-56 flex-col border-r border-gray-200/60 dark:border-gray-700/40 bg-white/30 dark:bg-black/20 backdrop-blur-2xl transition-all duration-300 z-20",
         isMobile && showMobileValues ? "hidden" : "flex"
       )}>
         <div className="absolute inset-0 bg-gradient-to-b from-gray-500/5 to-transparent pointer-events-none"></div>
         
         {/* Header da Sidebar com Busca */}
-        <div className="p-2 border-b border-gray-200 dark:border-gray-800 relative z-10 space-y-2">
+        <div className="p-2 border-b border-gray-200/60 dark:border-gray-700/40 relative z-10 space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 border border-gray-200 dark:border-gray-700 shadow-sm">
               <Building2 className="h-2.5 w-2.5" />
@@ -516,7 +516,7 @@ export function QuoteValuesTab({
               placeholder="Buscar..." 
               value={supplierSearch}
               onChange={e => setSupplierSearch(e.target.value)}
-              className="h-7 pl-7 text-[10px] bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-lg focus-visible:ring-1 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-600" 
+              className="h-7 pl-7 text-[10px] bg-white/50 dark:bg-black/20 border-gray-200/60 dark:border-gray-700/40 rounded-lg focus-visible:ring-1 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-600" 
             />
           </div>
         </div>
@@ -539,8 +539,8 @@ export function QuoteValuesTab({
                     className={cn(
                       "w-full text-left p-2 rounded-lg transition-all duration-300 relative overflow-hidden group/supplier",
                       isSelected 
-                        ? "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg shadow-gray-500/5 ring-1 ring-white/20" 
-                        : "hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent"
+                        ? "bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 shadow-lg shadow-gray-500/5 ring-1 ring-white/20" 
+                        : "hover:bg-white/30 dark:hover:bg-white/5 border border-transparent"
                     )}
                   >
                     {isSelected && (
@@ -590,14 +590,14 @@ export function QuoteValuesTab({
 
       {/* Área de Edição de Valores */}
       <div className={cn(
-        "flex-1 flex-col bg-white dark:bg-gray-900 relative overflow-hidden z-10",
+        "flex-1 flex-col bg-white/10 dark:bg-black/10 relative overflow-hidden z-10",
         isMobile && !showMobileValues ? "hidden" : "flex"
       )}>
         <div className="absolute inset-0 bg-gradient-to-br from-gray-500/5 via-transparent to-gray-500/5 pointer-events-none"></div>
         
         {/* Mobile Back Header */}
         {isMobile && (
-          <div className="flex items-center gap-2 p-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+          <div className="flex items-center gap-2 p-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowMobileValues(false)}>
                <ArrowLeft className="h-4 w-4" />
              </Button>
@@ -608,7 +608,7 @@ export function QuoteValuesTab({
         {selectedSupplier ? (
           <>
             {/* Header do Fornecedor */}
-            <div className="flex-shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 flex items-center justify-between gap-3 relative z-10">
+            <div className="flex-shrink-0 px-3 py-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-white/5 backdrop-blur-md flex items-center justify-between gap-3 relative z-10">
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm">
                   <DollarSign className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" />
@@ -634,7 +634,7 @@ export function QuoteValuesTab({
             
             {/* Lista Virtualizada de Produtos */}
             <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
-              <div className="grid grid-cols-[1.5fr_0.8fr_1.2fr_auto] gap-2 px-3 py-1.5 border-b border-gray-200 dark:border-gray-800 text-[8px] font-black uppercase text-gray-500 tracking-[0.2em] bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+              <div className="grid grid-cols-[1.5fr_0.8fr_1.2fr_auto] gap-2 px-3 py-1.5 border-b border-gray-200/60 dark:border-gray-700/40 text-[8px] font-black uppercase text-gray-500 tracking-[0.2em] bg-white/20 dark:bg-black/20 backdrop-blur-sm flex-shrink-0">
                  <div>Produto</div>
                  <div className="hidden sm:block">Qtd</div>
                  <div>Valor</div>
@@ -662,7 +662,7 @@ export function QuoteValuesTab({
         ) : (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center animate-in fade-in zoom-in-95 duration-700 max-w-sm">
-              <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center mx-auto mb-3 shadow-xl group hover:scale-110 transition-transform">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-500/10 to-gray-800/10 border border-gray-200/60 dark:border-gray-700/40 flex items-center justify-center mx-auto mb-3 backdrop-blur-md shadow-xl group hover:scale-110 transition-transform">
                 <Building2 className="h-8 w-8 text-gray-400 opacity-40 group-hover:opacity-100 transition-opacity" />
               </div>
               <p className="text-base font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">Selecione um fornecedor</p>

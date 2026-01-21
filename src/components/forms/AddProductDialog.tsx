@@ -5,7 +5,20 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogTrigger } from "@/components/ui/responsive-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -540,9 +553,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                   <FormControl>
                     <Input
                       placeholder="Ex: Coxa com Sobrecoxa Congelada"
-                      className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field}
-                      autoFocus
                     />
                   </FormControl>
                   <FormMessage />
@@ -575,11 +587,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                   <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Unidade de Medida *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white`}>
+                      <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white`}>
                         <SelectValue placeholder="Selecione a unidade" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
+                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
                       <SelectItem value="un">Unidade (un)</SelectItem>
                       <SelectItem value="kg">Quilograma (kg)</SelectItem>
                       <SelectItem value="g">Grama (g)</SelectItem>
@@ -608,7 +620,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                       <Input 
                         {...field} 
                         placeholder="EAN-13, EAN-8, UPC..."
-                        className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} bg-white dark:bg-gray-900 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         maxLength={13}
                       />
                       <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${isMobile ? 'right-4' : ''}`}>
@@ -629,7 +641,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               Foto do Produto
             </h3>
             
-            <div className={`space-y-4 ${isMobile ? 'p-3' : 'p-4'} border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900`}>
+            <div className={`space-y-4 ${isMobile ? 'p-3' : 'p-4'} border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm`}>
               <div className="flex items-center justify-between">
                 <Label className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Imagem (Opcional)</Label>
                 {productImage && (
@@ -747,7 +759,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         </div>
 
         {/* Footer com botões */}
-        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800`}>
+        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm`}>
           <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2 justify-end'}`}>
             <Button
               type="button"
@@ -798,45 +810,80 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     }
   };
 
+  // Mobile: Usar Drawer (bottom sheet)
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        {trigger && (
+          <DrawerTrigger asChild>
+            {trigger}
+          </DrawerTrigger>
+        )}
+        <DrawerContent className="h-[90vh] max-h-[90vh] overflow-hidden flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
+          <DrawerHeader className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                  <Package className="h-4 w-4" />
+                </div>
+                <DrawerTitle className="text-base font-bold text-gray-900 dark:text-white truncate">
+                  Novo Produto
+                </DrawerTitle>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => handleOpenChange(false)}
+                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </DrawerHeader>
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {formContent}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // Desktop: Usar Dialog
   return (
-    <ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={handleSetOpen}>
       {trigger && (
-        <ResponsiveDialogTrigger asChild>
+        <DialogTrigger asChild>
           {trigger}
-        </ResponsiveDialogTrigger>
+        </DialogTrigger>
       )}
-      <ResponsiveDialogContent 
-        className="w-[95vw] sm:w-[90vw] md:max-w-[520px] max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
-      >
-        <ResponsiveDialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
+      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-xl sm:rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg sm:shadow-none">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
                 <Package className="h-4 w-4" />
               </div>
-              <ResponsiveDialogTitle className="text-base sm:text-lg font-bold sm:font-semibold text-gray-900 dark:text-white truncate">
+              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                 Novo Produto
-              </ResponsiveDialogTitle>
+              </DialogTitle>
             </div>
             <Button
               type="button"
               variant="ghost"
-              size={isMobile ? "sm" : "icon"}
+              size="icon"
               onClick={() => handleOpenChange(false)}
-              className={isMobile 
-                ? "h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                : "h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              }
+              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
-              <X className={isMobile ? "h-5 w-5" : "h-4 w-4"} />
-              {!isMobile && <span className="sr-only">Fechar</span>}
+              <X className="h-4 w-4" />
+              <span className="sr-only">Fechar</span>
             </Button>
           </div>
-        </ResponsiveDialogHeader>
+        </DialogHeader>
         <div className="flex flex-col flex-1 overflow-hidden">
           {formContent}
         </div>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

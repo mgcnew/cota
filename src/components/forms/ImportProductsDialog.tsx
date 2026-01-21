@@ -1,6 +1,14 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogFooter, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogTrigger } from "@/components/ui/responsive-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { 
   Upload, 
   FileSpreadsheet, 
@@ -337,26 +345,26 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded, trig
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={handleSetOpen}>
+    <Dialog open={open} onOpenChange={handleSetOpen}>
       {trigger && (
-        <ResponsiveDialogTrigger asChild>
+        <DialogTrigger asChild>
           {trigger}
-        </ResponsiveDialogTrigger>
+        </DialogTrigger>
       )}
-      <ResponsiveDialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-t-xl sm:rounded-xl p-0 overflow-hidden bg-white dark:bg-gray-950">
-        <ResponsiveDialogHeader className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
+      <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-xl p-0 overflow-hidden">
+        <DialogHeader className="px-5 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
               <FileSpreadsheet className="h-5 w-5" />
             </div>
             <div>
-              <ResponsiveDialogTitle className="text-lg font-bold text-gray-900 dark:text-white">Importar Produtos</ResponsiveDialogTitle>
-              <ResponsiveDialogDescription className="text-sm text-gray-500 dark:text-gray-400">
+              <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">Importar Produtos</DialogTitle>
+              <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
                 Importe múltiplos produtos usando arquivos CSV ou Excel
-              </ResponsiveDialogDescription>
+              </DialogDescription>
             </div>
           </div>
-        </ResponsiveDialogHeader>
+        </DialogHeader>
 
         <div className="p-5 space-y-4 overflow-y-auto max-h-[calc(85vh-120px)]">
           {/* Download Template */}
@@ -519,7 +527,7 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded, trig
           </Card>
         </div>
 
-        <ResponsiveDialogFooter className="flex-col sm:flex-row gap-4 px-5 py-4 border-t border-gray-200 dark:border-gray-700">
+        <DialogFooter className="flex-col sm:flex-row gap-4 px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/40">
           {isProcessing && importProgress > 0 && (
             <div className="w-full space-y-2">
               <div className="flex justify-between text-sm">
@@ -554,8 +562,8 @@ export function ImportProductsDialog({ onProductsImported, onCategoryAdded, trig
               {isProcessing ? "Processando..." : `Importar ${parsedData.length} Produtos`}
             </Button>
           </div>
-        </ResponsiveDialogFooter>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

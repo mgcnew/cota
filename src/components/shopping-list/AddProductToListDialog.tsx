@@ -480,18 +480,29 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
     </div>
   );
 
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[90vh] flex flex-col rounded-t-[1.5rem] !bg-white/95 dark:!bg-gray-950/95 backdrop-blur-xl border-t border-white/20">
+          <DrawerHeader className="p-0 border-b-0 text-left">
+            {renderHeader()}
+          </DrawerHeader>
+          {renderContent()}
+          {renderFooter()}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className={cn(
-        "!bg-white/95 dark:!bg-gray-950/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl rounded-t-[1.5rem] sm:rounded-2xl p-0 gap-0 overflow-hidden flex flex-col",
-        isMobile ? "h-[90vh] border-t border-white/20" : "max-w-xl max-h-[85vh] h-[600px]"
-      )}>
-        <ResponsiveDialogHeader className="p-0 border-b-0 text-left">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden !bg-white/95 dark:!bg-gray-950/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl rounded-2xl [&>button]:hidden flex flex-col max-h-[85vh] h-[600px]">
+        <DialogHeader className="p-0 border-b-0 text-left">
           {renderHeader()}
-        </ResponsiveDialogHeader>
+        </DialogHeader>
         {renderContent()}
         {renderFooter()}
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

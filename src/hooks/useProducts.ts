@@ -29,7 +29,6 @@ export function useProducts() {
   const { data: products = [], isLoading, error } = useQuery({
     queryKey: ['products', user?.id],
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutos de cache para evitar re-fetches excessivos
     queryFn: async () => {
       if (!user) throw new Error('Usuário não autenticado');
 
@@ -235,7 +234,6 @@ export function useProducts() {
   const { data: categories = ["all"] } = useQuery({
     queryKey: ['product-categories', user?.id],
     enabled: !!user?.id,
-    staleTime: 30 * 60 * 1000, // 30 minutos (categorias mudam pouco)
     queryFn: async () => {
       if (!user) throw new Error('Usuário não autenticado');
 

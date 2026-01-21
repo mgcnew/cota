@@ -65,7 +65,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       title="Resumo da Cotação"
       description={`#${safeStr(quote.id).slice(0, 8)}`}
       desktopMaxWidth="lg"
-      className="!bg-white dark:!bg-gray-950 border-white/20 dark:border-white/10 shadow-2xl [&>button]:hidden"
+      className="!bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10 shadow-2xl [&>button]:hidden"
       footer={
         <Button 
           onClick={() => onOpenChange(false)} 
@@ -98,7 +98,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
-          <Card className="p-3 bg-gray-50 dark:bg-gray-900 border-white/20 dark:border-white/10 shadow-sm">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-1.5 text-teal-700 dark:text-teal-300 mb-1">
               <Package className="h-3.5 w-3.5" />
               <span className="text-xs font-medium uppercase tracking-wider opacity-70">Produtos</span>
@@ -106,7 +106,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
             <p className="text-xl font-bold text-teal-800 dark:text-teal-200">{products.length}</p>
           </Card>
           
-          <Card className="p-3 bg-gray-50 dark:bg-gray-900 border-white/20 dark:border-white/10 shadow-sm">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-1.5 text-blue-700 dark:text-blue-300 mb-1">
               <Users className="h-3.5 w-3.5" />
               <span className="text-xs font-medium uppercase tracking-wider opacity-70">Fornecedores</span>
@@ -114,7 +114,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
             <p className="text-xl font-bold text-blue-800 dark:text-blue-200">{fornecedoresRespondidos}/{fornecedores.length}</p>
           </Card>
           
-          <Card className="p-3 bg-gray-50 dark:bg-gray-900 border-white/20 dark:border-white/10 shadow-sm">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-1.5 text-green-700 dark:text-green-300 mb-1">
               <DollarSign className="h-3.5 w-3.5" />
               <span className="text-xs font-medium uppercase tracking-wider opacity-70">Melhor Total</span>
@@ -122,7 +122,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
             <p className="text-lg font-bold text-green-800 dark:text-green-200">R$ {totalMelhorPreco.toFixed(2)}</p>
           </Card>
           
-          <Card className="p-3 bg-gray-50 dark:bg-gray-900 border-white/20 dark:border-white/10 shadow-sm">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-1.5 text-purple-700 dark:text-purple-300 mb-1">
               <Calendar className="h-3.5 w-3.5" />
               <span className="text-xs font-medium uppercase tracking-wider opacity-70">Período</span>
@@ -136,7 +136,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
         {/* Melhor Fornecedor */}
         {melhorFornecedor && (
-          <Card className="p-3 bg-amber-50 dark:bg-amber-950 border-amber-500/20 dark:border-amber-500/10 shadow-sm">
+          <Card className="p-3 bg-amber-500/10 dark:bg-amber-500/5 border-amber-500/20 dark:border-amber-500/10 backdrop-blur-sm shadow-sm">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
                 <Award className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
@@ -152,16 +152,16 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         )}
 
         {/* Produtos */}
-        <Card className="overflow-hidden border-white/20 dark:border-white/10 bg-white dark:bg-gray-950 shadow-sm">
-          <div className="px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border-b border-white/10 dark:border-white/5 flex items-center gap-2">
+        <Card className="overflow-hidden border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm">
+          <div className="px-3 py-2.5 bg-white/10 dark:bg-white/5 border-b border-white/10 dark:border-white/5 flex items-center gap-2">
             <Package className="h-4 w-4 text-teal-600 dark:text-teal-400" />
             <span className="text-sm font-bold text-gray-900 dark:text-white">Produtos ({products.length})</span>
           </div>
-          <div className="divide-y divide-gray-100 dark:divide-white/5 max-h-[200px] overflow-y-auto">
+          <div className="divide-y divide-white/5 dark:divide-white/5 max-h-[200px] overflow-y-auto">
             {products.map((p: any, i: number) => {
               const best = getBestPrice(p.product_id);
               return (
-                <div key={p.product_id} className="px-3 py-2.5 flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                <div key={p.product_id} className="px-3 py-2.5 flex items-center gap-2 hover:bg-white/10 dark:hover:bg-white/5 transition-colors">
                   <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 w-5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{safeStr(p.product_name)}</p>
@@ -180,17 +180,17 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         </Card>
 
         {/* Fornecedores */}
-        <Card className="overflow-hidden border-white/20 dark:border-white/10 bg-white dark:bg-gray-950 shadow-sm">
-          <div className="px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border-b border-white/10 dark:border-white/5 flex items-center gap-2">
+        <Card className="overflow-hidden border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm">
+          <div className="px-3 py-2.5 bg-white/10 dark:bg-white/5 border-b border-white/10 dark:border-white/5 flex items-center gap-2">
             <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             <span className="text-sm font-bold text-gray-900 dark:text-white">Fornecedores ({fornecedores.length})</span>
           </div>
-          <div className="divide-y divide-gray-100 dark:divide-white/5 max-h-[180px] overflow-y-auto">
+          <div className="divide-y divide-white/5 dark:divide-white/5 max-h-[180px] overflow-y-auto">
             {fornecedores.map((f) => {
               const total = calcularTotalFornecedor(f.id);
               const isBest = melhorFornecedor?.id === f.id;
               return (
-                <div key={f.id} className={cn("px-3 py-2.5 flex items-center gap-2 transition-colors", isBest ? "bg-amber-50 dark:bg-amber-950" : "hover:bg-gray-50 dark:hover:bg-white/5")}>
+                <div key={f.id} className={cn("px-3 py-2.5 flex items-center gap-2 transition-colors", isBest ? "bg-amber-500/10 dark:bg-amber-500/5" : "hover:bg-white/10 dark:hover:bg-white/5")}>
                   <div className={cn("w-2 h-2 rounded-full shrink-0", f.status === 'respondido' ? "bg-green-500" : "bg-amber-500")} />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{safeStr(f.nome)}</p>
@@ -212,7 +212,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
         {/* Observações */}
         {(quote as any).observacoes && (
-          <Card className="p-3 bg-gray-50 dark:bg-gray-900 border-white/20 dark:border-white/10 shadow-sm">
+          <Card className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <FileText className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               <span className="text-sm font-bold text-gray-900 dark:text-white">Observações</span>

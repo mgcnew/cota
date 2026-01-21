@@ -1,5 +1,5 @@
 import { useState, useMemo, Suspense, lazy, useCallback, useEffect } from "react";
-import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -467,14 +467,11 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   if (!initialQuote || !quote) return null;
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent 
-        hideClose
-        className="w-[95vw] sm:w-[95vw] md:max-w-[1100px] h-[95vh] sm:h-[85vh] max-h-[95vh] sm:max-h-[700px] overflow-hidden p-0 gap-0 border border-gray-200 dark:border-gray-800 flex flex-col shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] bg-white dark:bg-gray-950 [&>button]:hidden"
-      >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300 [&>button]:hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           {/* Header Compacto com Tabs Integradas */}
-          <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden flex items-center justify-between">
+          <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden flex items-center justify-between">
             <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-transparent pointer-events-none"></div>
             
             <div className="flex items-center gap-4 relative z-10">
@@ -484,9 +481,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   <ClipboardList className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex flex-col">
-                  <ResponsiveDialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
+                  <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
                     Gerenciar
-                  </ResponsiveDialogTitle>
+                  </DialogTitle>
                   <span className="text-[8px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest mt-0.5">
                     #{safeStr(quote.id).substring(0, 8)}
                   </span>
@@ -616,7 +613,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         </Tabs>
 
         {/* Footer Minimalista */}
-        <div className="flex-shrink-0 px-4 py-1.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+        <div className="flex-shrink-0 px-4 py-1.5 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30 backdrop-blur-2xl flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse"></div>
             <span className="text-[7px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Painel Ativo</span>
@@ -640,7 +637,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           }}
           isDeleting={deleteQuote.isPending}
         />
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

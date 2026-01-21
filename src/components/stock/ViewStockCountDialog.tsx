@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -403,21 +403,21 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
 
   if (!count) {
     return (
-      <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-        <ResponsiveDialogContent>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
           <p className="text-center py-8 text-muted-foreground">Contagem não encontrada</p>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+        </DialogContent>
+      </Dialog>
     );
   }
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden rounded-t-xl sm:rounded-xl">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-orange-500 to-amber-600 p-4 text-white">
-          <ResponsiveDialogHeader className="p-0 space-y-0 text-left">
-            <ResponsiveDialogTitle className="text-white text-lg flex items-center gap-2">
+          <DialogHeader>
+            <DialogTitle className="text-white text-lg flex items-center gap-2">
               <ClipboardList className="w-5 h-5" />
               {(count as any)?.order?.supplier_name || "Contagem Livre"}
               {/* Offline indicator - Requirements: 15.4 */}
@@ -427,8 +427,8 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                   Offline
                 </Badge>
               )}
-            </ResponsiveDialogTitle>
-          </ResponsiveDialogHeader>
+            </DialogTitle>
+          </DialogHeader>
           <p className="text-sm text-orange-100 mt-1">
             {format(new Date(count.created_at), "dd/MM/yyyy", { locale: ptBR })}
             {count.notes && ` • ${count.notes}`}
@@ -742,11 +742,11 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
         </div>
 
         {/* Modal Resumo */}
-        <ResponsiveDialog open={showSummary} onOpenChange={setShowSummary}>
-          <ResponsiveDialogContent className="max-w-2xl max-h-[80vh] overflow-auto rounded-t-xl sm:rounded-xl">
-            <ResponsiveDialogHeader className="text-left">
-              <ResponsiveDialogTitle>Resumo da Contagem</ResponsiveDialogTitle>
-            </ResponsiveDialogHeader>
+        <Dialog open={showSummary} onOpenChange={setShowSummary}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>Resumo da Contagem</DialogTitle>
+            </DialogHeader>
             <div className="space-y-4">
               {summaryData.map((p, i) => (
                 <div key={i} className="border rounded-lg p-3">
@@ -770,15 +770,15 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                 <span className="text-2xl font-bold text-orange-600">{grandTotal} un</span>
               </div>
             </div>
-          </ResponsiveDialogContent>
-        </ResponsiveDialog>
+          </DialogContent>
+        </Dialog>
 
         {/* Modal Novo Setor */}
-        <ResponsiveDialog open={showAddSector} onOpenChange={setShowAddSector}>
-          <ResponsiveDialogContent>
-            <ResponsiveDialogHeader className="text-left">
-              <ResponsiveDialogTitle>Novo Setor</ResponsiveDialogTitle>
-            </ResponsiveDialogHeader>
+        <Dialog open={showAddSector} onOpenChange={setShowAddSector}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo Setor</DialogTitle>
+            </DialogHeader>
             <div className="space-y-4">
               <div>
                 <Label>Nome do setor</Label>
@@ -797,9 +797,9 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                 </Button>
               </div>
             </div>
-          </ResponsiveDialogContent>
-        </ResponsiveDialog>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+          </DialogContent>
+        </Dialog>
+      </DialogContent>
+    </Dialog>
   );
 }
