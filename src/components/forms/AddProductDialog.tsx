@@ -542,6 +542,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                       placeholder="Ex: Coxa com Sobrecoxa Congelada"
                       className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field}
+                      autoFocus
                     />
                   </FormControl>
                   <FormMessage />
@@ -806,7 +807,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       )}
       <ResponsiveDialogContent 
         hideClose 
-        className="w-[90vw] sm:w-[90vw] md:max-w-[520px] h-[90vh] sm:h-[85vh] max-h-[90vh] sm:max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl rounded-t-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
+        className="w-full sm:w-[90vw] md:max-w-[520px] h-auto sm:h-[85vh] max-h-[85dvh] sm:max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl rounded-t-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
       >
         <ResponsiveDialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
           <div className="flex items-center justify-between gap-3">

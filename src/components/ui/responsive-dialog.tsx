@@ -102,24 +102,34 @@ const ResponsiveDialogContent = React.forwardRef<
 
   // Autofoco automático no primeiro campo de input/textarea quando aberto
   React.useEffect(() => {
-    const timer = setTimeout(() => {
+    let focusTimer: number;
+    
+    // Pequeno atraso para garantir que a animação de entrada terminou
+    focusTimer = window.setTimeout(() => {
       if (contentRef.current) {
         // Procura primeiro por inputs de busca ou principais
         const priorityInput = contentRef.current.querySelector('input[placeholder*="buscar"], input[placeholder*="pesquisar"], input[name*="search"]') as HTMLElement;
-        const firstInput = priorityInput || contentRef.current.querySelector('input:not([type="hidden"]), textarea, [contenteditable="true"]') as HTMLElement;
+        const firstInput = priorityInput || contentRef.current.querySelector('input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), [contenteditable="true"]') as HTMLElement;
         
-        if (firstInput) {
-          firstInput.focus();
-          if (firstInput instanceof HTMLInputElement || firstInput instanceof HTMLTextAreaElement) {
-            const val = firstInput.value;
-            firstInput.value = '';
-            firstInput.value = val;
+        if (firstInput && document.activeElement !== firstInput) {
+          try {
+            firstInput.focus();
+            if (firstInput instanceof HTMLInputElement || firstInput instanceof HTMLTextAreaElement) {
+              const val = firstInput.value;
+              firstInput.value = '';
+              firstInput.value = val;
+            }
+          } catch (e) {
+            console.warn("Erro ao focar input:", e);
           }
         }
       }
-    }, 500); 
-    return () => clearTimeout(timer);
-  }, []); // Executa ao montar (quando o modal abre)
+    }, 400); 
+
+    return () => {
+      if (focusTimer) window.clearTimeout(focusTimer);
+    };
+  }, []); // Executa apenas ao montar (quando o modal abre)
 
   // Mobile: Render as Drawer
   if (isMobile && !forceDialog) {
@@ -127,19 +137,18 @@ const ResponsiveDialogContent = React.forwardRef<
       <DrawerContent
         ref={contentRef}
         className={cn(
-          "max-h-[96dvh] overflow-hidden flex flex-col bg-background transition-all duration-300 ease-in-out",
+          "max-h-[96dvh] overflow-hidden flex flex-col bg-background",
           className
         )}
         style={{ 
           WebkitOverflowScrolling: 'touch',
-          // Reposicionamento dinâmico conforme o teclado
-          // No iOS/Safari, o visualViewport.height diminui e precisamos subir o modal
-          transform: isKeyboardVisible ? `translateY(-${Math.max(0, keyboardHeight - 20)}px)` : 'translateY(0)',
-          // Margem de segurança para o teclado
-          marginBottom: isKeyboardVisible ? 'env(safe-area-inset-bottom, 20px)' : '0',
+          // Reposicionamento dinâmico usando APENAS transform para evitar layout shifts
+          // Adicionamos uma margem de segurança de 20px
+          transform: isKeyboardVisible ? `translateY(-${Math.max(0, keyboardHeight - 10)}px)` : 'translateY(0)',
           // Suaviza a transição quando o teclado aparece
-          transitionProperty: 'transform, margin-bottom, height',
-          transitionDuration: '300ms',
+          transition: 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)',
+          // Garantir que o conteúdo não seja cortado no fundo
+          paddingBottom: isKeyboardVisible ? '10px' : 'env(safe-area-inset-bottom, 0px)',
         }}
         {...props as any}
       >

@@ -10,6 +10,7 @@ export function useUserRole() {
   const { data: role, isLoading } = useQuery({
     queryKey: ["user-role", user?.id],
     enabled: Boolean(user?.id),
+    staleTime: 60 * 60 * 1000, // 1 hora (permissões não mudam frequentemente)
     queryFn: async (): Promise<AppRole | null> => {
       if (!user?.id) return null;
 

@@ -71,6 +71,7 @@ export function useCotacoes() {
 
   const { data: cotacoes = [], isLoading } = useQuery({
     queryKey: ['cotacoes'],
+    staleTime: 2 * 60 * 1000, // 2 minutos
     queryFn: async () => {
       try {
         console.log("📊 Fetching quotes...");

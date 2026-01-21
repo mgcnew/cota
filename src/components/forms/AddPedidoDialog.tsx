@@ -800,7 +800,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent 
         hideClose
-        className="w-[95vw] sm:w-[95vw] md:max-w-[1000px] h-[95vh] sm:h-[85vh] max-h-[95vh] sm:max-h-[700px] overflow-hidden p-0 gap-0 border border-gray-200 dark:border-gray-800 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] bg-white dark:bg-gray-950 [&>button]:hidden"
+        className="w-full sm:w-[95vw] md:max-w-[1000px] h-auto sm:h-[85vh] max-h-[90dvh] sm:max-h-[700px] overflow-hidden p-0 gap-0 border border-gray-200 dark:border-gray-800 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] bg-white dark:bg-gray-950 [&>button]:hidden"
         onKeyDown={handleModalKeyDown}
       >
         {modalInnerContent}
