@@ -195,11 +195,13 @@ const ResponsiveDialogContent = React.forwardRef<
           // Reposicionamento dinâmico usando APENAS transform para evitar layout shifts
           // Adicionamos uma margem de segurança de 20px
           transform: isKeyboardVisible ? `translate3d(0, -${Math.max(0, keyboardHeight - 10)}px, 0)` : 'translate3d(0, 0, 0)',
+          // Ajusta a altura máxima para evitar que o topo do modal saia da tela
+          maxHeight: isKeyboardVisible ? `calc(100dvh - ${Math.max(0, keyboardHeight - 10)}px)` : '96dvh',
           // Suaviza a transição quando o teclado aparece
-          transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+          transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), max-height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
           // Garantir que o conteúdo não seja cortado no fundo
           paddingBottom: isKeyboardVisible ? '10px' : 'env(safe-area-inset-bottom, 0px)',
-          willChange: 'transform',
+          willChange: 'transform, max-height',
         }}
         {...props as any}
       >

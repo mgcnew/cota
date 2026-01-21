@@ -799,25 +799,24 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange} modal={true}>
+    <ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
       {trigger && (
-        <DialogTrigger asChild>
+        <ResponsiveDialogTrigger asChild>
           {trigger}
-        </DialogTrigger>
+        </ResponsiveDialogTrigger>
       )}
-      <DialogContent 
-        hideClose 
+      <ResponsiveDialogContent 
         className="w-[95vw] sm:w-[90vw] md:max-w-[520px] max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
       >
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
+        <ResponsiveDialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-9 h-9 rounded-xl sm:rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg sm:shadow-none">
                 <Package className="h-4 w-4" />
               </div>
-              <DialogTitle className="text-base sm:text-lg font-bold sm:font-semibold text-gray-900 dark:text-white truncate">
+              <ResponsiveDialogTitle className="text-base sm:text-lg font-bold sm:font-semibold text-gray-900 dark:text-white truncate">
                 Novo Produto
-              </DialogTitle>
+              </ResponsiveDialogTitle>
             </div>
             <Button
               type="button"
@@ -833,11 +832,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               {!isMobile && <span className="sr-only">Fechar</span>}
             </Button>
           </div>
-        </DialogHeader>
+        </ResponsiveDialogHeader>
         <div className="flex flex-col flex-1 overflow-hidden">
           {formContent}
         </div>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
