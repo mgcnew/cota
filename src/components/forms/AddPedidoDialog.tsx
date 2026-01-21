@@ -406,7 +406,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const modalInnerContent = (
     <>
       {/* Header Compacto com design semiglass */}
-      <div className="flex-shrink-0 border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 backdrop-blur-md relative overflow-hidden">
+      <div className="flex-shrink-0 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
         
         {/* Top Bar: Título, Steps e Botão Fechar */}
@@ -469,7 +469,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               {currentStep === 0 && (
                 <div className="h-full flex flex-col p-4">
                   {/* Formulário de adicionar produto Compacto e Horizontal */}
-                  <div className="flex items-end gap-2 bg-white/60 dark:bg-gray-900/40 rounded-xl p-3 border border-gray-200/60 dark:border-gray-700/40 backdrop-blur-xl shadow-sm mb-3 relative z-50">
+                  <div className="flex items-end gap-2 bg-white dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-gray-800 shadow-sm mb-3 relative z-50">
                     <div className="flex-1 space-y-1">
                       <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Produto</Label>
                       <div className="relative group">
@@ -486,7 +486,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         {filteredProducts.length > 0 && !selectedProduct && (
                           <div 
                             ref={productListRef}
-                            className="absolute z-50 w-full mt-1 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-1 custom-scrollbar"
+                            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl max-h-64 overflow-auto custom-scrollbar"
                           >
                             {filteredProducts.map((p, index) => (
                               <button
@@ -696,7 +696,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               {currentStep === 2 && (
                 <div className="h-full flex flex-col p-4 space-y-4">
                   {/* Resumo Compacto */}
-                  <div className="bg-white/60 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-200/60 dark:border-gray-700/40 backdrop-blur-xl shadow-sm ring-1 ring-white/20">
+                  <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-800 shadow-sm ring-1 ring-white/20">
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-gray-50 dark:bg-gray-950/40 rounded-lg p-2 border border-gray-100 dark:border-gray-800">
                         <p className="text-[8px] text-gray-400 dark:text-gray-500 mb-0.5 font-black uppercase tracking-widest">Fornecedor</p>
@@ -750,7 +750,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       </div>
 
       {/* Footer Compacto */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30 backdrop-blur-2xl flex items-center justify-end gap-2 relative overflow-hidden">
+      <div className="flex-shrink-0 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-end gap-2 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-gray-500/5 to-transparent pointer-events-none"></div>
         
         <Button 
@@ -800,7 +800,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent 
         hideClose
-        className="w-[95vw] sm:w-[95vw] md:max-w-[1000px] h-[95vh] sm:h-[85vh] max-h-[95vh] sm:max-h-[700px] overflow-hidden p-0 gap-0 border border-white/20 dark:border-white/10 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl [&>button]:hidden animate-in fade-in zoom-in-95 duration-300"
+        className="w-[95vw] sm:w-[95vw] md:max-w-[1000px] h-[95vh] sm:h-[85vh] max-h-[95vh] sm:max-h-[700px] overflow-hidden p-0 gap-0 border border-white/20 dark:border-white/10 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] bg-white dark:bg-gray-950 [&>button]:hidden"
         onKeyDown={handleModalKeyDown}
       >
         {modalInnerContent}

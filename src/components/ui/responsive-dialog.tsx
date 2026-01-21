@@ -102,7 +102,7 @@ const ResponsiveDialogContent = React.forwardRef<
     return (
       <DrawerContent
         className={cn(
-          "max-h-[85vh] overflow-hidden flex flex-col will-change-transform",
+          "max-h-[96dvh] overflow-hidden flex flex-col bg-background",
           className
         )}
         style={{ WebkitOverflowScrolling: 'touch' }}

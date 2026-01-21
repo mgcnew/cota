@@ -279,7 +279,7 @@ function EditProductDialogInternal({
       {/* Product Image Preview */}
       {(currentProduct?.image_url || newImageUrl) && (
             <div className="flex flex-col items-center gap-3 pb-2">
-              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-md relative group bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm">
+              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-md relative group bg-gray-50 dark:bg-gray-900">
                 {isUploadingImage ? (
                   <div className="w-full h-full bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-400/20 dark:to-amber-400/20 flex items-center justify-center">
                     <Loader2 className="h-8 w-8 text-orange-600 animate-spin" />
@@ -353,7 +353,7 @@ function EditProductDialogInternal({
                   <FormControl>
                     <Input 
                       placeholder="Ex: Coxa com Sobrecoxa"
-                      className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
+                      className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
                       {...field}
                     />
                   </FormControl>
@@ -406,11 +406,11 @@ function EditProductDialogInternal({
                   <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Unidade de Medida *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="!bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
+                      <SelectTrigger className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
                         <SelectValue placeholder="Selecione a unidade" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
+                    <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
                       <SelectItem value="un">Unidade (un)</SelectItem>
                       <SelectItem value="kg">Quilograma (kg)</SelectItem>
                       <SelectItem value="g">Grama (g)</SelectItem>
@@ -439,7 +439,7 @@ function EditProductDialogInternal({
                       <Input 
                         {...field} 
                         placeholder="EAN-13, EAN-8, UPC..."
-                        className="pr-10 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
+                        className="pr-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
                         maxLength={13}
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -478,9 +478,9 @@ function EditProductDialogInternal({
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent 
         hideClose 
-        className="w-[90vw] sm:w-[90vw] md:max-w-[520px] h-[90vh] sm:h-[85vh] max-h-[90vh] sm:max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-t-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden"
+        className="w-[90vw] sm:w-[90vw] md:max-w-[520px] h-[90vh] sm:h-[85vh] max-h-[90vh] sm:max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl rounded-t-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
       >
-        <ResponsiveDialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md text-left">
+        <ResponsiveDialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg sm:shadow-none">

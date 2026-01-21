@@ -468,10 +468,10 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300 [&>button]:hidden">
+      <ResponsiveDialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 flex flex-col shadow-2xl rounded-t-xl sm:rounded-[2rem] [&>button]:hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           {/* Header Compacto com Tabs Integradas */}
-          <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden flex items-center justify-between">
+          <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden flex items-center justify-between">
             <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-transparent pointer-events-none"></div>
             
             <div className="flex items-center gap-4 relative z-10">
@@ -613,7 +613,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         </Tabs>
 
         {/* Footer Minimalista */}
-        <div className="flex-shrink-0 px-4 py-1.5 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30 backdrop-blur-2xl flex justify-between items-center">
+        <div className="flex-shrink-0 px-4 py-1.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse"></div>
             <span className="text-[7px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Painel Ativo</span>

@@ -551,9 +551,9 @@ export function ManagePackagingQuoteDialog({
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className="w-[96vw] sm:w-[92vw] md:w-[95vw] max-w-[1200px] h-[90vh] sm:h-[92vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-300">
+      <ResponsiveDialogContent className="w-[96vw] sm:w-[92vw] md:w-[95vw] max-w-[1200px] h-[90vh] sm:h-[92vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200 dark:border-gray-700 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] flex flex-col bg-white dark:bg-gray-950">
         {/* Header */}
-        <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden">
+        <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-transparent pointer-events-none"></div>
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-3">
@@ -926,8 +926,8 @@ export function ManagePackagingQuoteDialog({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Preview do que será exportado */}
-                  <Card className="border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl overflow-hidden">
-                    <div className="p-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40">
+                  <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
+                    <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
                       <h4 className="text-xs font-black text-gray-500 uppercase tracking-wider flex items-center gap-2">
                         <FileText className="h-3.5 w-3.5" />
                         Conteúdo
@@ -951,8 +951,8 @@ export function ManagePackagingQuoteDialog({
                   </Card>
 
                   {/* Resumo dos vencedores */}
-                  <Card className="border-gray-200/60 dark:border-gray-800/40 bg-gray-50/50 dark:bg-gray-950/30 backdrop-blur-xl shadow-sm rounded-xl overflow-hidden">
-                    <div className="p-3 border-b border-gray-200/60 dark:border-gray-800/40 bg-gray-100/40 dark:bg-gray-800/20">
+                  <Card className="border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 shadow-sm rounded-xl overflow-hidden">
+                    <div className="p-3 border-b border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800">
                       <h4 className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-2">
                         <Trophy className="h-3.5 w-3.5 text-gray-400" />
                         Vencedores
@@ -1008,8 +1008,8 @@ export function ManagePackagingQuoteDialog({
 
                 {/* Preview HTML */}
                 {showHtmlPreview && (
-                  <div className="mt-6 border border-gray-200/60 dark:border-gray-700/40 rounded-xl overflow-hidden shadow-2xl">
-                    <div className="bg-gray-50/80 dark:bg-gray-800/80 px-4 py-2 border-b border-gray-200/60 dark:border-gray-700/40 backdrop-blur-sm">
+                  <div className="mt-6 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-2xl">
+                    <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
                       <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Preview</p>
                     </div>
                     <iframe srcDoc={generateHtmlComparative()} className="w-full h-[600px] border-0 bg-white" title="HTML Preview" />

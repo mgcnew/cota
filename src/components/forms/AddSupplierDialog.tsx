@@ -202,7 +202,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     <FormControl>
                       <Input 
                         placeholder="Ex: Holambra Distribuidora" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 bg-white dark:bg-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         {...field} 
                       />
                     </FormControl>
@@ -220,7 +220,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     <FormControl>
                       <Input 
                         placeholder="00.000.000/0000-00" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 bg-white dark:bg-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         {...field} 
                       />
                     </FormControl>
@@ -239,7 +239,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                   <FormControl>
                     <Input 
                       placeholder="Rua das Flores, 123, Centro, São Paulo - SP" 
-                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 bg-white dark:bg-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field} 
                     />
                   </FormControl>
@@ -265,7 +265,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                   <FormControl>
                     <Input 
                       placeholder="Ex: João Silva Santos" 
-                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 bg-white dark:bg-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       {...field} 
                     />
                   </FormControl>
@@ -284,7 +284,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     <FormControl>
                       <Input 
                         placeholder="(11) 99999-9999" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 bg-white dark:bg-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         {...field} 
                       />
                     </FormControl>
@@ -303,7 +303,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                       <Input 
                         placeholder="comercial@empresa.com" 
                         type="email" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 bg-white dark:bg-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         {...field} 
                       />
                     </FormControl>
@@ -333,7 +333,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
         </div>
 
         {/* Footer com botões */}
-        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm`}>
+        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800`}>
           <div className={`flex gap-2 ${isMobile ? 'flex-col' : 'justify-end'}`}>
             <Button 
               type="button" 
@@ -380,9 +380,9 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent 
         hideClose 
-        className="w-[90vw] sm:w-[90vw] md:max-w-[520px] h-[90vh] sm:h-[85vh] max-h-[90vh] sm:max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-t-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden"
+        className="w-[90vw] sm:w-[90vw] md:max-w-[520px] h-[90vh] sm:h-[85vh] max-h-[90vh] sm:max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-xl rounded-t-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
       >
-        <ResponsiveDialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md text-left">
+        <ResponsiveDialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-left">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl sm:rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg sm:shadow-none">
