@@ -437,6 +437,7 @@ function Fornecedores() {
                           onEdit={setEditingSupplier}
                           onDelete={setDeletingSupplier}
                           onWhatsApp={openWhatsApp}
+                          onViewHistory={setHistorySupplier}
                           renderRating={renderNumericRating}
                         />
                       ))}
