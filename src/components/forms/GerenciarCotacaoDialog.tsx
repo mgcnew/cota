@@ -1,5 +1,5 @@
 import { useState, useMemo, Suspense, lazy, useCallback, useEffect } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -467,8 +467,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   if (!initialQuote || !quote) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300 [&>button]:hidden">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300 [&>button]:hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           {/* Header Compacto com Tabs Integradas */}
           <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden flex items-center justify-between">
@@ -481,9 +481,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   <ClipboardList className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex flex-col">
-                  <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
+                  <ResponsiveDialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
                     Gerenciar
-                  </DialogTitle>
+                  </ResponsiveDialogTitle>
                   <span className="text-[8px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest mt-0.5">
                     #{safeStr(quote.id).substring(0, 8)}
                   </span>
@@ -637,7 +637,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           }}
           isDeleting={deleteQuote.isPending}
         />
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

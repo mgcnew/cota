@@ -1,11 +1,5 @@
 import { useState, useMemo } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -286,22 +280,22 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
   const itemsCount = Object.values(ordersBySupplier).reduce((sum, o) => sum + o.items.length, 0);
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen); }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
-          <DialogTitle className="flex items-center gap-3">
+    <ResponsiveDialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen); }}>
+      <ResponsiveDialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col rounded-t-xl sm:rounded-xl">
+        <ResponsiveDialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 text-left">
+          <ResponsiveDialogTitle className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
               <ShoppingCart className="h-4 w-4 text-white" />
             </div>
             Converter Cotação em Pedido(s)
-          </DialogTitle>
-          <DialogDescription>
+          </ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>
             {suppliersCount > 1 
               ? `Serão criados ${suppliersCount} pedidos para fornecedores diferentes`
               : "Selecione o modo de conversão e confirme os itens"
             }
-          </DialogDescription>
-        </DialogHeader>
+          </ResponsiveDialogDescription>
+        </ResponsiveDialogHeader>
 
         <div className="flex-1 overflow-y-auto px-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
@@ -597,7 +591,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
             )}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

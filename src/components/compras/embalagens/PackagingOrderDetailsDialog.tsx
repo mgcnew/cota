@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ShoppingCart, Package, Calendar, Building2, DollarSign, Truck, Clock, CheckCircle2 } from "lucide-react";
@@ -26,14 +26,14 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
   const IconComponent = order.status === "pendente" ? Clock : order.status === "confirmado" ? CheckCircle2 : order.status === "entregue" ? Truck : Clock;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-t-xl sm:rounded-xl">
+        <ResponsiveDialogHeader className="text-left">
+          <ResponsiveDialogTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5 text-purple-600" />
             Detalhes do Pedido
-          </DialogTitle>
-        </DialogHeader>
+          </ResponsiveDialogTitle>
+        </ResponsiveDialogHeader>
 
         <div className="space-y-6">
           {/* Info do pedido */}
@@ -112,7 +112,7 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

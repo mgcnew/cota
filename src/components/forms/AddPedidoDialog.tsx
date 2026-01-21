@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -418,9 +417,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               <div className="w-8 h-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-lg ring-1 ring-white/20">
                 <ShoppingCart className="h-4 w-4" />
               </div>
-              <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
+              <ResponsiveDialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
                 Novo Pedido
-              </DialogTitle>
+              </ResponsiveDialogTitle>
             </div>
 
             {/* Steps indicator minimalista integrado */}
@@ -797,27 +796,15 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     </>
   );
 
-  // Mobile: Usar Drawer
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[95vh] overflow-hidden flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30 rounded-t-[2rem] shadow-2xl">
-          {modalInnerContent}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  // Desktop: Usar Dialog
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent 
         hideClose
-        className="max-w-[1000px] w-[95vw] h-[85vh] max-h-[700px] overflow-hidden p-0 gap-0 border border-white/20 dark:border-white/10 shadow-2xl rounded-[2rem] !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl [&>button]:hidden animate-in fade-in zoom-in-95 duration-300"
+        className="w-[95vw] sm:w-[95vw] md:max-w-[1000px] h-[95vh] sm:h-[85vh] max-h-[95vh] sm:max-h-[700px] overflow-hidden p-0 gap-0 border border-white/20 dark:border-white/10 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl [&>button]:hidden animate-in fade-in zoom-in-95 duration-300"
         onKeyDown={handleModalKeyDown}
       >
         {modalInnerContent}
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogTitle, ResponsiveDialogDescription } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -277,16 +277,16 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
 
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-4xl max-h-[90vh] p-0 overflow-hidden [&>button]:hidden">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent hideClose className="max-w-4xl max-h-[90vh] p-0 overflow-hidden [&>button]:hidden">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-900">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-teal-100"><ClipboardList className="h-5 w-5 text-teal-600" /></div>
               <div>
-                <DialogTitle className="text-lg font-bold">Cotação #{cotacaoId}</DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground">{cotacaoProduto}</DialogDescription>
+                <ResponsiveDialogTitle className="text-lg font-bold">Cotação #{cotacaoId}</ResponsiveDialogTitle>
+                <ResponsiveDialogDescription className="text-sm text-muted-foreground">{cotacaoProduto}</ResponsiveDialogDescription>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -469,7 +469,7 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
         {showMultipleOrdersDialog && (
           <ConvertToMultipleOrdersDialog open={showMultipleOrdersDialog} onOpenChange={setShowMultipleOrdersDialog} supplierOrders={supplierOrdersForConversion} onConfirm={handleConfirmMultipleOrders} />
         )}
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

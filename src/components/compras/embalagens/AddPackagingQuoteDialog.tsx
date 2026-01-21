@@ -1,11 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -179,9 +173,9 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
   }, [activeStep, currentStepIndex]);
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent 
-        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-2xl rounded-[2rem] flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-300"
+    <ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
+      <ResponsiveDialogContent 
+        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-300"
         onKeyDown={handleKeyDown}
       >
         {/* Header com design semiglass */}
@@ -193,12 +187,12 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
                 <Package className="h-4 w-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <DialogTitle className="text-lg font-black text-gray-900 dark:text-white tracking-tight truncate">
+                <ResponsiveDialogTitle className="text-lg font-black text-gray-900 dark:text-white tracking-tight truncate">
                   Nova Cotação de Embalagens
-                </DialogTitle>
-                <DialogDescription className="text-gray-500 dark:text-gray-400 text-xs font-medium truncate">
+                </ResponsiveDialogTitle>
+                <ResponsiveDialogDescription className="text-gray-500 dark:text-gray-400 text-xs font-medium truncate">
                   Etapa {currentStepIndex + 1}/{STEPS.length}
-                </DialogDescription>
+                </ResponsiveDialogDescription>
               </div>
             </div>
 
@@ -608,7 +602,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

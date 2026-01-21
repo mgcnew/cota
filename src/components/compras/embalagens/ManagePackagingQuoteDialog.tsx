@@ -1,10 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -555,8 +550,8 @@ export function ManagePackagingQuoteDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[95vw] max-w-[1200px] h-[90vh] sm:h-[92vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-2xl rounded-[2rem] flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-300">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="w-[96vw] sm:w-[92vw] md:w-[95vw] max-w-[1200px] h-[90vh] sm:h-[92vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-300">
         {/* Header */}
         <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-transparent pointer-events-none"></div>
@@ -566,7 +561,7 @@ export function ManagePackagingQuoteDialog({
                 <Package className="h-5 w-5" />
               </div>
               <div>
-                <DialogTitle className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Gerenciar Cotação</DialogTitle>
+                <ResponsiveDialogTitle className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Gerenciar Cotação</ResponsiveDialogTitle>
                 <div className="flex items-center gap-2 mt-0.5">
                   <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className="text-[10px] font-bold uppercase tracking-wider h-5">{quote.status}</Badge>
                   <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{quote.dataInicio} - {quote.dataFim}</span>
@@ -1024,7 +1019,7 @@ export function ManagePackagingQuoteDialog({
             </ScrollArea>
           </TabsContent>
         </Tabs>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

@@ -36,12 +36,55 @@ import {
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 
-// Re-export Dialog components with responsive behavior
-const ResponsiveDialog = Dialog;
-const ResponsiveDialogTrigger = DialogTrigger;
-const ResponsiveDialogClose = DialogClose;
-const ResponsiveDialogPortal = DialogPortal;
-const ResponsiveDialogOverlay = DialogOverlay;
+const ResponsiveDialog = ({ children, ...props }: React.ComponentProps<typeof Dialog>) => {
+  const isMobile = useIsMobile();
+  
+  if (isMobile) {
+    return <Drawer {...props}>{children}</Drawer>;
+  }
+  
+  return <Dialog {...props}>{children}</Dialog>;
+};
+
+const ResponsiveDialogTrigger = ({ children, ...props }: React.ComponentProps<typeof DialogTrigger>) => {
+  const isMobile = useIsMobile();
+  
+  if (isMobile) {
+    return <DrawerTrigger {...props}>{children}</DrawerTrigger>;
+  }
+  
+  return <DialogTrigger {...props}>{children}</DialogTrigger>;
+};
+
+const ResponsiveDialogClose = ({ children, ...props }: React.ComponentProps<typeof DialogClose>) => {
+  const isMobile = useIsMobile();
+  
+  if (isMobile) {
+    return <DrawerClose {...props}>{children}</DrawerClose>;
+  }
+  
+  return <DialogClose {...props}>{children}</DialogClose>;
+};
+
+const ResponsiveDialogPortal = ({ children, ...props }: React.ComponentProps<typeof DialogPortal>) => {
+  const isMobile = useIsMobile();
+  
+  if (isMobile) {
+    return <DrawerPortal {...props}>{children}</DrawerPortal>;
+  }
+  
+  return <DialogPortal {...props}>{children}</DialogPortal>;
+};
+
+const ResponsiveDialogOverlay = ({ className, ...props }: React.ComponentProps<typeof DialogOverlay>) => {
+  const isMobile = useIsMobile();
+  
+  if (isMobile) {
+    return <DrawerOverlay className={className} {...props} />;
+  }
+  
+  return <DialogOverlay className={className} {...props} />;
+};
 
 interface ResponsiveDialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogContent> {
   /** Force dialog mode even on mobile */
@@ -63,10 +106,9 @@ const ResponsiveDialogContent = React.forwardRef<
           className
         )}
         style={{ WebkitOverflowScrolling: 'touch' }}
+        {...props as any}
       >
-        <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4">
-          {children}
-        </div>
+        {children}
       </DrawerContent>
     );
   }

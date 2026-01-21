@@ -1,14 +1,6 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogFooter, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogTrigger } from "@/components/ui/responsive-dialog";
 import { 
   Upload, 
   FileSpreadsheet, 
@@ -306,29 +298,29 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <ResponsiveDialog open={open} onOpenChange={setOpen}>
+      <ResponsiveDialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">
             <Upload className="h-4 w-4 mr-2" />
             Importar
           </Button>
         )}
-      </DialogTrigger>
-      <DialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-xl p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 shadow-2xl">
-        <DialogHeader className="px-5 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
+      </ResponsiveDialogTrigger>
+      <ResponsiveDialogContent className="w-[90vw] max-w-4xl max-h-[85vh] rounded-t-xl sm:rounded-xl p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 shadow-2xl">
+        <ResponsiveDialogHeader className="px-5 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md text-left">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
               <FileSpreadsheet className="h-5 w-5" />
             </div>
             <div>
-              <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">Importar Fornecedores</DialogTitle>
-              <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
+              <ResponsiveDialogTitle className="text-lg font-bold text-gray-900 dark:text-white">Importar Fornecedores</ResponsiveDialogTitle>
+              <ResponsiveDialogDescription className="text-sm text-gray-500 dark:text-gray-400">
                 Importe múltiplos fornecedores usando arquivos CSV ou Excel
-              </DialogDescription>
+              </ResponsiveDialogDescription>
             </div>
           </div>
-        </DialogHeader>
+        </ResponsiveDialogHeader>
 
         <div className="p-5 space-y-4 overflow-y-auto max-h-[calc(85vh-180px)] bg-transparent">
           {/* Download Template */}
@@ -505,7 +497,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </Card>
         </div>
 
-        <DialogFooter className="px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30 backdrop-blur-sm">
+        <ResponsiveDialogFooter className="px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30 backdrop-blur-sm">
           <Button variant="outline" onClick={() => setOpen(false)} className="h-10 text-sm border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
             Cancelar
           </Button>
@@ -526,8 +518,8 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
               </>
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

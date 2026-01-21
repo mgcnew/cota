@@ -1,10 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -284,14 +279,14 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <ResponsiveDialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
+      <ResponsiveDialogContent className="max-w-md max-h-[90vh] rounded-t-xl sm:rounded-xl">
+        <ResponsiveDialogHeader className="text-left">
+          <ResponsiveDialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5 text-purple-600" />
             {step === "list" ? "Embalagens" : editingId ? "Editar Embalagem" : "Nova Embalagem"}
-          </DialogTitle>
-        </DialogHeader>
+          </ResponsiveDialogTitle>
+        </ResponsiveDialogHeader>
 
         {renderStep()}
 
@@ -300,7 +295,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
             <Button variant="outline" onClick={() => onOpenChange(false)}>Fechar</Button>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle } from "@/components/ui/drawer";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogTitle } from "@/components/ui/responsive-dialog";
+import { DrawerHeader, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -396,9 +396,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         <ShoppingCart className="h-4 w-4" />
       </div>
       <div className="flex flex-col">
-        <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
+        <ResponsiveDialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
           Gerenciar Pedido
-        </DialogTitle>
+        </ResponsiveDialogTitle>
         <div className="flex items-center gap-1.5 mt-1">
           <span className="text-[8px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest bg-gray-100/50 dark:bg-white/5 px-1.5 py-0.5 rounded-md border border-gray-200/50 dark:border-white/5">
             #{pedido?.id?.substring(0, 8)}
@@ -435,11 +435,20 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     </div>
   );
 
-  // Mobile: Render as Drawer (bottom sheet) - Requirements: 5.5
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh] overflow-hidden flex flex-col !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border-t border-white/20 rounded-t-[2.5rem] shadow-2xl animate-in slide-in-from-bottom duration-300">
+  return (
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent 
+        hideClose
+        className={cn(
+            "overflow-hidden !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl shadow-2xl animate-in duration-300 p-0 gap-0",
+            isMobile 
+              ? "max-h-[90vh] flex flex-col border-t border-white/20 rounded-t-[2.5rem] slide-in-from-bottom"
+              : "w-[95vw] max-w-[1100px] h-[85vh] max-h-[700px] border border-white/20 dark:border-white/10 rounded-[2rem] [&>button]:hidden fade-in zoom-in-95"
+        )}
+        onKeyDown={handleModalKeyDown}
+      >
+        {isMobile ? (
+          <>
           <DrawerHeader className="text-left border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 px-6 py-5 backdrop-blur-md relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
             <div className="relative z-10">
@@ -748,19 +757,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           <DrawerFooter className="border-t border-white/10 dark:border-white/5 bg-white/20 dark:bg-gray-900/20 px-4 py-3 backdrop-blur-md">
             {footerContent}
           </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  // Desktop: Render as Dialog (centered modal)
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        hideClose
-        className="w-[95vw] max-w-[1100px] h-[85vh] max-h-[700px] overflow-hidden p-0 gap-0 !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-[2rem] [&>button]:hidden animate-in fade-in zoom-in-95 duration-300"
-        onKeyDown={handleModalKeyDown}
-      >
+          </>
+        ) : (
+          <>
         {/* Tabs com design refinado */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           {/* Header compacto com semiglass e Tabs integradas */}
@@ -775,9 +774,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <div className="w-8 h-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-lg ring-1 ring-white/20">
                     <ShoppingCart className="h-4 w-4" />
                   </div>
-                  <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
+                  <ResponsiveDialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
                     Gerenciar Pedido
-                  </DialogTitle>
+                  </ResponsiveDialogTitle>
                 </div>
 
                 {/* Tabs List Integrada na mesma linha */}
@@ -1227,7 +1226,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             Salvar
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+          </>
+        )}
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

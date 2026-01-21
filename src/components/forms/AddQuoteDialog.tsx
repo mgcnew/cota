@@ -5,19 +5,7 @@ import * as z from "zod";
 import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogTrigger } from "@/components/ui/responsive-dialog";
 import {
   Form,
   FormControl,
@@ -1831,37 +1819,20 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       </>
     );
 
-  // Mobile: Usar Drawer
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={setOpen}>
-        {trigger && (
-          <DrawerTrigger asChild>
-            {trigger}
-          </DrawerTrigger>
-        )}
-        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-white/20">
-          {modalInnerContent}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  // Desktop: Usar Dialog
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <ResponsiveDialog open={open} onOpenChange={setOpen}>
       {trigger && (
-        <DialogTrigger asChild>
+        <ResponsiveDialogTrigger asChild>
           {trigger}
-        </DialogTrigger>
+        </ResponsiveDialogTrigger>
       )}
-      <DialogContent 
+      <ResponsiveDialogContent 
         hideClose
-        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-white/20 dark:border-white/10 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden"
+        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[95vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-white/20 dark:border-white/10 shadow-2xl rounded-t-2xl sm:rounded-2xl flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden"
         onKeyDown={handleModalKeyDown}
       >
         {modalInnerContent}
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
