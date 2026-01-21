@@ -124,10 +124,10 @@ export function QuoteConversionTab({
   }
 
   return (
-    <div className="p-3 space-y-3">
+    <div className="p-3 space-y-3 bg-gray-50 dark:bg-gray-900 min-h-full">
       {/* Resumo Financeiro */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="bg-gray-500/5 dark:bg-gray-900/10 rounded-2xl p-3 border border-gray-200/60 dark:border-gray-700/40 backdrop-blur-md shadow-sm relative overflow-hidden group">
+        <div className="bg-white dark:bg-gray-950 rounded-2xl p-3 border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="flex items-center gap-2 mb-1 relative z-10">
             <div className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -140,7 +140,7 @@ export function QuoteConversionTab({
             {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="bg-gray-900/5 dark:bg-white/5 rounded-2xl p-3 border border-gray-200 dark:border-gray-700 backdrop-blur-md shadow-sm relative overflow-hidden group">
+        <div className="bg-white dark:bg-gray-950 rounded-2xl p-3 border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 to-transparent dark:from-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="flex items-center gap-2 mb-1 relative z-10">
             <div className="w-6 h-6 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 border border-gray-900 dark:border-white shadow-sm">
@@ -156,7 +156,7 @@ export function QuoteConversionTab({
       </div>
 
       {/* Estratégias */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-white/30 dark:bg-black/20 p-2 rounded-xl border border-white/20">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 bg-white dark:bg-gray-950 p-2 rounded-xl border border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse"></div>
           <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Estratégia de Seleção</span>
@@ -189,11 +189,11 @@ export function QuoteConversionTab({
             }
           }
         }}>
-          <TabsList className="h-8 p-1 bg-white/40 dark:bg-gray-950/40 backdrop-blur-xl rounded-lg border border-white/20 shadow-inner gap-1">
-            <TabsTrigger value="melhores" className="h-full px-3 text-[7px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+          <TabsList className="h-8 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-inner gap-1">
+            <TabsTrigger value="melhores" className="h-full px-3 text-[7px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-950 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all">
               <Trophy className="h-2.5 w-2.5 mr-1.5" /> Melhores Preços
             </TabsTrigger>
-            <TabsTrigger value="unico" className="h-full px-3 text-[7px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+            <TabsTrigger value="unico" className="h-full px-3 text-[7px] font-black uppercase tracking-widest rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-gray-950 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all">
               <Building2 className="h-2.5 w-2.5 mr-1.5" /> Fornecedor Único
             </TabsTrigger>
           </TabsList>
@@ -201,7 +201,7 @@ export function QuoteConversionTab({
       </div>
 
       {totalSelecao > melhorTotal && (
-        <div className="bg-gray-500/10 border border-gray-200 dark:border-gray-700 p-2 rounded-xl flex items-center gap-2 animate-bounce-subtle">
+        <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-2 rounded-xl flex items-center gap-2 animate-bounce-subtle">
           <TrendingDown className="h-3 w-3 text-gray-500" />
           <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-tight">
             Economia Pendente: R$ {(totalSelecao - melhorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -217,7 +217,7 @@ export function QuoteConversionTab({
         </div>
         
         {/* Header da Tabela (Fixo) - Igual ao QuoteValuesTab */}
-        <div className="grid grid-cols-[1.5fr_0.8fr_1.5fr_auto] gap-2 px-3 py-1.5 border-b border-gray-100 dark:border-gray-800 text-[8px] font-black uppercase text-gray-500 tracking-[0.2em] bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm">
+        <div className="grid grid-cols-[1.5fr_0.8fr_1.5fr_auto] gap-2 px-3 py-1.5 border-b border-gray-200 dark:border-gray-800 text-[8px] font-black uppercase text-gray-500 tracking-[0.2em] bg-gray-100 dark:bg-gray-800 rounded-t-xl">
            <div>Produto</div>
            <div className="hidden sm:block">Qtd</div>
            <div>Fornecedor</div>
@@ -235,8 +235,8 @@ export function QuoteConversionTab({
               <div 
                 key={product.product_id} 
                 className={cn(
-                  "flex items-center px-3 rounded-xl border transition-all duration-300 group/row bg-white dark:bg-gray-900 shadow-sm hover:shadow-md", 
-                  isBest ? "border-emerald-100 dark:border-emerald-900/30" : "border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
+                  "flex items-center px-3 rounded-xl border transition-all duration-300 group/row bg-white dark:bg-gray-950 shadow-sm hover:shadow-md", 
+                  isBest ? "border-emerald-200 dark:border-emerald-800/50" : "border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
                 )}
                 style={{ height: '52px' }}
               >
@@ -246,7 +246,7 @@ export function QuoteConversionTab({
                     <p className="font-bold text-[11px] text-gray-900 dark:text-white truncate tracking-tight" title={safeStr(product.product_name)}>
                       {safeStr(product.product_name)}
                     </p>
-                    <span className="sm:hidden text-[7px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-100 dark:bg-gray-800 px-1 py-0 rounded border border-gray-200 dark:border-gray-700 w-fit mt-0.5 block">
+                    <span className="sm:hidden text-[7px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-800 px-1 py-0 rounded border border-gray-200 dark:border-gray-700 w-fit mt-0.5 block">
                       {safeStr(product.quantidade)} {safeStr(product.unidade)}
                     </span>
                   </div>
@@ -261,10 +261,10 @@ export function QuoteConversionTab({
                   {/* Select Fornecedor */}
                   <div className="min-w-0">
                     <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
-                      <SelectTrigger className="w-full h-7 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-bold rounded-lg text-[10px] shadow-sm transition-all text-gray-700 dark:text-gray-300">
+                      <SelectTrigger className="w-full h-7 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 font-bold rounded-lg text-[10px] shadow-sm transition-all text-gray-700 dark:text-gray-300">
                         <SelectValue placeholder="Escolha..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                      <SelectContent className="bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                         {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
                           <SelectItem key={f.id} value={f.id} className="font-bold text-xs">
                             {safeStr(f.nome)}
@@ -304,9 +304,9 @@ export function QuoteConversionTab({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {supplierGroups.map((group, index) => (
-              <Card key={group.supplierId} className="p-3 bg-white/40 dark:bg-gray-900/40 border-white/30 dark:border-white/10 backdrop-blur-2xl rounded-xl shadow-lg group/order hover:border-gray-400/40 transition-all duration-300">
+              <Card key={group.supplierId} className="p-3 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 rounded-xl shadow-sm group/order hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-300">
                 <div className="flex items-center justify-between mb-1.5">
-                  <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded shadow-sm">Pedido #{index + 1}</Badge>
+                  <Badge variant="outline" className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded shadow-sm">Pedido #{index + 1}</Badge>
                   <span className="font-black text-[10px] text-gray-900 dark:text-white">R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                 </div>
                 <p className="font-black text-[11px] text-gray-900 dark:text-white truncate mb-0.5 group-hover/order:text-gray-600 transition-colors" title={group.supplierName}>{group.supplierName}</p>
@@ -320,7 +320,7 @@ export function QuoteConversionTab({
       )}
 
       {/* Dados de Entrega */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/20 dark:bg-black/10 p-3 rounded-xl border border-white/20">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white dark:bg-gray-950 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
         <div className="space-y-1.5">
           <label className="block text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Data de Entrega *</label>
           <div className="relative group">
@@ -329,7 +329,7 @@ export function QuoteConversionTab({
               type="date" 
               value={deliveryDate} 
               onChange={(e) => setDeliveryDate(e.target.value)} 
-              className="h-9 bg-white/60 dark:bg-gray-950/60 border-white/30 dark:border-white/10 font-bold rounded-xl pl-9 focus:ring-gray-400/20 shadow-sm text-xs" 
+              className="h-9 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 font-bold rounded-xl pl-9 focus:ring-gray-400/20 shadow-sm text-xs" 
               min={new Date().toISOString().split('T')[0]} 
             />
           </div>
@@ -342,7 +342,7 @@ export function QuoteConversionTab({
               value={observations} 
               onChange={(e) => setObservations(e.target.value)} 
               placeholder="Instruções..." 
-              className="h-9 bg-white/60 dark:bg-gray-950/60 border-white/30 dark:border-white/10 font-medium rounded-xl pl-9 focus:ring-gray-400/20 shadow-sm text-xs" 
+              className="h-9 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 font-medium rounded-xl pl-9 focus:ring-gray-400/20 shadow-sm text-xs" 
             />
           </div>
         </div>

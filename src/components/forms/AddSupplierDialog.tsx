@@ -316,7 +316,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
 
           {/* Dica de preenchimento - Ocultar no mobile */}
           {!isMobile && (
-            <div className="bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-800/40 dark:to-gray-800/20 border border-gray-200/50 dark:border-gray-700/30 rounded-lg p-3 backdrop-blur-sm">
+            <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
               <div className="flex items-start gap-2">
                 <div className="text-lg">💡</div>
                 <div className="flex-1">
