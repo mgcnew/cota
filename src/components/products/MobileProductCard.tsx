@@ -6,7 +6,7 @@ import { LazyImage } from "@/components/responsive/LazyImage";
 import { 
   Package, Edit, Trash2,
   ClipboardList, TrendingUp, TrendingDown, Minus, Star,
-  ChevronDown, ChevronUp, Eye
+  ChevronDown, ChevronUp, History
 } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -163,7 +163,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
                 className="h-10 touch-target active:scale-95 transition-transform"
                 onClick={handleHistory}
               >
-                <Eye className="h-4 w-4 mr-2" />
+                <History className="h-4 w-4 mr-2" />
                 Histórico
               </Button>
             )}
