@@ -7,7 +7,8 @@ import {
   CheckCircle2, 
   AlertCircle,
   Download,
-  X
+  X,
+  Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
