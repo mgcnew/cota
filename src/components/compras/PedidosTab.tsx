@@ -19,6 +19,7 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { usePedidosStats, OrderData } from "@/hooks/usePedidosStats";
 import { PedidosListDesktop } from "./PedidosListDesktop";
+import { MobileOrderCard } from "@/components/pedidos/MobileOrderCard";
 
 function PedidosTab() {
   const { isMobile } = useBreakpoint();
@@ -138,47 +139,12 @@ function PedidosTab() {
       {/* Mobile Cards View */}
       <div className="md:hidden space-y-2">
         {paginatedData.items.map((pedido) => (
-          <div key={pedido.id} className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 p-3 shadow-sm">
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-600/30">
-                  <ShoppingCart className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{capitalize(pedido.fornecedor)}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">#{pedido.id.substring(0, 8)}</p>
-                </div>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><MoreVertical className="h-4 w-4" /></Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
-                  <DropdownMenuItem onClick={() => handleManagePedido(pedido)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70"><ShoppingCart className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
-                  {pedido.status !== "entregue" && pedido.status !== "cancelado" && (
-                    <DropdownMenuItem onClick={() => handleRegistrarEntrega(pedido)} className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
-                      <ClipboardCheck className="h-4 w-4 mr-2" />Registrar Entrega
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
-                  <DropdownMenuItem onClick={() => handleDeletePedidoClick(pedido)} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <StatusSelect
-                value={pedido.status}
-                options={ORDER_STATUS_OPTIONS}
-                onChange={(newStatus) => updatePedidoStatus({ pedidoId: pedido.id, status: newStatus })}
-                isLoading={isUpdating}
-              />
-              <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"><Package className="h-3 w-3 mr-1" />{pedido.itens} itens</Badge>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-500 dark:text-gray-400">Total: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{pedido.total}</span></span>
-              <span className="text-gray-500 dark:text-gray-400">Entrega: {pedido.dataEntrega || '-'}</span>
-            </div>
-          </div>
+          <MobileOrderCard
+            key={pedido.id}
+            pedido={pedido}
+            onManage={handleManagePedido}
+            onDelete={handleDeletePedidoClick}
+          />
         ))}
       </div>
 

@@ -22,6 +22,7 @@ import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { useToast } from "@/hooks/use-toast";
 import { useCotacoesStats } from "@/hooks/useCotacoesStats";
 import { CotacoesListDesktop } from "./CotacoesListDesktop";
+import { MobileQuoteCard } from "./MobileQuoteCard";
 
 import {
   AddQuoteDialogLazy,
@@ -252,95 +253,18 @@ function CotacoesTab() {
       <div className="md:hidden space-y-2">
         {paginatedData.items.map((cotacao, index) => {
           const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
-          const { isProntaParaDecisao, isVencendo, fornecedoresRespondidos, totalFornecedores } = getQuoteSpecialStatus(cotacao);
           
           return (
-            <div 
-              key={cotacao.id} 
-              className={`bg-white dark:bg-gray-800/50 rounded-xl border p-3 shadow-sm ${
-                isProntaParaDecisao 
-                  ? 'border-emerald-300 dark:border-emerald-700 ring-1 ring-emerald-200 dark:ring-emerald-800' 
-                  : isVencendo 
-                    ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800'
-                    : 'border-gray-200 dark:border-gray-700/30'
-              }`}
-            >
-              {/* Indicador de status especial */}
-              {isProntaParaDecisao && (
-                <div className="flex items-center gap-1.5 mb-2 text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-semibold uppercase">Pronta para decisão</span>
-                </div>
-              )}
-              {isVencendo && !isProntaParaDecisao && (
-                <div className="flex items-center gap-1.5 mb-2 text-amber-600 dark:text-amber-400">
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-semibold uppercase">Vencendo em breve</span>
-                </div>
-              )}
-              
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    isProntaParaDecisao 
-                      ? 'bg-emerald-100 dark:bg-emerald-900/30' 
-                      : 'bg-teal-100 dark:bg-teal-900/30'
-                  }`}>
-                    {isProntaParaDecisao ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                    ) : (
-                      <ClipboardList className="h-5 w-5 text-teal-600" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-sm truncate"><CapitalizedText>{cotacao.produtoResumo || cotacao.produto}</CapitalizedText></p>
-                    <p className="text-xs text-muted-foreground">#{cotacaoNumero.toString().padStart(4, '0')}</p>
-                  </div>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {(cotacao.status === "concluida" || cotacao.status === "finalizada") ? (
-                      <DropdownMenuItem onClick={() => handleViewQuote(cotacao)}><Eye className="h-4 w-4 mr-2" />Resumo</DropdownMenuItem>
-                    ) : (
-                      <>
-                        <DropdownMenuItem onClick={() => handleGerenciarQuote(cotacao)}><ClipboardList className="h-4 w-4 mr-2" />Gerenciar</DropdownMenuItem>
-                        {isProntaParaDecisao && (
-                          <DropdownMenuItem onClick={() => handleGerenciarQuote(cotacao)} className="text-emerald-600">
-                            <ShoppingCart className="h-4 w-4 mr-2" />Converter em Pedido
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleDeleteQuote(cotacao)} className="text-red-600"><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <StatusSelect
-                  value={cotacao.status}
-                  options={QUOTE_STATUS_OPTIONS}
-                  onChange={(newStatus) => updateQuoteStatus.mutate({ quoteId: cotacao.id, status: newStatus })}
-                  isLoading={isUpdating}
-                />
-                <Badge variant="outline" className={`text-xs ${
-                  fornecedoresRespondidos === totalFornecedores && totalFornecedores > 0
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700'
-                    : ''
-                }`}>
-                  <Building2 className="h-3 w-3 mr-1" />{fornecedoresRespondidos}/{totalFornecedores}
-                </Badge>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Melhor: <span className="font-semibold text-green-600">{cotacao.melhorPreco || 'R$ 0,00'}</span></span>
-                <span className={`${isVencendo ? 'text-amber-600 font-semibold' : 'text-muted-foreground'}`}>
-                  Fim: {cotacao.dataFim || '-'}
-                </span>
-              </div>
-            </div>
+            <MobileQuoteCard
+              key={cotacao.id}
+              cotacao={cotacao}
+              cotacaoNumero={cotacaoNumero}
+              onView={handleViewQuote}
+              onManage={handleGerenciarQuote}
+              onDelete={handleDeleteQuote}
+              onUpdateStatus={handleUpdateStatus}
+              isUpdating={isUpdating}
+            />
           );
         })}
       </div>
