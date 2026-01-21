@@ -10,6 +10,7 @@
 
 import * as React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useKeyboardAdjustment } from "@/hooks/useKeyboardAdjustment";
 import {
   Dialog,
   DialogContent,
@@ -96,16 +97,50 @@ const ResponsiveDialogContent = React.forwardRef<
   ResponsiveDialogContentProps
 >(({ className, children, forceDialog = false, ...props }, ref) => {
   const isMobile = useIsMobile();
+  const { keyboardHeight, isKeyboardVisible } = useKeyboardAdjustment();
+  const contentRef = React.useRef<HTMLDivElement>(null);
+
+  // Autofoco automático no primeiro campo de input/textarea quando aberto
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (contentRef.current) {
+        // Procura primeiro por inputs de busca ou principais
+        const priorityInput = contentRef.current.querySelector('input[placeholder*="buscar"], input[placeholder*="pesquisar"], input[name*="search"]') as HTMLElement;
+        const firstInput = priorityInput || contentRef.current.querySelector('input:not([type="hidden"]), textarea, [contenteditable="true"]') as HTMLElement;
+        
+        if (firstInput) {
+          firstInput.focus();
+          if (firstInput instanceof HTMLInputElement || firstInput instanceof HTMLTextAreaElement) {
+            const val = firstInput.value;
+            firstInput.value = '';
+            firstInput.value = val;
+          }
+        }
+      }
+    }, 500); 
+    return () => clearTimeout(timer);
+  }, []); // Executa ao montar (quando o modal abre)
 
   // Mobile: Render as Drawer
   if (isMobile && !forceDialog) {
     return (
       <DrawerContent
+        ref={contentRef}
         className={cn(
-          "max-h-[96dvh] overflow-hidden flex flex-col bg-background",
+          "max-h-[96dvh] overflow-hidden flex flex-col bg-background transition-all duration-300 ease-in-out",
           className
         )}
-        style={{ WebkitOverflowScrolling: 'touch' }}
+        style={{ 
+          WebkitOverflowScrolling: 'touch',
+          // Reposicionamento dinâmico conforme o teclado
+          // No iOS/Safari, o visualViewport.height diminui e precisamos subir o modal
+          transform: isKeyboardVisible ? `translateY(-${Math.max(0, keyboardHeight - 20)}px)` : 'translateY(0)',
+          // Margem de segurança para o teclado
+          marginBottom: isKeyboardVisible ? 'env(safe-area-inset-bottom, 20px)' : '0',
+          // Suaviza a transição quando o teclado aparece
+          transitionProperty: 'transform, margin-bottom, height',
+          transitionDuration: '300ms',
+        }}
         {...props as any}
       >
         {children}
@@ -116,7 +151,9 @@ const ResponsiveDialogContent = React.forwardRef<
   // Desktop: Render as Dialog
   return (
     <DialogContent ref={ref} className={className} {...props}>
-      {children}
+      <div ref={contentRef} className="h-full flex flex-col">
+        {children}
+      </div>
     </DialogContent>
   );
 });
