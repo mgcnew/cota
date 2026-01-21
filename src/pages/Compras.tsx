@@ -8,6 +8,7 @@ import { useKeyboardShortcuts, formatShortcut } from "@/hooks/useKeyboardShortcu
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 // Lazy load tab contents for better performance
 const CotacoesTab = lazy(() => import("@/components/compras/CotacoesTab"));
@@ -135,41 +136,73 @@ function Compras() {
           </div>
 
           {/* Tabs - Abaixo do header, acima do conteúdo */}
-          <div className={`mb-4 ${isMobile ? 'overflow-x-auto scrollbar-hide -mx-1 px-1' : ''}`}>
-            <TabsList className={`h-auto p-0 bg-transparent !bg-transparent border-0 gap-6 shadow-none !shadow-none ${isMobile ? 'w-max' : ''}`}>
+          <div className={cn(
+            "mb-4",
+            isMobile ? "sticky top-0 z-10 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm -mx-4 px-4 py-2 border-b border-gray-200 dark:border-gray-800 overflow-x-auto scrollbar-none" : ""
+          )}>
+            <TabsList className={cn(
+              isMobile 
+                ? "h-auto w-max p-0 bg-transparent gap-2" 
+                : "h-auto p-0 bg-transparent border-0 gap-6"
+            )}>
               <TabsTrigger 
                 value="cotacoes" 
-                className={`h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent transition-all bg-transparent !bg-transparent shadow-none !shadow-none data-[state=active]:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground`}
+                className={cn(
+                  "transition-all",
+                  isMobile 
+                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
+                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                )}
               >
-                <FileText className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
+                <FileText className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
                 Cotações
               </TabsTrigger>
               <TabsTrigger 
                 value="pedidos"
-                className={`h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent transition-all bg-transparent !bg-transparent shadow-none !shadow-none data-[state=active]:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground`}
+                className={cn(
+                  "transition-all",
+                  isMobile 
+                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
+                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                )}
               >
-                <ShoppingCart className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
+                <ShoppingCart className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
                 Pedidos
               </TabsTrigger>
               <TabsTrigger 
                 value="lista"
-                className={`h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent transition-all bg-transparent !bg-transparent shadow-none !shadow-none data-[state=active]:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground`}
+                className={cn(
+                  "transition-all",
+                  isMobile 
+                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
+                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                )}
               >
-                <ShoppingBasket className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
+                <ShoppingBasket className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
                 Lista
               </TabsTrigger>
               <TabsTrigger 
                 value="embalagens"
-                className={`h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent transition-all bg-transparent !bg-transparent shadow-none !shadow-none data-[state=active]:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground`}
+                className={cn(
+                  "transition-all",
+                  isMobile 
+                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
+                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                )}
               >
-                <Package className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
+                <Package className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
                 Embalagens
               </TabsTrigger>
               <TabsTrigger 
                 value="analise"
-                className={`h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent transition-all bg-transparent !bg-transparent shadow-none !shadow-none data-[state=active]:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground`}
+                className={cn(
+                  "transition-all",
+                  isMobile 
+                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
+                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                )}
               >
-                <BarChart3 className={`${isMobile ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'}`} />
+                <BarChart3 className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
                 Análise
               </TabsTrigger>
             </TabsList>

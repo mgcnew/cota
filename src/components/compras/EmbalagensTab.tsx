@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 
+import { MobilePackagingQuoteCard } from "./embalagens/MobilePackagingQuoteCard";
+
 // Dialogs e componentes
 import { 
   AddPackagingQuoteDialog, 
@@ -159,43 +161,82 @@ function EmbalagensTab() {
     <div className="space-y-4">
       {/* Sub-tabs: Cotações | Pedidos */}
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <TabsList className="h-11 p-1 bg-gray-100 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700/50">
-            <TabsTrigger value="cotacoes" className="h-9 px-4 text-sm font-medium rounded-lg transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400">
-              <ClipboardList className="h-4 w-4" />
-              Cotações
-              {stats.prontasParaDecisao > 0 && (
-                <Badge className="ml-1 bg-emerald-500 text-white text-[10px] px-1.5 py-0">
-                  {stats.prontasParaDecisao}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="pedidos" className="h-9 px-4 text-sm font-medium rounded-lg transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400">
-              <ShoppingCart className="h-4 w-4" />
-              Pedidos
-              {stats.totalPedidos > 0 && (
-                <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
-                  {stats.totalPedidos}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="analise" className="h-9 px-4 text-sm font-medium rounded-lg transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400">
-              <BarChart3 className="h-4 w-4" />
-              Análise
-            </TabsTrigger>
-            <TabsTrigger value="economia" className="h-9 px-4 text-sm font-medium rounded-lg transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400">
-              <Calculator className="h-4 w-4" />
-              Economia
-            </TabsTrigger>
-          </TabsList>
+        <div className={cn(
+          "flex items-center justify-between gap-3 mb-4",
+          isMobile ? "flex-col items-stretch gap-3" : "flex-row"
+        )}>
+          <div className={cn(
+            isMobile ? "overflow-x-auto scrollbar-none -mx-4 px-4 w-[calc(100%+2rem)]" : ""
+          )}>
+            <TabsList className={cn(
+              "p-1 bg-gray-100 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50",
+              isMobile 
+                ? "h-10 w-max justify-start rounded-full px-1" 
+                : "h-11 rounded-xl"
+            )}>
+              <TabsTrigger 
+                value="cotacoes" 
+                className={cn(
+                  "text-sm font-medium transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400",
+                  isMobile ? "h-8 rounded-full px-3" : "h-9 rounded-lg px-4"
+                )}
+              >
+                <ClipboardList className="h-4 w-4" />
+                Cotações
+                {stats.prontasParaDecisao > 0 && (
+                  <Badge className="ml-1 bg-emerald-500 text-white text-[10px] px-1.5 py-0">
+                    {stats.prontasParaDecisao}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="pedidos" 
+                className={cn(
+                  "text-sm font-medium transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400",
+                  isMobile ? "h-8 rounded-full px-3" : "h-9 rounded-lg px-4"
+                )}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Pedidos
+                {stats.totalPedidos > 0 && (
+                  <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+                    {stats.totalPedidos}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="analise" 
+                className={cn(
+                  "text-sm font-medium transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400",
+                  isMobile ? "h-8 rounded-full px-3" : "h-9 rounded-lg px-4"
+                )}
+              >
+                <BarChart3 className="h-4 w-4" />
+                Análise
+              </TabsTrigger>
+              <TabsTrigger 
+                value="economia" 
+                className={cn(
+                  "text-sm font-medium transition-all gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400",
+                  isMobile ? "h-8 rounded-full px-3" : "h-9 rounded-lg px-4"
+                )}
+              >
+                <Calculator className="h-4 w-4" />
+                Economia
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setItemsDialogOpen(true)} 
-            className="h-10"
+            className={cn(
+              "bg-white dark:bg-gray-800",
+              isMobile ? "w-full h-10 rounded-xl" : "h-10"
+            )}
           >
-            <Package className="h-4 w-4 mr-1" />
+            <Package className="h-4 w-4 mr-2" />
             Cadastrar Embalagens
           </Button>
         </div>
@@ -288,103 +329,17 @@ function EmbalagensTab() {
             /* Mobile: Cards */
             <div className="space-y-2">
               {paginatedData.items.map((quote, index) => {
-                const { respondidos, total, isPronta } = getQuoteStatus(quote);
                 const numero = paginatedData.pagination.startIndex + index + 1;
 
                 return (
-                  <div 
+                  <MobilePackagingQuoteCard
                     key={quote.id}
-                    className={`bg-white dark:bg-gray-800/50 rounded-xl border p-4 shadow-sm ${
-                      isPronta 
-                        ? 'border-emerald-300 dark:border-emerald-700 ring-1 ring-emerald-200 dark:ring-emerald-800' 
-                        : 'border-gray-200 dark:border-gray-700/50'
-                    }`}
-                  >
-                    {isPronta && (
-                      <div className="flex items-center gap-1.5 mb-2 text-emerald-600 dark:text-emerald-400">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        <span className="text-[10px] font-semibold uppercase">Pronta para decisão</span>
-                      </div>
-                    )}
-
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border ${
-                          isPronta 
-                            ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700' 
-                            : 'bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600/30'
-                        }`}>
-                          {isPronta ? (
-                            <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                          ) : (
-                            <Package className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
-                            <CapitalizedText>
-                              {quote.itens.map(i => i.packagingName).join(', ') || 'Sem itens'}
-                            </CapitalizedText>
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            #{numero.toString().padStart(4, '0')} • {quote.dataInicio} - {quote.dataFim}
-                          </p>
-                        </div>
-                      </div>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
-                          <DropdownMenuItem onClick={() => handleManageQuote(quote)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70">
-                            <Eye className="h-4 w-4 mr-2" />Gerenciar
-                          </DropdownMenuItem>
-                          {isPronta && (
-                            <DropdownMenuItem onClick={() => handleConvertToOrder(quote)} className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
-                              <ShoppingCart className="h-4 w-4 mr-2" />Converter em Pedido
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
-                          <DropdownMenuItem onClick={() => handleDeleteQuote(quote)} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
-                            <Trash2 className="h-4 w-4 mr-2" />Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-3 flex-wrap">
-                      <Badge variant={quote.status === "ativa" ? "default" : "secondary"}>
-                        {quote.status}
-                      </Badge>
-                      <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${
-                        respondidos === total && total > 0
-                          ? 'bg-emerald-50 dark:bg-emerald-900/20'
-                          : 'bg-blue-50 dark:bg-blue-900/20'
-                      }`}>
-                        <Building2 className={`h-3 w-3 ${
-                          respondidos === total && total > 0
-                            ? 'text-emerald-500 dark:text-emerald-400'
-                            : 'text-blue-500 dark:text-blue-400'
-                        }`} />
-                        <span className={`font-semibold text-xs ${
-                          respondidos === total && total > 0
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-blue-600 dark:text-blue-400'
-                        }`}>
-                          {respondidos}/{total}
-                        </span>
-                      </div>
-                      {quote.melhorPreco !== '-' && (
-                        <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-700">
-                          <DollarSign className="h-3 w-3 mr-1" />
-                          {quote.melhorPreco}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
+                    quote={quote}
+                    quoteNumber={numero}
+                    onManage={handleManageQuote}
+                    onDelete={handleDeleteQuote}
+                    onConvertToOrder={handleConvertToOrder}
+                  />
                 );
               })}
             </div>
