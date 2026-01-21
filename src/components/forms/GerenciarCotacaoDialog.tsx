@@ -468,7 +468,10 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 flex flex-col shadow-2xl rounded-t-xl sm:rounded-[2rem] [&>button]:hidden">
+      <ResponsiveDialogContent 
+        hideClose
+        className="w-[95vw] sm:w-[95vw] md:max-w-[1100px] h-[95vh] sm:h-[85vh] max-h-[95vh] sm:max-h-[700px] overflow-hidden p-0 gap-0 border border-gray-200 dark:border-gray-800 flex flex-col shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] bg-white dark:bg-gray-950 [&>button]:hidden"
+      >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           {/* Header Compacto com Tabs Integradas */}
           <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden flex items-center justify-between">

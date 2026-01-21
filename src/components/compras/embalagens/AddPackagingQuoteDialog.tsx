@@ -178,12 +178,12 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
         className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-gray-200 dark:border-gray-700 shadow-2xl rounded-t-[2rem] sm:rounded-[2rem] flex flex-col bg-white dark:bg-gray-950"
         onKeyDown={handleKeyDown}
       >
-        {/* Header com design semiglass */}
-        <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
+        {/* Header com design refinado */}
+        <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-transparent pointer-events-none"></div>
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white shadow-xl shadow-gray-500/20 ring-1 ring-white/20 flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-xl ring-1 ring-white/20 flex-shrink-0">
                 <Package className="h-4 w-4" />
               </div>
               <div className="flex-1 min-w-0">
@@ -200,7 +200,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
             <div className="flex items-center gap-2 sm:gap-3">
               {currentStepIndex > 0 && (
                 <Button type="button" variant="outline" size="sm" onClick={handlePrevious}
-                  className="border-gray-200/60 dark:border-gray-700/40 bg-white/50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all rounded-xl h-9 px-3 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 shadow-sm">
+                  className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all rounded-xl h-9 px-3 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 shadow-sm">
                   <ChevronLeft className="h-3 w-3 mr-1.5" />
                   <span className="hidden sm:inline">Voltar</span>
                 </Button>
@@ -225,19 +225,19 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
             </div>
             
             <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
-              className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-xl transition-all border border-transparent hover:border-gray-200/50 dark:hover:border-gray-700/50 shadow-sm ml-2">
+              className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700 shadow-sm ml-2">
               <X className="h-4 w-4" />
             </Button>
           </div>
           
           <div className="mt-3">
-            <Progress value={progress} className="h-1 bg-gray-200/50 dark:bg-gray-700/50 [&>div]:bg-gray-900 dark:[&>div]:bg-white rounded-full" />
+            <Progress value={progress} className="h-1 bg-gray-100 dark:bg-gray-800 [&>div]:bg-gray-900 dark:[&>div]:bg-white rounded-full" />
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-          <div className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-700 shadow-inner">
+        <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+          <div className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-inner">
             {STEPS.map((step) => {
               const Icon = step.icon;
               const status = getStepStatus(step.id);

@@ -586,7 +586,7 @@ export function ManagePackagingQuoteDialog({
         </div>
 
         {/* Stats */}
-        <div className="flex-shrink-0 px-5 py-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30 backdrop-blur-sm">
+        <div className="flex-shrink-0 px-5 py-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50 dark:bg-gray-900">
           <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
             <div className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap">
               <Package className="h-3.5 w-3.5 text-gray-400" />
@@ -605,8 +605,8 @@ export function ManagePackagingQuoteDialog({
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-            <TabsList className="flex w-full sm:w-auto space-x-1 overflow-x-auto scrollbar-hide p-1 bg-white/50 dark:bg-gray-950/50 rounded-xl border border-gray-200/60 dark:border-gray-700/40 shadow-inner h-auto">
+          <div className="flex-shrink-0 px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-950">
+            <TabsList className="flex w-full sm:w-auto space-x-1 overflow-x-auto scrollbar-hide p-1 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/60 dark:border-gray-700/40 shadow-inner h-auto">
               <TabsTrigger value="resumo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-gray-200 dark:data-[state=active]:ring-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                 <Trophy className="h-3.5 w-3.5 mb-0.5" />Resumo
               </TabsTrigger>
@@ -626,17 +626,17 @@ export function ManagePackagingQuoteDialog({
           </div>
 
           {/* Tab Resumo */}
-          <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
+          <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50 dark:bg-gray-950">
             <ScrollArea className="h-full">
               <div className="p-4 sm:p-6 space-y-4">
                 <h3 className="text-xs font-black text-gray-500 uppercase tracking-wider flex items-center gap-2 px-1">
                   <Star className="h-3.5 w-3.5 text-gray-400" />
                   Melhor Preço por Embalagem
                 </h3>
-                <Card className="overflow-hidden border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl">
+                <Card className="overflow-hidden border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-950 shadow-sm rounded-xl">
                   <div className="divide-y divide-gray-200/60 dark:divide-gray-700/40">
                     {bestPricesData.map((item) => (
-                      <div key={item.packagingId} className="p-4 hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
+                      <div key={item.packagingId} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-gray-900 dark:text-white text-sm">{item.packagingName}</p>
@@ -682,19 +682,19 @@ export function ManagePackagingQuoteDialog({
           </TabsContent>
 
           {/* Tab Editar Cotação */}
-          <TabsContent value="editar" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
+          <TabsContent value="editar" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50 dark:bg-gray-950">
             <ScrollArea className="h-full">
               <div className="p-4 sm:p-6 space-y-6">
                 {/* Seção Embalagens */}
-                <Card className="border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl overflow-hidden">
-                  <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40">
+                <Card className="border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-950 shadow-sm rounded-xl overflow-hidden">
+                  <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50 dark:bg-gray-900">
                     <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-2">
                       <Package className="h-4 w-4 text-gray-500" />
                       Embalagens da Cotação ({quote.itens.length})
                     </h3>
                   </div>
                   {packagingNotInQuote.length > 0 && (
-                    <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
+                    <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50 dark:bg-gray-900">
                       <div className="flex gap-3">
                         <Select value={selectedPackagingToAdd} onValueChange={setSelectedPackagingToAdd}>
                           <SelectTrigger className="flex-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 h-9 text-xs"><SelectValue placeholder="Selecione uma embalagem para adicionar..." /></SelectTrigger>
@@ -711,7 +711,7 @@ export function ManagePackagingQuoteDialog({
                     {quote.itens.length === 0 ? (
                       <div className="p-8 text-center text-gray-500"><Package className="h-10 w-10 mx-auto mb-3 opacity-20" /><p className="text-xs font-medium">Nenhuma embalagem na cotação</p></div>
                     ) : quote.itens.map((item, index) => (
-                      <div key={item.packagingId} className="p-3 flex items-center justify-between hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
+                      <div key={item.packagingId} className="p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
                         <div className="flex items-center gap-3">
                           <span className="text-[10px] font-bold text-gray-400 w-6">#{index + 1}</span>
                           <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
@@ -727,15 +727,15 @@ export function ManagePackagingQuoteDialog({
                 </Card>
 
                 {/* Seção Fornecedores */}
-                <Card className="border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl overflow-hidden">
-                  <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40">
+                <Card className="border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-950 shadow-sm rounded-xl overflow-hidden">
+                  <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50 dark:bg-gray-900">
                     <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-gray-500" />
                       Fornecedores da Cotação ({quote.fornecedores.length})
                     </h3>
                   </div>
                   {suppliersNotInQuote.length > 0 && (
-                    <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
+                    <div className="p-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-gray-50 dark:bg-gray-900">
                       <div className="flex gap-3">
                         <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
                           <SelectTrigger className="flex-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 h-9 text-xs"><SelectValue placeholder="Selecione um fornecedor para adicionar..." /></SelectTrigger>
@@ -752,7 +752,7 @@ export function ManagePackagingQuoteDialog({
                     {quote.fornecedores.length === 0 ? (
                       <div className="p-8 text-center text-gray-500"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-20" /><p className="text-xs font-medium">Nenhum fornecedor na cotação</p></div>
                     ) : quote.fornecedores.map((fornecedor, index) => (
-                      <div key={fornecedor.supplierId} className="p-3 flex items-center justify-between hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
+                      <div key={fornecedor.supplierId} className="p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
                         <div className="flex items-center gap-3">
                           <span className="text-[10px] font-bold text-gray-400 w-6">#{index + 1}</span>
                           <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
@@ -776,9 +776,9 @@ export function ManagePackagingQuoteDialog({
           </TabsContent>
 
           {/* Tab Valores */}
-          <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
+          <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50 dark:bg-gray-950">
             <div className="h-full flex">
-              <div className="w-56 flex-shrink-0 border-r border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl">
+              <div className="w-56 flex-shrink-0 border-r border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-950">
                 <div className="p-3 border-b border-gray-200/60 dark:border-gray-700/40"><h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Fornecedores</h4></div>
                 <ScrollArea className="h-[calc(100%-41px)]">
                   <div className="p-2 space-y-1">
@@ -787,7 +787,7 @@ export function ManagePackagingQuoteDialog({
                         className={cn("w-full p-2.5 rounded-lg text-left transition-all text-xs font-medium group relative overflow-hidden",
                           selectedSupplier === fornecedor.supplierId 
                             ? "bg-gray-900 text-white shadow-md ring-1 ring-gray-900/10" 
-                            : "text-gray-600 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:text-gray-900")}>
+                            : "text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900")}>
                         <div className="flex items-center gap-2 relative z-10">
                           <Building2 className={cn("h-3.5 w-3.5 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-gray-300" : "text-gray-400 group-hover:text-gray-600")} />
                           <span className="truncate font-bold">{fornecedor.supplierName}</span>
@@ -815,7 +815,7 @@ export function ManagePackagingQuoteDialog({
 
                       return (
                         <Card key={item.packagingId} className={cn("p-4 transition-all border-gray-200/60 dark:border-gray-700/40 shadow-sm", 
-                          isBestPrice ? "bg-gray-50/50 dark:bg-gray-800/50 ring-1 ring-gray-200/60" : "bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl",
+                          isBestPrice ? "bg-gray-50 dark:bg-gray-900 ring-1 ring-gray-200/60" : "bg-white dark:bg-gray-950",
                           isEditing && "ring-2 ring-gray-900 dark:ring-white shadow-lg z-10")}>
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2.5">
@@ -867,7 +867,7 @@ export function ManagePackagingQuoteDialog({
           </TabsContent>
 
           {/* Tab Comparativo */}
-          <TabsContent value="comparativo" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
+          <TabsContent value="comparativo" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50 dark:bg-gray-950">
             <ScrollArea className="h-full">
               <div className="p-4 sm:p-6 space-y-4">
                 {comparison.length === 0 || comparison.every(c => c.fornecedores.length === 0) ? (
@@ -879,8 +879,8 @@ export function ManagePackagingQuoteDialog({
                     <p className="text-xs">Adicione os valores na aba "Valores" para visualizar</p>
                   </div>
                 ) : comparison.map((comp) => (
-                  <Card key={comp.packagingId} className="overflow-hidden border-gray-200/60 dark:border-gray-700/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl shadow-sm rounded-xl">
-                    <div className="bg-gray-50/50 dark:bg-gray-800/50 p-3 border-b border-gray-200/60 dark:border-gray-700/40">
+                  <Card key={comp.packagingId} className="overflow-hidden border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-950 shadow-sm rounded-xl">
+                    <div className="bg-gray-50 dark:bg-gray-900 p-3 border-b border-gray-200/60 dark:border-gray-700/40">
                       <h4 className="font-bold text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2"><Package className="h-4 w-4 text-gray-400" />{comp.packagingName}</h4>
                     </div>
                     {comp.fornecedores.length === 0 ? (
@@ -888,7 +888,7 @@ export function ManagePackagingQuoteDialog({
                     ) : (
                       <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
                         {comp.fornecedores.map((f, index) => (
-                          <div key={f.supplierId} className={cn("p-4 flex items-center gap-4 transition-colors cursor-pointer hover:bg-white/80 dark:hover:bg-gray-800/80", f.isMelhorPreco && "bg-gray-50/50 dark:bg-gray-800/50")} onClick={() => handleEditItem(f.supplierId, comp.packagingId)}>
+                          <div key={f.supplierId} className={cn("p-4 flex items-center gap-4 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900", f.isMelhorPreco && "bg-gray-50 dark:bg-gray-900")} onClick={() => handleEditItem(f.supplierId, comp.packagingId)}>
                             <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm", f.isMelhorPreco ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500")}>
                               {f.isMelhorPreco ? <Award className="h-4 w-4" /> : index + 1}
                             </div>
@@ -911,7 +911,7 @@ export function ManagePackagingQuoteDialog({
           </TabsContent>
 
           {/* Tab Exportar PDF */}
-          <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50/30 dark:bg-black/20">
+          <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0 bg-gray-50 dark:bg-gray-950">
             <ScrollArea className="h-full">
               <div className="p-4 sm:p-6 space-y-6">
                 <div className="text-center py-6">
