@@ -472,20 +472,19 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
   // Shared Header Component
   const Header = (
-    <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-transparent pointer-events-none"></div>
+    <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
       <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white shadow-xl shadow-gray-500/20 ring-1 ring-white/20 flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
             <Package className="h-4 w-4" />
           </div>
           <div className="flex-1 min-w-0">
             {isMobile ? (
-              <DrawerTitle className="text-lg font-black text-gray-900 dark:text-white tracking-tight truncate">
+              <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
                 Novo Produto
               </DrawerTitle>
             ) : (
-              <DialogTitle className="text-lg font-black text-gray-900 dark:text-white tracking-tight truncate">
+              <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
                 Novo Produto
               </DialogTitle>
             )}
@@ -493,7 +492,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         </div>
         
         <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
-          className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-xl transition-all border border-transparent hover:border-gray-200/50 dark:hover:border-gray-700/50 shadow-sm ml-2">
+          className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -504,7 +503,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     <>
       {Header}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden">
+        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-950">
           <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-4">
             {/* Alerta de limite de produtos */}
             <LimitAlert 
@@ -515,7 +514,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             {/* Seção: Informações Básicas */}
             <div className="space-y-3">
               <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-                <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
                 Informações do Produto
               </h3>
               
@@ -528,7 +527,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                     <FormControl>
                       <Input
                         placeholder="Ex: Coxa com Sobrecoxa Congelada"
-                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                         {...field}
                       />
                     </FormControl>
@@ -562,11 +561,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                     <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Unidade de Medida *</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white`}>
+                        <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 dark:text-white`}>
                           <SelectValue placeholder="Selecione a unidade" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
+                      <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
                         <SelectItem value="un">Unidade (un)</SelectItem>
                         <SelectItem value="kg">Quilograma (kg)</SelectItem>
                         <SelectItem value="g">Grama (g)</SelectItem>
@@ -595,7 +594,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                         <Input 
                           {...field} 
                           placeholder="EAN-13, EAN-8, UPC..."
-                          className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm rounded-lg border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                          className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                           maxLength={13}
                         />
                         <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${isMobile ? 'right-4' : ''}`}>
@@ -612,11 +611,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             {/* Seção de Foto do Produto */}
             <div className="space-y-3">
               <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-                <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
                 Foto do Produto
               </h3>
               
-              <div className={`space-y-4 ${isMobile ? 'p-3' : 'p-4'} border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm`}>
+              <div className={`space-y-4 ${isMobile ? 'p-3' : 'p-4'} border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900`}>
                 <div className="flex items-center justify-between">
                   <Label className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Imagem (Opcional)</Label>
                   {productImage && (
@@ -634,7 +633,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                 </div>
                 
                 {productImage && (
-                  <div className={`relative w-full ${isMobile ? 'h-40' : 'h-48'} bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700`}>
+                  <div className={`relative w-full ${isMobile ? 'h-40' : 'h-48'} bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700`}>
                     <img 
                       src={productImage} 
                       alt="Preview do produto"
@@ -684,7 +683,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             {/* Seção: Categorização */}
             <div className="space-y-3">
               <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-                <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
+                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
                 Categorização
               </h3>
 
@@ -717,7 +716,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
             {/* Dica de preenchimento - ocultar no mobile para economizar espaço */}
             {!isMobile && (
-              <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border border-orange-200/50 dark:border-orange-800/30 rounded-lg p-3">
+              <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-lg p-3">
                 <div className="flex items-start gap-2">
                   <div className="text-lg">💡</div>
                   <div className="flex-1">
@@ -734,7 +733,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           </div>
 
           {/* Footer com botões */}
-          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm`}>
+          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900`}>
             <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2 justify-end'}`}>
               <Button
                 type="button"
@@ -747,7 +746,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               <Button 
                 type="button"
                 onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
-                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200`}
+                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-orange-600 hover:bg-orange-700 text-white rounded-lg shadow-sm transition-colors duration-200`}
               >
                 <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
                 Adicionar
@@ -778,7 +777,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent className="h-[90vh] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200/60 dark:border-gray-700/30 !bg-white/90 dark:!bg-gray-950/90 backdrop-blur-xl">
+        <DrawerContent className="h-[90vh] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950">
           {content}
         </DrawerContent>
       </Drawer>
@@ -792,7 +791,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
+      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden">
         {content}
       </DialogContent>
     </Dialog>
