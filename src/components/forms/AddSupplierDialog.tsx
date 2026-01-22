@@ -44,6 +44,7 @@ import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
 import { LimitAlert } from "@/components/billing/LimitAlert";
 import { useQueryClient } from '@tanstack/react-query';
 import { useUserRole } from "@/hooks/useUserRole";
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 
 const supplierSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -63,6 +64,7 @@ interface AddSupplierDialogProps {
 
 export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogProps) {
   const isMobile = useIsMobile();
+  const keyboardOffset = useKeyboardOffset();
   const [open, setOpen] = useState(false);
   const scrollPositionRef = useRef<number>(0);
   const { logActivity } = useActivityLog();
@@ -188,10 +190,18 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
     setOpen(newOpen);
   };
 
+  // Scroll into view helper para inputs
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!isMobile) return;
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+
   // Conteúdo do formulário (reutilizado em mobile e desktop)
   const formContent = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full">
+      <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full" id="add-supplier-form">
         <div className={`flex-1 overflow-y-auto bg-transparent ${isMobile ? 'p-4 space-y-4' : 'p-5 space-y-5'}`}>
           {/* Alerta de limite de fornecedores */}
           <LimitAlert 
@@ -217,6 +227,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                       <Input 
                         placeholder="Ex: Holambra Distribuidora" 
                         className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        onFocus={handleInputFocus}
                         {...field} 
                       />
                     </FormControl>
@@ -235,6 +246,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                       <Input 
                         placeholder="00.000.000/0000-00" 
                         className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        onFocus={handleInputFocus}
                         {...field} 
                       />
                     </FormControl>
@@ -254,6 +266,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     <Input 
                       placeholder="Rua das Flores, 123, Centro, São Paulo - SP" 
                       className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      onFocus={handleInputFocus}
                       {...field} 
                     />
                   </FormControl>
@@ -280,6 +293,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                     <Input 
                       placeholder="Ex: João Silva Santos" 
                       className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      onFocus={handleInputFocus}
                       {...field} 
                     />
                   </FormControl>
@@ -299,6 +313,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                       <Input 
                         placeholder="(11) 99999-9999" 
                         className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        onFocus={handleInputFocus}
                         {...field} 
                       />
                     </FormControl>
@@ -318,6 +333,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
                         placeholder="comercial@empresa.com" 
                         type="email" 
                         className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        onFocus={handleInputFocus}
                         {...field} 
                       />
                     </FormControl>
@@ -358,8 +374,8 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
               Cancelar
             </Button>
             <Button 
-              type="button"
-              onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
+              type="submit"
+              form="add-supplier-form"
               className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200`}
             >
               <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
@@ -394,7 +410,14 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
+        <DrawerContent 
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30 transition-all duration-200"
+          style={{ 
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
           <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
