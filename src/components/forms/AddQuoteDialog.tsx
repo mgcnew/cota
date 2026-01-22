@@ -5,6 +5,7 @@ import * as z from "zod";
 import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import {
   Dialog,
   DialogContent,
@@ -154,6 +155,7 @@ interface AddQuoteDialogProps {
 export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddQuoteDialogProps) {
   console.log("[AddQuoteDialog] Componente renderizado. Open state:", externalOpen);
   const isMobile = useIsMobile();
+  const keyboardOffset = useKeyboardOffset();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
@@ -205,6 +207,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     control: form.control,
     name: "produtos",
   });
+
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+  };
 
   const handleAddNewProduct = () => {
     if (selectedProduct && newProductQuantity && newProductUnit) {
@@ -654,19 +663,18 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
   const modalInnerContent = (
     <>
-      {/* Header Compacto com design semiglass e Steps integradas */}
-      <div className="flex-shrink-0 border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 backdrop-blur-md relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
+      {/* Header Compacto com design sólido */}
+      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 relative overflow-hidden">
         
         {/* Top Bar Minimalista */}
-        <div className="flex items-center justify-between px-4 py-2 relative z-10 min-h-[3rem] gap-4 bg-white/50 dark:bg-gray-950/50 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center justify-between px-4 py-2 relative z-10 min-h-[3rem] gap-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
           
           {/* Lado Esquerdo: Ícone Identificador */}
           <div className="flex items-center flex-shrink-0">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="w-8 h-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+                  <div className="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center text-white shadow-sm">
                     <Plus className="h-4 w-4 stroke-[3]" />
                   </div>
                 </TooltipTrigger>
@@ -688,11 +696,11 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      "h-full px-1 text-[9px] font-black uppercase tracking-widest rounded-none border-b-2 transition-colors cursor-pointer select-none outline-none",
+                      "h-full px-1 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-none border-b-2 transition-colors cursor-pointer select-none outline-none whitespace-nowrap",
                       "!bg-transparent hover:!bg-transparent focus:!bg-transparent",
                       "!shadow-none",
                       isActive 
-                        ? "!border-gray-900 dark:!border-white !text-gray-900 dark:!text-white" 
+                        ? "!border-orange-600 !text-orange-600 dark:!text-orange-400" 
                         : "!border-transparent !text-gray-400 dark:!text-gray-500 hover:!text-gray-600 dark:hover:!text-gray-300"
                     )}
                   >
@@ -705,30 +713,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
           {/* Lado Direito: Ações */}
           <div className="flex items-center gap-1 flex-shrink-0">
-            {currentTabIndex === tabs.length - 1 && (
-              <Button
-                type="button"
-                size="sm"
-                disabled={isSubmitting}
-                onClick={() => {
-                  const formElement = document.getElementById('quote-form') as HTMLFormElement;
-                  if (formElement) {
-                    formElement.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                  }
-                }}
-                className="mr-2 h-7 px-3 text-[9px] font-black uppercase tracking-widest text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-md !bg-transparent hover:!bg-transparent !shadow-none transition-colors hover:border-gray-900 dark:hover:border-white"
-              >
-                {isSubmitting ? "CRIANDO..." : "SALVAR"}
-              </Button>
-            )}
-
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => setOpen(false)} 
-              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-8 w-8 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
               <span className="sr-only">Fechar</span>
             </Button>
           </div>
@@ -756,13 +747,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
                         {/* Produtos Tab */}
                         <TabsContent value="produtos" className="h-full m-0">
-                          <div className="h-full p-3 sm:p-4 md:p-6">
+                          <div className="h-full p-3 sm:p-4 md:p-6 bg-gray-50 dark:bg-gray-950/50">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full">
                               {/* Formulário de Adição - Lado Esquerdo */}
-                              <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm h-fit">
-                                <CardHeader className="pb-3 border-b border-white/10 dark:border-white/5">
-                                  <CardTitle className="flex items-center gap-2 text-teal-900 dark:text-teal-100 text-base">
-                                    <Plus className="h-5 w-5 text-teal-600 flex-shrink-0" />
+                              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit">
+                                <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
+                                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-base">
+                                    <Plus className="h-5 w-5 text-orange-600 flex-shrink-0" />
                                     <span className="truncate">Adicionar Produto</span>
                                   </CardTitle>
                                 </CardHeader>
@@ -781,13 +772,16 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           setSelectedProduct(null); 
                                           setShowProductSuggestions(true);
                                         }}
-                                        onFocus={() => setShowProductSuggestions(true)}
+                                        onFocus={(e) => {
+                                            setShowProductSuggestions(true);
+                                            handleInputFocus(e);
+                                        }}
                                         onBlur={() => {
                                           // Timeout para permitir o clique nas sugestões
                                           setTimeout(() => setShowProductSuggestions(false), 200);
                                         }}
                                         onKeyDown={handleProductKeyDown}
-                                        className="h-10 pl-10 bg-white/60 dark:bg-gray-900/60 border-white/20 dark:border-white/10 font-bold text-sm rounded-xl focus:ring-orange-500/20 transition-all shadow-sm"
+                                        className="h-10 pl-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-medium text-sm rounded-xl focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
                                         tabIndex={0}
                                       />
                                       
@@ -795,7 +789,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       {showProductSuggestions && products.length > 0 && !selectedProduct && (
                                         <div 
                                           ref={productListRef}
-                                          className="absolute z-[100] w-full mt-2 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-2 custom-scrollbar"
+                                          className="absolute z-[100] w-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-2 custom-scrollbar"
                                         >
                                           <div className="p-2 space-y-1">
                                             {products.map((product, index) => (
@@ -816,22 +810,18 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                 className={cn(
                                                   "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
                                                   (highlightedProductIndex === index)
-                                                    ? "bg-orange-500/20 text-orange-700 dark:text-orange-400 border-orange-500/30" 
-                                                    : "hover:bg-orange-500/10 hover:text-orange-700 dark:hover:text-orange-400 border-transparent",
-                                                  "group border transition-all"
+                                                    ? "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400" 
+                                                    : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
                                                 )}
                                               >
                                                 <div className={cn(
                                                   "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
-                                                  highlightedProductIndex === index ? "bg-orange-500 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-400 group-hover:bg-orange-500 group-hover:text-white"
+                                                  highlightedProductIndex === index ? "bg-orange-100 text-orange-600 dark:bg-orange-900/40" : "bg-gray-100 dark:bg-gray-800 text-gray-400"
                                                 )}>
                                                   <Package className="h-4 w-4" />
                                                 </div>
                                                 <div className="flex flex-col min-w-0">
-                                                  <span className={cn(
-                                                    "font-black tracking-tight transition-colors",
-                                                    highlightedProductIndex === index ? "text-orange-700 dark:text-orange-400" : "text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400"
-                                                  )}>{product.name}</span>
+                                                  <span className="font-medium truncate">{product.name}</span>
                                                 </div>
                                               </button>
                                             ))}
@@ -841,14 +831,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                                       {/* Indicador de Carregamento Dinâmico */}
                                       {isSearchingProducts && (
-                                        <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                           <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
                                         </div>
                                       )}
 
                                       {/* Estado Vazio/Nenhum Resultado */}
                                       {showProductSuggestions && productSearch.length >= 2 && products.length === 0 && !selectedProduct && !isSearchingProducts && (
-                                        <div className="absolute z-[100] w-full mt-2 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl shadow-xl p-6 text-center animate-in fade-in slide-in-from-top-2">
+                                        <div className="absolute z-[100] w-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-6 text-center animate-in fade-in slide-in-from-top-2">
                                           <Package className="h-8 w-8 mx-auto mb-2 text-gray-300 opacity-50" />
                                           <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Nenhum produto encontrado</p>
                                         </div>
@@ -866,8 +856,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         type="number" 
                                         value={newProductQuantity}
                                         onChange={(e) => setNewProductQuantity(e.target.value)}
+                                        onFocus={handleInputFocus}
                                         onKeyDown={handleQuantityKeyDown}
-                                        className="border-white/20 dark:border-white/10 bg-transparent dark:text-white focus:border-teal-500 focus:ring-teal-500/20"
+                                        className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-orange-500 focus:ring-orange-500/20"
                                         tabIndex={0}
                                       />
                                     </div>
@@ -884,12 +875,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       }}>
                                         <SelectTrigger 
                                           ref={unitSelectRef}
-                                          className="border-white/20 dark:border-white/10 bg-transparent dark:text-white"
+                                          className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-orange-500 focus:ring-orange-500/20"
                                           tabIndex={0}
                                         >
                                           <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10">
+                                        <SelectContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
                                           <SelectItem value="kg">kg</SelectItem>
                                           <SelectItem value="g">g</SelectItem>
                                           <SelectItem value="un">un</SelectItem>
@@ -914,7 +905,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       }
                                     }}
                                     disabled={!selectedProduct || !newProductQuantity || !newProductUnit}
-                                    className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg disabled:opacity-50"
+                                    className="w-full bg-orange-600 hover:bg-orange-700 text-white shadow-sm disabled:opacity-50 h-10 font-medium"
                                     tabIndex={0}
                                   >
                                     <Plus className="h-4 w-4 mr-2" />
@@ -922,46 +913,47 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   </Button>
                                   
                                   {/* Dica de atalhos */}
-                                  <div className="text-xs text-center text-gray-500 dark:text-gray-400 space-y-1 pt-2 border-t border-gray-100 dark:border-gray-700">
-                                    <p className="font-medium text-teal-600 dark:text-teal-400">⌨️ Atalhos de Teclado</p>
-                                    <p><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">Tab</kbd> Navegar campos</p>
-                                    <p><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">Enter</kbd> Adicionar produto</p>
-                                    <p><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">Alt+→</kbd> Próxima aba</p>
+                                  <div className="text-xs text-center text-gray-500 dark:text-gray-400 space-y-1 pt-2 border-t border-gray-100 dark:border-gray-800">
+                                    <p className="font-medium text-orange-600 dark:text-orange-400">⌨️ Atalhos de Teclado</p>
+                                    <div className="flex justify-center gap-3">
+                                        <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-[10px]">Tab</kbd> Navegar</span>
+                                        <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-[10px]">Enter</kbd> Adicionar</span>
+                                    </div>
                                   </div>
                                 </CardContent>
                               </Card>
 
                               {/* Lista de Produtos - Lado Direito */}
-                              <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm">
-                                <CardHeader className="pb-3 border-b border-white/10 dark:border-white/5">
-                                  <CardTitle className="flex items-center gap-2 text-teal-900 dark:text-teal-100 text-base">
-                                    <Package className="h-5 w-5 text-teal-600 dark:text-teal-400 flex-shrink-0" />
+                              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+                                <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
+                                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-base">
+                                    <Package className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                                     <span className="truncate">Produtos Adicionados ({fields.length})</span>
                                   </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-4">
                                   {fields.length === 0 ? (
                                     <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                      <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                      <p>Nenhum produto adicionado ainda</p>
-                                      <p className="text-sm">Use o formulário ao lado para adicionar produtos</p>
+                                      <Package className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                                      <p className="font-medium">Nenhum produto adicionado</p>
+                                      <p className="text-xs mt-1">Use o formulário para adicionar</p>
                                     </div>
                                   ) : (
-                                    <ScrollArea className="h-[400px] [&>div>div[style]]:!pr-0">
+                                    <ScrollArea className="h-[400px] pr-2">
                                       <div className="space-y-3">
                                         {fields.map((field, index) => (
-                                          <Card key={field.id} className="border-white/10 dark:border-white/5 transition-all bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-                                            <div className="h-1 bg-gradient-to-r from-teal-500/50 to-cyan-500/50"></div>
+                                          <Card key={field.id} className="border-gray-200 dark:border-gray-800 transition-all bg-gray-50 dark:bg-gray-800/50 hover:border-orange-200 dark:hover:border-orange-900/50 group">
+                                            <div className="h-1 bg-gray-200 dark:bg-gray-700 group-hover:bg-orange-400 transition-colors rounded-t-xl"></div>
                                             <CardContent className="p-3">
                                               <div className="flex items-start justify-between gap-2">
                                                 <div className="flex-1 min-w-0">
                                                   <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
                                                     {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
                                                   </h4>
-                                                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                                    <span className="font-medium">{form.watch(`produtos.${index}.quantidade`)}</span>
-                                                    <span className="mx-1">×</span>
-                                                    <span>{form.watch(`produtos.${index}.unidade`)}</span>
+                                                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-2">
+                                                    <span className="font-mono bg-white dark:bg-gray-900 px-1.5 rounded border border-gray-200 dark:border-gray-700 text-xs">
+                                                        {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                                                    </span>
                                                   </div>
                                                 </div>
                                                 <Button
@@ -969,7 +961,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                   variant="ghost"
                                                   size="sm"
                                                   onClick={() => remove(index)}
-                                                  className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 h-8 w-8 p-0 flex-shrink-0"
+                                                  className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0 flex-shrink-0"
                                                 >
                                                   <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -1326,10 +1318,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               focusedSupplierId ? "hidden lg:flex lg:w-7/12" : "flex w-full lg:w-7/12"
                             )}>
                               {/* Header Fixo */}
-                              <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm z-10">
+                              <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3 bg-white dark:bg-gray-900 z-10">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                                    <Building2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                    <Building2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                                     <span className="font-bold text-sm">Catálogo de Fornecedores</span>
                                   </div>
                                   
@@ -1340,7 +1332,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       variant="ghost"
                                       size="sm"
                                       onClick={handleSelectAllSuppliers}
-                                      className="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 h-8 !bg-transparent !shadow-none"
+                                      className="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 h-8 !bg-transparent !shadow-none"
                                     >
                                       <Check className="h-3 w-3 mr-1.5" />
                                       {filteredSuppliers.every(s => selectedSuppliers.some(sel => sel.id === s.id)) 
@@ -1351,12 +1343,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 </div>
                                 
                                 <div className="relative group">
-                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-green-500 transition-colors" />
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
                                   <Input
                                     placeholder="Buscar por nome, contato ou e-mail..."
                                     value={supplierSearch}
                                     onChange={(e) => setSupplierSearch(e.target.value)}
-                                    className="pl-9 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 transition-all text-sm h-10 rounded-xl"
+                                    onFocus={handleInputFocus}
+                                    className="pl-9 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 transition-all text-sm h-10 rounded-xl focus:border-orange-500 focus:ring-orange-500/20"
                                   />
                                 </div>
                               </div>
@@ -1399,13 +1392,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                               className={cn(
                                                 "group flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
                                                 isFocused 
-                                                  ? "bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800/30 shadow-sm" 
-                                                  : "bg-white dark:bg-gray-900 border-transparent hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-gray-200 dark:hover:border-gray-700"
+                                                  ? "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800/30 shadow-sm" 
+                                                  : "bg-white dark:bg-gray-900 border-transparent hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
                                               )}
                                             >
                                               {/* Selection Indicator Bar */}
                                               {isFocused && (
-                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />
+                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500" />
                                               )}
 
                                               <div className="flex-shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
@@ -1413,8 +1406,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                   className={cn(
                                                     "w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer",
                                                     isSelected
-                                                      ? "bg-green-500 border-green-500 text-white"
-                                                      : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 group-hover:border-green-400"
+                                                      ? "bg-orange-500 border-orange-500 text-white"
+                                                      : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 group-hover:border-orange-400"
                                                   )}
                                                   onClick={() => handleSupplierSelect(supplier)}
                                                 >
@@ -1426,12 +1419,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                 <div className="flex items-center justify-between">
                                                   <span className={cn(
                                                     "font-medium text-sm truncate",
-                                                    isSelected ? "text-green-900 dark:text-green-100" : "text-gray-900 dark:text-gray-100"
+                                                    isSelected ? "text-orange-900 dark:text-orange-100" : "text-gray-900 dark:text-gray-100"
                                                   )}>
                                                     {supplier.name}
                                                   </span>
                                                   {isSelected && (
-                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded">
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400 px-1.5 py-0.5 rounded">
                                                       Selecionado
                                                     </span>
                                                   )}
@@ -1448,7 +1441,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                                               <ChevronRight className={cn(
                                                 "h-4 w-4 text-gray-300 dark:text-gray-600 transition-transform lg:hidden",
-                                                isFocused && "text-green-500 translate-x-1"
+                                                isFocused && "text-orange-500 translate-x-1"
                                               )} />
                                             </div>
                                           );
@@ -1664,11 +1657,11 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                         {/* Detalhes Tab */}
                         <TabsContent value="detalhes" className="flex-1 m-0 min-h-0">
-                          <ScrollArea className="h-full w-full [&>div>div[style]]:!pr-0">
+                          <ScrollArea className="h-full w-full [&>div>div[style]]:!pr-0 bg-gray-50 dark:bg-gray-950/50">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-3 sm:p-4">
                               {/* Coluna Esquerda - Formulário de Detalhes */}
-                              <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm h-fit">
-                                <CardHeader className="pb-3 border-b border-white/10 dark:border-white/5">
+                              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit">
+                                <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
                                   <CardTitle className="flex items-center gap-2 text-purple-900 dark:text-purple-100 text-base">
                                     <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                                     <span className="truncate">Detalhes Adicionais</span>
@@ -1684,7 +1677,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       <FormControl>
                                         <Textarea 
                                           placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
-                                          className="resize-none min-h-[100px] text-sm bg-transparent border-white/20 dark:border-white/10 dark:text-white" 
+                                          className="resize-none min-h-[100px] text-sm bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 dark:text-white focus:border-purple-500 focus:ring-purple-500/20" 
+                                          onFocus={handleInputFocus}
                                           {...field} 
                                         />
                                       </FormControl>
@@ -1697,7 +1691,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 />
 
                                 {/* Informações Adicionais */}
-                                <div className="bg-purple-50/30 dark:bg-purple-900/10 border border-purple-100/40 dark:border-purple-800/20 backdrop-blur-sm rounded-lg p-3">
+                                <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800/20 rounded-lg p-3">
                                   <h4 className="font-medium text-purple-900 dark:text-purple-300 mb-2 flex items-center gap-2 text-sm">
                                     <FileText className="h-3 w-3" />
                                     Dicas para uma boa cotação
@@ -1721,8 +1715,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                             </Card>
 
                             {/* Coluna Direita - Resumo da Cotação */}
-                            <Card className="border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm h-fit">
-                              <CardHeader className="pb-3 border-b border-white/10 dark:border-white/5">
+                            <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit">
+                              <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
                                 <CardTitle className="flex items-center gap-2 text-blue-900 dark:text-blue-100 text-base">
                                   <Package className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                                   <span className="truncate">Resumo da Cotação</span>
@@ -1731,18 +1725,18 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               <CardContent className="pt-3 space-y-3">
                                 {/* Estatísticas Principais */}
                                 <div className="grid grid-cols-2 gap-2">
-                                  <div className="bg-blue-50/30 dark:bg-blue-900/10 border border-blue-100/40 dark:border-blue-800/20 backdrop-blur-sm rounded-lg p-2 text-center">
+                                  <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/20 rounded-lg p-2 text-center">
                                     <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{fields.length}</div>
                                     <div className="text-xs text-blue-700 dark:text-blue-300 font-medium">Produtos</div>
                                   </div>
-                                  <div className="bg-green-50/30 dark:bg-green-900/10 border border-green-100/40 dark:border-green-800/20 backdrop-blur-sm rounded-lg p-2 text-center">
+                                  <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/20 rounded-lg p-2 text-center">
                                     <div className="text-xl font-bold text-green-600 dark:text-green-400">{selectedSuppliers.length}</div>
                                     <div className="text-xs text-green-700 dark:text-green-300 font-medium">Fornecedores</div>
                                   </div>
                                 </div>
 
                                 {/* Detalhes do Período */}
-                                <div className="bg-white/10 dark:bg-gray-800/30 border border-white/10 dark:border-white/5 backdrop-blur-sm rounded-lg p-3">
+                                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
                                   <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
                                     <Clock className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                                     Período da Cotação
@@ -1762,7 +1756,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                                 {/* Lista de Produtos */}
                                 {fields.length > 0 && (
-                                  <div className="bg-white/10 dark:bg-gray-800/30 border border-white/10 dark:border-white/5 backdrop-blur-sm rounded-lg p-3">
+                                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
                                     <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
                                       <Package className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                                       Produtos Selecionados
@@ -1770,7 +1764,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     <ScrollArea className="max-h-[120px] lg:max-h-[150px] [&>div>div[style]]:!pr-0">
                                       <div className="space-y-1">
                                         {fields.map((field, index) => (
-                                          <div key={field.id} className="flex items-center justify-between p-2 bg-white/10 dark:bg-gray-800/50 rounded border border-white/10 dark:border-white/5">
+                                          <div key={field.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700">
                                             <div className="flex-1 min-w-0">
                                               <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
                                                 {form.watch(`produtos.${index}.produtoNome`) || "Produto não selecionado"}
@@ -1788,7 +1782,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                                 {/* Lista de Fornecedores */}
                                 {selectedSuppliers.length > 0 && (
-                                  <div className="bg-white/10 dark:bg-gray-800/30 border border-white/10 dark:border-white/5 backdrop-blur-sm rounded-lg p-3">
+                                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
                                     <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
                                       <Building2 className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                                       Fornecedores Participantes
@@ -1796,7 +1790,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     <ScrollArea className="max-h-[100px] lg:max-h-[120px] [&>div>div[style]]:!pr-0">
                                       <div className="space-y-1">
                                         {selectedSuppliers.map((supplier) => (
-                                          <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white/10 dark:bg-gray-800/50 rounded border border-white/10 dark:border-white/5">
+                                          <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700">
                                             <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full"></div>
                                             <CapitalizedText className="text-xs font-medium text-gray-900 dark:text-white">
                                               {supplier.name}
@@ -1814,6 +1808,50 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         </TabsContent>
                       </Tabs>
                   </AnimatedTabContent>
+                </div>
+
+                {/* Footer Fixo */}
+                <div className="flex-shrink-0 px-4 py-3 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                  <div className="flex gap-2 justify-end">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setOpen(false)}
+                      className="h-10 px-4 text-sm font-medium rounded-xl border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    >
+                      Cancelar
+                    </Button>
+                    
+                    {currentTabIndex === tabs.length - 1 ? (
+                      <Button 
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="h-10 px-6 text-sm font-bold uppercase tracking-wide bg-orange-600 hover:bg-orange-700 text-white rounded-xl shadow-sm transition-all"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Salvando...
+                          </>
+                        ) : (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            Finalizar Cotação
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button 
+                        type="button"
+                        onClick={handleNext}
+                        disabled={!canProceedToNext()}
+                        className="h-10 px-6 text-sm font-bold uppercase tracking-wide bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 rounded-xl shadow-sm transition-all"
+                      >
+                        Próximo
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </form>
             </Form>
@@ -1840,7 +1878,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-white/20">
+        <DrawerContent 
+          className="rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
+          style={{ 
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
           {modalInnerContent}
         </DrawerContent>
       </Drawer>
