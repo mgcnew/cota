@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import {
   Dialog,
   DialogContent,
@@ -74,6 +75,7 @@ export default function EditSupplierDialog({
   onEdit,
 }: EditSupplierDialogProps) {
   const isMobile = useIsMobile();
+  const keyboardOffset = useKeyboardOffset();
   const scrollPositionRef = useRef<number>(0);
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
@@ -125,11 +127,19 @@ export default function EditSupplierDialog({
     onOpenChange(newOpen);
   };
 
+  // Scroll into view helper para inputs
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!isMobile) return;
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+
   // Conteúdo do formulário (reutilizado em mobile e desktop)
   const formContent = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className={`flex flex-col h-full ${isMobile ? 'space-y-3' : 'space-y-4'}`}>
-        <div className={`flex-1 overflow-y-auto bg-transparent ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-4 sm:py-5'}`}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full" id="edit-supplier-form">
+        <div className={`flex-1 overflow-y-auto bg-transparent ${isMobile ? 'px-4 py-4 space-y-3' : 'px-4 sm:px-5 py-4 sm:py-5 space-y-4'}`}>
           <FormField
             control={form.control}
             name="name"
@@ -140,6 +150,7 @@ export default function EditSupplierDialog({
                   <Input 
                     placeholder="Ex: Holambra" 
                     className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                    onFocus={handleInputFocus}
                     {...field} 
                   />
                 </FormControl>
@@ -158,6 +169,7 @@ export default function EditSupplierDialog({
                   <Input 
                     placeholder="Ex: João Silva" 
                     className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                    onFocus={handleInputFocus}
                     {...field} 
                   />
                 </FormControl>
@@ -177,6 +189,7 @@ export default function EditSupplierDialog({
                     <Input 
                       placeholder="(11) 99999-9999" 
                       className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      onFocus={handleInputFocus}
                       {...field} 
                     />
                   </FormControl>
@@ -196,6 +209,7 @@ export default function EditSupplierDialog({
                       placeholder="contato@empresa.com" 
                       type="email" 
                       className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      onFocus={handleInputFocus}
                       {...field} 
                     />
                   </FormControl>
@@ -215,6 +229,7 @@ export default function EditSupplierDialog({
                   <Input 
                     placeholder="Rua, número, bairro, cidade" 
                     className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                    onFocus={handleInputFocus}
                     {...field} 
                   />
                 </FormControl>
@@ -234,6 +249,7 @@ export default function EditSupplierDialog({
                     <Input 
                       placeholder="R$ 25.000" 
                       className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      onFocus={handleInputFocus}
                       {...field} 
                     />
                   </FormControl>
@@ -278,6 +294,7 @@ export default function EditSupplierDialog({
           </Button>
           <Button 
             type="submit"
+            form="edit-supplier-form"
             className={isMobile ? 'h-11 w-full text-base' : 'h-9 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm px-6'}
           >
             Salvar Alterações
@@ -291,7 +308,14 @@ export default function EditSupplierDialog({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30">
+        <DrawerContent 
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30 transition-all duration-200"
+          style={{ 
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
           <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
