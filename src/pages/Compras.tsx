@@ -148,10 +148,8 @@ function Compras() {
               <TabsTrigger 
                 value="cotacoes" 
                 className={cn(
-                  "transition-all",
-                  isMobile 
-                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
-                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
+                  isMobile ? "px-3 text-xs" : ""
                 )}
               >
                 <FileText className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
@@ -160,10 +158,8 @@ function Compras() {
               <TabsTrigger 
                 value="pedidos"
                 className={cn(
-                  "transition-all",
-                  isMobile 
-                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
-                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
+                  isMobile ? "px-3 text-xs" : ""
                 )}
               >
                 <ShoppingCart className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
@@ -172,10 +168,8 @@ function Compras() {
               <TabsTrigger 
                 value="lista"
                 className={cn(
-                  "transition-all",
-                  isMobile 
-                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
-                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
+                  isMobile ? "px-3 text-xs" : ""
                 )}
               >
                 <ShoppingBasket className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
@@ -184,10 +178,8 @@ function Compras() {
               <TabsTrigger 
                 value="embalagens"
                 className={cn(
-                  "transition-all",
-                  isMobile 
-                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
-                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
+                  isMobile ? "px-3 text-xs" : ""
                 )}
               >
                 <Package className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
@@ -196,10 +188,8 @@ function Compras() {
               <TabsTrigger 
                 value="analise"
                 className={cn(
-                  "transition-all",
-                  isMobile 
-                    ? "h-9 px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 data-[state=active]:bg-gray-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-gray-900 data-[state=active]:border-transparent shadow-sm"
-                    : "h-10 px-0 pb-2 text-sm font-medium rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground"
+                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
+                  isMobile ? "px-3 text-xs" : ""
                 )}
               >
                 <BarChart3 className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />

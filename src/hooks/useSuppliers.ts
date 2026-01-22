@@ -26,12 +26,13 @@ export function useSuppliers() {
 
   const { data: suppliers = [], isLoading, error } = useQuery({
     queryKey: ['suppliers'],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       // Fetch suppliers (RLS filtra por company_id automaticamente)
       const { data: suppliersData, error: suppliersError } = await supabase
         .from('suppliers')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .abortSignal(signal);
 
       if (suppliersError) throw suppliersError;
 
@@ -42,10 +43,10 @@ export function useSuppliers() {
         { data: quoteSupplierItems, error: qsiError },
         { data: quoteResponses, error: qrError }
       ] = await Promise.all([
-        supabase.from('quote_suppliers').select('supplier_id, valor_oferecido, quote_id, quotes(status, data_inicio)'),
-        supabase.from('orders').select('supplier_id, order_date, total_value, status').order('order_date', { ascending: false }),
-        supabase.from('quote_supplier_items').select('supplier_id, quote_id, product_id, valor_oferecido'),
-        supabase.from('quote_suppliers').select('supplier_id, quote_id, data_resposta, quotes(data_inicio)').not('data_resposta', 'is', null)
+        supabase.from('quote_suppliers').select('supplier_id, valor_oferecido, quote_id, quotes(status, data_inicio)').abortSignal(signal),
+        supabase.from('orders').select('supplier_id, order_date, total_value, status').order('order_date', { ascending: false }).abortSignal(signal),
+        supabase.from('quote_supplier_items').select('supplier_id, quote_id, product_id, valor_oferecido').abortSignal(signal),
+        supabase.from('quote_suppliers').select('supplier_id, quote_id, data_resposta, quotes(data_inicio)').not('data_resposta', 'is', null).abortSignal(signal)
       ]);
 
       if (qsError) throw qsError;
@@ -167,10 +168,11 @@ export function useSuppliers() {
         // Calculate final rating
         rating = Math.min(5, Math.max(0, scoreWinRate + scorePrice + scoreResponseTime + scoreAvailability + scoreOrders));
         
-        // Update rating in database (fire and forget)
-        if (rating !== s.rating) {
-          supabase.from('suppliers').update({ rating: Number(rating.toFixed(2)) }).eq('id', s.id).then();
-        }
+        // Removed side-effect: We should not update the database during a query fetch
+        // The rating is calculated on-the-fly here anyway
+        // if (rating !== s.rating) {
+        //   supabase.from('suppliers').update({ rating: Number(rating.toFixed(2)) }).eq('id', s.id).then();
+        // }
 
         // Mask sensitive data for non-admin users (SECURITY: LGPD compliance)
         const maskSensitiveData = !canViewSensitiveData;

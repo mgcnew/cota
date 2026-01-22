@@ -19,7 +19,7 @@ export function useCompanyUsers() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["company-users", user?.id],
     enabled: Boolean(user?.id),
-    queryFn: async (): Promise<CompanyUser[]> => {
+    queryFn: async ({ signal }): Promise<CompanyUser[]> => {
       if (!user?.id) return [];
 
       // Get company_id first
@@ -27,7 +27,8 @@ export function useCompanyUsers() {
         .from("company_users")
         .select("company_id")
         .eq("user_id", user.id)
-        .maybeSingle();
+        .maybeSingle()
+        .abortSignal(signal);
 
       if (!companyUserData) return [];
 
@@ -36,7 +37,8 @@ export function useCompanyUsers() {
         .from("company_users")
         .select("*")
         .eq("company_id", companyUserData.company_id)
-        .order("joined_at", { ascending: false });
+        .order("joined_at", { ascending: false })
+        .abortSignal(signal);
 
       if (companyUsersError) throw companyUsersError;
       if (!companyUsers || companyUsers.length === 0) return [];
@@ -45,7 +47,8 @@ export function useCompanyUsers() {
       const { data: userRoles, error: rolesError } = await supabase
         .from("user_roles")
         .select("*")
-        .eq("company_id", companyUserData.company_id);
+        .eq("company_id", companyUserData.company_id)
+        .abortSignal(signal);
 
       if (rolesError) throw rolesError;
 

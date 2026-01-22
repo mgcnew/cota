@@ -29,7 +29,7 @@ export function useProducts() {
   const { data: products = [], isLoading, error } = useQuery({
     queryKey: ['products', user?.id],
     enabled: !!user?.id,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!user) throw new Error('Usuário não autenticado');
 
       console.log('[PRODUCTS DEBUG] Fetching products for user:', user.id);
@@ -37,7 +37,8 @@ export function useProducts() {
       // Primeiro, obter a contagem total de produtos (RLS filtra por company_id automaticamente)
       const { count: totalCount, error: countError } = await supabase
         .from('products')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .abortSignal(signal);
 
       if (countError) throw countError;
 
@@ -67,7 +68,8 @@ export function useProducts() {
           .from('products')
           .select('*, brands(id, name, manual_rating)')
           .order('created_at', { ascending: false })
-          .range(from, to);
+          .range(from, to)
+          .abortSignal(signal);
 
         if (pageError) throw pageError;
 
@@ -94,7 +96,8 @@ export function useProducts() {
             status,
             created_at
           )
-        `);
+        `)
+        .abortSignal(signal);
 
       if (qiError) throw qiError;
 
@@ -112,7 +115,8 @@ export function useProducts() {
             status,
             created_at
           )
-        `);
+        `)
+        .abortSignal(signal);
 
       if (oiError) throw oiError;
 

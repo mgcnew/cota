@@ -47,13 +47,14 @@ export function useStockCounts() {
 
   const { data: stockCounts = [], isLoading, error } = useQuery({
     queryKey: ['stock-counts'],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!user) throw new Error('Usuário não autenticado');
 
       // Primeiro verificar se há contagens (query mais rápida)
       const { count, error: countError } = await supabase
         .from('stock_counts')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .abortSignal(signal);
 
       if (countError) throw countError;
 
@@ -74,7 +75,8 @@ export function useStockCounts() {
           )
         `)
         .order('created_at', { ascending: false })
-        .limit(100); // Limitar para evitar queries muito grandes
+        .limit(100) // Limitar para evitar queries muito grandes
+        .abortSignal(signal);
 
       if (fetchError) throw fetchError;
       return (data || []) as StockCount[];
