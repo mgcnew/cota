@@ -84,8 +84,11 @@ interface AddProductDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
+
 export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddProductDialogProps) {
   const isMobile = useIsMobile();
+  const keyboardOffset = useKeyboardOffset();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const handleSetOpen = externalOnOpenChange || ((newOpen: boolean) => setInternalOpen(newOpen));
@@ -470,6 +473,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     }
   };
 
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (!isMobile) return;
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+
   // Shared Header Component
   const Header = (
     <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
@@ -503,7 +513,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     <>
       {Header}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-950">
+        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden bg-gray-50 dark:bg-black">
           <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-4">
             {/* Alerta de limite de produtos */}
             <LimitAlert 
@@ -777,7 +787,14 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent className="h-[90vh] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950">
+        <DrawerContent 
+          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 transition-all duration-200"
+          style={{ 
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
           {content}
         </DrawerContent>
       </Drawer>
