@@ -40,6 +40,7 @@ import { LazyImage } from "@/components/responsive/LazyImage";
 import { compressImageForUpload, needsCompression, getCompressionInfo } from "@/utils/imageCompression";
 import { BrandSelect } from "@/components/products/BrandSelect";
 import { CategorySelectForm } from "@/components/products/CategorySelectForm";
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 
 const productSchema = z.object({
   name: z.string()
@@ -99,6 +100,7 @@ function EditProductDialogInternal({
   productId 
 }: EditProductDialogProps) {
   const isMobile = useIsMobile();
+  const keyboardOffset = useKeyboardOffset();
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -284,6 +286,14 @@ function EditProductDialogInternal({
     }, 50);
   };
 
+  // Scroll into view helper para inputs
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!isMobile) return;
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+
   // Conteúdo do formulário (compartilhado entre mobile e desktop)
   const formContent = (
     <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-gray-950">
@@ -365,6 +375,7 @@ function EditProductDialogInternal({
                     <Input 
                       placeholder="Ex: Coxa com Sobrecoxa"
                       className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
+                      onFocus={handleInputFocus}
                       {...field}
                     />
                   </FormControl>
@@ -452,6 +463,7 @@ function EditProductDialogInternal({
                         placeholder="EAN-13, EAN-8, UPC..."
                         className="pr-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
                         maxLength={13}
+                        onFocus={handleInputFocus}
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
                         <Package className="h-4 w-4 text-gray-400" />
@@ -489,7 +501,14 @@ function EditProductDialogInternal({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-700">
+        <DrawerContent 
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-700 transition-all duration-200"
+          style={{ 
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
           <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
