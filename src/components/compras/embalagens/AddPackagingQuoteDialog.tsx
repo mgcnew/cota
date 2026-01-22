@@ -320,7 +320,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden relative bg-gray-50 dark:bg-black">
+      <div className="flex-1 overflow-hidden relative bg-white dark:bg-gray-950">
         {/* Step: Embalagens */}
         {activeStep === "embalagens" && (
           <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
@@ -344,20 +344,20 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
                   {renderList(
                     filteredItems,
                     (item) => (
-                      <button key={item.id} onClick={() => toggleItem(item.id)}
+                      <div key={item.id} onClick={() => toggleItem(item.id)}
                         className={cn(
-                          "w-full p-2 rounded-md text-left transition-all flex items-center gap-2 group",
+                          "w-full p-2 rounded-md text-left transition-all flex items-center gap-2 group cursor-pointer",
                           selectedItems.includes(item.id)
                             ? "bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                             : "hover:bg-gray-50 dark:hover:bg-gray-800/50 border border-transparent"
                         )}>
                         <Checkbox checked={selectedItems.includes(item.id)} 
-                          className="data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 dark:data-[state=checked]:bg-white dark:data-[state=checked]:border-white dark:data-[state=checked]:text-gray-900 h-4 w-4 rounded" />
+                          className="data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 dark:data-[state=checked]:bg-white dark:data-[state=checked]:border-white dark:data-[state=checked]:text-gray-900 h-4 w-4 rounded pointer-events-none" />
                         <div className="flex-1 min-w-0">
                           <p className={cn("text-xs font-bold truncate", selectedItems.includes(item.id) ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400")}>{item.name}</p>
                           {item.category && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{item.category}</span>}
                         </div>
-                      </button>
+                      </div>
                     ),
                     "Nenhuma embalagem encontrada",
                     Package
@@ -540,6 +540,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
                     placeholder="Observações sobre a cotação..." 
                     value={observacoes}
                     onChange={(e) => setObservacoes(e.target.value)} 
+                    onFocus={handleInputFocus}
                     rows={4} 
                     className="resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm focus:ring-gray-400/20" 
                   />
@@ -662,7 +663,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent 
-        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-gray-200 dark:border-gray-800 shadow-md rounded-2xl flex flex-col bg-white dark:bg-gray-950"
+        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-gray-200 dark:border-gray-800 shadow-md rounded-2xl flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
         onKeyDown={handleKeyDown}
       >
         {content}
