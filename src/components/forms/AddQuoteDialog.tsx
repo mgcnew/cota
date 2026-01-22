@@ -1886,6 +1886,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
+          <DrawerTitle className="sr-only">Nova Cotação</DrawerTitle>
           {modalInnerContent}
         </DrawerContent>
       </Drawer>
