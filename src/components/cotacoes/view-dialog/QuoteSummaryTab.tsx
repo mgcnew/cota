@@ -24,6 +24,13 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
 
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+  };
+
   // Calcular Top Fornecedores
   const topSuppliers = useMemo(() => {
     const wins: Record<string, { name: string; count: number; total: number }> = {};
@@ -78,10 +85,10 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   }, [productPricesData, searchQuery, sortBy, safeStr]);
 
   return (
-    <div className="h-full flex flex-col bg-gray-50/50 dark:bg-gray-900/20">
+    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-950">
       {/* Top 3 Fornecedores Destaque */}
       {topSuppliers.length > 0 && (
-        <div className="p-3 bg-white/40 dark:bg-gray-950/40 border-b border-gray-200/60 dark:border-gray-700/40 backdrop-blur-md">
+        <div className="p-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-2 mb-2">
             <Trophy className="h-3 w-3 text-emerald-600" />
             <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Ranking de Economia</span>
@@ -93,8 +100,8 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                 className={cn(
                   "flex-1 p-2 rounded-xl border relative overflow-hidden group/top transition-all duration-300",
                   idx === 0 
-                    ? "bg-emerald-500/5 border-emerald-500/20 ring-1 ring-emerald-500/10 shadow-lg shadow-emerald-500/5" 
-                    : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+                    ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-900/30 ring-1 ring-emerald-500/10 shadow-sm" 
+                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                 )}
               >
                 <div className="absolute top-0 right-0 p-1">
@@ -103,7 +110,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                 <div className="flex items-center gap-2">
                   <div className={cn(
                     "w-6 h-6 rounded-lg flex items-center justify-center font-black text-[10px] shadow-sm",
-                    idx === 0 ? "bg-emerald-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-500"
+                    idx === 0 ? "bg-emerald-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
                   )}>
                     {idx + 1}º
                   </div>
@@ -119,7 +126,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       )}
 
       {/* Header com Filtros */}
-      <div className="flex-shrink-0 p-3 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10">
+      <div className="flex-shrink-0 p-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 z-10">
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
@@ -127,12 +134,13 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
               placeholder="Buscar produtos ou fornecedores..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 pl-8 text-xs bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600"
+              onFocus={handleInputFocus}
+              className="h-8 pl-8 text-xs bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600"
             />
           </div>
           <div className="flex items-center gap-2">
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-8 w-[140px] text-xs bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg">
+              <SelectTrigger className="h-8 w-[140px] text-xs bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg">
                 <div className="flex items-center gap-2">
                   <ArrowUpDown className="h-3 w-3 text-gray-400" />
                   <span className="truncate">Ordenar por</span>
@@ -146,7 +154,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                 <SelectItem value="name" className="text-xs">Nome (A-Z)</SelectItem>
               </SelectContent>
             </Select>
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Itens:</span>
               <span className="text-[10px] font-black text-gray-900 dark:text-white">{filteredAndSortedData.length}</span>
             </div>
@@ -157,14 +165,14 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       {/* Lista Compacta - Estilo Grid (Igual ao Valores/Pedido) */}
       <div className="flex-1 overflow-auto custom-scrollbar">
         {/* Header da Tabela (Fixo) */}
-        <div className="grid grid-cols-[1.5fr_0.8fr_1.5fr_auto] gap-2 px-3 py-1.5 border-b border-gray-200/60 dark:border-gray-700/40 text-[8px] font-black uppercase text-gray-500 tracking-[0.2em] bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="grid grid-cols-[1.5fr_0.8fr_1.5fr_auto] gap-2 px-3 py-1.5 border-b border-gray-200 dark:border-gray-800 text-[8px] font-black uppercase text-gray-500 tracking-[0.2em] bg-gray-50 dark:bg-gray-900 sticky top-0 z-10">
            <div>Produto</div>
            <div className="hidden sm:block">Qtd</div>
            <div>Melhor Fornecedor</div>
            <div className="text-right">Melhor Preço</div>
         </div>
 
-        <div className="flex flex-col bg-white dark:bg-gray-900">
+        <div className="flex flex-col bg-white dark:bg-gray-950">
           {filteredAndSortedData.length > 0 ? (
             filteredAndSortedData.map((item) => {
               const hasSavings = item.savings > 0;
@@ -239,7 +247,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                     <div className="px-3 pb-2 flex items-center gap-2 overflow-x-auto no-scrollbar">
                       <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest flex-shrink-0">Outras cotações:</span>
                       {item.allPrices.slice(1).map((price: any, idx: number) => (
-                        <div key={idx} className="flex items-center gap-1.5 px-2 py-0.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded text-[8px] text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        <div key={idx} className="flex items-center gap-1.5 px-2 py-0.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-[8px] text-gray-500 dark:text-gray-400 whitespace-nowrap">
                           <span className="font-bold">{safeStr(price.nome)}</span>
                           <span className="opacity-30">|</span>
                           <span>R$ {price.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>

@@ -1,5 +1,6 @@
 import { useState, useMemo, Suspense, lazy, useCallback, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { DeleteQuoteDialogLazy } from "@/components/forms/LazyDialogs";
 
 // Lazy loading dos componentes das abas
@@ -94,6 +96,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  const keyboardOffset = useKeyboardOffset();
 
   // Memos globais para evitar recálculos
   const products = useMemo(() => {
@@ -466,177 +469,233 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   if (!initialQuote || !quote) return null;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300 [&>button]:hidden">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          {/* Header Compacto com Tabs Integradas */}
-          <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md relative overflow-hidden flex items-center justify-between">
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-transparent pointer-events-none"></div>
-            
-            <div className="flex items-center gap-4 relative z-10">
-              {/* Título Minimalista */}
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-lg ring-1 ring-white/20">
-                  <ClipboardList className="h-3.5 w-3.5" />
-                </div>
-                <div className="flex flex-col">
+  const modalContent = (
+    <>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+        {/* Header Compacto com Tabs Integradas */}
+        <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 relative overflow-hidden flex items-center justify-between">
+          
+          <div className="flex items-center gap-4 relative z-10">
+            {/* Título Minimalista */}
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center text-white shadow-lg ring-1 ring-white/20">
+                <ClipboardList className="h-3.5 w-3.5" />
+              </div>
+              <div className="flex flex-col">
+                {isMobile ? (
+                  <DrawerTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
+                    Gerenciar
+                  </DrawerTitle>
+                ) : (
                   <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
                     Gerenciar
                   </DialogTitle>
-                  <span className="text-[8px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest mt-0.5">
-                    #{safeStr(quote.id).substring(0, 8)}
-                  </span>
-                </div>
+                )}
+                <span className="text-[8px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest mt-0.5">
+                  #{safeStr(quote.id).substring(0, 8)}
+                </span>
               </div>
-
-              {/* Tabs no Header - FORÇANDO TRANSPARÊNCIA TOTAL */}
-              <TabsList className="h-8 p-0 bg-transparent !bg-transparent border-0 flex gap-4 shadow-none !shadow-none">
-                {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
-                  <TabsTrigger 
-                    key={tab}
-                    value={tab} 
-                    className="h-full px-1 text-[9px] font-black uppercase tracking-widest rounded-none border-b-2 border-transparent 
-                      data-[state=active]:!border-gray-900 dark:data-[state=active]:!border-white 
-                      !bg-transparent data-[state=active]:!bg-transparent hover:!bg-transparent
-                      !text-gray-400 dark:!text-gray-500 
-                      data-[state=active]:!text-gray-900 dark:data-[state=active]:!text-white 
-                      !shadow-none data-[state=active]:!shadow-none 
-                      transition-colors cursor-pointer select-none"
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
             </div>
 
-            <div className="flex items-center gap-2 relative z-10">
-              <Button 
+            {/* Tabs no Header - FORÇANDO TRANSPARÊNCIA TOTAL */}
+            <TabsList className="h-8 p-0 bg-transparent !bg-transparent border-0 flex gap-4 shadow-none !shadow-none overflow-x-auto scrollbar-hide max-w-[200px] sm:max-w-none">
+              {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
+                <TabsTrigger 
+                  key={tab}
+                  value={tab} 
+                  className="h-full px-1 text-[9px] font-black uppercase tracking-widest rounded-none border-b-2 border-transparent 
+                    data-[state=active]:!border-orange-600 dark:data-[state=active]:!border-orange-400 
+                    !bg-transparent data-[state=active]:!bg-transparent hover:!bg-transparent
+                    !text-gray-400 dark:!text-gray-500 
+                    data-[state=active]:!text-orange-600 dark:data-[state=active]:!text-orange-400 
+                    !shadow-none data-[state=active]:!shadow-none 
+                    transition-colors cursor-pointer select-none whitespace-nowrap"
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+
+          <div className="flex items-center gap-2 relative z-10">
+            {!isMobile && (
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setDeleteDialogOpen(true)} 
+                  className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 !bg-transparent hover:!bg-red-50 dark:hover:!bg-red-900/10 transition-all duration-200 rounded-lg !shadow-none !border-0 flex"
+                >
+                  <Trash2 className="h-3 w-3 mr-1.5" />
+                  Excluir
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleExportHtml} 
+                  className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 !bg-transparent hover:!bg-blue-50 dark:hover:!bg-blue-900/10 transition-all duration-200 rounded-lg !shadow-none !border-0 flex"
+                >
+                  <Download className="h-3 w-3 mr-1.5" />
+                  Exportar
+                </Button>
+              </>
+            )}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => onOpenChange(false)} 
+              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Fechar</span>
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-hidden relative bg-white dark:bg-gray-950">
+          <Suspense fallback={<TabSkeleton type={activeTab} />}>
+            <TabsContent value="resumo" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
+              {activeTab === 'resumo' && (
+                <QuoteSummaryTab 
+                  stats={stats} 
+                  melhorTotal={melhorTotal} 
+                  productPricesData={productPricesData} 
+                  safeStr={safeStr} 
+                />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="valores" className="h-full m-0 p-0 overflow-hidden">
+              {activeTab === 'valores' && (
+                <QuoteValuesTab 
+                  products={products}
+                  fornecedores={fornecedores}
+                  quoteId={quote.id}
+                  supplierItems={supplierItems}
+                  onUpdateSupplierProductValue={handleUpdateSupplierProductValue}
+                  onRefresh={handleRefresh}
+                  isMobile={isMobile}
+                  safeStr={safeStr}
+                  getBestPriceInfoForProduct={getBestPriceInfoForProduct}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="converter" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
+              {activeTab === 'converter' && (
+                <QuoteConversionTab 
+                  products={products}
+                  fornecedores={fornecedores}
+                  quote={quote}
+                  onConvertToOrder={(quoteId, orders) => convertToOrder.mutate({ quoteId, orders })}
+                  onOpenChange={onOpenChange}
+                  getSupplierProductValue={getSupplierProductValue}
+                  getBestPriceInfoForProduct={getBestPriceInfoForProduct}
+                  safeStr={safeStr}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="editar" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
+              {activeTab === 'editar' && (
+                <QuoteEditTab 
+                  products={products}
+                  fornecedores={fornecedores}
+                  availableProducts={availableProducts || []}
+                  availableSuppliers={availableSuppliers || []}
+                  onAddQuoteItem={addQuoteItem.mutateAsync}
+                  onRemoveQuoteItem={(productId) => removeQuoteItem.mutateAsync({ quoteId: quote.id, productId })}
+                  onAddQuoteSupplier={(supplierId) => {
+                    const supplier = availableSuppliers.find(s => s.id === supplierId);
+                    return addQuoteSupplier.mutateAsync({ 
+                      quoteId: quote.id, 
+                      supplierId, 
+                      supplierName: supplier?.name || "Desconhecido" 
+                    });
+                  }}
+                  onRemoveQuoteSupplier={(supplierId) => removeQuoteSupplier.mutateAsync({ quoteId: quote.id, supplierId })}
+                  quoteId={quote.id}
+                  safeStr={safeStr}
+                />
+              )}
+            </TabsContent>
+          </Suspense>
+        </div>
+      </Tabs>
+
+      {/* Footer Minimalista */}
+      <div className="flex-shrink-0 px-4 py-1.5 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="h-1 w-1 rounded-full bg-orange-500 animate-pulse"></div>
+          <span className="text-[7px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Painel Ativo</span>
+        </div>
+        
+        {isMobile && (
+          <div className="flex gap-2">
+             <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setDeleteDialogOpen(true)} 
-                className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 !bg-transparent hover:!bg-red-50 dark:hover:!bg-red-900/10 transition-all duration-200 rounded-lg !shadow-none !border-0 flex"
+                className="h-6 px-2 text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 !bg-transparent hover:!bg-red-50 dark:hover:!bg-red-900/10 transition-all"
               >
-                <Trash2 className="h-3 w-3 mr-1.5" />
                 Excluir
               </Button>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={handleExportHtml} 
-                className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 !bg-transparent hover:!bg-blue-50 dark:hover:!bg-blue-900/10 transition-all duration-200 rounded-lg !shadow-none !border-0 hidden sm:flex"
+                className="h-6 px-2 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 !bg-transparent hover:!bg-blue-50 dark:hover:!bg-blue-900/10 transition-all"
               >
-                <Download className="h-3 w-3 mr-1.5" />
                 Exportar
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => onOpenChange(false)} 
-                className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Fechar</span>
-              </Button>
-            </div>
           </div>
+        )}
 
-          <div className="flex-1 overflow-hidden relative">
-            <Suspense fallback={<TabSkeleton type={activeTab} />}>
-              <TabsContent value="resumo" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
-                {activeTab === 'resumo' && (
-                  <QuoteSummaryTab 
-                    stats={stats} 
-                    melhorTotal={melhorTotal} 
-                    productPricesData={productPricesData} 
-                    safeStr={safeStr} 
-                  />
-                )}
-              </TabsContent>
-              
-              <TabsContent value="valores" className="h-full m-0 p-0 overflow-hidden">
-                {activeTab === 'valores' && (
-                  <QuoteValuesTab 
-                    products={products}
-                    fornecedores={fornecedores}
-                    quoteId={quote.id}
-                    supplierItems={supplierItems}
-                    onUpdateSupplierProductValue={handleUpdateSupplierProductValue}
-                    onRefresh={handleRefresh}
-                    isMobile={isMobile}
-                    safeStr={safeStr}
-                    getBestPriceInfoForProduct={getBestPriceInfoForProduct}
-                  />
-                )}
-              </TabsContent>
-
-              <TabsContent value="converter" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
-                {activeTab === 'converter' && (
-                  <QuoteConversionTab 
-                    products={products}
-                    fornecedores={fornecedores}
-                    quote={quote}
-                    onConvertToOrder={(quoteId, orders) => convertToOrder.mutate({ quoteId, orders })}
-                    onOpenChange={onOpenChange}
-                    getSupplierProductValue={getSupplierProductValue}
-                    getBestPriceInfoForProduct={getBestPriceInfoForProduct}
-                    safeStr={safeStr}
-                  />
-                )}
-              </TabsContent>
-
-              <TabsContent value="editar" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
-                {activeTab === 'editar' && (
-                  <QuoteEditTab 
-                    products={products}
-                    fornecedores={fornecedores}
-                    availableProducts={availableProducts || []}
-                    availableSuppliers={availableSuppliers || []}
-                    onAddQuoteItem={addQuoteItem.mutateAsync}
-                    onRemoveQuoteItem={(productId) => removeQuoteItem.mutateAsync({ quoteId: quote.id, productId })}
-                    onAddQuoteSupplier={(supplierId) => {
-                      const supplier = availableSuppliers.find(s => s.id === supplierId);
-                      return addQuoteSupplier.mutateAsync({ 
-                        quoteId: quote.id, 
-                        supplierId, 
-                        supplierName: supplier?.name || "Desconhecido" 
-                      });
-                    }}
-                    onRemoveQuoteSupplier={(supplierId) => removeQuoteSupplier.mutateAsync({ quoteId: quote.id, supplierId })}
-                    quoteId={quote.id}
-                    safeStr={safeStr}
-                  />
-                )}
-              </TabsContent>
-            </Suspense>
-          </div>
-        </Tabs>
-
-        {/* Footer Minimalista */}
-        <div className="flex-shrink-0 px-4 py-1.5 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30 backdrop-blur-2xl flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span className="text-[7px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Painel Ativo</span>
-          </div>
+        {!isMobile && (
           <span className="text-[7px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
             CotaJá v2.0
           </span>
-        </div>
+        )}
+      </div>
 
-        <DeleteQuoteDialogLazy 
-          open={deleteDialogOpen} 
-          onOpenChange={setDeleteDialogOpen} 
-          quote={quote} 
-          onDelete={(id) => {
-            deleteQuote.mutate(id, {
-              onSuccess: () => {
-                setDeleteDialogOpen(false);
-                onOpenChange(false); // Close the main dialog too
-              }
-            });
+      <DeleteQuoteDialogLazy 
+        open={deleteDialogOpen} 
+        onOpenChange={setDeleteDialogOpen} 
+        quote={quote} 
+        onDelete={(id) => {
+          deleteQuote.mutate(id, {
+            onSuccess: () => {
+              setDeleteDialogOpen(false);
+              onOpenChange(false); // Close the main dialog too
+            }
+          });
+        }}
+        isDeleting={deleteQuote.isPending}
+      />
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent 
+          className="rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
+          style={{ 
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
-          isDeleting={deleteQuote.isPending}
-        />
+        >
+          {modalContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300 [&>button]:hidden">
+        {modalContent}
       </DialogContent>
     </Dialog>
   );

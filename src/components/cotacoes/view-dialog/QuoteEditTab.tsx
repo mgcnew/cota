@@ -49,6 +49,13 @@ export function QuoteEditTab({
   const productSearchRef = useRef<HTMLInputElement>(null);
   const productListRef = useRef<HTMLDivElement>(null);
 
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+  };
+
   const suppliersNotInQuote = useMemo(() => 
     availableSuppliers.filter((s: any) => !fornecedores.some((f: any) => f.id === s.id)),
     [availableSuppliers, fornecedores]
@@ -135,7 +142,7 @@ export function QuoteEditTab({
   };
 
   return (
-    <div className="flex-1 overflow-auto m-0 p-0 custom-scrollbar">
+    <div className="flex-1 overflow-auto m-0 p-0 custom-scrollbar bg-white dark:bg-gray-950">
       <div className="p-3 space-y-3">
         {/* Gestão de Produtos */}
         <div className="space-y-2">
@@ -143,7 +150,7 @@ export function QuoteEditTab({
             <Package className="h-3 w-3 text-gray-400" />
             <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Adicionar Produtos</span>
           </div>
-          <Card className="p-2 bg-white/40 dark:bg-gray-900/40 border-white/30 dark:border-white/10 backdrop-blur-2xl rounded-xl shadow-sm relative z-50">
+          <Card className="p-2 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 rounded-xl shadow-sm relative z-50">
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="flex-1 relative group">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
@@ -156,14 +163,15 @@ export function QuoteEditTab({
                     setSelectedProduct(null); 
                     setSelectedProductToAdd("");
                   }}
+                  onFocus={handleInputFocus}
                   onKeyDown={handleProductKeyDown}
-                  className="h-8 pl-8 text-[10px] font-bold bg-white/60 dark:bg-white/5 border-white/30 rounded-lg focus:ring-orange-500/20"
+                  className="h-8 pl-8 text-[10px] font-bold bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-orange-500/20"
                 />
                 
                 {filteredProducts.length > 0 && !selectedProduct && (
                   <div 
                     ref={productListRef}
-                    className="absolute z-50 w-full mt-1 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-1 custom-scrollbar"
+                    className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-1 custom-scrollbar"
                   >
                     {filteredProducts.map((p: any, index: number) => (
                       <button
@@ -173,16 +181,16 @@ export function QuoteEditTab({
                         className={cn(
                           "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-all border-b border-gray-100 dark:border-gray-900 last:border-none",
                           highlightedProductIndex === index 
-                            ? "bg-orange-500/10 text-orange-700 dark:text-orange-400" 
-                            : "hover:bg-gray-50 dark:hover:bg-white/5"
+                            ? "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400" 
+                            : "hover:bg-gray-50 dark:hover:bg-gray-800"
                         )}
                       >
                         <div className="flex items-center gap-2 overflow-hidden">
-                          <div className={cn("w-6 h-6 rounded flex items-center justify-center transition-all flex-shrink-0", highlightedProductIndex === index ? "bg-orange-500 text-white shadow-md" : "bg-gray-100 dark:bg-gray-800 text-gray-400")}>
+                          <div className={cn("w-6 h-6 rounded flex items-center justify-center transition-all flex-shrink-0", highlightedProductIndex === index ? "bg-orange-100 text-orange-600 dark:bg-orange-900/40" : "bg-gray-100 dark:bg-gray-800 text-gray-400")}>
                             <Package className="h-3 w-3" />
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-bold tracking-tight truncate">{safeStr(p.name)}</span>
+                            <span className="font-bold tracking-tight truncate text-gray-900 dark:text-gray-100">{safeStr(p.name)}</span>
                             {p.brand_name && (
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{p.brand_name}</span>
@@ -217,13 +225,14 @@ export function QuoteEditTab({
                   min="1" 
                   value={productQuantity} 
                   onChange={(e) => setProductQuantity(Number(e.target.value))} 
-                  className="w-20 h-8 text-[10px] font-bold bg-white/60 dark:bg-white/5 border-white/30 rounded-lg" 
+                  onFocus={handleInputFocus}
+                  className="w-20 h-8 text-[10px] font-bold bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg" 
                 />
                 <Select value={productUnit} onValueChange={(val: PricingUnit) => setProductUnit(val)}>
-                  <SelectTrigger className="w-24 h-8 text-[10px] font-bold bg-white/60 dark:bg-white/5 border-white/30 rounded-lg">
+                  <SelectTrigger className="w-24 h-8 text-[10px] font-bold bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl">
+                  <SelectContent className="bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800">
                     <SelectItem value="un" className="text-[10px] font-bold">Unidade</SelectItem>
                     <SelectItem value="kg" className="text-[10px] font-bold">Kg</SelectItem>
                     <SelectItem value="cx" className="text-[10px] font-bold">Caixa</SelectItem>
@@ -244,15 +253,15 @@ export function QuoteEditTab({
 
           <div className="space-y-1">
             {products.map((p: any) => (
-              <div key={p.product_id} className="flex items-center justify-between p-2 bg-white/20 dark:bg-white/5 rounded-lg border border-white/10 hover:border-gray-400/30 transition-all group">
+              <div key={p.product_id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all group">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-md bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="w-6 h-6 rounded-md bg-white dark:bg-gray-800 flex items-center justify-center text-gray-600 border border-gray-200 dark:border-gray-700 shadow-sm">
                     <Package className="h-3 w-3" />
                   </div>
                   <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate">{safeStr(p.product_name)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest bg-white/40 dark:bg-white/5 h-5 px-1.5 border-white/20">
+                  <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest bg-white dark:bg-gray-800 h-5 px-1.5 border-gray-200 dark:border-gray-700">
                     {safeStr(p.quantidade)} {safeStr(p.unidade)}
                   </Badge>
                   <Button 
@@ -270,18 +279,18 @@ export function QuoteEditTab({
         </div>
 
         {/* Gestão de Fornecedores */}
-        <div className="space-y-2 pt-2 border-t border-gray-200/60 dark:border-gray-700/40">
+        <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-2 px-1">
             <Building2 className="h-3 w-3 text-gray-400" />
             <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Adicionar Fornecedores</span>
           </div>
-          <Card className="p-2 bg-white/40 dark:bg-gray-900/40 border-white/30 dark:border-white/10 backdrop-blur-2xl rounded-xl shadow-sm">
+          <Card className="p-2 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
             <div className="flex gap-2">
               <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-                <SelectTrigger className="flex-1 h-8 text-[10px] font-bold bg-white/60 dark:bg-white/5 border-white/30 rounded-lg">
+                <SelectTrigger className="flex-1 h-8 text-[10px] font-bold bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg">
                   <SelectValue placeholder="Selecione um fornecedor..." />
                 </SelectTrigger>
-                <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl">
+                <SelectContent className="bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800">
                   {suppliersNotInQuote.map((s: any) => (
                     <SelectItem key={s.id} value={s.id} className="text-[10px] font-bold">{safeStr(s.nome)}</SelectItem>
                   ))}
@@ -300,9 +309,9 @@ export function QuoteEditTab({
 
           <div className="grid grid-cols-2 gap-2">
             {fornecedores.map((f: any) => (
-              <div key={f.id} className="flex items-center justify-between p-2 bg-white/20 dark:bg-white/5 rounded-lg border border-white/10 hover:border-gray-400/30 transition-all group">
+              <div key={f.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all group">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-md bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="w-6 h-6 rounded-md bg-white dark:bg-gray-800 flex items-center justify-center text-gray-600 border border-gray-200 dark:border-gray-700 shadow-sm">
                     <Building2 className="h-3 w-3" />
                   </div>
                   <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate">{safeStr(f.nome)}</span>
