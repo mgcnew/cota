@@ -497,24 +497,39 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               </div>
             </div>
 
-            {/* Tabs no Header - FORÇANDO TRANSPARÊNCIA TOTAL */}
-            <TabsList className="h-8 p-0 bg-transparent !bg-transparent border-0 flex gap-4 shadow-none !shadow-none overflow-x-auto scrollbar-hide max-w-[200px] sm:max-w-none">
-              {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
-                <TabsTrigger 
-                  key={tab}
-                  value={tab} 
-                  className="h-full px-1 text-[9px] font-black uppercase tracking-widest rounded-none border-b-2 border-transparent 
-                    data-[state=active]:!border-orange-600 dark:data-[state=active]:!border-orange-400 
-                    !bg-transparent data-[state=active]:!bg-transparent hover:!bg-transparent
-                    !text-gray-400 dark:!text-gray-500 
-                    data-[state=active]:!text-orange-600 dark:data-[state=active]:!text-orange-400 
-                    !shadow-none data-[state=active]:!shadow-none 
-                    transition-colors cursor-pointer select-none whitespace-nowrap"
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            {/* Tabs no Header - Adaptativo Mobile/Desktop */}
+            {isMobile ? (
+              <Select value={activeTab} onValueChange={setActiveTab}>
+                <SelectTrigger className="h-8 w-[130px] border-0 bg-transparent text-[10px] font-black uppercase tracking-widest focus:ring-0 text-orange-600 dark:text-orange-400 p-0 [&>span]:line-clamp-1 justify-start gap-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
+                    <SelectItem key={tab} value={tab} className="text-xs font-medium uppercase tracking-wide">
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <TabsList className="h-8 p-0 bg-transparent !bg-transparent border-0 flex gap-4 shadow-none !shadow-none overflow-x-auto scrollbar-hide max-w-[200px] sm:max-w-none">
+                {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
+                  <TabsTrigger 
+                    key={tab}
+                    value={tab} 
+                    className="h-full px-1 text-[9px] font-black uppercase tracking-widest rounded-none border-b-2 border-transparent 
+                      data-[state=active]:!border-orange-600 dark:data-[state=active]:!border-orange-400 
+                      !bg-transparent data-[state=active]:!bg-transparent hover:!bg-transparent
+                      !text-gray-400 dark:!text-gray-500 
+                      data-[state=active]:!text-orange-600 dark:data-[state=active]:!text-orange-400 
+                      !shadow-none data-[state=active]:!shadow-none 
+                      transition-colors cursor-pointer select-none whitespace-nowrap"
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            )}
           </div>
 
           <div className="flex items-center gap-2 relative z-10">
