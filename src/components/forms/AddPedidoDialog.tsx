@@ -1,32 +1,51 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { AnimatedTabContent } from "@/components/ui/animated-tabs";
-import { useDebounce } from "@/hooks/useDebounce";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { 
-  Plus, ShoppingCart, Package, Building2, CheckCircle, ChevronRight, ChevronLeft, 
-  FileText, X, Search, Trash2, Copy, Calendar, DollarSign, Loader2, AlertCircle,
-  Star, Trophy
+  CalendarIcon, Package, Building2, Plus, Loader2, 
+  ChevronRight, ChevronLeft, Check, FileText, Search, X, Clock,
+  ShoppingCart, Trash2, Copy, Star, Trophy, DollarSign
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { parseDecimalInput } from "@/lib/text-utils";
-import { cn } from "@/lib/utils";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface PedidoItem {
   produto: string;
   quantidade: number;
   unidade: string;
   valorUnitario: number;
+  product_id?: string;
 }
 
 interface AddPedidoDialogProps {
@@ -36,57 +55,59 @@ interface AddPedidoDialogProps {
   preSelectedProducts?: any[];
 }
 
+const STEPS = [
+  { id: "produtos", title: "Produtos", icon: Package },
+  { id: "fornecedor", title: "Fornecedor", icon: Building2 },
+  { id: "confirmar", title: "Confirmar", icon: Check },
+];
+
 export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelectedProducts = [] }: AddPedidoDialogProps) {
   const isMobile = useIsMobile();
+  const keyboardOffset = useKeyboardOffset();
   const { toast } = useToast();
   const { user } = useAuth();
   const { logActivity } = useActivityLog();
-  
+
   // Form states
+  const [activeStep, setActiveStep] = useState("produtos");
   const [fornecedor, setFornecedor] = useState("");
-  const [dataEntrega, setDataEntrega] = useState("");
+  const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined);
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<PedidoItem[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   // Data states
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
-  
-  // Search states
+
+  // Search/Input states
   const [productSearch, setProductSearch] = useState("");
   const [supplierSearch, setSupplierSearch] = useState("");
   const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
   const debouncedProductSearch = useDebounce(productSearch, 300);
   const debouncedSupplierSearch = useDebounce(supplierSearch, 300);
 
-  // Step system
-  const [currentStep, setCurrentStep] = useState(0);
+  // New item states
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("un");
   const [newProductPrice, setNewProductPrice] = useState("");
   const [lastUsedPrices, setLastUsedPrices] = useState<Record<string, number>>({});
 
-  // Refs para navegação por teclado
+  // Refs
   const productSearchRef = useRef<HTMLInputElement>(null);
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const priceInputRef = useRef<HTMLInputElement>(null);
-  const addButtonRef = useRef<HTMLButtonElement>(null);
   const supplierSearchRef = useRef<HTMLInputElement>(null);
-  const productListRef = useRef<HTMLDivElement>(null);
 
-  const steps = [
-    { id: 0, title: "Produtos", icon: Package, description: "Adicione os produtos do pedido" },
-    { id: 1, title: "Fornecedor", icon: Building2, description: "Selecione o fornecedor" },
-    { id: 2, title: "Finalizar", icon: CheckCircle, description: "Revise e confirme" }
-  ];
+  const currentStepIndex = STEPS.findIndex(s => s.id === activeStep);
+  const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
 
-  // Load data when dialog opens
+  // Load data
   useEffect(() => {
     if (open) {
-      resetForm();
+      if (products.length === 0 && !productsLoading) loadProducts();
       loadSuppliers();
       loadLastPrices();
       if (preSelectedProducts.length > 0) {
@@ -95,49 +116,38 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
           quantidade: p.quantity,
           unidade: p.unit,
           valorUnitario: p.estimated_price || 0,
+          product_id: p.product_id
         }));
         setItens(preSelectedItems);
-        setCurrentStep(1);
+        setActiveStep("fornecedor");
       } else {
-        // Auto-foco no campo de busca de produto
-        setTimeout(() => {
-          productSearchRef.current?.focus();
-        }, 300);
+        handleReset();
+        setTimeout(() => productSearchRef.current?.focus(), 100);
       }
     }
   }, [open]);
 
-  // Auto-foco quando muda de step
+  // Focus management on step change
   useEffect(() => {
     if (open) {
       setTimeout(() => {
-        if (currentStep === 0) {
-          productSearchRef.current?.focus();
-        } else if (currentStep === 1) {
-          supplierSearchRef.current?.focus();
-        }
+        if (activeStep === "produtos") productSearchRef.current?.focus();
+        else if (activeStep === "fornecedor") supplierSearchRef.current?.focus();
       }, 100);
     }
-  }, [currentStep, open]);
+  }, [activeStep, open]);
 
-  useEffect(() => {
-    if (open && products.length === 0 && !productsLoading) {
-      loadProducts();
-    }
-  }, [open]);
-
-  const resetForm = () => {
-    setCurrentStep(0);
+  const handleReset = () => {
+    setActiveStep("produtos");
     setFornecedor("");
-    setDataEntrega("");
+    setDataEntrega(undefined);
     setObservacoes("");
-    setSelectedProduct(null);
-    setNewProductQuantity("");
-    setNewProductUnit("un");
-    setNewProductPrice("");
+    setItens([]);
     setProductSearch("");
     setSupplierSearch("");
-    setItens([]);
+    setSelectedProduct(null);
+    setNewProductQuantity("");
+    setNewProductPrice("");
   };
 
   const loadSuppliers = async () => {
@@ -170,7 +180,6 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
           .range(page * pageSize, (page + 1) * pageSize - 1);
         
         if (data) {
-          // Flatten the brand data
           const processedData = data.map(p => ({
             ...p,
             brand_name: p.brands?.name,
@@ -193,22 +202,6 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     return products.filter(p => p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase())).slice(0, 30);
   }, [products, debouncedProductSearch]);
 
-  // Reset highlighted index when search changes
-  useEffect(() => {
-    setHighlightedProductIndex(-1);
-  }, [debouncedProductSearch]);
-
-  // Scroll para o item destacado quando navegar com setas
-  useEffect(() => {
-    if (highlightedProductIndex >= 0 && productListRef.current) {
-      const listElement = productListRef.current;
-      const highlightedElement = listElement.children[highlightedProductIndex] as HTMLElement;
-      if (highlightedElement) {
-        highlightedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
-    }
-  }, [highlightedProductIndex]);
-
   const filteredSuppliers = useMemo(() => {
     if (!debouncedSupplierSearch) return suppliers;
     return suppliers.filter(s => s.name.toLowerCase().includes(debouncedSupplierSearch.toLowerCase()));
@@ -226,21 +219,26 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       return;
     }
     
-    setItens([...itens, { produto: selectedProduct.name, quantidade, unidade: newProductUnit, valorUnitario: preco }]);
-    setLastUsedPrices({ ...lastUsedPrices, [selectedProduct.id]: preco });
+    setItens(prev => [...prev, { 
+      produto: selectedProduct.name, 
+      quantidade, 
+      unidade: newProductUnit, 
+      valorUnitario: preco,
+      product_id: selectedProduct.id 
+    }]);
+    
+    setLastUsedPrices(prev => ({ ...prev, [selectedProduct.id]: preco }));
+    
+    // Reset inputs but keep adding
     setSelectedProduct(null);
     setNewProductQuantity("");
     setNewProductPrice("");
     setProductSearch("");
     toast({ title: "Produto adicionado", duration: 1500 });
     
-    // Auto-foco no campo de busca para continuar adicionando
-    setTimeout(() => {
-      productSearchRef.current?.focus();
-    }, 50);
+    setTimeout(() => productSearchRef.current?.focus(), 50);
   };
 
-  // Função para selecionar produto da lista
   const selectProductFromList = (product: any) => {
     setSelectedProduct(product);
     setProductSearch("");
@@ -248,76 +246,63 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     if (lastUsedPrices[product.id]) {
       setNewProductPrice(lastUsedPrices[product.id].toString());
     }
-    // Auto-foco no campo de quantidade
     setTimeout(() => {
       quantityInputRef.current?.focus();
       quantityInputRef.current?.select();
     }, 50);
   };
 
-  // Handler para navegação por teclado nos campos de produto
   const handleProductKeyDown = useCallback((e: React.KeyboardEvent, field: 'search' | 'quantity' | 'price') => {
     if (field === 'search' && filteredProducts.length > 0 && !selectedProduct) {
-      // Navegação por setas na lista de produtos
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setHighlightedProductIndex(prev => 
-          prev < filteredProducts.length - 1 ? prev + 1 : 0
-        );
+        setHighlightedProductIndex(prev => prev < filteredProducts.length - 1 ? prev + 1 : 0);
         return;
       }
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setHighlightedProductIndex(prev => 
-          prev > 0 ? prev - 1 : filteredProducts.length - 1
-        );
+        setHighlightedProductIndex(prev => prev > 0 ? prev - 1 : filteredProducts.length - 1);
         return;
       }
-      // Enter seleciona o produto destacado
       if (e.key === 'Enter' && highlightedProductIndex >= 0) {
         e.preventDefault();
         selectProductFromList(filteredProducts[highlightedProductIndex]);
-        return;
-      }
-      // Escape fecha a lista
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setProductSearch("");
-        setHighlightedProductIndex(-1);
         return;
       }
     }
 
     if (e.key === 'Enter') {
       e.preventDefault();
-      
-      if (field === 'search') {
-        // Se tem produto selecionado, vai para quantidade
-        if (selectedProduct) {
-          quantityInputRef.current?.focus();
-          quantityInputRef.current?.select();
-        }
+      if (field === 'search' && selectedProduct) {
+        quantityInputRef.current?.focus();
+        quantityInputRef.current?.select();
       } else if (field === 'quantity') {
-        // Vai para preço
         priceInputRef.current?.focus();
         priceInputRef.current?.select();
       } else if (field === 'price') {
-        // Tenta adicionar o produto
-        if (selectedProduct && newProductQuantity && newProductPrice) {
-          handleAddProduct();
-        }
+        handleAddProduct();
       }
     }
   }, [selectedProduct, newProductQuantity, newProductPrice, filteredProducts, highlightedProductIndex]);
 
-  const handleRemoveItem = (index: number) => setItens(itens.filter((_, i) => i !== index));
-  const handleDuplicateItem = (index: number) => { setItens([...itens, { ...itens[index] }]); toast({ title: "Produto duplicado", duration: 1500 }); };
-  const calculateTotal = () => itens.reduce((acc, item) => acc + item.quantidade * item.valorUnitario, 0);
-
   const canProceed = () => {
-    if (currentStep === 0) return itens.length > 0;
-    if (currentStep === 1) return fornecedor && dataEntrega;
-    return true;
+    switch (activeStep) {
+      case "produtos": return itens.length > 0;
+      case "fornecedor": return !!fornecedor && !!dataEntrega;
+      default: return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStepIndex < STEPS.length - 1 && canProceed()) {
+      setActiveStep(STEPS[currentStepIndex + 1].id);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStepIndex > 0) {
+      setActiveStep(STEPS[currentStepIndex - 1].id);
+    }
   };
 
   const handleSubmit = async () => {
@@ -325,7 +310,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     
     setLoading(true);
     try {
-      const total = calculateTotal();
+      const total = itens.reduce((acc, item) => acc + item.quantidade * item.valorUnitario, 0);
       const selectedSupplier = suppliers.find(s => s.id === fornecedor);
       const { data: companyData } = await supabase.from("company_users").select("company_id").eq("user_id", user.id).single();
       if (!companyData) throw new Error("Empresa não encontrada");
@@ -336,24 +321,21 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         supplier_name: selectedSupplier?.name || '',
         total_value: total,
         status: 'pendente',
-        delivery_date: dataEntrega,
+        delivery_date: format(dataEntrega, 'yyyy-MM-dd'),
         observations: observacoes
       }).select().single();
       
       if (orderError) throw orderError;
 
-      const orderItems = itens.map(item => {
-        const product = products.find(p => p.name === item.produto);
-        return {
-          order_id: order.id,
-          product_id: product?.id || null,
-          product_name: item.produto,
-          quantity: item.quantidade,
-          unit_price: item.valorUnitario,
-          total_price: item.quantidade * item.valorUnitario,
-          unit: item.unidade
-        };
-      });
+      const orderItems = itens.map(item => ({
+        order_id: order.id,
+        product_id: item.product_id || null,
+        product_name: item.produto,
+        quantity: item.quantidade,
+        unit_price: item.valorUnitario,
+        total_price: item.quantidade * item.valorUnitario,
+        unit: item.unidade
+      }));
       
       await supabase.from('order_items').insert(orderItems);
       await logActivity({ tipo: "pedido", acao: "Pedido criado", detalhes: `Pedido para ${selectedSupplier?.name} - R$ ${total.toFixed(2)}`, valor: total });
@@ -368,455 +350,505 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     }
   };
 
-  // Handler para atalhos globais do modal
-  const handleModalKeyDown = useCallback((e: React.KeyboardEvent) => {
-    // Ctrl+Enter para criar pedido (no último step)
-    if (e.ctrlKey && e.key === 'Enter' && currentStep === 2) {
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) handleReset();
+    onOpenChange(isOpen);
+  };
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.altKey && e.key === 'ArrowRight' && canProceed() && currentStepIndex < STEPS.length - 1) {
+      e.preventDefault();
+      handleNext();
+    }
+    if (e.altKey && e.key === 'ArrowLeft' && currentStepIndex > 0) {
+      e.preventDefault();
+      handlePrevious();
+    }
+    if (e.ctrlKey && e.key === 'Enter' && activeStep === "confirmar") {
       e.preventDefault();
       handleSubmit();
     }
-    
-    // Alt+Setas para navegar entre steps
-    if (e.altKey && e.key === 'ArrowRight' && canProceed() && currentStep < 2) {
-      e.preventDefault();
-      setCurrentStep(currentStep + 1);
-    }
-    if (e.altKey && e.key === 'ArrowLeft' && currentStep > 0) {
-      e.preventDefault();
-      setCurrentStep(currentStep - 1);
-    }
-    
-    // Alt+N para focar no campo de produto (step 0)
-    if (e.altKey && e.key === 'n' && currentStep === 0) {
-      e.preventDefault();
-      productSearchRef.current?.focus();
-    }
-    
-    // Números 1-3 com Alt para ir direto para o step
-    if (e.altKey && ['1', '2', '3'].includes(e.key)) {
-      e.preventDefault();
-      const stepIndex = parseInt(e.key) - 1;
-      if (stepIndex <= currentStep || (stepIndex === currentStep + 1 && canProceed())) {
-        setCurrentStep(stepIndex);
-      }
-    }
-  }, [currentStep]);
+  }, [activeStep, currentStepIndex, itens, fornecedor, dataEntrega]);
 
-
-  // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
-  const modalInnerContent = (
-    <>
-      {/* Header Compacto com design semiglass */}
-      <div className="flex-shrink-0 border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 backdrop-blur-md relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
-        
-        {/* Top Bar: Título, Steps e Botão Fechar */}
-        <div className="flex items-center justify-between px-6 py-2 relative z-10 h-14">
-          <div className="flex items-center gap-6">
-            {/* Título */}
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-lg ring-1 ring-white/20">
-                <ShoppingCart className="h-4 w-4" />
-              </div>
-              <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
-                Novo Pedido
-              </DialogTitle>
+  // Helpers de Renderização
+  const renderProductItem = (p: any, index: number) => (
+    <button
+      key={p.id}
+      onClick={() => selectProductFromList(p)}
+      className={cn(
+        "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-all border-b border-gray-100 dark:border-gray-800 last:border-none",
+        highlightedProductIndex === index 
+          ? "bg-gray-100 dark:bg-gray-800" 
+          : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+      )}
+    >
+      <div className="flex items-center gap-2 overflow-hidden">
+        <div className="w-8 h-8 rounded flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400 flex-shrink-0">
+          <Package className="h-4 w-4" />
+        </div>
+        <div className="flex flex-col min-w-0">
+          <span className="font-bold tracking-tight truncate text-gray-900 dark:text-white">{p.name}</span>
+          {p.brand_name && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{p.brand_name}</span>
+              {p.brand_rating > 0 && (
+                <div className="flex items-center gap-0.5">
+                  <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
+                  <span className="text-[9px] font-bold text-amber-600 dark:text-amber-500">{p.brand_rating}</span>
+                </div>
+              )}
             </div>
+          )}
+        </div>
+      </div>
+    </button>
+  );
 
-            {/* Steps indicator minimalista integrado */}
-            <div className="hidden sm:flex items-center h-full border-b border-transparent gap-1">
-              {steps.map((step, index) => (
-                <button
-                  key={step.id}
-                  onClick={() => index < currentStep && setCurrentStep(index)}
-                  disabled={index > currentStep}
-                  className={cn(
-                    "relative h-full px-3 flex items-center gap-2 border-b-2 transition-all text-[10px] uppercase tracking-[0.15em] font-black",
-                    index === currentStep 
-                      ? "border-orange-500 text-orange-600 dark:text-orange-400" 
-                      : index < currentStep
-                        ? "border-transparent text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"
-                        : "border-transparent text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                  )}
-                >
-                  {index < currentStep ? <CheckCircle className="h-3 w-3" /> : <step.icon className="h-3 w-3" />}
-                  <span>{step.title}</span>
-                </button>
-              ))}
+  const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
+  const DialogHeaderComponent = isMobile ? DrawerHeader : DialogHeader;
+  const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
+  const DialogDescriptionComponent = isMobile ? DrawerDescription : DialogDescription;
+
+  const content = (
+    <>
+      {/* Header */}
+      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <ShoppingCart className="h-4 w-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <DialogTitleComponent className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
+                Novo Pedido
+              </DialogTitleComponent>
+              <DialogDescriptionComponent className="text-gray-500 dark:text-gray-400 text-xs font-medium truncate">
+                Etapa {currentStepIndex + 1}/{STEPS.length}
+              </DialogDescriptionComponent>
             </div>
           </div>
 
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => onOpenChange(false)} 
-            className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-          >
+          <div className="flex items-center gap-2 sm:gap-3">
+            {currentStepIndex > 0 && (
+              <Button type="button" variant="outline" size="sm" onClick={handlePrevious}
+                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 h-9 px-3 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 shadow-sm">
+                <ChevronLeft className="h-3 w-3 sm:mr-1.5" />
+                <span className="hidden sm:inline">Voltar</span>
+              </Button>
+            )}
+            
+            {currentStepIndex < STEPS.length - 1 ? (
+              <Button type="button" size="sm" onClick={handleNext} disabled={!canProceed()}
+                className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
+                <span className="hidden sm:inline">Próximo</span>
+                <ChevronRight className="h-3 w-3 ml-1.5" />
+              </Button>
+            ) : (
+              <Button type="button" size="sm" onClick={handleSubmit} disabled={loading}
+                className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
+                {loading ? (
+                  <><Loader2 className="h-3 w-3 animate-spin mr-1.5" /><span className="hidden sm:inline">Criando...</span></>
+                ) : (
+                  <><Check className="h-3 w-3 mr-1.5" /><span className="hidden sm:inline">Criar</span></>
+                )}
+              </Button>
+            )}
+          </div>
+          
+          <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
+            className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg ml-2">
             <X className="h-4 w-4" />
-            <span className="sr-only">Fechar</span>
           </Button>
+        </div>
+        
+        <div className="mt-3">
+          <Progress value={progress} className="h-1 bg-gray-100 dark:bg-gray-800 [&>div]:bg-gray-900 dark:[&>div]:bg-white rounded-full" />
         </div>
       </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-500/5 to-transparent pointer-events-none"></div>
-            <AnimatedTabContent
-              value={String(currentStep)}
-              activeTab={String(currentStep)}
-              className="h-full relative z-10"
-            >
-              {/* Step 0: Produtos */}
-              {currentStep === 0 && (
-                <div className="h-full flex flex-col p-4">
-                  {/* Formulário de adicionar produto Compacto e Horizontal */}
-                  <div className="flex items-end gap-2 bg-white/60 dark:bg-gray-900/40 rounded-xl p-3 border border-gray-200/60 dark:border-gray-700/40 backdrop-blur-xl shadow-sm mb-3 relative z-50">
-                    <div className="flex-1 space-y-1">
-                      <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Produto</Label>
-                      <div className="relative group">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
-                        <Input
-                          ref={productSearchRef}
-                          placeholder="Buscar produto..."
-                          value={selectedProduct ? selectedProduct.name : productSearch}
-                          onChange={(e) => { setProductSearch(e.target.value); setSelectedProduct(null); }}
-                          onKeyDown={(e) => handleProductKeyDown(e, 'search')}
-                          className="h-9 pl-8 bg-white dark:bg-gray-950/60 border-gray-200 dark:border-gray-800 font-bold text-xs rounded-lg focus:ring-orange-500/20 transition-all shadow-sm"
-                          tabIndex={0}
-                        />
-                        {filteredProducts.length > 0 && !selectedProduct && (
-                          <div 
-                            ref={productListRef}
-                            className="absolute z-50 w-full mt-1 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-1 custom-scrollbar"
-                          >
-                            {filteredProducts.map((p, index) => (
-                              <button
-                                key={p.id}
-                                onClick={() => selectProductFromList(p)}
-                                onMouseEnter={() => setHighlightedProductIndex(index)}
-                                className={cn(
-                                  "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-all border-b border-gray-100 dark:border-gray-900 last:border-none",
-                                  highlightedProductIndex === index 
-                                    ? "bg-orange-500/10 text-orange-700 dark:text-orange-400" 
-                                    : "hover:bg-gray-50 dark:hover:bg-white/5"
-                                )}
-                              >
-                                <div className="flex items-center gap-2 overflow-hidden">
-                                  <div className={cn("w-6 h-6 rounded flex items-center justify-center transition-all flex-shrink-0", highlightedProductIndex === index ? "bg-orange-500 text-white shadow-md" : "bg-gray-100 dark:bg-gray-800 text-gray-400")}>
-                                    <Package className="h-3 w-3" />
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="font-bold tracking-tight truncate">{p.name}</span>
-                                    {p.brand_name && (
-                                      <div className="flex items-center gap-1.5 mt-0.5">
-                                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{p.brand_name}</span>
-                                        {p.brand_rating > 0 && (
-                                          <div className="flex items-center gap-0.5">
-                                            <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
-                                            <span className="text-[9px] font-bold text-amber-600 dark:text-amber-500">{p.brand_rating}</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                {p.brand_score > 0 && (
-                                  <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full flex-shrink-0">
-                                    <Trophy className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400" />
-                                    <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400">
-                                      {p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}
-                                    </span>
-                                  </div>
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+      {/* Tab Navigation */}
+      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <div className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+          {STEPS.map((step, index) => {
+            const Icon = step.icon;
+            const status = index < currentStepIndex ? "completed" : index === currentStepIndex ? "current" : "pending";
+            return (
+              <button key={step.id} type="button" onClick={() => status !== "pending" && setActiveStep(step.id)}
+                disabled={status === "pending"}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 flex-1 justify-center",
+                  status === "current" && "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-gray-700",
+                  status === "completed" && "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer shadow-sm",
+                  status === "pending" && "text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                )}>
+                <div className="flex items-center justify-center w-4 h-4">
+                  {status === "completed" ? <Check className="h-3 w-3" /> : <Icon className="h-3 w-3" />}
+                </div>
+                <span className="hidden sm:inline">{step.title}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-hidden relative bg-gray-50 dark:bg-black">
+        
+        {/* Step: Produtos */}
+        {activeStep === "produtos" && (
+          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start">
+              
+              {/* Adicionar Produto */}
+              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-visible z-10">
+                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 rounded-t-xl">
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
+                    <Plus className="h-4 w-4 text-gray-500" />
+                    <span>Adicionar Produto</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-4">
+                  {/* Busca */}
+                  <div className="space-y-1 relative">
+                    <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Produto</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                      <Input 
+                        ref={productSearchRef}
+                        placeholder="Buscar produto..." 
+                        value={selectedProduct ? selectedProduct.name : productSearch}
+                        onChange={(e) => { setProductSearch(e.target.value); setSelectedProduct(null); }}
+                        onKeyDown={(e) => handleProductKeyDown(e, 'search')}
+                        className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" 
+                      />
+                      {/* Dropdown de resultados */}
+                      {filteredProducts.length > 0 && !selectedProduct && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl max-h-[200px] overflow-y-auto z-50">
+                          {filteredProducts.map((p, i) => renderProductItem(p, i))}
+                        </div>
+                      )}
                     </div>
-                    <div className="w-20 space-y-1">
-                      <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Qtd</Label>
-                      <Input
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Quantidade</Label>
+                      <Input 
                         ref={quantityInputRef}
-                        type="number"
+                        type="number" 
                         placeholder="0"
                         value={newProductQuantity}
                         onChange={(e) => setNewProductQuantity(e.target.value)}
                         onKeyDown={(e) => handleProductKeyDown(e, 'quantity')}
-                        className="h-9 bg-white dark:bg-gray-950/60 border-gray-200 dark:border-gray-800 font-black text-center text-xs rounded-lg focus:ring-orange-500/20 transition-all shadow-sm"
-                        tabIndex={0}
+                        className="h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg"
                       />
                     </div>
-                    <div className="w-24 space-y-1">
-                      <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Preço</Label>
-                      <div className="relative group">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-emerald-600 font-black text-xs opacity-50">R$</span>
-                        <Input
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Preço Unit.</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">R$</span>
+                        <Input 
                           ref={priceInputRef}
-                          type="text"
                           inputMode="decimal"
                           placeholder="0,00"
                           value={newProductPrice}
                           onChange={(e) => setNewProductPrice(e.target.value)}
                           onKeyDown={(e) => handleProductKeyDown(e, 'price')}
-                          className="h-9 pl-7 bg-white dark:bg-gray-950/60 border-gray-200 dark:border-gray-800 font-black text-xs rounded-lg focus:ring-emerald-500/20 transition-all shadow-sm"
-                          tabIndex={0}
+                          className="pl-8 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg"
                         />
                       </div>
                     </div>
-                    <Button 
-                      ref={addButtonRef} 
-                      onClick={handleAddProduct} 
-                      disabled={!selectedProduct} 
-                      size="icon"
-                      className="h-9 w-9 bg-orange-600 hover:bg-orange-700 text-white shadow-md shadow-orange-500/10 rounded-lg transition-all active:scale-95 ring-1 ring-white/20 shrink-0"
-                    >
-                      <Plus className="h-5 w-5" />
-                    </Button>
                   </div>
 
-                <div className="flex-1 min-h-0 flex flex-col">
-                  <div className="flex items-center justify-between mb-2 px-1">
-                    <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Itens Adicionados ({itens.length})</span>
-                    <Badge variant="outline" className="h-5 px-2 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-black text-[9px] uppercase tracking-widest rounded-md">
-                      Total: R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  <Button onClick={handleAddProduct} disabled={!selectedProduct || !newProductQuantity || !newProductPrice}
+                    className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs h-9 rounded-lg shadow-sm">
+                    <Plus className="h-3.5 w-3.5 mr-2" />
+                    Adicionar Item
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Lista de Itens */}
+              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-full max-h-[400px] lg:max-h-none rounded-xl overflow-hidden flex flex-col">
+                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
+                  <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
+                    <span className="flex items-center gap-2 text-gray-900 dark:text-white">
+                      <ShoppingCart className="h-4 w-4 text-gray-500" />
+                      Itens do Pedido
+                    </span>
+                    <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 font-bold">
+                      {itens.length}
                     </Badge>
-                  </div>
-                  <ScrollArea className="flex-1 rounded-xl bg-gray-50/50 dark:bg-gray-950/20 shadow-inner custom-scrollbar border border-gray-100 dark:border-gray-800">
-                    {itens.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                        <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-2 border border-gray-200 dark:border-gray-800">
-                          <Package className="h-5 w-5 opacity-20" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0 flex-1 overflow-hidden p-0">
+                  <ScrollArea className="h-full">
+                    <div className="p-4 space-y-2">
+                      {itens.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                          <Package className="h-8 w-8 opacity-20 mb-2" />
+                          <p className="text-xs font-medium">Nenhum item adicionado</p>
                         </div>
-                        <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Lista vazia</p>
-                      </div>
-                    ) : (
-                      <div className="p-2 space-y-1.5">
-                        {itens.map((item, index) => (
-                          <div key={index} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-orange-500/30 transition-all group shadow-sm">
-                            <div className="w-8 h-8 rounded bg-orange-500/10 flex items-center justify-center border border-orange-500/10 flex-shrink-0">
-                              <span className="text-[9px] font-black text-orange-600 dark:text-orange-400">{itens.length - index}</span>
+                      ) : (
+                        itens.map((item, index) => (
+                          <div key={index} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm group">
+                            <div className="w-8 h-8 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 font-bold text-xs text-gray-500">
+                              {index + 1}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-black text-xs text-gray-900 dark:text-white truncate tracking-tight">{item.produto}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[9px] font-bold text-gray-500">
-                                  {item.quantidade} {item.unidade}
-                                </span>
-                                <span className="text-[9px] font-black text-gray-300 dark:text-gray-700">|</span>
-                                <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400">R$ {item.valorUnitario.toFixed(2)}</span>
+                              <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{item.produto}</p>
+                              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-gray-500">
+                                <span>{item.quantidade} {item.unidade}</span>
+                                <span>x</span>
+                                <span>R$ {item.valorUnitario.toFixed(2)}</span>
                               </div>
                             </div>
-                            <div className="text-right flex items-center gap-2">
-                              <p className="font-black text-emerald-600 dark:text-emerald-400 text-xs tracking-tight">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
-                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                <Button variant="ghost" size="icon" onClick={() => handleDuplicateItem(index)} className="h-6 w-6 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md">
-                                  <Copy className="h-3 w-3" />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)} className="h-6 w-6 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md">
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
+                            <div className="text-right">
+                              <p className="text-xs font-black text-gray-900 dark:text-white">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
                             </div>
+                            <Button variant="ghost" size="icon" onClick={() => setItens(itens.filter((_, i) => i !== index))}
+                              className="h-6 w-6 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
                           </div>
-                        )).reverse()}
-                      </div>
-                    )}
+                        )).reverse()
+                      )}
+                    </div>
                   </ScrollArea>
+                </CardContent>
+                <div className="p-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
+                  <span className="text-xs font-bold text-gray-500 uppercase">Total Estimado</span>
+                  <span className="text-sm font-black text-gray-900 dark:text-white">
+                    R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
+                  </span>
                 </div>
-                </div>
-              )}
+              </Card>
+            </div>
+          </div>
+        )}
 
-              {/* Step 1: Fornecedor */}
-              {currentStep === 1 && (
-                <div className="h-full flex flex-col p-4 space-y-4">
-                  <div className="flex-1 min-h-0 flex flex-col space-y-2">
-                    <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Selecione o Fornecedor</Label>
-                    <div className="relative group flex-shrink-0">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
-                      <Input
-                        ref={supplierSearchRef}
-                        placeholder="Buscar por nome ou contato..."
-                        value={supplierSearch}
-                        onChange={(e) => setSupplierSearch(e.target.value)}
-                        className="h-9 pl-9 bg-white dark:bg-gray-950/60 border-gray-200 dark:border-gray-800 font-bold text-xs rounded-lg focus:ring-orange-500/20 transition-all shadow-sm"
-                        tabIndex={0}
-                      />
-                    </div>
-                    <ScrollArea className="flex-1 rounded-xl bg-gray-50/50 dark:bg-gray-950/20 shadow-inner custom-scrollbar border border-gray-100 dark:border-gray-800">
-                      <div className="p-2 space-y-1.5">
-                        {filteredSuppliers.length === 0 ? (
-                          <div className="flex flex-col items-center justify-center py-8 opacity-50">
-                            <Building2 className="h-6 w-6 mb-2 text-gray-400" />
-                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Nenhum fornecedor encontrado</p>
-                          </div>
-                        ) : (
-                          filteredSuppliers.map(s => (
-                            <button
-                              key={s.id}
-                              onClick={() => setFornecedor(s.id)}
-                              className={cn(
-                                "w-full p-2 rounded-lg text-left transition-all flex items-center gap-3 border",
-                                fornecedor === s.id 
-                                  ? "bg-white dark:bg-gray-800 border-orange-500 shadow-md ring-1 ring-orange-500/10" 
-                                  : "bg-white/40 dark:bg-gray-900/40 border-gray-100 dark:border-gray-800 hover:border-orange-500/30"
-                              )}
-                            >
-                              <div className={cn("w-8 h-8 rounded flex items-center justify-center transition-all", fornecedor === s.id ? "bg-orange-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-400")}>
-                                <Building2 className="h-3.5 w-3.5" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className={cn("font-black text-xs tracking-tight truncate", fornecedor === s.id ? "text-orange-700 dark:text-orange-400" : "text-gray-900 dark:text-white")}>{s.name}</p>
-                                <p className="text-[9px] text-gray-500 dark:text-gray-400 font-bold truncate opacity-70">{s.contact || 'Sem contato'}</p>
-                              </div>
-                              {fornecedor === s.id && <CheckCircle className="h-3.5 w-3.5 text-orange-600" />}
-                            </button>
-                          ))
-                        )}
-                      </div>
-                    </ScrollArea>
-                  </div>
-                  
-                  <div className="flex-shrink-0 space-y-2 pt-2 border-t border-gray-100 dark:border-gray-800">
-                    <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Data Prevista de Entrega</Label>
-                    <div className="relative group max-w-xs">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
-                      <Input 
-                        type="date" 
-                        value={dataEntrega} 
-                        onChange={(e) => setDataEntrega(e.target.value)} 
-                        className="h-9 pl-9 bg-white dark:bg-gray-950/60 border-gray-200 dark:border-gray-800 font-bold text-xs rounded-lg focus:ring-orange-500/20 transition-all shadow-sm" 
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2: Finalizar */}
-              {currentStep === 2 && (
-                <div className="h-full flex flex-col p-4 space-y-4">
-                  {/* Resumo Compacto */}
-                  <div className="bg-white/60 dark:bg-gray-900/40 rounded-xl p-4 border border-gray-200/60 dark:border-gray-700/40 backdrop-blur-xl shadow-sm ring-1 ring-white/20">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-gray-50 dark:bg-gray-950/40 rounded-lg p-2 border border-gray-100 dark:border-gray-800">
-                        <p className="text-[8px] text-gray-400 dark:text-gray-500 mb-0.5 font-black uppercase tracking-widest">Fornecedor</p>
-                        <p className="font-black text-xs text-gray-900 dark:text-white truncate tracking-tight">{suppliers.find(s => s.id === fornecedor)?.name || '-'}</p>
-                      </div>
-                      <div className="bg-gray-50 dark:bg-gray-950/40 rounded-lg p-2 border border-gray-100 dark:border-gray-800">
-                        <p className="text-[8px] text-gray-400 dark:text-gray-500 mb-0.5 font-black uppercase tracking-widest">Entrega</p>
-                        <p className="font-black text-xs text-gray-900 dark:text-white tracking-tight">{dataEntrega ? new Date(dataEntrega + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</p>
-                      </div>
-                      <div className="bg-gray-50 dark:bg-gray-950/40 rounded-lg p-2 border border-gray-100 dark:border-gray-800">
-                        <p className="text-[8px] text-gray-400 dark:text-gray-500 mb-0.5 font-black uppercase tracking-widest">Itens</p>
-                        <p className="font-black text-xs text-gray-900 dark:text-white tracking-tight">{itens.length} produto(s)</p>
-                      </div>
-                      <div className="bg-emerald-500/5 dark:bg-emerald-900/20 rounded-lg p-2 border border-emerald-500/20 shadow-sm">
-                        <p className="text-[8px] text-emerald-700 dark:text-emerald-500 mb-0.5 font-black uppercase tracking-widest">Total</p>
-                        <p className="font-black text-sm text-emerald-600 dark:text-emerald-400 tracking-tight">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Observações */}
-                  <div className="space-y-1.5">
-                    <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Notas Adicionais</Label>
-                    <Textarea
-                      placeholder="Instruções de entrega, condições de pagamento..."
-                      value={observacoes}
-                      onChange={(e) => setObservacoes(e.target.value)}
-                      className="min-h-[60px] h-16 resize-none bg-white dark:bg-gray-950/60 border-gray-200 dark:border-gray-800 font-medium text-xs rounded-lg p-2 focus:ring-orange-500/20 transition-all shadow-sm"
+        {/* Step: Fornecedor */}
+        {activeStep === "fornecedor" && (
+          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start">
+              
+              {/* Selecionar Fornecedor */}
+              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-hidden">
+                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
+                    <Building2 className="h-4 w-4 text-gray-500" />
+                    <span>Selecionar Fornecedor</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                    <Input 
+                      ref={supplierSearchRef}
+                      placeholder="Buscar fornecedor..." 
+                      value={supplierSearch}
+                      onChange={(e) => setSupplierSearch(e.target.value)}
+                      className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg" 
                     />
                   </div>
-
-                  {/* Lista Simplificada */}
-                  <div className="flex-1 min-h-0 flex flex-col">
-                    <ScrollArea className="flex-1 border border-gray-100 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-950/20 shadow-inner custom-scrollbar">
-                      <div className="p-2 space-y-1">
-                        {itens.map((item, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-white dark:bg-gray-900 rounded-lg border border-gray-50 dark:border-gray-800 shadow-xs">
-                            <span className="truncate flex-1 font-black text-xs text-gray-900 dark:text-white tracking-tight">{item.produto}</span>
-                            <div className="flex items-center gap-3 ml-3">
-                              <span className="text-[9px] font-bold text-gray-500">{item.quantidade} {item.unidade}</span>
-                              <span className="font-black text-xs text-emerald-600 dark:text-emerald-400 tracking-tight">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</span>
-                            </div>
+                  
+                  <ScrollArea className="h-[250px] border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-950">
+                    <div className="p-1.5 space-y-1">
+                      {filteredSuppliers.map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => setFornecedor(s.id)}
+                          className={cn(
+                            "w-full p-2 rounded-md text-left transition-all flex items-center gap-3 group",
+                            fornecedor === s.id 
+                              ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm" 
+                              : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                          )}
+                        >
+                          <Building2 className={cn("h-4 w-4", fornecedor === s.id ? "text-white dark:text-gray-900" : "text-gray-400")} />
+                          <div className="flex-1 min-w-0">
+                            <p className={cn("text-xs font-bold truncate", fornecedor === s.id ? "text-white dark:text-gray-900" : "text-gray-700 dark:text-gray-300")}>{s.name}</p>
+                            {s.contact && <p className={cn("text-[10px] truncate opacity-80", fornecedor === s.id ? "text-gray-300 dark:text-gray-600" : "text-gray-500")}>{s.contact}</p>}
                           </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
+                          {fornecedor === s.id && <Check className="h-4 w-4" />}
+                        </button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Detalhes do Pedido */}
+              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-hidden">
+                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <span>Detalhes da Entrega</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-4">
+                  {fornecedor && (
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-800 mb-4">
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Fornecedor Selecionado</span>
+                      <p className="text-sm font-black text-gray-900 dark:text-white mt-1">
+                        {suppliers.find(s => s.id === fornecedor)?.name}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Data de Entrega</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn(
+                          "w-full justify-start text-left font-medium h-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800",
+                          !dataEntrega && "text-gray-400"
+                        )}>
+                          <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
+                          {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "Selecione a data..."}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 border-gray-200 dark:border-gray-700" align="start">
+                        <Calendar mode="single" selected={dataEntrega}
+                          onSelect={setDataEntrega} locale={ptBR}
+                          disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} 
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
-                </div>
-              )}
-          </AnimatedTabContent>
-      </div>
 
-      {/* Footer Compacto */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30 backdrop-blur-2xl flex items-center justify-end gap-2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-500/5 to-transparent pointer-events-none"></div>
-        
-        <Button 
-          variant="outline" 
-          onClick={() => currentStep > 0 ? setCurrentStep(currentStep - 1) : onOpenChange(false)} 
-          disabled={loading} 
-          className="h-8 px-4 border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-white/5 font-black text-[9px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all shadow-sm relative z-10"
-        >
-          {currentStep === 0 ? 'Cancelar' : 'Voltar'}
-        </Button>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Observações</Label>
+                    <Textarea 
+                      placeholder="Instruções de entrega, pagamento..." 
+                      value={observacoes}
+                      onChange={(e) => setObservacoes(e.target.value)}
+                      className="min-h-[100px] resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm" 
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
 
-        <div className="relative z-10">
-          {currentStep < 2 ? (
-            <Button 
-              onClick={() => setCurrentStep(currentStep + 1)} 
-              disabled={!canProceed()} 
-              className="h-8 px-6 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-[9px] tracking-widest shadow-md shadow-orange-500/10 rounded-lg transition-all active:scale-[0.98] ring-1 ring-white/20"
-            >
-              Próximo
-              <ChevronRight className="h-3.5 w-3.5 ml-1" />
-            </Button>
-          ) : (
-            <Button 
-              onClick={handleSubmit} 
-              disabled={loading || !canProceed()} 
-              className="h-8 px-6 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-[9px] tracking-widest shadow-md shadow-orange-500/10 rounded-lg transition-all active:scale-[0.98] ring-1 ring-white/20"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
-                  Criando...
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="h-3.5 w-3.5 mr-2" />
-                  Finalizar
-                </>
+        {/* Step: Confirmar */}
+        {activeStep === "confirmar" && (
+          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+             <div className="max-w-2xl mx-auto space-y-4">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Resumo Fornecedor */}
+                <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <Building2 className="h-3.5 w-3.5 text-gray-500" />
+                      </div>
+                      <span className="text-xs font-black uppercase tracking-wider text-gray-500">Fornecedor</span>
+                    </div>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white pl-8">
+                      {suppliers.find(s => s.id === fornecedor)?.name}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Resumo Entrega */}
+                <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <CalendarIcon className="h-3.5 w-3.5 text-gray-500" />
+                      </div>
+                      <span className="text-xs font-black uppercase tracking-wider text-gray-500">Entrega</span>
+                    </div>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white pl-8">
+                      {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "-"}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Resumo Itens */}
+              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
+                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+                  <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
+                    <span className="flex items-center gap-2 text-gray-900 dark:text-white">
+                      <ShoppingCart className="h-4 w-4 text-gray-500" />
+                      Itens do Pedido
+                    </span>
+                    <Badge variant="secondary" className="font-bold">{itens.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {itens.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-gray-900 dark:text-white">{item.produto}</p>
+                          <p className="text-[10px] text-gray-500">{item.quantidade} {item.unidade} x R$ {item.valorUnitario.toFixed(2)}</p>
+                        </div>
+                        <p className="text-xs font-black text-gray-900 dark:text-white">
+                          R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                    <span className="text-xs font-black uppercase tracking-wider text-gray-500">Valor Total</span>
+                    <span className="text-lg font-black text-gray-900 dark:text-white">
+                      R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Resumo Observações */}
+              {observacoes && (
+                <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <FileText className="h-3.5 w-3.5 text-gray-500" />
+                      </div>
+                      <span className="text-xs font-black uppercase tracking-wider text-gray-500">Observações</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 pl-8">{observacoes}</p>
+                  </CardContent>
+                </Card>
               )}
-            </Button>
-          )}
-        </div>
+             </div>
+          </div>
+        )}
+
       </div>
     </>
   );
 
-  // Mobile: Usar Drawer
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[95vh] overflow-hidden flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30 rounded-t-[2rem] shadow-2xl">
-          {modalInnerContent}
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerContent 
+          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 transition-all duration-200"
+          style={{ 
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
+          {content}
         </DrawerContent>
       </Drawer>
     );
   }
 
-  // Desktop: Usar Dialog
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent 
-        hideClose
-        className="max-w-[1000px] w-[95vw] h-[85vh] max-h-[700px] overflow-hidden p-0 gap-0 border border-white/20 dark:border-white/10 shadow-2xl rounded-[2rem] !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl [&>button]:hidden animate-in fade-in zoom-in-95 duration-300"
-        onKeyDown={handleModalKeyDown}
+        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-gray-200 dark:border-gray-800 shadow-md rounded-2xl flex flex-col bg-white dark:bg-gray-950"
+        onKeyDown={handleKeyDown}
       >
-        {modalInnerContent}
+        {content}
       </DialogContent>
     </Dialog>
   );
