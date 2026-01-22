@@ -296,9 +296,10 @@ function EditProductDialogInternal({
 
   // Conteúdo do formulário (compartilhado entre mobile e desktop)
   const formContent = (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-gray-950">
-      {/* Product Image Preview */}
-      {(currentProduct?.image_url || newImageUrl) && (
+    <>
+      <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-gray-950">
+        {/* Product Image Preview */}
+        {(currentProduct?.image_url || newImageUrl) && (
             <div className="flex flex-col items-center gap-3 pb-2">
               <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-sm relative group bg-gray-50 dark:bg-gray-900">
                 {isUploadingImage ? (
@@ -364,7 +365,7 @@ function EditProductDialogInternal({
           )}
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 text-sm">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 text-sm" id="edit-product-form">
             <FormField
               control={form.control}
               name="name"
@@ -474,27 +475,30 @@ function EditProductDialogInternal({
                 </FormItem>
               )}
             />
-
-            <div className="flex justify-end gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isUploadingImage}
-                className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 dark:bg-gray-900/50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-900/70"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                type="submit"
-                className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
-              >
-                Salvar Alterações
-              </Button>
-            </div>
             </form>
           </Form>
-    </div>
+      </div>
+      
+      {/* Footer fixo */}
+      <div className="p-4 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-3 flex-shrink-0">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={isUploadingImage}
+          className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 dark:bg-gray-900/50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-900/70"
+        >
+          Cancelar
+        </Button>
+        <Button 
+          type="submit"
+          form="edit-product-form"
+          className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
+        >
+          Salvar Alterações
+        </Button>
+      </div>
+    </>
   );
 
   // Mobile: Usar Drawer (bottom sheet)
