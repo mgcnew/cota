@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,7 +8,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -16,7 +15,6 @@ import {
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -28,13 +26,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, X, Building2 } from "lucide-react";
@@ -60,12 +51,16 @@ type SupplierFormData = z.infer<typeof supplierSchema>;
 interface AddSupplierDialogProps {
   onAdd: () => void;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogProps) {
+export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddSupplierDialogProps) {
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const handleSetOpen = externalOnOpenChange || ((newOpen: boolean) => setInternalOpen(newOpen));
   const scrollPositionRef = useRef<number>(0);
   const { logActivity } = useActivityLog();
   const { user } = useAuth();
@@ -84,6 +79,21 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
       address: "",
     },
   });
+
+  // Salvar posição de scroll quando abrir o modal
+  useEffect(() => {
+    if (open) {
+      scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+    } else {
+      // Restaurar posição de scroll quando fechar o modal
+      setTimeout(() => {
+        window.scrollTo({
+          top: scrollPositionRef.current,
+          behavior: 'instant' as ScrollBehavior
+        });
+      }, 0);
+    }
+  }, [open]);
 
   const onSubmit = async (data: SupplierFormData, keepOpen = false) => {
     try {
@@ -160,7 +170,7 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
       form.reset();
       
       if (!keepOpen) {
-        setOpen(false);
+        handleOpenChange(false);
       } else {
         // Focar no primeiro campo
         setTimeout(() => {
@@ -178,16 +188,16 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
 
   // Função para gerenciar abertura/fechamento e manter scroll
   const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen) {
-      // Salvar posição do scroll ao abrir
-      scrollPositionRef.current = window.scrollY;
-    } else {
-      // Restaurar posição do scroll ao fechar
+    handleSetOpen(newOpen);
+    if (!newOpen) {
       setTimeout(() => {
-        window.scrollTo(0, scrollPositionRef.current);
-      }, 100);
+        window.scrollTo({
+          top: scrollPositionRef.current,
+          behavior: 'instant' as ScrollBehavior
+        });
+      }, 0);
+      form.reset();
     }
-    setOpen(newOpen);
   };
 
   // Scroll into view helper para inputs
@@ -198,250 +208,256 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
     }, 300);
   };
 
-  // Conteúdo do formulário (reutilizado em mobile e desktop)
-  const formContent = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full" id="add-supplier-form">
-        <div className={`flex-1 overflow-y-auto bg-transparent ${isMobile ? 'p-4 space-y-4' : 'p-5 space-y-5'}`}>
-          {/* Alerta de limite de fornecedores */}
-          <LimitAlert 
-            resource="suppliers"
-            current={subscriptionLimits.currentSuppliers}
-            max={subscriptionLimits.maxSuppliers}
-          />
-          {/* Seção: Informações da Empresa */}
-          <div className={isMobile ? 'space-y-3' : 'space-y-3.5'}>
-            <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-1">
-              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
-              Informações da Empresa
-            </h3>
-            
-            <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'lg:grid-cols-2 gap-3.5'}`}>
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Nome do Fornecedor *</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Ex: Holambra Distribuidora" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                        onFocus={handleInputFocus}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="cnpj"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">CNPJ</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="00.000.000/0000-00" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                        onFocus={handleInputFocus}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Endereço Completo</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Rua das Flores, 123, Centro, São Paulo - SP" 
-                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                      onFocus={handleInputFocus}
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+  // Shared Header Component
+  const Header = (
+    <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
+      <div className="flex items-center justify-between relative z-10">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <Building2 className="h-4 w-4" />
           </div>
-
-          {/* Seção: Informações de Contato */}
-          <div className={isMobile ? 'space-y-3' : 'space-y-3.5'}>
-            <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-1">
-              <span className="w-1 h-4 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full"></span>
-              Informações de Contato
-            </h3>
-
-            <FormField
-              control={form.control}
-              name="contact"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Nome do Contato Principal *</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Ex: João Silva Santos" 
-                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                      onFocus={handleInputFocus}
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'sm:grid-cols-2 gap-3.5'}`}>
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Telefone / WhatsApp</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="(11) 99999-9999" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                        onFocus={handleInputFocus}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Email Comercial</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="comercial@empresa.com" 
-                        type="email" 
-                        className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} rounded-lg border-gray-200 dark:border-gray-700 focus:border-green-400 dark:focus:border-green-500 focus:ring-1 focus:ring-green-400/20 !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                        onFocus={handleInputFocus}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Dica de preenchimento - Ocultar no mobile */}
-          {!isMobile && (
-            <div className="bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-800/40 dark:to-gray-800/20 border border-gray-200/50 dark:border-gray-700/30 rounded-lg p-3 backdrop-blur-sm">
-              <div className="flex items-start gap-2">
-                <div className="text-lg">💡</div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-700 dark:text-gray-300 text-xs mb-1.5">Dicas Rápidas</h4>
-                  <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
-                    <li>• Campos com * são obrigatórios</li>
-                    <li>• Email usado para cotações</li>
-                    <li>• Mantenha dados atualizados</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer com botões */}
-        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm`}>
-          <div className={`flex gap-2 ${isMobile ? 'flex-col' : 'justify-end'}`}>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleOpenChange(false)}
-              className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-4'} rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white`}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="submit"
-              form="add-supplier-form"
-              className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200`}
-            >
-              <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
-              Adicionar
-            </Button>
-            {!isMobile && (
-              <Button 
-                type="button"
-                onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
-                variant="outline"
-                className="h-9 rounded-lg border-orange-400 dark:border-orange-500 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-sm px-4"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Criar Mais
-              </Button>
+          <div className="flex-1 min-w-0">
+            {isMobile ? (
+              <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
+                Novo Fornecedor
+              </DrawerTitle>
+            ) : (
+              <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
+                Novo Fornecedor
+              </DialogTitle>
             )}
           </div>
         </div>
-      </form>
-    </Form>
+        
+        <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
+          className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Conteúdo do formulário (reutilizado em mobile e desktop)
+  const content = (
+    <>
+      {Header}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-950" id="add-supplier-form">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-4">
+            {/* Alerta de limite de fornecedores */}
+            <LimitAlert 
+              resource="suppliers"
+              current={subscriptionLimits.currentSuppliers}
+              max={subscriptionLimits.maxSuppliers}
+            />
+            {/* Seção: Informações da Empresa */}
+            <div className="space-y-3">
+              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
+                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
+                Informações da Empresa
+              </h3>
+              
+              <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'lg:grid-cols-2 gap-3.5'}`}>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Fornecedor *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Ex: Holambra Distribuidora" 
+                          className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                          onFocus={handleInputFocus}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="cnpj"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>CNPJ</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="00.000.000/0000-00" 
+                          className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                          onFocus={handleInputFocus}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Endereço Completo</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Rua das Flores, 123, Centro, São Paulo - SP" 
+                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        onFocus={handleInputFocus}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Seção: Informações de Contato */}
+            <div className="space-y-3">
+              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
+                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
+                Informações de Contato
+              </h3>
+
+              <FormField
+                control={form.control}
+                name="contact"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Contato Principal *</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Ex: João Silva Santos" 
+                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        onFocus={handleInputFocus}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'sm:grid-cols-2 gap-3.5'}`}>
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Telefone / WhatsApp</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="(11) 99999-9999" 
+                          className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                          onFocus={handleInputFocus}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Email Comercial</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="comercial@empresa.com" 
+                          type="email" 
+                          className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                          onFocus={handleInputFocus}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Dica de preenchimento - Ocultar no mobile */}
+            {!isMobile && (
+              <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <div className="text-lg">💡</div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-orange-900 dark:text-orange-300 text-xs mb-1.5">Dicas Rápidas</h4>
+                    <ul className="text-xs text-orange-800 dark:text-orange-400 space-y-0.5">
+                      <li>• Campos com * são obrigatórios</li>
+                      <li>• Email usado para cotações</li>
+                      <li>• Mantenha dados atualizados</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer com botões */}
+          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900`}>
+            <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2 justify-end'}`}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => handleOpenChange(false)}
+                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-4'} rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white`}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit"
+                form="add-supplier-form"
+                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-orange-600 hover:bg-orange-700 text-white rounded-lg shadow-sm transition-colors duration-200`}
+              >
+                <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
+                Adicionar
+              </Button>
+              {!isMobile && (
+                <Button 
+                  type="button"
+                  onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
+                  variant="outline"
+                  className="h-9 rounded-lg border-orange-500 dark:border-orange-400 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-sm px-4"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Mais
+                </Button>
+              )}
+            </div>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 
   // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        <DrawerTrigger asChild>
-          {trigger || (
-            <Button className="gradient-primary">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Fornecedor
-            </Button>
-          )}
-        </DrawerTrigger>
+        {trigger && (
+          <DrawerTrigger asChild>
+            {trigger}
+          </DrawerTrigger>
+        )}
         <DrawerContent 
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30 transition-all duration-200"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-700 transition-all duration-200"
           style={{ 
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
-                  <Building2 className="h-5 w-5" />
-                </div>
-                <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                  Novo Fornecedor
-                </DrawerTitle>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => handleOpenChange(false)}
-                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </DrawerHeader>
-          <div className="flex flex-col flex-1 overflow-hidden">
-            {formContent}
-          </div>
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -449,41 +465,14 @@ export default function AddSupplierDialog({ onAdd, trigger }: AddSupplierDialogP
 
   // Desktop: Usar Dialog
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button className="gradient-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Fornecedor
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
-                <Building2 className="h-4 w-4" />
-              </div>
-              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-                Novo Fornecedor
-              </DialogTitle>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => handleOpenChange(false)}
-              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fechar</span>
-            </Button>
-          </div>
-        </DialogHeader>
-        <div className="flex flex-col flex-1 overflow-hidden">
-          {formContent}
-        </div>
+    <Dialog open={open} onOpenChange={handleSetOpen}>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
+      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden">
+        {content}
       </DialogContent>
     </Dialog>
   );
