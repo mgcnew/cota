@@ -135,60 +135,52 @@ export default function EditSupplierDialog({
     }, 300);
   };
 
+  // Shared Header Component
+  const Header = (
+    <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
+      <div className="flex items-center justify-between relative z-10">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <Building2 className="h-4 w-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            {isMobile ? (
+              <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
+                Editar Fornecedor
+              </DrawerTitle>
+            ) : (
+              <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
+                Editar Fornecedor
+              </DialogTitle>
+            )}
+          </div>
+        </div>
+        
+        <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
+          className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
   // Conteúdo do formulário (reutilizado em mobile e desktop)
-  const formContent = (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full" id="edit-supplier-form">
-        <div className={`flex-1 overflow-y-auto bg-transparent ${isMobile ? 'px-4 py-4 space-y-3' : 'px-4 sm:px-5 py-4 sm:py-5 space-y-4'}`}>
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Nome do Fornecedor*</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Ex: Holambra" 
-                    className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                    onFocus={handleInputFocus}
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="contact"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Nome do Contato*</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Ex: João Silva" 
-                    className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                    onFocus={handleInputFocus}
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-4'}`}>
+  const content = (
+    <>
+      {Header}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-950" id="edit-supplier-form">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-4">
             <FormField
               control={form.control}
-              name="phone"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Telefone</FormLabel>
+                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Fornecedor*</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="(11) 99999-9999" 
-                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      placeholder="Ex: Holambra" 
+                      className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       onFocus={handleInputFocus}
                       {...field} 
                     />
@@ -200,55 +192,14 @@ export default function EditSupplierDialog({
 
             <FormField
               control={form.control}
-              name="email"
+              name="contact"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Email</FormLabel>
+                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Contato*</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="contato@empresa.com" 
-                      type="email" 
-                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                      onFocus={handleInputFocus}
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Endereço</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Rua, número, bairro, cidade" 
-                    className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                    onFocus={handleInputFocus}
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-4'}`}>
-            <FormField
-              control={form.control}
-              name="limit"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Limite de Crédito*</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="R$ 25.000" 
-                      className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      placeholder="Ex: João Silva" 
+                      className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                       onFocus={handleInputFocus}
                       {...field} 
                     />
@@ -258,50 +209,133 @@ export default function EditSupplierDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={`text-xs font-medium text-gray-700 dark:text-gray-300 ${isMobile ? 'text-sm font-semibold' : ''}`}>Status*</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+            <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-4'}`}>
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Telefone</FormLabel>
                     <FormControl>
-                      <SelectTrigger className={`${isMobile ? 'h-11 text-base px-4' : 'h-10 text-sm px-3.5'} !bg-white/50 dark:!bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white`}>
-                        <SelectValue placeholder="Selecione o status" />
-                      </SelectTrigger>
+                      <Input 
+                        placeholder="(11) 99999-9999" 
+                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        onFocus={handleInputFocus}
+                        {...field} 
+                      />
                     </FormControl>
-                    <SelectContent className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
-                      <SelectItem value="active">Ativo</SelectItem>
-                      <SelectItem value="pending">Pendente</SelectItem>
-                      <SelectItem value="inactive">Inativo</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Email</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="contato@empresa.com" 
+                        type="email" 
+                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        onFocus={handleInputFocus}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Endereço</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Rua, número, bairro, cidade" 
+                      className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      onFocus={handleInputFocus}
+                      {...field} 
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-        </div>
 
-        <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4 flex flex-col gap-2' : 'flex justify-end gap-2 sm:gap-3 px-4 sm:px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/40 !bg-gray-50/30 dark:!bg-gray-800/30 backdrop-blur-sm'}`}>
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => handleOpenChange(false)}
-            className={isMobile ? 'h-11 w-full text-base' : 'h-9 rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm dark:text-white px-4'}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            type="submit"
-            form="edit-supplier-form"
-            className={isMobile ? 'h-11 w-full text-base' : 'h-9 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm px-6'}
-          >
-            Salvar Alterações
-          </Button>
-        </div>
-      </form>
-    </Form>
+            <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-2 gap-4'}`}>
+              <FormField
+                control={form.control}
+                name="limit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Limite de Crédito*</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="R$ 25.000" 
+                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        onFocus={handleInputFocus}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Status*</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 dark:text-white`}>
+                          <SelectValue placeholder="Selecione o status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
+                        <SelectItem value="active">Ativo</SelectItem>
+                        <SelectItem value="pending">Pendente</SelectItem>
+                        <SelectItem value="inactive">Inativo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900`}>
+            <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2 justify-end'}`}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => handleOpenChange(false)}
+                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-4'} rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white`}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit"
+                form="edit-supplier-form"
+                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-orange-600 hover:bg-orange-700 text-white rounded-lg shadow-sm transition-colors duration-200`}
+              >
+                Salvar Alterações
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 
   // Mobile: Usar Drawer (bottom sheet)
@@ -309,37 +343,14 @@ export default function EditSupplierDialog({
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerContent 
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/30 transition-all duration-200"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-700 transition-all duration-200"
           style={{ 
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
-                  <Building2 className="h-5 w-5" />
-                </div>
-                <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                  Editar Fornecedor
-                </DrawerTitle>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => handleOpenChange(false)}
-                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </DrawerHeader>
-          <div className="flex flex-col flex-1 overflow-hidden">
-            {formContent}
-          </div>
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -348,32 +359,8 @@ export default function EditSupplierDialog({
   // Desktop: Usar Dialog
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0">
-                <Building2 className="h-4 w-4" />
-              </div>
-              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-                Editar Fornecedor
-              </DialogTitle>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => handleOpenChange(false)}
-              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fechar</span>
-            </Button>
-          </div>
-        </DialogHeader>
-        <div className="flex flex-col flex-1 overflow-hidden">
-          {formContent}
-        </div>
+      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden">
+        {content}
       </DialogContent>
     </Dialog>
   );
