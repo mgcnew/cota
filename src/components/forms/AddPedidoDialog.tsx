@@ -61,12 +61,20 @@ const STEPS = [
   { id: "confirmar", title: "Confirmar", icon: Check },
 ];
 
+import { usePackagingItems } from "@/hooks/usePackagingItems";
+import { useSuppliers } from "@/hooks/useSuppliers";
+import { useProducts } from "@/hooks/useProducts";
+
 export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelectedProducts = [] }: AddPedidoDialogProps) {
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
   const { toast } = useToast();
   const { user } = useAuth();
   const { logActivity } = useActivityLog();
+
+  // Data Hooks
+  const { products, isLoading: productsLoading } = useProducts();
+  const { suppliers, isLoading: suppliersLoading } = useSuppliers();
 
   // Form states
   const [activeStep, setActiveStep] = useState("produtos");
@@ -75,11 +83,6 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<PedidoItem[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // Data states
-  const [suppliers, setSuppliers] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
-  const [productsLoading, setProductsLoading] = useState(false);
 
   // Search/Input states
   const [productSearch, setProductSearch] = useState("");
@@ -107,8 +110,6 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   // Load data
   useEffect(() => {
     if (open) {
-      if (products.length === 0 && !productsLoading) loadProducts();
-      loadSuppliers();
       loadLastPrices();
       if (preSelectedProducts.length > 0) {
         const preSelectedItems: PedidoItem[] = preSelectedProducts.map(p => ({
@@ -150,11 +151,6 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     setNewProductPrice("");
   };
 
-  const loadSuppliers = async () => {
-    const { data } = await supabase.from('suppliers').select('id, name, contact').order('name');
-    setSuppliers(data || []);
-  };
-
   const loadLastPrices = async () => {
     const { data } = await supabase.from('order_items').select('product_id, unit_price').limit(100);
     if (data) {
@@ -164,42 +160,23 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     }
   };
 
-  const loadProducts = async () => {
-    setProductsLoading(true);
-    try {
-      const { count } = await supabase.from('products').select('*', { count: 'exact', head: true });
-      if (!count) { setProducts([]); return; }
-      
-      const pageSize = 1000;
-      const allProducts: any[] = [];
-      for (let page = 0; page < Math.ceil(count / pageSize); page++) {
-        const { data } = await supabase
-          .from('products')
-          .select('id, name, brands(name, manual_rating, purchaseScore)')
-          .order('name')
-          .range(page * pageSize, (page + 1) * pageSize - 1);
-        
-        if (data) {
-          const processedData = data.map(p => ({
-            ...p,
-            brand_name: p.brands?.name,
-            brand_rating: p.brands?.manual_rating,
-            brand_score: p.brands?.purchaseScore
-          }));
-          allProducts.push(...processedData);
-        }
-      }
-      setProducts(allProducts);
-    } catch (error) {
-      toast({ title: "Erro", description: "Não foi possível carregar produtos", variant: "destructive" });
-    } finally {
-      setProductsLoading(false);
-    }
-  };
-
   const filteredProducts = useMemo(() => {
     if (!debouncedProductSearch || debouncedProductSearch.trim().length < 2) return [];
-    return products.filter(p => p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase())).slice(0, 30);
+    
+    // Filtrar apenas se houver produtos carregados
+    if (products.length === 0) return [];
+
+    const searchLower = debouncedProductSearch.toLowerCase().trim();
+    
+    return products.filter(p => {
+      // Busca pelo nome do produto
+      if (p.name.toLowerCase().includes(searchLower)) return true;
+      
+      // Busca pela marca (opcional, se quiser expandir a busca)
+      if (p.brand_name && p.brand_name.toLowerCase().includes(searchLower)) return true;
+      
+      return false;
+    }).slice(0, 30);
   }, [products, debouncedProductSearch]);
 
   const filteredSuppliers = useMemo(() => {
@@ -370,6 +347,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     }
   }, [activeStep, currentStepIndex, itens, fornecedor, dataEntrega]);
 
+  // Scroll into view helper para inputs
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!isMobile) return;
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+
   // Helpers de Renderização
   const renderProductItem = (p: any, index: number) => (
     <button
@@ -519,6 +504,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         value={selectedProduct ? selectedProduct.name : productSearch}
                         onChange={(e) => { setProductSearch(e.target.value); setSelectedProduct(null); }}
                         onKeyDown={(e) => handleProductKeyDown(e, 'search')}
+                        onFocus={handleInputFocus}
                         className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" 
                       />
                       {/* Dropdown de resultados */}
@@ -540,6 +526,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         value={newProductQuantity}
                         onChange={(e) => setNewProductQuantity(e.target.value)}
                         onKeyDown={(e) => handleProductKeyDown(e, 'quantity')}
+                        onFocus={handleInputFocus}
                         className="h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg"
                       />
                     </div>
@@ -723,6 +710,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       placeholder="Instruções de entrega, pagamento..." 
                       value={observacoes}
                       onChange={(e) => setObservacoes(e.target.value)}
+                      onFocus={handleInputFocus}
                       className="min-h-[100px] resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm" 
                     />
                   </div>
