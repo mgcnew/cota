@@ -2,6 +2,7 @@ import { useState, useMemo, Suspense, lazy, useCallback, useEffect } from "react
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Download, Loader2, Trash2 } from "lucide-react";
