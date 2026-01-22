@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import type { PackagingItem } from "@/types/packaging";
 import type { Supplier } from "@/hooks/useSuppliers";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 
 interface Props {
   open: boolean;
@@ -53,6 +54,7 @@ const STEPS = [
 export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, suppliers }: Props) {
   const { addQuote } = usePackagingQuotes();
   const isMobile = useIsMobile();
+  const keyboardOffset = useKeyboardOffset();
   const [activeStep, setActiveStep] = useState("embalagens");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
@@ -218,11 +220,22 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
     );
   };
 
+  // Scroll into view helper para inputs
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!isMobile) return;
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
+
   const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
   const DialogHeaderComponent = isMobile ? DrawerHeader : DialogHeader;
   const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
   const DialogDescriptionComponent = isMobile ? DrawerDescription : DialogDescription;
 
+  // Se estiver no mobile e teclado aberto, ajustamos o container para garantir visibilidade
+  // O container principal flex-1 precisa encolher
+  
   const content = (
     <>
       {/* Header otimizado */}
@@ -325,6 +338,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                     <Input ref={itemSearchRef} placeholder="Buscar embalagem..." value={searchItem}
                       onChange={(e) => setSearchItem(e.target.value)}
+                      onFocus={handleInputFocus}
                       className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" />
                   </div>
                   {renderList(
@@ -404,6 +418,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                     <Input ref={supplierSearchRef} placeholder="Buscar fornecedor..." value={searchSupplier}
                       onChange={(e) => setSearchSupplier(e.target.value)}
+                      onFocus={handleInputFocus}
                       className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" />
                   </div>
                   {renderList(
@@ -630,7 +645,14 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        <DrawerContent className="h-[90vh] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950">
+        <DrawerContent 
+          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 transition-all duration-200"
+          style={{ 
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
           {content}
         </DrawerContent>
       </Drawer>
