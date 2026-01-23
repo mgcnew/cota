@@ -204,14 +204,14 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200/50 dark:border-purple-800/50">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200/50 dark:border-purple-800/50">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-900/40"><Package className="h-6 w-6 text-purple-600 dark:text-purple-400" /></div>
-          <div><h2 className="text-lg font-bold text-gray-900 dark:text-white">{packagingName}</h2><p className="text-sm text-gray-500">Análise de Embalagem</p></div>
+          <div><h2 className="text-lg font-bold text-gray-900 dark:text-white break-all sm:break-normal">{packagingName}</h2><p className="text-sm text-gray-500">Análise de Embalagem</p></div>
         </div>
-        <Button variant="outline" size="sm" onClick={onClear}>Nova busca</Button>
+        <Button variant="outline" size="sm" onClick={onClear} className="w-full sm:w-auto">Nova busca</Button>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard icon={<FileText className="h-4 w-4" />} label="Cotações" value={metrics.totalQuotes.toString()} color="blue" />
         <MetricCard icon={<ShoppingCart className="h-4 w-4" />} label="Pedidos" value={metrics.totalOrders.toString()} color="green" />
         <MetricCard icon={<DollarSign className="h-4 w-4" />} label="Preço Médio" value={metrics.avgPrice > 0 ? `R$ ${metrics.avgPrice.toFixed(2)}` : "-"} color="violet" />
@@ -275,14 +275,14 @@ function SupplierPackagingAnalysis({ supplierId, supplierName, onClear }: { supp
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200/50 dark:border-blue-800/50">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200/50 dark:border-blue-800/50">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/40"><Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" /></div>
-          <div><h2 className="text-lg font-bold text-gray-900 dark:text-white">{supplierName}</h2><p className="text-sm text-gray-500">Análise de Fornecedor (Embalagens)</p></div>
+          <div><h2 className="text-lg font-bold text-gray-900 dark:text-white break-all sm:break-normal">{supplierName}</h2><p className="text-sm text-gray-500">Análise de Fornecedor (Embalagens)</p></div>
         </div>
-        <Button variant="outline" size="sm" onClick={onClear}>Nova busca</Button>
+        <Button variant="outline" size="sm" onClick={onClear} className="w-full sm:w-auto">Nova busca</Button>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard icon={<FileText className="h-4 w-4" />} label="Cotações" value={`${metrics.wonQuotes}/${metrics.totalQuotes}`} subtitle={`${metrics.winRate.toFixed(0)}% vitórias`} color="blue" />
         <MetricCard icon={<ShoppingCart className="h-4 w-4" />} label="Pedidos" value={metrics.totalOrders.toString()} subtitle={`${metrics.deliveredOrders} entregues`} color="green" />
         <MetricCard icon={<DollarSign className="h-4 w-4" />} label="Total Comprado" value={`R$ ${metrics.totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} color="violet" />
@@ -305,13 +305,13 @@ function SupplierPackagingAnalysis({ supplierId, supplierName, onClear }: { supp
 // Componentes auxiliares
 function MetricCard({ icon, label, value, subtitle, color }: { icon: React.ReactNode; label: string; value: string; subtitle?: string; color: "blue" | "green" | "violet" | "amber" | "red" | "gray" | "emerald" }) {
   const colors = { blue: "bg-blue-50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400", green: "bg-green-50 dark:bg-green-900/20 border-green-200/50 dark:border-green-800/50 text-green-600 dark:text-green-400", violet: "bg-violet-50 dark:bg-violet-900/20 border-violet-200/50 dark:border-violet-800/50 text-violet-600 dark:text-violet-400", amber: "bg-amber-50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/50 text-amber-600 dark:text-amber-400", red: "bg-red-50 dark:bg-red-900/20 border-red-200/50 dark:border-red-800/50 text-red-600 dark:text-red-400", gray: "bg-gray-50 dark:bg-gray-900/20 border-gray-200/50 dark:border-gray-800/50 text-gray-600 dark:text-gray-400", emerald: "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200/50 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400" };
-  return (<div className={cn("p-3 rounded-xl border", colors[color])}><div className="flex items-center gap-2 mb-1">{icon}<span className="text-xs font-medium opacity-80">{label}</span></div><p className="text-lg font-bold text-gray-900 dark:text-white">{value}</p>{subtitle && <p className="text-xs opacity-70 mt-0.5">{subtitle}</p>}</div>);
+  return (<div className={cn("p-3 rounded-xl border", colors[color])}><div className="flex items-center gap-2 mb-1">{icon}<span className="text-xs font-medium opacity-80">{label}</span></div><p className="text-lg font-bold text-gray-900 dark:text-white truncate" title={value}>{value}</p>{subtitle && <p className="text-xs opacity-70 mt-0.5 truncate" title={subtitle}>{subtitle}</p>}</div>);
 }
 
 function InsightCard({ icon, title, value, subtitle, color }: { icon: React.ReactNode; title: string; value: string; subtitle: string; color: "emerald" | "amber" | "blue" | "red" }) {
   const colors = { emerald: "from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200/50 dark:border-emerald-800/50", amber: "from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-200/50 dark:border-amber-800/50", blue: "from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50", red: "from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200/50 dark:border-red-800/50" };
   const iconColors = { emerald: "text-emerald-600 dark:text-emerald-400", amber: "text-amber-600 dark:text-amber-400", blue: "text-blue-600 dark:text-blue-400", red: "text-red-600 dark:text-red-400" };
-  return (<div className={cn("p-4 rounded-xl border bg-gradient-to-br", colors[color])}><div className={cn("mb-2", iconColors[color])}>{icon}</div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">{title}</p><p className="text-lg font-bold text-gray-900 dark:text-white">{value}</p><p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p></div>);
+  return (<div className={cn("p-4 rounded-xl border bg-gradient-to-br", colors[color])}><div className={cn("mb-2", iconColors[color])}>{icon}</div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">{title}</p><p className="text-lg font-bold text-gray-900 dark:text-white truncate" title={value}>{value}</p><p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate" title={subtitle}>{subtitle}</p></div>);
 }
 
 function PriceHistoryList({ history }: { history: Array<{ date: string; price: number; supplier: string; type: "quote" | "order" }> }) {
