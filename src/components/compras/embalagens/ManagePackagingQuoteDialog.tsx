@@ -789,8 +789,12 @@ export function ManagePackagingQuoteDialog({
                     <div className="p-4 border-b bg-background">
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedPackagingToAdd} onValueChange={setSelectedPackagingToAdd}>
-                          <SelectTrigger className="flex-1 h-9 text-xs font-medium"><SelectValue placeholder="Selecione uma embalagem para adicionar..." /></SelectTrigger>
-                          <SelectContent>{packagingNotInQuote.map(p => <SelectItem key={p.id} value={p.id} className="text-xs font-medium">{p.name}</SelectItem>)}</SelectContent>
+                          <SelectTrigger className="flex-1 h-9 text-xs font-medium bg-background text-foreground border-input">
+                            <SelectValue placeholder="Selecione uma embalagem para adicionar..." />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border-border">
+                            {packagingNotInQuote.map(p => <SelectItem key={p.id} value={p.id} className="text-xs font-medium focus:bg-accent focus:text-accent-foreground">{p.name}</SelectItem>)}
+                          </SelectContent>
                         </Select>
                         <Button onClick={handleAddPackaging} disabled={!selectedPackagingToAdd || addQuoteItem.isPending} 
                           className="h-9 px-4 text-xs font-bold uppercase tracking-wider w-full sm:w-auto">
