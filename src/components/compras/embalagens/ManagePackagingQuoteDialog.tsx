@@ -382,7 +382,7 @@ export function ManagePackagingQuoteDialog({
     
     // Rodapé
     const pageCount = doc.getNumberOfPages();
-    for (i = 1; i <= pageCount; i++) {
+    for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.setTextColor(gray[0], gray[1], gray[2]);
