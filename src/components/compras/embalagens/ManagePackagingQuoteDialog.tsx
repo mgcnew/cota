@@ -104,7 +104,7 @@ export function ManagePackagingQuoteDialog({
       setSelectedPackagingToAdd("");
       setSelectedSupplierToAdd("");
     }
-  }, [open, quote]);
+  }, [open, quote, selectedSupplier]);
 
   const comparison = useMemo(() => quote ? getComparison(quote) : [], [quote, getComparison]);
 
@@ -723,13 +723,13 @@ export function ManagePackagingQuoteDialog({
                   </div>
                   {packagingNotInQuote.length > 0 && (
                     <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedPackagingToAdd} onValueChange={setSelectedPackagingToAdd}>
                           <SelectTrigger className="flex-1 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 h-9 text-xs"><SelectValue placeholder="Selecione uma embalagem para adicionar..." /></SelectTrigger>
                           <SelectContent>{packagingNotInQuote.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
                         </Select>
                         <Button onClick={handleAddPackaging} disabled={!selectedPackagingToAdd || addQuoteItem.isPending} 
-                          className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 h-9 px-4 rounded-lg text-xs font-bold uppercase tracking-wider">
+                          className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 h-9 px-4 rounded-lg text-xs font-bold uppercase tracking-wider w-full sm:w-auto">
                           {addQuoteItem.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Plus className="h-3 w-3 mr-1.5" />}Adicionar
                         </Button>
                       </div>
@@ -764,13 +764,13 @@ export function ManagePackagingQuoteDialog({
                   </div>
                   {suppliersNotInQuote.length > 0 && (
                     <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
                           <SelectTrigger className="flex-1 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 h-9 text-xs"><SelectValue placeholder="Selecione um fornecedor para adicionar..." /></SelectTrigger>
                           <SelectContent>{suppliersNotInQuote.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                         </Select>
                         <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd || addQuoteSupplier.isPending} 
-                          className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 h-9 px-4 rounded-lg text-xs font-bold uppercase tracking-wider">
+                          className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 h-9 px-4 rounded-lg text-xs font-bold uppercase tracking-wider w-full sm:w-auto">
                           {addQuoteSupplier.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Plus className="h-3 w-3 mr-1.5" />}Adicionar
                         </Button>
                       </div>
@@ -786,7 +786,7 @@ export function ManagePackagingQuoteDialog({
                           <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                             <Building2 className="h-3 w-3 text-gray-500" />
                           </div>
-                          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{fornecedor.supplierName}</span>
+                          <span className="text-sm font-bold text-gray-700 dark:text-gray-300 truncate">{fornecedor.supplierName}</span>
                           {fornecedor.status === "respondido" ? (
                             <Badge className="text-[9px] bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-0"><CheckCircle2 className="h-2.5 w-2.5 mr-1" />Respondido</Badge>
                           ) : (
@@ -805,36 +805,64 @@ export function ManagePackagingQuoteDialog({
 
           {/* Tab Valores */}
           <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0 bg-white dark:bg-gray-950">
-            <div className="h-full flex">
-              <div className="w-56 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
-                <div className="p-3 border-b border-gray-200 dark:border-gray-800"><h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Fornecedores</h4></div>
-                <ScrollArea className="h-[calc(100%-41px)]">
-                  <div className="p-2 space-y-1">
-                    {quote.fornecedores.map((fornecedor) => (
-                      <button key={fornecedor.supplierId} onClick={() => setSelectedSupplier(fornecedor.supplierId)}
-                        className={cn("w-full p-2.5 rounded-lg text-left transition-all text-xs font-medium group relative overflow-hidden",
-                          selectedSupplier === fornecedor.supplierId 
-                            ? "bg-gray-900 text-white shadow-md ring-1 ring-gray-900/10" 
-                            : "text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900")}>
-                        <div className="flex items-center gap-2 relative z-10">
-                          <Building2 className={cn("h-3.5 w-3.5 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-gray-300" : "text-gray-400 group-hover:text-gray-600")} />
-                          <span className="truncate font-bold">{fornecedor.supplierName}</span>
-                        </div>
-                        <div className="flex items-center gap-1 mt-1.5 pl-5.5 relative z-10">
-                          {fornecedor.status === "respondido" ? 
-                            <span className={cn("text-[9px] flex items-center gap-1", selectedSupplier === fornecedor.supplierId ? "text-gray-300" : "text-gray-900")}><CheckCircle2 className="h-2.5 w-2.5" />Respondido</span> : 
-                            <span className={cn("text-[9px] flex items-center gap-1", selectedSupplier === fornecedor.supplierId ? "text-gray-400" : "text-gray-400")}><Clock className="h-2.5 w-2.5" />Pendente</span>
-                          }
-                        </div>
-                      </button>
-                    ))}
+            <div className="h-full flex flex-col md:flex-row">
+              <div className="w-full md:w-56 flex-shrink-0 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
+                {isMobile ? (
+                  <div className="p-3">
+                    <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Selecionar Fornecedor</Label>
+                    <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
+                      <SelectTrigger className="w-full h-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+                        <SelectValue placeholder="Selecione um fornecedor..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {quote.fornecedores.map((fornecedor) => (
+                          <SelectItem key={fornecedor.supplierId} value={fornecedor.supplierId}>
+                            <div className="flex items-center gap-2">
+                              <span>{fornecedor.supplierName}</span>
+                              {fornecedor.status === "respondido" && <CheckCircle2 className="h-3 w-3 text-emerald-500" />}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                </ScrollArea>
+                ) : (
+                  <>
+                    <div className="p-3 border-b border-gray-200 dark:border-gray-800"><h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Fornecedores</h4></div>
+                    <ScrollArea className="h-[calc(100%-41px)]">
+                      <div className="p-2 space-y-1">
+                        {quote.fornecedores.map((fornecedor) => (
+                          <button key={fornecedor.supplierId} onClick={() => setSelectedSupplier(fornecedor.supplierId)}
+                            className={cn("w-full p-2.5 rounded-lg text-left transition-all text-xs font-medium group relative overflow-hidden",
+                              selectedSupplier === fornecedor.supplierId 
+                                ? "bg-gray-900 text-white shadow-md ring-1 ring-gray-900/10" 
+                                : "text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900")}>
+                            <div className="flex items-center gap-2 relative z-10">
+                              <Building2 className={cn("h-3.5 w-3.5 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-gray-300" : "text-gray-400 group-hover:text-gray-600")} />
+                              <span className="truncate font-bold">{fornecedor.supplierName}</span>
+                            </div>
+                            <div className="flex items-center gap-1 mt-1.5 pl-5.5 relative z-10">
+                              {fornecedor.status === "respondido" ? 
+                                <span className={cn("text-[9px] flex items-center gap-1", selectedSupplier === fornecedor.supplierId ? "text-gray-300" : "text-gray-900")}><CheckCircle2 className="h-2.5 w-2.5" />Respondido</span> : 
+                                <span className={cn("text-[9px] flex items-center gap-1", selectedSupplier === fornecedor.supplierId ? "text-gray-400" : "text-gray-400")}><Clock className="h-2.5 w-2.5" />Pendente</span>
+                              }
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </>
+                )}
               </div>
               <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
                   <div className="p-4 sm:p-6 space-y-3" onKeyDown={handleKeyDown}>
-                    {selectedSupplier && quote.itens.map((item) => {
+                    {!selectedSupplier ? (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-8 text-gray-400">
+                        <Building2 className="h-12 w-12 mb-3 opacity-20" />
+                        <p className="text-sm font-medium">Selecione um fornecedor para editar os valores</p>
+                      </div>
+                    ) : quote.itens.map((item) => {
                       const fornecedor = quote.fornecedores.find(f => f.supplierId === selectedSupplier);
                       const supplierItem = fornecedor?.itens.find(si => si.packagingId === item.packagingId);
                       const isEditing = editingItem?.supplierId === selectedSupplier && editingItem?.packagingId === item.packagingId;
@@ -1040,7 +1068,7 @@ export function ManagePackagingQuoteDialog({
                     <div className="bg-gray-50 dark:bg-gray-900 px-4 py-2 border-b border-gray-200 dark:border-gray-800">
                       <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Preview</p>
                     </div>
-                    <iframe srcDoc={generateHtmlComparative()} className="w-full h-[600px] border-0 bg-white" title="HTML Preview" />
+                    <iframe srcDoc={generateHtmlComparative()} className="w-full h-[400px] sm:h-[600px] border-0 bg-white" title="HTML Preview" />
                   </div>
                 )}
               </div>
