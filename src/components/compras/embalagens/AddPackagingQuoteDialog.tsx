@@ -210,7 +210,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
     // On mobile, use native scroll within the step container instead of nested ScrollArea
     if (isMobile) {
       return (
-        <div className="p-1.5 space-y-1">
+        <div className="p-1.5 space-y-1 max-h-[300px] overflow-y-auto custom-scrollbar">
           {items.map(renderItem)}
         </div>
       );
