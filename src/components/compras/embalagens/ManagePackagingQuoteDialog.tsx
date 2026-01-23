@@ -21,10 +21,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
+import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { 
   Package, Building2, DollarSign, CheckCircle2, Clock, 
-  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText
+  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText, Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
@@ -60,6 +62,8 @@ export function ManagePackagingQuoteDialog({
     removeQuoteItem
   } = usePackagingQuotes();
   
+  const { orders } = usePackagingOrders();
+  
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
   const [activeTab, setActiveTab] = useState("resumo");
@@ -84,6 +88,27 @@ export function ManagePackagingQuoteDialog({
       e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 300);
   };
+
+  // Helper para obter a data da última compra
+  const getLastPurchaseInfo = useCallback((packagingId: string) => {
+    // Encontra o pedido mais recente que contém este item
+    // Os pedidos já vêm ordenados por data de criação decrescente do hook
+    const lastOrder = orders.find(order => 
+      order.status !== 'cancelado' && 
+      order.itens.some(item => item.packagingId === packagingId)
+    );
+
+    if (!lastOrder) return null;
+    
+    // Encontra o item específico dentro do pedido para pegar o preço se necessário
+    const item = lastOrder.itens.find(i => i.packagingId === packagingId);
+    
+    return {
+      date: lastOrder.orderDate, // Já está formatada como DD/MM/YYYY
+      price: item?.valorUnitario || 0,
+      supplierName: lastOrder.supplierName
+    };
+  }, [orders]);
 
   useEffect(() => {
     if (editingItem && open) {
@@ -394,6 +419,26 @@ export function ManagePackagingQuoteDialog({
     doc.save(`cotacao-embalagens-${quote.dataInicio.replace(/\//g, '-')}.pdf`);
   }, [quote, comparison]);
 
+  // Handle loading state when open but no quote
+  if (!quote && open) {
+    const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
+    return (
+      isMobile ? (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[95vh] flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="h-[300px] flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          </DialogContent>
+        </Dialog>
+      )
+    );
+  }
+
   // Função para gerar HTML comparativo
   const generateHtmlComparative = useCallback(() => {
     if (!quote || !comparison.length) return "";
@@ -565,6 +610,25 @@ export function ManagePackagingQuoteDialog({
     link.click();
     URL.revokeObjectURL(link.href);
   }, [generateHtmlComparative, quote]);
+
+  if (!quote && open) {
+    const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
+    return (
+      isMobile ? (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[95vh] flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="h-[300px] flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          </DialogContent>
+        </Dialog>
+      )
+    );
+  }
 
   if (!quote) return null;
 
@@ -879,7 +943,30 @@ export function ManagePackagingQuoteDialog({
                                 <Package className="h-4 w-4" />
                               </div>
                               <div>
-                                <span className="font-bold text-gray-900 dark:text-white block text-sm">{item.packagingName}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-gray-900 dark:text-white block text-sm">{item.packagingName}</span>
+                                  {(() => {
+                                    const lastPurchase = getLastPurchaseInfo(item.packagingId);
+                                    if (!lastPurchase) return null;
+                                    return (
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="cursor-help inline-flex">
+                                              <Info className="h-3.5 w-3.5 text-blue-500 hover:text-blue-600 transition-colors" />
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent className="max-w-[200px] text-xs">
+                                            <p className="font-bold mb-1">Última Compra:</p>
+                                            <p>Data: {lastPurchase.date}</p>
+                                            <p>Fornecedor: {lastPurchase.supplierName}</p>
+                                            <p>Preço: R$ {lastPurchase.price.toFixed(4)}</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    );
+                                  })()}
+                                </div>
                                 {isBestPrice && <span className="text-[10px] font-bold text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-1"><Award className="h-3 w-3" />Melhor Preço</span>}
                               </div>
                             </div>
