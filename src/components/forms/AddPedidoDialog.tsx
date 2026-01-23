@@ -458,13 +458,12 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             const Icon = step.icon;
             const status = index < currentStepIndex ? "completed" : index === currentStepIndex ? "current" : "pending";
             return (
-              <button key={step.id} type="button" onClick={() => status !== "pending" && setActiveStep(step.id)}
-                disabled={status === "pending"}
+              <button key={step.id} type="button" onClick={() => setActiveStep(step.id)}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 flex-1 justify-center",
                   status === "current" && "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-gray-700",
                   status === "completed" && "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer shadow-sm",
-                  status === "pending" && "text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                  status === "pending" && "text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400"
                 )}>
                 <div className="flex items-center justify-center w-4 h-4">
                   {status === "completed" ? <Check className="h-3 w-3" /> : <Icon className="h-3 w-3" />}
