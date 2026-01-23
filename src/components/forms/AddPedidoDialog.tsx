@@ -477,7 +477,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden relative bg-gray-50 dark:bg-black">
+      <div className="flex-1 overflow-hidden relative bg-white dark:bg-black">
         
         {/* Step: Produtos */}
         {activeStep === "produtos" && (
@@ -541,6 +541,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           value={newProductPrice}
                           onChange={(e) => setNewProductPrice(e.target.value)}
                           onKeyDown={(e) => handleProductKeyDown(e, 'price')}
+                          onFocus={handleInputFocus}
                           className="pl-8 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg"
                         />
                       </div>
@@ -635,6 +636,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       placeholder="Buscar fornecedor..." 
                       value={supplierSearch}
                       onChange={(e) => setSupplierSearch(e.target.value)}
+                      onFocus={handleInputFocus}
                       className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg" 
                     />
                   </div>
@@ -819,8 +821,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         <DrawerContent 
           className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 transition-all duration-200"
           style={{ 
-            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
