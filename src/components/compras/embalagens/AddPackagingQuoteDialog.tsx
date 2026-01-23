@@ -331,7 +331,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
           <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start">
               {/* Formulário de Seleção */}
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-hidden">
+              <Card className={cn("border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl relative", isMobile ? "overflow-visible z-20" : "overflow-hidden")}>
                 <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
                   <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
                     <Plus className="h-4 w-4 text-gray-500" />
@@ -339,7 +339,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
-                  <div className="relative mb-3">
+                  <div className="relative mb-3 z-30">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                     <Input ref={itemSearchRef} placeholder="Buscar embalagem..." value={searchItem}
                       onChange={(e) => setSearchItem(e.target.value)}
@@ -350,8 +350,40 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />
                       </div>
                     )}
+                    
+                    {/* Lista de Resultados Mobile - Dropdown Absoluto */}
+                    {isMobile && searchItem.trim().length > 0 && (
+                      <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl overflow-hidden">
+                        {renderList(
+                          searchResults || [],
+                          (item) => {
+                            const isSelected = selectedItems.some(i => i.id === item.id);
+                            return (
+                              <div key={item.id} onClick={() => toggleItem(item)}
+                                className={cn(
+                                  "w-full p-2 text-left transition-all flex items-center gap-2 group cursor-pointer border-b border-gray-100 dark:border-gray-800 last:border-0",
+                                  isSelected
+                                    ? "bg-gray-50 dark:bg-gray-800/50"
+                                    : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                                )}>
+                                <Checkbox checked={isSelected} 
+                                  className="data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 dark:data-[state=checked]:bg-white dark:data-[state=checked]:border-white dark:data-[state=checked]:text-gray-900 h-4 w-4 rounded pointer-events-none" />
+                                <div className="flex-1 min-w-0">
+                                  <p className={cn("text-xs font-bold truncate", isSelected ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400")}>{item.name}</p>
+                                  {item.category && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{item.category}</span>}
+                                </div>
+                              </div>
+                            );
+                          },
+                          "Nenhuma embalagem encontrada",
+                          Package
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {renderList(
+
+                  {/* Lista de Resultados Desktop - Normal Flow */}
+                  {!isMobile && renderList(
                     searchResults || [],
                     (item) => {
                       const isSelected = selectedItems.some(i => i.id === item.id);
@@ -375,11 +407,18 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                     searchItem.trim().length === 0 ? "Digite para buscar embalagens" : "Nenhuma embalagem encontrada",
                     Package
                   )}
+                  
+                  {/* Feedback vazio inicial Mobile (quando não há busca) */}
+                  {isMobile && searchItem.trim().length === 0 && (
+                     <div className="flex flex-col items-center justify-center py-4 text-gray-400">
+                       <p className="text-xs font-medium text-center">Digite para buscar embalagens</p>
+                     </div>
+                  )}
                 </CardContent>
               </Card>
 
               {/* Lista de Selecionados */}
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden h-fit">
+              <Card className={cn("border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden h-fit relative", isMobile ? "z-10" : "")}>
                 <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
                   <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
                     <span className="flex items-center gap-2 text-gray-900 dark:text-white">
