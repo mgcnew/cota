@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { cn } from "@/lib/utils";
 import { OrderExportTab } from "@/components/pedidos/OrderExportTab";
 
@@ -439,8 +440,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh] overflow-hidden flex flex-col !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border-t border-white/20 rounded-t-[2.5rem] shadow-2xl animate-in slide-in-from-bottom duration-300">
-          <DrawerHeader className="text-left border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 px-6 py-5 backdrop-blur-md relative overflow-hidden">
+        <DrawerContent 
+          className="flex flex-col !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border-t border-white/20 rounded-t-[2.5rem] shadow-2xl animate-in slide-in-from-bottom duration-300"
+          style={{ 
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
+          <DrawerHeader className="text-left border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 px-6 py-5 backdrop-blur-md relative overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
             <div className="relative z-10">
               {headerContent}
@@ -489,6 +497,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         type="date" 
                         value={dataEntrega} 
                         onChange={e => setDataEntrega(e.target.value)} 
+                        onFocus={handleInputFocus}
                         className="h-8 text-[10px] font-bold bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 rounded-lg shadow-sm" 
                       />
                     </div>
@@ -505,6 +514,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         value={newProductSearch}
                         onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
                         onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
+                        onFocus={handleInputFocus}
                         className="h-8 pl-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-bold rounded-lg"
                       />
                       {filteredNewProducts.length > 0 && !newProduct && (
@@ -668,6 +678,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     placeholder="Notas internas..."
                     value={observacoes}
                     onChange={e => setObservacoes(e.target.value)}
+                    onFocus={handleInputFocus}
                     className="min-h-[100px] resize-none text-xs bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 font-medium rounded-xl pt-2"
                   />
                 </div>
