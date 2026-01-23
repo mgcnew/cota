@@ -79,15 +79,23 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
     }
   }, [activeStep, open]);
 
-  const filteredItems = useMemo(() => 
-    packagingItems.filter(item =>
-      item.name.toLowerCase().includes(searchItem.toLowerCase())
-    ), [packagingItems, searchItem]);
+  const filteredItems = useMemo(() => {
+    const search = searchItem.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    if (!search) return packagingItems;
+    
+    return packagingItems.filter(item =>
+      item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(search)
+    );
+  }, [packagingItems, searchItem]);
 
-  const filteredSuppliers = useMemo(() => 
-    suppliers.filter(s =>
-      s.name.toLowerCase().includes(searchSupplier.toLowerCase())
-    ), [suppliers, searchSupplier]);
+  const filteredSuppliers = useMemo(() => {
+    const search = searchSupplier.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    if (!search) return suppliers;
+
+    return suppliers.filter(s =>
+      s.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(search)
+    );
+  }, [suppliers, searchSupplier]);
 
   const selectedItemsData = useMemo(() => 
     packagingItems.filter(item => selectedItems.includes(item.id)),
@@ -405,7 +413,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
         {/* Step: Fornecedores */}
         {activeStep === "fornecedores" && (
           <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 content-start min-h-full">
               <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-hidden">
                 <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
                   <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
