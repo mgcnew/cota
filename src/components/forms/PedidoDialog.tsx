@@ -43,6 +43,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const { toast } = useToast();
   const { user } = useAuth();
   const isMobile = useIsMobile();
+  const keyboardOffset = useKeyboardOffset();
   
   const [activeTab, setActiveTab] = useState("itens");
   
@@ -375,6 +376,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       }
     }
   }, [activeTab]);
+
+  // Scroll into view helper para inputs no mobile
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!isMobile) return;
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
 
   const getStatusBadge = (statusValue: string) => {
     const config = statusOptions.find(s => s.value === statusValue) || statusOptions[0];
