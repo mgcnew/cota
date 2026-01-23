@@ -830,8 +830,8 @@ export function ManagePackagingQuoteDialog({
                     <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 h-9 text-xs"><SelectValue placeholder="Selecione um fornecedor para adicionar..." /></SelectTrigger>
-                          <SelectContent>{suppliersNotInQuote.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                          <SelectTrigger className="flex-1 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 h-9 text-xs font-medium"><SelectValue placeholder="Selecione um fornecedor para adicionar..." /></SelectTrigger>
+                          <SelectContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">{suppliersNotInQuote.map(s => <SelectItem key={s.id} value={s.id} className="text-xs font-medium">{s.name}</SelectItem>)}</SelectContent>
                         </Select>
                         <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd || addQuoteSupplier.isPending} 
                           className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 h-9 px-4 rounded-lg text-xs font-bold uppercase tracking-wider w-full sm:w-auto">
@@ -840,27 +840,45 @@ export function ManagePackagingQuoteDialog({
                       </div>
                     </div>
                   )}
-                  <div className="divide-y divide-gray-200 dark:divide-gray-800">
+                  <div className="p-4 bg-white dark:bg-gray-950">
                     {quote.fornecedores.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-20" /><p className="text-xs font-medium">Nenhum fornecedor na cotação</p></div>
-                    ) : quote.fornecedores.map((fornecedor, index) => (
-                      <div key={fornecedor.supplierId} className="p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <span className="text-[10px] font-bold text-gray-400 w-6">#{index + 1}</span>
-                          <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                            <Building2 className="h-3 w-3 text-gray-500" />
+                      <div className="p-8 text-center text-gray-500 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-20" /><p className="text-xs font-medium">Nenhum fornecedor na cotação</p></div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {quote.fornecedores.map((fornecedor, index) => (
+                          <div key={fornecedor.supplierId} className="group relative flex items-center p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700 transition-all">
+                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center mr-3 shadow-sm">
+                              <Building2 className="h-5 w-5 text-gray-400" />
+                            </div>
+                            <div className="flex-1 min-w-0 mr-2">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="text-xs font-black text-gray-900 dark:text-white truncate">{fornecedor.supplierName}</span>
+                              </div>
+                              {fornecedor.status === "respondido" ? (
+                                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  <span className="uppercase tracking-wide">Respondido</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400">
+                                  <Clock className="h-3 w-3" />
+                                  <span className="uppercase tracking-wide">Pendente</span>
+                                </div>
+                              )}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveSupplier(fornecedor.supplierId)}
+                              disabled={removeQuoteSupplier.isPending}
+                              className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <span className="text-sm font-bold text-gray-700 dark:text-gray-300 truncate">{fornecedor.supplierName}</span>
-                          {fornecedor.status === "respondido" ? (
-                            <Badge className="text-[9px] bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-0"><CheckCircle2 className="h-2.5 w-2.5 mr-1" />Respondido</Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-[9px] text-gray-500 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50"><Clock className="h-2.5 w-2.5 mr-1" />Pendente</Badge>
-                          )}
-                        </div>
-                        <Button variant="ghost" size="sm" onClick={() => handleRemoveSupplier(fornecedor.supplierId)} disabled={removeQuoteSupplier.isPending}
-                          className="h-7 w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"><Trash2 className="h-3.5 w-3.5" /></Button>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
                 </Card>
               </div>
