@@ -606,6 +606,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                           placeholder="EAN-13, EAN-8, UPC..."
                           className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
                           maxLength={13}
+                          onFocus={handleInputFocus}
                         />
                         <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${isMobile ? 'right-4' : ''}`}>
                           <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-gray-400`} />

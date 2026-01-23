@@ -25,6 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
+import { usePackagingSearch } from "@/hooks/usePackagingSearch";
+import { useDebounce } from "@/hooks/useDebounce";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { 
@@ -51,14 +53,17 @@ const STEPS = [
   { id: "confirmar", title: "Confirmar", icon: FileText },
 ];
 
-export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, suppliers }: Props) {
+export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _initialItems, suppliers }: Props) {
   const { addQuote } = usePackagingQuotes();
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
   const [activeStep, setActiveStep] = useState("embalagens");
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<PackagingItem[]>([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
   const [searchItem, setSearchItem] = useState("");
+  const debouncedSearchItem = useDebounce(searchItem, 300);
+  const { data: searchResults, isLoading: isLoadingSearch } = usePackagingSearch(debouncedSearchItem);
+  
   const [searchSupplier, setSearchSupplier] = useState("");
   const [dataInicio, setDataInicio] = useState<Date>(new Date());
   const [dataFim, setDataFim] = useState<Date>(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
@@ -79,14 +84,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
     }
   }, [activeStep, open]);
 
-  const filteredItems = useMemo(() => {
-    const search = searchItem.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-    if (!search) return packagingItems;
-    
-    return packagingItems.filter(item =>
-      item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(search)
-    );
-  }, [packagingItems, searchItem]);
+  // filteredItems não é mais necessário pois usamos searchResults do hook
 
   const filteredSuppliers = useMemo(() => {
     const search = searchSupplier.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -97,18 +95,18 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
     );
   }, [suppliers, searchSupplier]);
 
-  const selectedItemsData = useMemo(() => 
-    packagingItems.filter(item => selectedItems.includes(item.id)),
-    [packagingItems, selectedItems]);
-
   const selectedSuppliersData = useMemo(() => 
     suppliers.filter(s => selectedSuppliers.includes(s.id)),
     [suppliers, selectedSuppliers]);
 
-  const toggleItem = (id: string) => {
-    setSelectedItems(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
+  const toggleItem = (item: PackagingItem) => {
+    setSelectedItems(prev => {
+      const exists = prev.some(i => i.id === item.id);
+      if (exists) {
+        return prev.filter(i => i.id !== item.id);
+      }
+      return [...prev, item];
+    });
   };
 
   const toggleSupplier = (id: string) => {
@@ -146,9 +144,8 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
   };
 
   const handleSubmit = async () => {
-    const itens = selectedItems.map(id => {
-      const item = packagingItems.find(p => p.id === id);
-      return { packagingId: id, packagingName: item?.name || '' };
+    const itens = selectedItems.map(item => {
+      return { packagingId: item.id, packagingName: item.name };
     });
 
     const fornecedoresNomes: { [id: string]: string } = {};
@@ -195,7 +192,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
       e.preventDefault();
       handleSubmit();
     }
-  }, [activeStep, currentStepIndex]);
+  }, [activeStep, currentStepIndex, canProceed]);
 
   // Render list helper
   const renderList = (items: any[], renderItem: (item: any) => React.ReactNode, emptyMessage: React.ReactNode, icon: React.ElementType) => {
@@ -347,27 +344,35 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
                     <Input ref={itemSearchRef} placeholder="Buscar embalagem..." value={searchItem}
                       onChange={(e) => setSearchItem(e.target.value)}
                       onFocus={handleInputFocus}
-                      className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" />
+                      className="pl-9 pr-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" />
+                    {isLoadingSearch && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />
+                      </div>
+                    )}
                   </div>
                   {renderList(
-                    filteredItems,
-                    (item) => (
-                      <div key={item.id} onClick={() => toggleItem(item.id)}
-                        className={cn(
-                          "w-full p-2 rounded-md text-left transition-all flex items-center gap-2 group cursor-pointer",
-                          selectedItems.includes(item.id)
-                            ? "bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-                            : "hover:bg-gray-50 dark:hover:bg-gray-800/50 border border-transparent"
-                        )}>
-                        <Checkbox checked={selectedItems.includes(item.id)} 
-                          className="data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 dark:data-[state=checked]:bg-white dark:data-[state=checked]:border-white dark:data-[state=checked]:text-gray-900 h-4 w-4 rounded pointer-events-none" />
-                        <div className="flex-1 min-w-0">
-                          <p className={cn("text-xs font-bold truncate", selectedItems.includes(item.id) ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400")}>{item.name}</p>
-                          {item.category && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{item.category}</span>}
+                    searchResults || [],
+                    (item) => {
+                      const isSelected = selectedItems.some(i => i.id === item.id);
+                      return (
+                        <div key={item.id} onClick={() => toggleItem(item)}
+                          className={cn(
+                            "w-full p-2 rounded-md text-left transition-all flex items-center gap-2 group cursor-pointer",
+                            isSelected
+                              ? "bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                              : "hover:bg-gray-50 dark:hover:bg-gray-800/50 border border-transparent"
+                          )}>
+                          <Checkbox checked={isSelected} 
+                            className="data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 dark:data-[state=checked]:bg-white dark:data-[state=checked]:border-white dark:data-[state=checked]:text-gray-900 h-4 w-4 rounded pointer-events-none" />
+                          <div className="flex-1 min-w-0">
+                            <p className={cn("text-xs font-bold truncate", isSelected ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400")}>{item.name}</p>
+                            {item.category && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{item.category}</span>}
+                          </div>
                         </div>
-                      </div>
-                    ),
-                    "Nenhuma embalagem encontrada",
+                      );
+                    },
+                    searchItem.trim().length === 0 ? "Digite para buscar embalagens" : "Nenhuma embalagem encontrada",
                     Package
                   )}
                 </CardContent>
@@ -388,14 +393,14 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
                 </CardHeader>
                 <CardContent className="pt-4">
                   {renderList(
-                    selectedItemsData,
+                    selectedItems,
                     (item) => (
                       <div key={item.id} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm group">
                         <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                           <Package className="h-3 w-3 text-gray-500" />
                         </div>
                         <span className="flex-1 text-xs font-bold text-gray-700 dark:text-gray-300 truncate">{item.name}</span>
-                        <Button variant="ghost" size="sm" onClick={() => toggleItem(item.id)}
+                        <Button variant="ghost" size="sm" onClick={() => toggleItem(item)}
                           className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
                           <X className="h-3 w-3" />
                         </Button>
@@ -588,10 +593,10 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems, su
                         </div>
                         <span className="text-xs font-black uppercase tracking-wider text-gray-500">Embalagens</span>
                       </div>
-                      <Badge variant="secondary" className="font-bold">{selectedItemsData.length}</Badge>
+                      <Badge variant="secondary" className="font-bold">{selectedItems.length}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-1.5 pl-8">
-                      {selectedItemsData.map(item => (
+                      {selectedItems.map(item => (
                         <Badge key={item.id} variant="outline" className="text-[10px] font-medium bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">
                           {item.name}
                         </Badge>
