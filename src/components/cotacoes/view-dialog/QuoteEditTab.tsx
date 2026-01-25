@@ -245,9 +245,9 @@ export function QuoteEditTab({
             <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Fornecedores</span>
           </div>
 
-          <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl shadow-xl flex gap-2">
+          <div className="p-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm flex gap-2">
             <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-              <SelectTrigger className={cn(designSystem.components.input.root, "flex-1 h-10 rounded-lg font-bold text-xs bg-zinc-900 border-zinc-800")}>
+              <SelectTrigger className={cn(designSystem.components.input.root, "flex-1 h-10 rounded-lg font-bold text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800")}>
                 <SelectValue placeholder="Convidar fornecedor..." />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 max-h-60 overflow-y-auto custom-scrollbar">

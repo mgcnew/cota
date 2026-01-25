@@ -122,7 +122,16 @@ export const designSystem = {
             },
 
             // Indicadores
-            activeIndicator: "absolute left-0 top-1/2 -translate-x-1/2 w-1 h-6 bg-[#83E509] rounded-r-full"
+            activeIndicator: "absolute left-0 top-1/2 -translate-x-1/2 w-1 h-6 bg-[#83E509] rounded-r-full",
+
+            // Sidebar Secundária (Painéis Internos de Modais/Dashboard)
+            secondary: {
+                wrapper: "w-full md:w-72 flex-shrink-0 flex flex-col bg-zinc-50/30 dark:bg-zinc-950/20 border-r border-zinc-100 dark:border-zinc-800",
+                header: "p-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/40",
+                item: "w-full text-left p-3 rounded-2xl border transition-all duration-200 relative overflow-hidden group",
+                itemActive: "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-md ring-1 ring-[#83E509]/20",
+                itemInactive: "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900/50"
+            }
         }
     },
 
@@ -197,9 +206,16 @@ export const designSystem = {
 
             // Layout de Scroll Unificado (Uso Recomendado)
             layout: {
-                viewport: "h-[90vh] flex flex-col overflow-hidden", // Container fixo
+                viewport: "h-[90vh] flex flex-col overflow-hidden border-none shadow-2xl", // Container fixo
                 scrollable: "flex-1 min-h-0 overflow-y-auto custom-scrollbar", // Onde o scroll acontece de verdade
                 fixedArea: "flex-shrink-0" // Áreas que não devem rolar (Header/TabsList)
+            },
+
+            // Layout de Duplo Scroll (Sidebar + List)
+            splitView: {
+                container: "flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden",
+                main: "flex-1 flex flex-col bg-white dark:bg-zinc-950 overflow-hidden",
+                content: "flex-1 overflow-y-auto custom-scrollbar p-6"
             }
         },
 
@@ -210,6 +226,8 @@ export const designSystem = {
             header: "bg-transparent",
             headerCell: "h-12 px-6 text-left align-middle font-bold text-zinc-500 dark:text-zinc-400 text-[10px] uppercase tracking-wider",
             row: "bg-card border border-border/40 shadow-sm rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.002]",
+            rowCompact: "group py-1.5 px-5 rounded-xl border transition-all duration-300 relative overflow-hidden",
+            rowActive: "bg-[#83E509]/10 border-[#83E509]/40 shadow-[0_0_20px_-5px_rgba(131,229,9,0.15)] ring-1 ring-[#83E509]/20",
             cell: "p-0 align-middle", // Padrão 0 para que o container interno da linha controle o padding
             caption: "mt-4 text-sm text-muted-foreground"
         },

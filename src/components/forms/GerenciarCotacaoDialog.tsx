@@ -69,7 +69,6 @@ import { designSystem } from "@/styles/design-system";
 
 export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange }: GerenciarCotacaoDialogProps) {
   const [activeTab, setActiveTab] = useState("resumo");
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'converter' && !open) setActiveTab('resumo');
@@ -523,7 +522,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                       value={tab.id}
                       className={cn(
                         designSystem.components.tabs.clean.trigger,
-                        "h-8 px-3 text-[11px] font-bold uppercase tracking-wider",
+                        "h-8 px-2 text-[10px] font-bold uppercase tracking-wider",
                         "data-[state=active]:bg-transparent"
                       )}
                     >
@@ -541,23 +540,15 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           <div className="flex items-center gap-1.5 ml-2">
             {!isMobile && (
               <div className="flex items-center gap-1 border-r border-zinc-100 dark:border-zinc-800 pr-2 mr-1">
+
                 <Button
                   variant="ghost"
-                  size="sm"
-                  onClick={() => setDeleteDialogOpen(true)}
-                  className="text-zinc-400 hover:text-red-500 hover:bg-red-500/5 h-8 px-2.5 rounded-lg font-bold text-[10px] uppercase tracking-tighter transition-all"
-                >
-                  <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                  Excluir
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={handleExportHtml}
-                  className="text-zinc-400 hover:text-zinc-900 dark:hover:text-[#83E509] hover:bg-zinc-100 dark:hover:bg-[#83E509]/5 h-8 px-2.5 rounded-lg font-bold text-[10px] uppercase tracking-tighter transition-all"
+                  className="text-zinc-400 hover:text-[#83E509] hover:bg-[#83E509]/5 h-8 w-8 rounded-lg transition-all"
+                  title="Exportar"
                 >
-                  <Download className="h-3.5 w-3.5 mr-1.5" />
-                  Exportar
+                  <Download className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -647,39 +638,20 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
       {/* Footer */}
       {isMobile && (
         <div className="flex items-center justify-end gap-2 p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+
           <Button
             variant="ghost"
-            size="sm"
-            onClick={() => setDeleteDialogOpen(true)}
-            className="text-red-500 hover:text-red-600 hover:bg-red-500/10 h-10 px-4 rounded-xl font-bold text-xs transition-all"
-          >
-            Excluir
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
+            size="icon"
             onClick={handleExportHtml}
-            className="text-zinc-500 hover:text-[#83E509] hover:bg-[#83E509]/10 h-10 px-4 rounded-xl font-bold text-xs transition-all"
+            className="text-zinc-500 hover:text-[#83E509] hover:bg-[#83E509]/10 h-10 w-10 rounded-xl transition-all"
+            title="Exportar"
           >
-            Exportar
+            <Download className="h-5 w-5" />
           </Button>
         </div>
       )}
 
-      <DeleteQuoteDialogLazy
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        quote={quote}
-        onDelete={(id) => {
-          deleteQuote.mutate(id, {
-            onSuccess: () => {
-              setDeleteDialogOpen(false);
-              onOpenChange(false); // Close the main dialog too
-            }
-          });
-        }}
-        isDeleting={deleteQuote.isPending}
-      />
+
     </>
   );
 

@@ -113,33 +113,6 @@ export function QuoteConversionTab({
   return (
     <div className="flex flex-col w-full bg-white dark:bg-zinc-950">
       <div className="p-6 space-y-6 pb-20">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm relative overflow-hidden group">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-lg bg-[#83E509]/10">
-                <DollarSign className="h-4 w-4 text-[#83E509]" />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Total Selecionado</span>
-            </div>
-            <p className="text-2xl font-black text-zinc-900 dark:text-zinc-50">
-              R$ {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-            <div className="absolute top-0 right-0 h-1 w-0 bg-[#83E509] group-hover:w-full transition-all duration-500" />
-          </div>
-
-          <div className="p-5 rounded-2xl bg-zinc-950 border border-zinc-800 shadow-xl overflow-hidden relative group">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-lg bg-[#83E509]/20">
-                <Trophy className="h-4 w-4 text-[#83E509]" />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Benchmark (Ideal)</span>
-            </div>
-            <p className="text-2xl font-black text-white">
-              R$ {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-        </div>
-
         <div className="flex items-center justify-between p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50">
           <div className="flex flex-col">
             <span className="text-[10px] font-black uppercase tracking-widest text-[#83E509] mb-0.5">ESTRATÉGIA</span>
@@ -217,14 +190,25 @@ export function QuoteConversionTab({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 rounded-2xl bg-zinc-950 border border-zinc-800 shadow-2xl relative overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50 shadow-sm relative overflow-hidden">
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">Entrega *</label>
-            <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className={cn("h-11 rounded-xl font-bold bg-zinc-900/50", designSystem.components.input.root)} min={new Date().toISOString().split('T')[0]} />
+            <label className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Entrega *</label>
+            <Input
+              type="date"
+              value={deliveryDate}
+              onChange={(e) => setDeliveryDate(e.target.value)}
+              className={cn("h-11 rounded-xl font-bold bg-white dark:bg-zinc-950", designSystem.components.input.root)}
+              min={new Date().toISOString().split('T')[0]}
+            />
           </div>
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">Observações</label>
-            <Input value={observations} onChange={(e) => setObservations(e.target.value)} placeholder="Ex: Entregar após as 14h..." className={cn("h-11 rounded-xl font-bold bg-zinc-900/50", designSystem.components.input.root)} />
+            <label className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Observações</label>
+            <Input
+              value={observations}
+              onChange={(e) => setObservations(e.target.value)}
+              placeholder="Ex: Entregar após as 14h..."
+              className={cn("h-11 rounded-xl font-bold bg-white dark:bg-zinc-950", designSystem.components.input.root)}
+            />
           </div>
         </div>
 
