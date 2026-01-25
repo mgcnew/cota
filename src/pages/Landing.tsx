@@ -6,8 +6,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load below-the-fold sections for faster FCP
 const FeaturesSection = lazy(() => import("@/components/landing/FeaturesSection"));
-const PricingPreviewSection = lazy(() => import("@/components/landing/PricingPreviewSection"));
-const CTASection = lazy(() => import("@/components/landing/CTASection"));
 const FooterSection = lazy(() => import("@/components/landing/FooterSection"));
 
 // Skeleton for lazy-loaded sections
@@ -27,7 +25,7 @@ const SectionSkeleton = memo(() => (
 
 SectionSkeleton.displayName = "SectionSkeleton";
 
-// Prefetch Auth page after Landing loads (Requirements 16.5)
+// Prefetch Auth page after Landing loads
 const prefetchAuth = () => import("./Auth");
 
 export default function Landing() {
@@ -44,34 +42,33 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <header className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-bold">
+            <div className="w-8 h-8 rounded-lg bg-[#83E509] flex items-center justify-center text-zinc-950 font-bold">
               C
             </div>
-            <span className="text-lg sm:text-xl font-bold">Cotaja</span>
+            <span className="text-lg sm:text-xl font-bold tracking-tight">CotaJá</span>
           </div>
-          
+
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/pricing">
-              <Button variant="ghost">Preços</Button>
+            <Link to="/auth?mode=login">
+              <Button variant="ghost" className="font-medium">Entrar</Button>
             </Link>
             <Link to="/auth?mode=login">
-              <Button variant="outline">Entrar</Button>
-            </Link>
-            <Link to="/auth?mode=signup">
-              <Button className="gradient-primary">Começar Grátis</Button>
+              <Button className="bg-[#83E509] hover:bg-[#72cc00] text-zinc-950 font-bold border-none">
+                Acessar Sistema
+              </Button>
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -81,43 +78,41 @@ export default function Landing() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-background px-4 py-4 space-y-3">
-            <Link to="/pricing" className="block">
-              <Button variant="ghost" className="w-full justify-start">Preços</Button>
+          <div className="md:hidden border-t bg-background px-4 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
+            <Link to="/auth?mode=login" className="block">
+              <Button variant="outline" className="w-full justify-center">Entrar</Button>
             </Link>
             <Link to="/auth?mode=login" className="block">
-              <Button variant="outline" className="w-full">Entrar</Button>
-            </Link>
-            <Link to="/auth?mode=signup" className="block">
-              <Button className="gradient-primary w-full">Começar Grátis</Button>
+              <Button className="bg-[#83E509] text-zinc-950 w-full font-bold">Acessar Sistema</Button>
             </Link>
           </div>
         )}
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-12 sm:py-16 md:py-24 lg:py-32">
-        <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-            Gerencie suas cotações de forma
-            <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent"> inteligente</span>
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-            Sistema completo para gestão de produtos, fornecedores e cotações. 
-            Economize tempo e dinheiro com automação inteligente.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
-            <Link to="/auth?mode=signup" className="w-full sm:w-auto">
-              <Button size="lg" className="gradient-primary text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto">
-                Começar Agora
-                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-              </Button>
-            </Link>
-            <Link to="/pricing" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto">
-                Ver Planos
-              </Button>
-            </Link>
+      <section className="relative overflow-hidden border-b border-zinc-100 dark:border-zinc-900">
+
+
+        <div className="container mx-auto px-4 py-16 sm:py-24 md:py-32 lg:py-40 relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-8 sm:space-y-10">
+            <div className="inline-flex items-center rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-500 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              Sistema Interno de Cotações
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter leading-[1.1]">
+              Gestão de Cotações de Forma
+              <span className="block text-[#83E509]"> Totalmente Inteligente</span>
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto px-4 leading-relaxed font-medium">
+              A plataforma centralizada para controle total de produtos, fornecedores e processos de compras da empresa.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center px-4 pt-4">
+              <Link to="/auth?mode=login" className="w-full sm:w-auto">
+                <Button size="lg" className="bg-[#83E509] hover:bg-[#72cc00] text-zinc-950 text-base sm:text-lg px-8 sm:px-12 w-full sm:w-auto font-bold h-14 transition-all transform hover:-translate-y-1">
+                  Acessar Plataforma
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -125,14 +120,6 @@ export default function Landing() {
       {/* Below-the-fold content - lazy loaded for faster FCP */}
       <Suspense fallback={<SectionSkeleton />}>
         <FeaturesSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionSkeleton />}>
-        <PricingPreviewSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionSkeleton />}>
-        <CTASection />
       </Suspense>
 
       <Suspense fallback={<SectionSkeleton />}>

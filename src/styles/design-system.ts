@@ -122,7 +122,7 @@ export const designSystem = {
             },
 
             // Indicadores
-            activeIndicator: "absolute left-0 top-1/2 -translate-x-1/2 w-1 h-6 bg-[#83E509] rounded-r-full shadow-[0_0_12px_rgba(131,229,9,0.5)]"
+            activeIndicator: "absolute left-0 top-1/2 -translate-x-1/2 w-1 h-6 bg-[#83E509] rounded-r-full"
         }
     },
 
@@ -149,7 +149,7 @@ export const designSystem = {
         // Botões
         button: {
             // Primário "Brand" (Ação principal)
-            primary: "inline-flex items-center justify-center gap-2 bg-[#83E509] hover:bg-[#72cc00] text-white shadow-sm hover:shadow-md active:scale-[0.98] transition-all rounded-lg text-sm font-bold px-4 py-2.5 disabled:opacity-50 disabled:pointer-events-none tracking-tight",
+            primary: "inline-flex items-center justify-center gap-2 bg-[#83E509] hover:bg-[#72cc00] text-zinc-950 active:scale-[0.98] transition-all rounded-lg text-sm font-bold px-4 py-2.5 disabled:opacity-50 disabled:pointer-events-none tracking-tight",
             // Secundário (Outline)
             secondary: "inline-flex items-center justify-center gap-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white active:scale-[0.98] transition-all rounded-lg text-sm font-medium px-4 py-2.5",
             // Ghost (Link/Ação sutil)
@@ -232,7 +232,7 @@ export const designSystem = {
             results: "text-[13px] font-medium text-zinc-500 dark:text-zinc-400 order-2 sm:order-1",
             controls: "flex items-center gap-3 order-1 sm:order-2",
             item: "flex items-center justify-center min-w-[36px] h-9 rounded-lg border text-[13px] font-semibold transition-all duration-200",
-            active: "bg-[#83E509] border-[#83E509] text-zinc-950 shadow-[0_4px_12px_rgba(131,229,9,0.25)]",
+            active: "bg-[#83E509] border-[#83E509] text-zinc-950",
             inactive: "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50",
             disabled: "opacity-40 pointer-events-none",
             nav: "flex items-center gap-1.5",
@@ -245,7 +245,7 @@ export const designSystem = {
     // ============================================
     utils: {
         shadows: {
-            highlight: "shadow-[0_0_0_1px_rgba(131,229,9,0.3),0_0_0_4px_rgba(131,229,9,0.1)]", // Focus ring effect
+            highlight: "ring-2 ring-[#83E509] ring-offset-2", // Focus ring effect
             card: "shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)]"
         },
         // Efeitos de vidro

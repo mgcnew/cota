@@ -21,7 +21,6 @@ import { queryClient } from "./lib/queryClient";
 
 // Páginas públicas - lazy load para reduzir bundle inicial
 const Landing = lazy(() => import("./pages/Landing"));
-const Pricing = lazy(() => import("./pages/Pricing"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AcceptInvite = lazy(() => import("./pages/AcceptInvite"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -75,10 +74,9 @@ const App = () => {
               <Routes>
                 {/* Rotas públicas - lazy loaded with ErrorBoundary (Requirements 10.5, 12.1, 12.2) */}
                 <Route path="/" element={<PageWrapper><Landing /></PageWrapper>} />
-                <Route path="/pricing" element={<PageWrapper><Pricing /></PageWrapper>} />
                 <Route path="/auth" element={<PageWrapper><Auth /></PageWrapper>} />
                 <Route path="/accept-invite" element={<PageWrapper><AcceptInvite /></PageWrapper>} />
-                
+
                 {/* Rotas protegidas - with ErrorBoundary */}
                 <Route
                   path="/dashboard/*"
