@@ -188,11 +188,19 @@ export const designSystem = {
         // Modais (Dialogs) & Drawers
         modal: {
             overlay: "fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-[2px] animate-in fade-in duration-200",
-            content: "fixed left-[50%] top-[50%] z-50 w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl p-0 duration-200 animate-in zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%] flex flex-col max-h-[90vh]", // Flex col + Max Height viewport
+            content: "fixed left-[50%] top-[50%] z-50 w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl p-0 duration-200 animate-in zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%] flex flex-col max-h-[90vh]",
+            // Padrão para Modais de Alta Densidade (Scroll Global)
             header: "flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-transparent rounded-t-xl",
             title: "text-lg font-semibold leading-none tracking-tight text-zinc-900 dark:text-zinc-50",
-            body: "p-6 overflow-y-auto flex-1 custom-scrollbar", // Scroll interno dinâmico
-            footer: "flex-shrink-0 flex items-center justify-end gap-2 p-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl"
+            body: "p-6 overflow-y-auto flex-1 custom-scrollbar",
+            footer: "flex-shrink-0 flex items-center justify-end gap-2 p-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl",
+
+            // Layout de Scroll Unificado (Uso Recomendado)
+            layout: {
+                viewport: "h-[90vh] flex flex-col overflow-hidden", // Container fixo
+                scrollable: "flex-1 min-h-0 overflow-y-auto custom-scrollbar", // Onde o scroll acontece de verdade
+                fixedArea: "flex-shrink-0" // Áreas que não devem rolar (Header/TabsList)
+            }
         },
 
         // Tabelas (Data Display) - Padrão de Linhas Flutuantes (Floating Rows)

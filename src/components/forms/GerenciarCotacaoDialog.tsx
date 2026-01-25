@@ -474,7 +474,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   const modalContent = (
     <>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden bg-transparent">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col min-h-0 bg-transparent overflow-hidden">
         {/* Header - Compacto e Responsivo */}
         <div className="flex items-center justify-between py-3 px-5 border-b bg-white dark:bg-zinc-950 min-h-[64px]">
 
@@ -573,9 +573,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden relative bg-white dark:bg-gray-950">
+        <div className="flex-1 min-h-0 relative bg-white dark:bg-zinc-950 flex flex-col">
           <Suspense fallback={<TabSkeleton type={activeTab} />}>
-            <TabsContent value="resumo" className="h-full m-0 p-0 overflow-hidden">
+            <TabsContent value="resumo" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
               {activeTab === 'resumo' && (
                 <QuoteSummaryTab
                   stats={stats}
@@ -586,7 +586,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               )}
             </TabsContent>
 
-            <TabsContent value="valores" className="h-full m-0 p-0 overflow-hidden">
+            <TabsContent value="valores" className="flex-1 min-h-0 m-0 p-0 overflow-hidden data-[state=active]:flex flex-col">
               {activeTab === 'valores' && (
                 <QuoteValuesTab
                   products={products}
@@ -602,7 +602,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               )}
             </TabsContent>
 
-            <TabsContent value="converter" className="h-full m-0 p-0 overflow-hidden">
+            <TabsContent value="converter" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
               {activeTab === 'converter' && (
                 <QuoteConversionTab
                   products={products}
@@ -617,7 +617,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               )}
             </TabsContent>
 
-            <TabsContent value="editar" className="h-full m-0 p-0 overflow-hidden">
+            <TabsContent value="editar" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
               {activeTab === 'editar' && (
                 <QuoteEditTab
                   products={products}
@@ -702,7 +702,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden [&>button]:hidden">
+      <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border-none shadow-2xl">
         {modalContent}
       </DialogContent>
     </Dialog>

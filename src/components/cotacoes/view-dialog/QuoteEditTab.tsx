@@ -1,6 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Plus, Trash2, Package, Building2, Search, Star, Trophy, X } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { PricingUnit } from "@/utils/priceNormalization";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDebounce } from "@/hooks/useDebounce";
 import { designSystem } from "@/styles/design-system";
 
@@ -43,7 +41,6 @@ export function QuoteEditTab({
   const [productUnit, setProductUnit] = useState<PricingUnit>("un");
   const [selectedSupplierToAdd, setSelectedSupplierToAdd] = useState("");
 
-  // States para busca de produtos
   const [productSearch, setProductSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
@@ -71,11 +68,10 @@ export function QuoteEditTab({
   const filteredProducts = useMemo(() => {
     if (!debouncedProductSearch || debouncedProductSearch.trim().length < 2) return [];
     return availableProductsNotInQuote
-      .filter((p: any) => p.nome.toLowerCase().includes(debouncedProductSearch.toLowerCase()))
+      .filter((p: any) => safeStr(p.name).toLowerCase().includes(debouncedProductSearch.toLowerCase()))
       .slice(0, 30);
-  }, [availableProductsNotInQuote, debouncedProductSearch]);
+  }, [availableProductsNotInQuote, debouncedProductSearch, safeStr]);
 
-  // Reset highlighted index when search changes
   useEffect(() => {
     setHighlightedProductIndex(-1);
   }, [debouncedProductSearch]);
@@ -83,7 +79,7 @@ export function QuoteEditTab({
   const selectProductFromList = (product: any) => {
     setSelectedProduct(product);
     setSelectedProductToAdd(product.id);
-    setProductSearch(product.nome);
+    setProductSearch(safeStr(product.name));
     setHighlightedProductIndex(-1);
   };
 
@@ -144,227 +140,144 @@ export function QuoteEditTab({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-950 overflow-hidden">
-      <ScrollArea className="flex-1">
-        <div className="p-5 space-y-6">
-          {/* Gestão de Produtos */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2">
-                <div className="p-1 rounded-lg bg-[#83E509]/10">
-                  <Package className="h-3.5 w-3.5 text-[#83E509]" />
-                </div>
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Incluir Novos Itens</span>
+    <div className="flex flex-col w-full bg-white dark:bg-zinc-950">
+      <div className="p-5 space-y-6 pb-20">
+        {/* Gestão de Produtos */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <div className="p-1 rounded-lg bg-[#83E509]/10">
+                <Package className="h-3.5 w-3.5 text-[#83E509]" />
               </div>
-              <Badge variant="outline" className="text-[9px] font-black uppercase text-[#83E509] border-[#83E509]/20">PASSO 01</Badge>
-            </div>
-
-            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm relative z-50 space-y-3">
-              <div className="flex flex-col md:flex-row gap-2">
-                <div className="flex-1 relative group">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
-                  <Input
-                    ref={productSearchRef}
-                    placeholder="Pesquisar catálogo..."
-                    value={selectedProduct ? selectedProduct.nome : productSearch}
-                    onChange={(e) => {
-                      setProductSearch(e.target.value);
-                      setSelectedProduct(null);
-                      setSelectedProductToAdd("");
-                    }}
-                    onFocus={handleInputFocus}
-                    onKeyDown={handleProductKeyDown}
-                    className={cn("pl-11 h-10 rounded-lg text-xs font-bold", designSystem.components.input.root)}
-                  />
-
-                  {filteredProducts.length > 0 && !selectedProduct && (
-                    <div
-                      ref={productListRef}
-                      className="absolute z-50 w-full mt-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl max-h-60 overflow-auto animate-in fade-in slide-in-from-top-2 custom-scrollbar p-1"
-                    >
-                      <div className="px-3 py-1.5 text-[9px] font-black text-[#83E509] uppercase tracking-widest opacity-50 border-b border-zinc-100 dark:border-zinc-800">Sugestões Encontradas</div>
-                      {filteredProducts.map((p: any, index: number) => (
-                        <button
-                          key={p.id}
-                          onClick={() => selectProductFromList(p)}
-                          onMouseEnter={() => setHighlightedProductIndex(index)}
-                          className={cn(
-                            "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-3 transition-all rounded-lg mt-1",
-                            highlightedProductIndex === index
-                              ? "bg-[#83E509]/10 text-zinc-900 dark:text-[#83E509]"
-                              : "hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400"
-                          )}
-                        >
-                          <div className="flex items-center gap-3 overflow-hidden">
-                            <div className={cn("w-7 h-7 rounded-md flex items-center justify-center transition-all flex-shrink-0 shadow-sm", highlightedProductIndex === index ? "bg-[#83E509] text-black" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 group-hover:bg-[#83E509]/20 group-hover:text-[#83E509]")}>
-                              <Package className="h-3.5 w-3.5" />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                              <span className="font-black tracking-tight truncate uppercase leading-none">{safeStr(p.name)}</span>
-                              {p.brand_name && (
-                                <div className="flex items-center gap-1.5 mt-0.5 opacity-60">
-                                  <span className="text-[8px] font-black uppercase tracking-widest">{p.brand_name}</span>
-                                  {p.brand_rating > 0 && (
-                                    <div className="flex items-center gap-0.5">
-                                      <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
-                                      <span className="text-[8px] font-black">{p.brand_rating}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {p.brand_score > 0 && (
-                            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded-md flex-shrink-0 border border-zinc-200 dark:border-zinc-700">
-                              <Trophy className="h-2.5 w-2.5 text-amber-500" />
-                              <span className="text-[9px] font-black text-zinc-500">
-                                {p.brand_score >= 1000 ? `${(p.brand_score / 1000).toFixed(1)}k` : p.brand_score}
-                              </span>
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2 min-w-fit">
-                  <div className="relative group">
-                    <Input
-                      type="number"
-                      min="1"
-                      value={productQuantity}
-                      onChange={(e) => setProductQuantity(Number(e.target.value))}
-                      onFocus={handleInputFocus}
-                      className={cn("w-20 h-10 text-center font-black text-xs", designSystem.components.input.root)}
-                    />
-                    <div className="absolute top-[-7px] left-2 bg-zinc-50 dark:bg-zinc-900 px-1 text-[7px] font-black text-zinc-400 uppercase tracking-widest">QTD</div>
-                  </div>
-
-                  <Select value={productUnit} onValueChange={(val: PricingUnit) => setProductUnit(val)}>
-                    <SelectTrigger className={cn("w-28 h-10 rounded-lg font-bold text-[10px] uppercase", designSystem.components.input.root)}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-zinc-800">
-                      <SelectItem value="un" className="text-xs font-bold">UNIDADE</SelectItem>
-                      <SelectItem value="kg" className="text-xs font-bold">QUILO (KG)</SelectItem>
-                      <SelectItem value="cx" className="text-xs font-bold">CAIXA</SelectItem>
-                      <SelectItem value="pct" className="text-xs font-bold">PACOTE</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    onClick={handleAddProduct}
-                    disabled={!selectedProductToAdd}
-                    className="h-10 w-10 rounded-lg bg-[#83E509] hover:bg-[#83E509]/80 text-black shadow-lg shadow-[#83E509]/10 transition-all active:scale-95 disabled:grayscale disabled:opacity-30"
-                  >
-                    <Plus className="h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-1.5 max-h-[40vh] overflow-auto pr-2 custom-scrollbar">
-              {products.length > 0 ? (
-                products.map((p: any) => (
-                  <div key={p.product_id} className="flex items-center justify-between p-2.5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl group hover:border-[#83E509]/30 transition-all duration-200">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center text-zinc-400 border border-zinc-200 dark:border-zinc-800 shadow-sm group-hover:text-[#83E509] group-hover:border-[#83E509]/30 transition-colors">
-                        <Package className="h-4 w-4" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[11px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight truncate leading-tight">{safeStr(p.product_name)}</span>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest bg-zinc-50 dark:bg-zinc-950 h-4 px-1.5 border-zinc-100 dark:border-zinc-800 text-zinc-500">
-                            {safeStr(p.quantidade)} {safeStr(p.unidade)}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onRemoveQuoteItem(p.product_id)}
-                      className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))
-              ) : (
-                <div className="py-8 text-center rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800">
-                  <Package className="h-8 w-8 text-zinc-200 mx-auto mb-2 opacity-50" />
-                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Aguardando produtos...</p>
-                </div>
-              )}
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Produtos</span>
             </div>
           </div>
 
-          {/* Gestão de Fornecedores */}
-          <div className="space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800">
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2">
-                <div className="p-1 rounded-lg bg-[#83E509]/10">
-                  <Building2 className="h-3.5 w-3.5 text-[#83E509]" />
-                </div>
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Vincular Fornecedores</span>
-              </div>
-              <Badge variant="outline" className="text-[9px] font-black uppercase text-[#83E509] border-[#83E509]/20">PASSO 02</Badge>
-            </div>
+          <div className="p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm space-y-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex-1 relative group">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+                <Input
+                  ref={productSearchRef}
+                  placeholder="Adicionar produto..."
+                  value={selectedProduct ? safeStr(selectedProduct.name) : productSearch}
+                  onChange={(e) => {
+                    setProductSearch(e.target.value);
+                    setSelectedProduct(null);
+                    setSelectedProductToAdd("");
+                  }}
+                  onFocus={handleInputFocus}
+                  onKeyDown={handleProductKeyDown}
+                  className={cn(designSystem.components.input.root, "pl-11 h-10 rounded-lg text-xs font-bold bg-white dark:bg-zinc-950")}
+                />
 
-            <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl shadow-xl space-y-2 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-6 opacity-5">
-                <Building2 className="h-16 w-16 text-[#83E509]" />
+                {filteredProducts.length > 0 && !selectedProduct && (
+                  <div ref={productListRef} className="absolute z-50 w-full mt-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl max-h-60 overflow-y-auto p-1 custom-scrollbar">
+                    {filteredProducts.map((p: any, index: number) => (
+                      <button
+                        key={p.id}
+                        onClick={() => selectProductFromList(p)}
+                        onMouseEnter={() => setHighlightedProductIndex(index)}
+                        className={cn(
+                          "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-3 transition-all rounded-lg",
+                          highlightedProductIndex === index ? "bg-[#83E509]/10 text-zinc-900 dark:text-[#83E509]" : "hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400"
+                        )}
+                      >
+                        <span className="font-black tracking-tight truncate uppercase">{safeStr(p.name)}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2 relative z-10">
-                <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-                  <SelectTrigger className={cn("flex-1 h-10 rounded-lg font-bold text-xs", designSystem.components.input.root)}>
-                    <SelectValue placeholder="Convidar fornecedor..." />
+
+              <div className="flex gap-2 min-w-fit">
+                <Input type="number" min="1" value={productQuantity} onChange={(e) => setProductQuantity(Number(e.target.value))} className={cn(designSystem.components.input.root, "w-20 h-10 text-center font-black text-xs bg-white dark:bg-zinc-950")} />
+                <Select value={productUnit} onValueChange={(val: PricingUnit) => setProductUnit(val)}>
+                  <SelectTrigger className={cn(designSystem.components.input.root, "w-28 h-10 rounded-lg font-bold text-[10px] uppercase bg-white dark:bg-zinc-950")}>
+                    <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950">
-                    {suppliersNotInQuote.length > 0 ? (
-                      suppliersNotInQuote.map((s: any) => (
-                        <SelectItem key={s.id} value={s.id} className="font-bold text-xs uppercase">{safeStr(s.nome)}</SelectItem>
-                      ))
-                    ) : (
-                      <div className="p-3 text-center text-[9px] font-black text-zinc-600 uppercase">Todos cadastrados já participam</div>
-                    )}
+                  <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800">
+                    <SelectItem value="un" className="text-xs font-bold">UNIDADE</SelectItem>
+                    <SelectItem value="kg" className="text-xs font-bold">KG</SelectItem>
+                    <SelectItem value="cx" className="text-xs font-bold">CAIXA</SelectItem>
+                    <SelectItem value="pct" className="text-xs font-bold">PACOTE</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button
-                  onClick={handleAddSupplier}
-                  disabled={!selectedSupplierToAdd}
-                  className="h-10 w-10 rounded-lg bg-[#83E509] hover:bg-[#83E509]/80 text-black shadow-lg shadow-[#83E509]/20 transition-all active:scale-95 disabled:grayscale disabled:opacity-30"
-                >
+                <Button onClick={handleAddProduct} disabled={!selectedProductToAdd} className="h-10 w-10 rounded-lg bg-[#83E509] hover:bg-[#83E509]/80 text-black">
                   <Plus className="h-5 w-5" />
                 </Button>
               </div>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {fornecedores.map((f: any) => (
-                <div key={f.id} className="flex items-center justify-between p-2.5 bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-100 dark:border-zinc-800 rounded-xl group hover:border-[#83E509]/30 transition-all duration-200 shadow-sm">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-900 flex items-center justify-center text-zinc-400 border border-zinc-100 dark:border-zinc-800 shadow-sm group-hover:text-[#83E509] transition-colors">
-                      <Building2 className="h-4 w-4" />
+          <div className="space-y-2">
+            {products.length > 0 ? (
+              products.map((p: any) => (
+                <div key={p.product_id} className="flex items-center justify-between p-3 bg-zinc-50/50 dark:bg-zinc-900/20 border border-zinc-100 dark:border-zinc-800 rounded-xl group hover:border-[#83E509]/30 transition-all">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-950 flex items-center justify-center text-zinc-400 border border-zinc-100 dark:border-zinc-800 shadow-sm group-hover:text-[#83E509] transition-colors">
+                      <Package className="h-4 w-4" />
                     </div>
-                    <span className="text-[10px] font-black text-zinc-700 dark:text-zinc-300 truncate uppercase tracking-tight leading-tight">{safeStr(f.nome)}</span>
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight truncate">{safeStr(p.product_name)}</span>
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase">{safeStr(p.quantidade)} {safeStr(p.unidade)}</span>
+                    </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onRemoveQuoteSupplier(f.id)}
-                    className="h-8 w-8 text-zinc-300 hover:text-red-500 hover:bg-red-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                  >
+                  <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteItem(p.product_id)} className="h-8 w-8 text-zinc-300 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="py-12 text-center rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800">
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Nenhum produto</p>
+              </div>
+            )}
           </div>
         </div>
-      </ScrollArea>
+
+        {/* Gestão de Fornecedores */}
+        <div className="space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-2 px-1">
+            <div className="p-1 rounded-lg bg-[#83E509]/10">
+              <Building2 className="h-3.5 w-3.5 text-[#83E509]" />
+            </div>
+            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Fornecedores</span>
+          </div>
+
+          <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl shadow-xl flex gap-2">
+            <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
+              <SelectTrigger className={cn(designSystem.components.input.root, "flex-1 h-10 rounded-lg font-bold text-xs bg-zinc-900 border-zinc-800")}>
+                <SelectValue placeholder="Convidar fornecedor..." />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 max-h-60 overflow-y-auto custom-scrollbar">
+                {suppliersNotInQuote.map((s: any) => (
+                  <SelectItem key={s.id} value={s.id} className="font-bold text-xs uppercase text-zinc-900 dark:text-zinc-100">
+                    {safeStr(s.name)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd} className="h-10 w-10 rounded-lg bg-[#83E509] hover:bg-[#83E509]/80 text-black">
+              <Plus className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {fornecedores.map((f: any) => (
+              <div key={f.id} className="flex items-center justify-between p-3 bg-zinc-50/50 dark:bg-zinc-900/20 border border-zinc-100 dark:border-zinc-800 rounded-xl group hover:border-[#83E509]/30 transition-all">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Building2 className="h-4 w-4 text-zinc-400 group-hover:text-[#83E509]" />
+                  <span className="text-[10px] font-black text-zinc-700 dark:text-zinc-300 uppercase truncate">{safeStr(f.nome)}</span>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteSupplier(f.id)} className="h-8 w-8 text-zinc-300 hover:text-red-500 hover:bg-red-500/5 opacity-0 group-hover:opacity-100 transition-all">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
