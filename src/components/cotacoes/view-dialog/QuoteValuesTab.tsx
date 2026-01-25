@@ -1,21 +1,12 @@
-import { useState, useRef, useMemo, useEffect, useCallback, memo } from "react";
-import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Trophy, Inbox } from "lucide-react";
+import { useState, useRef, useMemo, useEffect, useCallback } from "react";
+import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
-import { PricingUnit } from "@/utils/priceNormalization";
-import { EmptyState } from "@/components/ui/empty-state";
-
-const PRICING_UNIT_OPTIONS: { value: PricingUnit; label: string }[] = [
-  { value: "kg", label: "por kg" },
-  { value: "un", label: "por unidade" },
-  { value: "cx", label: "por caixa" },
-  { value: "pct", label: "por pacote" },
-];
+import { useToast } from "@/hooks/use-toast";
+import { designSystem } from "@/styles/design-system";
 
 interface QuoteValuesTabProps {
   products: any[];
@@ -40,10 +31,10 @@ export function QuoteValuesTab({
   safeStr,
   getBestPriceInfoForProduct
 }: QuoteValuesTabProps) {
+  const { toast } = useToast();
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, string | number>>({});
-  const [editedPricingMetadata, setEditedPricingMetadata] = useState<Record<string, { unidadePreco: PricingUnit; fatorConversao?: number }>>({});
   const editInputRef = useRef<HTMLInputElement>(null);
   const [supplierSearch, setSupplierSearch] = useState("");
   const [showMobileValues, setShowMobileValues] = useState(false);
@@ -115,34 +106,36 @@ export function QuoteValuesTab({
   }, [fornecedores, supplierSearch]);
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-transparent">
       {/* Sidebar - Lista de Fornecedores */}
       <div className={cn(
-        "w-64 flex-shrink-0 border-r flex flex-col",
+        "w-72 flex-shrink-0 border-r border-zinc-100 dark:border-zinc-800 flex flex-col bg-zinc-50/50 dark:bg-zinc-950/30",
         isMobile && showMobileValues ? "hidden" : "flex"
       )}>
-        <div className="p-3 border-b">
-          <div className="flex items-center gap-2 mb-2">
-            <Building2 className="h-4 w-4 text-gray-600" />
-            <span className="text-xs font-semibold text-gray-500">Fornecedores</span>
+        <div className="p-4 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-2 mb-3">
+            <Building2 className="h-4 w-4 text-zinc-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Fornecedores Participantes</span>
           </div>
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
             <Input
-              placeholder="Buscar..."
+              placeholder="Filtro rápido..."
               value={supplierSearch}
               onChange={e => setSupplierSearch(e.target.value)}
-              className="pl-8 h-8"
+              className={cn("pl-9 h-9 rounded-xl text-xs", designSystem.components.input.root)}
             />
           </div>
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="p-2 space-y-1">
+          <div className="p-3 space-y-2">
             {filteredSuppliers.length > 0 ? (
               filteredSuppliers.map((fornecedor: any) => {
                 const total = calcularTotalFornecedor(fornecedor.id);
                 const isSelected = selectedSupplier === fornecedor.id;
+                const matchesSearch = supplierSearch && fornecedor.nome.toLowerCase().includes(supplierSearch.toLowerCase());
+
                 return (
                   <button
                     key={fornecedor.id}
@@ -152,37 +145,44 @@ export function QuoteValuesTab({
                       if (isMobile) setShowMobileValues(true);
                     }}
                     className={cn(
-                      "w-full text-left p-2 rounded-lg border transition-colors",
+                      "w-full text-left p-3 rounded-2xl border transition-all duration-200 relative overflow-hidden group",
                       isSelected
-                        ? "bg-teal-50 border-teal-200"
-                        : "bg-white border-transparent hover:bg-gray-50"
+                        ? "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-md ring-1 ring-[#83E509]/20"
+                        : "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900/50"
                     )}
                   >
-                    <div className="flex items-center gap-2">
+                    {isSelected && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#83E509]" />
+                    )}
+                    <div className="flex items-center gap-2 mb-1.5">
                       <div className={cn(
                         "w-2 h-2 rounded-full",
-                        fornecedor.status === 'respondido' ? "bg-green-500" : "bg-gray-300"
+                        fornecedor.status === 'respondido' ? "bg-[#83E509] shadow-[0_0_8px_#83E509]" : "bg-zinc-300 dark:bg-zinc-700"
                       )} />
-                      <span className="text-sm font-medium truncate">{safeStr(fornecedor.nome)}</span>
+                      <span className={cn(
+                        "text-xs font-bold truncate transition-colors",
+                        isSelected ? "text-zinc-900 dark:text-zinc-50" : "text-zinc-500"
+                      )}>{safeStr(fornecedor.nome)}</span>
                     </div>
-                    <div className="ml-4 mt-1 flex items-center justify-between">
-                      <span className="text-xs text-gray-500">
+                    <div className="flex items-center justify-between pl-4">
+                      <span className={cn(
+                        "text-[11px] font-black",
+                        isSelected ? "text-[#83E509]" : "text-zinc-400"
+                      )}>
                         R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
-                      {fornecedor.status === 'respondido' && (
-                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">OK</Badge>
+                      {fornecedor.status === 'respondido' && isSelected && (
+                        <div className="h-4 px-1.5 rounded bg-[#83E509]/10 text-[#83E509] text-[9px] font-black tracking-tighter">RESPONDEU</div>
                       )}
                     </div>
                   </button>
                 );
               })
             ) : (
-              <EmptyState
-                icon={Inbox}
-                title="Nenhum fornecedor"
-                description={supplierSearch ? "Tente buscar outro nome." : "Sem fornecedores."}
-                variant="inline"
-              />
+              <div className="py-12 text-center">
+                <Inbox className="h-6 w-6 text-zinc-300 mx-auto mb-2 opacity-20" />
+                <p className="text-[10px] font-bold text-zinc-500 uppercase">Nenhum fornecedor</p>
+              </div>
             )}
           </div>
         </ScrollArea>
@@ -190,42 +190,47 @@ export function QuoteValuesTab({
 
       {/* Área Principal - Valores */}
       <div className={cn(
-        "flex-1 flex flex-col",
+        "flex-1 flex flex-col bg-white dark:bg-zinc-950",
         isMobile && !showMobileValues ? "hidden" : "flex"
       )}>
         {isMobile && (
-          <div className="flex items-center gap-2 p-3 border-b">
-            <Button variant="ghost" size="icon" onClick={() => setShowMobileValues(false)}>
-              <ArrowLeft className="h-4 w-4" />
+          <div className="flex items-center gap-2 p-4 border-b border-zinc-100 dark:border-zinc-800">
+            <Button variant="ghost" className="h-9 px-2 rounded-xl" onClick={() => setShowMobileValues(false)}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              <span className="text-xs font-bold">Trocar Fornecedor</span>
             </Button>
-            <span className="text-sm font-medium">Voltar</span>
           </div>
         )}
 
         {selectedSupplier ? (
           <>
             {/* Header do Fornecedor */}
-            <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-teal-100">
-                  <DollarSign className="h-4 w-4 text-teal-600" />
+            <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-[#83E509]/10">
+                  <DollarSign className="h-5 w-5 text-[#83E509]" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Valores de:</p>
-                  <p className="font-semibold">{fornecedores.find((f: any) => f.id === selectedSupplier)?.nome}</p>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Editando Valores de:</p>
+                  <p className="text-lg font-black text-zinc-900 dark:text-zinc-50 tracking-tight">
+                    {fornecedores.find((f: any) => f.id === selectedSupplier)?.nome}
+                  </p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-500">Total</p>
-                <p className="text-lg font-bold text-teal-600">
-                  R$ {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
+              <div className="text-right flex flex-col items-end">
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Total Geral</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xs font-bold text-[#83E509]">R$</span>
+                  <p className="text-2xl font-black text-zinc-900 dark:text-zinc-50">
+                    {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Lista de Produtos */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-2">
+            <ScrollArea className="flex-1">
+              <div className="p-6 space-y-3">
                 {products.map((product: any) => {
                   const currentValue = getCurrentProductValue(selectedSupplier, product.product_id);
                   const isEditing = editingProductId === product.product_id;
@@ -236,17 +241,24 @@ export function QuoteValuesTab({
                     <div
                       key={product.product_id}
                       className={cn(
-                        "flex items-center justify-between p-3 rounded-lg border",
-                        isBest ? "bg-green-50 border-green-200" : "bg-white"
+                        "flex items-center justify-between p-4 rounded-2xl border transition-all duration-200",
+                        isBest
+                          ? "bg-[#83E509]/5 border-[#83E509]/20"
+                          : "bg-white dark:bg-zinc-900/30 border-zinc-100 dark:border-zinc-800"
                       )}
                     >
-                      <div className="flex-1">
-                        <p className="font-medium">{safeStr(product.product_name)}</p>
-                        <p className="text-xs text-muted-foreground">Qtd: {safeStr(product.quantidade)} {safeStr(product.unidade)}</p>
+                      <div className="flex-1 min-w-0 pr-4">
+                        <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate">{safeStr(product.product_name)}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-black uppercase text-zinc-500 border-zinc-200 dark:border-zinc-800">
+                            {safeStr(product.quantidade)} {safeStr(product.unidade)}
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
+
+                      <div className="flex items-center gap-3">
                         {isEditing ? (
-                          <>
+                          <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-right-1">
                             <Input
                               ref={editInputRef}
                               type="text"
@@ -257,25 +269,37 @@ export function QuoteValuesTab({
                                 if (e.key === 'Enter') handleSaveEdit(product.product_id);
                                 if (e.key === 'Escape') handleCancelEdit();
                               }}
-                              className="w-28 h-8"
+                              className={cn("w-32 h-10 rounded-xl text-center font-bold", designSystem.components.input.root)}
                             />
-                            <Button size="icon" className="h-8 w-8 bg-green-600 hover:bg-green-700" onClick={() => handleSaveEdit(product.product_id)}>
-                              <Check className="h-4 w-4" />
+                            <Button size="icon" className="h-10 w-10 rounded-xl bg-[#83E509] hover:bg-[#83E509]/80 text-black shadow-lg shadow-[#83E509]/20" onClick={() => handleSaveEdit(product.product_id)}>
+                              <Check className="h-5 w-5" />
                             </Button>
-                            <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600" onClick={handleCancelEdit}>
-                              <X className="h-4 w-4" />
+                            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-red-500 hover:bg-red-500/10" onClick={handleCancelEdit}>
+                              <X className="h-5 w-5" />
                             </Button>
-                          </>
+                          </div>
                         ) : (
-                          <>
-                            <span className={cn("font-semibold", isBest ? "text-green-600" : "text-gray-700")}>
-                              R$ {currentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </span>
-                            {isBest && <Badge className="bg-green-100 text-green-700 border-green-200">Melhor</Badge>}
-                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleStartEdit(product.product_id, currentValue)}>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className={cn(
+                                "text-lg font-black tracking-tight",
+                                isBest ? "text-[#83E509]" : "text-zinc-900 dark:text-zinc-100"
+                              )}>
+                                R$ {currentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                              {isBest && (
+                                <p className="text-[9px] font-black text-[#83E509] uppercase tracking-tighter">🏆 MELHOR PREÇO</p>
+                              )}
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-10 w-10 rounded-xl text-zinc-400 hover:text-[#83E509] hover:bg-[#83E509]/10 transition-all"
+                              onClick={() => handleStartEdit(product.product_id, currentValue)}
+                            >
                               <Edit2 className="h-4 w-4" />
                             </Button>
-                          </>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -285,13 +309,12 @@ export function QuoteValuesTab({
             </ScrollArea>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <EmptyState
-              icon={Building2}
-              title="Selecione um fornecedor"
-              description="Escolha um fornecedor na lista para ver/editar valores."
-              variant="inline"
-            />
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
+            <div className="p-6 rounded-full bg-zinc-100 dark:bg-zinc-900 mb-6">
+              <Building2 className="h-12 w-12 text-zinc-400" />
+            </div>
+            <h3 className="text-lg font-black text-zinc-900 dark:text-zinc-50 tracking-tight uppercase">Selecione um fornecedor</h3>
+            <p className="text-zinc-500 text-sm mt-1 mx-auto max-w-[200px]">Escolha um parceiro ao lado para gerenciar os valores oferecidos.</p>
           </div>
         )}
       </div>

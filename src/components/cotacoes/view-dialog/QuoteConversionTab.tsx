@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
-import { EmptyState } from "@/components/ui/empty-state";
+import { useToast } from "@/hooks/use-toast";
+import { designSystem } from "@/styles/design-system";
 
 interface QuoteConversionTabProps {
   products: any[];
@@ -31,6 +31,7 @@ export function QuoteConversionTab({
   getBestPriceInfoForProduct,
   safeStr
 }: QuoteConversionTabProps) {
+  const { toast } = useToast();
   const [pedidoSubTab, setPedidoSubTab] = useState("melhores");
   const [productSelections, setProductSelections] = useState<Record<string, string>>({});
   const [deliveryDate, setDeliveryDate] = useState("");
@@ -104,198 +105,230 @@ export function QuoteConversionTab({
 
   if (products.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center p-12">
-        <EmptyState
-          icon={Inbox}
-          title="Nenhum produto"
-          description="Não há produtos para converter."
-          variant="inline"
-        />
+      <div className="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
+        <div className="p-6 rounded-full bg-zinc-100 dark:bg-zinc-900 mb-6">
+          <Inbox className="h-12 w-12 text-zinc-400" />
+        </div>
+        <h3 className="text-lg font-black text-zinc-900 dark:text-zinc-50 tracking-tight uppercase">Nenhum produto</h3>
+        <p className="text-zinc-500 text-sm mt-1 mx-auto max-w-[200px]">Não há produtos vinculados a esta cotação para converter.</p>
       </div>
     );
   }
 
   return (
-    <ScrollArea className="h-full">
-      <div className="p-4 space-y-4">
-        {/* Cards de Resumo */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-teal-50 border border-teal-200">
-            <div className="flex items-center gap-2 mb-1">
-              <DollarSign className="h-4 w-4 text-teal-600" />
-              <span className="text-xs text-teal-700">Total Selecionado</span>
-            </div>
-            <p className="text-2xl font-bold text-teal-800">
-              R$ {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-          <div className="p-4 rounded-xl bg-green-50 border border-green-200">
-            <div className="flex items-center gap-2 mb-1">
-              <Trophy className="h-4 w-4 text-green-600" />
-              <span className="text-xs text-green-700">Melhor Total Possível</span>
-            </div>
-            <p className="text-2xl font-bold text-green-800">
-              R$ {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-        </div>
-
-        {/* Estratégia */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border">
-          <span className="text-sm font-medium text-gray-600">Estratégia de Seleção:</span>
-          <Tabs value={pedidoSubTab} onValueChange={(val) => {
-            setPedidoSubTab(val);
-            if (val === "melhores") {
-              const bestSelections: Record<string, string> = {};
-              products.forEach((product: any) => {
-                const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
-                if (bestSupplierId) bestSelections[product.product_id] = bestSupplierId;
-              });
-              setProductSelections(bestSelections);
-            } else if (val === "unico") {
-              const supplierTotals = fornecedores.map((f: any) => {
-                const total = products.reduce((sum: number, p: any) => {
-                  const value = getSupplierProductValue(f.id, p.product_id);
-                  return sum + (value > 0 ? value : Infinity);
-                }, 0);
-                const hasAll = !products.some((p: any) => getSupplierProductValue(f.id, p.product_id) === 0);
-                return { id: f.id, total, hasAll };
-              }).filter(s => s.hasAll).sort((a, b) => a.total - b.total);
-
-              if (supplierTotals.length > 0) {
-                const best = supplierTotals[0].id;
-                const single: Record<string, string> = {};
-                products.forEach((p: any) => { single[p.product_id] = best; });
-                setProductSelections(single);
-              }
-            }
-          }}>
-            <TabsList className="h-8">
-              <TabsTrigger value="melhores" className="text-xs">
-                <Trophy className="h-3 w-3 mr-1" /> Melhores Preços
-              </TabsTrigger>
-              <TabsTrigger value="unico" className="text-xs">
-                <Building2 className="h-3 w-3 mr-1" /> Fornecedor Único
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {/* Lista de Seleção */}
-        <div className="space-y-2">
-          <h4 className="font-semibold flex items-center gap-2">
-            <ShoppingCart className="h-4 w-4" />
-            Configurar Pedido
-          </h4>
-          {products.map((product: any) => {
-            const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
-            const selectedSupplierId = productSelections[product.product_id];
-            const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
-            const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
-
-            return (
-              <div
-                key={product.product_id}
-                className={cn(
-                  "flex items-center justify-between p-3 rounded-lg border",
-                  isBest ? "bg-green-50 border-green-200" : "bg-white"
-                )}
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{safeStr(product.product_name)}</p>
-                  <p className="text-xs text-muted-foreground">Qtd: {safeStr(product.quantidade)} {safeStr(product.unidade)}</p>
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-950 overflow-hidden">
+      <ScrollArea className="h-full">
+        <div className="p-6 space-y-6">
+          {/* Cards de Resumo */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm relative overflow-hidden group">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-[#83E509]/10">
+                  <DollarSign className="h-4 w-4 text-[#83E509]" />
                 </div>
-                <div className="flex items-center gap-3">
-                  <Select
-                    value={selectedSupplierId || ""}
-                    onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Selecione..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
-                        <SelectItem key={f.id} value={f.id}>{safeStr(f.nome)}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="text-right min-w-[100px]">
-                    <p className={cn("font-semibold", isBest ? "text-green-600" : "text-gray-700")}>
-                      R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
-                    {isBest && <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">Melhor</Badge>}
-                  </div>
-                </div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Total Selecionado</span>
               </div>
-            );
-          })}
-        </div>
+              <p className="text-2xl font-black text-zinc-900 dark:text-zinc-50">
+                R$ {totalSelecao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <div className="absolute top-0 right-0 h-1 w-0 bg-[#83E509] group-hover:w-full transition-all duration-500" />
+            </div>
 
-        {/* Preview de Pedidos */}
-        {supplierGroups.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Preview de Envio ({supplierGroups.length} {supplierGroups.length === 1 ? 'pedido' : 'pedidos'})
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {supplierGroups.map((group, idx) => (
-                <div key={group.supplierId} className="p-3 rounded-lg bg-gray-50 border">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">Pedido #{idx + 1}</Badge>
-                    <span className="font-semibold">
-                      R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <p className="font-medium">{group.supplierName}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {group.products.map((p: any) => safeStr(p.product_name)).join(", ")}
-                  </p>
+            <div className="p-5 rounded-2xl bg-zinc-950 border border-zinc-800 shadow-xl overflow-hidden relative group">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-[#83E509]/20">
+                  <Trophy className="h-4 w-4 text-[#83E509]" />
                 </div>
-              ))}
+                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Benchmark (Ideal)</span>
+              </div>
+              <p className="text-2xl font-black text-white">
+                R$ {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <div className="absolute bottom-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <TrendingDown className="h-12 w-12 text-[#83E509]" />
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Dados de Entrega */}
-        <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-gray-50 border">
-          <div>
-            <label className="text-xs font-medium text-gray-600 mb-1 block">Data de Entrega *</label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="date"
-                value={deliveryDate}
-                onChange={(e) => setDeliveryDate(e.target.value)}
-                className="pl-10"
-                min={new Date().toISOString().split('T')[0]}
-              />
+          {/* Estratégia */}
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#83E509] mb-0.5">ESTRATÉGIA</span>
+              <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Como deseja montar o pedido?</span>
+            </div>
+            <Tabs value={pedidoSubTab} onValueChange={(val) => {
+              setPedidoSubTab(val);
+              if (val === "melhores") {
+                const bestSelections: Record<string, string> = {};
+                products.forEach((product: any) => {
+                  const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
+                  if (bestSupplierId) bestSelections[product.product_id] = bestSupplierId;
+                });
+                setProductSelections(bestSelections);
+              } else if (val === "unico") {
+                const supplierTotals = fornecedores.map((f: any) => {
+                  const total = products.reduce((sum: number, p: any) => {
+                    const value = getSupplierProductValue(f.id, p.product_id);
+                    return sum + (value > 0 ? value : Infinity);
+                  }, 0);
+                  const hasAll = !products.some((p: any) => getSupplierProductValue(f.id, p.product_id) === 0);
+                  return { id: f.id, total, hasAll };
+                }).filter(s => s.hasAll).sort((a, b) => a.total - b.total);
+
+                if (supplierTotals.length > 0) {
+                  const best = supplierTotals[0].id;
+                  const single: Record<string, string> = {};
+                  products.forEach((p: any) => { single[p.product_id] = best; });
+                  setProductSelections(single);
+                }
+              }
+            }}>
+              <TabsList className="bg-zinc-200 dark:bg-zinc-950 p-1 rounded-xl h-10 border border-zinc-300 dark:border-zinc-800">
+                <TabsTrigger value="melhores" className="rounded-lg px-3 text-xs font-bold data-[state=active]:bg-[#83E509] data-[state=active]:text-black transition-all">
+                  Melhores Preços
+                </TabsTrigger>
+                <TabsTrigger value="unico" className="rounded-lg px-3 text-xs font-bold data-[state=active]:bg-[#83E509] data-[state=active]:text-black transition-all">
+                  Forn. Único
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          {/* Lista de Seleção */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-2 p-1">
+              <ShoppingCart className="h-4 w-4 text-[#83E509]" />
+              <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500">Itens e Atribuições</h4>
+            </div>
+            <div className="space-y-3">
+              {products.map((product: any) => {
+                const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
+                const selectedSupplierId = productSelections[product.product_id];
+                const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
+                const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
+
+                return (
+                  <div
+                    key={product.product_id}
+                    className={cn(
+                      "flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl border transition-all duration-200 gap-4",
+                      isBest
+                        ? "bg-white dark:bg-zinc-900/40 border-[#83E509]/30"
+                        : "bg-white dark:bg-zinc-900/20 border-zinc-100 dark:border-zinc-800"
+                    )}
+                  >
+                    <div className="flex-1 min-w-0 pr-4">
+                      <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate">{safeStr(product.product_name)}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-black uppercase text-zinc-500 border-zinc-200 dark:border-zinc-800 bg-transparent">
+                          {safeStr(product.quantidade)} {safeStr(product.unidade)}
+                        </Badge>
+                        {isBest && (
+                          <div className="flex items-center gap-1 text-[10px] font-black text-[#83E509] uppercase tracking-tighter">
+                            <Trophy className="h-3 w-3" /> Benchmark
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <Select
+                        value={selectedSupplierId || ""}
+                        onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}
+                      >
+                        <SelectTrigger className={cn("w-full md:w-52 h-10 rounded-xl font-bold text-xs", designSystem.components.input.root)}>
+                          <SelectValue placeholder="Selecione Fornecedor" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-zinc-800">
+                          {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
+                            <SelectItem key={f.id} value={f.id} className="text-xs font-bold">{safeStr(f.nome)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <div className="text-right min-w-[120px] pr-2">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Vlr Escolhido</p>
+                        <p className={cn(
+                          "text-base font-black tracking-tight",
+                          isBest ? "text-[#83E509]" : "text-zinc-900 dark:text-zinc-100"
+                        )}>
+                          R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          <div>
-            <label className="text-xs font-medium text-gray-600 mb-1 block">Observações</label>
-            <div className="relative">
-              <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                value={observations}
-                onChange={(e) => setObservations(e.target.value)}
-                placeholder="Instruções..."
-                className="pl-10"
-              />
+
+          {/* Preview de Pedidos */}
+          {supplierGroups.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-2 p-1">
+                <Package className="h-4 w-4 text-[#83E509]" />
+                <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500">Visualização de Pedidos Gerados</h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {supplierGroups.map((group, idx) => (
+                  <div key={group.supplierId} className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all hover:border-[#83E509]/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="px-2 py-0.5 rounded bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 text-[9px] font-black uppercase tracking-widest">PEDIDO 0{idx + 1}</div>
+                      <span className="text-sm font-black text-[#83E509]">
+                        R$ {group.products.reduce((sum: number, p: any) => sum + p.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm truncate uppercase tracking-tight">{group.supplierName}</p>
+                    <p className="text-[10px] font-bold text-zinc-400 truncate opacity-70 mt-1">
+                      {group.products.map((p: any) => safeStr(p.product_name)).join(", ")}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Dados de Entrega */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 rounded-2xl bg-zinc-950 border border-zinc-800 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#83E509]/20 to-transparent" />
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1 block">Expectativa de Entrega *</label>
+              <div className="relative group">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-[#83E509] transition-colors" />
+                <Input
+                  type="date"
+                  value={deliveryDate}
+                  onChange={(e) => setDeliveryDate(e.target.value)}
+                  className={cn("pl-11 h-11 rounded-xl font-bold bg-zinc-900/50", designSystem.components.input.root)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1 block">Observações do Pedido</label>
+              <div className="relative group">
+                <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-[#83E509] transition-colors" />
+                <Input
+                  value={observations}
+                  onChange={(e) => setObservations(e.target.value)}
+                  placeholder="Ex: Entregar após as 14h..."
+                  className={cn("pl-11 h-11 rounded-xl font-bold bg-zinc-900/50", designSystem.components.input.root)}
+                />
+              </div>
             </div>
           </div>
+
+          {/* Botão de Ação */}
+          <Button
+            onClick={handleConvertToOrder}
+            disabled={!deliveryDate || Object.keys(productSelections).length === 0}
+            className="w-full h-14 rounded-2xl bg-[#83E509] hover:bg-[#83E509]/80 text-black font-black text-base shadow-xl shadow-[#83E509]/10 transition-all active:scale-[0.98] disabled:opacity-20 disabled:grayscale"
+          >
+            <ShoppingCart className="h-5 w-5 mr-3" />
+            {supplierGroups.length > 1 ? `FINALIZAR ${supplierGroups.length} PEDIDOS` : "GERAR PEDIDO AGORA"}
+          </Button>
         </div>
-
-        {/* Botão de Ação */}
-        <Button
-          onClick={handleConvertToOrder}
-          disabled={!deliveryDate || Object.keys(productSelections).length === 0}
-          className="w-full bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800"
-        >
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          {supplierGroups.length > 1 ? `Confirmar ${supplierGroups.length} Pedidos` : "Converter em Pedido"}
-        </Button>
-      </div>
-    </ScrollArea>
+      </ScrollArea>
+    </div>
   );
 }

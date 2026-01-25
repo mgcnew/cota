@@ -65,6 +65,8 @@ const TabSkeleton = ({ type }: { type: string }) => {
   );
 };
 
+import { designSystem } from "@/styles/design-system";
+
 export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange }: GerenciarCotacaoDialogProps) {
   const [activeTab, setActiveTab] = useState("resumo");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -472,85 +474,100 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   const modalContent = (
     <>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-900">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden bg-transparent">
+        {/* Header - Compacto e Responsivo */}
+        <div className="flex items-center justify-between py-3 px-5 border-b bg-white dark:bg-zinc-950 min-h-[64px]">
 
-          <div className="flex items-center gap-4 relative z-10">
-            {/* Título */}
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-teal-100">
-                <ClipboardList className="h-5 w-5 text-teal-600" />
+          <div className="flex items-center gap-4 relative z-10 flex-1 min-w-0">
+            {/* Título - Mais compacto */}
+            <div className="flex items-center gap-2.5 min-w-max">
+              <div className="p-1.5 rounded-lg bg-[#83E509]/10">
+                <ClipboardList className="h-4 w-4 text-[#83E509]" />
               </div>
-              <div>
-                {isMobile ? (
-                  <DrawerTitle className="text-lg font-bold">Gerenciar Cotação</DrawerTitle>
-                ) : (
-                  <DialogTitle className="text-lg font-bold">Gerenciar Cotação</DialogTitle>
-                )}
-                <span className="text-sm text-muted-foreground">#{safeStr(quote.id).substring(0, 8)}</span>
+              <div className="hidden sm:block">
+                <DialogTitle className="text-base font-black text-zinc-900 dark:text-zinc-50 tracking-tight leading-none mb-1">Gerenciar Cotação</DialogTitle>
+                <p className="text-[10px] font-bold text-zinc-500 leading-none">ID #{safeStr(quote.id).substring(0, 8)}</p>
               </div>
             </div>
 
-            {/* Tabs */}
-            {isMobile ? (
-              <Select value={activeTab} onValueChange={setActiveTab}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
-                    <SelectItem key={tab} value={tab}>
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </SelectItem>
+            {/* Tabs - Flexível */}
+            <div className="flex-1 min-w-0 max-w-fit overflow-x-auto no-scrollbar">
+              {isMobile ? (
+                <Select value={activeTab} onValueChange={setActiveTab}>
+                  <SelectTrigger className={cn("w-32 h-9 rounded-xl text-xs", designSystem.components.input.root)}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[
+                      { id: 'resumo', label: 'Resumo' },
+                      { id: 'valores', label: 'Valores' },
+                      { id: 'converter', label: 'Conversão' },
+                      { id: 'editar', label: 'Editar' }
+                    ].map((tab) => (
+                      <SelectItem key={tab.id} value={tab.id}>
+                        {tab.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <TabsList className={cn(designSystem.components.tabs.clean.list, "bg-transparent h-9 p-0 gap-1")}>
+                  {[
+                    { id: 'resumo', label: 'Resumo' },
+                    { id: 'valores', label: 'Valores' },
+                    { id: 'converter', label: 'Conversão' },
+                    { id: 'editar', label: 'Configurações' }
+                  ].map((tab) => (
+                    <TabsTrigger
+                      key={tab.id}
+                      value={tab.id}
+                      className={cn(
+                        designSystem.components.tabs.clean.trigger,
+                        "h-8 px-3 text-[11px] font-bold uppercase tracking-wider",
+                        "data-[state=active]:bg-transparent"
+                      )}
+                    >
+                      {tab.label}
+                      {activeTab === tab.id && (
+                        <div className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#83E509] shadow-[0_0_8px_#83E509] rounded-full" />
+                      )}
+                    </TabsTrigger>
                   ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <TabsList className="rounded-none border-b bg-transparent p-0">
-                {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
-                  <TabsTrigger
-                    key={tab}
-                    value={tab}
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent"
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            )}
+                </TabsList>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 ml-2">
             {!isMobile && (
-              <>
+              <div className="flex items-center gap-1 border-r border-zinc-100 dark:border-zinc-800 pr-2 mr-1">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setDeleteDialogOpen(true)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="text-zinc-400 hover:text-red-500 hover:bg-red-500/5 h-8 px-2.5 rounded-lg font-bold text-[10px] uppercase tracking-tighter transition-all"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-3.5 w-3.5 mr-1.5" />
                   Excluir
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleExportHtml}
-                  className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+                  className="text-zinc-400 hover:text-zinc-900 dark:hover:text-[#83E509] hover:bg-zinc-100 dark:hover:bg-[#83E509]/5 h-8 px-2.5 rounded-lg font-bold text-[10px] uppercase tracking-tighter transition-all"
                 >
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="h-3.5 w-3.5 mr-1.5" />
                   Exportar
                 </Button>
-              </>
+              </div>
             )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onOpenChange(false)}
-              className="h-8 w-8"
+              className="h-8 w-8 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4 text-zinc-400" />
               <span className="sr-only">Fechar</span>
             </Button>
           </div>
@@ -558,7 +575,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
         <div className="flex-1 overflow-hidden relative bg-white dark:bg-gray-950">
           <Suspense fallback={<TabSkeleton type={activeTab} />}>
-            <TabsContent value="resumo" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
+            <TabsContent value="resumo" className="h-full m-0 p-0 overflow-hidden">
               {activeTab === 'resumo' && (
                 <QuoteSummaryTab
                   stats={stats}
@@ -585,7 +602,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               )}
             </TabsContent>
 
-            <TabsContent value="converter" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
+            <TabsContent value="converter" className="h-full m-0 p-0 overflow-hidden">
               {activeTab === 'converter' && (
                 <QuoteConversionTab
                   products={products}
@@ -600,7 +617,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               )}
             </TabsContent>
 
-            <TabsContent value="editar" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
+            <TabsContent value="editar" className="h-full m-0 p-0 overflow-hidden">
               {activeTab === 'editar' && (
                 <QuoteEditTab
                   products={products}
@@ -629,12 +646,12 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
       {/* Footer */}
       {isMobile && (
-        <div className="flex items-center justify-end gap-2 p-4 border-t bg-white dark:bg-gray-900">
+        <div className="flex items-center justify-end gap-2 p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setDeleteDialogOpen(true)}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="text-red-500 hover:text-red-600 hover:bg-red-500/10 h-10 px-4 rounded-xl font-bold text-xs transition-all"
           >
             Excluir
           </Button>
@@ -642,7 +659,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             variant="ghost"
             size="sm"
             onClick={handleExportHtml}
-            className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+            className="text-zinc-500 hover:text-[#83E509] hover:bg-[#83E509]/10 h-10 px-4 rounded-xl font-bold text-xs transition-all"
           >
             Exportar
           </Button>
