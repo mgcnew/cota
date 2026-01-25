@@ -148,7 +148,7 @@ export function QuoteEditTab({
         <div className="space-y-2">
           <div className="flex items-center gap-2 px-1">
             <Package className="h-3 w-3 text-gray-400" />
-            <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Adicionar Produtos</span>
+            <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Adicionar Produtos</span>
           </div>
           <Card className="p-2 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 rounded-xl shadow-sm relative z-50">
             <div className="flex flex-col sm:flex-row gap-2">
@@ -193,11 +193,11 @@ export function QuoteEditTab({
                             <span className="font-bold tracking-tight truncate text-gray-900 dark:text-gray-100">{safeStr(p.name)}</span>
                             {p.brand_name && (
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{p.brand_name}</span>
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{p.brand_name}</span>
                                 {p.brand_rating > 0 && (
                                   <div className="flex items-center gap-0.5">
                                     <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
-                                    <span className="text-[9px] font-bold text-amber-600 dark:text-amber-500">{p.brand_rating}</span>
+                                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-500">{p.brand_rating}</span>
                                   </div>
                                 )}
                               </div>
@@ -208,7 +208,7 @@ export function QuoteEditTab({
                         {p.brand_score > 0 && (
                           <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full flex-shrink-0">
                             <Trophy className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400" />
-                            <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400">
+                            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
                               {p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}
                             </span>
                           </div>
@@ -261,7 +261,7 @@ export function QuoteEditTab({
                   <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate">{safeStr(p.product_name)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest bg-white dark:bg-gray-800 h-5 px-1.5 border-gray-200 dark:border-gray-700">
+                  <Badge variant="outline" className="text-[10px] font-semibold uppercase tracking-widest bg-white dark:bg-gray-800 h-5 px-1.5 border-gray-200 dark:border-gray-700">
                     {safeStr(p.quantidade)} {safeStr(p.unidade)}
                   </Badge>
                   <Button 
@@ -282,7 +282,7 @@ export function QuoteEditTab({
         <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-2 px-1">
             <Building2 className="h-3 w-3 text-gray-400" />
-            <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Adicionar Fornecedores</span>
+            <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Adicionar Fornecedores</span>
           </div>
           <Card className="p-2 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
             <div className="flex gap-2">

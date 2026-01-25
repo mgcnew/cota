@@ -38,6 +38,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
+import { designSystem } from "@/styles/design-system";
 
 interface MenuItem {
   title: string;
@@ -88,7 +89,6 @@ export function AppSidebar() {
   const { user, signOut } = useAuth();
   const { profile } = useUserProfile();
   const { theme } = useTheme();
-  const isDark = theme === "dark";
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -146,7 +146,6 @@ export function AppSidebar() {
     }
   }, [signOut, toast, navigate]);
 
-  // Fechar menu mobile ao navegar
   const handleMobileNavigation = useCallback(() => {
     setMobileMenuOpen(false);
   }, []);
@@ -159,12 +158,12 @@ export function AppSidebar() {
     expanded?: boolean;
     mobile?: boolean;
   }) => (
-    <div className="w-full h-full flex flex-col bg-card overflow-hidden">
+    <div className={cn("w-full h-full flex flex-col overflow-hidden", expanded ? "px-3 py-4" : "items-center py-4")}>
       {/* Header */}
       <div
         className={cn(
-          "flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700/50 transition-all duration-300",
-          expanded ? "gap-3" : "justify-center"
+          "flex items-center mb-6 transition-all duration-300",
+          expanded ? "px-2 gap-3" : "justify-center"
         )}
       >
         <UserAvatar
@@ -174,38 +173,39 @@ export function AppSidebar() {
           showStatus
           clickable
           onClick={() => setProfileDialogOpen(true)}
+          className="ring-2 ring-white/10 shadow-lg"
         />
         {expanded && (
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
+          <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
+            <p className="text-sm font-semibold text-foreground truncate">
               {profile?.full_name || user?.email?.split("@")[0] || "Usuário"}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Membro</p>
+            <p className="text-xs text-muted-foreground truncate">Membro</p>
           </div>
         )}
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 flex flex-col py-3 px-2 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 flex flex-col space-y-1 overflow-y-auto custom-scrollbar pr-1">
         {expanded ? (
           menuCategories.map((category, idx) => {
             const isCollapsed = collapsedCategories.has(category.title);
             return (
-              <div key={category.title} className={idx > 0 ? "mt-4" : ""}>
+              <div key={category.title} className={idx > 0 ? "mt-6" : ""}>
                 <button
                   onClick={() => toggleCategory(category.title)}
-                  className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-pink-600 dark:hover:text-pink-400"
+                  className="w-full flex items-center justify-between px-2 py-1.5 mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors group"
                 >
-                  <span>{category.title}</span>
+                  <span className="opacity-70 group-hover:opacity-100 transition-opacity">{category.title}</span>
                   {isCollapsed ? (
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-3 h-3 opacity-50 text-[#83E509]" />
                   ) : (
-                    <ChevronDown className="w-3.5 h-3.5" />
+                    <ChevronDown className="w-3 h-3 opacity-50" />
                   )}
                 </button>
 
                 {!isCollapsed && (
-                  <div className="space-y-1 mt-1 px-1">
+                  <div className="space-y-0.5">
                     {category.items.map((item) => (
                       <NavLink
                         key={item.title}
@@ -214,10 +214,10 @@ export function AppSidebar() {
                         onClick={() => collapseOtherCategories(category.title)}
                         className={({ isActive }) =>
                           cn(
-                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                            designSystem.layout.sidebar.item.base,
                             isActive
-                              ? "bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg shadow-pink-500/25"
-                              : "hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:translate-x-0.5"
+                              ? designSystem.layout.sidebar.item.active
+                              : designSystem.layout.sidebar.item.inactive
                           )
                         }
                       >
@@ -225,20 +225,13 @@ export function AppSidebar() {
                           <>
                             <item.icon
                               className={cn(
-                                "w-5 h-5 transition-colors flex-shrink-0",
+                                "w-4 h-4 transition-colors relative z-10",
                                 isActive
-                                  ? "text-white"
-                                  : "text-gray-500 dark:text-gray-300 group-hover:text-pink-600 dark:group-hover:text-pink-400"
+                                  ? designSystem.layout.sidebar.item.icon.active
+                                  : designSystem.layout.sidebar.item.icon.inactive
                               )}
                             />
-                            <span
-                              className={cn(
-                                "text-sm font-medium truncate transition-colors",
-                                isActive
-                                  ? "text-white"
-                                  : "text-gray-700 dark:text-gray-200 group-hover:text-pink-600 dark:group-hover:text-pink-400"
-                              )}
-                            >
+                            <span className="text-sm font-medium relative z-10">
                               {item.title}
                             </span>
                           </>
@@ -252,44 +245,34 @@ export function AppSidebar() {
           })
         ) : (
           <TooltipProvider delayDuration={0}>
-            <div className="flex flex-col gap-2 mt-2">
+            <div className="flex flex-col gap-2 mt-2 items-center w-full">
               {allMenuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = item.url === "/dashboard" 
+                const isActive = item.url === "/dashboard"
                   ? location.pathname === "/dashboard"
                   : location.pathname.startsWith(item.url);
-                
+
                 return (
                   <Tooltip key={item.title}>
                     <TooltipTrigger asChild>
                       <NavLink
                         to={item.url}
                         className={cn(
-                          "relative flex items-center justify-center h-10 w-10 mx-auto rounded-none transition-all duration-300",
-                          isActive 
-                            ? "text-orange-600 dark:text-orange-400" 
-                            : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg"
+                          "relative flex items-center justify-center w-10 h-10 mx-auto transition-all duration-300 group rounded-none",
+                          isActive
+                            ? "text-[#83E509] shadow-[inset_0_-2px_0_0_#83E509] bg-transparent"
+                            : "text-muted-foreground hover:text-foreground hover:bg-transparent"
                         )}
                       >
                         <Icon
-                          className="w-5 h-5"
-                          style={{
-                            color: 'currentColor'
-                          }}
-                        />
-                        {/* Underline indicator */}
-                        <span 
-                          className={cn(
-                            "absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] bg-orange-600 dark:bg-orange-400 transition-all duration-300",
-                            isActive ? "w-5 opacity-100" : "w-0 opacity-0"
-                          )} 
+                          className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive && "text-[#83E509]")}
                         />
                       </NavLink>
                     </TooltipTrigger>
                     <TooltipContent
                       side="right"
                       sideOffset={12}
-                      className="font-medium text-sm z-[60] bg-gray-900 text-white border-0 shadow-lg"
+                      className="font-medium text-xs"
                     >
                       {item.title}
                     </TooltipContent>
@@ -303,21 +286,21 @@ export function AppSidebar() {
 
       {/* Toggle Button */}
       {!mobile && (
-        <div className="px-2 py-2 border-t border-gray-200 dark:border-gray-700/50">
+        <div className={cn("pt-4 mt-2 border-t border-white/5", expanded ? "px-2" : "flex justify-center")}>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsSidebarExpanded(!expanded)}
             className={cn(
-              "w-full transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-pink-600 dark:hover:text-pink-400",
-              expanded ? "justify-between px-3" : "justify-center px-0"
+              "w-full transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-white/5",
+              expanded ? "justify-between px-3" : "h-10 w-10 p-0 justify-center rounded-xl"
             )}
           >
-            {expanded && <span className="text-xs font-medium">Recolher</span>}
+            {expanded && <span className="text-xs font-medium">Recolher Menu</span>}
             {expanded ? (
-              <PanelLeftClose className="w-4 h-4" />
+              <PanelLeftClose className="w-4 h-4 opacity-50" />
             ) : (
-              <PanelLeftOpen className="w-4 h-4" />
+              <PanelLeftOpen className="w-4 h-4 opacity-50" />
             )}
           </Button>
         </div>
@@ -328,95 +311,87 @@ export function AppSidebar() {
 
   return (
     <>
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar (Floating) */}
       <div
         className={cn(
-          "hidden md:flex fixed z-50 left-0.5 top-0.5 bottom-0.5 transition-all duration-300 ease-in-out",
+          "hidden md:flex fixed z-50 left-3 top-3 bottom-3 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
           isSidebarExpanded ? "w-64" : "w-20"
         )}
       >
-        <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg shadow-black/10 dark:shadow-black/30 border border-subtle bg-card">
+        <div className={designSystem.layout.sidebar.wrapper}>
           <SidebarContent expanded={isSidebarExpanded} />
         </div>
       </div>
 
-      {/* Mobile Sidebar - Otimizado para performance */}
+      {/* Mobile Sidebar */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden fixed top-2 left-2.5 z-50 h-10 w-10 rounded-lg bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 shadow-sm active:scale-95 transition-transform duration-100"
+            className="md:hidden fixed top-3 left-3 z-[60] h-10 w-10 rounded-xl bg-background/80 backdrop-blur-md border border-border shadow-sm active:scale-95 transition-all"
           >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="p-0 w-[280px] border-r border-subtle bg-card will-change-transform"
+          className={cn("p-0 w-[280px] border-r border-white/5", designSystem.layout.container.glass)}
         >
-          <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
-          <SheetDescription className="sr-only">
-            Menu principal da aplicação
-          </SheetDescription>
-          
-          {/* Mobile Menu Content - Simplificado para performance */}
           <div className="w-full h-full flex flex-col">
-            {/* Header */}
-            <div className="flex items-center gap-3 h-14 px-4 border-b border-gray-200 dark:border-gray-700/50 flex-shrink-0">
+            {/* Mobile Header */}
+            <div className="flex items-center gap-3 h-16 px-4 border-b border-white/5">
               <UserAvatar
                 user={user}
                 profile={profile}
                 size="sm"
-                showStatus
                 clickable
                 onClick={() => {
                   setProfileDialogOpen(true);
                   setMobileMenuOpen(false);
                 }}
               />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
-                  {profile?.full_name || user?.email?.split("@")[0] || "Usuário"}
-                </p>
+              <div className="flex items-center gap-2">
+                <Package className={cn("w-5 h-5", designSystem.colors.brand.primary)} />
+                <span className="font-bold text-white tracking-tight">Cota Aki</span>
               </div>
             </div>
 
-            {/* Menu Items - Lista direta sem animações pesadas */}
-            <nav className="flex-1 py-2 px-2 overflow-y-auto overscroll-contain">
+            {/* Mobile Menu Items */}
+            <nav className="flex-1 py-4 px-3 overflow-y-auto space-y-1">
               {allMenuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = item.url === "/dashboard" 
+                const isActive = item.url === "/dashboard"
                   ? location.pathname === "/dashboard"
                   : location.pathname.startsWith(item.url);
-                
+
                 return (
                   <NavLink
                     key={item.title}
                     to={item.url}
                     onClick={handleMobileNavigation}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-0.5",
+                      "flex items-center gap-3 px-3 py-3 rounded-xl transition-all active:scale-[0.98]",
                       isActive
-                        ? "bg-pink-500 text-white"
-                        : "text-gray-700 dark:text-gray-200 active:bg-gray-100 dark:active:bg-gray-700/50"
+                        ? designSystem.layout.sidebar.item.active
+                        : designSystem.layout.sidebar.item.inactive
                     )}
                   >
-                    <Icon className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-white" : "text-gray-500 dark:text-gray-400")} />
+                    <Icon className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-[#83E509]" : "opacity-70")} />
                     <span className="text-sm font-medium">{item.title}</span>
                   </NavLink>
                 );
               })}
             </nav>
 
-            {/* Footer Actions */}
-            <div className="px-2 py-2 border-t border-gray-200 dark:border-gray-700/50 flex-shrink-0">
+            {/* Mobile Footer */}
+            <div className="p-4 border-t border-white/5 space-y-2">
               <button
                 onClick={() => {
                   navigate('/dashboard/configuracoes');
                   setMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-700/50"
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
               >
                 <Settings className="w-5 h-5" />
                 <span className="text-sm font-medium">Configurações</span>
@@ -426,7 +401,7 @@ export function AppSidebar() {
                   handleLogout();
                   setMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-red-600 dark:text-red-400 active:bg-red-50 dark:active:bg-red-950/20"
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
                 <span className="text-sm font-medium">Sair</span>
@@ -440,3 +415,4 @@ export function AppSidebar() {
     </>
   );
 }
+

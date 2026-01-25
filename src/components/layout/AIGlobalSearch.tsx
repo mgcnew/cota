@@ -355,37 +355,39 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
   );
 }
 
-export function AIGlobalSearchTrigger({ onClick }: { onClick: () => void }) {
+export function AIGlobalSearchTrigger({ onClick, compact }: { onClick: () => void; compact?: boolean }) {
   return (
     <Button
       variant="outline"
       onClick={onClick}
       className={cn(
         "relative transition-all duration-300 active:scale-95 touch-manipulation group",
-        "w-full h-10 px-4 justify-start overflow-hidden",
-        "bg-white/40 dark:bg-gray-950/40 backdrop-blur-md",
-        "border border-violet-200/50 dark:border-violet-800/30 hover:border-violet-400/50 dark:hover:border-violet-500/50",
-        "shadow-[0_2px_10px_-3px_rgba(139,92,246,0.05)] hover:shadow-[0_4px_20px_-5px_rgba(139,92,246,0.15)]"
+        compact ? "h-9 px-3 w-auto min-w-[180px]" : "w-full h-10 px-4 justify-start",
+        "bg-white/5 dark:bg-white/5 backdrop-blur-md overflow-hidden",
+        "border border-[#83E509]/20 hover:border-[#83E509]/50",
+        "shadow-[0_2px_10px_-3px_rgba(131,229,9,0.05)] hover:shadow-[0_4px_20px_-5px_rgba(131,229,9,0.15)]"
       )}
     >
-      <div className="flex items-center w-full gap-3 relative z-10">
+      <div className="flex items-center w-full gap-2 relative z-10">
         <div className="relative">
-          <Sparkles className="h-4 w-4 shrink-0 text-violet-500 dark:text-violet-400 group-hover:scale-110 transition-transform duration-300" />
-          <div className="absolute inset-0 blur-sm bg-violet-400/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Sparkles className="h-4 w-4 shrink-0 text-[#83E509] group-hover:scale-110 transition-transform duration-300" />
+          <div className="absolute inset-0 blur-sm bg-[#83E509]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        <span className="text-gray-500 dark:text-gray-400 font-medium flex-1 text-left text-sm truncate group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+        <span className="text-muted-foreground font-medium flex-1 text-left text-sm truncate group-hover:text-foreground transition-colors">
           Assistente de IA
         </span>
-        <div className="hidden lg:flex items-center gap-1">
-          <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-violet-100 dark:border-violet-900/50 bg-violet-50/50 dark:bg-violet-950/50 font-mono text-[10px] font-medium text-violet-400 dark:text-violet-500">
-            ⌘
-          </kbd>
-          <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-violet-100 dark:border-violet-900/50 bg-violet-50/50 dark:bg-violet-950/50 font-mono text-[10px] font-medium text-violet-400 dark:text-violet-500">
-            K
-          </kbd>
-        </div>
+        {!compact && (
+          <div className="hidden lg:flex items-center gap-1">
+            <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-[#83E509]/20 bg-[#83E509]/5 font-mono text-[10px] font-medium text-[#83E509]">
+              ⌘
+            </kbd>
+            <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-[#83E509]/20 bg-[#83E509]/5 font-mono text-[10px] font-medium text-[#83E509]">
+              K
+            </kbd>
+          </div>
+        )}
       </div>
-      
+
       {/* Subtle shine effect on hover */}
       <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent" />
     </Button>

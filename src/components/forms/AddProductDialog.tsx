@@ -8,14 +8,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -37,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Package, Sparkles, Upload, Loader2, Trash2, X } from "lucide-react";
+import { Plus, Package, Upload, Loader2, Trash2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { useQueryClient } from '@tanstack/react-query';
@@ -47,6 +45,9 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { compressImageForUpload, needsCompression, getCompressionInfo } from "@/utils/imageCompression";
 import { BrandSelect } from "@/components/products/BrandSelect";
 import { CategorySelectForm } from "@/components/products/CategorySelectForm";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
+import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 
 const productSchema = z.object({
   name: z.string()
@@ -84,8 +85,6 @@ interface AddProductDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
-
 export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddProductDialogProps) {
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
@@ -104,7 +103,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
   const queryClient = useQueryClient();
   const subscriptionLimits = useSubscriptionLimits();
   const { isOwner } = useUserRole();
-  
+
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -167,7 +166,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
   const handleGenerateImage = async () => {
     const productName = form.getValues("name");
     const category = form.getValues("category");
-    
+
     if (!productName) {
       toast({
         title: "Nome obrigatório",
@@ -176,16 +175,16 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       });
       return;
     }
-    
+
     setIsGeneratingImage(true);
-    
+
     try {
       const { data, error } = await supabase.functions.invoke("generate-product-image", {
         body: { productName, category },
       });
-      
+
       if (error) throw error;
-      
+
       if (data.success) {
         setProductImage(data.imageUrl);
         toast({
@@ -208,77 +207,62 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    
+
     if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Arquivo inválido",
-        description: "Selecione uma imagem válida",
-        variant: "destructive",
-      });
+      toast({ title: "Arquivo inválido", description: "Selecione uma imagem válida", variant: "destructive" });
       return;
     }
-    
+
     // Allow larger files since we'll compress them (max 10MB input)
     if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "Arquivo muito grande",
-        description: "Tamanho máximo: 10MB",
-        variant: "destructive",
-      });
+      toast({ title: "Arquivo muito grande", description: "Tamanho máximo: 10MB", variant: "destructive" });
       return;
     }
-    
+
     setIsUploadingImage(true);
-    
+
     try {
       const { data: companyData } = await supabase
         .from("company_users")
         .select("company_id")
         .eq("user_id", user!.id)
         .single();
-      
+
       if (!companyData) throw new Error("Empresa não encontrada");
-      
+
       // Compress image if needed (> 500KB)
       let processedFile: File = file;
       if (needsCompression(file)) {
         const originalSize = file.size;
         processedFile = await compressImageForUpload(file);
         const info = getCompressionInfo(originalSize, processedFile.size);
-        
+
         toast({
           title: "Imagem comprimida",
           description: `${info.originalSizeKB}KB → ${info.compressedSizeKB}KB (${info.savedPercent}% menor)`,
         });
       }
-      
+
       const fileExt = processedFile.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const filePath = `${companyData.company_id}/${fileName}`;
-      
+
       const { error: uploadError } = await supabase.storage
         .from("product-images")
         .upload(filePath, processedFile);
-      
+
       if (uploadError) throw uploadError;
-      
+
       const { data } = supabase.storage
         .from("product-images")
         .getPublicUrl(filePath);
-      
+
       setProductImage(data.publicUrl);
-      
-      toast({
-        title: "✅ Upload concluído",
-        description: "Imagem do produto enviada com sucesso",
-      });
+
+      toast({ title: "✅ Upload concluído", description: "Imagem do produto enviada com sucesso" });
     } catch (error) {
       console.error("Erro no upload:", error);
-      toast({
-        title: "Erro no upload",
-        description: "Tente novamente",
-        variant: "destructive",
-      });
+      toast({ title: "Erro no upload", description: "Tente novamente", variant: "destructive" });
     } finally {
       setIsUploadingImage(false);
     }
@@ -287,7 +271,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
   const onSubmit = async (data: ProductFormData, keepOpen = false) => {
     // Determinar a categoria final
     const finalCategory = data.category === "nova" ? data.newCategory! : data.category;
-    
+
     if (data.category === "nova" && !data.newCategory?.trim()) {
       form.setError("newCategory", { message: "Nome da nova categoria é obrigatório" });
       return;
@@ -295,13 +279,9 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
     try {
       const { data: userData, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError || !userData.user) {
-        toast({
-          title: "Erro",
-          description: "Você precisa estar autenticado para adicionar produtos.",
-          variant: "destructive",
-        });
+        toast({ title: "Erro", description: "Você precisa estar autenticado para adicionar produtos.", variant: "destructive" });
         return;
       }
 
@@ -328,7 +308,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
       // Verificar limite antes de inserir (validação adicional no frontend)
       const ownerEmails = ['mgc.info.new@gmail.com'];
-      
+
       let userIsOwner = false;
       if (user.email && ownerEmails.includes(user.email.toLowerCase().trim())) {
         userIsOwner = true;
@@ -338,7 +318,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           try {
             const { data: isSuperAdmin, error: superAdminError } = await supabase
               .rpc('is_super_admin', { _user_id: user.id });
-            
+
             if (!superAdminError && isSuperAdmin) {
               userIsOwner = true;
             } else {
@@ -348,7 +328,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                 .eq("user_id", user.id)
                 .eq("company_id", companyData.company_id)
                 .maybeSingle();
-              
+
               if (!roleError && roleData?.role === 'owner') {
                 userIsOwner = true;
               }
@@ -358,7 +338,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           }
         }
       }
-      
+
       if (!userIsOwner && !subscriptionLimits.canAddProduct) {
         toast({
           title: "Limite atingido",
@@ -407,23 +387,23 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           const newCategories = [...prev, data.newCategory!].sort();
           return Array.from(new Set(newCategories));
         });
-        
+
         if (onCategoryAdded) {
           onCategoryAdded(data.newCategory);
         }
       }
-      
+
       toast({
         title: "Produto adicionado",
-        description: keepOpen 
-          ? `${data.name} foi adicionado! Adicione outro produto.` 
+        description: keepOpen
+          ? `${data.name} foi adicionado! Adicione outro produto.`
           : `${data.name} foi adicionado com sucesso.`,
       });
 
       onProductAdded(null);
       form.reset();
       setProductImage(null);
-      
+
       if (!keepOpen) {
         handleOpenChange(false);
       } else {
@@ -433,16 +413,16 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       }
     } catch (error: any) {
       console.error("Erro ao adicionar produto:", error);
-      
+
       let errorMessage = "Não foi possível adicionar o produto. Tente novamente.";
-      
+
       if (error?.details) errorMessage = error.details;
       else if (error?.message) errorMessage = error.message;
       else if (error?.hint) errorMessage = error.hint;
       else if (error?.error_description) errorMessage = error.error_description;
       else if (typeof error === 'string') errorMessage = error;
       else if (error?.error) errorMessage = error.error;
-      
+
       if (errorMessage.includes('duplicate') || errorMessage.includes('unique')) {
         errorMessage = "Já existe um produto com este nome e categoria.";
       } else if (errorMessage.includes('permission') || errorMessage.includes('policy') || errorMessage.includes('RLS')) {
@@ -450,7 +430,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       } else if (errorMessage.includes('company_id') || errorMessage.includes('company')) {
         errorMessage = "Erro ao identificar a empresa. Faça login novamente.";
       }
-      
+
       toast({
         title: "Erro ao adicionar produto",
         description: errorMessage,
@@ -480,32 +460,18 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     }, 300);
   };
 
-  // Shared Header Component
+  // Header Component
   const Header = (
-    <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
-      <div className="flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
-            <Package className="h-4 w-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            {isMobile ? (
-              <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
-                Novo Produto
-              </DrawerTitle>
-            ) : (
-              <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
-                Novo Produto
-              </DialogTitle>
-            )}
-          </div>
+    <div className={designSystem.components.modal.header}>
+      <div className="flex items-center gap-3">
+        <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
+          <Package className={cn("h-4 w-4", designSystem.colors.text.primary)} />
         </div>
-        
-        <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
-          className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
-          <X className="h-4 w-4" />
-        </Button>
+        <DialogTitle className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+          Novo Produto
+        </DialogTitle>
       </div>
+      {/* Botão de fechar removido - usando o nativo do DialogContent */}
     </div>
   );
 
@@ -513,267 +479,162 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     <>
       {Header}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden bg-gray-50 dark:bg-black">
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-4">
+        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className={cn("flex flex-col h-full overflow-hidden", designSystem.colors.surface.page)}>
+          <div className={cn(designSystem.components.modal.body, "flex-1 overflow-y-auto custom-scrollbar space-y-4 p-4")}>
             {/* Alerta de limite de produtos */}
-            <LimitAlert 
+            <LimitAlert
               resource="products"
               current={subscriptionLimits.currentProducts}
               max={subscriptionLimits.maxProducts}
             />
             {/* Seção: Informações Básicas */}
-            <div className="space-y-3">
-              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
-                Informações do Produto
+            <div className={designSystem.components.card.flat + " p-4"}>
+              <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider mb-4 flex items-center gap-2", designSystem.colors.text.muted)}>
+                Informações
               </h3>
-              
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Produto *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ex: Coxa com Sobrecoxa Congelada"
-                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="brand_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Marca (Opcional)</FormLabel>
-                    <FormControl>
-                      <BrandSelect 
-                        value={field.value} 
-                        onChange={field.onChange} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="unit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Unidade de Medida *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={designSystem.typography.size.sm}>Nome do Produto *</FormLabel>
                       <FormControl>
-                        <SelectTrigger className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 dark:text-white`}>
-                          <SelectValue placeholder="Selecione a unidade" />
-                        </SelectTrigger>
+                        <Input placeholder="Ex: Coxa com Sobrecoxa" className={designSystem.components.input.root} {...field} />
                       </FormControl>
-                      <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
-                        <SelectItem value="un">Unidade (un)</SelectItem>
-                        <SelectItem value="kg">Quilograma (kg)</SelectItem>
-                        <SelectItem value="g">Grama (g)</SelectItem>
-                        <SelectItem value="lt">Litro (lt)</SelectItem>
-                        <SelectItem value="ml">Mililitro (ml)</SelectItem>
-                        <SelectItem value="cx">Caixa (cx)</SelectItem>
-                        <SelectItem value="pc">Pacote (pc)</SelectItem>
-                        <SelectItem value="dz">Dúzia (dz)</SelectItem>
-                        <SelectItem value="m">Metro (m)</SelectItem>
-                        <SelectItem value="m2">Metro² (m²)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="barcode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Código de Barras (Opcional)</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input 
-                          {...field} 
-                          placeholder="EAN-13, EAN-8, UPC..."
-                          className={`${isMobile ? 'h-11 text-base pr-12' : 'h-9 text-sm pr-10'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
-                          maxLength={13}
-                          onFocus={handleInputFocus}
-                        />
-                        <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${isMobile ? 'right-4' : ''}`}>
-                          <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-gray-400`} />
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Seção de Foto do Produto */}
-            <div className="space-y-3">
-              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
-                Foto do Produto
-              </h3>
-              
-              <div className={`space-y-4 ${isMobile ? 'p-3' : 'p-4'} border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900`}>
-                <div className="flex items-center justify-between">
-                  <Label className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Imagem (Opcional)</Label>
-                  {productImage && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setProductImage(null)}
-                      className={`${isMobile ? 'h-8 text-xs' : 'h-7 text-xs'}`}
-                    >
-                      <Trash2 className={`${isMobile ? 'h-3.5 w-3.5' : 'h-3 w-3'} mr-1`} />
-                      Remover
-                    </Button>
+                      <FormMessage />
+                    </FormItem>
                   )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="unit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={designSystem.typography.size.sm}>Unidade *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className={designSystem.components.input.root}>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="un">Unidade (un)</SelectItem>
+                            <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                            <SelectItem value="cx">Caixa (cx)</SelectItem>
+                            <SelectItem value="pc">Pacote (pc)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={designSystem.typography.size.sm}>Categoria *</FormLabel>
+                        <FormControl>
+                          <CategorySelectForm
+                            value={field.value}
+                            onChange={field.onChange}
+                            categories={categories}
+                            isLoading={loadingCategories}
+                            onCategoryAdded={(newCat) => {
+                              setCategories(prev => {
+                                const newCategories = [...prev, newCat].sort();
+                                return Array.from(new Set(newCategories));
+                              });
+                              if (onCategoryAdded) onCategoryAdded(newCat);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-                
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="brand_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={designSystem.typography.size.sm}>Marca (Opcional)</FormLabel>
+                        <FormControl>
+                          <BrandSelect value={field.value} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="barcode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={designSystem.typography.size.sm}>Cód. Barras</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="EAN-13, EAN-8..." className={designSystem.components.input.root} maxLength={13} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Upload de Imagem Simplificado */}
+            <div className={designSystem.components.card.flat + " p-4"}>
+              <div className="flex items-center justify-between mb-3">
+                <Label className={designSystem.typography.size.sm}>Foto do Produto</Label>
                 {productImage && (
-                  <div className={`relative w-full ${isMobile ? 'h-40' : 'h-48'} bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700`}>
-                    <img 
-                      src={productImage} 
-                      alt="Preview do produto"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setProductImage(null)} className={cn(designSystem.components.button.ghost, "h-6 px-2 text-xs")}>
+                    <Trash2 className="h-3 w-3 mr-1" /> Remover
+                  </Button>
                 )}
-                
-                <div className="flex gap-2">
-                  <label className="flex-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={`w-full ${isMobile ? 'h-11 text-base' : 'h-9 text-sm'}`}
-                      disabled={isUploadingImage}
-                      asChild
-                    >
-                      <div>
-                        {isUploadingImage ? (
-                          <>
-                            <Loader2 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2 animate-spin`} />
-                            Enviando...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
-                            Fazer Upload da Imagem
-                          </>
-                        )}
-                      </div>
-                    </Button>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                  </label>
-                </div>
-                
-                <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-gray-500 dark:text-gray-400 text-center`}>
-                  Formatos aceitos: JPG, PNG, WEBP (máx. 5MB)
-                </p>
               </div>
-            </div>
 
-            {/* Seção: Categorização */}
-            <div className="space-y-3">
-              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
-                Categorização
-              </h3>
-
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-semibold text-gray-600 dark:text-gray-400`}>Categoria do Produto *</FormLabel>
-                    <FormControl>
-                      <CategorySelectForm 
-                        value={field.value}
-                        onChange={field.onChange}
-                        categories={categories}
-                        isLoading={loadingCategories}
-                        onCategoryAdded={(newCat) => {
-                          setCategories(prev => {
-                            const newCategories = [...prev, newCat].sort();
-                            return Array.from(new Set(newCategories));
-                          });
-                          if (onCategoryAdded) onCategoryAdded(newCat);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Dica de preenchimento - ocultar no mobile para economizar espaço */}
-            {!isMobile && (
-              <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-lg p-3">
-                <div className="flex items-start gap-2">
-                  <div className="text-lg">💡</div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-orange-900 dark:text-orange-300 text-xs mb-1.5">Dicas Rápidas</h4>
-                    <ul className="text-xs text-orange-800 dark:text-orange-400 space-y-0.5">
-                      <li>• Use nomes descritivos</li>
-                      <li>• Especifique peso/quantidade</li>
-                      <li>• Categorias organizam cotações</li>
-                    </ul>
+              {productImage ? (
+                <div className="relative w-full h-32 bg-white rounded-lg overflow-hidden border border-zinc-200 flex items-center justify-center">
+                  <img src={productImage} alt="Preview" className="h-full object-contain" />
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-200 rounded-lg cursor-pointer hover:bg-zinc-50 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-8 h-8 text-zinc-400 mb-2" />
+                    <p className="text-xs text-zinc-500">Clique para selecionar (max 5MB)</p>
                   </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Footer com botões */}
-          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900`}>
-            <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2 justify-end'}`}>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleOpenChange(false)}
-                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-4'} rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white`}
-              >
-                Cancelar
-              </Button>
-              <Button 
-                type="button"
-                onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
-                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-orange-600 hover:bg-orange-700 text-white rounded-lg shadow-sm transition-colors duration-200`}
-              >
-                <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
-                Adicionar
-              </Button>
-              {!isMobile && (
-                <Button 
-                  type="button"
-                  onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
-                  variant="outline"
-                  className="h-9 rounded-lg border-orange-500 dark:border-orange-400 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-sm px-4"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Criar Mais
-                </Button>
+                  <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                </label>
               )}
             </div>
+          </div>
+
+          {/* Footer */}
+          <div className={cn(designSystem.components.modal.footer, "py-3")}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              className={designSystem.components.button.secondary}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
+              className={designSystem.components.button.primary}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar
+            </Button>
           </div>
         </form>
       </Form>
@@ -783,19 +644,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        {trigger && (
-          <DrawerTrigger asChild>
-            {trigger}
-          </DrawerTrigger>
-        )}
-        <DrawerContent 
-          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 transition-all duration-200"
-          style={{ 
-            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
-          }}
-        >
+        {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
+        <DrawerContent className={cn(designSystem.components.modal.content, "flex flex-col p-0 gap-0 overflow-hidden h-[90vh]")}>
           {content}
         </DrawerContent>
       </Drawer>
@@ -803,13 +653,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleSetOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && (
         <DialogTrigger asChild>
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden">
+      <DialogContent className={designSystem.components.modal.content}>
         {content}
       </DialogContent>
     </Dialog>

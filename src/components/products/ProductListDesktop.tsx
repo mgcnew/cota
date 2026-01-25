@@ -7,6 +7,8 @@ import { TableActionGroup } from "@/components/ui/table-action-group";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import { capitalize } from "@/lib/text-utils";
 import type { Product } from "@/hooks/useProducts";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 
 interface ProductListDesktopProps {
   products: Product[];
@@ -30,48 +32,48 @@ const getTrendIcon = (trend: "up" | "down" | "stable") => {
 
 export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory }: ProductListDesktopProps) => {
   return (
-    <div className="hidden md:block overflow-x-auto w-full">
-      <Table className="w-full">
+    <div className="hidden md:block overflow-x-auto w-full custom-scrollbar">
+      <Table className="w-full border-separate border-spacing-y-2">
         <TableHeader>
-          <TableRow>
-            <TableCell colSpan={9} className="px-1 pb-3 pt-0 border-none">
-              <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
+          <TableRow className="hover:bg-transparent border-none">
+            <TableCell colSpan={9} className="px-1 py-0 border-none">
+              <div className={cn("flex items-center rounded-xl shadow-sm px-4 py-4", designSystem.components.card.flat)}>
                 <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                     <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   </div>
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</span>
+                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Produto</span>
                 </div>
                 <div className="w-[12%] px-2 flex justify-center items-center gap-2">
                   <Tags className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Categoria</span>
+                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Categoria</span>
                 </div>
                 <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
                   <Award className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Marca</span>
+                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Marca</span>
                 </div>
                 <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-2">
                   <Barcode className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Código</span>
+                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Código</span>
                 </div>
                 <div className="w-[11%] px-2 flex justify-center items-center gap-2">
                   <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
+                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Status</span>
                 </div>
                 <div className="w-[10%] px-2 flex justify-center items-center gap-2">
                   <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Preço</span>
+                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Preço</span>
                 </div>
                 <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
                   <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
+                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Fornecedor</span>
                 </div>
                 <div className="w-[8%] px-2 flex justify-center items-center gap-2">
                   <ClipboardList className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Cot.</span>
+                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Cot.</span>
                 </div>
                 <div className="w-[10%] flex justify-end items-center gap-2 px-2">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
+                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Ações</span>
                 </div>
               </div>
             </TableCell>
@@ -79,30 +81,34 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
         </TableHeader>
         <TableBody>
           {products.map((product) => (
-            <TableRow key={product.id} className="group border-none">
-              <TableCell colSpan={9} className="px-1 py-1.5">
-                <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-smooth hover:scale-[1.005] hover:shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800/70">
+            <TableRow key={product.id} className="group border-none hover:bg-transparent">
+              <TableCell colSpan={9} className="px-1 py-0 border-none">
+                <div className={cn(
+                  "flex items-center px-4 py-3 rounded-xl border transition-all duration-200 hover:scale-[1.005] hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 cursor-default",
+                  designSystem.colors.surface.card,
+                  designSystem.colors.border.subtle
+                )}>
                   <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-200 dark:border-gray-600/30">
+                    <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-200 dark:border-gray-700/50">
                       {product.image_url ? (
-                        <LazyImage 
-                          src={product.image_url} 
-                          alt={product.name} 
-                          className="w-9 h-9 rounded-xl object-cover"
+                        <LazyImage
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
                           showSkeleton={true}
-                          fallback={<Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />}
+                          fallback={<Package className="h-5 w-5 text-gray-400 dark:text-gray-500" />}
                         />
                       ) : (
-                        <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <Package className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{capitalize(product.name)}</div>
+                      <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{capitalize(product.name)}</div>
                     </div>
                   </div>
 
                   <div className="w-[12%] px-2 flex justify-center items-center">
-                    <Badge variant="secondary" className="bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 border-0 font-medium">
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-0 font-medium px-2.5 py-0.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                       {capitalize(product.category)}
                     </Badge>
                   </div>
@@ -114,9 +120,9 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                     {product.brand_rating ? (
                       <div className="flex items-center gap-0.5">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`h-2.5 w-2.5 ${i < (product.brand_rating || 0) ? "text-amber-400 fill-amber-400" : "text-gray-300 dark:text-gray-600"}`} 
+                          <Star
+                            key={i}
+                            className={`h-2.5 w-2.5 ${i < (product.brand_rating || 0) ? "text-amber-400 fill-amber-400" : "text-gray-300 dark:text-gray-700"}`}
                           />
                         ))}
                       </div>
@@ -124,7 +130,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                   </div>
 
                   <div className="hidden xl:flex w-[10%] px-2 justify-center items-center">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-mono bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
                       {product.barcode || "—"}
                     </span>
                   </div>
@@ -133,19 +139,21 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                     <StatusBadge status={getProductStatus(product)} />
                   </div>
 
-                  <div className="w-[10%] px-2 flex justify-center items-center gap-1.5">
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">{product.lastOrderPrice}</span>
+                  <div className="w-[10%] px-2 flex justify-center items-center gap-1.5 bg-gray-50/50 dark:bg-gray-800/20 py-1 rounded-lg mx-1">
+                    <span className="font-bold text-gray-900 dark:text-white text-sm">{product.lastOrderPrice}</span>
                     {getTrendIcon(product.trend)}
                   </div>
 
                   <div className="hidden lg:flex w-[12%] px-2 justify-center items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400 truncate">{capitalize(product.bestSupplier || "—")}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-[120px]" title={capitalize(product.bestSupplier || "")}>
+                      {capitalize(product.bestSupplier || "—")}
+                    </span>
                   </div>
 
                   <div className="w-[8%] px-2 flex justify-center items-center gap-1.5">
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                      <ClipboardList className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                      <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{product.quotesCount || 0}</span>
+                    <div className="flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-100 dark:border-blue-900/50">
+                      <ClipboardList className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                      <span className="font-bold text-blue-700 dark:text-blue-300 text-xs">{product.quotesCount || 0}</span>
                     </div>
                   </div>
 

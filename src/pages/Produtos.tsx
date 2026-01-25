@@ -25,6 +25,8 @@ import { BrandManagementDialog } from "@/components/products/BrandManagementDial
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
 import { ProductListDesktop } from "@/components/products/ProductListDesktop";
 import { useProductStats } from "@/hooks/useProductStats";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 
 // Lazy load dialogs for better initial load performance
 const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
@@ -34,8 +36,8 @@ const ImportProductsDialog = lazy(() => import("@/components/forms/ImportProduct
 
 // Dialog loading fallback
 const DialogLoader = () => (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <Loader2 className="h-8 w-8 animate-spin text-white" />
+  <div className={cn(designSystem.components.modal.overlay, "flex items-center justify-center")}>
+    <Loader2 className={cn("h-8 w-8 animate-spin", designSystem.colors.text.primary)} />
   </div>
 );
 
@@ -174,7 +176,7 @@ function Produtos() {
   if (loading || productsLoading) {
     return (
       <PageWrapper>
-        <div className="page-container">
+        <div className={designSystem.layout.container.page}>
           <ProductsSkeleton />
         </div>
       </PageWrapper>
@@ -185,13 +187,15 @@ function Produtos() {
     <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        <div className="page-container">
-          {/* Page Title */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg transition-smooth hover:shadow-xl hover:scale-105">
-              <Package className="h-6 w-6 text-white" />
+        <div className={designSystem.layout.container.page}>
+          {/* Header & Title */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className={cn("p-2.5 rounded-xl border transition-all", designSystem.components.card.root)}>
+              <Package className="h-6 w-6 text-[#83E509]" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Produtos</h1>
+            <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+              Produtos
+            </h1>
           </div>
 
           {/* Métricas essenciais */}
@@ -201,91 +205,93 @@ function Produtos() {
               value={stats.totalProducts}
               icon={Package}
               variant="warning"
-              className="transition-smooth hover:scale-[1.02]"
+              className="hover:scale-[1.02] transition-transform"
             />
             <MetricCard
               title="Categorias"
               value={stats.totalCategories}
               icon={Tags}
               variant="info"
-              className="transition-smooth hover:scale-[1.02]"
+              className="hover:scale-[1.02] transition-transform"
             />
             <MetricCard
               title="Cotações"
               value={stats.activeQuotes}
               icon={ClipboardList}
               variant="success"
-              className="transition-smooth hover:scale-[1.02]"
+              className="hover:scale-[1.02] transition-transform"
             />
             <MetricCard
               title="Valor Médio"
               value={stats.averageValue}
               icon={DollarSign}
               variant="default"
-              className="transition-smooth hover:scale-[1.02]"
+              className="hover:scale-[1.02] transition-transform"
             />
           </ResponsiveGrid>
 
           {/* Filters & Actions */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-4">
-            <div className="flex-1 sm:flex-shrink-0">
-              <ExpandableSearch
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Buscar produtos..."
-                accentColor="orange"
-                expandedWidth="w-full sm:w-64"
-              />
-            </div>
-            <div className="flex-1 sm:flex-initial sm:w-[180px]">
-              <CategorySelect
-                categories={safeCategories}
-                products={safeProducts}
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-              />
-            </div>
-            <div className="flex items-center gap-2 ml-auto">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setBrandDialogOpen(true)}
-                className="h-10 hidden sm:flex border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-smooth"
-              >
-                <Award className="h-4 w-4 mr-2 text-orange-500" /> Marcas
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleExportProducts}
-                className="h-10 hidden sm:flex transition-smooth"
-              >
-                <Download className="h-4 w-4 mr-2" /> Exportar
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="h-11 sm:h-10 min-w-[44px] px-3 sm:px-4 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm touch-target">
-                    <Plus className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Adicionar</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[180px]">
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
-                    <Plus className="h-4 w-4 mr-2" /> Novo Produto
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                    <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setBrandDialogOpen(true); }} className="min-h-[44px] sm:hidden">
-                    <Award className="h-4 w-4 mr-2 text-orange-500" /> Marcas
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+          <div className={designSystem.layout.container.section}>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <div className="flex-1 sm:flex-shrink-0">
+                <ExpandableSearch
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Buscar produtos..."
+                  accentColor="gray" // Neutral accent matching Design System
+                  expandedWidth="w-full sm:w-64"
+                />
+              </div>
+              <div className="flex-1 sm:flex-initial sm:w-[180px]">
+                <CategorySelect
+                  categories={safeCategories}
+                  products={safeProducts}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={setSelectedCategory}
+                />
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBrandDialogOpen(true)}
+                  className={cn(designSystem.components.button.secondary, "h-10 hidden sm:flex")}
+                >
+                  <Award className="h-4 w-4 mr-2" /> Marcas
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportProducts}
+                  className={cn(designSystem.components.button.secondary, "h-10 hidden sm:flex")}
+                >
+                  <Download className="h-4 w-4 mr-2" /> Exportar
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className={cn(designSystem.components.button.primary, "h-11 sm:h-10 min-w-[44px] px-3 sm:px-4 text-sm touch-target")}>
+                      <Plus className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Adicionar</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[180px]">
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
+                      <Plus className="h-4 w-4 mr-2" /> Novo Produto
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                      <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setBrandDialogOpen(true); }} className="min-h-[44px] sm:hidden">
+                      <Award className="h-4 w-4 mr-2 text-zinc-500" /> Marcas
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
 
-          <Card className="border-0 bg-transparent">
+          <Card className={cn(designSystem.components.card.root, "bg-transparent border-0 shadow-none")}>
             <CardContent className="p-0">
               {paginatedData.items.length === 0 && !productsLoading ? (
                 <EmptyState
@@ -299,8 +305,8 @@ function Produtos() {
                 />
               ) : (
                 <>
-                  {/* Mobile Cards View - Paginated for better UX */}
-                  <div className="md:hidden px-2 py-3 space-y-2">
+                  {/* Mobile Cards View */}
+                  <div className="md:hidden space-y-2">
                     {paginatedData.items.map((product) => (
                       <MobileProductCard
                         key={product.id}
@@ -313,17 +319,19 @@ function Produtos() {
                   </div>
 
                   {/* Desktop Table View */}
-                  <ProductListDesktop 
-                    products={paginatedData.items} 
-                    onEdit={handleEditProduct}
-                    onDelete={handleDeleteProduct}
-                    onHistory={handleHistoryProduct}
-                  />
+                  <div className="hidden md:block">
+                    <ProductListDesktop
+                      products={paginatedData.items}
+                      onEdit={handleEditProduct}
+                      onDelete={handleDeleteProduct}
+                      onHistory={handleHistoryProduct}
+                    />
+                  </div>
 
                   {/* Pagination */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-600 dark:text-gray-400">
-                      <span className="text-xs order-2 sm:order-1">
+                  <div className={cn("border-t mt-4 pt-4 px-2", designSystem.colors.border.subtle)}>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+                      <span className={cn(designSystem.typography.size.xs, designSystem.colors.text.secondary, "order-2 sm:order-1")}>
                         {paginatedData.items.length > 0
                           ? `${((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}-${Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}`
                           : '0'
@@ -379,15 +387,15 @@ function Produtos() {
                 onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
                 onProductUpdated={(updatedProduct) => {
                   if (typeof updateProduct === 'function') {
-                    updateProduct({ 
-                      productId: updatedProduct.id, 
-                      data: { 
-                        name: updatedProduct.name, 
-                        category: updatedProduct.category, 
-                        unit: updatedProduct.unit, 
+                    updateProduct({
+                      productId: updatedProduct.id,
+                      data: {
+                        name: updatedProduct.name,
+                        category: updatedProduct.category,
+                        unit: updatedProduct.unit,
                         barcode: updatedProduct.barcode,
                         brand_id: updatedProduct.brand_id
-                      } 
+                      }
                     });
                   }
                   setEditingProduct(null);

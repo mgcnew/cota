@@ -6,14 +6,14 @@ import { z } from "zod";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
   DrawerTitle,
+  DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -34,13 +34,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Upload, Loader2, X } from "lucide-react";
+import { Package, Upload, Loader2, X, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import { compressImageForUpload, needsCompression, getCompressionInfo } from "@/utils/imageCompression";
 import { BrandSelect } from "@/components/products/BrandSelect";
 import { CategorySelectForm } from "@/components/products/CategorySelectForm";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 const productSchema = z.object({
   name: z.string()
@@ -87,17 +90,17 @@ interface EditProductDialogProps {
   onProductUpdated: (product: Product) => void;
   onCategoryAdded?: (category: string) => void;
   categories: string[];
-  productId?: string | null; // Para lazy loading no mobile
+  productId?: string | null;
 }
 
-function EditProductDialogInternal({ 
-  product, 
-  open, 
-  onOpenChange, 
-  onProductUpdated, 
+function EditProductDialogInternal({
+  product,
+  open,
+  onOpenChange,
+  onProductUpdated,
   onCategoryAdded,
   categories,
-  productId 
+  productId
 }: EditProductDialogProps) {
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
@@ -105,10 +108,9 @@ function EditProductDialogInternal({
   const [newImageUrl, setNewImageUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const { toast } = useToast();
-  
-  // Usar product prop diretamente (removida lógica de lazy loading mobile)
+
   const currentProduct: Product | null = product;
-  
+
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -121,9 +123,6 @@ function EditProductDialogInternal({
     },
   });
 
-  const availableCategories = categories.filter(cat => cat !== "all");
-
-  // Atualizar form quando currentProduct mudar
   useEffect(() => {
     if (currentProduct && open) {
       form.reset({
@@ -142,97 +141,60 @@ function EditProductDialogInternal({
     }
   }, [currentProduct, open, form]);
 
-  // Cleanup quando o modal fecha
   useEffect(() => {
     if (!open) {
-      // Limpar estados quando o modal fecha
       setImageFile(null);
-      // Não resetar newImageUrl aqui para manter a imagem caso o usuário reabra
     }
   }, [open]);
-  
-  // Não renderizar nada se não estiver aberto
+
   if (!open) return null;
-  
-  // Verificar se está carregando (removida lógica de lazy loading mobile)
+
   const isLoading = false;
-  
-  // Se não tiver produto e não estiver carregando, não renderizar
-  // (Isso evita renderizar o modal vazio)
+
   if (!currentProduct && !isLoading) return null;
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !currentProduct) return;
 
-    // Validar tipo de arquivo
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Arquivo inválido",
-        description: "Por favor, selecione uma imagem.",
-        variant: "destructive",
-      });
+      toast({ title: "Arquivo inválido", description: "Selecione uma imagem válida.", variant: "destructive" });
       return;
     }
 
-    // Allow larger files since we'll compress them (max 10MB input)
     if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "Arquivo muito grande",
-        description: "A imagem deve ter no máximo 10MB.",
-        variant: "destructive",
-      });
+      toast({ title: "Arquivo muito grande", description: "Máximo 10MB.", variant: "destructive" });
       return;
     }
 
     setIsUploadingImage(true);
     try {
-      // Compress image if needed (> 500KB)
       let processedFile: File = file;
       if (needsCompression(file)) {
-        const originalSize = file.size;
         processedFile = await compressImageForUpload(file);
-        const info = getCompressionInfo(originalSize, processedFile.size);
-        
-        toast({
-          title: "Imagem comprimida",
-          description: `${info.originalSizeKB}KB → ${info.compressedSizeKB}KB (${info.savedPercent}% menor)`,
-        });
       }
 
-      // Upload para o Supabase Storage
       const fileExt = processedFile.name.split('.').pop();
       const fileName = `${currentProduct.id}-${Date.now()}.${fileExt}`;
       const filePath = `product-images/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('products')
-        .upload(filePath, processedFile, {
-          cacheControl: '3600',
-          upsert: false
-        });
+        .upload(filePath, processedFile, { cacheControl: '3600', upsert: false });
 
       if (uploadError) throw uploadError;
 
-      // Obter URL pública
       const { data: { publicUrl } } = supabase.storage
         .from('products')
         .getPublicUrl(filePath);
 
       setNewImageUrl(publicUrl);
       setImageFile(processedFile);
-      
-      toast({
-        title: "Imagem carregada!",
-        description: "A nova imagem foi enviada com sucesso.",
-      });
+
+      toast({ title: "Imagem carregada!", description: "Imagem enviada com sucesso." });
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
-      toast({
-        title: "Erro ao enviar imagem",
-        description: "Não foi possível fazer upload da imagem. Tente novamente.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro", description: "Falha no upload.", variant: "destructive" });
     } finally {
       setIsUploadingImage(false);
     }
@@ -246,9 +208,8 @@ function EditProductDialogInternal({
   const onSubmit = (data: ProductFormData) => {
     if (!currentProduct) return;
 
-    // Determinar a categoria final
     const finalCategory = data.category === "nova" ? data.newCategory! : data.category;
-    
+
     if (data.category === "nova" && !data.newCategory?.trim()) {
       form.setError("newCategory", { message: "Nome da nova categoria é obrigatório" });
       return;
@@ -265,28 +226,16 @@ function EditProductDialogInternal({
       image_url: newImageUrl || currentProduct.image_url,
     };
 
-    // Chamar callback de atualização primeiro
     onProductUpdated(updatedProduct);
-    
-    // Adicionar nova categoria à lista se necessário
+
     if (data.category === "nova" && data.newCategory && onCategoryAdded) {
       onCategoryAdded(data.newCategory);
     }
 
-    // Mostrar toast
-    toast({
-      title: "Produto atualizado",
-      description: `${data.name} foi atualizado com sucesso.`,
-    });
-
-    // Fechar modal de forma síncrona após pequeno delay para garantir que o toast apareça
-    // Usar setTimeout com delay mínimo para garantir que o estado seja atualizado
-    setTimeout(() => {
-      onOpenChange(false);
-    }, 50);
+    toast({ title: "Produto atualizado", description: `${data.name} atualizado.` });
+    setTimeout(() => onOpenChange(false), 50);
   };
 
-  // Scroll into view helper para inputs
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!isMobile) return;
     setTimeout(() => {
@@ -294,206 +243,178 @@ function EditProductDialogInternal({
     }, 300);
   };
 
-  // Conteúdo do formulário (compartilhado entre mobile e desktop)
+  // Header Component
+  const Header = (
+    <div className={designSystem.components.modal.header}>
+      <div className="flex items-center gap-3">
+        <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
+          <Package className={cn("h-4 w-4", designSystem.colors.text.primary)} />
+        </div>
+        <DialogTitle className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+          {isLoading ? 'Carregando...' : 'Editar Produto'}
+        </DialogTitle>
+      </div>
+
+      <Button type="button" variant="ghost" size="icon" onClick={() => onOpenChange(false)}
+        className={cn(designSystem.components.button.ghost, "h-8 w-8")}>
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+
   const formContent = (
     <>
-      <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 bg-white dark:bg-gray-950">
-        {/* Product Image Preview */}
-        {(currentProduct?.image_url || newImageUrl) && (
-            <div className="flex flex-col items-center gap-3 pb-2">
-              <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-200 dark:border-orange-800 shadow-sm relative group bg-gray-50 dark:bg-gray-900">
+      <div className={cn("flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4", designSystem.colors.surface.page)}>
+        {/* Imagem */}
+        <div className={cn(designSystem.components.card.flat, "p-4")}>
+          <div className="flex items-center justify-between mb-3">
+            <Label className={designSystem.typography.size.sm}>Foto do Produto</Label>
+            {(newImageUrl || currentProduct?.image_url) && (
+              <Button type="button" variant="ghost" size="sm" onClick={handleRemoveNewImage} className={cn(designSystem.components.button.ghost, "h-6 px-2 text-xs")}>
+                <Trash2 className="h-3 w-3 mr-1" /> Remover
+              </Button>
+            )}
+          </div>
+
+          {(newImageUrl || currentProduct?.image_url) ? (
+            <div className="relative w-full h-32 bg-white rounded-lg overflow-hidden border border-zinc-200 flex items-center justify-center">
+              {isUploadingImage ? (
+                <div className="flex items-center justify-center w-full h-full bg-zinc-50">
+                  <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+                </div>
+              ) : (
+                <LazyImage
+                  src={newImageUrl || currentProduct?.image_url}
+                  alt={currentProduct?.name || "Produto"}
+                  className="h-full object-contain"
+                  containerClassName="w-full h-full flex items-center justify-center"
+                />
+              )}
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-200 rounded-lg cursor-pointer hover:bg-zinc-50 transition-colors">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 {isUploadingImage ? (
-                  <div className="w-full h-full bg-orange-50 dark:bg-orange-900/10 flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 text-orange-600 animate-spin" />
-                  </div>
+                  <Loader2 className="w-8 h-8 text-zinc-400 animate-spin mb-2" />
                 ) : (
-                  <>
-                    <LazyImage 
-                      src={newImageUrl || currentProduct.image_url} 
-                      alt={currentProduct.name}
-                      className="w-full h-full object-cover"
-                      containerClassName="w-full h-full"
-                      showSkeleton={true}
-                      enableBlurUp={true}
-                    />
-                    {newImageUrl && (
-                      <button
-                        type="button"
-                        onClick={handleRemoveNewImage}
-                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    )}
-                  </>
+                  <Upload className="w-8 h-8 text-zinc-400 mb-2" />
                 )}
+                <p className="text-xs text-zinc-500">Clique para selecionar</p>
               </div>
-              <div className="flex gap-2">
-                <label htmlFor="image-upload">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={isUploadingImage}
-                    className="text-xs border-orange-300 hover:bg-orange-50 dark:border-orange-700 dark:hover:bg-orange-900/30 cursor-pointer"
-                    asChild
-                  >
-                    <span>
-                      {isUploadingImage ? (
-                        <>
-                          <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-                          Enviando...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="h-3 w-3 mr-1.5" />
-                          Trocar Imagem
-                        </>
-                      )}
-                    </span>
-                  </Button>
-                </label>
-                <input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
+              <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} disabled={isUploadingImage} />
+            </label>
+          )}
+        </div>
+
+        {/* Form Fields */}
+        <Form {...form}>
+          <form id="edit-product-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className={cn(designSystem.components.card.flat, "p-4 space-y-4")}>
+              <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider mb-2 flex items-center gap-2", designSystem.colors.text.muted)}>
+                Detalhes
+              </h3>
+
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={designSystem.typography.size.sm}>Nome do Produto</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Coxa com Sobrecoxa" className={designSystem.components.input.root} onFocus={handleInputFocus} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="unit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={designSystem.typography.size.sm}>Unidade</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className={designSystem.components.input.root}>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="un">Unidade (un)</SelectItem>
+                          <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                          <SelectItem value="cx">Caixa (cx)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={designSystem.typography.size.sm}>Categoria</FormLabel>
+                      <CategorySelectForm
+                        value={field.value}
+                        onChange={field.onChange}
+                        categories={categories}
+                        onCategoryAdded={onCategoryAdded}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="brand_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={designSystem.typography.size.sm}>Marca</FormLabel>
+                      <BrandSelect value={field.value} onChange={field.onChange} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="barcode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={designSystem.typography.size.sm}>Cód. Barras</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="EAN-13..." className={designSystem.components.input.root} maxLength={13} onFocus={handleInputFocus} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
             </div>
-          )}
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 text-sm" id="edit-product-form">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Nome do Produto</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Ex: Coxa com Sobrecoxa"
-                      className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
-                      onFocus={handleInputFocus}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="brand_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Marca</FormLabel>
-                  <FormControl>
-                    <BrandSelect 
-                      value={field.value} 
-                      onChange={field.onChange} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Categoria</FormLabel>
-                  <FormControl>
-                    <CategorySelectForm 
-                      value={field.value}
-                      onChange={field.onChange}
-                      categories={categories}
-                      onCategoryAdded={onCategoryAdded}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="unit"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Unidade de Medida *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 dark:text-white">
-                        <SelectValue placeholder="Selecione a unidade" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 z-50 rounded-lg shadow-lg">
-                      <SelectItem value="un">Unidade (un)</SelectItem>
-                      <SelectItem value="kg">Quilograma (kg)</SelectItem>
-                      <SelectItem value="g">Grama (g)</SelectItem>
-                      <SelectItem value="lt">Litro (lt)</SelectItem>
-                      <SelectItem value="ml">Mililitro (ml)</SelectItem>
-                      <SelectItem value="cx">Caixa (cx)</SelectItem>
-                      <SelectItem value="pc">Pacote (pc)</SelectItem>
-                      <SelectItem value="dz">Dúzia (dz)</SelectItem>
-                      <SelectItem value="m">Metro (m)</SelectItem>
-                      <SelectItem value="m2">Metro² (m²)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="barcode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs font-medium text-gray-700 dark:text-gray-300">Código de Barras (Opcional)</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input 
-                        {...field} 
-                        placeholder="EAN-13, EAN-8, UPC..."
-                        className="pr-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-1 focus:ring-orange-400/20 dark:text-white"
-                        maxLength={13}
-                        onFocus={handleInputFocus}
-                      />
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Package className="h-4 w-4 text-gray-400" />
-                      </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            </form>
-          </Form>
+          </form>
+        </Form>
       </div>
-      
-      {/* Footer fixo */}
-      <div className="p-4 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-3 flex-shrink-0">
+
+      {/* Footer */}
+      <div className={designSystem.components.modal.footer}>
         <Button
           type="button"
           variant="outline"
           onClick={() => onOpenChange(false)}
           disabled={isUploadingImage}
-          className="bg-white hover:bg-gray-50 border-gray-200 text-gray-700 dark:bg-gray-900/50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-900/70"
+          className={designSystem.components.button.secondary}
         >
           Cancelar
         </Button>
-        <Button 
+        <Button
           type="submit"
           form="edit-product-form"
-          className="bg-orange-600 hover:bg-orange-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
+          className={designSystem.components.button.primary}
         >
           Salvar Alterações
         </Button>
@@ -501,88 +422,28 @@ function EditProductDialogInternal({
     </>
   );
 
-  // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent 
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-700 transition-all duration-200"
-          style={{ 
-            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
-          }}
-        >
-          <DrawerHeader className="flex-shrink-0 px-4 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white flex-shrink-0 shadow-sm border border-gray-200 dark:border-gray-700">
-                  <Package className="h-5 w-5" />
-                </div>
-                <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                  {isLoading ? 'Carregando...' : 'Editar Produto'}
-                </DrawerTitle>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => onOpenChange(false)}
-                className="h-9 w-9 p-0 flex-shrink-0 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </DrawerHeader>
-          <div className="flex flex-col flex-1 overflow-hidden">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12 flex-1">
-                <Loader2 className="h-8 w-8 animate-spin text-orange-600 dark:text-orange-400" />
-              </div>
-            ) : (
-              formContent
-            )}
-          </div>
+        <DrawerContent className={cn(designSystem.components.modal.content, "flex flex-col p-0 gap-0 overflow-hidden h-[90vh]")}>
+          {Header}
+          {formContent}
         </DrawerContent>
       </Drawer>
     );
   }
 
-  // Desktop: Usar Dialog
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden">
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white flex-shrink-0 border border-gray-200 dark:border-gray-700">
-                <Package className="h-4 w-4" />
-              </div>
-              <DialogTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-                Editar Produto
-              </DialogTitle>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fechar</span>
-            </Button>
-          </div>
-        </DialogHeader>
+      <DialogContent hideClose className={cn(designSystem.components.modal.content, "max-h-[85vh] p-0 overflow-hidden flex flex-col")}>
+        {Header}
         {formContent}
       </DialogContent>
     </Dialog>
   );
 }
 
-// Memoizar componente para evitar re-renders desnecessários
 export const EditProductDialog = memo(EditProductDialogInternal, (prevProps, nextProps) => {
-  // Re-renderizar apenas se props relevantes mudarem
   return (
     prevProps.open === nextProps.open &&
     prevProps.product?.id === nextProps.product?.id &&

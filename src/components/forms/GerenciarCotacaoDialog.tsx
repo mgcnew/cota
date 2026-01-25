@@ -73,9 +73,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     if (activeTab === 'converter' && !open) setActiveTab('resumo');
   }, [open, activeTab]);
 
-  const { 
+  const {
     cotacoes, // Get full list to find latest version
-    updateQuoteItemPrice, 
+    updateQuoteItemPrice,
     addQuoteItem,
     removeQuoteItem,
     addQuoteSupplier,
@@ -138,10 +138,10 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     let bestPrice = Infinity;
     let bestSupplierId = null;
     let bestSupplierName = "";
-    
+
     // Filtra apenas preços > 0
     const validPrices = supplierItems.filter((i: any) => i?.product_id === productId && i?.valor_oferecido > 0);
-    
+
     if (validPrices.length > 0) {
       validPrices.forEach((priceItem: any) => {
         if (priceItem.valor_oferecido < bestPrice) {
@@ -154,7 +154,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     } else {
       bestPrice = 0;
     }
-    
+
     return { bestPrice, bestSupplierId, bestSupplierName };
   }, [supplierItems, fornecedores]);
 
@@ -163,12 +163,12 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     const totalProdutos = products.length;
     const totalFornecedores = fornecedores.length;
     const fornecedoresRespondidos = fornecedores.filter((f: any) => f.status === 'respondido').length;
-    
+
     let melhorTotal = 0;
     let melhorFornecedor = "";
-    
+
     // Lógica simplificada para melhor fornecedor total (se necessário)
-    
+
     return {
       totalProdutos,
       totalFornecedores,
@@ -188,14 +188,14 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const productPricesData = useMemo(() => {
     return products.map((product: any) => {
       const { bestPrice, bestSupplierName } = getBestPriceInfoForProduct(product.product_id);
-      
+
       const allPrices = fornecedores.map((f: any) => ({
         nome: f.nome,
         value: getSupplierProductValue(f.id, product.product_id)
       })).filter((p: any) => p.value > 0).sort((a: any, b: any) => a.value - b.value);
 
-      const averagePrice = allPrices.length > 0 
-        ? allPrices.reduce((acc: number, curr: any) => acc + curr.value, 0) / allPrices.length 
+      const averagePrice = allPrices.length > 0
+        ? allPrices.reduce((acc: number, curr: any) => acc + curr.value, 0) / allPrices.length
         : 0;
 
       const savings = averagePrice > 0 && bestPrice > 0 ? averagePrice - bestPrice : 0;
@@ -237,7 +237,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           // Normalizar valores para comparação
           const item = supplierItems.find((i: any) => i?.supplier_id === f.id && i?.product_id === product.product_id);
           const valor = item?.valor_oferecido || 0;
-          
+
           let valorNormalizado = valor;
           if (item?.unidade_preco === 'cx' && item?.fator_conversao) {
             valorNormalizado = valor / item.fator_conversao;
@@ -408,20 +408,20 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               </thead>
               <tbody>
                 ${comp.fornecedores
-                  .sort((a: any, b: any) => a.valorNormalizado - b.valorNormalizado)
-                  .map((f: any) => {
-                    const melhorValor = Math.min(...comp.fornecedores.map((x: any) => x.valorNormalizado));
-                    const diferenca = melhorValor > 0 ? ((f.valorNormalizado - melhorValor) / melhorValor * 100) : 0;
-                    return `
+        .sort((a: any, b: any) => a.valorNormalizado - b.valorNormalizado)
+        .map((f: any) => {
+          const melhorValor = Math.min(...comp.fornecedores.map((x: any) => x.valorNormalizado));
+          const diferenca = melhorValor > 0 ? ((f.valorNormalizado - melhorValor) / melhorValor * 100) : 0;
+          return `
                   <tr class="${f.isMelhorPreco ? 'winner-row' : ''}">
                     <td>${f.supplierName}</td>
                     <td>R$ ${formatCurrency(f.valorOferecido)}</td>
                     <td><strong>R$ ${formatCurrency(f.valorNormalizado)}</strong></td>
                     <td>
-                      ${f.isMelhorPreco 
-                        ? '<span class="badge badge-winner">🏆 MELHOR PREÇO</span>' 
-                        : `<span class="badge badge-difference">+${diferenca.toFixed(1)}%</span>`
-                      }
+                      ${f.isMelhorPreco
+              ? '<span class="badge badge-winner">🏆 MELHOR PREÇO</span>'
+              : `<span class="badge badge-difference">+${diferenca.toFixed(1)}%</span>`
+            }
                     </td>
                   </tr>
                 `}).join('')}
@@ -473,58 +473,46 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const modalContent = (
     <>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-        {/* Header Compacto com Tabs Integradas */}
-        <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 relative overflow-hidden flex items-center justify-between">
-          
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-900">
+
           <div className="flex items-center gap-4 relative z-10">
-            {/* Título Minimalista */}
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center text-white shadow-lg ring-1 ring-white/20">
-                <ClipboardList className="h-3.5 w-3.5" />
+            {/* Título */}
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-teal-100">
+                <ClipboardList className="h-5 w-5 text-teal-600" />
               </div>
-              <div className="flex flex-col">
+              <div>
                 {isMobile ? (
-                  <DrawerTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
-                    Gerenciar
-                  </DrawerTitle>
+                  <DrawerTitle className="text-lg font-bold">Gerenciar Cotação</DrawerTitle>
                 ) : (
-                  <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
-                    Gerenciar
-                  </DialogTitle>
+                  <DialogTitle className="text-lg font-bold">Gerenciar Cotação</DialogTitle>
                 )}
-                <span className="text-[8px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest mt-0.5">
-                  #{safeStr(quote.id).substring(0, 8)}
-                </span>
+                <span className="text-sm text-muted-foreground">#{safeStr(quote.id).substring(0, 8)}</span>
               </div>
             </div>
 
-            {/* Tabs no Header - Adaptativo Mobile/Desktop */}
+            {/* Tabs */}
             {isMobile ? (
               <Select value={activeTab} onValueChange={setActiveTab}>
-                <SelectTrigger className="h-8 w-[130px] border-0 bg-transparent text-[10px] font-black uppercase tracking-widest focus:ring-0 text-orange-600 dark:text-orange-400 p-0 [&>span]:line-clamp-1 justify-start gap-1">
+                <SelectTrigger className="w-[140px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
-                    <SelectItem key={tab} value={tab} className="text-xs font-medium uppercase tracking-wide">
+                    <SelectItem key={tab} value={tab}>
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             ) : (
-              <TabsList className="h-8 p-0 bg-transparent !bg-transparent border-0 flex gap-4 shadow-none !shadow-none overflow-x-auto scrollbar-hide max-w-[200px] sm:max-w-none">
+              <TabsList className="rounded-none border-b bg-transparent p-0">
                 {['resumo', 'valores', 'converter', 'editar'].map((tab) => (
-                  <TabsTrigger 
+                  <TabsTrigger
                     key={tab}
-                    value={tab} 
-                    className="h-full px-1 text-[9px] font-black uppercase tracking-widest rounded-none border-b-2 border-transparent 
-                      data-[state=active]:!border-orange-600 dark:data-[state=active]:!border-orange-400 
-                      !bg-transparent data-[state=active]:!bg-transparent hover:!bg-transparent
-                      !text-gray-400 dark:!text-gray-500 
-                      data-[state=active]:!text-orange-600 dark:data-[state=active]:!text-orange-400 
-                      !shadow-none data-[state=active]:!shadow-none 
-                      transition-colors cursor-pointer select-none whitespace-nowrap"
+                    value={tab}
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent"
                   >
                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
                   </TabsTrigger>
@@ -533,34 +521,34 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             )}
           </div>
 
-          <div className="flex items-center gap-2 relative z-10">
+          <div className="flex items-center gap-2">
             {!isMobile && (
               <>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setDeleteDialogOpen(true)} 
-                  className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 !bg-transparent hover:!bg-red-50 dark:hover:!bg-red-900/10 transition-all duration-200 rounded-lg !shadow-none !border-0 flex"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
-                  <Trash2 className="h-3 w-3 mr-1.5" />
+                  <Trash2 className="h-4 w-4 mr-2" />
                   Excluir
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleExportHtml} 
-                  className="h-8 px-2.5 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 !bg-transparent hover:!bg-blue-50 dark:hover:!bg-blue-900/10 transition-all duration-200 rounded-lg !shadow-none !border-0 flex"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportHtml}
+                  className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
                 >
-                  <Download className="h-3 w-3 mr-1.5" />
+                  <Download className="h-4 w-4 mr-2" />
                   Exportar
                 </Button>
               </>
             )}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => onOpenChange(false)} 
-              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange(false)}
+              className="h-8 w-8"
             >
               <X className="h-4 w-4" />
               <span className="sr-only">Fechar</span>
@@ -572,18 +560,18 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           <Suspense fallback={<TabSkeleton type={activeTab} />}>
             <TabsContent value="resumo" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
               {activeTab === 'resumo' && (
-                <QuoteSummaryTab 
-                  stats={stats} 
-                  melhorTotal={melhorTotal} 
-                  productPricesData={productPricesData} 
-                  safeStr={safeStr} 
+                <QuoteSummaryTab
+                  stats={stats}
+                  melhorTotal={melhorTotal}
+                  productPricesData={productPricesData}
+                  safeStr={safeStr}
                 />
               )}
             </TabsContent>
-            
+
             <TabsContent value="valores" className="h-full m-0 p-0 overflow-hidden">
               {activeTab === 'valores' && (
-                <QuoteValuesTab 
+                <QuoteValuesTab
                   products={products}
                   fornecedores={fornecedores}
                   quoteId={quote.id}
@@ -599,7 +587,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
             <TabsContent value="converter" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
               {activeTab === 'converter' && (
-                <QuoteConversionTab 
+                <QuoteConversionTab
                   products={products}
                   fornecedores={fornecedores}
                   quote={quote}
@@ -614,7 +602,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
             <TabsContent value="editar" className="h-full m-0 p-0 overflow-auto custom-scrollbar">
               {activeTab === 'editar' && (
-                <QuoteEditTab 
+                <QuoteEditTab
                   products={products}
                   fornecedores={fornecedores}
                   availableProducts={availableProducts || []}
@@ -623,10 +611,10 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   onRemoveQuoteItem={(productId) => removeQuoteItem.mutateAsync({ quoteId: quote.id, productId })}
                   onAddQuoteSupplier={(supplierId) => {
                     const supplier = availableSuppliers.find(s => s.id === supplierId);
-                    return addQuoteSupplier.mutateAsync({ 
-                      quoteId: quote.id, 
-                      supplierId, 
-                      supplierName: supplier?.name || "Desconhecido" 
+                    return addQuoteSupplier.mutateAsync({
+                      quoteId: quote.id,
+                      supplierId,
+                      supplierName: supplier?.name || "Desconhecido"
                     });
                   }}
                   onRemoveQuoteSupplier={(supplierId) => removeQuoteSupplier.mutateAsync({ quoteId: quote.id, supplierId })}
@@ -639,45 +627,32 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         </div>
       </Tabs>
 
-      {/* Footer Minimalista */}
-      <div className="flex-shrink-0 px-4 py-1.5 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="h-1 w-1 rounded-full bg-orange-500 animate-pulse"></div>
-          <span className="text-[7px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Painel Ativo</span>
+      {/* Footer */}
+      {isMobile && (
+        <div className="flex items-center justify-end gap-2 p-4 border-t bg-white dark:bg-gray-900">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDeleteDialogOpen(true)}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            Excluir
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleExportHtml}
+            className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+          >
+            Exportar
+          </Button>
         </div>
-        
-        {isMobile && (
-          <div className="flex gap-2">
-             <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setDeleteDialogOpen(true)} 
-                className="h-6 px-2 text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 !bg-transparent hover:!bg-red-50 dark:hover:!bg-red-900/10 transition-all"
-              >
-                Excluir
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleExportHtml} 
-                className="h-6 px-2 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 !bg-transparent hover:!bg-blue-50 dark:hover:!bg-blue-900/10 transition-all"
-              >
-                Exportar
-              </Button>
-          </div>
-        )}
+      )}
 
-        {!isMobile && (
-          <span className="text-[7px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-            CotaJá v2.0
-          </span>
-        )}
-      </div>
-
-      <DeleteQuoteDialogLazy 
-        open={deleteDialogOpen} 
-        onOpenChange={setDeleteDialogOpen} 
-        quote={quote} 
+      <DeleteQuoteDialogLazy
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        quote={quote}
         onDelete={(id) => {
           deleteQuote.mutate(id, {
             onSuccess: () => {
@@ -694,9 +669,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent 
+        <DrawerContent
           className="rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
-          style={{ 
+          style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
@@ -710,7 +685,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-5xl w-[95vw] h-[90vh] max-h-[800px] p-0 overflow-hidden bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 flex flex-col shadow-2xl rounded-[2rem] animate-in fade-in zoom-in-95 duration-300 [&>button]:hidden">
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden [&>button]:hidden">
         {modalContent}
       </DialogContent>
     </Dialog>
