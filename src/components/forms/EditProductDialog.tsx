@@ -425,7 +425,14 @@ function EditProductDialogInternal({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className={cn(designSystem.components.modal.content, "flex flex-col p-0 gap-0 overflow-hidden h-[90vh]")}>
+        <DrawerContent
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-all duration-200"
+          style={{
+            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
           {Header}
           {formContent}
         </DrawerContent>
